@@ -1,6 +1,6 @@
 {
-  "title": "Three thousand criminals, measured",
-  "description": "Macdonell's 1902 table of stature against left middle finger length as a complete regular grid, which is what geom_raster needs to work.",
-  "tags": ["raster", "grid", "heatmap"],
-  "docsSection": "Rectangles & grids"
+  "title": "Where chocolate reviews cluster",
+  "description": "A complete cocoa-percent × rating grid of bar counts. Use geom_raster when your table is already a regular grid of fill values.",
+  "tags": ["raster", "heatmap", "fill", "grid"],
+  "docsSection": "Rectangles & tiles"
 }

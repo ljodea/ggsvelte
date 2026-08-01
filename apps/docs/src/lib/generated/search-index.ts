@@ -19005,26 +19005,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["map-region-missing"],
   },
   {
-    id: "heading:guide-errors:group-single-observation",
-    kind: "heading",
-    title: "group-single-observation",
-    summary:
-      "group-single-observation in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#group-single-observation",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["group-single-observation"],
-  },
-  {
-    id: "heading:guide-errors:stack-align-skipped",
-    kind: "heading",
-    title: "stack-align-skipped",
-    summary:
-      "stack-align-skipped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#stack-align-skipped",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["stack-align-skipped"],
-  },
-  {
     id: "heading:guide-errors:smooth-group-dropped",
     kind: "heading",
     title: "smooth-group-dropped",
@@ -19732,16 +19712,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/advisories#jitter-seeded",
     keywords: ["Advisories", "Reference"],
     exact: ["jitter-seeded"],
-  },
-  {
-    id: "heading:guide-advisories:stack-align-applied",
-    kind: "heading",
-    title: "stack-align-applied",
-    summary:
-      "stack-align-applied in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
-    href: "/guide/advisories#stack-align-applied",
-    keywords: ["Advisories", "Reference"],
-    exact: ["stack-align-applied"],
   },
   {
     id: "heading:guide-advisories:palette-inferred",
@@ -20521,12 +20491,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:bar:dodged",
     kind: "example",
-    title: "Deaths in six English counties, 1876 to 1882",
+    title: "US beer production by package type",
     summary:
-      "The two-way table Edgeworth used to develop the analysis of variance, drawn as side-by-side bars decades before Fisher named the method.",
+      "Dodged bars of national production by year and package. Copy this when categories share an x-axis and need side-by-side comparison.",
     href: "/examples/bar/dodged",
     keywords: [
-      "Deaths in six English counties, 1876 to 1882",
+      "US beer production by package type",
       "Bars & columns",
       "bar",
       "count",
@@ -20537,7 +20507,7 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
       "palette",
     ],
-    exact: ["Deaths in six English counties, 1876 to 1882"],
+    exact: ["US beer production by package type"],
   },
   {
     id: "example:bar:horizontal",
@@ -21135,20 +21105,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:jitter:basic",
     kind: "example",
-    title: "Wages across 70 trades, 1910",
+    title: "Menu calories, spread so items do not stack",
     summary:
-      "Pearson's study of drink and wages. The trades share a handful of wage classes, so jitter is what separates them into readable marks.",
+      "Jittered entrée calories by restaurant. Use this when many points share a category and would otherwise cover each other.",
     href: "/examples/jitter/basic",
     keywords: [
-      "Wages across 70 trades, 1910",
+      "Menu calories, spread so items do not stack",
       "Points & scatter",
       "jitter",
-      "point",
-      "position",
+      "scatter",
+      "categorical",
       "overplotting",
-      "theme",
     ],
-    exact: ["Wages across 70 trades, 1910"],
+    exact: ["Menu calories, spread so items do not stack"],
   },
   {
     id: "example:label:basic",
@@ -21413,20 +21382,20 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:jitter",
     kind: "example",
-    title: "The same wages, jittered by position",
+    title: "The same calories, with position jitter",
     summary:
-      "Pearson's drink and wages study again, with the jitter applied through the position rather than the geom sugar.",
+      "The fast-food calorie scatter again, using position_jitter on geom_point instead of the dedicated jitter geom.",
     href: "/examples/point/jitter",
     keywords: [
-      "The same wages, jittered by position",
+      "The same calories, with position jitter",
       "Points & scatter",
       "point",
       "jitter",
       "position",
-      "overplotting",
-      "theme",
+      "scatter",
+      "categorical",
     ],
-    exact: ["The same wages, jittered by position"],
+    exact: ["The same calories, with position jitter"],
   },
   {
     id: "example:point:layer-data-bands",
@@ -21468,21 +21437,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:quantile-lines",
     kind: "example",
-    title: "Earthquake strength by depth",
+    title: "Flavor against aroma in cupping scores",
     summary:
-      "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
+      "Quantile lines through coffee cupping scores. Use this when a mean smooth hides how the spread of y moves with x.",
     href: "/examples/point/quantile-lines",
     keywords: [
-      "Earthquake strength by depth",
+      "Flavor against aroma in cupping scores",
       "Points & scatter",
       "point",
       "quantile",
+      "scatter",
       "stat",
-      "line",
-      "regression",
-      "theme",
     ],
-    exact: ["Earthquake strength by depth"],
+    exact: ["Flavor against aroma in cupping scores"],
   },
   {
     id: "example:point:scatter-color",
@@ -21633,18 +21600,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:raster:grid",
     kind: "example",
-    title: "Three thousand criminals, measured",
+    title: "Where chocolate reviews cluster",
     summary:
-      "Macdonell's 1902 table of stature against left middle finger length as a complete regular grid, which is what geom_raster needs to work.",
+      "A complete cocoa-percent × rating grid of bar counts. Use geom_raster when your table is already a regular grid of fill values.",
     href: "/examples/raster/grid",
     keywords: [
-      "Three thousand criminals, measured",
-      "Rectangles & grids",
+      "Where chocolate reviews cluster",
+      "Rectangles & tiles",
       "raster",
-      "grid",
       "heatmap",
+      "fill",
+      "grid",
     ],
-    exact: ["Three thousand criminals, measured"],
+    exact: ["Where chocolate reviews cluster"],
   },
   {
     id: "example:rect:regions",
@@ -21718,18 +21686,18 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:rule:data-driven",
     kind: "example",
-    title: "The first statistical graph was a rug",
+    title: "A rug of every cupping score",
     summary:
-      "Van Langren's 1644 longitude estimates, one rule per determination, which is the form his own chart took.",
+      "One vertical rule per coffee lot on total cup points. Use this when you want a 1-D sample drawn as a strip of marks.",
     href: "/examples/rule/data-driven",
     keywords: [
-      "The first statistical graph was a rug",
+      "A rug of every cupping score",
       "Annotations & rules",
       "rule",
       "distribution",
       "rug",
     ],
-    exact: ["The first statistical graph was a rug"],
+    exact: ["A rug of every cupping score"],
   },
   {
     id: "example:segment:annotations",
@@ -21843,20 +21811,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:smooth:loess-scatter",
     kind: "example",
-    title: "The first scatterplot, redrawn",
+    title: "Cocoa percent against bar rating",
     summary:
-      "Herschel plotted gamma Virginis in 1833 and fitted the curve through it by hand. A loess smooth with a confidence band does the same job.",
+      "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
     href: "/examples/smooth/loess-scatter",
     keywords: [
-      "The first scatterplot, redrawn",
+      "Cocoa percent against bar rating",
       "Statistical summaries",
       "smooth",
       "loess",
       "ribbon",
       "scatter",
-      "size",
     ],
-    exact: ["The first scatterplot, redrawn"],
+    exact: ["Cocoa percent against bar rating"],
   },
   {
     id: "example:spoke:vector-field",
@@ -42258,34 +42225,6 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["map-region-missing", "warning:map-region-missing"],
-  },
-  {
-    id: "diagnostic:warning:group-single-observation",
-    kind: "diagnostic",
-    title: "group-single-observation · warning",
-    summary:
-      "Connected path/area marks derived one observation per group (often a discrete x joining default grouping), so each stroke or ribbon degenerates; map aes.group to join rows into series.",
-    href: "/guide/errors#group-single-observation",
-    keywords: [
-      "warning",
-      "warning",
-      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
-    ],
-    exact: ["group-single-observation", "warning:group-single-observation"],
-  },
-  {
-    id: "diagnostic:warning:stack-align-skipped",
-    kind: "diagnostic",
-    title: "stack-align-skipped · warning",
-    summary:
-      "Sparse stacked-area groups were left unaligned because the shared-grid expansion exceeds the auto-rescue budget; bands with interior gaps may render as floating polygons.",
-    href: "/guide/errors#stack-align-skipped",
-    keywords: [
-      "warning",
-      "warning",
-      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
-    ],
-    exact: ["stack-align-skipped", "warning:stack-align-skipped"],
   },
   {
     id: "diagnostic:warning:smooth-group-dropped",

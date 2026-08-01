@@ -7,22 +7,22 @@
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { longitudeEstimates } from "./data.js";
+  import { coffeeRatings } from "./data.js";
 </script>
 
 <GGPlot
-  data={longitudeEstimates}
-  aes={{ x: "longitude" }}
+  data={coffeeRatings}
+  aes={{ x: "totalCupPoints" }}
   width={640}
   height={400}
 >
   <ThemeMinimal />
   <Labs
-    title="The first statistical graph was a rug"
-    subtitle="Van Langren, 1628–1644: 61 estimates of a single fixed distance, spread across thirteen degrees"
-    x="Estimated distance (degrees of longitude)"
+    title="A rug of every cupping score"
+    subtitle="One vertical line per coffee lot. Most lots sit between about 80 and 88 total cup points"
+    x="Total cup points"
   />
   <!-- y is synthetic for panel-spanning vertical rules; hide the 0–1 ladder (#700) -->
   <GuideNone channel="y" />
-  <GeomRule alpha={0.35} linewidth={1.5} />
+  <GeomRule alpha={0.2} linewidth={1} />
 </GGPlot>

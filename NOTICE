@@ -142,6 +142,38 @@ ggsvelte redistributes the same popular-model subset used as ggplot2's classic
 teaching table. Cite the EPA source for the measurements and ggplot2 for the
 subset definition when publishing charts (see the MPG_CITATION export).
 
+TidyTuesday teaching tables (bundled)
+-------------------------------------
+Four additional teaching tables under packages/svelte/src/lib/data/ and the
+matching apps/docs/static/*.json assets are curated subsets of TidyTuesday
+weekly datasets (https://github.com/rfordatascience/tidytuesday). The
+TidyTuesday project releases its curated tables under CC0 1.0 Universal.
+ggsvelte redistributes the rows below with that dedication and with credit to
+each table's original measurement source. Cite the primary source when
+publishing charts (see each *_CITATION export).
+
+  chocolate-bars.ts / chocolate-bars.json — 2,530 Flavors of Cacao bar reviews
+    (cocoa percent, rating, company location, bean origin). Primary source:
+    http://flavorsofcacao.com/chocolate_database.html. Via TidyTuesday
+    2022-01-18.
+
+  coffee-ratings.ts / coffee-ratings.json — 1,338 Coffee Quality Institute
+    cupping lots (total cup points, aroma, flavor, acidity, body, origin,
+    processing). Compiled by James LeDoux from CQI review pages (January 2018):
+    https://github.com/jldbc/coffee-quality-database. Via TidyTuesday
+    2020-07-07. Altitude outliers outside 200–3000 m and zero sensory scores
+    are dropped.
+
+  beer-production.ts / beer-production.json — 36 national US beer-production
+    totals by package type (bottles and cans, kegs and barrels, on premises),
+    2008–2019, stored as millions of barrels. Primary source: US Alcohol and
+    Tobacco Tax and Trade Bureau (TTB). Via TidyTuesday 2020-03-31. US
+    government works are not subject to copyright in the United States.
+
+  fastfood-menu.ts / fastfood-menu.json — 515 US fast-food entrée nutrition
+    rows (calories, fat, protein, sodium) across eight chains. Primary source:
+    fastfoodnutrition.org entrée tables. Via TidyTuesday 2018-09-04.
+
 Google turbo colormap (bundled sequential scheme stops)
 -------------------------------------------------------
 packages/core/src/scales/sequential-schemes.ts includes a 10-stop sample of

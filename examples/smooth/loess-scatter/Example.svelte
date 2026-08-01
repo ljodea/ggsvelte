@@ -4,30 +4,25 @@
     GeomSmooth,
     GGPlot,
     Labs,
-    ScaleSizeContinuous,
-    ScaleXContinuous,
     ThemeTufte,
   } from "@ggsvelte/svelte";
 
-  import { gammaVirginis } from "./data.js";
+  import { chocolateBars } from "./data.js";
 </script>
 
 <GGPlot
-  data={gammaVirginis}
-  aes={{ x: "year", y: "angle" }}
+  data={chocolateBars}
+  aes={{ x: "cocoaPercent", y: "rating" }}
   width={640}
   height={400}
 >
   <ThemeTufte />
-  <ScaleXContinuous labels="d" />
-  <ScaleSizeContinuous range={[3, 8]} />
   <Labs
-    title="The first scatterplot, redrawn"
-    subtitle="Herschel plotted γ Virginis in 1833 and fitted the curve by hand"
-    x="Year"
-    y="Position angle (°)"
-    size="Herschel's weight"
+    title="Cocoa percent against bar rating"
+    subtitle="Loess through 2,530 chocolate reviews, with a confidence band"
+    x="Cocoa (%)"
+    y="Rating (1–4)"
   />
   <GeomSmooth method="loess" span={0.75} />
-  <GeomPoint aes={{ size: "weight" }} alpha={0.85} />
+  <GeomPoint alpha={0.25} size={2} />
 </GGPlot>

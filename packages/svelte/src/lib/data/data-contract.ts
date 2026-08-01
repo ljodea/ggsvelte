@@ -13,6 +13,10 @@
  */
 import type { DataInput } from "@ggsvelte/spec";
 
+import { beerProduction } from "./beer-production.js";
+import { chocolateBars } from "./chocolate-bars.js";
+import { coffeeRatings } from "./coffee-ratings.js";
+import { fastfoodMenu } from "./fastfood-menu.js";
 import { kyotoSakura } from "./kyoto-sakura.js";
 import { mpg } from "./mpg.js";
 import { palmerPenguins } from "./palmer-penguins.js";
@@ -20,9 +24,17 @@ import { palmerPenguins } from "./palmer-penguins.js";
 /** Every bundled dataset must be assignable to the plot `data` prop. */
 type BundledDataset = DataInput;
 
+const beerProductionIsPlottable: BundledDataset = beerProduction;
+const chocolateBarsIsPlottable: BundledDataset = chocolateBars;
+const coffeeRatingsIsPlottable: BundledDataset = coffeeRatings;
+const fastfoodMenuIsPlottable: BundledDataset = fastfoodMenu;
 const kyotoSakuraIsPlottable: BundledDataset = kyotoSakura;
 const mpgIsPlottable: BundledDataset = mpg;
 const palmerPenguinsIsPlottable: BundledDataset = palmerPenguins;
+void beerProductionIsPlottable;
+void chocolateBarsIsPlottable;
+void coffeeRatingsIsPlottable;
+void fastfoodMenuIsPlottable;
 void kyotoSakuraIsPlottable;
 void mpgIsPlottable;
 void palmerPenguinsIsPlottable;

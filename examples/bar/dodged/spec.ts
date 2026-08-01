@@ -1,19 +1,19 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { edgeworthDeaths } from "./data.js";
+import { beerProduction } from "./data.js";
 
 export default defineExample(
-  gg(edgeworthDeaths, aes({ x: "year", fill: "county", weight: "deaths" }))
+  gg(beerProduction, aes({ x: "year", fill: "package", weight: "barrelsMillions" }))
     .geomBar({ position: "dodge" })
     .scales({ fill: { type: "ordinal", scheme: "tableau10" } })
     .theme("few")
     .labs({
-      title: "Deaths in six English counties, 1876–82",
-      subtitle: "Edgeworth's two-way table, decades before Fisher named the method",
+      title: "US beer production by package type",
+      subtitle: "Millions of barrels each year as bottles and cans, kegs, or on-premises pours",
       x: "Year",
-      y: "Deaths per million",
-      fill: "County",
+      y: "Millions of barrels",
+      fill: "Package",
     })
     .spec(),
 );

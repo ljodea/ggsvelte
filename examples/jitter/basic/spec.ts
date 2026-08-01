@@ -1,18 +1,17 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { drinksWages } from "./data.js";
+import { fastfoodMenu } from "./data.js";
 
 export default defineExample(
-  // geom_jitter is sugar for point + position jitter (#818).
-  gg(drinksWages, aes({ x: "wageClass", y: "wage" }))
-    .geomJitter({ width: 0.22, height: 0, alpha: 0.75 })
+  gg(fastfoodMenu, aes({ x: "restaurant", y: "calories" }))
+    .geomJitter({ width: 0.22, height: 0, alpha: 0.65 })
     .theme("clean")
     .labs({
-      title: "Wages across 70 trades, 1910",
-      subtitle: "geom_jitter separates trades that share a wage class",
-      x: "Wage class",
-      y: "Weekly wage (shillings)",
+      title: "Menu calories, spread so items do not stack",
+      subtitle: "Each point is one entrée. Jitter separates items that share a restaurant",
+      x: "Restaurant",
+      y: "Calories",
     })
     .spec(),
 );

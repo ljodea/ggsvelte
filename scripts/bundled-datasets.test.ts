@@ -1,21 +1,34 @@
 /**
  * Gate G2 — the bundled teaching datasets under `@ggsvelte/svelte/data` are
  * real, intact, and cover the guide shapes: time series (kyotoSakura),
- * categorical comparison (mpg), and continuous distribution + groups
- * (palmerPenguins). Each assertion pins the docs static JSON asset to the
- * package export so headless agents and human imports cannot drift.
+ * categorical comparison (mpg, beerProduction, fastfoodMenu), continuous
+ * distribution + groups (palmerPenguins, coffeeRatings), and dense scatter /
+ * heatmaps (chocolateBars). Each assertion pins the docs static JSON asset to
+ * the package export so headless agents and human imports cannot drift.
  */
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "bun:test";
 
 import {
+  BEER_PRODUCTION_CITATION,
+  CHOCOLATE_BARS_CITATION,
+  COFFEE_RATINGS_CITATION,
+  FASTFOOD_MENU_CITATION,
   KYOTO_SAKURA_CITATION,
   MPG_CITATION,
   PALMER_PENGUINS_CITATION,
+  beerProduction,
+  chocolateBars,
+  coffeeRatings,
+  fastfoodMenu,
   kyotoSakura,
   mpg,
   palmerPenguins,
+  type BeerProductionRow,
+  type ChocolateBarRow,
+  type CoffeeRatingRow,
+  type FastfoodMenuRow,
   type KyotoSakuraRow,
   type MpgRow,
   type PalmerPenguinRow,
@@ -279,5 +292,164 @@ describe("mpg dataset", () => {
   it("keeps the docs static asset identical to the package export", () => {
     const asset = JSON.parse(readFileSync(`${STATIC}mpg.json`, "utf8")) as MpgRow[];
     expect(asset).toEqual(mpg as MpgRow[]);
+  });
+});
+
+describe("chocolateBars dataset", () => {
+  it("is the 2,530-row Flavors of Cacao table", () => {
+    expect(chocolateBars).toHaveLength(2530);
+    expect(chocolateBars[0]).toMatchObject({
+      id: "bar-0001",
+      companyLocation: "U.S.A.",
+      cocoaPercent: 76,
+      rating: 3.25,
+    });
+    expect(chocolateBars.at(-1)?.id).toMatch(/^bar-/);
+  });
+
+  it("keeps every row internally consistent", () => {
+    const ids = new Set<string>();
+    for (const row of chocolateBars) {
+      expect(ids.has(row.id)).toBe(false);
+      ids.add(row.id);
+      expect(row.company.length).toBeGreaterThan(0);
+      expect(row.companyLocation.length).toBeGreaterThan(0);
+      expect(row.beanOrigin.length).toBeGreaterThan(0);
+      expect(row.cocoaPercent).toBeGreaterThan(0);
+      expect(row.cocoaPercent).toBeLessThanOrEqual(100);
+      expect(row.rating).toBeGreaterThanOrEqual(1);
+      expect(row.rating).toBeLessThanOrEqual(4);
+    }
+    expect(ids.size).toBe(2530);
+  });
+
+  it("names its source", () => {
+    expect(CHOCOLATE_BARS_CITATION).toContain("Flavors of Cacao");
+    expect(CHOCOLATE_BARS_CITATION).toContain("TidyTuesday");
+    expect(NOTICE).toContain("chocolate-bars.ts");
+    expect(NOTICE).toContain("flavorsofcacao.com");
+  });
+
+  it("keeps the docs static asset identical to the package export", () => {
+    const asset = JSON.parse(
+      readFileSync(`${STATIC}chocolate-bars.json`, "utf8"),
+    ) as ChocolateBarRow[];
+    expect(asset).toEqual(chocolateBars as ChocolateBarRow[]);
+  });
+});
+
+describe("coffeeRatings dataset", () => {
+  it("is the cleaned Coffee Quality Institute cupping table", () => {
+    expect(coffeeRatings).toHaveLength(1338);
+    expect(coffeeRatings[0]).toMatchObject({
+      id: "lot-0001",
+      species: "Arabica",
+    });
+    expect(coffeeRatings[0]!.totalCupPoints).toBeGreaterThan(80);
+  });
+
+  it("keeps every row internally consistent", () => {
+    const ids = new Set<string>();
+    for (const row of coffeeRatings) {
+      expect(ids.has(row.id)).toBe(false);
+      ids.add(row.id);
+      expect(row.country.length).toBeGreaterThan(0);
+      expect(row.totalCupPoints).toBeGreaterThan(0);
+      expect(row.totalCupPoints).toBeLessThanOrEqual(100);
+      expect(row.aroma).toBeGreaterThan(0);
+      expect(row.flavor).toBeGreaterThan(0);
+      if (row.altitudeM !== null) {
+        expect(row.altitudeM).toBeGreaterThanOrEqual(200);
+        expect(row.altitudeM).toBeLessThanOrEqual(3000);
+      }
+    }
+    expect(ids.size).toBe(1338);
+  });
+
+  it("names its source", () => {
+    expect(COFFEE_RATINGS_CITATION).toContain("Coffee Quality Institute");
+    expect(COFFEE_RATINGS_CITATION).toContain("LeDoux");
+    expect(NOTICE).toContain("coffee-ratings.ts");
+    expect(NOTICE).toContain("coffee-quality-database");
+  });
+
+  it("keeps the docs static asset identical to the package export", () => {
+    const asset = JSON.parse(
+      readFileSync(`${STATIC}coffee-ratings.json`, "utf8"),
+    ) as CoffeeRatingRow[];
+    expect(asset).toEqual(coffeeRatings as CoffeeRatingRow[]);
+  });
+});
+
+describe("beerProduction dataset", () => {
+  it("is 36 national package-type totals for 2008–2019", () => {
+    expect(beerProduction).toHaveLength(36);
+    expect(beerProduction[0]).toMatchObject({
+      year: "2008",
+      package: "Bottles and cans",
+    });
+    expect(new Set(beerProduction.map((r) => r.year)).size).toBe(12);
+    expect(new Set(beerProduction.map((r) => r.package))).toEqual(
+      new Set(["Bottles and cans", "Kegs and barrels", "On premises"]),
+    );
+  });
+
+  it("keeps every row internally consistent", () => {
+    for (const row of beerProduction) {
+      expect(Number(row.year)).toBeGreaterThanOrEqual(2008);
+      expect(Number(row.year)).toBeLessThanOrEqual(2019);
+      expect(row.barrelsMillions).toBeGreaterThan(0);
+    }
+  });
+
+  it("names its source", () => {
+    expect(BEER_PRODUCTION_CITATION).toContain("TTB");
+    expect(BEER_PRODUCTION_CITATION).toContain("TidyTuesday");
+    expect(NOTICE).toContain("beer-production.ts");
+    expect(NOTICE).toContain("Tax and Trade Bureau");
+  });
+
+  it("keeps the docs static asset identical to the package export", () => {
+    const asset = JSON.parse(
+      readFileSync(`${STATIC}beer-production.json`, "utf8"),
+    ) as BeerProductionRow[];
+    expect(asset).toEqual(beerProduction as BeerProductionRow[]);
+  });
+});
+
+describe("fastfoodMenu dataset", () => {
+  it("is 515 entrée rows across eight chains", () => {
+    expect(fastfoodMenu).toHaveLength(515);
+    const chains = new Set(fastfoodMenu.map((r) => r.restaurant));
+    expect(chains.size).toBe(8);
+    expect(chains.has("McDonald's")).toBe(true);
+  });
+
+  it("keeps every row internally consistent", () => {
+    const ids = new Set<string>();
+    for (const row of fastfoodMenu) {
+      expect(ids.has(row.id)).toBe(false);
+      ids.add(row.id);
+      expect(row.item.length).toBeGreaterThan(0);
+      expect(row.calories).toBeGreaterThanOrEqual(0);
+      expect(row.totalFat).toBeGreaterThanOrEqual(0);
+      expect(row.protein).toBeGreaterThanOrEqual(0);
+      expect(row.sodium).toBeGreaterThanOrEqual(0);
+    }
+    expect(ids.size).toBe(515);
+  });
+
+  it("names its source", () => {
+    expect(FASTFOOD_MENU_CITATION).toContain("fastfoodnutrition.org");
+    expect(FASTFOOD_MENU_CITATION).toContain("TidyTuesday");
+    expect(NOTICE).toContain("fastfood-menu.ts");
+    expect(NOTICE).toContain("fastfoodnutrition.org");
+  });
+
+  it("keeps the docs static asset identical to the package export", () => {
+    const asset = JSON.parse(
+      readFileSync(`${STATIC}fastfood-menu.json`, "utf8"),
+    ) as FastfoodMenuRow[];
+    expect(asset).toEqual(fastfoodMenu as FastfoodMenuRow[]);
   });
 });

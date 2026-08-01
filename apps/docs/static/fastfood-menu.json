@@ -1,0 +1,4637 @@
+[
+  {
+    "id": "item-0001",
+    "restaurant": "McDonald's",
+    "item": "Artisan Grilled Chicken Sandwich",
+    "calories": 380.0,
+    "totalFat": 7.0,
+    "protein": 37.0,
+    "sodium": 1110.0
+  },
+  {
+    "id": "item-0002",
+    "restaurant": "McDonald's",
+    "item": "Single Bacon Smokehouse Burger",
+    "calories": 840.0,
+    "totalFat": 45.0,
+    "protein": 46.0,
+    "sodium": 1580.0
+  },
+  {
+    "id": "item-0003",
+    "restaurant": "McDonald's",
+    "item": "Double Bacon Smokehouse Burger",
+    "calories": 1130.0,
+    "totalFat": 67.0,
+    "protein": 70.0,
+    "sodium": 1920.0
+  },
+  {
+    "id": "item-0004",
+    "restaurant": "McDonald's",
+    "item": "Grilled Bacon Smokehouse Chicken Sandwich",
+    "calories": 750.0,
+    "totalFat": 31.0,
+    "protein": 55.0,
+    "sodium": 1940.0
+  },
+  {
+    "id": "item-0005",
+    "restaurant": "McDonald's",
+    "item": "Crispy Bacon Smokehouse Chicken Sandwich",
+    "calories": 920.0,
+    "totalFat": 45.0,
+    "protein": 46.0,
+    "sodium": 1980.0
+  },
+  {
+    "id": "item-0006",
+    "restaurant": "McDonald's",
+    "item": "Big Mac",
+    "calories": 540.0,
+    "totalFat": 28.0,
+    "protein": 25.0,
+    "sodium": 950.0
+  },
+  {
+    "id": "item-0007",
+    "restaurant": "McDonald's",
+    "item": "Cheeseburger",
+    "calories": 300.0,
+    "totalFat": 12.0,
+    "protein": 15.0,
+    "sodium": 680.0
+  },
+  {
+    "id": "item-0008",
+    "restaurant": "McDonald's",
+    "item": "Classic Chicken Sandwich",
+    "calories": 510.0,
+    "totalFat": 24.0,
+    "protein": 25.0,
+    "sodium": 1040.0
+  },
+  {
+    "id": "item-0009",
+    "restaurant": "McDonald's",
+    "item": "Double Cheeseburger",
+    "calories": 430.0,
+    "totalFat": 21.0,
+    "protein": 25.0,
+    "sodium": 1040.0
+  },
+  {
+    "id": "item-0010",
+    "restaurant": "McDonald's",
+    "item": "Double Quarter Pounder\u00ae with Cheese",
+    "calories": 770.0,
+    "totalFat": 45.0,
+    "protein": 51.0,
+    "sodium": 1290.0
+  },
+  {
+    "id": "item-0011",
+    "restaurant": "McDonald's",
+    "item": "Filet-O-Fish\u00ae",
+    "calories": 380.0,
+    "totalFat": 18.0,
+    "protein": 15.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0012",
+    "restaurant": "McDonald's",
+    "item": "Garlic White Cheddar Burger",
+    "calories": 620.0,
+    "totalFat": 34.0,
+    "protein": 32.0,
+    "sodium": 790.0
+  },
+  {
+    "id": "item-0013",
+    "restaurant": "McDonald's",
+    "item": "Grilled Garlic White Cheddar Chicken Sandwich",
+    "calories": 530.0,
+    "totalFat": 20.0,
+    "protein": 42.0,
+    "sodium": 1150.0
+  },
+  {
+    "id": "item-0014",
+    "restaurant": "McDonald's",
+    "item": "Crispy Garlic White Cheddar Chicken Sandwich",
+    "calories": 700.0,
+    "totalFat": 34.0,
+    "protein": 33.0,
+    "sodium": 1190.0
+  },
+  {
+    "id": "item-0015",
+    "restaurant": "McDonald's",
+    "item": "Hamburger",
+    "calories": 250.0,
+    "totalFat": 8.0,
+    "protein": 13.0,
+    "sodium": 480.0
+  },
+  {
+    "id": "item-0016",
+    "restaurant": "McDonald's",
+    "item": "Lobster Roll",
+    "calories": 290.0,
+    "totalFat": 5.0,
+    "protein": 24.0,
+    "sodium": 630.0
+  },
+  {
+    "id": "item-0017",
+    "restaurant": "McDonald's",
+    "item": "Maple Bacon Dijon 1/4 lb Burger",
+    "calories": 640.0,
+    "totalFat": 36.0,
+    "protein": 37.0,
+    "sodium": 1260.0
+  },
+  {
+    "id": "item-0018",
+    "restaurant": "McDonald's",
+    "item": "Grilled Maple Bacon Dijon Chicken Sandwich",
+    "calories": 580.0,
+    "totalFat": 21.0,
+    "protein": 48.0,
+    "sodium": 1890.0
+  },
+  {
+    "id": "item-0019",
+    "restaurant": "McDonald's",
+    "item": "Crispy Maple Bacon Dijon Chicken Sandwich",
+    "calories": 740.0,
+    "totalFat": 35.0,
+    "protein": 39.0,
+    "sodium": 1780.0
+  },
+  {
+    "id": "item-0020",
+    "restaurant": "McDonald's",
+    "item": "McChicken",
+    "calories": 350.0,
+    "totalFat": 15.0,
+    "protein": 15.0,
+    "sodium": 600.0
+  },
+  {
+    "id": "item-0021",
+    "restaurant": "McDonald's",
+    "item": "McDouble",
+    "calories": 380.0,
+    "totalFat": 18.0,
+    "protein": 23.0,
+    "sodium": 840.0
+  },
+  {
+    "id": "item-0022",
+    "restaurant": "McDonald's",
+    "item": "McRib",
+    "calories": 480.0,
+    "totalFat": 22.0,
+    "protein": 25.0,
+    "sodium": 870.0
+  },
+  {
+    "id": "item-0023",
+    "restaurant": "McDonald's",
+    "item": "Pico Guacamole 1/4 lb Burger",
+    "calories": 580.0,
+    "totalFat": 33.0,
+    "protein": 29.0,
+    "sodium": 920.0
+  },
+  {
+    "id": "item-0024",
+    "restaurant": "McDonald's",
+    "item": "Grilled Pico Guacamole Chicken Sandwich",
+    "calories": 520.0,
+    "totalFat": 18.0,
+    "protein": 40.0,
+    "sodium": 1540.0
+  },
+  {
+    "id": "item-0025",
+    "restaurant": "McDonald's",
+    "item": "Crispy Pico Guacamole Chicken Sandwich",
+    "calories": 680.0,
+    "totalFat": 32.0,
+    "protein": 31.0,
+    "sodium": 1430.0
+  },
+  {
+    "id": "item-0026",
+    "restaurant": "McDonald's",
+    "item": "Premium Buttermilk Crispy Chicken Deluxe Sandwich",
+    "calories": 570.0,
+    "totalFat": 23.0,
+    "protein": 28.0,
+    "sodium": 1050.0
+  },
+  {
+    "id": "item-0027",
+    "restaurant": "McDonald's",
+    "item": "Premium Crispy Chicken Deluxe Sandwich",
+    "calories": 530.0,
+    "totalFat": 22.0,
+    "protein": 25.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0028",
+    "restaurant": "McDonald's",
+    "item": "Quarter Pounder\u00ae with Cheese",
+    "calories": 530.0,
+    "totalFat": 27.0,
+    "protein": 31.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0029",
+    "restaurant": "McDonald's",
+    "item": "Signature Sriracha Burger",
+    "calories": 670.0,
+    "totalFat": 35.0,
+    "protein": 32.0,
+    "sodium": 1010.0
+  },
+  {
+    "id": "item-0030",
+    "restaurant": "McDonald's",
+    "item": "Grilled Signature Sriracha Chicken Sandwich",
+    "calories": 560.0,
+    "totalFat": 20.0,
+    "protein": 41.0,
+    "sodium": 1550.0
+  },
+  {
+    "id": "item-0031",
+    "restaurant": "McDonald's",
+    "item": "Crispy Signature Sriracha Chicken Sandwich",
+    "calories": 730.0,
+    "totalFat": 33.0,
+    "protein": 32.0,
+    "sodium": 1430.0
+  },
+  {
+    "id": "item-0032",
+    "restaurant": "McDonald's",
+    "item": "Sweet BBQ Bacon 1/4 lb Burger",
+    "calories": 690.0,
+    "totalFat": 37.0,
+    "protein": 38.0,
+    "sodium": 1310.0
+  },
+  {
+    "id": "item-0033",
+    "restaurant": "McDonald's",
+    "item": "Grilled Sweet BBQ Bacon Chicken Sandwich",
+    "calories": 630.0,
+    "totalFat": 22.0,
+    "protein": 48.0,
+    "sodium": 1930.0
+  },
+  {
+    "id": "item-0034",
+    "restaurant": "McDonald's",
+    "item": "Crispy Sweet BBQ Bacon Chicken Sandwich",
+    "calories": 800.0,
+    "totalFat": 36.0,
+    "protein": 39.0,
+    "sodium": 1820.0
+  },
+  {
+    "id": "item-0035",
+    "restaurant": "McDonald's",
+    "item": "3 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 370.0,
+    "totalFat": 21.0,
+    "protein": 28.0,
+    "sodium": 910.0
+  },
+  {
+    "id": "item-0036",
+    "restaurant": "McDonald's",
+    "item": "4 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 480.0,
+    "totalFat": 28.0,
+    "protein": 38.0,
+    "sodium": 1290.0
+  },
+  {
+    "id": "item-0037",
+    "restaurant": "McDonald's",
+    "item": "6 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 760.0,
+    "totalFat": 44.0,
+    "protein": 58.0,
+    "sodium": 1890.0
+  },
+  {
+    "id": "item-0038",
+    "restaurant": "McDonald's",
+    "item": "10 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 1210.0,
+    "totalFat": 70.0,
+    "protein": 94.0,
+    "sodium": 3230.0
+  },
+  {
+    "id": "item-0039",
+    "restaurant": "McDonald's",
+    "item": "12 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 1510.0,
+    "totalFat": 88.0,
+    "protein": 115.0,
+    "sodium": 3770.0
+  },
+  {
+    "id": "item-0040",
+    "restaurant": "McDonald's",
+    "item": "20 piece Buttermilk Crispy Chicken Tenders",
+    "calories": 2430.0,
+    "totalFat": 141.0,
+    "protein": 186.0,
+    "sodium": 6080.0
+  },
+  {
+    "id": "item-0041",
+    "restaurant": "McDonald's",
+    "item": "4 Piece Chicken McNuggets",
+    "calories": 180.0,
+    "totalFat": 11.0,
+    "protein": 10.0,
+    "sodium": 340.0
+  },
+  {
+    "id": "item-0042",
+    "restaurant": "McDonald's",
+    "item": "6 Piece Chicken McNuggets",
+    "calories": 270.0,
+    "totalFat": 16.0,
+    "protein": 15.0,
+    "sodium": 510.0
+  },
+  {
+    "id": "item-0043",
+    "restaurant": "McDonald's",
+    "item": "10 Piece Chicken McNuggets",
+    "calories": 440.0,
+    "totalFat": 27.0,
+    "protein": 24.0,
+    "sodium": 840.0
+  },
+  {
+    "id": "item-0044",
+    "restaurant": "McDonald's",
+    "item": "20 Piece Chicken McNuggets",
+    "calories": 890.0,
+    "totalFat": 53.0,
+    "protein": 49.0,
+    "sodium": 1680.0
+  },
+  {
+    "id": "item-0045",
+    "restaurant": "McDonald's",
+    "item": "40 piece Chicken McNuggets",
+    "calories": 1770.0,
+    "totalFat": 107.0,
+    "protein": 98.0,
+    "sodium": 3370.0
+  },
+  {
+    "id": "item-0046",
+    "restaurant": "McDonald's",
+    "item": "4 piece Sweet N' Spicy Honey BBQ Glazed Tenders",
+    "calories": 640.0,
+    "totalFat": 27.0,
+    "protein": 39.0,
+    "sodium": 1780.0
+  },
+  {
+    "id": "item-0047",
+    "restaurant": "McDonald's",
+    "item": "6 piece Sweet N' Spicy Honey BBQ Glazed Tenders",
+    "calories": 960.0,
+    "totalFat": 40.0,
+    "protein": 58.0,
+    "sodium": 2670.0
+  },
+  {
+    "id": "item-0048",
+    "restaurant": "McDonald's",
+    "item": "10 piece Sweet N' Spicy Honey BBQ Glazed Tenders",
+    "calories": 1600.0,
+    "totalFat": 66.0,
+    "protein": 97.0,
+    "sodium": 4450.0
+  },
+  {
+    "id": "item-0049",
+    "restaurant": "McDonald's",
+    "item": "Premium Asian Salad w/o Chicken",
+    "calories": 140.0,
+    "totalFat": 7.0,
+    "protein": 7.0,
+    "sodium": 20.0
+  },
+  {
+    "id": "item-0050",
+    "restaurant": "McDonald's",
+    "item": "Premium Asian Salad w/ Grilled Chicken",
+    "calories": 270.0,
+    "totalFat": 9.0,
+    "protein": 31.0,
+    "sodium": 740.0
+  },
+  {
+    "id": "item-0051",
+    "restaurant": "McDonald's",
+    "item": "Premium Asian Salad w/ Crispy Chicken",
+    "calories": 490.0,
+    "totalFat": 28.0,
+    "protein": 33.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0052",
+    "restaurant": "McDonald's",
+    "item": "Premium Bacon Ranch Salad w/o Chicken",
+    "calories": 190.0,
+    "totalFat": 12.0,
+    "protein": 14.0,
+    "sodium": 660.0
+  },
+  {
+    "id": "item-0053",
+    "restaurant": "McDonald's",
+    "item": "Premium Bacon Ranch Salad w/ Grilled Chicken",
+    "calories": 320.0,
+    "totalFat": 14.0,
+    "protein": 42.0,
+    "sodium": 1230.0
+  },
+  {
+    "id": "item-0054",
+    "restaurant": "McDonald's",
+    "item": "Premium Bacon Ranch Salad w/ Crispy Chicken",
+    "calories": 490.0,
+    "totalFat": 28.0,
+    "protein": 33.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0055",
+    "restaurant": "McDonald's",
+    "item": "Premium Southwest Salad w/o Chicken",
+    "calories": 220.0,
+    "totalFat": 10.0,
+    "protein": 8.0,
+    "sodium": 500.0
+  },
+  {
+    "id": "item-0056",
+    "restaurant": "McDonald's",
+    "item": "Premium Southwest Salad w/ Grilled Chicken",
+    "calories": 350.0,
+    "totalFat": 12.0,
+    "protein": 37.0,
+    "sodium": 1070.0
+  },
+  {
+    "id": "item-0057",
+    "restaurant": "McDonald's",
+    "item": "Premium Southwest Salad w/ Crispy Chicken",
+    "calories": 520.0,
+    "totalFat": 25.0,
+    "protein": 28.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0058",
+    "restaurant": "Chick-fil-A",
+    "item": "Chargrilled Chicken Club Sandwich",
+    "calories": 430.0,
+    "totalFat": 16.0,
+    "protein": 37.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0059",
+    "restaurant": "Chick-fil-A",
+    "item": "Chargrilled Chicken Sandwich",
+    "calories": 310.0,
+    "totalFat": 6.0,
+    "protein": 29.0,
+    "sodium": 820.0
+  },
+  {
+    "id": "item-0060",
+    "restaurant": "Chick-fil-A",
+    "item": "Chick-n-Slider",
+    "calories": 270.0,
+    "totalFat": 11.0,
+    "protein": 16.0,
+    "sodium": 800.0
+  },
+  {
+    "id": "item-0061",
+    "restaurant": "Chick-fil-A",
+    "item": "1 Piece Chick-n-Strips",
+    "calories": 120.0,
+    "totalFat": 6.0,
+    "protein": 11.0,
+    "sodium": 320.0
+  },
+  {
+    "id": "item-0062",
+    "restaurant": "Chick-fil-A",
+    "item": "2 Piece Chick-n-Strips",
+    "calories": 230.0,
+    "totalFat": 12.0,
+    "protein": 22.0,
+    "sodium": 630.0
+  },
+  {
+    "id": "item-0063",
+    "restaurant": "Chick-fil-A",
+    "item": "3 Piece Chick-n-Strips",
+    "calories": 350.0,
+    "totalFat": 17.0,
+    "protein": 28.0,
+    "sodium": 940.0
+  },
+  {
+    "id": "item-0064",
+    "restaurant": "Chick-fil-A",
+    "item": "4 piece Chick-n-Strips",
+    "calories": 470.0,
+    "totalFat": 23.0,
+    "protein": 37.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0065",
+    "restaurant": "Chick-fil-A",
+    "item": "Chicken Deluxe",
+    "calories": 500.0,
+    "totalFat": 23.0,
+    "protein": 31.0,
+    "sodium": 1590.0
+  },
+  {
+    "id": "item-0066",
+    "restaurant": "Chick-fil-A",
+    "item": "4 piece Chicken Nuggets",
+    "calories": 130.0,
+    "totalFat": 6.0,
+    "protein": 14.0,
+    "sodium": 490.0
+  },
+  {
+    "id": "item-0067",
+    "restaurant": "Chick-fil-A",
+    "item": "6 piece Chicken Nuggets",
+    "calories": 190.0,
+    "totalFat": 9.0,
+    "protein": 21.0,
+    "sodium": 730.0
+  },
+  {
+    "id": "item-0068",
+    "restaurant": "Chick-fil-A",
+    "item": "8 piece Chicken Nuggets",
+    "calories": 260.0,
+    "totalFat": 12.0,
+    "protein": 28.0,
+    "sodium": 990.0
+  },
+  {
+    "id": "item-0069",
+    "restaurant": "Chick-fil-A",
+    "item": "12 piece Chicken Nuggets",
+    "calories": 390.0,
+    "totalFat": 18.0,
+    "protein": 41.0,
+    "sodium": 1460.0
+  },
+  {
+    "id": "item-0070",
+    "restaurant": "Chick-fil-A",
+    "item": "30 piece Chicken Nuggets",
+    "calories": 970.0,
+    "totalFat": 46.0,
+    "protein": 103.0,
+    "sodium": 3660.0
+  },
+  {
+    "id": "item-0071",
+    "restaurant": "Chick-fil-A",
+    "item": "Chicken Salad Sandwich",
+    "calories": 490.0,
+    "totalFat": 19.0,
+    "protein": 28.0,
+    "sodium": 1130.0
+  },
+  {
+    "id": "item-0072",
+    "restaurant": "Chick-fil-A",
+    "item": "Chicken Sandwich",
+    "calories": 440.0,
+    "totalFat": 19.0,
+    "protein": 28.0,
+    "sodium": 1350.0
+  },
+  {
+    "id": "item-0073",
+    "restaurant": "Chick-fil-A",
+    "item": "4 Piece Grilled Chicken Nuggets",
+    "calories": 70.0,
+    "totalFat": 2.0,
+    "protein": 13.0,
+    "sodium": 220.0
+  },
+  {
+    "id": "item-0074",
+    "restaurant": "Chick-fil-A",
+    "item": "6 Piece Grilled Chicken Nuggets",
+    "calories": 110.0,
+    "totalFat": 3.0,
+    "protein": 19.0,
+    "sodium": 330.0
+  },
+  {
+    "id": "item-0075",
+    "restaurant": "Chick-fil-A",
+    "item": "8 piece Grilled Chicken Nuggets",
+    "calories": 140.0,
+    "totalFat": 4.0,
+    "protein": 25.0,
+    "sodium": 440.0
+  },
+  {
+    "id": "item-0076",
+    "restaurant": "Chick-fil-A",
+    "item": "12 Piece Grilled Chicken Nuggets",
+    "calories": 210.0,
+    "totalFat": 5.0,
+    "protein": 38.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0077",
+    "restaurant": "Chick-fil-A",
+    "item": "Spicy Grilled Chicken Sub Sandwich",
+    "calories": 430.0,
+    "totalFat": 12.0,
+    "protein": 33.0,
+    "sodium": 1310.0
+  },
+  {
+    "id": "item-0078",
+    "restaurant": "Chick-fil-A",
+    "item": "Regular Grilled Chicken Sub Sandwich",
+    "calories": 450.0,
+    "totalFat": 13.0,
+    "protein": 34.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0079",
+    "restaurant": "Chick-fil-A",
+    "item": "Smokehouse BBQ Bacon Sandwich",
+    "calories": 500.0,
+    "totalFat": 18.0,
+    "protein": 33.0,
+    "sodium": 1200.0
+  },
+  {
+    "id": "item-0080",
+    "restaurant": "Chick-fil-A",
+    "item": "Spicy Chicken Sandwich",
+    "calories": 450.0,
+    "totalFat": 19.0,
+    "protein": 29.0,
+    "sodium": 1620.0
+  },
+  {
+    "id": "item-0081",
+    "restaurant": "Chick-fil-A",
+    "item": "Spicy Deluxe",
+    "calories": 540.0,
+    "totalFat": 25.0,
+    "protein": 34.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0082",
+    "restaurant": "Chick-fil-A",
+    "item": "Chargrilled Chicken Cool Wrap",
+    "calories": 350.0,
+    "totalFat": 14.0,
+    "protein": 37.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0083",
+    "restaurant": "Chick-fil-A",
+    "item": "Chicken Enchiladas Meal Kit",
+    "calories": 860.0,
+    "totalFat": 47.0,
+    "protein": 39.0,
+    "sodium": 2520.0
+  },
+  {
+    "id": "item-0084",
+    "restaurant": "Chick-fil-A",
+    "item": "Chicken Parmesan Meal Kit",
+    "calories": 720.0,
+    "totalFat": 31.0,
+    "protein": 48.0,
+    "sodium": 1780.0
+  },
+  {
+    "id": "item-0085",
+    "restaurant": "Sonic",
+    "item": "Hatch Green Chile Cheeseburger",
+    "calories": 710.0,
+    "totalFat": 43.0,
+    "protein": 35.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0086",
+    "restaurant": "Sonic",
+    "item": "Jalapeno Burger",
+    "calories": 640.0,
+    "totalFat": 37.0,
+    "protein": 31.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0087",
+    "restaurant": "Sonic",
+    "item": "Jr. Burger",
+    "calories": 340.0,
+    "totalFat": 17.0,
+    "protein": 15.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0088",
+    "restaurant": "Sonic",
+    "item": "Jr. Chili Cheeseburger",
+    "calories": 410.0,
+    "totalFat": 24.0,
+    "protein": 20.0,
+    "sodium": 730.0
+  },
+  {
+    "id": "item-0089",
+    "restaurant": "Sonic",
+    "item": "Jr. Deluxe Burger",
+    "calories": 380.0,
+    "totalFat": 23.0,
+    "protein": 15.0,
+    "sodium": 470.0
+  },
+  {
+    "id": "item-0090",
+    "restaurant": "Sonic",
+    "item": "Jr. Deluxe Cheeseburger",
+    "calories": 450.0,
+    "totalFat": 28.0,
+    "protein": 19.0,
+    "sodium": 800.0
+  },
+  {
+    "id": "item-0091",
+    "restaurant": "Sonic",
+    "item": "Jr. Double Cheeseburger",
+    "calories": 600.0,
+    "totalFat": 38.0,
+    "protein": 31.0,
+    "sodium": 1350.0
+  },
+  {
+    "id": "item-0092",
+    "restaurant": "Sonic",
+    "item": "Sonic Bacon Cheeseburger (w/mayo)",
+    "calories": 870.0,
+    "totalFat": 59.0,
+    "protein": 39.0,
+    "sodium": 1350.0
+  },
+  {
+    "id": "item-0093",
+    "restaurant": "Sonic",
+    "item": "Sonic Burger W/ Mustard",
+    "calories": 640.0,
+    "totalFat": 37.0,
+    "protein": 31.0,
+    "sodium": 790.0
+  },
+  {
+    "id": "item-0094",
+    "restaurant": "Sonic",
+    "item": "Sonic Burger W/ Ketchup",
+    "calories": 650.0,
+    "totalFat": 37.0,
+    "protein": 32.0,
+    "sodium": 860.0
+  },
+  {
+    "id": "item-0095",
+    "restaurant": "Sonic",
+    "item": "Sonic Burger W/ Mayonnaise",
+    "calories": 740.0,
+    "totalFat": 48.0,
+    "protein": 31.0,
+    "sodium": 760.0
+  },
+  {
+    "id": "item-0096",
+    "restaurant": "Sonic",
+    "item": "Sonic Cheeseburger W/ Mustard",
+    "calories": 710.0,
+    "totalFat": 43.0,
+    "protein": 35.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0097",
+    "restaurant": "Sonic",
+    "item": "Sonic Cheeseburger W/ Ketchup",
+    "calories": 720.0,
+    "totalFat": 43.0,
+    "protein": 35.0,
+    "sodium": 1190.0
+  },
+  {
+    "id": "item-0098",
+    "restaurant": "Sonic",
+    "item": "Sonic Cheeseburger W/ Mayonnaise",
+    "calories": 800.0,
+    "totalFat": 54.0,
+    "protein": 35.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0099",
+    "restaurant": "Sonic",
+    "item": "Super Sonic Bacon Double Cheeseburger (w/mayo)",
+    "calories": 1280.0,
+    "totalFat": 92.0,
+    "protein": 67.0,
+    "sodium": 1630.0
+  },
+  {
+    "id": "item-0100",
+    "restaurant": "Sonic",
+    "item": "Super Sonic Double Cheeseburger W/ Mustard",
+    "calories": 1120.0,
+    "totalFat": 76.0,
+    "protein": 63.0,
+    "sodium": 1550.0
+  },
+  {
+    "id": "item-0101",
+    "restaurant": "Sonic",
+    "item": "Super Sonic Double Cheeseburger W/ Ketchup",
+    "calories": 1130.0,
+    "totalFat": 76.0,
+    "protein": 63.0,
+    "sodium": 1620.0
+  },
+  {
+    "id": "item-0102",
+    "restaurant": "Sonic",
+    "item": "Super Sonic Double Cheeseburger W/ Mayo",
+    "calories": 1220.0,
+    "totalFat": 87.0,
+    "protein": 63.0,
+    "sodium": 1520.0
+  },
+  {
+    "id": "item-0103",
+    "restaurant": "Sonic",
+    "item": "Super Sonic Jalapeno Double Cheeseburger",
+    "calories": 1120.0,
+    "totalFat": 76.0,
+    "protein": 63.0,
+    "sodium": 1690.0
+  },
+  {
+    "id": "item-0104",
+    "restaurant": "Sonic",
+    "item": "Veggie Burger W/ Ketchup",
+    "calories": 450.0,
+    "totalFat": 14.0,
+    "protein": 15.0,
+    "sodium": 1410.0
+  },
+  {
+    "id": "item-0105",
+    "restaurant": "Sonic",
+    "item": "Veggie Burger With Mustard",
+    "calories": 450.0,
+    "totalFat": 14.0,
+    "protein": 15.0,
+    "sodium": 1350.0
+  },
+  {
+    "id": "item-0106",
+    "restaurant": "Sonic",
+    "item": "Veggie Burger W/ Mustard",
+    "calories": 450.0,
+    "totalFat": 14.0,
+    "protein": 15.0,
+    "sodium": 1300.0
+  },
+  {
+    "id": "item-0107",
+    "restaurant": "Sonic",
+    "item": "Grilled Asiago Caesar Chicken Club Sandwich",
+    "calories": 610.0,
+    "totalFat": 30.0,
+    "protein": 40.0,
+    "sodium": 1570.0
+  },
+  {
+    "id": "item-0108",
+    "restaurant": "Sonic",
+    "item": "Crispy Asiago Caesar Chicken Club Sandwich",
+    "calories": 680.0,
+    "totalFat": 39.0,
+    "protein": 31.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0109",
+    "restaurant": "Sonic",
+    "item": "Grilled Chicken Sandwich",
+    "calories": 430.0,
+    "totalFat": 20.0,
+    "protein": 28.0,
+    "sodium": 940.0
+  },
+  {
+    "id": "item-0110",
+    "restaurant": "Sonic",
+    "item": "Crispy Chicken Sandwich",
+    "calories": 570.0,
+    "totalFat": 33.0,
+    "protein": 23.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0111",
+    "restaurant": "Sonic",
+    "item": "Chicken Strip Sandwich",
+    "calories": 450.0,
+    "totalFat": 24.0,
+    "protein": 19.0,
+    "sodium": 740.0
+  },
+  {
+    "id": "item-0112",
+    "restaurant": "Sonic",
+    "item": "3 Piece Crispy Chicken Tender Dinner",
+    "calories": 280.0,
+    "totalFat": 14.0,
+    "protein": 22.0,
+    "sodium": 800.0
+  },
+  {
+    "id": "item-0113",
+    "restaurant": "Sonic",
+    "item": "5 Piece Crispy Chicken Tender Dinner",
+    "calories": 470.0,
+    "totalFat": 24.0,
+    "protein": 37.0,
+    "sodium": 1340.0
+  },
+  {
+    "id": "item-0114",
+    "restaurant": "Sonic",
+    "item": "Deluxe Ultimate Chicken Sandwich",
+    "calories": 740.0,
+    "totalFat": 39.0,
+    "protein": 33.0,
+    "sodium": 1550.0
+  },
+  {
+    "id": "item-0115",
+    "restaurant": "Sonic",
+    "item": "Buffalo Dunked Ultimate Chicken Sandwich",
+    "calories": 1000.0,
+    "totalFat": 61.0,
+    "protein": 23.0,
+    "sodium": 4520.0
+  },
+  {
+    "id": "item-0116",
+    "restaurant": "Sonic",
+    "item": "Garlic Parmesan Dunked Ultimate Chicken Sandwich",
+    "calories": 1350.0,
+    "totalFat": 100.0,
+    "protein": 23.0,
+    "sodium": 2180.0
+  },
+  {
+    "id": "item-0117",
+    "restaurant": "Sonic",
+    "item": "Small Jumbo Popcorn Chicken",
+    "calories": 380.0,
+    "totalFat": 22.0,
+    "protein": 18.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0118",
+    "restaurant": "Sonic",
+    "item": "Large Jumbo Popcorn Chicken",
+    "calories": 560.0,
+    "totalFat": 32.0,
+    "protein": 27.0,
+    "sodium": 1890.0
+  },
+  {
+    "id": "item-0119",
+    "restaurant": "Sonic",
+    "item": "Small Spicy Jumbo Popcorn Chicken",
+    "calories": 350.0,
+    "totalFat": 17.0,
+    "protein": 21.0,
+    "sodium": 860.0
+  },
+  {
+    "id": "item-0120",
+    "restaurant": "Sonic",
+    "item": "Large Spicy Jumbo Popcorn Chicken",
+    "calories": 610.0,
+    "totalFat": 30.0,
+    "protein": 36.0,
+    "sodium": 1500.0
+  },
+  {
+    "id": "item-0121",
+    "restaurant": "Sonic",
+    "item": "3 Piece Super Crunch Chicken Strip Dinner",
+    "calories": 970.0,
+    "totalFat": 46.0,
+    "protein": 30.0,
+    "sodium": 2160.0
+  },
+  {
+    "id": "item-0122",
+    "restaurant": "Sonic",
+    "item": "4 Piece Super Crunch Chicken Strip Dinner",
+    "calories": 1080.0,
+    "totalFat": 51.0,
+    "protein": 37.0,
+    "sodium": 2390.0
+  },
+  {
+    "id": "item-0123",
+    "restaurant": "Sonic",
+    "item": "5 Piece Super Crunch Chicken Strip Dinner",
+    "calories": 1190.0,
+    "totalFat": 57.0,
+    "protein": 44.0,
+    "sodium": 2610.0
+  },
+  {
+    "id": "item-0124",
+    "restaurant": "Sonic",
+    "item": "3 Piece Super Crunch Chicken Strips",
+    "calories": 330.0,
+    "totalFat": 16.0,
+    "protein": 22.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0125",
+    "restaurant": "Sonic",
+    "item": "4 Piece Super Crunch Chicken Strips",
+    "calories": 440.0,
+    "totalFat": 21.0,
+    "protein": 29.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0126",
+    "restaurant": "Sonic",
+    "item": "5 Piece Super Crunch Chicken Strips",
+    "calories": 550.0,
+    "totalFat": 26.0,
+    "protein": 36.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0127",
+    "restaurant": "Sonic",
+    "item": "Traditional Ultimate Chicken Sandwich",
+    "calories": 730.0,
+    "totalFat": 39.0,
+    "protein": 32.0,
+    "sodium": 1540.0
+  },
+  {
+    "id": "item-0128",
+    "restaurant": "Sonic",
+    "item": "Ultimate Chicken Club",
+    "calories": 100.0,
+    "totalFat": 64.0,
+    "protein": 39.0,
+    "sodium": 2070.0
+  },
+  {
+    "id": "item-0129",
+    "restaurant": "Sonic",
+    "item": "All Beef All-american Style Dog \u2013 6\"",
+    "calories": 370.0,
+    "totalFat": 18.0,
+    "protein": 12.0,
+    "sodium": 1180.0
+  },
+  {
+    "id": "item-0130",
+    "restaurant": "Sonic",
+    "item": "All Beef Chicago Dog \u2013 6\"",
+    "calories": 430.0,
+    "totalFat": 20.0,
+    "protein": 14.0,
+    "sodium": 2310.0
+  },
+  {
+    "id": "item-0131",
+    "restaurant": "Sonic",
+    "item": "All Beef Chili Cheese Coney \u2013 6\"",
+    "calories": 410.0,
+    "totalFat": 26.0,
+    "protein": 17.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0132",
+    "restaurant": "Sonic",
+    "item": "All Beef New York Dog \u2013 6\"",
+    "calories": 340.0,
+    "totalFat": 19.0,
+    "protein": 13.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0133",
+    "restaurant": "Sonic",
+    "item": "All Beef Regular Hot Dog \u2013 6\"",
+    "calories": 320.0,
+    "totalFat": 18.0,
+    "protein": 11.0,
+    "sodium": 870.0
+  },
+  {
+    "id": "item-0134",
+    "restaurant": "Sonic",
+    "item": "Cheesy Bacon Pretzel Dog - 6 In.",
+    "calories": 500.0,
+    "totalFat": 26.0,
+    "protein": 15.0,
+    "sodium": 1410.0
+  },
+  {
+    "id": "item-0135",
+    "restaurant": "Sonic",
+    "item": "Corn Dog",
+    "calories": 210.0,
+    "totalFat": 11.0,
+    "protein": 6.0,
+    "sodium": 530.0
+  },
+  {
+    "id": "item-0136",
+    "restaurant": "Sonic",
+    "item": "Footlong Quarter Pound Coney",
+    "calories": 830.0,
+    "totalFat": 54.0,
+    "protein": 30.0,
+    "sodium": 1940.0
+  },
+  {
+    "id": "item-0137",
+    "restaurant": "Sonic",
+    "item": "The Original Pretzel Dog",
+    "calories": 320.0,
+    "totalFat": 18.0,
+    "protein": 11.0,
+    "sodium": 910.0
+  },
+  {
+    "id": "item-0138",
+    "restaurant": "Arby's",
+    "item": "Arby's Melt",
+    "calories": 330.0,
+    "totalFat": 11.0,
+    "protein": 18.0,
+    "sodium": 920.0
+  },
+  {
+    "id": "item-0139",
+    "restaurant": "Arby's",
+    "item": "Arby-Q Sandwich",
+    "calories": 400.0,
+    "totalFat": 10.0,
+    "protein": 18.0,
+    "sodium": 1230.0
+  },
+  {
+    "id": "item-0140",
+    "restaurant": "Arby's",
+    "item": "Beef 'n Cheddar Classic",
+    "calories": 450.0,
+    "totalFat": 20.0,
+    "protein": 23.0,
+    "sodium": 1280.0
+  },
+  {
+    "id": "item-0141",
+    "restaurant": "Arby's",
+    "item": "Beef 'n Cheddar Mid",
+    "calories": 630.0,
+    "totalFat": 32.0,
+    "protein": 39.0,
+    "sodium": 2100.0
+  },
+  {
+    "id": "item-0142",
+    "restaurant": "Arby's",
+    "item": "Bourbon BBQ Brisket Sandwich",
+    "calories": 650.0,
+    "totalFat": 33.0,
+    "protein": 38.0,
+    "sodium": 1460.0
+  },
+  {
+    "id": "item-0143",
+    "restaurant": "Arby's",
+    "item": "Bourbon BBQ Chicken Sandwich",
+    "calories": 690.0,
+    "totalFat": 31.0,
+    "protein": 38.0,
+    "sodium": 1990.0
+  },
+  {
+    "id": "item-0144",
+    "restaurant": "Arby's",
+    "item": "Bourbon BBQ Steak Sandwich",
+    "calories": 690.0,
+    "totalFat": 31.0,
+    "protein": 38.0,
+    "sodium": 1990.0
+  },
+  {
+    "id": "item-0145",
+    "restaurant": "Arby's",
+    "item": "Buttermilk Buffalo Chicken Sandwich",
+    "calories": 540.0,
+    "totalFat": 24.0,
+    "protein": 29.0,
+    "sodium": 2110.0
+  },
+  {
+    "id": "item-0146",
+    "restaurant": "Arby's",
+    "item": "Buttermilk Chicken Bacon & Swiss",
+    "calories": 650.0,
+    "totalFat": 31.0,
+    "protein": 39.0,
+    "sodium": 1750.0
+  },
+  {
+    "id": "item-0147",
+    "restaurant": "Arby's",
+    "item": "Buttermilk Chicken Cordon Bleu Sandwich",
+    "calories": 690.0,
+    "totalFat": 35.0,
+    "protein": 41.0,
+    "sodium": 2000.0
+  },
+  {
+    "id": "item-0148",
+    "restaurant": "Arby's",
+    "item": "Buttermilk Crispy Chicken Sandwich",
+    "calories": 550.0,
+    "totalFat": 26.0,
+    "protein": 29.0,
+    "sodium": 1480.0
+  },
+  {
+    "id": "item-0149",
+    "restaurant": "Arby's",
+    "item": "Classic French Dip & Swiss/Au Jus",
+    "calories": 540.0,
+    "totalFat": 23.0,
+    "protein": 35.0,
+    "sodium": 2500.0
+  },
+  {
+    "id": "item-0150",
+    "restaurant": "Arby's",
+    "item": "Classic Roast Beef",
+    "calories": 360.0,
+    "totalFat": 14.0,
+    "protein": 23.0,
+    "sodium": 970.0
+  },
+  {
+    "id": "item-0151",
+    "restaurant": "Arby's",
+    "item": "Double Roast Beef",
+    "calories": 510.0,
+    "totalFat": 24.0,
+    "protein": 38.0,
+    "sodium": 1610.0
+  },
+  {
+    "id": "item-0152",
+    "restaurant": "Arby's",
+    "item": "Fire-Roasted Philly Steak",
+    "calories": 640.0,
+    "totalFat": 32.0,
+    "protein": 42.0,
+    "sodium": 1950.0
+  },
+  {
+    "id": "item-0153",
+    "restaurant": "Arby's",
+    "item": "Grand Turkey Club",
+    "calories": 480.0,
+    "totalFat": 24.0,
+    "protein": 30.0,
+    "sodium": 1610.0
+  },
+  {
+    "id": "item-0154",
+    "restaurant": "Arby's",
+    "item": "Greek Gyro",
+    "calories": 710.0,
+    "totalFat": 44.0,
+    "protein": 23.0,
+    "sodium": 1360.0
+  },
+  {
+    "id": "item-0155",
+    "restaurant": "Arby's",
+    "item": "Half Pound Beef 'n Cheddar Sandwich",
+    "calories": 740.0,
+    "totalFat": 39.0,
+    "protein": 49.0,
+    "sodium": 2530.0
+  },
+  {
+    "id": "item-0156",
+    "restaurant": "Arby's",
+    "item": "Half Pound French Dip & Swiss",
+    "calories": 750.0,
+    "totalFat": 36.0,
+    "protein": 55.0,
+    "sodium": 3350.0
+  },
+  {
+    "id": "item-0157",
+    "restaurant": "Arby's",
+    "item": "Half Pound Roast Beef Sandwich",
+    "calories": 610.0,
+    "totalFat": 30.0,
+    "protein": 48.0,
+    "sodium": 2040.0
+  },
+  {
+    "id": "item-0158",
+    "restaurant": "Arby's",
+    "item": "Ham & Swiss Melt",
+    "calories": 300.0,
+    "totalFat": 9.0,
+    "protein": 18.0,
+    "sodium": 1030.0
+  },
+  {
+    "id": "item-0159",
+    "restaurant": "Arby's",
+    "item": "Loaded Italian Sandwich",
+    "calories": 680.0,
+    "totalFat": 40.0,
+    "protein": 32.0,
+    "sodium": 2270.0
+  },
+  {
+    "id": "item-0160",
+    "restaurant": "Arby's",
+    "item": "Pecan Chicken Salad Flatbread",
+    "calories": 710.0,
+    "totalFat": 46.0,
+    "protein": 22.0,
+    "sodium": 980.0
+  },
+  {
+    "id": "item-0161",
+    "restaurant": "Arby's",
+    "item": "Pecan Chicken Salad Sandwich",
+    "calories": 840.0,
+    "totalFat": 44.0,
+    "protein": 33.0,
+    "sodium": 1210.0
+  },
+  {
+    "id": "item-0162",
+    "restaurant": "Arby's",
+    "item": "2 piece Prime-Cut Chicken Tenders",
+    "calories": 240.0,
+    "totalFat": 11.0,
+    "protein": 16.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0163",
+    "restaurant": "Arby's",
+    "item": "3 piece Prime-Cut Chicken Tenders",
+    "calories": 360.0,
+    "totalFat": 17.0,
+    "protein": 23.0,
+    "sodium": 950.0
+  },
+  {
+    "id": "item-0164",
+    "restaurant": "Arby's",
+    "item": "5 piece Prime-Cut Chicken Tenders",
+    "calories": 600.0,
+    "totalFat": 28.0,
+    "protein": 39.0,
+    "sodium": 1590.0
+  },
+  {
+    "id": "item-0165",
+    "restaurant": "Arby's",
+    "item": "Reuben Sandwich",
+    "calories": 680.0,
+    "totalFat": 31.0,
+    "protein": 37.0,
+    "sodium": 2420.0
+  },
+  {
+    "id": "item-0166",
+    "restaurant": "Arby's",
+    "item": "Roast Beef Gyro",
+    "calories": 550.0,
+    "totalFat": 29.0,
+    "protein": 24.0,
+    "sodium": 1290.0
+  },
+  {
+    "id": "item-0167",
+    "restaurant": "Arby's",
+    "item": "Roast Turkey & Swiss Sandwich",
+    "calories": 710.0,
+    "totalFat": 28.0,
+    "protein": 38.0,
+    "sodium": 1930.0
+  },
+  {
+    "id": "item-0168",
+    "restaurant": "Arby's",
+    "item": "Roast Turkey & Swiss Wrap",
+    "calories": 520.0,
+    "totalFat": 27.0,
+    "protein": 30.0,
+    "sodium": 1640.0
+  },
+  {
+    "id": "item-0169",
+    "restaurant": "Arby's",
+    "item": "Roast Turkey, Ranch & Bacon Sandwich",
+    "calories": 800.0,
+    "totalFat": 34.0,
+    "protein": 45.0,
+    "sodium": 2420.0
+  },
+  {
+    "id": "item-0170",
+    "restaurant": "Arby's",
+    "item": "Roast Turkey, Ranch & Bacon Wrap",
+    "calories": 620.0,
+    "totalFat": 34.0,
+    "protein": 37.0,
+    "sodium": 2130.0
+  },
+  {
+    "id": "item-0171",
+    "restaurant": "Arby's",
+    "item": "Smoke Mountain w/ Beef Short Rib",
+    "calories": 740.0,
+    "totalFat": 35.0,
+    "protein": 43.0,
+    "sodium": 2050.0
+  },
+  {
+    "id": "item-0172",
+    "restaurant": "Arby's",
+    "item": "Smokehouse Beef Short Rib Sandwich",
+    "calories": 590.0,
+    "totalFat": 59.0,
+    "protein": 26.0,
+    "sodium": 1510.0
+  },
+  {
+    "id": "item-0173",
+    "restaurant": "Arby's",
+    "item": "Smokehouse Brisket",
+    "calories": 600.0,
+    "totalFat": 35.0,
+    "protein": 33.0,
+    "sodium": 1240.0
+  },
+  {
+    "id": "item-0174",
+    "restaurant": "Arby's",
+    "item": "Super Roast Beef",
+    "calories": 430.0,
+    "totalFat": 17.0,
+    "protein": 23.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0175",
+    "restaurant": "Arby's",
+    "item": "Three Cheese Steak Sandwich",
+    "calories": 650.0,
+    "totalFat": 36.0,
+    "protein": 30.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0176",
+    "restaurant": "Arby's",
+    "item": "Triple Decker Sandwich",
+    "calories": 1030.0,
+    "totalFat": 51.0,
+    "protein": 62.0,
+    "sodium": 2940.0
+  },
+  {
+    "id": "item-0177",
+    "restaurant": "Arby's",
+    "item": "Turkey Avocado Club",
+    "calories": 730.0,
+    "totalFat": 28.0,
+    "protein": 41.0,
+    "sodium": 2140.0
+  },
+  {
+    "id": "item-0178",
+    "restaurant": "Arby's",
+    "item": "Turkey Gyro",
+    "calories": 470.0,
+    "totalFat": 20.0,
+    "protein": 25.0,
+    "sodium": 1520.0
+  },
+  {
+    "id": "item-0179",
+    "restaurant": "Arby's",
+    "item": "Ultimate BLT",
+    "calories": 980.0,
+    "totalFat": 55.0,
+    "protein": 43.0,
+    "sodium": 2130.0
+  },
+  {
+    "id": "item-0180",
+    "restaurant": "Arby's",
+    "item": "Buffalo Chicken Slider",
+    "calories": 290.0,
+    "totalFat": 13.0,
+    "protein": 12.0,
+    "sodium": 860.0
+  },
+  {
+    "id": "item-0181",
+    "restaurant": "Arby's",
+    "item": "Chicken Tender 'n Cheese Slider",
+    "calories": 290.0,
+    "totalFat": 12.0,
+    "protein": 15.0,
+    "sodium": 720.0
+  },
+  {
+    "id": "item-0182",
+    "restaurant": "Arby's",
+    "item": "Corned Beef 'n Cheese Slider",
+    "calories": 220.0,
+    "totalFat": 9.0,
+    "protein": 14.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0183",
+    "restaurant": "Arby's",
+    "item": "Ham 'n Cheese Slider",
+    "calories": 210.0,
+    "totalFat": 8.0,
+    "protein": 13.0,
+    "sodium": 780.0
+  },
+  {
+    "id": "item-0184",
+    "restaurant": "Arby's",
+    "item": "Jalapeno Roast Beef 'n Cheese Slider",
+    "calories": 240.0,
+    "totalFat": 11.0,
+    "protein": 14.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0185",
+    "restaurant": "Arby's",
+    "item": "Pizza Slider",
+    "calories": 300.0,
+    "totalFat": 17.0,
+    "protein": 13.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0186",
+    "restaurant": "Arby's",
+    "item": "Roast Beef 'n Cheese Slider",
+    "calories": 240.0,
+    "totalFat": 11.0,
+    "protein": 14.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0187",
+    "restaurant": "Arby's",
+    "item": "Turkey 'n Cheese Slider",
+    "calories": 200.0,
+    "totalFat": 7.0,
+    "protein": 14.0,
+    "sodium": 760.0
+  },
+  {
+    "id": "item-0188",
+    "restaurant": "Arby's",
+    "item": "Chopped Side Salad",
+    "calories": 70.0,
+    "totalFat": 5.0,
+    "protein": 5.0,
+    "sodium": 100.0
+  },
+  {
+    "id": "item-0189",
+    "restaurant": "Arby's",
+    "item": "Crispy Chicken Farmhouse Salad",
+    "calories": 430.0,
+    "totalFat": 24.0,
+    "protein": 28.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0190",
+    "restaurant": "Arby's",
+    "item": "Greek Gyro Salad",
+    "calories": 420.0,
+    "totalFat": 37.0,
+    "protein": 10.0,
+    "sodium": 700.0
+  },
+  {
+    "id": "item-0191",
+    "restaurant": "Arby's",
+    "item": "Roast Turkey Farmhouse Salad",
+    "calories": 230.0,
+    "totalFat": 13.0,
+    "protein": 22.0,
+    "sodium": 870.0
+  },
+  {
+    "id": "item-0192",
+    "restaurant": "Arby's",
+    "item": "Super Greek Salad",
+    "calories": 720.0,
+    "totalFat": 53.0,
+    "protein": 22.0,
+    "sodium": 1310.0
+  },
+  {
+    "id": "item-0193",
+    "restaurant": "Burger King",
+    "item": "American Brewhouse King",
+    "calories": 1550.0,
+    "totalFat": 126.0,
+    "protein": 134.0,
+    "sodium": 1820.0
+  },
+  {
+    "id": "item-0194",
+    "restaurant": "Burger King",
+    "item": "Bacon & Swiss Sourdough King",
+    "calories": 1000.0,
+    "totalFat": 65.0,
+    "protein": 56.0,
+    "sodium": 1320.0
+  },
+  {
+    "id": "item-0195",
+    "restaurant": "Burger King",
+    "item": "Bacon Cheeseburger",
+    "calories": 330.0,
+    "totalFat": 16.0,
+    "protein": 18.0,
+    "sodium": 830.0
+  },
+  {
+    "id": "item-0196",
+    "restaurant": "Burger King",
+    "item": "Bacon Cheeseburger Deluxe",
+    "calories": 290.0,
+    "totalFat": 14.0,
+    "protein": 12.0,
+    "sodium": 720.0
+  },
+  {
+    "id": "item-0197",
+    "restaurant": "Burger King",
+    "item": "Bacon King",
+    "calories": 1040.0,
+    "totalFat": 48.0,
+    "protein": 57.0,
+    "sodium": 1900.0
+  },
+  {
+    "id": "item-0198",
+    "restaurant": "Burger King",
+    "item": "Bacon King Jr",
+    "calories": 730.0,
+    "totalFat": 39.0,
+    "protein": 32.0,
+    "sodium": 1930.0
+  },
+  {
+    "id": "item-0199",
+    "restaurant": "Burger King",
+    "item": "BBQ Bacon King",
+    "calories": 1100.0,
+    "totalFat": 75.0,
+    "protein": 57.0,
+    "sodium": 1850.0
+  },
+  {
+    "id": "item-0200",
+    "restaurant": "Burger King",
+    "item": "Cheeseburger",
+    "calories": 300.0,
+    "totalFat": 14.0,
+    "protein": 16.0,
+    "sodium": 710.0
+  },
+  {
+    "id": "item-0201",
+    "restaurant": "Burger King",
+    "item": "Double Bacon Cheeseburger",
+    "calories": 520.0,
+    "totalFat": 31.0,
+    "protein": 31.0,
+    "sodium": 1180.0
+  },
+  {
+    "id": "item-0202",
+    "restaurant": "Burger King",
+    "item": "Double Cheeseburger",
+    "calories": 450.0,
+    "totalFat": 26.0,
+    "protein": 26.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0203",
+    "restaurant": "Burger King",
+    "item": "Double Hamburger",
+    "calories": 360.0,
+    "totalFat": 18.0,
+    "protein": 22.0,
+    "sodium": 520.0
+  },
+  {
+    "id": "item-0204",
+    "restaurant": "Burger King",
+    "item": "Double Quarter Pound King",
+    "calories": 900.0,
+    "totalFat": 54.0,
+    "protein": 56.0,
+    "sodium": 1740.0
+  },
+  {
+    "id": "item-0205",
+    "restaurant": "Burger King",
+    "item": "Extra Long Cheeseburger",
+    "calories": 580.0,
+    "totalFat": 33.0,
+    "protein": 26.0,
+    "sodium": 1030.0
+  },
+  {
+    "id": "item-0206",
+    "restaurant": "Burger King",
+    "item": "Farmhouse King",
+    "calories": 1220.0,
+    "totalFat": 80.0,
+    "protein": 0.0,
+    "sodium": 2050.0
+  },
+  {
+    "id": "item-0207",
+    "restaurant": "Burger King",
+    "item": "Hamburger",
+    "calories": 260.0,
+    "totalFat": 10.0,
+    "protein": 13.0,
+    "sodium": 490.0
+  },
+  {
+    "id": "item-0208",
+    "restaurant": "Burger King",
+    "item": "Homestyle Cheeseburger",
+    "calories": 550.0,
+    "totalFat": 27.0,
+    "protein": 30.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0209",
+    "restaurant": "Burger King",
+    "item": "Jalapeno King Sandwich",
+    "calories": 990.0,
+    "totalFat": 65.0,
+    "protein": 55.0,
+    "sodium": 1550.0
+  },
+  {
+    "id": "item-0210",
+    "restaurant": "Burger King",
+    "item": "Mushroom & Swiss King",
+    "calories": 940.0,
+    "totalFat": 63.0,
+    "protein": 49.0,
+    "sodium": 1380.0
+  },
+  {
+    "id": "item-0211",
+    "restaurant": "Burger King",
+    "item": "Rodeo Burger",
+    "calories": 310.0,
+    "totalFat": 13.0,
+    "protein": 9.0,
+    "sodium": 450.0
+  },
+  {
+    "id": "item-0212",
+    "restaurant": "Burger King",
+    "item": "Rodeo King",
+    "calories": 1250.0,
+    "totalFat": 82.0,
+    "protein": 60.0,
+    "sodium": 2270.0
+  },
+  {
+    "id": "item-0213",
+    "restaurant": "Burger King",
+    "item": "Sourdough King Single",
+    "calories": 730.0,
+    "totalFat": 43.0,
+    "protein": 35.0,
+    "sodium": 1570.0
+  },
+  {
+    "id": "item-0214",
+    "restaurant": "Burger King",
+    "item": "Sourdough King Double",
+    "calories": 970.0,
+    "totalFat": 61.0,
+    "protein": 55.0,
+    "sodium": 1640.0
+  },
+  {
+    "id": "item-0215",
+    "restaurant": "Burger King",
+    "item": "Steakhouse King",
+    "calories": 1100.0,
+    "totalFat": 74.0,
+    "protein": 50.0,
+    "sodium": 1620.0
+  },
+  {
+    "id": "item-0216",
+    "restaurant": "Burger King",
+    "item": "Bacon & Cheese Whopper",
+    "calories": 770.0,
+    "totalFat": 48.0,
+    "protein": 29.0,
+    "sodium": 1360.0
+  },
+  {
+    "id": "item-0217",
+    "restaurant": "Burger King",
+    "item": "DOUBLE WHOPPER w/o Cheese",
+    "calories": 900.0,
+    "totalFat": 57.0,
+    "protein": 47.0,
+    "sodium": 1050.0
+  },
+  {
+    "id": "item-0218",
+    "restaurant": "Burger King",
+    "item": "DOUBLE WHOPPER w/ Cheese",
+    "calories": 990.0,
+    "totalFat": 65.0,
+    "protein": 52.0,
+    "sodium": 1480.0
+  },
+  {
+    "id": "item-0219",
+    "restaurant": "Burger King",
+    "item": "WHOPPER w/o Cheese",
+    "calories": 660.0,
+    "totalFat": 40.0,
+    "protein": 28.0,
+    "sodium": 980.0
+  },
+  {
+    "id": "item-0220",
+    "restaurant": "Burger King",
+    "item": "WHOPPER w/ Cheese",
+    "calories": 760.0,
+    "totalFat": 47.0,
+    "protein": 33.0,
+    "sodium": 1410.0
+  },
+  {
+    "id": "item-0221",
+    "restaurant": "Burger King",
+    "item": "WHOPPER JR. w/o Cheese",
+    "calories": 340.0,
+    "totalFat": 19.0,
+    "protein": 14.0,
+    "sodium": 510.0
+  },
+  {
+    "id": "item-0222",
+    "restaurant": "Burger King",
+    "item": "WHOPPER JR. w/ Cheese",
+    "calories": 380.0,
+    "totalFat": 23.0,
+    "protein": 16.0,
+    "sodium": 730.0
+  },
+  {
+    "id": "item-0223",
+    "restaurant": "Burger King",
+    "item": "Bacon Cheddar Ranch Chicken Salad w/ grilled Chicken & Dressing",
+    "calories": 590.0,
+    "totalFat": 40.0,
+    "protein": 42.0,
+    "sodium": 1540.0
+  },
+  {
+    "id": "item-0224",
+    "restaurant": "Burger King",
+    "item": "Bacon Cheddar Ranch Chicken Salad w/ crispy Chicken & Dressing",
+    "calories": 720.0,
+    "totalFat": 50.0,
+    "protein": 36.0,
+    "sodium": 1960.0
+  },
+  {
+    "id": "item-0225",
+    "restaurant": "Burger King",
+    "item": "Chicken BLT Salad w/ Grilled Chicken",
+    "calories": 550.0,
+    "totalFat": 37.0,
+    "protein": 36.0,
+    "sodium": 1640.0
+  },
+  {
+    "id": "item-0226",
+    "restaurant": "Burger King",
+    "item": "Chicken BLT Salad w/ Crispy Chicken",
+    "calories": 690.0,
+    "totalFat": 48.0,
+    "protein": 35.0,
+    "sodium": 1750.0
+  },
+  {
+    "id": "item-0227",
+    "restaurant": "Burger King",
+    "item": "Chicken Caesar Salad w/ Grilled Chicken",
+    "calories": 530.0,
+    "totalFat": 32.0,
+    "protein": 35.0,
+    "sodium": 1640.0
+  },
+  {
+    "id": "item-0228",
+    "restaurant": "Burger King",
+    "item": "Chicken Caesar Salad w/ Crispy Chicken",
+    "calories": 670.0,
+    "totalFat": 43.0,
+    "protein": 34.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0229",
+    "restaurant": "Burger King",
+    "item": "Chicken, Apple & Cranberry Salad w/ Grilled Chicken",
+    "calories": 560.0,
+    "totalFat": 30.0,
+    "protein": 29.0,
+    "sodium": 980.0
+  },
+  {
+    "id": "item-0230",
+    "restaurant": "Burger King",
+    "item": "Chicken, Apple & Cranberry Salad w/ Crispy Chicken",
+    "calories": 700.0,
+    "totalFat": 41.0,
+    "protein": 28.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0231",
+    "restaurant": "Burger King",
+    "item": "Garden Grilled Chicken Salad w/ Grilled Chicken, no dressing",
+    "calories": 320.0,
+    "totalFat": 14.0,
+    "protein": 36.0,
+    "sodium": 650.0
+  },
+  {
+    "id": "item-0232",
+    "restaurant": "Burger King",
+    "item": "Garden Grilled Chicken Salad w/ Crispy Chicken, no dressing",
+    "calories": 450.0,
+    "totalFat": 24.0,
+    "protein": 29.0,
+    "sodium": 1070.0
+  },
+  {
+    "id": "item-0233",
+    "restaurant": "Burger King",
+    "item": "Side Caesar Salad with dressing",
+    "calories": 220.0,
+    "totalFat": 20.0,
+    "protein": 6.0,
+    "sodium": 540.0
+  },
+  {
+    "id": "item-0234",
+    "restaurant": "Burger King",
+    "item": "Side Garden Salad and Avocado Ranch Dressing",
+    "calories": 230.0,
+    "totalFat": 21.0,
+    "protein": 5.0,
+    "sodium": 520.0
+  },
+  {
+    "id": "item-0235",
+    "restaurant": "Burger King",
+    "item": "Bacon Cheddar Ranch Crispy Chicken Sandwich",
+    "calories": 830.0,
+    "totalFat": 52.0,
+    "protein": 34.0,
+    "sodium": 2100.0
+  },
+  {
+    "id": "item-0236",
+    "restaurant": "Burger King",
+    "item": "BBQ Bacon Crispy Chicken Sandwich",
+    "calories": 440.0,
+    "totalFat": 27.0,
+    "protein": 7.0,
+    "sodium": 630.0
+  },
+  {
+    "id": "item-0237",
+    "restaurant": "Burger King",
+    "item": "Big Fish Sandwich",
+    "calories": 530.0,
+    "totalFat": 27.0,
+    "protein": 17.0,
+    "sodium": 1360.0
+  },
+  {
+    "id": "item-0238",
+    "restaurant": "Burger King",
+    "item": "BK VEGGIE Burger",
+    "calories": 410.0,
+    "totalFat": 16.0,
+    "protein": 22.0,
+    "sodium": 1030.0
+  },
+  {
+    "id": "item-0239",
+    "restaurant": "Burger King",
+    "item": "Chicken Burger",
+    "calories": 480.0,
+    "totalFat": 25.0,
+    "protein": 22.0,
+    "sodium": 1160.0
+  },
+  {
+    "id": "item-0240",
+    "restaurant": "Burger King",
+    "item": "Chicken Cordon Bleu Sandwich",
+    "calories": 730.0,
+    "totalFat": 39.0,
+    "protein": 32.0,
+    "sodium": 1930.0
+  },
+  {
+    "id": "item-0241",
+    "restaurant": "Burger King",
+    "item": "Chicken Fries",
+    "calories": 290.0,
+    "totalFat": 17.0,
+    "protein": 16.0,
+    "sodium": 780.0
+  },
+  {
+    "id": "item-0242",
+    "restaurant": "Burger King",
+    "item": "4 Piece Chicken Nuggets",
+    "calories": 190.0,
+    "totalFat": 11.0,
+    "protein": 10.0,
+    "sodium": 310.0
+  },
+  {
+    "id": "item-0243",
+    "restaurant": "Burger King",
+    "item": "6 Piece Chicken Nuggets",
+    "calories": 290.0,
+    "totalFat": 17.0,
+    "protein": 15.0,
+    "sodium": 460.0
+  },
+  {
+    "id": "item-0244",
+    "restaurant": "Burger King",
+    "item": "20 Piece Chicken Nuggets",
+    "calories": 950.0,
+    "totalFat": 55.0,
+    "protein": 51.0,
+    "sodium": 1530.0
+  },
+  {
+    "id": "item-0245",
+    "restaurant": "Burger King",
+    "item": "Chicken Nuggets (10pc)",
+    "calories": 470.0,
+    "totalFat": 29.0,
+    "protein": 21.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0246",
+    "restaurant": "Burger King",
+    "item": "Chicken Parmesan Sandwich",
+    "calories": 570.0,
+    "totalFat": 25.0,
+    "protein": 32.0,
+    "sodium": 1340.0
+  },
+  {
+    "id": "item-0247",
+    "restaurant": "Burger King",
+    "item": "Crispy Buffalo Chicken Melt",
+    "calories": 580.0,
+    "totalFat": 28.0,
+    "protein": 30.0,
+    "sodium": 2310.0
+  },
+  {
+    "id": "item-0248",
+    "restaurant": "Burger King",
+    "item": "Crispy Chicken Jr.",
+    "calories": 430.0,
+    "totalFat": 28.0,
+    "protein": 12.0,
+    "sodium": 760.0
+  },
+  {
+    "id": "item-0249",
+    "restaurant": "Burger King",
+    "item": "Crispy Chicken Sandwich",
+    "calories": 670.0,
+    "totalFat": 41.0,
+    "protein": 23.0,
+    "sodium": 1070.0
+  },
+  {
+    "id": "item-0250",
+    "restaurant": "Burger King",
+    "item": "Grilled Chicken Sandwich",
+    "calories": 470.0,
+    "totalFat": 19.0,
+    "protein": 37.0,
+    "sodium": 850.0
+  },
+  {
+    "id": "item-0251",
+    "restaurant": "Burger King",
+    "item": "Grilled Chili Cheese Dog",
+    "calories": 330.0,
+    "totalFat": 19.0,
+    "protein": 14.0,
+    "sodium": 980.0
+  },
+  {
+    "id": "item-0252",
+    "restaurant": "Burger King",
+    "item": "Grilled Hot Dog",
+    "calories": 310.0,
+    "totalFat": 16.0,
+    "protein": 11.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0253",
+    "restaurant": "Burger King",
+    "item": "Jalapeno Chicken Fries",
+    "calories": 300.0,
+    "totalFat": 18.0,
+    "protein": 15.0,
+    "sodium": 950.0
+  },
+  {
+    "id": "item-0254",
+    "restaurant": "Burger King",
+    "item": "Original Chicken Sandwich",
+    "calories": 630.0,
+    "totalFat": 39.0,
+    "protein": 24.0,
+    "sodium": 1390.0
+  },
+  {
+    "id": "item-0255",
+    "restaurant": "Burger King",
+    "item": "Pretzel Chicken Fries",
+    "calories": 340.0,
+    "totalFat": 21.0,
+    "protein": 16.0,
+    "sodium": 1200.0
+  },
+  {
+    "id": "item-0256",
+    "restaurant": "Burger King",
+    "item": "Rodeo Crispy Chicken Sandwich",
+    "calories": 410.0,
+    "totalFat": 17.0,
+    "protein": 12.0,
+    "sodium": 870.0
+  },
+  {
+    "id": "item-0257",
+    "restaurant": "Burger King",
+    "item": "Sourdough Chicken Club",
+    "calories": 840.0,
+    "totalFat": 51.0,
+    "protein": 32.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0258",
+    "restaurant": "Burger King",
+    "item": "4 Piece Spicy Chicken Nuggets",
+    "calories": 210.0,
+    "totalFat": 15.0,
+    "protein": 8.0,
+    "sodium": 570.0
+  },
+  {
+    "id": "item-0259",
+    "restaurant": "Burger King",
+    "item": "Spicy Chicken Nuggets",
+    "calories": 530.0,
+    "totalFat": 37.0,
+    "protein": 20.0,
+    "sodium": 1420.0
+  },
+  {
+    "id": "item-0260",
+    "restaurant": "Burger King",
+    "item": "Spicy Crispy Chicken Jr.",
+    "calories": 410.0,
+    "totalFat": 25.0,
+    "protein": 12.0,
+    "sodium": 850.0
+  },
+  {
+    "id": "item-0261",
+    "restaurant": "Burger King",
+    "item": "Spicy Crispy Chicken Sandwich",
+    "calories": 700.0,
+    "totalFat": 42.0,
+    "protein": 25.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0262",
+    "restaurant": "Burger King",
+    "item": "Spicy Crispy Jalapeno Chicken Sandwich",
+    "calories": 760.0,
+    "totalFat": 45.0,
+    "protein": 32.0,
+    "sodium": 1720.0
+  },
+  {
+    "id": "item-0263",
+    "restaurant": "Dairy Queen",
+    "item": "1/2 lb. FlameThrower\u00ae GrillBurger",
+    "calories": 1000.0,
+    "totalFat": 74.0,
+    "protein": 46.0,
+    "sodium": 1610.0
+  },
+  {
+    "id": "item-0264",
+    "restaurant": "Dairy Queen",
+    "item": "1/2 lb. GrillBurger with Cheese",
+    "calories": 800.0,
+    "totalFat": 51.0,
+    "protein": 40.0,
+    "sodium": 1280.0
+  },
+  {
+    "id": "item-0265",
+    "restaurant": "Dairy Queen",
+    "item": "1/4 lb. Bacon Cheese GrillBurger",
+    "calories": 630.0,
+    "totalFat": 37.0,
+    "protein": 30.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0266",
+    "restaurant": "Dairy Queen",
+    "item": "1/4 lb. GrillBurger with Cheese",
+    "calories": 540.0,
+    "totalFat": 30.0,
+    "protein": 23.0,
+    "sodium": 1020.0
+  },
+  {
+    "id": "item-0267",
+    "restaurant": "Dairy Queen",
+    "item": "1/4 lb. Mushroom Swiss GrillBurger",
+    "calories": 570.0,
+    "totalFat": 35.0,
+    "protein": 24.0,
+    "sodium": 820.0
+  },
+  {
+    "id": "item-0268",
+    "restaurant": "Dairy Queen",
+    "item": "Original Cheeseburger",
+    "calories": 400.0,
+    "totalFat": 18.0,
+    "protein": 19.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0269",
+    "restaurant": "Dairy Queen",
+    "item": "Original Double Cheeseburger",
+    "calories": 630.0,
+    "totalFat": 34.0,
+    "protein": 34.0,
+    "sodium": 1240.0
+  },
+  {
+    "id": "item-0270",
+    "restaurant": "Dairy Queen",
+    "item": "4 Piece Chicken Strip Basket w/ Country Gravy",
+    "calories": 1030.0,
+    "totalFat": 53.0,
+    "protein": 35.0,
+    "sodium": 2780.0
+  },
+  {
+    "id": "item-0271",
+    "restaurant": "Dairy Queen",
+    "item": "6 Piece Chicken Strip Basket w/ Country Gravy",
+    "calories": 1260.0,
+    "totalFat": 66.0,
+    "protein": 49.0,
+    "sodium": 3500.0
+  },
+  {
+    "id": "item-0272",
+    "restaurant": "Dairy Queen",
+    "item": "Bacon Cheese Dog",
+    "calories": 420.0,
+    "totalFat": 26.0,
+    "protein": 19.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0273",
+    "restaurant": "Dairy Queen",
+    "item": "Cheese Dog",
+    "calories": 390.0,
+    "totalFat": 24.0,
+    "protein": 16.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0274",
+    "restaurant": "Dairy Queen",
+    "item": "Chili Cheese Dog",
+    "calories": 380.0,
+    "totalFat": 24.0,
+    "protein": 16.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0275",
+    "restaurant": "Dairy Queen",
+    "item": "Chili Dog",
+    "calories": 330.0,
+    "totalFat": 20.0,
+    "protein": 13.0,
+    "sodium": 1050.0
+  },
+  {
+    "id": "item-0276",
+    "restaurant": "Dairy Queen",
+    "item": "Hot Dog",
+    "calories": 290.0,
+    "totalFat": 17.0,
+    "protein": 11.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0277",
+    "restaurant": "Dairy Queen",
+    "item": "Relish Dog",
+    "calories": 350.0,
+    "totalFat": 20.0,
+    "protein": 13.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0278",
+    "restaurant": "Dairy Queen",
+    "item": "Barbecue Pork Sandwich",
+    "calories": 310.0,
+    "totalFat": 9.0,
+    "protein": 17.0,
+    "sodium": 830.0
+  },
+  {
+    "id": "item-0279",
+    "restaurant": "Dairy Queen",
+    "item": "Breaded Mushrooms",
+    "calories": 250.0,
+    "totalFat": 9.0,
+    "protein": 7.0,
+    "sodium": 500.0
+  },
+  {
+    "id": "item-0280",
+    "restaurant": "Dairy Queen",
+    "item": "Regular Cheese Curds",
+    "calories": 550.0,
+    "totalFat": 45.0,
+    "protein": 35.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0281",
+    "restaurant": "Dairy Queen",
+    "item": "Large Cheese Curds",
+    "calories": 1050.0,
+    "totalFat": 75.0,
+    "protein": 43.0,
+    "sodium": 2210.0
+  },
+  {
+    "id": "item-0282",
+    "restaurant": "Dairy Queen",
+    "item": "Chili Cheese Mega Dog",
+    "calories": 760.0,
+    "totalFat": 49.0,
+    "protein": 32.0,
+    "sodium": 1570.0
+  },
+  {
+    "id": "item-0283",
+    "restaurant": "Dairy Queen",
+    "item": "Corn Dog",
+    "calories": 260.0,
+    "totalFat": 15.0,
+    "protein": 6.0,
+    "sodium": 450.0
+  },
+  {
+    "id": "item-0284",
+    "restaurant": "Dairy Queen",
+    "item": "Crispy Fish Sandwich",
+    "calories": 470.0,
+    "totalFat": 22.0,
+    "protein": 17.0,
+    "sodium": 1210.0
+  },
+  {
+    "id": "item-0285",
+    "restaurant": "Dairy Queen",
+    "item": "Deluxe Cheeseburger",
+    "calories": 400.0,
+    "totalFat": 18.0,
+    "protein": 20.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0286",
+    "restaurant": "Dairy Queen",
+    "item": "Deluxe Double Cheeseburger",
+    "calories": 640.0,
+    "totalFat": 34.0,
+    "protein": 34.0,
+    "sodium": 1240.0
+  },
+  {
+    "id": "item-0287",
+    "restaurant": "Dairy Queen",
+    "item": "Deluxe Double Hamburger",
+    "calories": 540.0,
+    "totalFat": 26.0,
+    "protein": 29.0,
+    "sodium": 750.0
+  },
+  {
+    "id": "item-0288",
+    "restaurant": "Dairy Queen",
+    "item": "Deluxe Hamburger",
+    "calories": 350.0,
+    "totalFat": 14.0,
+    "protein": 17.0,
+    "sodium": 680.0
+  },
+  {
+    "id": "item-0289",
+    "restaurant": "Dairy Queen",
+    "item": "DQ Ultimate\u00ae Burger",
+    "calories": 780.0,
+    "totalFat": 48.0,
+    "protein": 41.0,
+    "sodium": 1390.0
+  },
+  {
+    "id": "item-0290",
+    "restaurant": "Dairy Queen",
+    "item": "Pork Tenderloin Sandwich",
+    "calories": 580.0,
+    "totalFat": 34.0,
+    "protein": 19.0,
+    "sodium": 910.0
+  },
+  {
+    "id": "item-0291",
+    "restaurant": "Dairy Queen",
+    "item": "Steak Finger Basket",
+    "calories": 910.0,
+    "totalFat": 48.0,
+    "protein": 23.0,
+    "sodium": 2210.0
+  },
+  {
+    "id": "item-0292",
+    "restaurant": "Dairy Queen",
+    "item": "3 chicken strips Chicken Strips",
+    "calories": 350.0,
+    "totalFat": 20.0,
+    "protein": 22.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0293",
+    "restaurant": "Dairy Queen",
+    "item": "Chicken Bacon Ranch Sandwich",
+    "calories": 500.0,
+    "totalFat": 20.0,
+    "protein": 33.0,
+    "sodium": 1190.0
+  },
+  {
+    "id": "item-0294",
+    "restaurant": "Dairy Queen",
+    "item": "Chicken Mozzarella Sandwich",
+    "calories": 640.0,
+    "totalFat": 25.0,
+    "protein": 34.0,
+    "sodium": 1530.0
+  },
+  {
+    "id": "item-0295",
+    "restaurant": "Dairy Queen",
+    "item": "Crispy Chicken BLT Salad",
+    "calories": 520.0,
+    "totalFat": 31.0,
+    "protein": 37.0,
+    "sodium": 1470.0
+  },
+  {
+    "id": "item-0296",
+    "restaurant": "Dairy Queen",
+    "item": "Crispy Chicken Garden Greens Salad",
+    "calories": 280.0,
+    "totalFat": 13.0,
+    "protein": 17.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0297",
+    "restaurant": "Dairy Queen",
+    "item": "Crispy Chicken Sandwich",
+    "calories": 600.0,
+    "totalFat": 30.0,
+    "protein": 24.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0298",
+    "restaurant": "Dairy Queen",
+    "item": "Crispy Chicken Wrap",
+    "calories": 350.0,
+    "totalFat": 21.0,
+    "protein": 12.0,
+    "sodium": 820.0
+  },
+  {
+    "id": "item-0299",
+    "restaurant": "Dairy Queen",
+    "item": "Grilled Chicken BLT Salad",
+    "calories": 380.0,
+    "totalFat": 19.0,
+    "protein": 42.0,
+    "sodium": 1540.0
+  },
+  {
+    "id": "item-0300",
+    "restaurant": "Dairy Queen",
+    "item": "Grilled Chicken Garden Greens Salad",
+    "calories": 150.0,
+    "totalFat": 2.0,
+    "protein": 23.0,
+    "sodium": 730.0
+  },
+  {
+    "id": "item-0301",
+    "restaurant": "Dairy Queen",
+    "item": "Grilled Chicken Sandwich",
+    "calories": 360.0,
+    "totalFat": 15.0,
+    "protein": 25.0,
+    "sodium": 1040.0
+  },
+  {
+    "id": "item-0302",
+    "restaurant": "Dairy Queen",
+    "item": "Grilled Chicken Wrap",
+    "calories": 280.0,
+    "totalFat": 15.0,
+    "protein": 15.0,
+    "sodium": 800.0
+  },
+  {
+    "id": "item-0303",
+    "restaurant": "Dairy Queen",
+    "item": "Side Salad",
+    "calories": 20.0,
+    "totalFat": 0.0,
+    "protein": 1.0,
+    "sodium": 15.0
+  },
+  {
+    "id": "item-0304",
+    "restaurant": "Dairy Queen",
+    "item": "Turkey BLT Sandwich",
+    "calories": 550.0,
+    "totalFat": 26.0,
+    "protein": 30.0,
+    "sodium": 1420.0
+  },
+  {
+    "id": "item-0305",
+    "restaurant": "Subway",
+    "item": "6\" B.L.T.",
+    "calories": 320.0,
+    "totalFat": 9.0,
+    "protein": 15.0,
+    "sodium": 680.0
+  },
+  {
+    "id": "item-0306",
+    "restaurant": "Subway",
+    "item": "Footlong B.L.T.",
+    "calories": 640.0,
+    "totalFat": 18.0,
+    "protein": 30.0,
+    "sodium": 1360.0
+  },
+  {
+    "id": "item-0307",
+    "restaurant": "Subway",
+    "item": "6\" BBQ Rib Sandwich",
+    "calories": 430.0,
+    "totalFat": 18.0,
+    "protein": 19.0,
+    "sodium": 590.0
+  },
+  {
+    "id": "item-0308",
+    "restaurant": "Subway",
+    "item": "Footlong BBQ Rib Sandwich",
+    "calories": 860.0,
+    "totalFat": 36.0,
+    "protein": 38.0,
+    "sodium": 1180.0
+  },
+  {
+    "id": "item-0309",
+    "restaurant": "Subway",
+    "item": "6\" Big Hot Pastrami",
+    "calories": 580.0,
+    "totalFat": 31.0,
+    "protein": 29.0,
+    "sodium": 1470.0
+  },
+  {
+    "id": "item-0310",
+    "restaurant": "Subway",
+    "item": "Footlong Big Hot Pastrami",
+    "calories": 1160.0,
+    "totalFat": 62.0,
+    "protein": 58.0,
+    "sodium": 2940.0
+  },
+  {
+    "id": "item-0311",
+    "restaurant": "Subway",
+    "item": "6\" Big Philly Cheesesteak",
+    "calories": 500.0,
+    "totalFat": 17.0,
+    "protein": 38.0,
+    "sodium": 1310.0
+  },
+  {
+    "id": "item-0312",
+    "restaurant": "Subway",
+    "item": "Footlong Big Philly Cheesesteak",
+    "calories": 1000.0,
+    "totalFat": 34.0,
+    "protein": 76.0,
+    "sodium": 2620.0
+  },
+  {
+    "id": "item-0313",
+    "restaurant": "Subway",
+    "item": "Kids Mini Sub Black Forest Ham",
+    "calories": 180.0,
+    "totalFat": 3.0,
+    "protein": 10.0,
+    "sodium": 450.0
+  },
+  {
+    "id": "item-0314",
+    "restaurant": "Subway",
+    "item": "6\" Black Forest Ham",
+    "calories": 290.0,
+    "totalFat": 5.0,
+    "protein": 18.0,
+    "sodium": 830.0
+  },
+  {
+    "id": "item-0315",
+    "restaurant": "Subway",
+    "item": "Footlong Black Forest Ham",
+    "calories": 580.0,
+    "totalFat": 10.0,
+    "protein": 36.0,
+    "sodium": 1660.0
+  },
+  {
+    "id": "item-0316",
+    "restaurant": "Subway",
+    "item": "6\" Carved Turkey",
+    "calories": 330.0,
+    "totalFat": 5.0,
+    "protein": 25.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0317",
+    "restaurant": "Subway",
+    "item": "Footlong Carved Turkey",
+    "calories": 660.0,
+    "totalFat": 10.0,
+    "protein": 50.0,
+    "sodium": 1780.0
+  },
+  {
+    "id": "item-0318",
+    "restaurant": "Subway",
+    "item": "6\" Carved Turkey & Bacon w/ Cheese",
+    "calories": 570.0,
+    "totalFat": 26.0,
+    "protein": 33.0,
+    "sodium": 1600.0
+  },
+  {
+    "id": "item-0319",
+    "restaurant": "Subway",
+    "item": "Footlong Carved Turkey & Bacon w/ Cheese",
+    "calories": 1140.0,
+    "totalFat": 52.0,
+    "protein": 66.0,
+    "sodium": 3200.0
+  },
+  {
+    "id": "item-0320",
+    "restaurant": "Subway",
+    "item": "6\" Chicken & Bacon Ranch Melt",
+    "calories": 570.0,
+    "totalFat": 28.0,
+    "protein": 35.0,
+    "sodium": 1080.0
+  },
+  {
+    "id": "item-0321",
+    "restaurant": "Subway",
+    "item": "Footlong Chicken & Bacon Ranch Melt",
+    "calories": 1140.0,
+    "totalFat": 56.0,
+    "protein": 70.0,
+    "sodium": 2160.0
+  },
+  {
+    "id": "item-0322",
+    "restaurant": "Subway",
+    "item": "6\" Chicken Pizziola Melt",
+    "calories": 460.0,
+    "totalFat": 16.0,
+    "protein": 32.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0323",
+    "restaurant": "Subway",
+    "item": "Footlong Chicken Pizziola Melt",
+    "calories": 920.0,
+    "totalFat": 32.0,
+    "protein": 64.0,
+    "sodium": 2280.0
+  },
+  {
+    "id": "item-0324",
+    "restaurant": "Subway",
+    "item": "6\" Cold Cut Combo",
+    "calories": 370.0,
+    "totalFat": 13.0,
+    "protein": 18.0,
+    "sodium": 1140.0
+  },
+  {
+    "id": "item-0325",
+    "restaurant": "Subway",
+    "item": "Footlong Cold Cut Combo",
+    "calories": 740.0,
+    "totalFat": 26.0,
+    "protein": 36.0,
+    "sodium": 2280.0
+  },
+  {
+    "id": "item-0326",
+    "restaurant": "Subway",
+    "item": "6\" Corned Beef Reuben",
+    "calories": 470.0,
+    "totalFat": 15.0,
+    "protein": 39.0,
+    "sodium": 1770.0
+  },
+  {
+    "id": "item-0327",
+    "restaurant": "Subway",
+    "item": "Footlong Corned Beef Reuben",
+    "calories": 940.0,
+    "totalFat": 30.0,
+    "protein": 78.0,
+    "sodium": 3540.0
+  },
+  {
+    "id": "item-0328",
+    "restaurant": "Subway",
+    "item": "6\" Italian B.M.T.",
+    "calories": 410.0,
+    "totalFat": 16.0,
+    "protein": 20.0,
+    "sodium": 1300.0
+  },
+  {
+    "id": "item-0329",
+    "restaurant": "Subway",
+    "item": "Footlong Italian B.M.T.",
+    "calories": 820.0,
+    "totalFat": 32.0,
+    "protein": 40.0,
+    "sodium": 2600.0
+  },
+  {
+    "id": "item-0330",
+    "restaurant": "Subway",
+    "item": "6\" Italian Hero",
+    "calories": 550.0,
+    "totalFat": 29.0,
+    "protein": 26.0,
+    "sodium": 1470.0
+  },
+  {
+    "id": "item-0331",
+    "restaurant": "Subway",
+    "item": "Footlong Italian Hero",
+    "calories": 1100.0,
+    "totalFat": 58.0,
+    "protein": 52.0,
+    "sodium": 2940.0
+  },
+  {
+    "id": "item-0332",
+    "restaurant": "Subway",
+    "item": "6\" Meatball Marinara",
+    "calories": 480.0,
+    "totalFat": 18.0,
+    "protein": 21.0,
+    "sodium": 950.0
+  },
+  {
+    "id": "item-0333",
+    "restaurant": "Subway",
+    "item": "Footlong Meatball Marinara",
+    "calories": 960.0,
+    "totalFat": 36.0,
+    "protein": 42.0,
+    "sodium": 1900.0
+  },
+  {
+    "id": "item-0334",
+    "restaurant": "Subway",
+    "item": "6\" Oven Roasted Chicken",
+    "calories": 320.0,
+    "totalFat": 5.0,
+    "protein": 23.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0335",
+    "restaurant": "Subway",
+    "item": "Footlong Oven Roasted Chicken",
+    "calories": 640.0,
+    "totalFat": 10.0,
+    "protein": 46.0,
+    "sodium": 1280.0
+  },
+  {
+    "id": "item-0336",
+    "restaurant": "Subway",
+    "item": "Kids Mini Sub Roast Beef",
+    "calories": 200.0,
+    "totalFat": 3.0,
+    "protein": 14.0,
+    "sodium": 390.0
+  },
+  {
+    "id": "item-0337",
+    "restaurant": "Subway",
+    "item": "6\" Roast Beef",
+    "calories": 320.0,
+    "totalFat": 5.0,
+    "protein": 24.0,
+    "sodium": 700.0
+  },
+  {
+    "id": "item-0338",
+    "restaurant": "Subway",
+    "item": "Footlong Roast Beef",
+    "calories": 640.0,
+    "totalFat": 10.0,
+    "protein": 48.0,
+    "sodium": 1400.0
+  },
+  {
+    "id": "item-0339",
+    "restaurant": "Subway",
+    "item": "6\" Rotisserie Style Chicken",
+    "calories": 350.0,
+    "totalFat": 6.0,
+    "protein": 29.0,
+    "sodium": 540.0
+  },
+  {
+    "id": "item-0340",
+    "restaurant": "Subway",
+    "item": "Footlong Rotisserie Style Chicken",
+    "calories": 700.0,
+    "totalFat": 12.0,
+    "protein": 58.0,
+    "sodium": 1080.0
+  },
+  {
+    "id": "item-0341",
+    "restaurant": "Subway",
+    "item": "6\" Spicy Italian",
+    "calories": 480.0,
+    "totalFat": 24.0,
+    "protein": 20.0,
+    "sodium": 1520.0
+  },
+  {
+    "id": "item-0342",
+    "restaurant": "Subway",
+    "item": "Footlong Spicy Italian",
+    "calories": 960.0,
+    "totalFat": 48.0,
+    "protein": 40.0,
+    "sodium": 3040.0
+  },
+  {
+    "id": "item-0343",
+    "restaurant": "Subway",
+    "item": "6\" Steak and Cheese",
+    "calories": 380.0,
+    "totalFat": 10.0,
+    "protein": 26.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0344",
+    "restaurant": "Subway",
+    "item": "Footlong Steak and Cheese",
+    "calories": 760.0,
+    "totalFat": 20.0,
+    "protein": 52.0,
+    "sodium": 2120.0
+  },
+  {
+    "id": "item-0345",
+    "restaurant": "Subway",
+    "item": "6\" Subway Club",
+    "calories": 310.0,
+    "totalFat": 5.0,
+    "protein": 23.0,
+    "sodium": 880.0
+  },
+  {
+    "id": "item-0346",
+    "restaurant": "Subway",
+    "item": "Footlong Subway Club",
+    "calories": 620.0,
+    "totalFat": 10.0,
+    "protein": 46.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0347",
+    "restaurant": "Subway",
+    "item": "6\" Subway Melt (includes cheese)",
+    "calories": 370.0,
+    "totalFat": 11.0,
+    "protein": 23.0,
+    "sodium": 1210.0
+  },
+  {
+    "id": "item-0348",
+    "restaurant": "Subway",
+    "item": "Footlong Subway Melt (includes cheese)",
+    "calories": 740.0,
+    "totalFat": 22.0,
+    "protein": 46.0,
+    "sodium": 1420.0
+  },
+  {
+    "id": "item-0349",
+    "restaurant": "Subway",
+    "item": "6\" Subway Seafood Sensation",
+    "calories": 420.0,
+    "totalFat": 19.0,
+    "protein": 13.0,
+    "sodium": 690.0
+  },
+  {
+    "id": "item-0350",
+    "restaurant": "Subway",
+    "item": "Footlong Subway Seafood Sensation",
+    "calories": 840.0,
+    "totalFat": 38.0,
+    "protein": 26.0,
+    "sodium": 1380.0
+  },
+  {
+    "id": "item-0351",
+    "restaurant": "Subway",
+    "item": "6\" Sweet Onion Chicken Teriyaki",
+    "calories": 380.0,
+    "totalFat": 5.0,
+    "protein": 26.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0352",
+    "restaurant": "Subway",
+    "item": "Footlong Sweet Onion Chicken Teriyaki",
+    "calories": 760.0,
+    "totalFat": 10.0,
+    "protein": 52.0,
+    "sodium": 1800.0
+  },
+  {
+    "id": "item-0353",
+    "restaurant": "Subway",
+    "item": "6\" Tuna",
+    "calories": 470.0,
+    "totalFat": 24.0,
+    "protein": 20.0,
+    "sodium": 620.0
+  },
+  {
+    "id": "item-0354",
+    "restaurant": "Subway",
+    "item": "Footlong Tuna",
+    "calories": 940.0,
+    "totalFat": 48.0,
+    "protein": 40.0,
+    "sodium": 1240.0
+  },
+  {
+    "id": "item-0355",
+    "restaurant": "Subway",
+    "item": "6\" Turkey & Bacon Avocado",
+    "calories": 390.0,
+    "totalFat": 13.0,
+    "protein": 22.0,
+    "sodium": 860.0
+  },
+  {
+    "id": "item-0356",
+    "restaurant": "Subway",
+    "item": "Footlong Turkey & Bacon Avocado",
+    "calories": 780.0,
+    "totalFat": 26.0,
+    "protein": 44.0,
+    "sodium": 1720.0
+  },
+  {
+    "id": "item-0357",
+    "restaurant": "Subway",
+    "item": "Kids Mini Sub Turkey Breast",
+    "calories": 180.0,
+    "totalFat": 2.0,
+    "protein": 10.0,
+    "sodium": 380.0
+  },
+  {
+    "id": "item-0358",
+    "restaurant": "Subway",
+    "item": "6\" Turkey Breast",
+    "calories": 280.0,
+    "totalFat": 4.0,
+    "protein": 18.0,
+    "sodium": 810.0
+  },
+  {
+    "id": "item-0359",
+    "restaurant": "Subway",
+    "item": "Footlong Turkey Breast",
+    "calories": 560.0,
+    "totalFat": 8.0,
+    "protein": 36.0,
+    "sodium": 1620.0
+  },
+  {
+    "id": "item-0360",
+    "restaurant": "Subway",
+    "item": "6\" Turkey Breast & Ham",
+    "calories": 280.0,
+    "totalFat": 4.0,
+    "protein": 18.0,
+    "sodium": 820.0
+  },
+  {
+    "id": "item-0361",
+    "restaurant": "Subway",
+    "item": "Footlong Turkey Breast & Ham",
+    "calories": 560.0,
+    "totalFat": 8.0,
+    "protein": 36.0,
+    "sodium": 1640.0
+  },
+  {
+    "id": "item-0362",
+    "restaurant": "Subway",
+    "item": "6\" Turkey Italiano Melt (with Provolone)",
+    "calories": 490.0,
+    "totalFat": 24.0,
+    "protein": 24.0,
+    "sodium": 1480.0
+  },
+  {
+    "id": "item-0363",
+    "restaurant": "Subway",
+    "item": "Footlong Turkey Italiano Melt (with Provolone)",
+    "calories": 980.0,
+    "totalFat": 48.0,
+    "protein": 48.0,
+    "sodium": 2960.0
+  },
+  {
+    "id": "item-0364",
+    "restaurant": "Subway",
+    "item": "Kids Mini Sub Veggie Delite",
+    "calories": 150.0,
+    "totalFat": 2.0,
+    "protein": 6.0,
+    "sodium": 190.0
+  },
+  {
+    "id": "item-0365",
+    "restaurant": "Subway",
+    "item": "6\" Veggie Delite",
+    "calories": 230.0,
+    "totalFat": 3.0,
+    "protein": 8.0,
+    "sodium": 310.0
+  },
+  {
+    "id": "item-0366",
+    "restaurant": "Subway",
+    "item": "Footlong Veggie Delite",
+    "calories": 460.0,
+    "totalFat": 6.0,
+    "protein": 16.0,
+    "sodium": 620.0
+  },
+  {
+    "id": "item-0367",
+    "restaurant": "Subway",
+    "item": "6\" Veggie Patty",
+    "calories": 390.0,
+    "totalFat": 7.0,
+    "protein": 23.0,
+    "sodium": 800.0
+  },
+  {
+    "id": "item-0368",
+    "restaurant": "Subway",
+    "item": "Footlong Veggie Patty",
+    "calories": 780.0,
+    "totalFat": 14.0,
+    "protein": 46.0,
+    "sodium": 1600.0
+  },
+  {
+    "id": "item-0369",
+    "restaurant": "Subway",
+    "item": "Autumn Carved Turkey Salad",
+    "calories": 300.0,
+    "totalFat": 9.0,
+    "protein": 25.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0370",
+    "restaurant": "Subway",
+    "item": "B.L.T. Salad",
+    "calories": 150.0,
+    "totalFat": 8.0,
+    "protein": 10.0,
+    "sodium": 420.0
+  },
+  {
+    "id": "item-0371",
+    "restaurant": "Subway",
+    "item": "Big Hot Pastrami Melt Salad",
+    "calories": 400.0,
+    "totalFat": 29.0,
+    "protein": 23.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0372",
+    "restaurant": "Subway",
+    "item": "Big Philly Cheesesteak Salad",
+    "calories": 330.0,
+    "totalFat": 16.0,
+    "protein": 32.0,
+    "sodium": 1080.0
+  },
+  {
+    "id": "item-0373",
+    "restaurant": "Subway",
+    "item": "Black Forest Ham Salad",
+    "calories": 110.0,
+    "totalFat": 3.0,
+    "protein": 12.0,
+    "sodium": 590.0
+  },
+  {
+    "id": "item-0374",
+    "restaurant": "Subway",
+    "item": "Buffalo Chicken Salad (with Ranch dressing)",
+    "calories": 360.0,
+    "totalFat": 26.0,
+    "protein": 20.0,
+    "sodium": 1100.0
+  },
+  {
+    "id": "item-0375",
+    "restaurant": "Subway",
+    "item": "Carved Turkey & Bacon w/ Cheese Salad",
+    "calories": 280.0,
+    "totalFat": 12.0,
+    "protein": 28.0,
+    "sodium": 1320.0
+  },
+  {
+    "id": "item-0376",
+    "restaurant": "Subway",
+    "item": "Carved Turkey Salad",
+    "calories": 150.0,
+    "totalFat": 4.0,
+    "protein": 19.0,
+    "sodium": 680.0
+  },
+  {
+    "id": "item-0377",
+    "restaurant": "Subway",
+    "item": "Chicken & Bacon Ranch Melt Salad (includes Ranch dressing)",
+    "calories": 510.0,
+    "totalFat": 38.0,
+    "protein": 30.0,
+    "sodium": 1040.0
+  },
+  {
+    "id": "item-0378",
+    "restaurant": "Subway",
+    "item": "Cold Cut Combo Salad",
+    "calories": 180.0,
+    "totalFat": 11.0,
+    "protein": 12.0,
+    "sodium": 820.0
+  },
+  {
+    "id": "item-0379",
+    "restaurant": "Subway",
+    "item": "Double Chicken Salad",
+    "calories": 220.0,
+    "totalFat": 5.0,
+    "protein": 36.0,
+    "sodium": 490.0
+  },
+  {
+    "id": "item-0380",
+    "restaurant": "Subway",
+    "item": "Italian B.M.T.\u00ae Salad",
+    "calories": 230.0,
+    "totalFat": 15.0,
+    "protein": 14.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0381",
+    "restaurant": "Subway",
+    "item": "Italian Hero Salad",
+    "calories": 230.0,
+    "totalFat": 15.0,
+    "protein": 14.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0382",
+    "restaurant": "Subway",
+    "item": "Meatball Marinara Salad",
+    "calories": 310.0,
+    "totalFat": 17.0,
+    "protein": 16.0,
+    "sodium": 720.0
+  },
+  {
+    "id": "item-0383",
+    "restaurant": "Subway",
+    "item": "Oven Roasted Chicken Salad",
+    "calories": 140.0,
+    "totalFat": 3.0,
+    "protein": 19.0,
+    "sodium": 280.0
+  },
+  {
+    "id": "item-0384",
+    "restaurant": "Subway",
+    "item": "Roast Beef Salad",
+    "calories": 140.0,
+    "totalFat": 4.0,
+    "protein": 18.0,
+    "sodium": 450.0
+  },
+  {
+    "id": "item-0385",
+    "restaurant": "Subway",
+    "item": "Spicy Italian Salad",
+    "calories": 310.0,
+    "totalFat": 23.0,
+    "protein": 15.0,
+    "sodium": 1280.0
+  },
+  {
+    "id": "item-0386",
+    "restaurant": "Subway",
+    "item": "Steak & Cheese Salad",
+    "calories": 210.0,
+    "totalFat": 8.0,
+    "protein": 20.0,
+    "sodium": 830.0
+  },
+  {
+    "id": "item-0387",
+    "restaurant": "Subway",
+    "item": "Subway Club Salad",
+    "calories": 140.0,
+    "totalFat": 4.0,
+    "protein": 17.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0388",
+    "restaurant": "Subway",
+    "item": "Subway Melt\u00ae Salad",
+    "calories": 200.0,
+    "totalFat": 10.0,
+    "protein": 18.0,
+    "sodium": 910.0
+  },
+  {
+    "id": "item-0389",
+    "restaurant": "Subway",
+    "item": "Sweet Onion Chicken Teriyaki Salad",
+    "calories": 200.0,
+    "totalFat": 3.0,
+    "protein": 20.0,
+    "sodium": 660.0
+  },
+  {
+    "id": "item-0390",
+    "restaurant": "Subway",
+    "item": "Tuna Salad",
+    "calories": 310.0,
+    "totalFat": 24.0,
+    "protein": 15.0,
+    "sodium": 370.0
+  },
+  {
+    "id": "item-0391",
+    "restaurant": "Subway",
+    "item": "Turkey Breast & Ham Salad",
+    "calories": 110.0,
+    "totalFat": 3.0,
+    "protein": 12.0,
+    "sodium": 580.0
+  },
+  {
+    "id": "item-0392",
+    "restaurant": "Subway",
+    "item": "Turkey Breast Salad",
+    "calories": 110.0,
+    "totalFat": 2.0,
+    "protein": 12.0,
+    "sodium": 570.0
+  },
+  {
+    "id": "item-0393",
+    "restaurant": "Subway",
+    "item": "Veggie Delite Salad",
+    "calories": 50.0,
+    "totalFat": 1.0,
+    "protein": 3.0,
+    "sodium": 65.0
+  },
+  {
+    "id": "item-0394",
+    "restaurant": "Subway",
+    "item": "Chipotle Southwest Steak & Cheese Wrap",
+    "calories": 760.0,
+    "totalFat": 37.0,
+    "protein": 43.0,
+    "sodium": 2250.0
+  },
+  {
+    "id": "item-0395",
+    "restaurant": "Subway",
+    "item": "Rotisserie-Style Chicken Caesar Wrap",
+    "calories": 730.0,
+    "totalFat": 34.0,
+    "protein": 55.0,
+    "sodium": 1900.0
+  },
+  {
+    "id": "item-0396",
+    "restaurant": "Subway",
+    "item": "Turkey, Bacon & Guacamole Wrap",
+    "calories": 810.0,
+    "totalFat": 42.0,
+    "protein": 43.0,
+    "sodium": 2970.0
+  },
+  {
+    "id": "item-0397",
+    "restaurant": "Subway",
+    "item": "Cheese & Veggies Pizza",
+    "calories": 740.0,
+    "totalFat": 25.0,
+    "protein": 36.0,
+    "sodium": 1270.0
+  },
+  {
+    "id": "item-0398",
+    "restaurant": "Subway",
+    "item": "Cheese Pizza",
+    "calories": 680.0,
+    "totalFat": 22.0,
+    "protein": 32.0,
+    "sodium": 1070.0
+  },
+  {
+    "id": "item-0399",
+    "restaurant": "Subway",
+    "item": "Pepperoni Pizza",
+    "calories": 790.0,
+    "totalFat": 32.0,
+    "protein": 38.0,
+    "sodium": 1350.0
+  },
+  {
+    "id": "item-0400",
+    "restaurant": "Subway",
+    "item": "Sausage Pizza",
+    "calories": 820.0,
+    "totalFat": 34.0,
+    "protein": 39.0,
+    "sodium": 1420.0
+  },
+  {
+    "id": "item-0401",
+    "restaurant": "Taco Bell",
+    "item": "1/2 lb.* Cheesy Potato Burrito",
+    "calories": 540.0,
+    "totalFat": 26.0,
+    "protein": 19.0,
+    "sodium": 1360.0
+  },
+  {
+    "id": "item-0402",
+    "restaurant": "Taco Bell",
+    "item": "1/2 lb.* Combo Burrito",
+    "calories": 460.0,
+    "totalFat": 18.0,
+    "protein": 21.0,
+    "sodium": 1320.0
+  },
+  {
+    "id": "item-0403",
+    "restaurant": "Taco Bell",
+    "item": "7-Layer Burrito",
+    "calories": 510.0,
+    "totalFat": 19.0,
+    "protein": 16.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0404",
+    "restaurant": "Taco Bell",
+    "item": "Bean Burrito",
+    "calories": 370.0,
+    "totalFat": 11.0,
+    "protein": 13.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0405",
+    "restaurant": "Taco Bell",
+    "item": "Beefy 5-Layer Burrito",
+    "calories": 550.0,
+    "totalFat": 22.0,
+    "protein": 19.0,
+    "sodium": 1270.0
+  },
+  {
+    "id": "item-0406",
+    "restaurant": "Taco Bell",
+    "item": "Beefy Fritos\u00ae Burrito",
+    "calories": 440.0,
+    "totalFat": 18.0,
+    "protein": 13.0,
+    "sodium": 1030.0
+  },
+  {
+    "id": "item-0407",
+    "restaurant": "Taco Bell",
+    "item": "Black Bean Burrito",
+    "calories": 410.0,
+    "totalFat": 12.0,
+    "protein": 14.0,
+    "sodium": 1100.0
+  },
+  {
+    "id": "item-0408",
+    "restaurant": "Taco Bell",
+    "item": "Burrito Supreme\u00ae \u2013 Beef",
+    "calories": 420.0,
+    "totalFat": 16.0,
+    "protein": 16.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0409",
+    "restaurant": "Taco Bell",
+    "item": "Burrito Supreme\u00ae - Chicken",
+    "calories": 390.0,
+    "totalFat": 12.0,
+    "protein": 19.0,
+    "sodium": 1050.0
+  },
+  {
+    "id": "item-0410",
+    "restaurant": "Taco Bell",
+    "item": "Burrito Supreme\u00ae - Steak",
+    "calories": 390.0,
+    "totalFat": 13.0,
+    "protein": 17.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0411",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Burrito - Chicken",
+    "calories": 760.0,
+    "totalFat": 27.0,
+    "protein": 32.0,
+    "sodium": 1960.0
+  },
+  {
+    "id": "item-0412",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Burrito - Steak",
+    "calories": 780.0,
+    "totalFat": 28.0,
+    "protein": 33.0,
+    "sodium": 1900.0
+  },
+  {
+    "id": "item-0413",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Burrito - Veggie",
+    "calories": 740.0,
+    "totalFat": 26.0,
+    "protein": 20.0,
+    "sodium": 1750.0
+  },
+  {
+    "id": "item-0414",
+    "restaurant": "Taco Bell",
+    "item": "Cheesy Bean and Rice Burrito",
+    "calories": 420.0,
+    "totalFat": 17.0,
+    "protein": 11.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0415",
+    "restaurant": "Taco Bell",
+    "item": "Chili Cheese Burrito",
+    "calories": 380.0,
+    "totalFat": 17.0,
+    "protein": 16.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0416",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Crunchy Cheesy Core Burrito",
+    "calories": 610.0,
+    "totalFat": 24.0,
+    "protein": 25.0,
+    "sodium": 1510.0
+  },
+  {
+    "id": "item-0417",
+    "restaurant": "Taco Bell",
+    "item": "Steak Crunchy Cheesy Core Burrito",
+    "calories": 610.0,
+    "totalFat": 24.0,
+    "protein": 25.0,
+    "sodium": 1520.0
+  },
+  {
+    "id": "item-0418",
+    "restaurant": "Taco Bell",
+    "item": "Beef Crunchy Cheesy Core Burrito",
+    "calories": 630.0,
+    "totalFat": 26.0,
+    "protein": 22.0,
+    "sodium": 1530.0
+  },
+  {
+    "id": "item-0419",
+    "restaurant": "Taco Bell",
+    "item": "Loaded Taco Burrito",
+    "calories": 550.0,
+    "totalFat": 29.0,
+    "protein": 20.0,
+    "sodium": 1130.0
+  },
+  {
+    "id": "item-0420",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Quesarito",
+    "calories": 620.0,
+    "totalFat": 30.0,
+    "protein": 24.0,
+    "sodium": 1440.0
+  },
+  {
+    "id": "item-0421",
+    "restaurant": "Taco Bell",
+    "item": "Steak Quesarito",
+    "calories": 630.0,
+    "totalFat": 31.0,
+    "protein": 25.0,
+    "sodium": 1410.0
+  },
+  {
+    "id": "item-0422",
+    "restaurant": "Taco Bell",
+    "item": "Beef Quesarito",
+    "calories": 650.0,
+    "totalFat": 34.0,
+    "protein": 22.0,
+    "sodium": 1450.0
+  },
+  {
+    "id": "item-0423",
+    "restaurant": "Taco Bell",
+    "item": "Shredded Chicken Burrito",
+    "calories": 400.0,
+    "totalFat": 18.0,
+    "protein": 16.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0424",
+    "restaurant": "Taco Bell",
+    "item": "Smothered Burrito - Beef",
+    "calories": 710.0,
+    "totalFat": 35.0,
+    "protein": 28.0,
+    "sodium": 2260.0
+  },
+  {
+    "id": "item-0425",
+    "restaurant": "Taco Bell",
+    "item": "Smothered Burrito - Shredded Chicken",
+    "calories": 650.0,
+    "totalFat": 28.0,
+    "protein": 34.0,
+    "sodium": 2230.0
+  },
+  {
+    "id": "item-0426",
+    "restaurant": "Taco Bell",
+    "item": "Smothered Burrito - Steak",
+    "calories": 670.0,
+    "totalFat": 29.0,
+    "protein": 35.0,
+    "sodium": 2080.0
+  },
+  {
+    "id": "item-0427",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Spicy Cheesy Core Burrito",
+    "calories": 540.0,
+    "totalFat": 20.0,
+    "protein": 24.0,
+    "sodium": 1740.0
+  },
+  {
+    "id": "item-0428",
+    "restaurant": "Taco Bell",
+    "item": "Steak Spicy Cheesy Core Burrito",
+    "calories": 550.0,
+    "totalFat": 21.0,
+    "protein": 24.0,
+    "sodium": 1750.0
+  },
+  {
+    "id": "item-0429",
+    "restaurant": "Taco Bell",
+    "item": "Beef Spicy Cheesy Core Burrito",
+    "calories": 570.0,
+    "totalFat": 23.0,
+    "protein": 22.0,
+    "sodium": 1760.0
+  },
+  {
+    "id": "item-0430",
+    "restaurant": "Taco Bell",
+    "item": "Triple Melt Burrito",
+    "calories": 410.0,
+    "totalFat": 16.0,
+    "protein": 15.0,
+    "sodium": 1030.0
+  },
+  {
+    "id": "item-0431",
+    "restaurant": "Taco Bell",
+    "item": "XXL Grilled Stuft Burrito - Beef",
+    "calories": 880.0,
+    "totalFat": 42.0,
+    "protein": 31.0,
+    "sodium": 2020.0
+  },
+  {
+    "id": "item-0432",
+    "restaurant": "Taco Bell",
+    "item": "XXL Grilled Stuft Burrito - Chicken",
+    "calories": 830.0,
+    "totalFat": 35.0,
+    "protein": 37.0,
+    "sodium": 1940.0
+  },
+  {
+    "id": "item-0433",
+    "restaurant": "Taco Bell",
+    "item": "XXL Grilled Stuft Burrito - Steak",
+    "calories": 820.0,
+    "totalFat": 36.0,
+    "protein": 33.0,
+    "sodium": 2020.0
+  },
+  {
+    "id": "item-0434",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Soft Taco",
+    "calories": 170.0,
+    "totalFat": 6.0,
+    "protein": 12.0,
+    "sodium": 460.0
+  },
+  {
+    "id": "item-0435",
+    "restaurant": "Taco Bell",
+    "item": "Cool Ranch\u00ae Doritos\u00ae Double Decker\u00ae Taco",
+    "calories": 320.0,
+    "totalFat": 14.0,
+    "protein": 13.0,
+    "sodium": 770.0
+  },
+  {
+    "id": "item-0436",
+    "restaurant": "Taco Bell",
+    "item": "Cool Ranch\u00ae Doritos\u00ae Locos Taco",
+    "calories": 160.0,
+    "totalFat": 10.0,
+    "protein": 8.0,
+    "sodium": 350.0
+  },
+  {
+    "id": "item-0437",
+    "restaurant": "Taco Bell",
+    "item": "Cool Ranch\u00ae Doritos\u00ae Locos Taco Supreme",
+    "calories": 200.0,
+    "totalFat": 12.0,
+    "protein": 9.0,
+    "sodium": 370.0
+  },
+  {
+    "id": "item-0438",
+    "restaurant": "Taco Bell",
+    "item": "Crunchy Taco",
+    "calories": 170.0,
+    "totalFat": 10.0,
+    "protein": 8.0,
+    "sodium": 290.0
+  },
+  {
+    "id": "item-0439",
+    "restaurant": "Taco Bell",
+    "item": "Crunchy Taco Supreme\u00ae",
+    "calories": 200.0,
+    "totalFat": 12.0,
+    "protein": 9.0,
+    "sodium": 320.0
+  },
+  {
+    "id": "item-0440",
+    "restaurant": "Taco Bell",
+    "item": "Double Decker\u00ae Taco",
+    "calories": 320.0,
+    "totalFat": 14.0,
+    "protein": 13.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0441",
+    "restaurant": "Taco Bell",
+    "item": "DOUBLE DECKER\u00ae Taco Supreme\u00ae",
+    "calories": 350.0,
+    "totalFat": 16.0,
+    "protein": 14.0,
+    "sodium": 670.0
+  },
+  {
+    "id": "item-0442",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Sweet Double Stacked Taco",
+    "calories": 340.0,
+    "totalFat": 18.0,
+    "protein": 12.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0443",
+    "restaurant": "Taco Bell",
+    "item": "Cool Ranch Habanero Double Stacked Taco",
+    "calories": 350.0,
+    "totalFat": 20.0,
+    "protein": 13.0,
+    "sodium": 630.0
+  },
+  {
+    "id": "item-0444",
+    "restaurant": "Taco Bell",
+    "item": "Nacho Crunch Double Stacked Taco",
+    "calories": 380.0,
+    "totalFat": 19.0,
+    "protein": 13.0,
+    "sodium": 650.0
+  },
+  {
+    "id": "item-0445",
+    "restaurant": "Taco Bell",
+    "item": "Fiery Doritos\u00ae Double Decker\u00ae Taco",
+    "calories": 320.0,
+    "totalFat": 13.0,
+    "protein": 14.0,
+    "sodium": 770.0
+  },
+  {
+    "id": "item-0446",
+    "restaurant": "Taco Bell",
+    "item": "Fiery Doritos\u00ae Locos Taco",
+    "calories": 170.0,
+    "totalFat": 10.0,
+    "protein": 8.0,
+    "sodium": 370.0
+  },
+  {
+    "id": "item-0447",
+    "restaurant": "Taco Bell",
+    "item": "Fiery Doritos\u00ae Locos Taco Supreme",
+    "calories": 200.0,
+    "totalFat": 12.0,
+    "protein": 9.0,
+    "sodium": 390.0
+  },
+  {
+    "id": "item-0448",
+    "restaurant": "Taco Bell",
+    "item": "Grilled Steak Soft Taco",
+    "calories": 250.0,
+    "totalFat": 14.0,
+    "protein": 11.0,
+    "sodium": 550.0
+  },
+  {
+    "id": "item-0449",
+    "restaurant": "Taco Bell",
+    "item": "Nacho Cheese Doritos\u00ae Double Decker\u00ae Taco",
+    "calories": 320.0,
+    "totalFat": 13.0,
+    "protein": 14.0,
+    "sodium": 760.0
+  },
+  {
+    "id": "item-0450",
+    "restaurant": "Taco Bell",
+    "item": "Nacho Cheese Doritos\u00ae Locos Tacos",
+    "calories": 170.0,
+    "totalFat": 9.0,
+    "protein": 8.0,
+    "sodium": 340.0
+  },
+  {
+    "id": "item-0451",
+    "restaurant": "Taco Bell",
+    "item": "Nacho Cheese Doritos\u00ae Locos Tacos Supreme",
+    "calories": 200.0,
+    "totalFat": 11.0,
+    "protein": 9.0,
+    "sodium": 370.0
+  },
+  {
+    "id": "item-0452",
+    "restaurant": "Taco Bell",
+    "item": "Soft Taco Supreme\u00ae \u2013 Beef",
+    "calories": 230.0,
+    "totalFat": 11.0,
+    "protein": 10.0,
+    "sodium": 530.0
+  },
+  {
+    "id": "item-0453",
+    "restaurant": "Taco Bell",
+    "item": "Soft Taco-Beef",
+    "calories": 200.0,
+    "totalFat": 9.0,
+    "protein": 10.0,
+    "sodium": 510.0
+  },
+  {
+    "id": "item-0454",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Potato Soft Taco",
+    "calories": 250.0,
+    "totalFat": 13.0,
+    "protein": 6.0,
+    "sodium": 510.0
+  },
+  {
+    "id": "item-0455",
+    "restaurant": "Taco Bell",
+    "item": "Chalupa Supreme\u00ae - Chicken",
+    "calories": 340.0,
+    "totalFat": 18.0,
+    "protein": 16.0,
+    "sodium": 530.0
+  },
+  {
+    "id": "item-0456",
+    "restaurant": "Taco Bell",
+    "item": "Chalupa Supreme\u00ae - Steak",
+    "calories": 340.0,
+    "totalFat": 18.0,
+    "protein": 14.0,
+    "sodium": 570.0
+  },
+  {
+    "id": "item-0457",
+    "restaurant": "Taco Bell",
+    "item": "Chalupa Supreme\u00ae\u2013Beef",
+    "calories": 370.0,
+    "totalFat": 21.0,
+    "protein": 13.0,
+    "sodium": 570.0
+  },
+  {
+    "id": "item-0458",
+    "restaurant": "Taco Bell",
+    "item": "Double Chalupa",
+    "calories": 600.0,
+    "totalFat": 35.0,
+    "protein": 21.0,
+    "sodium": 1010.0
+  },
+  {
+    "id": "item-0459",
+    "restaurant": "Taco Bell",
+    "item": "Wild Naked Chicken Chalupa",
+    "calories": 420.0,
+    "totalFat": 28.0,
+    "protein": 19.0,
+    "sodium": 1070.0
+  },
+  {
+    "id": "item-0460",
+    "restaurant": "Taco Bell",
+    "item": "Mild Naked Chicken Chalupa",
+    "calories": 440.0,
+    "totalFat": 30.0,
+    "protein": 20.0,
+    "sodium": 1090.0
+  },
+  {
+    "id": "item-0461",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Double Chalupa",
+    "calories": 600.0,
+    "totalFat": 35.0,
+    "protein": 21.0,
+    "sodium": 1240.0
+  },
+  {
+    "id": "item-0462",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Bean Burrito",
+    "calories": 350.0,
+    "totalFat": 9.0,
+    "protein": 11.0,
+    "sodium": 950.0
+  },
+  {
+    "id": "item-0463",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Burrito Supreme\u00ae \u2013 Chicken",
+    "calories": 340.0,
+    "totalFat": 8.0,
+    "protein": 17.0,
+    "sodium": 1020.0
+  },
+  {
+    "id": "item-0464",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Burrito Supreme\u00ae \u2013 Steak",
+    "calories": 340.0,
+    "totalFat": 9.0,
+    "protein": 15.0,
+    "sodium": 1060.0
+  },
+  {
+    "id": "item-0465",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Chicken Soft Taco",
+    "calories": 150.0,
+    "totalFat": 4.0,
+    "protein": 11.0,
+    "sodium": 460.0
+  },
+  {
+    "id": "item-0466",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Crunchy Taco",
+    "calories": 140.0,
+    "totalFat": 8.0,
+    "protein": 6.0,
+    "sodium": 290.0
+  },
+  {
+    "id": "item-0467",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Grilled Steak Soft Taco",
+    "calories": 150.0,
+    "totalFat": 4.0,
+    "protein": 9.0,
+    "sodium": 500.0
+  },
+  {
+    "id": "item-0468",
+    "restaurant": "Taco Bell",
+    "item": "Fresco Soft Taco",
+    "calories": 170.0,
+    "totalFat": 7.0,
+    "protein": 8.0,
+    "sodium": 500.0
+  },
+  {
+    "id": "item-0469",
+    "restaurant": "Taco Bell",
+    "item": "Cheesy Gordita Crunch",
+    "calories": 490.0,
+    "totalFat": 29.0,
+    "protein": 20.0,
+    "sodium": 810.0
+  },
+  {
+    "id": "item-0470",
+    "restaurant": "Taco Bell",
+    "item": "Doritos\u00ae Cheesy Gordita Crunch - Cool Ranch",
+    "calories": 490.0,
+    "totalFat": 28.0,
+    "protein": 20.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0471",
+    "restaurant": "Taco Bell",
+    "item": "Doritos\u00ae Cheesy Gordita Crunch - Fiery",
+    "calories": 490.0,
+    "totalFat": 28.0,
+    "protein": 20.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0472",
+    "restaurant": "Taco Bell",
+    "item": "Doritos\u00ae Cheesy Gordita Crunch - Nacho Cheese",
+    "calories": 490.0,
+    "totalFat": 28.0,
+    "protein": 20.0,
+    "sodium": 880.0
+  },
+  {
+    "id": "item-0473",
+    "restaurant": "Taco Bell",
+    "item": "Double Cheesy Gordita Crunch",
+    "calories": 570.0,
+    "totalFat": 32.0,
+    "protein": 25.0,
+    "sodium": 1110.0
+  },
+  {
+    "id": "item-0474",
+    "restaurant": "Taco Bell",
+    "item": "Gordita Supreme\u00ae \u2013 Beef",
+    "calories": 300.0,
+    "totalFat": 14.0,
+    "protein": 13.0,
+    "sodium": 550.0
+  },
+  {
+    "id": "item-0475",
+    "restaurant": "Taco Bell",
+    "item": "Gordita Supreme\u00ae - Chicken",
+    "calories": 270.0,
+    "totalFat": 10.0,
+    "protein": 16.0,
+    "sodium": 510.0
+  },
+  {
+    "id": "item-0476",
+    "restaurant": "Taco Bell",
+    "item": "Gordita Supreme\u00ae - Steak",
+    "calories": 270.0,
+    "totalFat": 11.0,
+    "protein": 14.0,
+    "sodium": 550.0
+  },
+  {
+    "id": "item-0477",
+    "restaurant": "Taco Bell",
+    "item": "Nacho Fries Bellgrande",
+    "calories": 710.0,
+    "totalFat": 41.0,
+    "protein": 13.0,
+    "sodium": 1420.0
+  },
+  {
+    "id": "item-0478",
+    "restaurant": "Taco Bell",
+    "item": "Nachos BellGrande\u00ae",
+    "calories": 760.0,
+    "totalFat": 39.0,
+    "protein": 18.0,
+    "sodium": 1100.0
+  },
+  {
+    "id": "item-0479",
+    "restaurant": "Taco Bell",
+    "item": "Nachos Supreme",
+    "calories": 430.0,
+    "totalFat": 23.0,
+    "protein": 12.0,
+    "sodium": 690.0
+  },
+  {
+    "id": "item-0480",
+    "restaurant": "Taco Bell",
+    "item": "Triple Layer Nachos",
+    "calories": 320.0,
+    "totalFat": 15.0,
+    "protein": 7.0,
+    "sodium": 600.0
+  },
+  {
+    "id": "item-0481",
+    "restaurant": "Taco Bell",
+    "item": "Triple Melt Nachos",
+    "calories": 260.0,
+    "totalFat": 16.0,
+    "protein": 10.0,
+    "sodium": 550.0
+  },
+  {
+    "id": "item-0482",
+    "restaurant": "Taco Bell",
+    "item": "Beefy Cheddar Crunchwrap Slider",
+    "calories": 410.0,
+    "totalFat": 19.0,
+    "protein": 14.0,
+    "sodium": 960.0
+  },
+  {
+    "id": "item-0483",
+    "restaurant": "Taco Bell",
+    "item": "Beefy Mini Quesadilla",
+    "calories": 210.0,
+    "totalFat": 12.0,
+    "protein": 9.0,
+    "sodium": 560.0
+  },
+  {
+    "id": "item-0484",
+    "restaurant": "Taco Bell",
+    "item": "Beefy Nacho Griller",
+    "calories": 420.0,
+    "totalFat": 19.0,
+    "protein": 12.0,
+    "sodium": 870.0
+  },
+  {
+    "id": "item-0485",
+    "restaurant": "Taco Bell",
+    "item": "BLT Crunchwrap Slider",
+    "calories": 430.0,
+    "totalFat": 23.0,
+    "protein": 12.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0486",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Bowl - Chicken",
+    "calories": 560.0,
+    "totalFat": 22.0,
+    "protein": 26.0,
+    "sodium": 1520.0
+  },
+  {
+    "id": "item-0487",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Bowl - Steak",
+    "calories": 580.0,
+    "totalFat": 23.0,
+    "protein": 27.0,
+    "sodium": 1460.0
+  },
+  {
+    "id": "item-0488",
+    "restaurant": "Taco Bell",
+    "item": "Cantina Power Bowl - Veggie",
+    "calories": 540.0,
+    "totalFat": 21.0,
+    "protein": 14.0,
+    "sodium": 1310.0
+  },
+  {
+    "id": "item-0489",
+    "restaurant": "Taco Bell",
+    "item": "Cheese Quesadilla",
+    "calories": 480.0,
+    "totalFat": 27.0,
+    "protein": 19.0,
+    "sodium": 1000.0
+  },
+  {
+    "id": "item-0490",
+    "restaurant": "Taco Bell",
+    "item": "Cheese Roll-Up",
+    "calories": 190.0,
+    "totalFat": 9.0,
+    "protein": 9.0,
+    "sodium": 450.0
+  },
+  {
+    "id": "item-0491",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Quesadilla",
+    "calories": 520.0,
+    "totalFat": 28.0,
+    "protein": 27.0,
+    "sodium": 1210.0
+  },
+  {
+    "id": "item-0492",
+    "restaurant": "Taco Bell",
+    "item": "Chickstar",
+    "calories": 620.0,
+    "totalFat": 37.0,
+    "protein": 17.0,
+    "sodium": 1290.0
+  },
+  {
+    "id": "item-0493",
+    "restaurant": "Taco Bell",
+    "item": "Chili Cheese Burrito",
+    "calories": 380.0,
+    "totalFat": 17.0,
+    "protein": 16.0,
+    "sodium": 930.0
+  },
+  {
+    "id": "item-0494",
+    "restaurant": "Taco Bell",
+    "item": "Chipotle Crispy Chicken Griller",
+    "calories": 290.0,
+    "totalFat": 18.0,
+    "protein": 9.0,
+    "sodium": 640.0
+  },
+  {
+    "id": "item-0495",
+    "restaurant": "Taco Bell",
+    "item": "Crispy Chicken Quesadilla",
+    "calories": 650.0,
+    "totalFat": 37.0,
+    "protein": 26.0,
+    "sodium": 1480.0
+  },
+  {
+    "id": "item-0496",
+    "restaurant": "Taco Bell",
+    "item": "Crunchwrap Supreme\u00ae",
+    "calories": 540.0,
+    "totalFat": 21.0,
+    "protein": 16.0,
+    "sodium": 1110.0
+  },
+  {
+    "id": "item-0497",
+    "restaurant": "Taco Bell",
+    "item": "Double Tostada",
+    "calories": 270.0,
+    "totalFat": 11.0,
+    "protein": 12.0,
+    "sodium": 650.0
+  },
+  {
+    "id": "item-0498",
+    "restaurant": "Taco Bell",
+    "item": "Express Taco Salad w/ Chips",
+    "calories": 580.0,
+    "totalFat": 29.0,
+    "protein": 23.0,
+    "sodium": 1270.0
+  },
+  {
+    "id": "item-0499",
+    "restaurant": "Taco Bell",
+    "item": "Loaded Potato Griller",
+    "calories": 470.0,
+    "totalFat": 22.0,
+    "protein": 13.0,
+    "sodium": 1120.0
+  },
+  {
+    "id": "item-0500",
+    "restaurant": "Taco Bell",
+    "item": "Mexican Pizza",
+    "calories": 540.0,
+    "totalFat": 31.0,
+    "protein": 20.0,
+    "sodium": 860.0
+  },
+  {
+    "id": "item-0501",
+    "restaurant": "Taco Bell",
+    "item": "MexiMelt\u00ae",
+    "calories": 270.0,
+    "totalFat": 14.0,
+    "protein": 14.0,
+    "sodium": 740.0
+  },
+  {
+    "id": "item-0502",
+    "restaurant": "Taco Bell",
+    "item": "Steak Quesalupa",
+    "calories": 440.0,
+    "totalFat": 23.0,
+    "protein": 22.0,
+    "sodium": 840.0
+  },
+  {
+    "id": "item-0503",
+    "restaurant": "Taco Bell",
+    "item": "Chicken Quesalupa",
+    "calories": 440.0,
+    "totalFat": 23.0,
+    "protein": 22.0,
+    "sodium": 840.0
+  },
+  {
+    "id": "item-0504",
+    "restaurant": "Taco Bell",
+    "item": "Beef Quesalupa",
+    "calories": 460.0,
+    "totalFat": 26.0,
+    "protein": 19.0,
+    "sodium": 890.0
+  },
+  {
+    "id": "item-0505",
+    "restaurant": "Taco Bell",
+    "item": "Shredded Chicken Mini Quesadilla",
+    "calories": 180.0,
+    "totalFat": 8.0,
+    "protein": 12.0,
+    "sodium": 540.0
+  },
+  {
+    "id": "item-0506",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Chicken Crunchwrap Slider",
+    "calories": 400.0,
+    "totalFat": 20.0,
+    "protein": 15.0,
+    "sodium": 900.0
+  },
+  {
+    "id": "item-0507",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Tostada",
+    "calories": 200.0,
+    "totalFat": 10.0,
+    "protein": 7.0,
+    "sodium": 440.0
+  },
+  {
+    "id": "item-0508",
+    "restaurant": "Taco Bell",
+    "item": "Stacker",
+    "calories": 390.0,
+    "totalFat": 18.0,
+    "protein": 18.0,
+    "sodium": 1050.0
+  },
+  {
+    "id": "item-0509",
+    "restaurant": "Taco Bell",
+    "item": "Steak Quesadilla",
+    "calories": 520.0,
+    "totalFat": 28.0,
+    "protein": 25.0,
+    "sodium": 1250.0
+  },
+  {
+    "id": "item-0510",
+    "restaurant": "Taco Bell",
+    "item": "Original Triple Double Crunchwrap",
+    "calories": 700.0,
+    "totalFat": 30.0,
+    "protein": 23.0,
+    "sodium": 1550.0
+  },
+  {
+    "id": "item-0511",
+    "restaurant": "Taco Bell",
+    "item": "Spicy Triple Double Crunchwrap",
+    "calories": 780.0,
+    "totalFat": 38.0,
+    "protein": 23.0,
+    "sodium": 1850.0
+  },
+  {
+    "id": "item-0512",
+    "restaurant": "Taco Bell",
+    "item": "Express Taco Salad w/ Chips",
+    "calories": 580.0,
+    "totalFat": 29.0,
+    "protein": 23.0,
+    "sodium": 1270.0
+  },
+  {
+    "id": "item-0513",
+    "restaurant": "Taco Bell",
+    "item": "Fiesta Taco Salad-Beef",
+    "calories": 780.0,
+    "totalFat": 42.0,
+    "protein": 26.0,
+    "sodium": 1340.0
+  },
+  {
+    "id": "item-0514",
+    "restaurant": "Taco Bell",
+    "item": "Fiesta Taco Salad-Chicken",
+    "calories": 720.0,
+    "totalFat": 35.0,
+    "protein": 32.0,
+    "sodium": 1260.0
+  },
+  {
+    "id": "item-0515",
+    "restaurant": "Taco Bell",
+    "item": "Fiesta Taco Salad-Steak",
+    "calories": 720.0,
+    "totalFat": 36.0,
+    "protein": 28.0,
+    "sodium": 1340.0
+  }
+]

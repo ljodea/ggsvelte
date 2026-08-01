@@ -7,23 +7,23 @@
     ThemeFew,
   } from "@ggsvelte/svelte";
 
-  import { criminalStature } from "./data.js";
+  import { chocolateRatingGrid } from "./data.js";
 </script>
 
 <GGPlot
-  data={criminalStature}
-  aes={{ x: "finger", y: "height", fill: "men" }}
+  data={chocolateRatingGrid}
+  aes={{ x: "cocoaPercent", y: "rating", fill: "bars" }}
   width={640}
   height={400}
 >
   <ThemeFew />
   <ScaleFillContinuous scheme="viridis" />
   <Labs
-    title="Three thousand criminals, measured"
-    subtitle="Macdonell, 1902: stature against left middle-finger length, 495 cells of a complete grid"
-    x="Left middle finger (cm)"
-    y="Height (feet)"
-    fill="Men"
+    title="Where chocolate reviews cluster"
+    subtitle="Count of bars at each cocoa percent and rating. Darker cells hold more reviews"
+    x="Cocoa (%)"
+    y="Rating (1–4)"
+    fill="Bars"
   />
   <GeomRaster />
 </GGPlot>

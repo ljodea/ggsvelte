@@ -11562,16 +11562,6 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "group-single-observation",
-        title: "group-single-observation",
-        level: 3,
-      },
-      {
-        id: "stack-align-skipped",
-        title: "stack-align-skipped",
-        level: 3,
-      },
-      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,
@@ -11936,11 +11926,6 @@ export const DOCS_ROUTES = [
       {
         id: "jitter-seeded",
         title: "jitter-seeded",
-        level: 3,
-      },
-      {
-        id: "stack-align-applied",
-        title: "stack-align-applied",
         level: 3,
       },
       {
@@ -12338,9 +12323,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/dodged",
-    title: "Deaths in six English counties, 1876 to 1882 — ggsvelte gallery",
+    title: "US beer production by package type — ggsvelte gallery",
     description:
-      "The two-way table Edgeworth used to develop the analysis of variance, drawn as side-by-side bars decades before Fisher named the method.",
+      "Dodged bars of national production by year and package. Copy this when categories share an x-axis and need side-by-side comparison.",
     canonicalPath: "/examples/bar/dodged",
     kind: "page",
     index: true,
@@ -12712,9 +12697,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/jitter/basic",
-    title: "Wages across 70 trades, 1910 — ggsvelte gallery",
+    title: "Menu calories, spread so items do not stack — ggsvelte gallery",
     description:
-      "Pearson's study of drink and wages. The trades share a handful of wage classes, so jitter is what separates them into readable marks.",
+      "Jittered entrée calories by restaurant. Use this when many points share a category and would otherwise cover each other.",
     canonicalPath: "/examples/jitter/basic",
     kind: "page",
     index: true,
@@ -12888,9 +12873,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/jitter",
-    title: "The same wages, jittered by position — ggsvelte gallery",
+    title: "The same calories, with position jitter — ggsvelte gallery",
     description:
-      "Pearson's drink and wages study again, with the jitter applied through the position rather than the geom sugar.",
+      "The fast-food calorie scatter again, using position_jitter on geom_point instead of the dedicated jitter geom.",
     canonicalPath: "/examples/point/jitter",
     kind: "page",
     index: true,
@@ -12921,9 +12906,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/quantile-lines",
-    title: "Earthquake strength by depth — ggsvelte gallery",
+    title: "Flavor against aroma in cupping scores — ggsvelte gallery",
     description:
-      "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
+      "Quantile lines through coffee cupping scores. Use this when a mean smooth hides how the spread of y moves with x.",
     canonicalPath: "/examples/point/quantile-lines",
     kind: "page",
     index: true,
@@ -13020,9 +13005,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/raster/grid",
-    title: "Three thousand criminals, measured — ggsvelte gallery",
+    title: "Where chocolate reviews cluster — ggsvelte gallery",
     description:
-      "Macdonell's 1902 table of stature against left middle finger length as a complete regular grid, which is what geom_raster needs to work.",
+      "A complete cocoa-percent × rating grid of bar counts. Use geom_raster when your table is already a regular grid of fill values.",
     canonicalPath: "/examples/raster/grid",
     kind: "page",
     index: true,
@@ -13075,9 +13060,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/rule/data-driven",
-    title: "The first statistical graph was a rug — ggsvelte gallery",
+    title: "A rug of every cupping score — ggsvelte gallery",
     description:
-      "Van Langren's 1644 longitude estimates, one rule per determination, which is the form his own chart took.",
+      "One vertical rule per coffee lot on total cup points. Use this when you want a 1-D sample drawn as a strip of marks.",
     canonicalPath: "/examples/rule/data-driven",
     kind: "page",
     index: true,
@@ -13152,9 +13137,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/smooth/loess-scatter",
-    title: "The first scatterplot, redrawn — ggsvelte gallery",
+    title: "Cocoa percent against bar rating — ggsvelte gallery",
     description:
-      "Herschel plotted gamma Virginis in 1833 and fitted the curve through it by hand. A loess smooth with a confidence band does the same job.",
+      "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
     canonicalPath: "/examples/smooth/loess-scatter",
     kind: "page",
     index: true,

@@ -1,25 +1,23 @@
 import { aes, gg, guideNone } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { longitudeEstimates } from "./data.js";
+import { coffeeRatings } from "./data.js";
 
 export default defineExample(
   // Data-driven form: aes.x is mapped, so every row draws one vertical rule
-  // spanning the panel. Van Langren's own graph was exactly this - a
-  // one-dimensional strip of the estimates - which makes the rug not a
-  // restyling of his chart but a reconstruction of it.
+  // spanning the panel. A rug is the natural chart for a 1-D sample of scores.
   //
   // y is synthetic for panel-spanning vertical rules; suppress the 0–1
   // axis ladder (#700).
-  gg(longitudeEstimates, aes({ x: "longitude" }))
-    .geomRule({ alpha: 0.35, linewidth: 1.5 })
+  gg(coffeeRatings, aes({ x: "totalCupPoints" }))
+    .geomRule({ alpha: 0.2, linewidth: 1 })
     .guides({ y: guideNone() })
     .theme("minimal")
     .labs({
-      title: "The first statistical graph was a rug",
+      title: "A rug of every cupping score",
       subtitle:
-        "Van Langren, 1628–1644: 61 estimates of a single fixed distance, spread across thirteen degrees",
-      x: "Estimated distance (degrees of longitude)",
+        "One vertical line per coffee lot. Most lots sit between about 80 and 88 total cup points",
+      x: "Total cup points",
     })
     .spec(),
 );

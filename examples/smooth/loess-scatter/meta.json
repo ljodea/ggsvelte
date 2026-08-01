@@ -1,6 +1,6 @@
 {
-  "title": "The first scatterplot, redrawn",
-  "description": "Herschel plotted gamma Virginis in 1833 and fitted the curve through it by hand. A loess smooth with a confidence band does the same job.",
-  "tags": ["smooth", "loess", "ribbon", "scatter", "size"],
+  "title": "Cocoa percent against bar rating",
+  "description": "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
+  "tags": ["smooth", "loess", "ribbon", "scatter"],
   "docsSection": "Statistical summaries"
 }
