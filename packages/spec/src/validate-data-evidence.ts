@@ -41,6 +41,11 @@ export type ResolveFieldEvidenceResult =
 
 /** Plot + per-layer field evidence from one pass over inline tables / profile. */
 export type ResolveLayerFieldEvidenceResult =
+  /**
+   * `layers[i]` may be the same object as `plot` or as another layer's entry
+   * when those layers read one dataset. Treat every map as read-only; copy
+   * before writing.
+   */
   | { status: "ok"; plot: FieldEvidenceMap | null; layers: Array<FieldEvidenceMap | null> }
   | { status: "none" }
   | { status: "errors"; errors: SpecError[] };
@@ -228,25 +233,46 @@ export function resolveLayerFieldEvidence(
 
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];
+  /** Layer index → dataset name, for the layers that reference one. */
+  const layerNames: Array<string | null> = [];
+  // Several layers commonly name one dataset. Pivoting {values} rows into
+  // columns is O(rows x columns), so resolve each name once rather than once
+  // per reference. Inline data keeps its own table: equal content is not the
+  // same table.
+  const columnsByName = new Map<string, Record<string, readonly CellValue[]>>();
+  const plotData = spec["data"];
+  const plotName =
+    isRecord(plotData) && typeof plotData["name"] === "string" ? plotData["name"] : null;
+  // The plot's own table seeds it, so a layer naming the plot's dataset reuses
+  // that pivot instead of building a second one.
+  if (plotColumns !== null && plotName !== null) columnsByName.set(plotName, plotColumns);
   for (const layer of layers) {
     if (!isRecord(layer) || layer["data"] === undefined) {
       layerColumns.push(null); // inherit plot
+      layerNames.push(null);
       continue;
     }
     const data = layer["data"];
-    const cols = columnsFromDataRef(data, datasets);
-    if (cols === null) {
-      // Named ref not in datasets (or malformed) — runtime-only / skip.
-      layerColumns.push("runtime");
-      continue;
+    const name = isRecord(data) && typeof data["name"] === "string" ? data["name"] : null;
+    let cols = name === null ? undefined : columnsByName.get(name);
+    if (cols === undefined) {
+      const resolved = columnsFromDataRef(data, datasets);
+      if (resolved === null) {
+        // Named ref not in datasets (or malformed) — runtime-only / skip.
+        // Left unmemoized: a miss is cheap and re-resolving keeps the
+        // runtime marker distinct from a resolved table.
+        layerColumns.push("runtime");
+        layerNames.push(null);
+        continue;
+      }
+      cols = resolved;
+      if (name !== null) columnsByName.set(name, cols);
     }
     // Deduplicate limit accounting for shared named datasets.
-    const key =
-      isRecord(data) && typeof data["name"] === "string"
-        ? `name:${data["name"]}`
-        : `inline:${layerColumns.length}`;
+    const key = name === null ? `inline:${layerColumns.length}` : `name:${name}`;
     countTable(key, cols);
     layerColumns.push(cols);
+    layerNames.push(name);
   }
 
   if (plotColumns === null && layerColumns.every((c) => c === null || c === "runtime")) {
@@ -279,10 +305,21 @@ export function resolveLayerFieldEvidence(
   }
 
   const plot = plotColumns === null ? null : evidenceFromColumns(plotColumns);
-  const layerMaps: Array<FieldEvidenceMap | null> = layerColumns.map((cols) => {
+  // Type inference walks every value of every column, so it too runs once per
+  // named dataset. The plot's own table seeds it, matching the row accounting
+  // above, which already treats a name the plot and a layer share as one table.
+  const evidenceByName = new Map<string, FieldEvidenceMap>();
+  if (plot !== null && plotName !== null) evidenceByName.set(plotName, plot);
+  const layerMaps: Array<FieldEvidenceMap | null> = layerColumns.map((cols, index) => {
     if (cols === "runtime") return null;
     if (cols === null) return plot;
-    return evidenceFromColumns(cols);
+    const name = layerNames[index] ?? null;
+    if (name === null) return evidenceFromColumns(cols);
+    const cached = evidenceByName.get(name);
+    if (cached !== undefined) return cached;
+    const built = evidenceFromColumns(cols);
+    evidenceByName.set(name, built);
+    return built;
   });
   return { status: "ok", plot, layers: layerMaps };
 }
