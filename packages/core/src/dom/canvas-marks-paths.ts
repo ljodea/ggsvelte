@@ -9,6 +9,7 @@ import type { Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import { stepCorners } from "../path-step.js";
+import { ringCuts } from "../ring-cuts.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
 
@@ -80,12 +81,7 @@ function traceSubpath(
     traceRing(ctx, batch, start, end);
     return;
   }
-  const cuts: number[] = [start];
-  for (let i = 0; i < breaks.length; i++) {
-    const b = breaks[i]!;
-    if (b > start && b < end) cuts.push(b);
-  }
-  cuts.push(end);
+  const cuts = ringCuts(breaks, start, end);
   for (let i = 0; i + 1 < cuts.length; i++) {
     traceRing(ctx, batch, cuts[i]!, cuts[i + 1]!);
   }

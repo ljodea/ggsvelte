@@ -84,8 +84,11 @@ export interface PathsBatch {
    * Additional ring-start vertex indices within a closed filled subpath
    * (exterior already starts at pathOffsets[s]). Used for polygon holes:
    * one compound path with multiple M…Z rings (#809 phase 4).
-   * Non-decreasing: writers append at a monotone vertex cursor, and hit
-   * testing binary-searches this array per subpath.
+   *
+   * Non-decreasing in vertex order across the whole batch: writers append at a
+   * monotone vertex cursor. Consumers window it by binary search (`ringCuts`)
+   * and pair consecutive cuts into rings, so any other order both mis-pairs
+   * vertices and hides breaks.
    */
   ringStarts?: Uint32Array;
   /**

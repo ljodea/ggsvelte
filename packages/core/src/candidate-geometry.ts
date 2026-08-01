@@ -2,6 +2,7 @@ import type { ResolvedCandidateInspectMode } from "./candidate-store-types.js";
 import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
 import type { GeometryBatch, PointsBatch } from "./scene.js";
+import { ringCuts } from "./ring-cuts.js";
 
 /**
  * Geometry-array topology for candidate indexes / hit refine:
@@ -235,24 +236,7 @@ function pathRingRanges(
   if (end <= start) return [];
   const breaks = batch.ringStarts;
   if (breaks === undefined || breaks.length === 0) return [[start, end]];
-  // breaks is non-decreasing (writers append at a monotone vertex cursor), so
-  // the entries inside (start, end) form one contiguous run: binary-search the
-  // first entry > start, then walk while < end — O(log R + local) instead of
-  // scanning all R batch-wide breaks per point-in-path test.
-  let lo = 0;
-  let hi = breaks.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (breaks[mid]! > start) hi = mid;
-    else lo = mid + 1;
-  }
-  const cuts: number[] = [start];
-  for (let i = lo; i < breaks.length; i++) {
-    const b = breaks[i]!;
-    if (b >= end) break;
-    cuts.push(b);
-  }
-  cuts.push(end);
+  const cuts = ringCuts(breaks, start, end);
   const ranges: (readonly [number, number])[] = [];
   for (let i = 0; i + 1 < cuts.length; i++) {
     const a = cuts[i]!;
