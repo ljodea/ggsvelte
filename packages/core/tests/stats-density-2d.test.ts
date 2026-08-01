@@ -51,6 +51,77 @@ function naiveProductKdeGrid(
   return z;
 }
 
+/**
+ * Sorted-order reference: same admitted set AND the same addend order as
+ * production (ascending x, ties by original index), so equality can be exact.
+ * `naiveProductKdeGrid` above sums in input order instead, which is why it only
+ * agrees to 1e-12.
+ *
+ * Predicates are written negated (`!(… > w)`) to match production, so a NaN
+ * coordinate is admitted rather than dropped.
+ */
+function sortedProductKdeGrid(
+  xs: Float64Array,
+  ys: Float64Array,
+  gx: Float64Array,
+  gy: Float64Array,
+  hx: number,
+  hy: number,
+): { z: number[][]; pairs: number } {
+  const invSqrt2pi = 1 / Math.sqrt(2 * Math.PI);
+  const dnorm = (u: number) => invSqrt2pi * Math.exp(-0.5 * u * u);
+  const nx = xs.length;
+  const wx = 8 * hx;
+  const wy = 8 * hy;
+  const invN = 1 / (nx * hx * hy);
+  const order = Array.from({ length: nx }, (_, i) => i).toSorted(
+    (a, b) => xs[a]! - xs[b]! || a - b,
+  );
+  const z: number[][] = Array.from({ length: gy.length }, () =>
+    Array.from({ length: gx.length }, () => 0),
+  );
+  let pairs = 0;
+  for (let j = 0; j < gy.length; j++) {
+    const yj = gy[j]!;
+    for (let i = 0; i < gx.length; i++) {
+      const xi = gx[i]!;
+      let s = 0;
+      for (let o = 0; o < nx; o++) {
+        const k = order[o]!;
+        const dx = xi - xs[k]!;
+        if (Math.abs(dx) > wx) continue;
+        const dy = yj - ys[k]!;
+        if (Math.abs(dy) > wy) continue;
+        pairs++;
+        s += dnorm(dx / hx) * dnorm(dy / hy);
+      }
+      z[j]![i] = s * invN;
+    }
+  }
+  return { z, pairs };
+}
+
+/** Deterministic pseudo-normal cloud (Box-Muller-lite), as used downstream. */
+function normalCloud(n: number): { xs: Float64Array; ys: Float64Array } {
+  const x: number[] = [];
+  const y: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const u = ((i * 37 + 11) % 1000) / 1000 + 1e-6;
+    const v = ((i * 91 + 17) % 1000) / 1000 + 1e-6;
+    const r = Math.sqrt(-2 * Math.log(u));
+    const th = 2 * Math.PI * v;
+    x.push(r * Math.cos(th));
+    y.push(r * Math.sin(th));
+  }
+  return { xs: Float64Array.from(x), ys: Float64Array.from(y) };
+}
+
+function evenGrid(from: number, to: number, n: number): Float64Array {
+  const out = new Float64Array(n);
+  for (let i = 0; i < n; i++) out[i] = from + ((to - from) * i) / (n - 1);
+  return out;
+}
+
 describe("productKdeGrid", () => {
   it("matches the direct-product reference surface on a small cloud", () => {
     // Irregular x spacing so sorted-window order differs from input order.
@@ -95,6 +166,68 @@ describe("productKdeGrid", () => {
     // Local bandwidth should examine far fewer than the naive full product.
     expect(examinations).toBeLessThan(full * 0.25);
     expect(examinations).toBeGreaterThan(0);
+  });
+
+  it("sums in ascending-x order, bit for bit", () => {
+    const { xs, ys } = normalCloud(400);
+    const gx = evenGrid(-3, 3, 32);
+    const gy = evenGrid(-3, 3, 32);
+    const got = productKdeGrid(xs, ys, gx, gy, 0.3, 0.25);
+    const { z: want } = sortedProductKdeGrid(xs, ys, gx, gy, 0.3, 0.25);
+    for (let j = 0; j < want.length; j++) {
+      for (let i = 0; i < want[j]!.length; i++) {
+        expect(got[j]![i]!).toBe(want[j]![i]!);
+      }
+    }
+  });
+
+  it("visits only the pairs inside both windows", () => {
+    // The measured regression case: NRD-scale bandwidth, default grid size.
+    const { xs, ys } = normalCloud(4000);
+    const gx = evenGrid(-4, 4, 100);
+    const gy = evenGrid(-4, 4, 100);
+    const hx = 0.12;
+    const hy = 0.12;
+    const { pairs } = sortedProductKdeGrid(xs, ys, gx, gy, hx, hy);
+    const { examinations } = productKdeGrid(xs, ys, gx, gy, hx, hy, {
+      countExaminations: true,
+    });
+    expect(examinations).toBe(pairs);
+  });
+
+  it("zeroes a row whose samples all fall outside the y window", () => {
+    const xs = Float64Array.from([-1, 0, 1]);
+    const ys = Float64Array.from([0, 0, 0]);
+    const gx = evenGrid(-1, 1, 5);
+    const gy = Float64Array.from([-50, 0, 50]);
+    const z = productKdeGrid(xs, ys, gx, gy, 0.5, 0.5);
+    for (const value of z[0]!) expect(value).toBe(0);
+    for (const value of z[2]!) expect(value).toBe(0);
+    expect(z[1]!.some((value) => value > 0)).toBe(true);
+  });
+
+  it("stays exact when the y window covers every row", () => {
+    // Fat bandwidth: no y pruning is possible, so the gather must not change
+    // the surface (nor be re-run per row).
+    const { xs, ys } = normalCloud(300);
+    const gx = evenGrid(-3, 3, 24);
+    const gy = evenGrid(-3, 3, 24);
+    const got = productKdeGrid(xs, ys, gx, gy, 0.4, 40);
+    const { z: want } = sortedProductKdeGrid(xs, ys, gx, gy, 0.4, 40);
+    for (let j = 0; j < want.length; j++) {
+      for (let i = 0; i < want[j]!.length; i++) {
+        expect(got[j]![i]!).toBe(want[j]![i]!);
+      }
+    }
+  });
+
+  it("admits a non-finite y the same way the x window does", () => {
+    // `!(|dy| > wy)` keeps a NaN sample in, matching the pre-existing contract.
+    const xs = Float64Array.from([0, 0.1]);
+    const ys = Float64Array.from([0, Number.NaN]);
+    const gx = Float64Array.from([0]);
+    const gy = Float64Array.from([0]);
+    expect(Number.isNaN(productKdeGrid(xs, ys, gx, gy, 0.5, 0.5)[0]![0]!)).toBe(true);
   });
 });
 

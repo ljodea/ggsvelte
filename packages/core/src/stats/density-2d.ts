@@ -90,7 +90,7 @@ function dnorm(u: number): number {
 export type ProductKdeGridOptions = {
   /**
    * When true, also return how many (grid-cell, sample) pairs the inner loop
-   * examined (post x-window admission). Used by complexity tests only.
+   * examined — those inside both the x and the y window. Complexity tests only.
    */
   countExaminations?: boolean;
 };
@@ -103,9 +103,15 @@ export type ProductKdeGridResult = number[][] & {
  * Product-Gaussian KDE on a regular grid.
  *
  * Samples are sorted once by x; each grid row slides an x-window across
- * ascending `gx` so far-away points are never visited — O(G·n + work) average
- * vs a full O(G²·n) scan of every sample at every cell. Same ±8σ truncation
- * and invN scaling as the historical direct product (MASS::kde2d-shaped).
+ * ascending `gx`, and gathers the samples inside its y-window once up front, so
+ * neither dimension is scanned per cell. Cost is O(G·n) for the gathers plus
+ * one visit per sample-cell pair inside both windows. Scanning y per cell
+ * instead — as this did before — costs O(G²·n·fx) with fx = 16·hx/xspan, and
+ * throws away a share that grows with n (64% at n = 20 000, G = 100).
+ *
+ * `gx` must ascend (the x slide only moves forward). Same ±8σ truncation and
+ * invN scaling as the historical direct product (MASS::kde2d-shaped), and the
+ * same ascending-x addend order, so the surface is unchanged bit for bit.
  */
 export function productKdeGrid(
   xs: Float64Array,
@@ -143,21 +149,59 @@ export function productKdeGrid(
   let examinations = 0;
   const count = options.countExaminations === true;
 
+  // Does any row ever exclude a sample? If the widest sample-to-row gap still
+  // fits inside the window, no gather can remove anything, so read the sorted
+  // arrays directly. That is the wide-bandwidth case, where the gather would be
+  // pure overhead.
+  let yMin = Number.POSITIVE_INFINITY;
+  let yMax = Number.NEGATIVE_INFINITY;
+  for (let k = 0; k < nx; k++) {
+    const v = sortedY[k]!;
+    if (v < yMin) yMin = v;
+    if (v > yMax) yMax = v;
+  }
+  let gyMin = Number.POSITIVE_INFINITY;
+  let gyMax = Number.NEGATIVE_INFINITY;
+  for (let j = 0; j < gridNY; j++) {
+    const v = gy[j]!;
+    if (v < gyMin) gyMin = v;
+    if (v > gyMax) gyMax = v;
+  }
+  const everyRowTakesEverySample = Math.max(gyMax - yMin, yMax - gyMin) <= wy;
+
+  // Samples inside the current row's y window, packed by value in the same
+  // ascending-x order as `sortedX` — so the slide below still works and the
+  // addends keep their order. Packed rather than indexed so the innermost loop
+  // reads one array element per coordinate either way.
+  const rowX = everyRowTakesEverySample ? sortedX : new Float64Array(nx);
+  const rowY = everyRowTakesEverySample ? sortedY : new Float64Array(nx);
+  let rowCount = nx;
+
   for (let j = 0; j < gridNY; j++) {
     const yj = gy[j]!;
+    if (!everyRowTakesEverySample) {
+      rowCount = 0;
+      for (let k = 0; k < nx; k++) {
+        // Negated so a non-finite dy is admitted, as the per-cell test was.
+        if (!(Math.abs(yj - sortedY[k]!) > wy)) {
+          rowX[rowCount] = sortedX[k]!;
+          rowY[rowCount] = sortedY[k]!;
+          rowCount++;
+        }
+      }
+    }
     let lo = 0;
     for (let i = 0; i < gridNX; i++) {
       const xi = gx[i]!;
       const xLo = xi - wx;
       const xHi = xi + wx;
-      while (lo < nx && sortedX[lo]! < xLo) lo++;
+      while (lo < rowCount && rowX[lo]! < xLo) lo++;
       let s = 0;
-      for (let k = lo; k < nx; k++) {
-        const xv = sortedX[k]!;
+      for (let k = lo; k < rowCount; k++) {
+        const xv = rowX[k]!;
         if (xv > xHi) break;
         if (count) examinations++;
-        const dy = yj - sortedY[k]!;
-        if (Math.abs(dy) > wy) continue;
+        const dy = yj - rowY[k]!;
         const dx = xi - xv;
         s += dnorm(dx / hx) * dnorm(dy / hy);
       }
