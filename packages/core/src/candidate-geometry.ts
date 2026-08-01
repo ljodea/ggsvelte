@@ -235,10 +235,22 @@ function pathRingRanges(
   if (end <= start) return [];
   const breaks = batch.ringStarts;
   if (breaks === undefined || breaks.length === 0) return [[start, end]];
+  // breaks is non-decreasing (writers append at a monotone vertex cursor), so
+  // the entries inside (start, end) form one contiguous run: binary-search the
+  // first entry > start, then walk while < end — O(log R + local) instead of
+  // scanning all R batch-wide breaks per point-in-path test.
+  let lo = 0;
+  let hi = breaks.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (breaks[mid]! > start) hi = mid;
+    else lo = mid + 1;
+  }
   const cuts: number[] = [start];
-  for (let i = 0; i < breaks.length; i++) {
+  for (let i = lo; i < breaks.length; i++) {
     const b = breaks[i]!;
-    if (b > start && b < end) cuts.push(b);
+    if (b >= end) break;
+    cuts.push(b);
   }
   cuts.push(end);
   const ranges: (readonly [number, number])[] = [];
