@@ -139,7 +139,6 @@ describe("geom tile", () => {
     );
     const batch = model.scene.batches[0] as RectsBatch;
     expect(batch.rects.length / 4).toBe(6);
-    // x gap 2 over an 8-unit domain, y gap 5 over a 15-unit domain.
     const widths: number[] = [];
     const heights: number[] = [];
     for (let i = 0; i < batch.rects.length; i += 4) {
@@ -148,10 +147,11 @@ describe("geom tile", () => {
     }
     expect(widths.every((w) => Math.abs(w - widths[0]!) < 1e-6)).toBe(true);
     expect(heights.every((h) => Math.abs(h - heights[0]!) < 1e-6)).toBe(true);
-    expect(widths[0]! / heights[0]!).toBeCloseTo(
-      (2 / 8 / (5 / 15)) * (size.width / size.height),
-      1,
-    );
+    // Measure against the panel, not the plot: axis and legend margins are not
+    // ours to predict. x gap 2 of an 8-unit domain, y gap 5 of a 15-unit one.
+    const panel = model.scene.panels[0]!;
+    expect(widths[0]! / panel.width).toBeCloseTo(2 / 8, 6);
+    expect(heights[0]! / panel.height).toBeCloseTo(5 / 15, 6);
   });
 
   it("applies width after log transform (params.width is transformed-space span)", () => {

@@ -132,10 +132,9 @@ function emitBandTiles(input: {
   const keptRows = new Uint32Array(n);
   let kept = 0;
   let removed = 0;
-  // resolution() scans the whole column into a Set and sorts the distinct
-  // values, and the loop never writes xNumeric/yNumeric, so derive each axis
-  // default once. Band axes keep paying nothing: 1 is the same literal they
-  // pass today, so they never reach resolution().
+  // Safe to hoist because the loop never writes xNumeric/yNumeric. Only the
+  // continuous branches read these; the band arms size from scale.step, so the
+  // guard exists to keep them from paying for a scan they never consult.
   const defaultW = fx.xScale.type === "band" ? 1 : defaultResolution(frame.xNumeric);
   const defaultH = fx.yScale.type === "band" ? 1 : defaultResolution(frame.yNumeric);
   for (let row = 0; row < n; row++) {

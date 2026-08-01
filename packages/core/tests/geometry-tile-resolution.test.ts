@@ -12,7 +12,7 @@ import type { LayerFrame } from "../src/pipeline/types.ts";
 
 type ScaleKind = "linear" | "band";
 
-function scaleOf(kind: ScaleKind): unknown {
+function scaleOf(kind: ScaleKind): Frame["xScale"] {
   if (kind === "band") {
     return {
       type: "band",
@@ -117,14 +117,17 @@ describe("geom_tile continuous default size", () => {
         h: Array.from({ length: N }, () => 1),
       },
     });
-    tileRectsBatch(frame, fx("linear", "linear"), null, null, fromPartial({}), []);
+    const batch = tileRectsBatch(frame, fx("linear", "linear"), null, null, fromPartial({}), []);
+    // Assert the rows survived, so the bounds cannot be met by emitting nothing.
+    expect(batch?.rects.length).toBe(N * 4);
     expect(x.reads()).toBeLessThan(6 * N);
     expect(y.reads()).toBeLessThan(6 * N);
   });
 
   it("never touches the numeric column on a band axis", () => {
     // Band axes size from scale.step and read xValues, so they must not gain a
-    // resolution() scan they never paid for.
+    // resolution() scan they never paid for. This is the only test holding the
+    // band guard, so it also pins that the mixed-axis geometry is still emitted.
     const x = counting(grid(N));
     const frame = tileFrame({
       n: N,
@@ -132,7 +135,12 @@ describe("geom_tile continuous default size", () => {
       yNumeric: grid(N),
       xValues: Array.from({ length: N }, (_, i) => i + 1),
     });
-    tileRectsBatch(frame, fx("band", "linear"), null, null, fromPartial({}), []);
+    const batch = tileRectsBatch(frame, fx("band", "linear"), null, null, fromPartial({}), []);
+    expect(batch?.rects.length).toBe(N * 4);
+    // Band x: one step (0.1) of the 100px panel. Continuous y: gap 1 of the
+    // /100 normalize, so 1px. Mixed axes size from their own rule.
+    expect(batch!.rects[2]!).toBeCloseTo(10, 6);
+    expect(batch!.rects[3]!).toBeCloseTo(1, 6);
     expect(x.reads()).toBe(0);
   });
 
