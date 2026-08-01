@@ -112,8 +112,10 @@ export class GGBuilderCore {
     }
     // layer.data may be raw DataInput (geom sugar) or an AuthoringDataRef
     // already; toAuthoringDataRef accepts both.
-    const data: DataInput = layer.data as DataInput;
-    const snapped = { ...layer, data: toAuthoringDataRef(data) } as LayerInput;
+    const snapped = {
+      ...layer,
+      data: toAuthoringDataRef(layer.data),
+    } as LayerInput;
     return this.#with({ layers: [...this.#state.layers, snapped] });
   }
 
