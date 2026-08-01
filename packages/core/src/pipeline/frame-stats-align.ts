@@ -167,6 +167,14 @@ function needsStackAlign(
   }
   if (perGroup.size < 2) return null;
   const gridSorted = [...grid].toSorted((a, b) => a - b);
+  // Rank of each grid x, so a group's window width is a subtraction rather than
+  // a walk. Scanning the sorted grid per group cost groups × grid-x, and the
+  // `xv <= min` arm was a `continue` rather than a seek, so a group whose window
+  // starts late still paid for the whole prefix below it.
+  // Built on the first group that is not already the whole grid: a tidy stack
+  // where every group covers every x short-circuits below without ever needing
+  // ranks, and this runs per panel per area layer.
+  let rankOf: Map<number, number> | null = null;
   for (const set of perGroup.values()) {
     if (set.size === gridSorted.length) continue;
     let min = Infinity;
@@ -175,12 +183,19 @@ function needsStackAlign(
       if (v < min) min = v;
       if (v > max) max = v;
     }
-    for (const xv of gridSorted) {
-      if (xv <= min) continue;
-      if (xv >= max) break;
-      if (!set.has(xv)) {
-        return { groupCount: perGroup.size, gridSize: gridSorted.length, finiteRows };
-      }
+    if (rankOf === null) {
+      rankOf = new Map<number, number>();
+      for (let i = 0; i < gridSorted.length; i++) rankOf.set(gridSorted[i]!, i);
+    }
+    // Every member of `set` is a grid x, they are distinct, they all sit in
+    // [min, max], and min and max are themselves members. So the group covers
+    // its own window exactly when it holds one value per grid slot in it —
+    // anything short of that is the interior hole the scan looked for.
+    // Ranks, not values: the grid is not evenly spaced, so `max - min` counts
+    // gaps that were never grid x in the first place.
+    const span = rankOf.get(max)! - rankOf.get(min)! + 1;
+    if (set.size < span) {
+      return { groupCount: perGroup.size, gridSize: gridSorted.length, finiteRows };
     }
   }
   return null;
