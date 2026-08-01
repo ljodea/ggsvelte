@@ -270,10 +270,48 @@ describe("path AABB / edge helpers (candidate-path-geometry)", () => {
     expect(closestPathEdge(batch, null, 5, 0, 1)).toBe(Infinity);
   });
 
+  it("closestPathEdge measures the drawn stair, not the chord (step-hv)", () => {
+    const batch = pathsBatch([0, 2]);
+    batch.positions = Float32Array.from([0, 0, 100, 100]);
+    batch.curve = "step-hv";
+    // Drawn: (0,0) → (100,0) → (100,100). A pointer on the horizontal leg hits.
+    expect(closestPathEdge(batch, [0, 1], 90, 0, 2)).toBe(0);
+    // A pointer on the vertical leg hits.
+    expect(closestPathEdge(batch, [0, 1], 100, 90, 2)).toBe(0);
+    // The chord midpoint is 50px from every drawn leg, so it misses.
+    expect(closestPathEdge(batch, [0, 1], 50, 50, 2)).toBe(Infinity);
+  });
+
+  it("closestPathEdge measures the drawn stair for step-vh and step-mid", () => {
+    const vh = pathsBatch([0, 2]);
+    vh.positions = Float32Array.from([0, 0, 100, 100]);
+    vh.curve = "step-vh";
+    // Drawn: (0,0) → (0,100) → (100,100).
+    expect(closestPathEdge(vh, [0, 1], 0, 90, 2)).toBe(0);
+    expect(closestPathEdge(vh, [0, 1], 90, 0, 2)).toBe(Infinity);
+
+    const mid = pathsBatch([0, 2]);
+    mid.positions = Float32Array.from([0, 0, 100, 100]);
+    mid.curve = "step";
+    // Drawn: (0,0) → (50,0) → (50,100) → (100,100).
+    expect(closestPathEdge(mid, [0, 1], 50, 50, 2)).toBe(0);
+    expect(closestPathEdge(mid, [0, 1], 90, 0, 2)).toBe(Infinity);
+  });
+
   it("pathSegmentsIntersectRect detects an edge crossing the query box", () => {
     const batch = pathsBatch([0, 2]);
     batch.positions = Float32Array.from([0, 0, 10, 10]);
     expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 4, 4, 6, 6)).toBe(true);
     expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 20, 20, 30, 30)).toBe(false);
+  });
+
+  it("pathSegmentsIntersectRect crosses the drawn stair, not the chord", () => {
+    const batch = pathsBatch([0, 2]);
+    batch.positions = Float32Array.from([0, 0, 100, 100]);
+    batch.curve = "step-hv";
+    // Drawn: (0,0) → (100,0) → (100,100). A box on the horizontal leg crosses.
+    expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 80, -5, 95, 5)).toBe(true);
+    // A box on the chord midpoint does not — no drawn leg goes there.
+    expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 45, 45, 55, 55)).toBe(false);
   });
 });

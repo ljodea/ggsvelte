@@ -573,37 +573,48 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
       const epochIndex = layerWithValues(layers, SAKURA_EPOCHS);
       expect(pointIndex).toBeGreaterThanOrEqual(0);
 
-      // A late-record observation: on-mark probe must return the bloom point
+      // Late-record observations: an on-mark probe must return the bloom point
       // (year + date), not a band. Off-mark exact returns null after opt-out —
       // do not expect a substitute point at panel center.
-      let probe: { x: number; y: number; year: number; date: string } | null = null;
+      //
+      // Not every observation answers as the point. The median trend line is a
+      // stepped stroke drawn over the points, and topmost-hit gives it the
+      // observations it covers. So this asserts what the gate is for: SOME
+      // observation is reachable, and the epoch band is NEVER the answer.
+      const probes: { x: number; y: number; year: number; date: string }[] = [];
       for (let id = 0; id < model.candidates.size; id += 1) {
         const candidate = model.candidates.candidate(id);
         if (candidate === null || candidate.layerIndex !== pointIndex) continue;
         if (typeof candidate.xValue !== "number") continue;
         if (candidate.xValue < 1995 || candidate.xValue > 2005) continue;
         if (typeof candidate.yValue !== "string") continue;
-        probe = {
+        probes.push({
           x: candidate.x,
           y: candidate.y,
           year: candidate.xValue,
           date: candidate.yValue,
-        };
-        break;
+        });
       }
-      expect(probe, "expected a point candidate near year 2000").not.toBeNull();
+      expect(probes.length, "expected point candidates near year 2000").toBeGreaterThan(0);
 
-      const hit = model.candidates.nearest(probe!.x, probe!.y, {
-        mode: "exact",
-        maxDistance: 24,
-      });
-      expect(hit).not.toBeNull();
-      expect(hit!.layerIndex).toBe(pointIndex);
-      expect(hit!.xValue).toBe(probe!.year);
-      expect(hit!.yValue).toBe(probe!.date);
-      // Band geometry columns must not leak through the winning candidate.
-      expect(hit!.xValue).not.toBe("top");
-      expect(String(hit!.yValue)).not.toMatch(/^(top|bottom|until)$/);
+      let reached = 0;
+      for (const probe of probes) {
+        const hit = model.candidates.nearest(probe.x, probe.y, {
+          mode: "exact",
+          maxDistance: 24,
+        });
+        expect(hit).not.toBeNull();
+        // The band never wins on a mark, whichever layer does.
+        expect(hit!.layerIndex).not.toBe(epochIndex);
+        // Band geometry columns must not leak through the winning candidate.
+        expect(hit!.xValue).not.toBe("top");
+        expect(String(hit!.yValue)).not.toMatch(/^(top|bottom|until)$/);
+        if (hit!.layerIndex !== pointIndex) continue;
+        expect(hit!.xValue).toBe(probe.year);
+        expect(hit!.yValue).toBe(probe.date);
+        reached += 1;
+      }
+      expect(reached, "expected an observation to answer as the points layer").toBeGreaterThan(0);
 
       // Empty space used to answer as the band (distance 0). After opt-out,
       // exact mode returns nothing off-mark — or at least never the band.

@@ -154,6 +154,30 @@ describe("Mark hit-geometry table", () => {
     expect(strokedHit.probeRect(8, 20, 12, 30).intersects(1)).toBe(false);
   });
 
+  it("paths: stepped stroke distance follows the drawn stairs, not the chord", () => {
+    const stepped = scene();
+    stepped.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([0, 0, 100, 100]),
+        rowIndex: new Uint32Array([0, 1]),
+        pathOffsets: new Uint32Array([0, 2]),
+        strokes: [null],
+        linewidth: 2,
+        alpha: 1,
+        curve: "step-hv",
+      },
+    ];
+    const hit = createHitGeometry(buildCandidateStoreIndexes(stepped, { hitTolerance: 0 }));
+    // Drawn: (0,0) → (100,0) → (100,100). Both legs are under the pointer.
+    expect(hit.probePoint(90, 0).distance(0)).toBe(0);
+    expect(hit.probePoint(100, 90).distance(0)).toBe(0);
+    // The chord midpoint is 50px from every drawn leg — no hover there.
+    expect(hit.probePoint(50, 50).distance(0)).toBeNull();
+  });
+
   it("paths: a rect probe caches fill containment per subpath, scoped to that probe", () => {
     const filled = scene();
     filled.batches = [
