@@ -86,7 +86,7 @@ export function assembleCandidateStore(
     // when any vertex may take exact mode.
     let contained: boolean | null = null;
     const isContained = (): boolean => {
-      if (contained === null) contained = probe.distance(repId) !== null;
+      contained ??= probe.distance(repId) !== null;
       return contained;
     };
     let bestId = -1;
