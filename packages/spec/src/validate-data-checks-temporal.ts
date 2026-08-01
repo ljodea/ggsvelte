@@ -39,19 +39,31 @@ export function temporalParserUsable(parse: unknown): boolean {
   );
 }
 
-/** One Map per dataChecks() call — shared by position, color, and style checkers. */
-export type TemporalDecisionCache = Map<string, TemporalDecision | null | undefined>;
+/**
+ * One cache per dataChecks() call — shared by position, color, and style checkers.
+ *
+ * Outer key: field + parser + timezone + disambiguation.
+ * Inner key: the FieldEvidenceEntry object (null when info is missing). Layers
+ * that share a named dataset reuse the same entry object, so multi-consumer
+ * memoization still hits. Layers with different datasets get different entries
+ * and must not share a decision under the same field name (#1339).
+ */
+export type TemporalDecisionCache = Map<
+  string,
+  Map<FieldEvidenceEntry | null, TemporalDecision | null | undefined>
+>;
 
 /**
  * Resolve one field's temporal decision for scale compatibility checks.
  *
  * Memoized per dataChecks() call so multi-layer / multi-channel consumers of
- * the same field under the same parser+options pay O(n) once, not O(U·n).
+ * the same field evidence under the same parser+options pay O(n) once, not O(U·n).
  * When parser is auto and options match the evidence pass (no timezone /
  * disambiguation), reuse FieldEvidenceEntry.temporal instead of re-scanning.
  *
  * Cache key omits parseFailure and temporalKind — those only affect how the
- * decision is interpreted, not the decision itself.
+ * decision is interpreted, not the decision itself. Dataset identity is the
+ * FieldEvidenceEntry object identity (inner map key).
  */
 export function temporalDecisionForField(
   cache: TemporalDecisionCache,
@@ -62,7 +74,13 @@ export function temporalDecisionForField(
 ): TemporalDecision | null | undefined {
   const parserKey = parser === "auto" ? "auto" : canonicalTemporalParserKey(parser);
   const key = `${field}\0${parserKey}\0${options.timezone ?? ""}\0${options.disambiguation ?? ""}`;
-  if (cache.has(key)) return cache.get(key);
+  let byInfo = cache.get(key);
+  if (byInfo === undefined) {
+    byInfo = new Map();
+    cache.set(key, byInfo);
+  }
+  const infoKey = info ?? null;
+  if (byInfo.has(infoKey)) return byInfo.get(infoKey);
 
   let decision: TemporalDecision | null | undefined;
   if (info?.values === null || info?.values === undefined) {
@@ -79,7 +97,7 @@ export function temporalDecisionForField(
   } else {
     decision = parseTemporalColumn(info.values, parser, options).decision;
   }
-  cache.set(key, decision);
+  byInfo.set(infoKey, decision);
   return decision;
 }
 

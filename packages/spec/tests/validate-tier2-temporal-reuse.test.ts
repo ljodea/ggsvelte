@@ -147,4 +147,54 @@ describe("tier 2 — temporal decision reuse (characterization)", () => {
     expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch", "scale-type-mismatch"]);
     expect(errors.every((e) => e.message.includes('field "city" is nominal'))).toBe(true);
   });
+
+  // #1339 — temporalDecisionForField must not share a decision across layers that
+  // read different datasets under the same field name.
+  it("rejects a non-temporal layer after a temporal layer when both map the same field name", () => {
+    const errors = errorsOf({
+      scales: { x: { type: "time" } },
+      layers: [
+        {
+          data: { columns: { t: ["2020-01-01", "2020-01-02"], y: [1, 2] } },
+          geom: "point",
+          aes: { x: { field: "t" }, y: { field: "y" } },
+        },
+        {
+          data: { columns: { t: ["apple", "banana"], y: [3, 4] } },
+          geom: "point",
+          aes: { x: { field: "t" }, y: { field: "y" } },
+        },
+      ],
+    });
+    // Without a per-dataset cache key, the date decision for layer 0 is reused for
+    // layer 1 and validation wrongly accepts fruit under a time scale.
+    expect(errors.map((e) => ({ code: e.code, path: e.path }))).toEqual([
+      { code: "scale-type-mismatch", path: "/layers/1/aes/x" },
+    ]);
+    expect(errors[0]?.message).toContain('field "t" is nominal');
+  });
+
+  it("accepts a temporal layer after a non-temporal layer when both map the same field name", () => {
+    const errors = errorsOf({
+      scales: { x: { type: "time" } },
+      layers: [
+        {
+          data: { columns: { t: ["apple", "banana"], y: [1, 2] } },
+          geom: "point",
+          aes: { x: { field: "t" }, y: { field: "y" } },
+        },
+        {
+          data: { columns: { t: ["2020-01-01", "2020-01-02"], y: [3, 4] } },
+          geom: "point",
+          aes: { x: { field: "t" }, y: { field: "y" } },
+        },
+      ],
+    });
+    // Without a per-dataset cache key, the nominal decision for layer 0 is reused
+    // for layer 1 and valid dates are wrongly rejected.
+    expect(errors.map((e) => ({ code: e.code, path: e.path }))).toEqual([
+      { code: "scale-type-mismatch", path: "/layers/0/aes/x" },
+    ]);
+    expect(errors[0]?.message).toContain('field "t" is nominal');
+  });
 });

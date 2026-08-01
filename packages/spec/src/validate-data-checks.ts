@@ -20,7 +20,6 @@
 import type { SpecError } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
 import type { ValidateLimits, ValidateOptions } from "./validate-data.js";
-import type { TemporalDecision } from "./temporal-column.js";
 import {
   resolveLayerFieldEvidence,
   type FieldEvidenceMap,
@@ -37,6 +36,7 @@ import {
   checkFiniteStyleScaleDataCompatibility,
   checkNumericStyleScaleDataCompatibility,
 } from "./validate-data-checks-style.js";
+import type { TemporalDecisionCache } from "./validate-data-checks-temporal.js";
 
 export { STAT_COLUMNS };
 
@@ -56,7 +56,8 @@ export function dataChecks(
 ): SpecError[] {
   const errors: SpecError[] = [];
   // One cache per dataChecks call — shared by position, color, and style checkers.
-  const temporalDecisionCache = new Map<string, TemporalDecision | null | undefined>();
+  // Nested by FieldEvidenceEntry so same-named fields on different datasets stay independent (#1339).
+  const temporalDecisionCache: TemporalDecisionCache = new Map();
   const scales = isRecord(spec["scales"]) ? spec["scales"] : undefined;
 
   // Pre-evidence: temporal axis configuration (errors even without data/profile).
