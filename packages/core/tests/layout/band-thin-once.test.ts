@@ -38,9 +38,10 @@ describe("band y thinning rebuild cost (#1335)", () => {
     expect(formats).toBe(k);
   });
 
-  it("does not thin uniform long labels when doubling cannot shrink width (#1356)", () => {
-    // Every category is over-wide; index 0 always stays labeled, so thinning never
-    // reduces maxLabeledWidth. Truncate in place with every=1 instead.
+  it("does not width-thin uniform long labels; density still thins crowded lists (#1356)", () => {
+    // Width doubling cannot shrink maxLabeledWidth (index 0 always labeled), so
+    // the width loop truncates. Density thinning (separate pass) still raises
+    // labelEvery when band step is below label height + gap.
     const k = 64;
     const cats = longCategories(k);
     const r = layout(
@@ -51,13 +52,33 @@ describe("band y thinning rebuild cost (#1335)", () => {
         y: band(...cats),
       }),
     );
-    expect(r.y.labelEvery).toBe(1);
     expect(r.y.ticks).toHaveLength(k);
     expect(r.y.ticks.map((t) => t.value)).toEqual(cats);
+    expect(r.y.labelEvery).toBeGreaterThan(1);
+    expect(r.degradations).toContain("y:thin");
+    expect(r.degradations).toContain("y:truncate");
+    expect(r.y.truncated).toBe(true);
+    for (let i = 0; i < k; i++) {
+      expect(r.y.ticks[i]!.labeled).toBe(i % r.y.labelEvery === 0);
+    }
+  });
+
+  it("width-truncates without density thin when few long categories fit the height", () => {
+    // Under BAND_THIN_MIN_CATEGORIES, density never fires; width still cannot
+    // improve via thinning, so every stays 1 and labels truncate.
+    const cats = longCategories(8);
+    const r = layout(
+      base({
+        width: 400,
+        height: 400,
+        x: lin(0, 100),
+        y: band(...cats),
+      }),
+    );
+    expect(r.y.labelEvery).toBe(1);
     expect(r.y.ticks.every((t) => t.labeled)).toBe(true);
     expect(r.degradations).not.toContain("y:thin");
     expect(r.degradations).toContain("y:truncate");
-    expect(r.y.truncated).toBe(true);
   });
 
   it("stops doubling when the next every would cover the whole tick list", () => {

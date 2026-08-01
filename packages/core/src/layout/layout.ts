@@ -31,6 +31,7 @@
 
 import type { AxisGuidePlan } from "./guide-plan-types.js";
 import type { TextMeasurer } from "./measure.js";
+import { BAND_THIN_MIN_CATEGORIES, MIN_BAND_LABEL_GAP_PX } from "./band-label-layout.js";
 import { deriveTicks, type AxisTicks, type DeriveTicksContext } from "./layout-derive-ticks.js";
 import { truncateToFit } from "./truncate.js";
 import {
@@ -221,22 +222,31 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     // Degrade 1: tick thinning.
     // Band axes: only the labeled flag depends on every — flip flags in place
     // instead of re-deriving and re-formatting all k ticks each doubling (#1335).
-    // Commit a doubling only when max labeled width actually shrinks; otherwise
-    // fall through to truncation. Width overflow on a vertical band is a
-    // truncation problem, not a density problem (#1356).
+    // Commit a doubling only when max labeled width actually shrinks; probe
+    // further doublings when the next step is a no-op (widest at an even index)
+    // before falling through to truncation (#1356).
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
         if (yEvery * 2 >= y.ticks.length) break;
-        const nextEvery = yEvery * 2;
-        applyBandLabelEvery(y, nextEvery);
-        const nextW = maxLabeledWidth(y, measurer, fontSize);
-        if (nextW >= yLabelW) {
+        let probe = yEvery * 2;
+        let improved = false;
+        while (true) {
+          applyBandLabelEvery(y, probe);
+          const nextW = maxLabeledWidth(y, measurer, fontSize);
+          if (nextW < yLabelW) {
+            yEvery = probe;
+            yLabelW = nextW;
+            degradations.push("y:thin");
+            improved = true;
+            break;
+          }
+          if (probe * 2 >= y.ticks.length) break;
+          probe *= 2;
+        }
+        if (!improved) {
           applyBandLabelEvery(y, yEvery);
           break;
         }
-        yEvery = nextEvery;
-        yLabelW = nextW;
-        degradations.push("y:thin");
       } else {
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
@@ -260,6 +270,29 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
       }
       degradations.push("y:truncate");
       yLabelW = maxLabeledWidth(y, measurer, fontSize);
+    }
+  }
+
+  // Vertical density for band Y (legacy path only — measured planner owns
+  // horizontal collision). Independent of the width loop so #1356 can truncate
+  // over-wide survivors without stripping short siblings, while crowded tall
+  // lists still thin to label height + min gap.
+  if (
+    yLabelsVisible &&
+    !yPreserve &&
+    !y.empty &&
+    input.y.type === "band" &&
+    y.guidePlan === undefined &&
+    y.ticks.length >= BAND_THIN_MIN_CATEGORIES
+  ) {
+    const n = y.ticks.length;
+    const bandStep = innerH / n;
+    const minStep = labelH + MIN_BAND_LABEL_GAP_PX;
+    while (yEvery * bandStep < minStep) {
+      if (yEvery * 2 >= n) break;
+      yEvery *= 2;
+      applyBandLabelEvery(y, yEvery);
+      degradations.push("y:thin");
     }
   }
 

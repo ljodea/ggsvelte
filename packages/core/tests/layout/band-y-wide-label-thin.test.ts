@@ -68,6 +68,7 @@ describe("vertical band y: over-wide label does not hide short siblings (#1356)"
 
   it("still thins when hiding wider ticks actually reduces left-margin width", () => {
     // Odd indices are the only over-wide labels; every=2 keeps even shorts.
+    // Tall plot + 16 cats so density does not force further thinning.
     const cats = Array.from({ length: 16 }, (_, i) =>
       i % 2 === 1
         ? `Very long category label that blows the left margin budget number ${i}`
@@ -76,7 +77,7 @@ describe("vertical band y: over-wide label does not hide short siblings (#1356)"
     const r = layout(
       base({
         width: 200,
-        height: 400,
+        height: 640,
         x: lin(0, 10),
         y: band(...cats),
       }),
@@ -87,5 +88,45 @@ describe("vertical band y: over-wide label does not hide short siblings (#1356)"
     const labeled = r.y.ticks.filter((t) => t.labeled);
     expect(labeled.length).toBeGreaterThan(0);
     expect(labeled.every((t) => String(t.value).startsWith("S"))).toBe(true);
+  });
+
+  it("probes past a no-op doubling when a later every drops the widest survivor", () => {
+    // Widest at index 2: every=2 still labels it; every=4 drops it and shrinks width.
+    const cats = [
+      "Short0",
+      "Short1",
+      "THIS IS THE ONE VERY LONG CATEGORY LABEL THAT BLOWS THE LEFT MARGIN ALONE",
+      "Short3",
+      "Short4",
+      "Short5",
+      "Short6",
+      "Short7",
+    ];
+    const r = layout(
+      base({
+        width: 200,
+        height: 320,
+        x: lin(0, 10),
+        y: band(...cats),
+      }),
+    );
+    expect(r.y.labelEvery).toBeGreaterThanOrEqual(4);
+    expect(r.y.ticks.find((t) => t.value === cats[2])?.labeled).toBe(false);
+    expect(r.degradations).toContain("y:thin");
+  });
+
+  it("density-thins many short categories when the plot is too short for all labels", () => {
+    const cats = Array.from({ length: 40 }, (_, i) => `C${i}`);
+    const r = layout(
+      base({
+        width: 400,
+        height: 120,
+        x: lin(0, 10),
+        y: band(...cats),
+      }),
+    );
+    expect(r.y.labelEvery).toBeGreaterThan(1);
+    expect(r.degradations).toContain("y:thin");
+    expect(r.y.ticks.filter((t) => t.labeled).length).toBeLessThan(cats.length);
   });
 });
