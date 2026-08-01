@@ -137,17 +137,18 @@ export function expandSfLeaves(geom: SfParsed, path: string, depth = 0): SfLeaf[
         );
       }
       const c = child as { type: string; coordinates?: unknown; geometries?: unknown };
-      out.push(
-        ...expandSfLeaves(
-          {
-            type: c.type,
-            ...(c.coordinates !== undefined && { coordinates: c.coordinates }),
-            ...(c.geometries !== undefined && { geometries: c.geometries }),
-          },
-          path,
-          depth + 1,
-        ),
+      // Push one leaf at a time — spread into push throws past the engine
+      // argument limit on large nested GeometryCollections (#1344).
+      const childLeaves = expandSfLeaves(
+        {
+          type: c.type,
+          ...(c.coordinates !== undefined && { coordinates: c.coordinates }),
+          ...(c.geometries !== undefined && { geometries: c.geometries }),
+        },
+        path,
+        depth + 1,
       );
+      for (const leaf of childLeaves) out.push(leaf);
     }
     return out;
   }
@@ -164,7 +165,9 @@ export function representativePointsForGeometry(
   const leaves = expandSfLeaves(geom, path);
   const out: SfPosition[] = [];
   for (const leaf of leaves) {
-    out.push(...representativePoints(leaf.type, leaf.coordinates));
+    // Per-element push: MultiPoint / multi-part leaves can exceed the engine
+    // argument limit when spread into push (#1344).
+    for (const pt of representativePoints(leaf.type, leaf.coordinates)) out.push(pt);
   }
   return out;
 }
