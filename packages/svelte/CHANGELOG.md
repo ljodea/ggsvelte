@@ -1,5 +1,101 @@
 # @ggsvelte/svelte
 
+## 0.23.0
+
+### Minor Changes
+
+- 50e9292: # CLI split: ggsvelte-render moves to @ggsvelte/cli
+
+  The `ggsvelte-render` CLI moves to its own package, `@ggsvelte/cli` (ADR 0022).
+
+  - `@ggsvelte/cli` (new): owns the `ggsvelte-render` bin; depends only on
+    `@ggsvelte/core`, so agent sandboxes install the spec feedback loop without
+    the Svelte component library. Also re-exports `runCLI`/`CLIIO` for
+    spawn-free embedding.
+  - `@ggsvelte/svelte` (breaking, pre-1.0 minor): no longer ships the
+    `ggsvelte-render` bin. Migrate with `npm install -g @ggsvelte/cli` (or add
+    `@ggsvelte/cli` as a dependency) — the command name and behavior are
+    unchanged. `ggsvelte-codemod` still ships with `@ggsvelte/svelte`.
+  - `@ggsvelte/core`: the `--version` help text no longer names
+    `@ggsvelte/svelte`; `runCLI` reports the version its caller passes.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#cli-moved-to-ggsvelte-cli>
+
+- e57bdbf: # Lean render path
+
+  Migration: none — additive
+
+  Add lean chart import paths that drop TypeBox validation and the Temporal polyfill from identity-chart client bundles.
+
+  - `@ggsvelte/core/render` — pipeline + SVG with basic geoms only (no heavy stats).
+  - `@ggsvelte/core/temporal` — optional install for time scales / Temporal polyfill.
+  - `@ggsvelte/spec/portable` — fluent builder that finishes with normalize only.
+  - `GGBuilder.toPortable()` on the full package; `.spec()` still TypeBox-validates.
+
+  Measured lean scatter path: ~327 KB → ~140 KB gzip (−57%). Full package default entry stays complete.
+
+### Patch Changes
+
+- 368d990: <!-- markdownlint-disable MD041 -->
+
+  refactor: one capability resolution seam behind the layer registry
+
+  Internal only — no public API or behavior change. Legend focus/filter
+  resolution shares one channel-capability core; the plot engine reads
+  inspect/legendFocus/legendFilter through a single resolution factory with
+  three independent SSR-safe deriveds, and advisory delivery goes through one
+  once-per-diagnostic helper.
+
+- e66c68b: <!-- markdownlint-disable MD041 -->
+
+  fix: warn when an `<Inspect>` child drops the inspect prop's `identity`
+
+  `<GGPlot inspect={{ identity: "year" }}><Inspect /></GGPlot>` used to lose the
+  `identity` without a word. The child replaces the prop whole (REPLACE, as
+  documented), an empty child bag means `inspect={true}`, and row identity then
+  fell back to an `id` column or the row index — so pins and selection keys
+  silently rebound to the wrong rows.
+
+  The capability seam now resolves row identity itself and reports the loss as
+  `INTERACTION_INSPECT_IDENTITY_DROPPED`. A child that names its own `identity`
+  is a deliberate override and stays quiet. REPLACE semantics are unchanged;
+  only the silence is gone.
+
+- 9ae7909: <!-- markdownlint-disable MD041 -->
+
+  refactor: shared mark style resolvers for rects, segments, glyphs
+
+  `@ggsvelte/core` now exports `resolveRectMark`, `resolveSegmentMark`, and
+  `resolveGlyphMark` (with their `Resolved*Mark` types) beside the existing
+  point/path resolvers, completing the renderer-neutral style table. The SVG
+  string renderer, the canvas drawers, and the Svelte `Batch` component all
+  resolve per-mark fill/stroke/dash/alpha through these shared functions.
+
+  No rendering behavior changes — emitted SVG, canvas draw calls, and DOM
+  output are unchanged. `@ggsvelte/svelte` picks up the internal refactor of
+  `Batch.svelte` only.
+
+  Migration: none — additive
+
+- Updated dependencies [50e9292]
+- Updated dependencies [1d68bcc]
+- Updated dependencies [322bc60]
+- Updated dependencies [97f739a]
+- Updated dependencies [8987d9c]
+- Updated dependencies [ccdab47]
+- Updated dependencies [c8d7484]
+- Updated dependencies [e57bdbf]
+- Updated dependencies [58356ea]
+- Updated dependencies [9e43af7]
+- Updated dependencies [488f170]
+- Updated dependencies [a54207b]
+- Updated dependencies [9ae7909]
+- Updated dependencies [4870c0c]
+- Updated dependencies [146c2c8]
+- Updated dependencies [1a9ec15]
+  - @ggsvelte/core@0.23.0
+  - @ggsvelte/spec@0.23.0
+
 ## 0.22.0
 
 ### Patch Changes

@@ -1,5 +1,195 @@
 # @ggsvelte/core
 
+## 0.23.0
+
+### Minor Changes
+
+- 50e9292: # CLI split: ggsvelte-render moves to @ggsvelte/cli
+
+  The `ggsvelte-render` CLI moves to its own package, `@ggsvelte/cli` (ADR 0022).
+
+  - `@ggsvelte/cli` (new): owns the `ggsvelte-render` bin; depends only on
+    `@ggsvelte/core`, so agent sandboxes install the spec feedback loop without
+    the Svelte component library. Also re-exports `runCLI`/`CLIIO` for
+    spawn-free embedding.
+  - `@ggsvelte/svelte` (breaking, pre-1.0 minor): no longer ships the
+    `ggsvelte-render` bin. Migrate with `npm install -g @ggsvelte/cli` (or add
+    `@ggsvelte/cli` as a dependency) — the command name and behavior are
+    unchanged. `ggsvelte-codemod` still ships with `@ggsvelte/svelte`.
+  - `@ggsvelte/core`: the `--version` help text no longer names
+    `@ggsvelte/svelte`; `runCLI` reports the version its caller passes.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#cli-moved-to-ggsvelte-cli>
+
+- e57bdbf: # Lean render path
+
+  Migration: none — additive
+
+  Add lean chart import paths that drop TypeBox validation and the Temporal polyfill from identity-chart client bundles.
+
+  - `@ggsvelte/core/render` — pipeline + SVG with basic geoms only (no heavy stats).
+  - `@ggsvelte/core/temporal` — optional install for time scales / Temporal polyfill.
+  - `@ggsvelte/spec/portable` — fluent builder that finishes with normalize only.
+  - `GGBuilder.toPortable()` on the full package; `.spec()` still TypeBox-validates.
+
+  Measured lean scatter path: ~327 KB → ~140 KB gzip (−57%). Full package default entry stays complete.
+
+- 9ae7909: <!-- markdownlint-disable MD041 -->
+
+  refactor: shared mark style resolvers for rects, segments, glyphs
+
+  `@ggsvelte/core` now exports `resolveRectMark`, `resolveSegmentMark`, and
+  `resolveGlyphMark` (with their `Resolved*Mark` types) beside the existing
+  point/path resolvers, completing the renderer-neutral style table. The SVG
+  string renderer, the canvas drawers, and the Svelte `Batch` component all
+  resolve per-mark fill/stroke/dash/alpha through these shared functions.
+
+  No rendering behavior changes — emitted SVG, canvas draw calls, and DOM
+  output are unchanged. `@ggsvelte/svelte` picks up the internal refactor of
+  `Batch.svelte` only.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 1d68bcc: # Group facet rows once per layer instead of rescanning per panel
+
+  Migration: none — internal
+
+  Building panel frames sliced each layer once per panel, and each slice walked
+  the layer's whole filtered table to keep the rows belonging to that panel. The
+  useful work is one pass over the layer, but the cost was one pass per panel:
+  O(P x N) where P is the panel count and N the filtered rows.
+
+  Group each layer's rows by facet key once, then answer each panel with a lookup.
+  Faceting on a 200-category field did 200 times the necessary row visits,
+  multiplied again by layer count, on the main bind path before stats and scale
+  training.
+
+  The replicate paths (unfaceted, or a layer carrying none of the facet fields)
+  also rebuilt an identical source-row array per panel; they now share one.
+
+  Slices are unchanged for every layout the pipeline can build: same table
+  instance or subset, same row order, same source-row lineage, across wrap, grid,
+  partial-field replication, absent facet values, and empty tables. A panel
+  identity missing a facet field its layer partitions on now throws where it used
+  to replicate — no facet form can produce that, since `assertFacetForm` rejects
+  wrap mixed with grid and every degenerate layout collapses to the unfaceted
+  path.
+
+  The trade is retained memory: each layer holds its grouping for the whole panel
+  loop, so a many-layer faceted plot carries roughly one extra index per row per
+  layer, where the per-panel arrays were previously garbage as soon as each frame
+  copied them.
+
+- 322bc60: <!-- markdownlint-disable MD041 -->
+
+  perf(core): run the ISO shape regex once per string cell in `isIsoLikeString` (was twice), and hoist the kind-rank table out of `compareTokens` so the store-build sort comparator allocates nothing per call
+
+- 97f739a: <!-- markdownlint-disable MD041 -->
+
+  perf(core): binary-search `ringStarts` for a subpath's hole breaks instead of scanning the whole batch array per point-in-path test (O(R) → O(log R + local) per probe; R grows with polygon feature/hole count in choropleths)
+
+- 8987d9c: <!-- markdownlint-disable MD041 -->
+
+  perf(core): resolve outline mask sources with one per-layer index instead of rescanning every batch per outline in `buildInteractionMasks` (O(B²) → O(B) over geometry batches; this path recomputes on every hover/legend emphasis change)
+
+- ccdab47: # Gather the y window per grid row in the 2-D KDE
+
+  Migration: none — internal
+
+  `productKdeGrid`, which builds the density surface behind `geom_density_2d`,
+  sorted samples by x and slid an x window across each grid row, but tested y one
+  sample at a time in the innermost loop. Every grid row therefore re-walked the
+  whole x band and threw away the samples outside `±8σy` individually. It now
+  gathers each row's y window once, so neither axis is scanned per cell.
+
+  The share of wasted visits grows with the data, because the bandwidth shrinks as
+  `n^(-1/5)` while the x band keeps admitting the same fraction: 16% of visited
+  pairs cleared no y window at n = 200, 64% at n = 20 000. On a 4 000-point cloud
+  over the default 100 × 100 grid the visit count drops from 9.50M to 2.25M, and a
+  50 000-point cloud renders 1.29× faster end to end.
+
+  The surface is unchanged bit for bit — the gather keeps samples in ascending-x
+  order, so the kernel terms are still added in the same sequence, and a
+  non-finite `y` is still admitted rather than dropped. When the y window already
+  reaches every row there is nothing to prune, so the gather is skipped and the
+  sorted arrays are read directly.
+
+- c8d7484: <!-- markdownlint-disable MD041 -->
+
+  fix(core): lean path — mixed ISO+number columns stay non-temporal; tag lean lifecycle surfaces
+
+  - `@ggsvelte/core/render` no longer classifies columns like `["2024-01-01", 5]` as temporal (numbers were epoch-ms near 1970).
+  - Register `@ggsvelte/core/render`, `@ggsvelte/core/temporal`, and `@ggsvelte/spec/portable` in `lifecycle.json`.
+
+- 9e43af7: <!-- markdownlint-disable MD041 -->
+
+  refactor: probe-scoped hit geometry replaces the threaded containment memo
+
+  Internal only — no public API or behavior change. `createHitGeometry` now
+  hands out probe handles: `probePoint(px, py)` answers `distance`/`contains`
+  and `probeRect(lo, hi)` answers `intersects`, each owning its own
+  containment cache. The cache map no longer travels through four signatures,
+  and point and rect containment can no longer be mixed by mistake. The two
+  pass-through modules that only restated the interface — candidate-store-
+  spatial.ts and candidate-store-spatial-refine.ts — are gone, so a store now
+  builds one hit-geometry object instead of two.
+
+- 488f170: <!-- markdownlint-disable MD041 -->
+
+  perf(core): cache filled-path containment per brush rect in queryRect — an interior brush over a filled area/polygon ran a full point-in-polygon walk per candidate (O(K×V)); one cached walk per subpath per query (O(K+V))
+
+- a54207b: # Window polygon hole rings instead of rescanning the batch
+
+  Migration: none — internal, except a narrowed input contract on `pathData`
+
+  SVG serialization, canvas tracing, and the coord hole remap each scanned the
+  whole batch-wide `PathsBatch.ringStarts` array to find the ring breaks inside
+  one subpath. A shared `ringCuts` helper binary-searches the window instead, so
+  a batch with S filled subpaths and R hole rings drops from O(S x R) to
+  O(S log R) per SVG render and per canvas frame. Hit testing got the same search
+  inline in #1301; it now shares the helper.
+
+  This only bites maps whose parts carry holes: with no holes the batch omits
+  `ringStarts` and every call site short-circuits ahead of the helper. Where holes
+  are common, R grows with S — 3000 counties with a lake each cost 9 million
+  compares per frame before.
+
+  `ringStarts` ascending order is now documented on `PathsBatch` and on the
+  exported `pathData`. Both producers emit it ascending, so every in-tree caller
+  is unaffected. A caller hand-building an unsorted array for `pathData` used to
+  get its out-of-order breaks anyway (paired into the wrong rings); those breaks
+  are now dropped instead.
+
+- 4870c0c: <!-- markdownlint-disable MD041 -->
+
+  fix(core): reject invalid auto-scale timezones early; lean date axes use timeTicks without Temporal
+
+  - `assertTemporalConfiguration` still validates `timezone` when the parser is `"auto"` (no more silent fall-through to generic parse failures).
+  - Lean `@ggsvelte/core/render` date-axis charts fall back to `timeTicks` + `formatTime` when the temporal runtime is not installed, instead of throwing from `planTemporalAxis`.
+
+- 146c2c8: # Derive tile resolution once per axis instead of once per row
+
+  Migration: none — internal
+
+  `emitBandTiles` passed `defaultResolution(frame.xNumeric)` straight into a call
+  inside its per-row loop. JavaScript evaluates arguments eagerly, so a continuous
+  axis re-derived that value on every row even when a mapped or param width made
+  the callee ignore it. `resolution()` scans the whole column into a Set and sorts
+  the distinct values, so a `geom_tile` heatmap on continuous axes was O(n²) in
+  its cell count: a 200x200 grid scanned 40,000 values 40,000 times, per axis.
+
+  Derive it once per axis before the loop. Band axes are unchanged — they pass a
+  literal `1` and never reach `resolution()`.
+
+  Output is identical for every input; only how often the value is derived changes.
+
+- Updated dependencies [e57bdbf]
+- Updated dependencies [58356ea]
+- Updated dependencies [1a9ec15]
+  - @ggsvelte/spec@0.23.0
+
 ## 0.22.0
 
 ### Minor Changes
