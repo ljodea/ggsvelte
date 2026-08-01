@@ -4671,4 +4671,4 @@ export const fastfoodMenu: readonly FastfoodMenuRow[] = [
 
 /** Short citation for chart captions and README-style attribution. */
 export const FASTFOOD_MENU_CITATION =
-  "US fast-food entr\u00e9e nutrition from fastfoodnutrition.org, via TidyTuesday 2018-09-04 (https://github.com/rfordatascience/tidytuesday). CC0 curation; cite the original nutrition tables for the measurements.";
+  "US fast-food entrée nutrition from fastfoodnutrition.org, via TidyTuesday 2018-09-04 (https://github.com/rfordatascience/tidytuesday). CC0 curation; cite the original nutrition tables for the measurements.";

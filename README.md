@@ -43,31 +43,26 @@ and Windows.
     GeomSmooth,
     GGPlot,
     Labs,
-    ScaleSizeContinuous,
-    ScaleXContinuous,
     ThemeTufte,
   } from "@ggsvelte/svelte";
 
-  import { gammaVirginis } from "./data.js";
+  import { chocolateBarsSample } from "./data.js";
 </script>
 
-<GGPlot data={gammaVirginis} aes={{ x: "year", y: "angle" }}>
+<GGPlot data={chocolateBarsSample} aes={{ x: "cocoaPercent", y: "rating" }}>
   <ThemeTufte />
-  <ScaleXContinuous labels="d" />
-  <ScaleSizeContinuous range={[3, 8]} />
   <Labs
-    title="The first scatterplot, redrawn"
-    subtitle="Herschel plotted γ Virginis in 1833 and fitted the curve by hand"
-    x="Year"
-    y="Position angle (°)"
-    size="Herschel's weight"
+    title="Cocoa percent against bar rating"
+    subtitle="Loess through a sample of chocolate reviews, with a confidence band"
+    x="Cocoa (%)"
+    y="Rating (1–4)"
   />
   <GeomSmooth method="loess" span={0.75} />
-  <GeomPoint aes={{ size: "weight" }} alpha={0.85} />
+  <GeomPoint alpha={0.25} size={2} />
 </GGPlot>
 ```
 
-[![The position angle of gamma Virginis from 1718 to 1830 with a loess trend and confidence ribbon](apps/docs/static/previews/smooth-loess-scatter-light.png)](https://ggsvelte.sh/examples/smooth/loess-scatter)
+[![Cocoa percent against chocolate bar rating with a loess trend and confidence ribbon](apps/docs/static/previews/smooth-loess-scatter-light.png)](https://ggsvelte.sh/examples/smooth/loess-scatter)
 
 ### [Stacked area](https://ggsvelte.sh/examples/area/stacked)
 
