@@ -83,6 +83,34 @@ function applyBandLabelEvery(axis: AxisTicks, every: number): void {
   }
 }
 
+/**
+ * Probe higher band `labelEvery` values until max labeled width shrinks.
+ * Restores the prior every when no probe improves width (#1356).
+ */
+function thinBandForWidth(
+  axis: AxisTicks,
+  every: number,
+  currentW: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): { every: number; width: number; improved: boolean } {
+  if (every * 2 >= axis.ticks.length) {
+    return { every, width: currentW, improved: false };
+  }
+  let probe = every * 2;
+  for (;;) {
+    applyBandLabelEvery(axis, probe);
+    const nextW = maxLabeledWidth(axis, measurer, fontSize);
+    if (nextW < currentW) {
+      return { every: probe, width: nextW, improved: true };
+    }
+    if (probe * 2 >= axis.ticks.length) break;
+    probe *= 2;
+  }
+  applyBandLabelEvery(axis, every);
+  return { every, width: currentW, improved: false };
+}
+
 /** Measure preserved labels without mutating the semantic guide plan. */
 function presentForLayout(axis: AxisTicks, preserve: boolean): AxisTicks {
   if (!preserve) return axis;
@@ -227,26 +255,11 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     // before falling through to truncation (#1356).
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
-        if (yEvery * 2 >= y.ticks.length) break;
-        let probe = yEvery * 2;
-        let improved = false;
-        while (true) {
-          applyBandLabelEvery(y, probe);
-          const nextW = maxLabeledWidth(y, measurer, fontSize);
-          if (nextW < yLabelW) {
-            yEvery = probe;
-            yLabelW = nextW;
-            degradations.push("y:thin");
-            improved = true;
-            break;
-          }
-          if (probe * 2 >= y.ticks.length) break;
-          probe *= 2;
-        }
-        if (!improved) {
-          applyBandLabelEvery(y, yEvery);
-          break;
-        }
+        const thinned = thinBandForWidth(y, yEvery, yLabelW, measurer, fontSize);
+        if (!thinned.improved) break;
+        yEvery = thinned.every;
+        yLabelW = thinned.width;
+        degradations.push("y:thin");
       } else {
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
