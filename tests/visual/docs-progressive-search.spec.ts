@@ -36,11 +36,12 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
   ]);
 
   // Intermediate steps are build-time SVGs; Make it interactive is the one live
-  // plot (hydrate near-viewport, #972). Before that scroll, every step is an img.
+  // plot (intent-gated, #972). Before engage, every step is an img.
   await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
   await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
   const finishedChart = page.locator(".finished-chart");
   await finishedChart.scrollIntoViewIfNeeded();
+  await finishedChart.getByRole("button", { name: "Load interactive chart" }).click();
   const finished = finishedChart.locator(".gg-plot-root");
   await expect(finished).toHaveAttribute("data-gg-ready", "true", {
     timeout: 45_000,
@@ -54,6 +55,7 @@ test("the finished chart answers keyboard inspection", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
   const finishedChart = page.locator(".finished-chart");
   await finishedChart.scrollIntoViewIfNeeded();
+  await finishedChart.getByRole("button", { name: "Load interactive chart" }).click();
   const capture = finishedChart.locator(".gg-capture");
   await expect(capture).toBeVisible({ timeout: 45_000 });
   await capture.focus();
@@ -77,6 +79,7 @@ test("the finished chart drops its band fills and names the epochs in forced col
   await page.goto("/guide/getting-started?theme=light");
   const finished = page.locator(".finished-chart");
   await finished.scrollIntoViewIfNeeded();
+  await finished.getByRole("button", { name: "Load interactive chart" }).click();
   await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 45_000,
   });

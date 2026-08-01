@@ -1,9 +1,9 @@
 <script lang="ts">
   /**
    * Example detail frame: paint the gallery PNG first, then upgrade to the
-   * live Example.svelte chart only after user intent (hover/focus) so SPA nav
-   * and scroll stay responsive. Near-viewport auto-upgrade pulled the full
-   * chart stack as soon as a specimen approached the fold.
+   * live Example.svelte chart only after user intent (hover/focus/button) so
+   * SPA nav and scroll stay responsive. Near-viewport auto-upgrade pulled the
+   * full chart stack as soon as a specimen approached the fold.
    *
    * `?vr` forces an immediate upgrade so visual regression can wait on
    * `.gg-plot-root[data-gg-ready]` without racing intent handlers.
@@ -76,9 +76,6 @@
   class="gg-example-frame"
   class:full-width={fullWidth}
   bind:this={host}
-  tabindex="0"
-  role="group"
-  aria-label={`${title} (hover or focus to load the interactive chart)`}
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
   {#if Live !== null}
@@ -93,11 +90,15 @@
       decoding="async"
       fetchpriority="high"
     />
+    <button type="button" class="load-interactive" onclick={startLoad}>
+      Load interactive chart
+    </button>
   {/if}
 </div>
 
 <style>
   .gg-example-frame {
+    position: relative;
     margin: 2.5rem 0;
     width: 100%;
     max-width: var(--example-vr-width);
@@ -108,15 +109,30 @@
     max-width: none;
   }
 
-  .gg-example-frame:focus-visible {
-    outline: 2px solid var(--ink, #111);
-    outline-offset: 4px;
-  }
-
   .example-preview {
     display: block;
     width: 100%;
     height: auto;
     background: #fff;
+  }
+
+  .load-interactive {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--line, #ccc);
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--paper, #fff) 92%, transparent);
+    color: var(--ink, #111);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .load-interactive:focus-visible {
+    outline: 2px solid var(--ink, #111);
+    outline-offset: 2px;
   }
 </style>

@@ -30,16 +30,19 @@ describe("docs example PNG-first (PR3)", () => {
     expect(page).toContain("{#key data.entry.id}");
   });
 
-  it("defers Example.svelte via user intent or ?vr eager load", () => {
+  it("defers Example.svelte via user intent, button, or ?vr eager load", () => {
     const frame = read("lib/components/ExampleLiveFrame.svelte");
     expect(frame).toContain("loadExampleComponent");
     expect(frame).toContain("observeUserIntent");
     expect(frame).not.toContain("observeNearViewport");
+    expect(frame).toContain("Load interactive chart");
     expect(frame).toContain('has("vr")');
     expect(frame).toContain("example-preview");
     expect(frame).toContain("previewPath");
     // VR starts the import at module init, not only in onMount.
     expect(frame).toContain('typeof window !== "undefined"');
+    // Keyboard path is a real button (not tabindex on a noninteractive div).
+    expect(frame).not.toContain('tabindex="0"');
   });
 
   it("keeps loadExample for callers that still need the full bundle", () => {
