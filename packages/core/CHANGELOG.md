@@ -1,5 +1,20 @@
 # @ggsvelte/core
 
+## 0.24.2
+
+### Patch Changes
+
+- 36569c5: <!-- markdownlint-disable MD041 -->
+
+  # Push sf geometry leaves without spreading large arrays
+
+  Migration: none — internal
+
+  `expandSfLeaves` and `representativePointsForGeometry` used `out.push(...items)`.
+  Past the engine argument limit a large nested GeometryCollection or MultiPoint
+  threw `RangeError`. Leaves and points are now pushed one element at a time.
+  - @ggsvelte/spec@0.24.2
+
 ## 0.24.1
 
 ### Patch Changes
