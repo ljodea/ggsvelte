@@ -1,5 +1,16 @@
 # @ggsvelte/svelte
 
+## 0.24.3
+
+### Patch Changes
+
+- Updated dependencies [a84fd4e]
+- Updated dependencies [47a660a]
+- Updated dependencies [5d8c5b8]
+- Updated dependencies [a8c2292]
+  - @ggsvelte/core@0.24.3
+  - @ggsvelte/spec@0.24.3
+
 ## 0.24.2
 
 ### Patch Changes
