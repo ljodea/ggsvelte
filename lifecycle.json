@@ -4830,6 +4830,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "groupBatchesByPanel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "humanizeFieldTitle": {
           "kind": "value",
           "lifecycle": "experimental"

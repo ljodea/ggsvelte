@@ -20,6 +20,7 @@
     ScenePanel,
   } from "@ggsvelte/core";
   import {
+    groupBatchesByPanel,
     letterboxGutterRects,
     sceneLabel,
     STRIP_BAND,
@@ -140,6 +141,19 @@
   // indexOf per batch during panel loops.
   const markFocusMasks = $derived(
     resolveBatchFocusMasks(scene.batches, markBatches, focusMasks),
+  );
+  // Bucket batches by panel once. Batch count grows with panel count (the
+  // pipeline emits per layer per panel), so testing every batch against every
+  // panel cost ~O(layers x panels^2) per render. Same routing the SVG-string
+  // and canvas renderers use, so all three drop a batch with a panelIndex that
+  // is not a real bucket (NaN, fractional, out of range) identically.
+  //
+  // Batches and their original indices stay in parallel arrays rather than
+  // paired objects: a fresh wrapper per recompute would fail the keyed each's
+  // identity check and re-run every Batch's props, where the batch object
+  // itself keeps its identity across a rebucket.
+  const panelBatches = $derived(
+    groupBatchesByPanel(scene.panels.length, markBatches, true),
   );
 
   const gridBounds = $derived.by(() => {
@@ -314,16 +328,15 @@
             ? undefined
             : `url(#${uid}-clip-${i})`}
         >
-          {#each markBatches as batch, bi (bi)}
-            {#if batch.panelIndex === i}
-              <Batch
-                {batch}
-                theme={scene.theme}
-                {focusable}
-                {markLabel}
-                focusMask={markFocusMasks[bi] ?? null}
-              />
-            {/if}
+          {#each panelBatches.byPanel[i] ?? [] as batch, k (panelBatches.indices?.[i]?.[k] ?? k)}
+            <Batch
+              {batch}
+              theme={scene.theme}
+              {focusable}
+              {markLabel}
+              focusMask={markFocusMasks[panelBatches.indices?.[i]?.[k] ?? -1] ??
+                null}
+            />
           {/each}
         </g>
       {/if}

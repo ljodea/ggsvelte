@@ -11,6 +11,9 @@
 // into lifecycle.json by scripts/gen-lifecycle.ts.
 // @lifecycle-default experimental
 
+// Panel routing shared by every renderer (SVG string, canvas, Svelte scene).
+export { groupBatchesByPanel } from "./group-batches-by-panel.js";
+
 // Full grammar: register every stat frame builder and geom batch.
 import "./pipeline/frame-stats-register-all.js";
 import "./pipeline/geometry-register-all.js";
