@@ -1,10 +1,16 @@
 import { error } from "@sveltejs/kit";
 
-import { POSITION_REFERENCE, type PositionName, KNOWN_POSITIONS } from "@ggsvelte/spec";
+import {
+  GEOM_DEFAULTS,
+  POSITION_REFERENCE,
+  type GeomName,
+  type PositionName,
+  KNOWN_POSITIONS,
+} from "@ggsvelte/spec";
 
 import { EXAMPLES } from "$lib/examples-manifest";
 
-import type { EntryGenerator, PageLoad } from "./$types";
+import type { EntryGenerator, PageServerLoad } from "./$types";
 
 const POSITION_SET = new Set<string>(KNOWN_POSITIONS);
 
@@ -21,14 +27,20 @@ function relatedExamples(position: PositionName) {
   ).slice(0, 8);
 }
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageServerLoad = ({ params }) => {
   const name = params.name;
   if (!POSITION_SET.has(name)) {
     error(404, `No position reference for "${name}".`);
   }
   const entry = POSITION_REFERENCE[name as PositionName];
+  const primaryGeom = entry.defaultForGeoms[0] ?? entry.compatibleGeoms[0];
+  const geomName = (primaryGeom ?? "bar") as GeomName;
+  const defaultStat = GEOM_DEFAULTS[geomName]?.stat ?? "identity";
   return {
     entry,
+    primaryGeom: primaryGeom ?? null,
+    geomName,
+    defaultStat,
     examples: relatedExamples(entry.name).map((ex) => ({
       id: ex.id,
       title: ex.title,

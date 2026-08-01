@@ -1,11 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import {
-    componentNameForGeom,
-    GEOM_DEFAULTS,
-    type GeomName,
-  } from "@ggsvelte/spec";
 
+  import { componentNameForGeom } from "$lib/component-name-for-geom";
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
   import { plotAesLiteral } from "$lib/reference-snippets";
 
@@ -14,16 +10,12 @@
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
 
-  const primaryGeom = $derived(
-    entry.defaultForGeoms[0] ?? entry.compatibleGeoms[0],
-  );
+  const primaryGeom = $derived(data.primaryGeom);
   const primaryComponent = $derived(
-    primaryGeom === undefined ? "GeomBar" : componentNameForGeom(primaryGeom),
+    primaryGeom === null ? "GeomBar" : componentNameForGeom(primaryGeom),
   );
-  const geomName = $derived(primaryGeom ?? "bar");
-  const defaultStat = $derived(
-    GEOM_DEFAULTS[geomName as GeomName]?.stat ?? "identity",
-  );
+  const geomName = $derived(data.geomName);
+  const defaultStat = $derived(data.defaultStat);
   const plotAes = $derived(plotAesLiteral(geomName, defaultStat));
   const plotOpen = $derived(
     plotAes === "" ? "<GGPlot data={rows}>" : `<GGPlot data={rows} ${plotAes}>`,

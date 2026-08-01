@@ -4,7 +4,7 @@ import { STAT_REFERENCE, type StatName, KNOWN_STATS } from "@ggsvelte/spec";
 
 import { EXAMPLES } from "$lib/examples-manifest";
 
-import type { EntryGenerator, PageLoad } from "./$types";
+import type { EntryGenerator, PageServerLoad } from "./$types";
 
 const STAT_SET = new Set<string>(KNOWN_STATS);
 
@@ -23,7 +23,7 @@ function relatedExamples(stat: StatName) {
   ).slice(0, 8);
 }
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageServerLoad = ({ params }) => {
   const name = params.name;
   if (!STAT_SET.has(name)) {
     error(404, `No stat reference for "${name}".`);

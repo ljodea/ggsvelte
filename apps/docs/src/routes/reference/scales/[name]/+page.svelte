@@ -1,6 +1,5 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { SCALE_REFERENCE } from "@ggsvelte/spec";
 
   import { scaleSwatchFor } from "$lib/catalog/scale-swatches";
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
@@ -10,9 +9,7 @@
 
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
-  const aliasTarget = $derived(
-    entry.aliasOf === undefined ? undefined : SCALE_REFERENCE[entry.aliasOf],
-  );
+  const aliasTarget = $derived(data.aliasTarget);
   const swatch = $derived(scaleSwatchFor(entry));
 
   const aes = $derived(entry.aesthetics[0] ?? "x");

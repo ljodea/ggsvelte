@@ -1,7 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { KNOWN_GEOMS, KNOWN_STATS } from "@ggsvelte/spec";
 
+  import { KNOWN_GEOMS, KNOWN_STATS } from "$lib/catalog/known-names";
   import { segmentReferenceLede } from "$lib/reference-lede";
 
   interface Props {

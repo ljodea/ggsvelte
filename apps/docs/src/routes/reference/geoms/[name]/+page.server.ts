@@ -4,7 +4,7 @@ import { GEOM_REFERENCE, type GeomName, KNOWN_GEOMS } from "@ggsvelte/spec";
 
 import { EXAMPLES } from "$lib/examples-manifest";
 
-import type { EntryGenerator, PageLoad } from "./$types";
+import type { EntryGenerator, PageServerLoad } from "./$types";
 
 const GEOM_SET = new Set<string>(KNOWN_GEOMS);
 
@@ -21,7 +21,7 @@ function relatedExamples(geom: GeomName) {
   ).slice(0, 8);
 }
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageServerLoad = ({ params }) => {
   const name = params.name;
   if (!GEOM_SET.has(name)) {
     error(404, `No geom reference for "${name}".`);
