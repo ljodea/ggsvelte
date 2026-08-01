@@ -848,3 +848,89 @@ it("uses job-private Bun caches across CI workflows (issue #319)", () => {
     );
   }
 });
+
+describe("release.yml concurrent-merge race recovery", () => {
+  const release = () => read(".github/workflows/release.yml");
+
+  it("queues releases and never cancels an in-flight publish", () => {
+    const yml = release();
+    expect(yml).toMatch(/concurrency:\s*\n\s*group:\s*release/);
+    expect(yml).toContain("cancel-in-progress: false");
+  });
+
+  it("does not pass publish to changesets/action (publish is decoupled)", () => {
+    // changesets/action is either/or: any leftover .changeset/*.md makes it
+    // skip publish while staying green. Publish lives in a separate step so
+    // concurrent feature merges cannot suppress shipping already-bumped versions.
+    const yml = release();
+    expect(yml).toContain("changesets/action@");
+    expect(yml).toContain("changesets — open/update Version Packages PR");
+    // No changesets/action `publish:` input anywhere in the workflow. The
+    // publish command lives only in publish-unpublished.ts.
+    expect(yml).not.toMatch(/publish:\s*bun node_modules/);
+    expect(yml).not.toMatch(/publish:\s*changeset/);
+  });
+
+  it("publishes, stages, tags, and asserts on the main tip before the version-PR step", () => {
+    const yml = release();
+    expect(yml).toContain("bun scripts/publish-unpublished.ts");
+    expect(yml).toContain("bun scripts/stage-github-releases.ts");
+    expect(yml).toContain("bun scripts/assert-npm-published.ts");
+    expect(yml).toContain("gh release create");
+    expect(yml).toContain("vars.NPM_PUBLISH_ENABLED == 'true'");
+    // Publish → stage → gh-create → assert → version PR. Publish must not run
+    // after changesets/action, which leaves the workspace on
+    // changeset-release/main with unreviewed next-version package.json files.
+    const publishAt = yml.indexOf("bun scripts/publish-unpublished.ts");
+    const stageAt = yml.indexOf("bun scripts/stage-github-releases.ts");
+    const createAt = yml.indexOf("gh release create");
+    const assertAt = yml.indexOf("bun scripts/assert-npm-published.ts");
+    const versionAt = yml.indexOf("changesets — open/update Version Packages PR");
+    expect(publishAt).toBeGreaterThan(-1);
+    expect(stageAt).toBeGreaterThan(publishAt);
+    expect(createAt).toBeGreaterThan(stageAt);
+    expect(assertAt).toBeGreaterThan(createAt);
+    expect(versionAt).toBeGreaterThan(assertAt);
+  });
+
+  it("keeps the write credential out of publish and staging (bun) steps", () => {
+    // Same shape as the vr-approve invariant: steps that run repository code
+    // must not hold GITHUB_TOKEN. Tagging is a later gh-only step.
+    const yml = release();
+    const steps = yml.split("\n      - name: ").slice(1);
+    expect(steps.length).toBeGreaterThan(5);
+
+    for (const step of steps) {
+      const label = step.split("\n")[0] ?? "";
+      const holdsToken = /^\s+GITHUB_TOKEN: /m.test(step);
+      const runsBun = /\brun: bun\b/.test(step) || /\n\s+bun scripts\//.test(step);
+      if (holdsToken && runsBun) {
+        throw new Error(`release.yml bun step holds GITHUB_TOKEN: ${label}`);
+      }
+    }
+
+    // Publish and stage are the recovery scripts; they must stay token-free.
+    const publishStep = steps.find((s) => s.includes("bun scripts/publish-unpublished.ts"));
+    const stageStep = steps.find((s) => s.includes("bun scripts/stage-github-releases.ts"));
+    expect(publishStep, "publish step present").toBeDefined();
+    expect(stageStep, "stage step present").toBeDefined();
+    expect(publishStep).not.toMatch(/GITHUB_TOKEN:/);
+    expect(stageStep).not.toMatch(/GITHUB_TOKEN:/);
+
+    // Create step holds the token and must stay script-free (gh/git only).
+    const createStep = steps.find((s) => s.includes("gh release create"));
+    expect(createStep, "create-releases step present").toBeDefined();
+    expect(createStep).toMatch(/GITHUB_TOKEN:/);
+    expect(createStep).not.toMatch(/\brun: bun\b/);
+    expect(createStep).not.toMatch(/\n\s+bun \S/);
+  });
+
+  it("keeps OIDC trusted publishing (no NPM_TOKEN secret)", () => {
+    const yml = release();
+    expect(yml).toContain("id-token: write");
+    expect(yml).toContain("registry-url: https://registry.npmjs.org");
+    // Comments may name NPM_TOKEN when forbidding it; the secret must not be wired.
+    expect(yml).not.toMatch(/secrets\.NPM_TOKEN/);
+    expect(yml).not.toMatch(/NPM_TOKEN:\s*\$\{\{/);
+  });
+});
