@@ -26,10 +26,11 @@ export function tokenKey(token: CanonicalAxisToken): string {
   return token.value ? "b:1" : "b:0";
 }
 
+const KIND_RANK = { number: 0, string: 1, boolean: 2 } as const;
+
 /** Total order over canonical axis tokens (package-internal). */
 export function compareTokens(a: CanonicalAxisToken, b: CanonicalAxisToken): number {
-  const rank = { number: 0, string: 1, boolean: 2 } as const;
-  const kind = rank[a.kind] - rank[b.kind];
+  const kind = KIND_RANK[a.kind] - KIND_RANK[b.kind];
   if (kind !== 0) return kind;
   if (a.kind === "number" && b.kind === "number") return a.value - b.value;
   if (a.kind === "string" && b.kind === "string")

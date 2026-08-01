@@ -6,7 +6,9 @@ const ISO_LIKE =
   /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?(?:Z|([+-])(\d{2}):?(\d{2}))?)?$/;
 
 export function isIsoLikeString(value: string): boolean {
-  return ISO_LIKE.test(value) && isoEpochMs(value) !== undefined;
+  // isoEpochMs already rejects non-matching shapes, so one regex run suffices
+  // (this runs per string cell during column coercion).
+  return isoEpochMs(value) !== undefined;
 }
 
 /** True when the ISO string carries a clock component (time or datetime). */

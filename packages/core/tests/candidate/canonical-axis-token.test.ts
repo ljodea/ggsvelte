@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
+import { compareTokens } from "../../src/candidate-axis-token.ts";
 import { canonicalAxisToken } from "../../src/candidate-store.ts";
 
 describe("canonicalAxisToken", () => {
@@ -11,5 +12,25 @@ describe("canonicalAxisToken", () => {
     expect(canonicalAxisToken(null)).toBeNull();
     expect(canonicalAxisToken(Number.NaN)).toBeNull();
     expect(canonicalAxisToken(Infinity)).toBeNull();
+  });
+});
+
+describe("compareTokens", () => {
+  const num = (value: number) => ({ kind: "number", value }) as const;
+  const str = (value: string) => ({ kind: "string", value }) as const;
+  const bool = (value: boolean) => ({ kind: "boolean", value }) as const;
+
+  it("orders kinds number < string < boolean, then by value within a kind", () => {
+    expect(compareTokens(num(9), str("a"))).toBeLessThan(0);
+    expect(compareTokens(str("z"), bool(false))).toBeLessThan(0);
+    expect(compareTokens(bool(true), num(0))).toBeGreaterThan(0);
+
+    expect(compareTokens(num(1), num(2))).toBeLessThan(0);
+    expect(compareTokens(str("b"), str("a"))).toBeGreaterThan(0);
+    expect(compareTokens(bool(false), bool(true))).toBeLessThan(0);
+
+    expect(compareTokens(num(3), num(3))).toBe(0);
+    expect(compareTokens(str("a"), str("a"))).toBe(0);
+    expect(compareTokens(bool(true), bool(true))).toBe(0);
   });
 });
