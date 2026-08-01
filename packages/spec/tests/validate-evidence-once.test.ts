@@ -174,6 +174,63 @@ describe("tier 2 — single field-evidence pass", () => {
     expect(reads).toBeLessThan(240);
   });
 
+  it("infers a shared named dataset's types once, not once per layer", () => {
+    // A {columns} ref skips the pivot, so this counts the second stage: type
+    // inference walks the column arrays themselves.
+    const x = Array.from({ length: 40 }, (_, i) => i);
+    let reads = 0;
+    const counted = new Proxy(x, {
+      get(target, prop) {
+        if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+        return Reflect.get(target, prop) as unknown;
+      },
+    });
+    const layers = Array.from({ length: 6 }, () => ({
+      geom: "point",
+      data: { name: "shared" },
+      aes: { x: { field: "x" } },
+    }));
+    const resolved = evidence.resolveLayerFieldEvidence(
+      { datasets: { shared: { columns: { x: counted } } }, layers },
+      {},
+      DEFAULT_VALIDATE_LIMITS,
+    );
+    expect(resolved.status).toBe("ok");
+    expect(reads).toBeGreaterThan(0);
+    // Six layers each inferring the column cost 1040 reads before; one pass
+    // costs far less. The bound fails on the first repeat.
+    expect(reads).toBeLessThan(400);
+  });
+
+  it("shares the plot's table with a layer that names it", () => {
+    const rows = Array.from({ length: 40 }, (_, i) => ({ x: i }));
+    let reads = 0;
+    const counted = new Proxy(rows, {
+      get(target, prop) {
+        if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+        return Reflect.get(target, prop) as unknown;
+      },
+    });
+    const resolved = evidence.resolveLayerFieldEvidence(
+      {
+        data: { name: "shared" },
+        datasets: { shared: { values: counted } },
+        layers: [
+          { geom: "point", data: { name: "shared" }, aes: { x: { field: "x" } } },
+          { geom: "line", data: { name: "shared" }, aes: { x: { field: "x" } } },
+        ],
+      },
+      {},
+      DEFAULT_VALIDATE_LIMITS,
+    );
+    expect(resolved.status).toBe("ok");
+    if (resolved.status !== "ok") return;
+    // The plot pivots once; naming the same dataset must not pivot again.
+    expect(reads).toBeLessThan(2 * 40 * 2);
+    expect(resolved.layers[0]).toBe(resolved.plot);
+    expect(resolved.layers[1]).toBe(resolved.plot);
+  });
+
   it("gives layers naming one dataset the same evidence content", () => {
     const spec = {
       datasets: {

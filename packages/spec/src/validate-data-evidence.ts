@@ -41,6 +41,11 @@ export type ResolveFieldEvidenceResult =
 
 /** Plot + per-layer field evidence from one pass over inline tables / profile. */
 export type ResolveLayerFieldEvidenceResult =
+  /**
+   * `layers[i]` may be the same object as `plot` or as another layer's entry
+   * when those layers read one dataset. Treat every map as read-only; copy
+   * before writing.
+   */
   | { status: "ok"; plot: FieldEvidenceMap | null; layers: Array<FieldEvidenceMap | null> }
   | { status: "none" }
   | { status: "errors"; errors: SpecError[] };
@@ -235,6 +240,12 @@ export function resolveLayerFieldEvidence(
   // per reference. Inline data keeps its own table: equal content is not the
   // same table.
   const columnsByName = new Map<string, Record<string, readonly CellValue[]>>();
+  const plotData = spec["data"];
+  const plotName =
+    isRecord(plotData) && typeof plotData["name"] === "string" ? plotData["name"] : null;
+  // The plot's own table seeds it, so a layer naming the plot's dataset reuses
+  // that pivot instead of building a second one.
+  if (plotColumns !== null && plotName !== null) columnsByName.set(plotName, plotColumns);
   for (const layer of layers) {
     if (!isRecord(layer) || layer["data"] === undefined) {
       layerColumns.push(null); // inherit plot
@@ -298,10 +309,7 @@ export function resolveLayerFieldEvidence(
   // named dataset. The plot's own table seeds it, matching the row accounting
   // above, which already treats a name the plot and a layer share as one table.
   const evidenceByName = new Map<string, FieldEvidenceMap>();
-  const plotData = spec["data"];
-  if (plot !== null && isRecord(plotData) && typeof plotData["name"] === "string") {
-    evidenceByName.set(plotData["name"], plot);
-  }
+  if (plot !== null && plotName !== null) evidenceByName.set(plotName, plot);
   const layerMaps: Array<FieldEvidenceMap | null> = layerColumns.map((cols, index) => {
     if (cols === "runtime") return null;
     if (cols === null) return plot;
