@@ -6,11 +6,12 @@
 
 Migration: none — internal, except a narrowed input contract on `pathData`
 
-Every consumer of `PathsBatch.ringStarts` scanned the whole batch-wide array to
-find the ring breaks inside one subpath. A shared `ringCuts` helper binary-
-searches the window instead, so a batch with S filled subpaths and R hole rings
-drops from O(S x R) to O(S log R) per SVG render, per canvas frame, and on the
-brush path through hit-testing.
+SVG serialization, canvas tracing, and the coord hole remap each scanned the
+whole batch-wide `PathsBatch.ringStarts` array to find the ring breaks inside
+one subpath. A shared `ringCuts` helper binary-searches the window instead, so
+a batch with S filled subpaths and R hole rings drops from O(S x R) to
+O(S log R) per SVG render and per canvas frame. Hit testing got the same search
+inline in #1301; it now shares the helper.
 
 This only bites maps whose parts carry holes: with no holes the batch omits
 `ringStarts` and every call site short-circuits ahead of the helper. Where holes
