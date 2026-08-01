@@ -5,8 +5,10 @@
  *   window.competitiveBench.list() -> { libs, cases }
  *   window.competitiveBench.clear()
  *
- * Timing includes one rAF after mount so layout/paint can flush (closer to
- * LightningChart-style "visible on screen" than pure JS-only timers).
+ * Timing is paint-inclusive: after the sync mount we wait for two animation
+ * frames so layout/paint can flush (closer to LightningChart-style "visible on
+ * screen" than pure JS-only timers). Small cases therefore sit near a ~1–2
+ * frame floor; discriminate on denser cases (e.g. line-3x10k, scatter-10k).
  */
 import { mountChartJs } from "../adapters/chartjs";
 import { mountD3 } from "../adapters/d3";

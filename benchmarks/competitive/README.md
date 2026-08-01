@@ -47,6 +47,8 @@ Results: `results/bundles.json`, `results/browser.json`.
 5. **No interaction (mousemove) or max-capacity sweep yet.** uPlot's table and LC's capacity/stream metrics are the next expansion targets.
 6. **SveltePlot / LayerCake** remain bundle-only until component fixtures mount in Playwright.
 7. Compare **within one machine and one run**. Absolute ms are host-sensitive (same as internal budgets).
+8. **Paint-inclusive timing** waits two animation frames after mount, so small cases sit near a ~1–2 frame floor. Use denser cases (`line-3x10k`, `scatter-color-10k`, full matrix) to rank libraries.
+9. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
 
 ## Scenario catalog
 

@@ -93,7 +93,7 @@ const server = await createServer({
 await server.listen();
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
+let page = await browser.newPage();
 page.setDefaultTimeout(120_000);
 
 const results: Record<string, unknown>[] = [];
@@ -102,11 +102,32 @@ process.stderr.write(
   `competitive browser: ${matrix.length} cells (full=${full ? "yes" : "no"}, cases=${cases.length}, libs=${browserLibs.length})\n`,
 );
 
+async function waitForBenchApi(): Promise<void> {
+  await page.waitForFunction(() => {
+    const w = window as unknown as { competitiveBench?: BenchApi };
+    return w.competitiveBench !== undefined;
+  });
+}
+
+async function recoverPage(): Promise<void> {
+  try {
+    await page.reload();
+    await waitForBenchApi();
+  } catch {
+    try {
+      await page.close();
+    } catch {
+      // already closed
+    }
+    page = await browser.newPage();
+    page.setDefaultTimeout(120_000);
+    await page.goto("http://127.0.0.1:5199/");
+    await waitForBenchApi();
+  }
+}
+
 await page.goto("http://127.0.0.1:5199/");
-await page.waitForFunction(() => {
-  const w = window as unknown as { competitiveBench?: BenchApi };
-  return w.competitiveBench !== undefined;
-});
+await waitForBenchApi();
 
 for (const cell of matrix) {
   const label = `${cell.lib.id} ${cell.caseId}`;
@@ -157,25 +178,8 @@ for (const cell of matrix) {
       ok: false,
       error: message,
     });
-    // Recover page if a lib crashed the tab.
-    try {
-      await page.reload();
-      await page.waitForFunction(() => {
-        const w = window as unknown as { competitiveBench?: BenchApi };
-        return w.competitiveBench !== undefined;
-      });
-    } catch {
-      // page dead — recreate
-      await page.close();
-      const next = await browser.newPage();
-      next.setDefaultTimeout(120_000);
-      await next.goto("http://127.0.0.1:5199/");
-      await next.waitForFunction(() => {
-        const w = window as unknown as { competitiveBench?: BenchApi };
-        return w.competitiveBench !== undefined;
-      });
-      // rebind page reference is hard in const — use goto on existing if possible
-    }
+    // Recover page if a lib crashed the tab; rebind `page` so later cells run.
+    await recoverPage();
   }
 }
 

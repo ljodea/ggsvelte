@@ -43,6 +43,14 @@ export function mountUplot(
   root.replaceChildren();
   if (scenario === "scatter-color") {
     const scatter = data as ScatterColumns;
+    // uPlot requires data[0] (x) sorted ascending; it takes x-domain from first/last
+    // samples. Sort outside the timed region would need harness changes — sort here
+    // so paint cost still covers all N markers (not an off-canvas empty chart).
+    const order = Array.from({ length: scatter.x.length }, (_, i) => i).toSorted(
+      (a, b) => scatter.x[a]! - scatter.x[b]!,
+    );
+    const xs = order.map((i) => scatter.x[i]!);
+    const ys = order.map((i) => scatter.y[i]!);
     // uPlot is not a scatter specialist; plot as points with one series of x/y.
     // Fairness: still a cold canvas chart with N markers.
     const opts: uPlot.Options = {
@@ -61,7 +69,7 @@ export function mountUplot(
       axes: [{}, {}],
       legend: { show: false },
     };
-    const u = new uPlot(opts, [scatter.x as number[], scatter.y as number[]], root);
+    const u = new uPlot(opts, [xs, ys], root);
     return { markHint: scatter.x.length, handle: { destroy: () => u.destroy() } };
   }
 
