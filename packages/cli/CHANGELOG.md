@@ -1,5 +1,31 @@
 # @ggsvelte/cli
 
+## 0.24.1
+
+### Patch Changes
+
+- 45c6cc9: # Refresh package README front doors
+
+  Migration: none — package README + skill docs only
+
+  Rewrite the npm package READMEs for current APIs; treat them as shipped
+  surfaces for changesets and CI; execute TypeScript fences in unit tests. Fix
+  skill prose that still called 0.13.0 grammar-prop removal “planned.”
+
+- 06afe2c: # Share frozen band domain across facet guide plans
+
+  Migration: none — internal memory hygiene; guide plan domain contents and freeze contract unchanged.
+
+  Under fixed facet scales, band axis guide plans reused to copy `scale.rawDomain`
+  once per panel. Reuse the already-frozen array when present so panels share one
+  object. Free scales still get distinct domains because each panel trains its own
+  `rawDomain`.
+
+- Updated dependencies [45c6cc9]
+- Updated dependencies [06afe2c]
+- Updated dependencies [95aa7b2]
+  - @ggsvelte/core@0.24.1
+
 ## 0.24.0
 
 ### Patch Changes
