@@ -20,6 +20,9 @@ function resolve(plot: ReturnType<typeof scene>, px: number, py: number, hitTole
       xs: indexes.xs,
       ys: indexes.ys,
       pointBatchIndexes: query.pointBatchIndexes,
+      filledSpanStart: query.filledSpanStart,
+      filledSpanEnd: query.filledSpanEnd,
+      isFilledPath: query.isFilledPath,
       addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
         query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
       },

@@ -60,7 +60,65 @@ export function assembleCandidateStore(
   } = indexes;
   const hit = createHitGeometry(indexes);
   const query = buildSpatialIndex(indexes, hit);
-  const { spatial, isPoint, pointBatchIndexes } = query;
+  const { spatial, isPoint, pointBatchIndexes, isFilledPath, filledSpanStart, filledSpanEnd } =
+    query;
+
+  /**
+   * Expand a filled-path subpath representative to the best candidate in its
+   * span for the active inspect mode (#1342). Filled paths stay axis-snap /
+   * exact-containment — never promote via containment hypot under auto (#770).
+   */
+  const bestFilledInSpan = (
+    repId: number,
+    candidateMode: ResolvedCandidateInspectMode,
+    px: number,
+    py: number,
+    maxDistance: number,
+    probe: ReturnType<typeof hit.probePoint>,
+  ): { id: number; distance: number; orth: number } | null => {
+    const start = filledSpanStart[repId]!;
+    const end = filledSpanEnd[repId]!;
+    if (start < 0 || end <= start) return null;
+    if (candidateMode === "exact") {
+      // Containment is identical for every vertex on the subpath.
+      if (probe.distance(repId) === null) return null;
+      let bestId = start;
+      let bestDistance = Math.hypot(xs[start]! - px, ys[start]! - py);
+      let bestOrth = 0;
+      for (let id = start + 1; id < end; id++) {
+        const distance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        if (distance < bestDistance) {
+          bestId = id;
+          bestDistance = distance;
+        }
+      }
+      return { id: bestId, distance: bestDistance, orth: bestOrth };
+    }
+    let bestId = -1;
+    let bestDistance = Infinity;
+    let bestOrth = Infinity;
+    for (let id = start; id < end; id++) {
+      const distance =
+        candidateMode === "x"
+          ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
+          : candidateMode === "y"
+            ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
+            : Math.hypot(xs[id]! - px, ys[id]! - py);
+      if (distance > maxDistance) continue;
+      const orth =
+        candidateMode === "x"
+          ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
+          : candidateMode === "y"
+            ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
+            : 0;
+      if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
+        bestId = id;
+        bestDistance = distance;
+        bestOrth = orth;
+      }
+    }
+    return bestId < 0 ? null : { id: bestId, distance: bestDistance, orth: bestOrth };
+  };
 
   return {
     epoch,
@@ -79,6 +137,9 @@ export function assembleCandidateStore(
           xs,
           ys,
           pointBatchIndexes,
+          filledSpanStart,
+          filledSpanEnd,
+          isFilledPath,
           addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
             query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
           },
@@ -102,10 +163,10 @@ export function assembleCandidateStore(
       const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
       let resultMode: ResolvedCandidateInspectMode = mode;
       const probe = hit.probePoint(px, py);
-      const ids =
-        spatial === null
-          ? Array.from({ length: n }, (_, id) => n - 1 - id)
-          : query.shortlistNearest(px, py, search.mode, search.maxDistance);
+      // When spatial is null (n===0) shortlistNearest returns []. Empty scenes
+      // have nothing to scan; non-empty always builds a tree (or filled-only
+      // trees that still shortlist via extended).
+      const ids = query.shortlistNearest(px, py, search.mode, search.maxDistance);
       for (const id of ids) {
         if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
           continue;
@@ -115,6 +176,40 @@ export function assembleCandidateStore(
           (candidateMode === "y" && yTokenIds[id] === -1)
         )
           continue;
+
+        // Filled-path shortlist entries are subpath reps (#1342) — expand to
+        // the best vertex in the span for this mode before global ranking.
+        if (isFilledPath[id] === 1) {
+          // Only process the representative once (span start equals rep id).
+          if (filledSpanStart[id] !== id) continue;
+          const expanded = bestFilledInSpan(id, candidateMode, px, py, search.maxDistance, probe);
+          if (expanded === null) continue;
+          // Filled paths use autoMode "x" (tier 2) — never geometric under auto.
+          const geometric = isAuto && candidateMode === "exact";
+          if (isAuto) {
+            if (geometric && !bestGeometric) {
+              best = expanded.id;
+              bestDistance = expanded.distance;
+              bestOrth = expanded.orth;
+              resultMode = candidateMode;
+              bestGeometric = true;
+              continue;
+            }
+            if (!geometric && bestGeometric) continue;
+          }
+          if (
+            expanded.distance < bestDistance ||
+            (expanded.distance === bestDistance && expanded.orth < bestOrth)
+          ) {
+            best = expanded.id;
+            bestDistance = expanded.distance;
+            bestOrth = expanded.orth;
+            resultMode = candidateMode;
+            if (isAuto) bestGeometric = geometric;
+          }
+          continue;
+        }
+
         const distance =
           candidateMode === "exact"
             ? probe.distance(id)
@@ -267,22 +362,33 @@ export function assembleCandidateStore(
       const hiX = Math.max(x0, x1);
       const loY = Math.min(y0, y1);
       const hiY = Math.max(y0, y1);
-      if (spatial === null || n === 0) return EMPTY_UINT32;
+      if (n === 0) return EMPTY_UINT32;
       // Point anchors: exact rect membership via the tree. Extended geometry
       // (rects/segments/paths) can intersect far from the anchor — always refine.
       // Collect hits then order by traversal rank (preserves prior contract).
       const hits: number[] = [];
-      for (const id of spatial.queryRect(loX, loY, hiX, hiY)) {
-        if (isPoint[id] !== 1) continue;
-        if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        hits.push(id);
+      if (spatial !== null) {
+        for (const id of spatial.queryRect(loX, loY, hiX, hiY)) {
+          if (isPoint[id] !== 1) continue;
+          if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
+          hits.push(id);
+        }
       }
       const extendedHits: number[] = [];
       query.addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
       const probe = hit.probeRect(loX, loY, hiX, hiY);
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        if (probe.intersects(id)) hits.push(id);
+        if (!probe.intersects(id)) continue;
+        // Filled subpath rep: brush contract returns every vertex on the
+        // subpath without re-walking geometry per id (#1342 / fill-brush tests).
+        if (isFilledPath[id] === 1) {
+          const start = filledSpanStart[id]!;
+          const end = filledSpanEnd[id]!;
+          for (let cid = start; cid < end; cid++) hits.push(cid);
+          continue;
+        }
+        hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
       return Uint32Array.from(hits);
