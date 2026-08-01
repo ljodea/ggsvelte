@@ -32,6 +32,10 @@ export type TopmostHitContext = {
   readonly xs: Float32Array;
   readonly ys: Float32Array;
   readonly pointBatchIndexes: readonly PointBatchIndex[];
+  /** Filled-path subpath candidate spans (#1342); -1 when not a filled path. */
+  readonly filledSpanStart: Int32Array;
+  readonly filledSpanEnd: Int32Array;
+  readonly isFilledPath: Uint8Array;
   addExtendedIntersecting(loX: number, loY: number, hiX: number, hiY: number, into: number[]): void;
   probePoint(px: number, py: number): HitProbePoint;
   fact(id: number): CandidateFacts | null;
@@ -43,7 +47,19 @@ export function resolveTopmostHit(
   px: number,
   py: number,
 ): CandidateFacts | null {
-  const { scene, hitTolerance, batchIds, primitiveIds, panelIds, xs, ys, pointBatchIndexes } = ctx;
+  const {
+    scene,
+    hitTolerance,
+    batchIds,
+    primitiveIds,
+    panelIds,
+    xs,
+    ys,
+    pointBatchIndexes,
+    filledSpanStart,
+    filledSpanEnd,
+    isFilledPath,
+  } = ctx;
   // Bind via arrows so type-aware unbound-method is satisfied.
   const addExtendedIntersecting = (
     loX: number,
@@ -116,6 +132,46 @@ export function resolveTopmostHit(
       (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height)
     )
       continue;
+
+    // Filled path: one extended shortlist entry per subpath (#1342). Contain
+    // once via the rep, then nearest-anchor scan over the candidate span.
+    if (isFilledPath[id] === 1 && batch.kind === "paths" && batch.fills !== undefined) {
+      const spanStart = filledSpanStart[id]!;
+      const spanEnd = filledSpanEnd[id]!;
+      if (spanStart < 0 || spanEnd <= spanStart) continue;
+      // Containment is identical for every vertex on the subpath.
+      if (probe.distance(id) === null) continue;
+      const range = pathRange(batch, primitiveIds[id]!);
+      const pathStart = range?.[0] ?? -1;
+      let candidateId = spanStart;
+      let anchorDistance = Math.hypot(xs[spanStart]! - px, ys[spanStart]! - py);
+      let primitive = primitiveIds[spanStart]!;
+      for (let cid = spanStart + 1; cid < spanEnd; cid++) {
+        const d = Math.hypot(xs[cid]! - px, ys[cid]! - py);
+        const p = primitiveIds[cid]!;
+        if (d < anchorDistance || (d === anchorDistance && p < primitive)) {
+          candidateId = cid;
+          anchorDistance = d;
+          primitive = p;
+        }
+      }
+      const sameBatch = batchIndex === bestBatch;
+      const improvesWithinBatch =
+        pathStart > bestPathStart ||
+        (pathStart === bestPathStart &&
+          (anchorDistance < bestDistance ||
+            (anchorDistance === bestDistance &&
+              primitive < (best < 0 ? Infinity : primitiveIds[best]!))));
+      if (batchIndex > bestBatch || (sameBatch && improvesWithinBatch)) {
+        best = candidateId;
+        bestBatch = batchIndex;
+        bestDistance = anchorDistance;
+        bestPathStart = pathStart;
+        bestPathEdge = Infinity;
+      }
+      continue;
+    }
+
     const distance = probe.distance(id);
     if (distance === null) continue;
     const sameBatch = batchIndex === bestBatch;

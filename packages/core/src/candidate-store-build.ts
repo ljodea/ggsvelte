@@ -60,8 +60,104 @@ export function assembleCandidateStore(
   } = indexes;
   const hit = createHitGeometry(indexes);
   const query = buildSpatialIndex(indexes, hit);
-  const { spatial, isPoint, pointBatchIndexes } = query;
+  const { spatial, isPoint, pointBatchIndexes, isFilledPath, filledSpanStart, filledSpanEnd } =
+    query;
 
+  /**
+   * Expand a filled-path subpath representative to the best candidate in its
+   * span (#1342). Per-vertex autoMode / axis-token filters apply inside the
+   * span (not only on the rep). Scans high→low id so exact (distance, orth)
+   * ties keep the topmost candidate, matching the descending shortlist contract.
+   * Never promote filled paths via containment hypot under auto (#770).
+   */
+  const bestFilledInSpan = (
+    repId: number,
+    isAuto: boolean,
+    explicitMode: ResolvedCandidateInspectMode,
+    px: number,
+    py: number,
+    maxDistance: number,
+    probe: ReturnType<typeof hit.probePoint>,
+  ): { id: number; distance: number; orth: number; mode: ResolvedCandidateInspectMode } | null => {
+    const start = filledSpanStart[repId]!;
+    const end = filledSpanEnd[repId]!;
+    if (start < 0 || end <= start) return null;
+    // Containment is identical for every vertex on the subpath — compute once
+    // when any vertex may take exact mode.
+    let contained: boolean | null = null;
+    const isContained = (): boolean => {
+      contained ??= probe.distance(repId) !== null;
+      return contained;
+    };
+    // Under auto, exact-mode vertices (tier 1) beat axis-snap (tier 2) even when
+    // farther — track tiers separately so a mixed-mode span cannot collapse
+    // away the tier winner before the outer ranking sees it (#770 / Devin).
+    let bestExactId = -1;
+    let bestExactDistance = Infinity;
+    let bestSnapId = -1;
+    let bestSnapDistance = Infinity;
+    let bestSnapOrth = Infinity;
+    let bestSnapMode: ResolvedCandidateInspectMode = explicitMode;
+    // Descending: first equal (distance, orth) wins → highest id (topmost).
+    for (let id = end - 1; id >= start; id--) {
+      const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : explicitMode;
+      if (
+        (candidateMode === "x" && xTokenIds[id] === -1) ||
+        (candidateMode === "y" && yTokenIds[id] === -1)
+      )
+        continue;
+      let distance: number;
+      let orth: number;
+      if (candidateMode === "exact") {
+        if (!isContained()) continue;
+        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        orth = 0;
+        if (distance < bestExactDistance) {
+          bestExactId = id;
+          bestExactDistance = distance;
+        }
+        // Explicit exact ranks among exact vertices only (via bestExact*).
+        // Under auto, exact is tier-1 and returned below; skip snap ranking.
+        continue;
+      }
+      if (candidateMode === "x") {
+        distance = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
+        if (distance > maxDistance) continue;
+        orth = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
+      } else if (candidateMode === "y") {
+        distance = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
+        if (distance > maxDistance) continue;
+        orth = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
+      } else {
+        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        if (distance > maxDistance) continue;
+        orth = 0;
+      }
+      if (distance < bestSnapDistance || (distance === bestSnapDistance && orth < bestSnapOrth)) {
+        bestSnapId = id;
+        bestSnapDistance = distance;
+        bestSnapOrth = orth;
+        bestSnapMode = candidateMode;
+      }
+    }
+    // Prefer exact when auto (tier 1) or when explicit mode is exact.
+    if (bestExactId >= 0 && (isAuto || explicitMode === "exact")) {
+      return {
+        id: bestExactId,
+        distance: bestExactDistance,
+        orth: 0,
+        mode: "exact",
+      };
+    }
+    return bestSnapId < 0
+      ? null
+      : {
+          id: bestSnapId,
+          distance: bestSnapDistance,
+          orth: bestSnapOrth,
+          mode: bestSnapMode,
+        };
+  };
   return {
     epoch,
     size: n,
@@ -79,6 +175,9 @@ export function assembleCandidateStore(
           xs,
           ys,
           pointBatchIndexes,
+          filledSpanStart,
+          filledSpanEnd,
+          isFilledPath,
           addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
             query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
           },
@@ -102,19 +201,56 @@ export function assembleCandidateStore(
       const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
       let resultMode: ResolvedCandidateInspectMode = mode;
       const probe = hit.probePoint(px, py);
-      const ids =
-        spatial === null
-          ? Array.from({ length: n }, (_, id) => n - 1 - id)
-          : query.shortlistNearest(px, py, search.mode, search.maxDistance);
+      // When spatial is null (n===0) shortlistNearest returns []. Empty scenes
+      // have nothing to scan; non-empty always builds a tree (or filled-only
+      // trees that still shortlist via extended).
+      const ids = query.shortlistNearest(px, py, search.mode, search.maxDistance);
       for (const id of ids) {
         if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
           continue;
+
+        // Filled-path shortlist entries are subpath reps (#1342) — expand with
+        // per-vertex mode/token filters before global ranking.
+        if (isFilledPath[id] === 1) {
+          // Only process the representative once (span start equals rep id).
+          if (filledSpanStart[id] !== id) continue;
+          const expanded = bestFilledInSpan(id, isAuto, mode, px, py, search.maxDistance, probe);
+          if (expanded === null) continue;
+          // Exact-mode vertices in a filled span are rare (override datum);
+          // default filled autoMode is "x" (tier 2) — do not promote via
+          // containment hypot under auto (#770).
+          const geometric = isAuto && expanded.mode === "exact";
+          if (isAuto) {
+            if (geometric && !bestGeometric) {
+              best = expanded.id;
+              bestDistance = expanded.distance;
+              bestOrth = expanded.orth;
+              resultMode = expanded.mode;
+              bestGeometric = true;
+              continue;
+            }
+            if (!geometric && bestGeometric) continue;
+          }
+          if (
+            expanded.distance < bestDistance ||
+            (expanded.distance === bestDistance && expanded.orth < bestOrth)
+          ) {
+            best = expanded.id;
+            bestDistance = expanded.distance;
+            bestOrth = expanded.orth;
+            resultMode = expanded.mode;
+            if (isAuto) bestGeometric = geometric;
+          }
+          continue;
+        }
+
         const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : mode;
         if (
           (candidateMode === "x" && xTokenIds[id] === -1) ||
           (candidateMode === "y" && yTokenIds[id] === -1)
         )
           continue;
+
         const distance =
           candidateMode === "exact"
             ? probe.distance(id)
@@ -267,21 +403,35 @@ export function assembleCandidateStore(
       const hiX = Math.max(x0, x1);
       const loY = Math.min(y0, y1);
       const hiY = Math.max(y0, y1);
-      if (spatial === null || n === 0) return EMPTY_UINT32;
+      if (n === 0) return EMPTY_UINT32;
       // Point anchors: exact rect membership via the tree. Extended geometry
       // (rects/segments/paths) can intersect far from the anchor — always refine.
       // Collect hits then order by traversal rank (preserves prior contract).
       const hits: number[] = [];
-      for (const id of spatial.queryRect(loX, loY, hiX, hiY)) {
-        if (isPoint[id] !== 1) continue;
-        if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        hits.push(id);
+      if (spatial !== null) {
+        for (const id of spatial.queryRect(loX, loY, hiX, hiY)) {
+          if (isPoint[id] !== 1) continue;
+          if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
+          hits.push(id);
+        }
       }
       const extendedHits: number[] = [];
       query.addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
       const probe = hit.probeRect(loX, loY, hiX, hiY);
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
+        // Filled subpath: one AABB shortlist entry, then per-vertex membership
+        // (anchor / adjacent edges / fill-center). Do not expand the whole
+        // span from a rep-only graze — that over-selects and under-selects
+        // mid-band brushes (Devin review on #1342).
+        if (isFilledPath[id] === 1) {
+          const start = filledSpanStart[id]!;
+          const end = filledSpanEnd[id]!;
+          for (let cid = start; cid < end; cid++) {
+            if (probe.intersects(cid)) hits.push(cid);
+          }
+          continue;
+        }
         if (probe.intersects(id)) hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
