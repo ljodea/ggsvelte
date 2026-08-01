@@ -89,10 +89,15 @@ export function assembleCandidateStore(
       contained ??= probe.distance(repId) !== null;
       return contained;
     };
-    let bestId = -1;
-    let bestDistance = Infinity;
-    let bestOrth = Infinity;
-    let bestMode: ResolvedCandidateInspectMode = explicitMode;
+    // Under auto, exact-mode vertices (tier 1) beat axis-snap (tier 2) even when
+    // farther — track tiers separately so a mixed-mode span cannot collapse
+    // away the tier winner before the outer ranking sees it (#770 / Devin).
+    let bestExactId = -1;
+    let bestExactDistance = Infinity;
+    let bestSnapId = -1;
+    let bestSnapDistance = Infinity;
+    let bestSnapOrth = Infinity;
+    let bestSnapMode: ResolvedCandidateInspectMode = explicitMode;
     // Descending: first equal (distance, orth) wins → highest id (topmost).
     for (let id = end - 1; id >= start; id--) {
       const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : explicitMode;
@@ -101,13 +106,21 @@ export function assembleCandidateStore(
         (candidateMode === "y" && yTokenIds[id] === -1)
       )
         continue;
-      let distance: number | null;
+      let distance: number;
       let orth: number;
       if (candidateMode === "exact") {
         if (!isContained()) continue;
         distance = Math.hypot(xs[id]! - px, ys[id]! - py);
         orth = 0;
-      } else if (candidateMode === "x") {
+        if (distance < bestExactDistance) {
+          bestExactId = id;
+          bestExactDistance = distance;
+        }
+        // Explicit exact ranks among exact vertices only (via bestExact*).
+        // Under auto, exact is tier-1 and returned below; skip snap ranking.
+        continue;
+      }
+      if (candidateMode === "x") {
         distance = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
         if (distance > maxDistance) continue;
         orth = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
@@ -120,16 +133,30 @@ export function assembleCandidateStore(
         if (distance > maxDistance) continue;
         orth = 0;
       }
-      if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
-        bestId = id;
-        bestDistance = distance;
-        bestOrth = orth;
-        bestMode = candidateMode;
+      if (distance < bestSnapDistance || (distance === bestSnapDistance && orth < bestSnapOrth)) {
+        bestSnapId = id;
+        bestSnapDistance = distance;
+        bestSnapOrth = orth;
+        bestSnapMode = candidateMode;
       }
     }
-    return bestId < 0
+    // Prefer exact when auto (tier 1) or when explicit mode is exact.
+    if (bestExactId >= 0 && (isAuto || explicitMode === "exact")) {
+      return {
+        id: bestExactId,
+        distance: bestExactDistance,
+        orth: 0,
+        mode: "exact",
+      };
+    }
+    return bestSnapId < 0
       ? null
-      : { id: bestId, distance: bestDistance, orth: bestOrth, mode: bestMode };
+      : {
+          id: bestSnapId,
+          distance: bestSnapDistance,
+          orth: bestSnapOrth,
+          mode: bestSnapMode,
+        };
   };
   return {
     epoch,
