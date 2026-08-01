@@ -129,4 +129,34 @@ describe("vertical band y: over-wide label does not hide short siblings (#1356)"
     expect(r.degradations).toContain("y:thin");
     expect(r.y.ticks.filter((t) => t.labeled).length).toBeLessThan(cats.length);
   });
+
+  it("does not reserve left margin for a wide label that density hides", () => {
+    // Wide label only at odd indices; density (every≥2) hides it. Left margin
+    // must reflect the short survivors, not the hidden long name.
+    const cats = Array.from({ length: 40 }, (_, i) =>
+      i % 2 === 1 ? `Very long category label reserved width should not survive ${i}` : `S${i}`,
+    );
+    const shortOnly = layout(
+      base({
+        width: 400,
+        height: 120,
+        x: lin(0, 10),
+        y: band(...Array.from({ length: 40 }, (_, i) => `S${i}`)),
+      }),
+    );
+    const mixed = layout(
+      base({
+        width: 400,
+        height: 120,
+        x: lin(0, 10),
+        y: band(...cats),
+      }),
+    );
+    expect(mixed.y.labelEvery).toBeGreaterThan(1);
+    expect(mixed.y.ticks.some((t) => t.labeled && String(t.value).startsWith("Very"))).toBe(false);
+    // Same density outcome as all-short → left margin within one quantum.
+    expect(Math.abs(mixed.margins.left - shortOnly.margins.left)).toBeLessThanOrEqual(
+      theme.quantum,
+    );
+  });
 });

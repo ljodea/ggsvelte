@@ -299,14 +299,21 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     y.ticks.length >= BAND_THIN_MIN_CATEGORIES
   ) {
     const n = y.ticks.length;
-    const bandStep = innerH / n;
+    // Band pitch is over the full category domain (breaks are a subset of
+    // domainIndex slots) — matches planBandAxis's categoryCount denominator.
+    const categoryCount = Math.max(1, input.y.categories.length);
+    const bandStep = innerH / categoryCount;
     const minStep = labelH + MIN_BAND_LABEL_GAP_PX;
+    let densityThinned = false;
     while (yEvery * bandStep < minStep) {
       if (yEvery * 2 >= n) break;
       yEvery *= 2;
       applyBandLabelEvery(y, yEvery);
       degradations.push("y:thin");
+      densityThinned = true;
     }
+    // Hidden labels must not keep reserving left-margin width.
+    if (densityThinned) yLabelW = maxLabeledWidth(y, measurer, fontSize);
   }
 
   // --- x axis → bottom margin (one label line) + right margin (overhang of
