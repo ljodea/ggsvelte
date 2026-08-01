@@ -102,7 +102,10 @@ jobs:
       - name: Publish package versions on main that are missing from npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         # Token intentionally absent — publish uses OIDC only. Tagging is later.
+        # RELEASE_STAGING_DIR: write just-published.txt so staging survives registry lag.
         run: bun scripts/publish-unpublished.ts
+        env:
+          RELEASE_STAGING_DIR: ${{ runner.temp }}/ggsvelte-release-staging
       - name: Stage GitHub release notes for package versions on npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         run: bun scripts/stage-github-releases.ts
@@ -114,8 +117,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_STAGING_DIR: ${{ runner.temp }}/ggsvelte-release-staging
         # Script-free: only gh/git so the write credential never reaches bun or
-        # node_modules. Staging covers every local version already on npm so a
-        # re-run recovers tags after a prior post-publish failure.
+        # node_modules. Per-tag targets come from staging (version-introducing
+        # commit), not always HEAD — recovery tags stay truthful.
         run: |
           set -euo pipefail
           staging="${RELEASE_STAGING_DIR:?}"
@@ -137,9 +140,18 @@ jobs:
               echo "create-github-releases: missing notes for index ${i} (tag ${tag})"
               exit 1
             fi
-            echo "creating GitHub release + remote tag ${tag}"
+            target_file="${staging}/targets/${i}.txt"
+            if [ -f "${target_file}" ]; then
+              target="$(tr -d '[:space:]' <"${target_file}")"
+            else
+              target="${head}"
+            fi
+            if [ -z "${target}" ]; then
+              target="${head}"
+            fi
+            echo "creating GitHub release + remote tag ${tag} → ${target}"
             set +e
-            create_out="$(gh release create "${tag}" --title "${tag}" --notes-file "${notes}" --target "${head}" 2>&1)"
+            create_out="$(gh release create "${tag}" --title "${tag}" --notes-file "${notes}" --target "${target}" 2>&1)"
             create_status=$?
             set -e
             if [ "${create_status}" -eq 0 ]; then

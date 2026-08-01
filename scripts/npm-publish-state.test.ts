@@ -8,10 +8,12 @@ import {
   npmVersionUrl,
   packageReleaseTag,
   parseNewTags,
+  parsePackageReleaseTag,
   planGithubReleaseStaging,
   readPublishedPackageVersions,
   type PackageVersion,
 } from "./npm-publish-state";
+import { commitForPackageVersion } from "./stage-github-releases";
 
 const root = join(import.meta.dir, "..");
 
@@ -202,5 +204,63 @@ describe("npmVersionExists", () => {
     }
     expect(threw).toBeInstanceOf(Error);
     expect(String(threw)).toMatch(/npm registry 500/);
+  });
+});
+
+describe("parsePackageReleaseTag", () => {
+  it("parses scoped and unscoped tags", () => {
+    expect(parsePackageReleaseTag("@ggsvelte/core@0.24.1")).toEqual({
+      name: "@ggsvelte/core",
+      version: "0.24.1",
+    });
+    expect(parsePackageReleaseTag("left-pad@1.0.0")).toEqual({
+      name: "left-pad",
+      version: "1.0.0",
+    });
+    expect(parsePackageReleaseTag("bad")).toBeNull();
+  });
+});
+
+describe("npmVersionExists retries", () => {
+  it("retries 404s then succeeds", async () => {
+    let calls = 0;
+    const fetchImpl = (() => {
+      calls += 1;
+      if (calls < 3) return Promise.resolve(new Response("no", { status: 404 }));
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    }) as unknown as typeof fetch;
+    const sleeps: number[] = [];
+    const ok = await npmVersionExists("@ggsvelte/core", "0.24.1", {
+      fetchImpl,
+      retries: 4,
+      retryDelayMs: 10,
+      sleep: (ms) => {
+        sleeps.push(ms);
+        return Promise.resolve();
+      },
+    });
+    expect(ok).toBe(true);
+    expect(calls).toBe(3);
+    expect(sleeps.length).toBe(2);
+  });
+});
+
+describe("commitForPackageVersion", () => {
+  it("returns git-log result when present", () => {
+    const sha = commitForPackageVersion(
+      { dir: "packages/core", name: "@ggsvelte/core", version: "0.24.1" },
+      "HEADSHA",
+      () => "abc123",
+    );
+    expect(sha).toBe("abc123");
+  });
+
+  it("falls back to HEAD when git finds nothing", () => {
+    const sha = commitForPackageVersion(
+      { dir: "packages/core", name: "@ggsvelte/core", version: "0.24.1" },
+      "HEADSHA",
+      () => null,
+    );
+    expect(sha).toBe("HEADSHA");
   });
 });

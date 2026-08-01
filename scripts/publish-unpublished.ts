@@ -18,11 +18,12 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   filterUnpublished,
   npmVersionExists,
+  packageReleaseTag,
   parseNewTags,
   readPublishedPackageVersions,
 } from "./npm-publish-state.ts";
@@ -88,13 +89,14 @@ async function main(): Promise<number> {
     return publish.status;
   }
 
-  const tags = parseNewTags(publish.stdout);
+  let tags = parseNewTags(publish.stdout);
   if (tags.length === 0) {
     // Registry can race (another runner published between our check and publish).
-    // Re-check; if still missing, fail loud.
+    // Re-check with retries; if still missing, fail loud. If present, treat the
+    // unpublished set as published for the staging hand-off.
     const stillMissing: string[] = [];
     for (const pkg of unpublished) {
-      if (!(await npmVersionExists(pkg.name, pkg.version))) {
+      if (!(await npmVersionExists(pkg.name, pkg.version, { retries: 5, retryDelayMs: 2000 }))) {
         stillMissing.push(`${pkg.name}@${pkg.version}`);
       }
     }
@@ -107,7 +109,22 @@ async function main(): Promise<number> {
     console.log(
       "publish-unpublished: versions appeared on npm without new tags (concurrent publish?)",
     );
-    return 0;
+    tags = unpublished.map((pkg) => packageReleaseTag(pkg.name, pkg.version));
+  }
+
+  // Hand just-published tags to stage-github-releases so registry lag cannot
+  // drop them from the GitHub release list (negative CDN cache after 404 probes).
+  const staging = process.env["RELEASE_STAGING_DIR"];
+  if (staging !== undefined && staging.length > 0) {
+    mkdirSync(staging, { recursive: true });
+    writeFileSync(
+      join(staging, "just-published.txt"),
+      tags.length === 0 ? "" : `${tags.join("\n")}\n`,
+      "utf8",
+    );
+    console.log(
+      `publish-unpublished: wrote ${String(tags.length)} just-published tag(s) for staging`,
+    );
   }
 
   console.log(

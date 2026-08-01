@@ -62,6 +62,10 @@ export function npmVersionUrl(
  * True when the registry has this exact version.
  * 404 → false; other non-OK responses throw (auth/network must not look like
  * "not published" and green the assert).
+ *
+ * `retries` + cache-busting query: post-publish paths often re-hit a URL that
+ * just returned 404 (negative CDN cache). Retry with backoff and `?t=` so a
+ * just-published version is not invisible for the rest of the job.
  */
 export async function npmVersionExists(
   name: string,
@@ -69,20 +73,46 @@ export async function npmVersionExists(
   opts: {
     fetchImpl?: typeof fetch;
     registry?: string;
+    /** Extra attempts after the first (default 0). */
+    retries?: number;
+    /** Sleep between retries in ms (default 1500). */
+    retryDelayMs?: number;
+    sleep?: (ms: number) => Promise<void>;
   } = {},
 ): Promise<boolean> {
   const fetchImpl = opts.fetchImpl ?? fetch;
-  const url = npmVersionUrl(name, version, opts.registry);
-  const res = await fetchImpl(url, {
-    headers: { accept: "application/json" },
-  });
-  if (res.status === 404) return false;
-  if (!res.ok) {
-    throw new Error(
-      `npm registry ${res.status} for ${name}@${version} (${url}): refuse to treat as unpublished`,
-    );
+  const retries = opts.retries ?? 0;
+  const retryDelayMs = opts.retryDelayMs ?? 1500;
+  const sleep =
+    opts.sleep ??
+    ((ms: number) =>
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, ms);
+      }));
+  const baseUrl = npmVersionUrl(name, version, opts.registry);
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const url = attempt === 0 ? baseUrl : `${baseUrl}?t=${String(Date.now())}`;
+    const res = await fetchImpl(url, {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+    });
+    if (res.status === 404) {
+      if (attempt < retries) {
+        await sleep(retryDelayMs);
+        continue;
+      }
+      return false;
+    }
+    if (!res.ok) {
+      throw new Error(
+        `npm registry ${res.status} for ${name}@${version} (${url}): refuse to treat as unpublished`,
+      );
+    }
+    return true;
   }
-  return true;
+  return false;
 }
 
 /** Packages whose local version is not in the set of "name@version" strings known on npm. */
@@ -132,27 +162,39 @@ export function packageReleaseTag(name: string, version: string): string {
 }
 
 /**
- * Pure staging plan: one release entry per package whose version is already on npm.
- * Notes body comes from the caller (reads CHANGELOG). Used by stage-github-releases
- * so a later `gh`-only workflow step can mint tags without running repo code
- * while holding GITHUB_TOKEN — and so a re-run recovers tags for versions that
- * already landed on npm without a GitHub release.
+ * Pure staging plan: one release entry per package that should get a GitHub
+ * release. Include when the key is in `includeKeys` (on npm and/or just
+ * published this run — the latter covers registry visibility lag).
+ * Notes body comes from the caller (reads CHANGELOG).
  */
 export function planGithubReleaseStaging(
   local: readonly PackageVersion[],
-  onNpmKeys: ReadonlySet<string>,
+  includeKeys: ReadonlySet<string>,
   notesFor: (pkg: PackageVersion) => string,
 ): { tag: string; notes: string }[] {
   const out: { tag: string; notes: string }[] = [];
   for (const pkg of local) {
     const key = `${pkg.name}@${pkg.version}`;
-    if (!onNpmKeys.has(key)) continue;
+    if (!includeKeys.has(key)) continue;
     out.push({
       tag: packageReleaseTag(pkg.name, pkg.version),
       notes: notesFor(pkg),
     });
   }
   return out;
+}
+
+/**
+ * Parse a changesets-style tag `@scope/name@1.2.3` (or `name@1.2.3`) into
+ * name + version. Returns null when the shape is unusable.
+ */
+export function parsePackageReleaseTag(tag: string): { name: string; version: string } | null {
+  const at = tag.lastIndexOf("@");
+  if (at <= 0) return null;
+  const name = tag.slice(0, at);
+  const version = tag.slice(at + 1);
+  if (name.length === 0 || version.length === 0) return null;
+  return { name, version };
 }
 
 /** Human-readable failure for the assert gate. */
