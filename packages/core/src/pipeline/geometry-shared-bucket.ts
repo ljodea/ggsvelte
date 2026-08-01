@@ -13,9 +13,10 @@ export function bucketByGroup(
 ): number[][] {
   const groupRows: number[][] = [];
   let removed = 0;
-  // Continuous × continuous: finite filter on scale-space numerics only.
-  // normalizeTransformed is paid once in writeLineSubpaths / area writers —
-  // not again here for every multi-series vertex (line-3xN competitive path).
+  // Continuous × continuous: monomorphic numeric + normalizeTransformed finite
+  // filter (no band / column normalize branch). Still call normalizeTransformed
+  // so projected panel scales (coord log/sqrt/etc.) that map out-of-range
+  // fractions to NaN are dropped with removed-missing — same as positionOf.
   const continuous =
     fx.xScale.type !== "band" &&
     fx.yScale.type !== "band" &&
@@ -24,10 +25,18 @@ export function bucketByGroup(
   if (continuous) {
     const xNum = frame.xNumeric!;
     const yNum = yNumericOverride ?? frame.yNumeric!;
+    const xScale = fx.xScale;
+    const yScale = fx.yScale;
     for (let row = 0; row < frame.n; row++) {
       const xv = xNum[row];
       const yv = yNum[row];
       if (xv === undefined || yv === undefined || !Number.isFinite(xv) || !Number.isFinite(yv)) {
+        removed++;
+        continue;
+      }
+      const tx = xScale.normalizeTransformed(xv);
+      const ty = yScale.normalizeTransformed(yv);
+      if (Number.isNaN(tx) || Number.isNaN(ty)) {
         removed++;
         continue;
       }

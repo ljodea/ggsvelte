@@ -74,27 +74,36 @@ describe("bucketByGroup continuous multi-series", () => {
     expect(warnings.some((w) => w.code === "removed-missing")).toBe(true);
   });
 
-  it("does not call continuous normalize during finite filtering", () => {
+  it("drops rows whose continuous normalizeTransformed is NaN (projected scales)", () => {
+    // Coord projectors wrap normalizeTransformed and can map finite scale-space
+    // values to NaN when outside the transform domain (qq_line + log/sqrt etc.).
     const linear = trainContinuous([[0, 100]], {}).scale;
-    let normalizeCalls = 0;
-    const instrumented = {
+    const projected = {
       ...linear,
       type: "linear" as const,
       normalizeTransformed(value: number): number {
-        normalizeCalls++;
-        return linear.normalizeTransformed(value);
+        // Reject values ≥ 50 (stand-in for out-of-range projectFraction).
+        return value >= 50 ? Number.NaN : linear.normalizeTransformed(value);
       },
     };
-    const frame = continuousFrame(4, [0, 0, 1, 1]);
-    const fx = fromPartial<Frame>({
-      innerWidth: 100,
-      innerHeight: 50,
-      xScale: instrumented,
-      yScale: instrumented,
-    });
-    bucketByGroup(frame, fx, null, []);
-    // Continuous finite filter must not pay normalizeTransformed per axis×row.
-    expect(normalizeCalls).toBe(0);
+    const frame = continuousFrame(4, [0, 0, 0, 0]);
+    // xNumeric is 0,1,2,3 — all kept for x; yNumeric is 0,2,4,6 — all kept for y
+    // Raise one y into the NaN zone via override.
+    const yOverride = Float64Array.of(1, 2, 60, 3);
+    const warnings: { code: string }[] = [];
+    const buckets = bucketByGroup(
+      frame,
+      fromPartial<Frame>({
+        innerWidth: 100,
+        innerHeight: 50,
+        xScale: linear,
+        yScale: projected,
+      }),
+      yOverride,
+      warnings,
+    );
+    expect(buckets).toEqual([[0, 1, 3]]);
+    expect(warnings.some((w) => w.code === "removed-missing")).toBe(true);
   });
 });
 
