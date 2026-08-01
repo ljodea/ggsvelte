@@ -153,8 +153,9 @@ describe("skill teaches v0.21 row identity, not plot-level key", () => {
     const keyMentions = [...skill.matchAll(/`key`/g)];
     expect(keyMentions.length).toBeGreaterThan(0);
     for (const match of keyMentions) {
-      const start = Math.max(0, match.index! - 40);
-      const end = Math.min(skill.length, match.index! + match[0].length + 40);
+      const index = match.index ?? 0;
+      const start = Math.max(0, index - 40);
+      const end = Math.min(skill.length, index + match[0].length + 40);
       expect(skill.slice(start, end).toLowerCase()).toMatch(/deprecat/);
     }
   });
