@@ -120,23 +120,34 @@ export function buildInteractionMasks<Key extends PropertyKey>(
 
   // Mirror fill-batch focus onto presentation-only path batches on the same
   // layer (ribbon outline open paths). Null masks stay fully opaque in canvas.
+  // The mask source is the lowest-indexed same-layer batch holding a mask at
+  // that point in the loop — masks mirrored onto earlier outlines included —
+  // so the per-layer index below must track masks this loop adds, not just
+  // the candidate-derived ones.
+  let peerByLayer: Map<number, { batchIndex: number; values: Uint8Array; count: number }> | null =
+    null;
   for (let index = 0; index < batches.length; index++) {
     const batch = batches[index];
     if (batch === undefined || batch.kind !== "paths" || batch.candidates !== false) continue;
     if (focused.has(index)) continue;
-    let source: Uint8Array | undefined;
-    let sourceCount = 0;
-    for (let other = 0; other < batches.length; other++) {
-      if (other === index) continue;
-      const peer = batches[other];
-      if (peer === undefined || peer.layerIndex !== batch.layerIndex) continue;
-      const values = focused.get(other);
-      if (values === undefined) continue;
-      source = values;
-      sourceCount = renderPrimitiveCount(peer);
-      break;
+    if (peerByLayer === null) {
+      peerByLayer = new Map();
+      for (let other = 0; other < batches.length; other++) {
+        const candidate = batches[other];
+        if (candidate === undefined || peerByLayer.has(candidate.layerIndex)) continue;
+        const values = focused.get(other);
+        if (values === undefined) continue;
+        peerByLayer.set(candidate.layerIndex, {
+          batchIndex: other,
+          values,
+          count: renderPrimitiveCount(candidate),
+        });
+      }
     }
-    if (source === undefined) continue;
+    const peer = peerByLayer.get(batch.layerIndex);
+    if (peer === undefined) continue;
+    const source = peer.values;
+    const sourceCount = peer.count;
     const outlineCount = renderPrimitiveCount(batch);
     const mirrored = new Uint8Array(outlineCount);
     if (outlineCount === sourceCount) {
@@ -153,6 +164,12 @@ export function buildInteractionMasks<Key extends PropertyKey>(
       // (zeros = not focused → canvas draws at mutedAlpha)
     }
     focused.set(index, mirrored);
+    if (index < peer.batchIndex)
+      peerByLayer.set(batch.layerIndex, {
+        batchIndex: index,
+        values: mirrored,
+        count: outlineCount,
+      });
   }
 
   return freezeMasks(batches, focused);
