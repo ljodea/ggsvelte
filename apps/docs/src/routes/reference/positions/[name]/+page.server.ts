@@ -34,7 +34,7 @@ export const load: PageServerLoad = ({ params }) => {
   }
   const entry = POSITION_REFERENCE[name as PositionName];
   const primaryGeom = entry.defaultForGeoms[0] ?? entry.compatibleGeoms[0];
-  const geomName = (primaryGeom ?? "bar") as GeomName;
+  const geomName: GeomName = primaryGeom ?? "bar";
   const defaultStat = GEOM_DEFAULTS[geomName]?.stat ?? "identity";
   return {
     entry,
