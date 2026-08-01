@@ -6,7 +6,9 @@ import {
   formatUnpublishedFailure,
   npmVersionExists,
   npmVersionUrl,
+  packageReleaseTag,
   parseNewTags,
+  planGithubReleaseStaging,
   readPublishedPackageVersions,
   type PackageVersion,
 } from "./npm-publish-state";
@@ -144,6 +146,35 @@ describe("formatUnpublishedFailure", () => {
     expect(msg).toContain("@ggsvelte/core@0.24.1");
     expect(msg).toContain("changesets/action");
     expect(msg).toContain("ERROR:");
+  });
+});
+
+describe("packageReleaseTag", () => {
+  it("joins scoped name and version the way changesets tags them", () => {
+    expect(packageReleaseTag("@ggsvelte/core", "0.24.1")).toBe("@ggsvelte/core@0.24.1");
+  });
+});
+
+describe("planGithubReleaseStaging", () => {
+  const local: PackageVersion[] = [
+    { dir: "packages/core", name: "@ggsvelte/core", version: "0.24.1" },
+    { dir: "packages/spec", name: "@ggsvelte/spec", version: "0.24.1" },
+  ];
+
+  it("stages only packages already on npm and uses caller notes", () => {
+    const onNpm = new Set(["@ggsvelte/core@0.24.1"]);
+    const planned = planGithubReleaseStaging(local, onNpm, (pkg) => `notes for ${pkg.name}`);
+    expect(planned).toEqual([{ tag: "@ggsvelte/core@0.24.1", notes: "notes for @ggsvelte/core" }]);
+  });
+
+  it("stages every local package when all are on npm (release recovery)", () => {
+    const onNpm = new Set(["@ggsvelte/core@0.24.1", "@ggsvelte/spec@0.24.1"]);
+    const planned = planGithubReleaseStaging(local, onNpm, () => "body");
+    expect(planned.map((e) => e.tag)).toEqual(["@ggsvelte/core@0.24.1", "@ggsvelte/spec@0.24.1"]);
+  });
+
+  it("returns empty when nothing is on npm yet", () => {
+    expect(planGithubReleaseStaging(local, new Set(), () => "x")).toEqual([]);
   });
 });
 

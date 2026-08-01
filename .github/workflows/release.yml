@@ -14,12 +14,19 @@
 # way packages leave this repo. That needs npm >= 11.5, hence Node 24 below.
 #
 # Flow (when NPM_PUBLISH_ENABLED=true):
-#   1. publish-unpublished.ts ships any package.json versions already on THIS
-#      commit that are missing from npm (idempotent). Runs BEFORE the version
-#      PR step so we never read package.json from changeset-release/main.
-#   2. assert-npm-published.ts FAILS the job if any package version on this
+#   1. Fail-fast if GITHUB_TOKEN is missing (needed for tags/releases later).
+#   2. publish-unpublished.ts ships any package.json versions already on THIS
+#      commit that are missing from npm (idempotent). No GITHUB_TOKEN — only
+#      OIDC for npm. Runs BEFORE the version PR step so we never read
+#      package.json from changeset-release/main.
+#   3. stage-github-releases.ts writes notes for every local version on npm
+#      (recovery: includes versions published in prior runs that never got a
+#      GitHub release). No GITHUB_TOKEN.
+#   4. Create missing GitHub releases/tags via `gh` only (holds GITHUB_TOKEN;
+#      script-free so repo code and node_modules never see the write credential).
+#   5. assert-npm-published.ts FAILS the job if any package version on this
 #      commit is still missing from npm — no silent skips.
-#   3. changesets/action opens/updates the "Version Packages" PR when
+#   6. changesets/action opens/updates the "Version Packages" PR when
 #      .changeset/*.md files are present (version-only — no publish script).
 #      The action leaves the workspace on changeset-release/main; that is fine
 #      because publish/assert already finished against the main tip.
@@ -82,11 +89,72 @@ jobs:
       # MUST run before changesets/action: the action switches the workspace
       # onto changeset-release/main and leaves next-version package.json files
       # checked out. Publishing after that would ship unreviewed bumps.
-      - name: Publish package versions on main that are missing from npm
+      - name: Require GITHUB_TOKEN for release tagging
         if: vars.NPM_PUBLISH_ENABLED == 'true'
-        run: bun scripts/publish-unpublished.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GITHUB_TOKEN}" ]; then
+            echo "GITHUB_TOKEN is required so the create-releases step can mint tags"
+            exit 1
+          fi
+      - name: Publish package versions on main that are missing from npm
+        if: vars.NPM_PUBLISH_ENABLED == 'true'
+        # Token intentionally absent — publish uses OIDC only. Tagging is later.
+        run: bun scripts/publish-unpublished.ts
+      - name: Stage GitHub release notes for package versions on npm
+        if: vars.NPM_PUBLISH_ENABLED == 'true'
+        run: bun scripts/stage-github-releases.ts
+        env:
+          RELEASE_STAGING_DIR: ${{ runner.temp }}/ggsvelte-release-staging
+      - name: Create missing GitHub releases and tags
+        if: vars.NPM_PUBLISH_ENABLED == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_STAGING_DIR: ${{ runner.temp }}/ggsvelte-release-staging
+        # Script-free: only gh/git so the write credential never reaches bun or
+        # node_modules. Staging covers every local version already on npm so a
+        # re-run recovers tags after a prior post-publish failure.
+        run: |
+          set -euo pipefail
+          staging="${RELEASE_STAGING_DIR:?}"
+          tags_file="${staging}/tags.txt"
+          if [ ! -f "${tags_file}" ]; then
+            echo "create-github-releases: no tags.txt staged"
+            exit 1
+          fi
+          if [ ! -s "${tags_file}" ]; then
+            echo "create-github-releases: nothing staged (no package versions on npm yet)"
+            exit 0
+          fi
+          head="$(git rev-parse HEAD)"
+          i=0
+          while IFS= read -r tag || [ -n "${tag}" ]; do
+            [ -n "${tag}" ] || continue
+            notes="${staging}/notes/${i}.md"
+            if [ ! -f "${notes}" ]; then
+              echo "create-github-releases: missing notes for index ${i} (tag ${tag})"
+              exit 1
+            fi
+            echo "creating GitHub release + remote tag ${tag}"
+            set +e
+            create_out="$(gh release create "${tag}" --title "${tag}" --notes-file "${notes}" --target "${head}" 2>&1)"
+            create_status=$?
+            set -e
+            if [ "${create_status}" -eq 0 ]; then
+              printf '%s\n' "${create_out}"
+            elif printf '%s' "${create_out}" | grep -qi 'already exists'; then
+              printf '%s\n' "${create_out}"
+              echo "GitHub release ${tag} already exists — ok"
+            else
+              printf '%s\n' "${create_out}"
+              echo "gh release create ${tag} failed with status ${create_status}"
+              exit 1
+            fi
+            i=$((i + 1))
+          done < "${tags_file}"
+          echo "create-github-releases: processed ${i} tag(s)"
       - name: Assert every package.json version is on npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         run: bun scripts/assert-npm-published.ts

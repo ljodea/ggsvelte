@@ -4,21 +4,23 @@
  * Decoupled from changesets/action on purpose. The action is either/or: any
  * leftover `.changeset/*.md` makes it open/update the Version Packages PR and
  * skip publish entirely (job still green). This script always ships whatever
- * is already version-bumped on main, recovering the concurrent-merge race,
- * then creates GitHub releases (and remote tags) for the new versions.
+ * is already version-bumped on main, recovering the concurrent-merge race.
+ *
+ * GitHub releases / tags are intentionally NOT created here. That work lives
+ * in a later workflow step that holds GITHUB_TOKEN and runs only `gh`/`git`,
+ * so the write credential never enters a process that executes repository
+ * code or node_modules (see stage-github-releases.ts + release.yml).
  *
  * Idempotent: if everything is already on npm, exits 0 with no work.
  *
  * Usage: bun scripts/publish-unpublished.ts
- * Requires: built packages (dist/), npm auth (OIDC trusted publishing or token),
- *           GITHUB_TOKEN so `gh release create` can mint tags + releases.
+ * Requires: built packages (dist/), npm auth (OIDC trusted publishing or token).
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
-  changelogSectionForVersion,
   filterUnpublished,
   npmVersionExists,
   parseNewTags,
@@ -44,56 +46,6 @@ function run(
     throw new Error(`${command} ${args.join(" ")} exited ${String(status)}`);
   }
   return { status, stdout, stderr };
-}
-
-function gitHeadSha(): string {
-  const res = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" });
-  if (res.status !== 0) throw new Error("git rev-parse HEAD failed");
-  return (res.stdout ?? "").trim();
-}
-
-/**
- * Create the remote git tag + GitHub release via `gh` (uses GITHUB_TOKEN from
- * the env). Avoids embedding a basic-auth git remote URL in source — pre-push
- * redaction blocks those patterns, and checkout uses persist-credentials: false.
- * If the release already exists (retry), treat as success.
- */
-function createGithubRelease(tag: string, body: string, target: string): void {
-  const res = spawnSync(
-    "gh",
-    ["release", "create", tag, "--title", tag, "--notes", body, "--target", target],
-    { encoding: "utf8", env: process.env },
-  );
-  if (res.status === 0) {
-    if (res.stdout) process.stdout.write(res.stdout);
-    return;
-  }
-  const err = `${res.stderr ?? ""}${res.stdout ?? ""}`;
-  if (/already exists/i.test(err)) {
-    console.log(`GitHub release ${tag} already exists — ok`);
-    return;
-  }
-  if (res.stdout) process.stdout.write(res.stdout);
-  if (res.stderr) process.stderr.write(res.stderr);
-  throw new Error(`gh release create ${tag} exited ${String(res.status ?? 1)}`);
-}
-
-function releaseNotesForTag(root: string, tag: string): string {
-  // tag shape: @ggsvelte/core@0.24.1 → name=@ggsvelte/core, version=0.24.1
-  const at = tag.lastIndexOf("@");
-  if (at <= 0) {
-    return `Release ${tag}`;
-  }
-  const name = tag.slice(0, at);
-  const version = tag.slice(at + 1);
-  const local = readPublishedPackageVersions(root);
-  const pkg = local.find((p) => p.name === name);
-  if (!pkg) return `Release ${tag}`;
-  const changelogPath = join(root, pkg.dir, "CHANGELOG.md");
-  if (!existsSync(changelogPath)) return `Release ${tag}`;
-  const section = changelogSectionForVersion(readFileSync(changelogPath, "utf8"), version);
-  if (section === null || section.length === 0) return `Release ${tag}`;
-  return section;
 }
 
 async function main(): Promise<number> {
@@ -158,22 +110,12 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  const githubToken = process.env["GITHUB_TOKEN"];
-  if (githubToken === undefined || githubToken.length === 0) {
-    console.error(
-      "publish-unpublished: GITHUB_TOKEN is required so gh can create tags and releases",
-    );
-    return 1;
-  }
-
-  const head = gitHeadSha();
+  console.log(
+    `publish-unpublished: published ${String(tags.length)} tag(s); GitHub releases staged next`,
+  );
   for (const tag of tags) {
-    const notes = releaseNotesForTag(root, tag);
-    console.log(`creating GitHub release + remote tag ${tag}`);
-    createGithubRelease(tag, notes, head);
+    console.log(`  - ${tag}`);
   }
-
-  console.log(`publish-unpublished: published and released ${String(tags.length)} tag(s)`);
   return 0;
 }
 

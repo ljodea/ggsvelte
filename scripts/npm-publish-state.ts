@@ -126,6 +126,35 @@ export function changelogSectionForVersion(changelog: string, version: string): 
   return body;
 }
 
+/** Changesets-style tag for a package version (`@scope/name@1.2.3`). */
+export function packageReleaseTag(name: string, version: string): string {
+  return `${name}@${version}`;
+}
+
+/**
+ * Pure staging plan: one release entry per package whose version is already on npm.
+ * Notes body comes from the caller (reads CHANGELOG). Used by stage-github-releases
+ * so a later `gh`-only workflow step can mint tags without running repo code
+ * while holding GITHUB_TOKEN — and so a re-run recovers tags for versions that
+ * already landed on npm without a GitHub release.
+ */
+export function planGithubReleaseStaging(
+  local: readonly PackageVersion[],
+  onNpmKeys: ReadonlySet<string>,
+  notesFor: (pkg: PackageVersion) => string,
+): { tag: string; notes: string }[] {
+  const out: { tag: string; notes: string }[] = [];
+  for (const pkg of local) {
+    const key = `${pkg.name}@${pkg.version}`;
+    if (!onNpmKeys.has(key)) continue;
+    out.push({
+      tag: packageReleaseTag(pkg.name, pkg.version),
+      notes: notesFor(pkg),
+    });
+  }
+  return out;
+}
+
 /** Human-readable failure for the assert gate. */
 export function formatUnpublishedFailure(unpublished: readonly PackageVersion[]): string {
   const lines = unpublished.map((p) => `  - ${p.name}@${p.version} (${p.dir}/package.json)`);
