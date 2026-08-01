@@ -631,4 +631,65 @@ describe("RenderModel semantic viewport", () => {
       model.viewport.locate(250, 250, { left: 100, top: 100, width: 100, height: 100 }),
     ).toEqual({ x: 150, y: 150 });
   });
+
+  it("resolves a band selection without materializing every key", () => {
+    // resolve() reports the first and last selected values. It used to map the
+    // whole key list to get them, allocating an array per key to read two.
+    const categories = Array.from({ length: 400 }, (_, i) => `c${i}`);
+    const model = runPipeline(
+      gg(
+        categories.map((category, i) => ({ category, y: i })),
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+
+    let reads = 0;
+    const keys = new Proxy(
+      categories.map((category) => encodeKey(category)),
+      {
+        get(target, prop) {
+          if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+          return Reflect.get(target, prop) as unknown;
+        },
+      },
+    );
+    expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["c0", "c399"]);
+    expect(reads).toBeGreaterThan(0);
+    // Two ends, found by scanning inward from each. Mapping the whole list
+    // reads all 400.
+    expect(reads).toBeLessThan(10);
+    model.dispose();
+  });
+
+  it("still finds the ends when the outermost keys are not on the axis", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { category: "a", y: 1 },
+          { category: "b", y: 2 },
+          { category: "c", y: 3 },
+        ],
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+
+    // Unknown keys bracket the real ones and must be skipped from both sides.
+    const keys = ["ghost-1", encodeKey("a"), encodeKey("c"), "ghost-2"];
+    expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["a", "c"]);
+    // Every key unknown: no span at all.
+    expect(panel.resolve({ x: { kind: "band", keys: ["ghost-1", "ghost-2"] } }).x).toBeUndefined();
+    // A single known key is both ends.
+    expect(panel.resolve({ x: { kind: "band", keys: [encodeKey("b")] } }).x).toEqual(["b", "b"]);
+    model.dispose();
+  });
 });
