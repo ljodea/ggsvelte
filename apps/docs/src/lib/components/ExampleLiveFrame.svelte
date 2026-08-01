@@ -1,18 +1,19 @@
 <script lang="ts">
   /**
    * Example detail frame: paint the gallery PNG first, then upgrade to the
-   * live Example.svelte chart near the viewport so first paint / LCP do not
-   * wait on the chart stack.
+   * live Example.svelte chart only after user intent (hover/focus) so SPA nav
+   * and scroll stay responsive. Near-viewport auto-upgrade pulled the full
+   * chart stack as soon as a specimen approached the fold.
    *
    * `?vr` forces an immediate upgrade so visual regression can wait on
-   * `.gg-plot-root[data-gg-ready]` without racing IntersectionObserver.
+   * `.gg-plot-root[data-gg-ready]` without racing intent handlers.
    */
   import { base } from "$app/paths";
   import { onMount } from "svelte";
   import type { Component } from "svelte";
 
   import { loadExampleComponent } from "$lib/examples";
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
 
   const {
     exampleId,
@@ -44,7 +45,7 @@
   }
 
   // Kick off the VR import as soon as the client module runs (before paint
-  // settles). onMount still owns near-viewport upgrades for normal visits.
+  // settles). onMount still owns intent-gated upgrades for normal visits.
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     if (params.has("vr")) startLoad();
@@ -63,9 +64,7 @@
         cancelled = true;
       };
     }
-    const stop = observeNearViewport(el, startLoad, {
-      rootMargin: "480px 0px",
-    });
+    const stop = observeUserIntent(el, startLoad);
     return () => {
       cancelled = true;
       stop();
@@ -77,6 +76,9 @@
   class="gg-example-frame"
   class:full-width={fullWidth}
   bind:this={host}
+  tabindex="0"
+  role="group"
+  aria-label={`${title} (hover or focus to load the interactive chart)`}
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
   {#if Live !== null}
@@ -104,6 +106,11 @@
 
   .gg-example-frame.full-width {
     max-width: none;
+  }
+
+  .gg-example-frame:focus-visible {
+    outline: 2px solid var(--ink, #111);
+    outline-offset: 4px;
   }
 
   .example-preview {

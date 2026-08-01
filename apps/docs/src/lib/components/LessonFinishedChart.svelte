@@ -22,7 +22,7 @@
     LESSON_CHART_WIDTH,
     sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
   import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 
@@ -152,18 +152,15 @@
       });
     };
 
-    // Shared helper — no idle-load. An early dynamic import + fold still
-    // monopolizes the main thread and stalls header clicks (#972).
-    // When IntersectionObserver is missing (SSR/tests), observeNearViewport
-    // fires immediately so the chart still upgrades, matching ThemeSpecimen.
-    const stopNear = observeNearViewport(target, loadLivePlot, {
-      rootMargin: "240px 0px",
-    });
+    // Intent only — near-viewport auto-upgrade still folded 838 points as
+    // soon as the chart approached the fold and stalled chrome (#972).
+    // Match ThemeSpecimen / ExampleLiveFrame: static shell until hover/focus.
+    const stopIntent = observeUserIntent(target, loadLivePlot);
 
     return () => {
       cancelled = true;
       observer?.disconnect();
-      stopNear();
+      stopIntent();
     };
   });
 </script>

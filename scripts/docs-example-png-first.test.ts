@@ -30,10 +30,11 @@ describe("docs example PNG-first (PR3)", () => {
     expect(page).toContain("{#key data.entry.id}");
   });
 
-  it("defers Example.svelte via near-viewport or ?vr eager load", () => {
+  it("defers Example.svelte via user intent or ?vr eager load", () => {
     const frame = read("lib/components/ExampleLiveFrame.svelte");
     expect(frame).toContain("loadExampleComponent");
-    expect(frame).toContain("observeNearViewport");
+    expect(frame).toContain("observeUserIntent");
+    expect(frame).not.toContain("observeNearViewport");
     expect(frame).toContain('has("vr")');
     expect(frame).toContain("example-preview");
     expect(frame).toContain("previewPath");
