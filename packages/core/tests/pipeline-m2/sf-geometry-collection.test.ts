@@ -73,6 +73,33 @@ describe("expandSfLeaves (#809 GeometryCollection)", () => {
   it("rejects GeometryCollection without geometries array", () => {
     expect(() => expandSfLeaves({ type: "GeometryCollection" }, "/test")).toThrow(PipelineError);
   });
+
+  it("flattens a nested GeometryCollection past the engine spread argument limit (#1344)", () => {
+    // Nested GC: parent spreads the child's full leaf list into push(...).
+    // Flat GC of N Points does not crash (each child expands to one leaf).
+    // Engine limit is runtime-specific; on Bun 1.3.x bare push(...arr) ok at
+    // 5e5 and throws at 1e6 — pin n so the regression stays meaningful.
+    const n = 1_000_000;
+    const bulk = Array.from({ length: n }, () => 0);
+    expect(() => {
+      Array.prototype.push.apply([], bulk);
+    }).toThrow(RangeError);
+
+    const inner = Array.from({ length: n }, (_, i) => ({
+      type: "Point" as const,
+      coordinates: [i, i] as [number, number],
+    }));
+    const leaves = expandSfLeaves(
+      {
+        type: "GeometryCollection",
+        geometries: [{ type: "GeometryCollection", geometries: inner }],
+      },
+      "/test",
+    );
+    expect(leaves).toHaveLength(n);
+    expect(leaves[0]).toEqual({ type: "Point", coordinates: [0, 0] });
+    expect(leaves[n - 1]).toEqual({ type: "Point", coordinates: [n - 1, n - 1] });
+  });
 });
 
 describe("representativePointsForGeometry (#809 GC labels)", () => {
@@ -91,5 +118,21 @@ describe("representativePointsForGeometry (#809 GC labels)", () => {
       [0, 0],
       [2, 2],
     ]);
+  });
+
+  it("expands MultiPoint past the engine spread argument limit (#1344)", () => {
+    // representativePointsForGeometry pushes each leaf's points via spread;
+    // MultiPoint with n positions returns n points, then one push(...pts).
+    const n = 1_000_000;
+    const bulk = Array.from({ length: n }, () => 0);
+    expect(() => {
+      Array.prototype.push.apply([], bulk);
+    }).toThrow(RangeError);
+
+    const coordinates = Array.from({ length: n }, (_, i) => [i, i] as [number, number]);
+    const pts = representativePointsForGeometry({ type: "MultiPoint", coordinates }, "/test");
+    expect(pts).toHaveLength(n);
+    expect(pts[0]).toEqual([0, 0]);
+    expect(pts[n - 1]).toEqual([n - 1, n - 1]);
   });
 });
