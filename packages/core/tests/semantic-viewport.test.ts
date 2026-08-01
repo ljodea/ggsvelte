@@ -631,4 +631,96 @@ describe("RenderModel semantic viewport", () => {
       model.viewport.locate(250, 250, { left: 100, top: 100, width: 100, height: 100 }),
     ).toEqual({ x: 150, y: 150 });
   });
+
+  it("resolves a band selection without materializing every key", () => {
+    // resolve() reports the first and last selected values. It used to map the
+    // whole key list to get them, allocating an array per key to read two.
+    const categories = Array.from({ length: 400 }, (_, i) => `c${i}`);
+    const model = runPipeline(
+      gg(
+        categories.map((category, i) => ({ category, y: i })),
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+
+    let reads = 0;
+    const keys = new Proxy(
+      categories.map((category) => encodeKey(category)),
+      {
+        get(target, prop) {
+          if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+          return Reflect.get(target, prop) as unknown;
+        },
+      },
+    );
+    expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["c0", "c399"]);
+    // Exactly two, and independent of the key count: a bound relative to the
+    // fixture size would go green if the fixture ever shrank.
+    expect(reads).toBe(2);
+    model.dispose();
+  });
+
+  it("still finds the ends when the outermost keys are not on the axis", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { category: "a", y: 1 },
+          { category: "b", y: 2 },
+          { category: "c", y: 3 },
+        ],
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+
+    // Unknown keys bracket the real ones and must be skipped from both sides.
+    const keys = ["ghost-1", encodeKey("a"), encodeKey("c"), "ghost-2"];
+    expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["a", "c"]);
+    // Every key unknown: no span at all.
+    expect(panel.resolve({ x: { kind: "band", keys: ["ghost-1", "ghost-2"] } }).x).toBeUndefined();
+    // A single known key is both ends, whether or not unknowns bracket it —
+    // the second reaches the same return only after the backward scan runs.
+    expect(panel.resolve({ x: { kind: "band", keys: [encodeKey("b")] } }).x).toEqual(["b", "b"]);
+    expect(
+      panel.resolve({ x: { kind: "band", keys: ["ghost-1", encodeKey("b"), "ghost-2"] } }).x,
+    ).toEqual(["b", "b"]);
+    // No keys at all: nothing to span.
+    expect(panel.resolve({ x: { kind: "band", keys: [] } }).x).toBeUndefined();
+    // A key repeated is still just that value at both ends.
+    expect(
+      panel.resolve({ x: { kind: "band", keys: [encodeKey("b"), encodeKey("b")] } }).x,
+    ).toEqual(["b", "b"]);
+  });
+
+  it("spans a band y axis the same way", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, category: "a" },
+          { x: 2, category: "b" },
+          { x: 3, category: "c" },
+        ],
+        aes({ x: "x", y: "category" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+    expect(
+      panel.resolve({ y: { kind: "band", keys: ["ghost", encodeKey("a"), encodeKey("c")] } }).y,
+    ).toEqual(["a", "c"]);
+    model.dispose();
+    model.dispose();
+  });
 });

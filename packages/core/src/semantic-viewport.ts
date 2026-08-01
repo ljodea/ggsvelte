@@ -153,14 +153,36 @@ function bandValueIndex(scale: PositionScale): ReadonlyMap<string, CellValue> {
   return valuesByKey;
 }
 
-function bandValuesForKeys(
+/**
+ * First and last selected keys that land on the axis.
+ *
+ * `resolve` reports only the two ends, so scan inward from each rather than
+ * mapping the whole selection: the key list is caller-supplied and as long as
+ * the axis has categories, and mapping it allocated an array per key to read
+ * two values. A key the axis does not carry is skipped, exactly as the map
+ * step dropped it.
+ */
+function bandSpanForKeys(
   valuesByKey: ReadonlyMap<string, CellValue>,
   keys: readonly string[],
-): readonly CellValue[] {
-  return keys.flatMap((key) => {
-    const value = valuesByKey.get(key);
-    return value === undefined ? [] : [value];
-  });
+): readonly [CellValue, CellValue] | undefined {
+  let firstIndex = -1;
+  let first: CellValue | undefined;
+  for (let i = 0; i < keys.length; i++) {
+    const value = valuesByKey.get(keys[i]!);
+    if (value !== undefined) {
+      first = value;
+      firstIndex = i;
+      break;
+    }
+  }
+  if (firstIndex === -1) return undefined;
+  for (let i = keys.length - 1; i > firstIndex; i--) {
+    const value = valuesByKey.get(keys[i]!);
+    if (value !== undefined) return [first!, value];
+  }
+  // Only one key landed on the axis; it is both ends.
+  return [first!, first!];
 }
 
 function projectedSpan(
@@ -304,8 +326,7 @@ function createPanel(
         if (axis === undefined) return undefined;
         if (axis.kind === "continuous") return axis.domain;
         if (scale.type !== "band") return undefined;
-        const values = bandValuesForKeys(bandValuesByKey, axis.keys);
-        return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
+        return bandSpanForKeys(bandValuesByKey, axis.keys);
       };
       const x = resolveAxis(scales.x, selection.x, xBandValuesByKey);
       const y = resolveAxis(scales.y, selection.y, yBandValuesByKey);
