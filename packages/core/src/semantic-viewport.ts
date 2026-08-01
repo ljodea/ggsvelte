@@ -266,9 +266,10 @@ function createPanel(
   coord: PanelCoordProjector | undefined,
   flipped: boolean,
   candidates: CandidateStore,
+  indexFor: (scale: PositionScale) => ReadonlyMap<string, CellValue>,
 ): SemanticViewportPanel {
-  const xBandValuesByKey = bandValueIndex(scales.x);
-  const yBandValuesByKey = bandValueIndex(scales.y);
+  const xBandValuesByKey = indexFor(scales.x);
+  const yBandValuesByKey = indexFor(scales.y);
   return {
     id: panel.id,
     bounds: {
@@ -381,6 +382,20 @@ export type CreateSemanticViewportInput = {
 
 export function createSemanticViewport(input: CreateSemanticViewportInput): SemanticViewport {
   const { panels, scales, coordProjectors, flipped, candidates, sceneSize } = input;
+  // Under fixed facet scales every panel is handed the same scale object, so
+  // building the band index per panel walked one domain once per panel and kept
+  // a copy of it per panel. Key on the object: free scales give each panel its
+  // own scale, so they still get their own index. The map is local to this
+  // viewport and never written after it is built, so panels can share it.
+  const bandIndexByScale = new WeakMap<PositionScale, ReadonlyMap<string, CellValue>>();
+  const indexFor = (scale: PositionScale): ReadonlyMap<string, CellValue> => {
+    let index = bandIndexByScale.get(scale);
+    if (index === undefined) {
+      index = bandValueIndex(scale);
+      bandIndexByScale.set(scale, index);
+    }
+    return index;
+  };
   const viewportPanels = panels.map((panel, panelIndex) =>
     createPanel(
       panel,
@@ -388,6 +403,7 @@ export function createSemanticViewport(input: CreateSemanticViewportInput): Sema
       coordProjectors[panelIndex],
       flipped,
       candidates,
+      indexFor,
     ),
   );
   function panelAt(point: Readonly<{ x: number; y: number }>): SemanticViewportPanel | null {
