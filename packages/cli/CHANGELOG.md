@@ -1,5 +1,18 @@
 # @ggsvelte/cli
 
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [a3de79e]
+- Updated dependencies [12da8b8]
+- Updated dependencies [8c9685f]
+- Updated dependencies [8f75979]
+- Updated dependencies [375f0d2]
+- Updated dependencies [e28fa5f]
+- Updated dependencies [4d23a25]
+  - @ggsvelte/core@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes

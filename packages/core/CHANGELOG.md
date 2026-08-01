@@ -1,5 +1,153 @@
 # @ggsvelte/core
 
+## 0.24.0
+
+### Minor Changes
+
+- 375f0d2: # Bucket batches by panel once per render
+
+  Migration: none — additive
+
+  `SceneView` nested a loop over batches inside its loop over panels, deciding
+  membership with a per-pair `batch.panelIndex === i`. Batch count itself grows
+  with panel count — the pipeline emits per layer per panel — so the product grew
+  roughly with layers times panels squared.
+
+  The SVG-string renderer and the canvas renderer already grouped once (issue 185) through `groupBatchesByPanel`, which was reachable only from
+  `@ggsvelte/core/dom`. It is pure, so it now sits on `@ggsvelte/core` and all
+  three renderers share one copy of the routing rule rather than three.
+
+  Measured element reads of the batch list per render, with 24 batches: 2 panels
+  48, 4 panels 96, 12 panels 288, 24 panels 576 before; 24 at every panel count
+  after.
+
+### Patch Changes
+
+- a3de79e: <!-- markdownlint-disable MD041 -->
+
+  fix: project a wide band selection without spreading the keys
+
+  `SemanticViewportPanel.project()` derived a band selection's extent with
+  `Math.min(...centers)` / `Math.max(...centers)`, one argument per selected key.
+  `keys` is a plain `readonly string[]` on the exported selection type, so a wide
+  enough band brush threw `RangeError: Maximum call stack size exceeded` instead
+  of returning an extent. The ceiling is the engine's argument limit — around
+  100 000 keys in V8, so a browser hits it well before Bun does.
+
+  It now walks the keys once, tracking the smallest and largest center, so no
+  selection size can overflow the call. Same extent as before for every selection
+  that already worked, and unknown keys are still skipped.
+
+- 12da8b8: # Read a band selection's ends without mapping every key
+
+  Migration: none — internal
+
+  `SemanticViewport.resolve` reports the first and last selected values on a band
+  axis. It got them by mapping the whole key list through a `flatMap` used as a
+  filter, allocating a short-lived array per key to read two values. It now scans
+  inward from each end.
+
+  Scope honestly: this is an allocation cleanup on a cold path, not a hot-path
+  win. The only in-tree caller is the precise-bounds editor's apply handler, which
+  calls `project` on the same selection a few lines later — and that still walks
+  every key, doing more per key than the loop removed here. What this buys is
+  simpler code and no per-key garbage; `SemanticViewportPanel` is exported, so
+  external callers get it too.
+
+  Behaviour is unchanged: a key the axis does not carry is skipped exactly as the
+  map step dropped it, one match is both ends, and no match is still undefined.
+
+- 8c9685f: # Decide the stacked-area align rescue without rescanning the grid per group
+
+  Migration: none — internal
+
+  Before rewriting a stacked-area frame, the auto-align rescue asks whether any
+  group skips a shared-grid x inside its own range. It answered by walking the
+  sorted grid once per group, and the "before this group starts" arm was a
+  `continue` rather than a seek, so every group also paid for the whole prefix
+  of grid values below its own minimum.
+
+  Groups and distinct x both grow with the data and neither is capped, so that
+  scan cost groups × grid-x. It now ranks the grid once and compares each group's
+  size against the width of its own window, which is the same question answered
+  by subtraction: every value a group holds is a grid value inside `[min, max]`,
+  and `min` and `max` are themselves members, so the group is dense exactly when
+  it holds one value per grid slot in that window.
+
+  The decision is unchanged for every input, and so is the frame that follows
+  from it.
+
+  Scope honestly: the shape this helps is many series that each cover a dense
+  window of a wider shared grid. A tidy stack where every group covers the whole
+  grid already short-circuited on a size check, and when a group really does have
+  a hole the rescue's own row expansion dwarfs the scan. On 100 staggered series
+  over a 10,000-value grid the scan read 505,000 grid slots; it now reads 10,000.
+
+- 8f75979: # Intern a stat mark's group lineage once instead of once per mark
+
+  Migration: none — internal
+
+  A stat mark's lineage is the whole group it summarizes. The per-group row bucket
+  is built once and frozen, and `LineageStore` interns such an array by identity so
+  a group is tokenized once however many marks point at it. Two things defeated
+  that, and either one alone kept the work at marks × group rows:
+
+  - The represented-rows fallback returned `[...baseRows]`. A clone is not frozen,
+    so it never matched the identity cache and every mark paid a fresh set build,
+    sort and join over its whole group. The three indexed arms directly above it
+    already return the shared frozen bucket for exactly this reason.
+  - The cache lookup sat behind `Object.isFrozen`, which walks the array in this
+    engine. Guarding a hash lookup with a linear check costs one pass over the
+    members per call — the very rescan the cache exists to avoid.
+
+  Both quantities grow with the data: marks are stat output rows, and a group's
+  size is a share of the input. For a single-group plot both are the row count, so
+  the cost was quadratic. Measured on a `stat: "ecdf"` line, forcing the deferred
+  candidate store:
+
+  | rows | before   | after |
+  | ---- | -------- | ----- |
+  | 2000 | 572 ms   | 38 ms |
+  | 4000 | 1987 ms  | 54 ms |
+  | 8000 | 10203 ms | 84 ms |
+
+  A `stat: "connect"` line goes from 21135 ms to 100 ms at 8000 rows. The curve is
+  now flat where it used to quadruple with each doubling.
+
+  This is construction work behind a lazy gate, so it does not show up in render
+  timings — it lands as a freeze on the first hover, hit-test or keyboard
+  traversal after a render.
+
+  Lineage membership is unchanged: stats that narrow their group (`smooth`,
+  `summary`, `boxplot`, binned counts) still clone and filter.
+
+- e28fa5f: <!-- markdownlint-disable MD041 -->
+
+  fix(core): hit-test stepped paths against the stairs the renderer draws, not the straight chord between authored vertices. `geom_step` (and `geom_line`/`geom_path` with `curve: "step" | "step-hv" | "step-vh"`) carried the step shape as a render-time flag, so hover and brush measured a line the user never saw — a pointer resting on the drawn stroke could report no hit at all. `path-step` now owns the drawn polyline for one authored edge and both the renderers and `closestPathEdge`/`pathSegmentsIntersectRect` read it.
+
+- 4d23a25: # Build a band axis index once per scale, not once per panel
+
+  Migration: none — internal
+
+  Under the default fixed facet scales every panel is handed the same trained
+  `PositionScale` object, but the semantic viewport built that scale's key→value
+  index separately for each one. A plot with P panels over an axis of C
+  categories walked the same domain P times and kept P copies of the resulting
+  map alive for as long as the render model. Both quantities grow with the data,
+  so the cost was O(P×C) where O(P+C) does.
+
+  The viewport now memoises the index on the scale object itself, so panels that
+  share a scale share one map. Free facet scales give each panel its own scale
+  object and so still get their own index; nothing writes to the map after it is
+  built.
+
+  Scope honestly: this is construction work, not a per-row or per-pointer term —
+  it runs once when the render model is assembled. Results from `resolve`,
+  `project`, and `locate` are unchanged.
+
+- Updated dependencies [f8e379c]
+  - @ggsvelte/spec@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes
