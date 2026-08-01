@@ -6,6 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import { calendarDateFields, toAuthoringDataRef, toDataRef } from "../src/builder-data.ts";
 import { aes, gg } from "../src/builder.ts";
+import { layerFrom } from "../src/builder-core.ts";
 
 const rows = [
   { x: 1, y: 2, cls: "a" },
@@ -59,5 +60,54 @@ describe("builder-data — authoring forms", () => {
       },
     });
     expect([...fields].toSorted()).toEqual(["group", "when"]);
+  });
+});
+
+describe("builder geom sugar — single snapshot (#1280)", () => {
+  it("layerFrom does not deep-copy layer data; layer() is the snapshot point", () => {
+    const source = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    // Geom sugar is this.layer(layerFrom(...)). Snapshotting in both places
+    // deep-copied every row twice; layerFrom must pass the caller's ref through.
+    const assembled = layerFrom("point", { data: source });
+    expect(assembled.data).toBe(source);
+  });
+
+  it("geom sugar still isolates caller mutation after the geom call", () => {
+    const plotRows = [
+      { x: 0, y: 0 },
+      { x: 1, y: 1 },
+    ];
+    const layerRows = [
+      { x: 10, y: 20 },
+      { x: 30, y: 40 },
+    ];
+    const builder = gg(plotRows, aes({ x: "x", y: "y" })).geomPoint({ data: layerRows });
+    // Mutate after the geom call — must not leak into .spec().
+    layerRows[0]!.x = 999;
+    layerRows.push({ x: 50, y: 60 });
+    const spec = builder.spec();
+    expect(spec.layers[0]!.data).toEqual({
+      values: [
+        { x: 10, y: 20 },
+        { x: 30, y: 40 },
+      ],
+    });
+  });
+
+  it("geom sugar with layer data matches direct .layer() parity", () => {
+    const layerRows = [
+      { x: 1, y: 2, g: "a" },
+      { x: 3, y: 4, g: "b" },
+    ];
+    const viaSugar = gg(rows, aes({ x: "x", y: "y" }))
+      .geomPoint({ data: layerRows, alpha: 0.5 })
+      .spec();
+    const viaLayer = gg(rows, aes({ x: "x", y: "y" }))
+      .layer({ geom: "point", data: layerRows, params: { alpha: 0.5 } })
+      .spec();
+    expect(viaSugar).toEqual(viaLayer);
   });
 });
