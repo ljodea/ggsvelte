@@ -1,5 +1,44 @@
 # @ggsvelte/svelte
 
+## 0.24.1
+
+### Patch Changes
+
+- 45c6cc9: # Refresh package README front doors
+
+  Migration: none — package README + skill docs only
+
+  Rewrite the npm package READMEs for current APIs; treat them as shipped
+  surfaces for changesets and CI; execute TypeScript fences in unit tests. Fix
+  skill prose that still called 0.13.0 grammar-prop removal “planned.”
+
+- 06afe2c: # Share frozen band domain across facet guide plans
+
+  Migration: none — internal memory hygiene; guide plan domain contents and freeze contract unchanged.
+
+  Under fixed facet scales, band axis guide plans reused to copy `scale.rawDomain`
+  once per panel. Reuse the already-frozen array when present so panels share one
+  object. Free scales still get distinct domains because each panel trains its own
+  `rawDomain`.
+
+- 2cbcdb2: <!-- markdownlint-disable MD041 -->
+
+  # Teach v0.21 row identity; mark plot-level key deprecated
+
+  Migration: none — skill docs only
+
+  SKILL.md still listed `key` as a first-class GGPlot prop and told agents to
+  always give a stable key after #1254/#1257 moved durable identity onto
+  Inspect / Select / createPlotInteraction. Align the lead skill with
+  references/interactions.md so agents stop generating the deprecated surface.
+
+- Updated dependencies [45c6cc9]
+- Updated dependencies [06afe2c]
+- Updated dependencies [95aa7b2]
+- Updated dependencies [ea0c0b3]
+  - @ggsvelte/spec@0.24.1
+  - @ggsvelte/core@0.24.1
+
 ## 0.24.0
 
 ### Patch Changes
