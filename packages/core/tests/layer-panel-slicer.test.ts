@@ -2,8 +2,8 @@
  * Per-layer facet slicing: one grouping pass, then a lookup per panel.
  *
  * The oracle below is a frozen copy of the per-panel scan this replaced. It is
- * deliberately independent of the implementation — comparing the slicer against
- * the shipped `sliceLayerForPanel` would be a tautology once that delegates.
+ * deliberately independent of the implementation: an oracle that called into
+ * the code under test would agree with it no matter what either one did.
  */
 import { describe, expect, it } from "bun:test";
 
@@ -81,9 +81,18 @@ function gridPanel(
 
 const EMPTY = ColumnTable.fromColumns({});
 
-function inputFor(table: ColumnTable, facetFields: string[], filteredToSource: number[] | null) {
+/**
+ * `unfiltered` stands in for the pre-filter source table the registry indexes,
+ * so remapped rows resolve to real global ids instead of collapsing to NO_ROW.
+ */
+function inputFor(
+  table: ColumnTable,
+  facetFields: string[],
+  filteredToSource: number[] | null,
+  unfiltered?: ColumnTable,
+) {
   const registry = new SourceRegistry();
-  const sourceId = registry.register(table);
+  const sourceId = registry.register(unfiltered ?? table);
   return { filteredTable: table, filteredToSource, sourceId, registry, facetFields, faceted: true };
 }
 
@@ -98,8 +107,8 @@ function expectMatchesOracle(input: SliceInput, panels: FacetPanelDef[]): void {
     // Table identity matters: the fast path must return the original instance,
     // because SourceRegistry keys its namespace on object identity.
     expect(got.table === input.filteredTable).toBe(want.table === input.filteredTable);
-    for (const field of ["g", "h", "v"]) {
-      if (!want.table.has(field)) continue;
+    expect(got.table.fields).toEqual(want.table.fields);
+    for (const field of want.table.fields) {
       expect([...got.table.column(field)]).toEqual([...want.table.column(field)]);
     }
   }
@@ -168,12 +177,20 @@ describe("createLayerPanelSlicer matches the per-panel scan", () => {
   });
 
   it("filter remap feeds the global source rows", () => {
+    // Filtered rows 0,1,2 came from unfiltered 2,5,7 of a 9-row source, so the
+    // remap must survive as real global ids rather than collapsing to NO_ROW.
+    const unfiltered = ColumnTable.fromColumns({
+      g: ["x", "x", "a", "x", "x", "b", "x", "a", "x"],
+      v: [0, 0, 1, 0, 0, 2, 0, 3, 0],
+    });
     const table = ColumnTable.fromColumns({ g: ["a", "b", "a"], v: [1, 2, 3] });
-    // Filtered rows 0,1,2 came from unfiltered 2,5,7.
-    expectMatchesOracle(inputFor(table, ["g"], [2, 5, 7]), [
-      wrapPanel("g", "a"),
-      wrapPanel("g", "b"),
-    ]);
+    const input = inputFor(table, ["g"], [2, 5, 7], unfiltered);
+    expectMatchesOracle(input, [wrapPanel("g", "a"), wrapPanel("g", "b")]);
+    // Pin the actual ids: comparing against the oracle alone would pass even if
+    // both sides collapsed every remapped row to NO_ROW.
+    const slicer = createLayerPanelSlicer(input);
+    expect([...slicer(wrapPanel("g", "a")).globalSourceRows]).toEqual([2, 7]);
+    expect([...slicer(wrapPanel("g", "b")).globalSourceRows]).toEqual([5]);
   });
 
   it("distinguishes values that a naive key join would collide", () => {
@@ -243,5 +260,36 @@ describe("createLayerPanelSlicer cost", () => {
     expect(reads).toBeGreaterThan(0);
     // One pass over the facet column is N. The per-panel scan was P*N = 8000.
     expect(reads).toBeLessThan(3 * N);
+  });
+
+  it("builds the shared source-row array once on the replicate path", () => {
+    // A layer carrying no facet field replicates into every panel. That path
+    // reads no facet column, so the guard above cannot see it: count the
+    // registry lookups instead, which is what used to be rebuilt per panel.
+    const P = 40;
+    const N = 200;
+    const table = ColumnTable.fromColumns({ v: Array.from({ length: N }, (_, i) => i) });
+    const registry = new SourceRegistry();
+    const sourceId = registry.register(table);
+    let toGlobalCalls = 0;
+    const realToGlobal = registry.toGlobal.bind(registry);
+    registry.toGlobal = (id: number, row: number): number => {
+      toGlobalCalls += 1;
+      return realToGlobal(id, row);
+    };
+
+    const slicer = createLayerPanelSlicer({
+      filteredTable: table,
+      filteredToSource: null,
+      sourceId,
+      registry,
+      facetFields: ["g"],
+      faceted: true,
+    });
+    const slices = Array.from({ length: P }, (_, p) => slicer(wrapPanel("g", `g${p}`)));
+    for (const slice of slices) expect(slice.globalSourceRows).toHaveLength(N);
+    // Every panel takes the whole table, so one array serves them all.
+    expect(slices.every((s) => s.globalSourceRows === slices[0]!.globalSourceRows)).toBe(true);
+    expect(toGlobalCalls).toBe(N);
   });
 });

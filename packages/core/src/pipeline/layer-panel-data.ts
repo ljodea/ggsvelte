@@ -16,9 +16,11 @@ export interface LayerPanelSlice {
   table: ColumnTable;
   /**
    * Panel-local row → global source-row id (SourceRegistry).
-   * null only when the slice is identity over an empty mapping (unused).
+   *
+   * Readonly because panels that take the whole table share one array; the
+   * consumer ({@link finalizeFrameSourceRows}) copies before it stores.
    */
-  globalSourceRows: number[];
+  globalSourceRows: readonly number[];
 }
 
 /**
@@ -64,15 +66,17 @@ export interface LayerPanelSlicerInput {
  * carries. `assertFacetForm` allows wrap XOR grid, so there are at most two.
  */
 type RowBuckets =
-  | { fields: 0 }
   | { fields: 1; byA: Map<string, number[]> }
   | { fields: 2; byAB: Map<string, Map<string, number[]>> };
 
 /**
  * Prepare a layer for slicing into every panel of a facet layout.
  *
- * The panels partition the rows, so grouping once and looking each panel up
- * costs O(rows) for the layer rather than O(rows) per panel.
+ * Grouping the layer's rows by facet key once costs O(rows) for the whole
+ * layer, where answering each panel by scanning cost O(rows) per panel. Rows
+ * still replicate into several panels when the layer carries only some of the
+ * facet fields; the key is those fields, so replication falls out of the
+ * lookup rather than needing a scan.
  *
  * `filteredToSource` maps filtered-local index → unfiltered local index
  * (null = identity). `sourceId` + registry produce global ids.
@@ -82,7 +86,8 @@ export function createLayerPanelSlicer(
 ): (panel: FacetPanelDef) => LayerPanelSlice {
   const { filteredTable, filteredToSource, sourceId, registry, facetFields, faceted } = input;
 
-  // Panel-local row → global source row, once for the whole layer.
+  // Indexed by filtered-table row, not panel row: panel slices index into this
+  // through their kept-row list.
   const allGlobals: number[] = [];
   for (let i = 0; i < filteredTable.rowCount; i++) {
     allGlobals.push(registry.toGlobal(sourceId, filteredToSource?.[i] ?? i));
@@ -99,6 +104,13 @@ export function createLayerPanelSlicer(
     return () => whole;
   }
 
+  // Both impossible-by-construction cases fail loudly rather than one throwing
+  // and the other silently dropping fields: see the RowBuckets note above.
+  if (presentFields.length > 2) {
+    throw new Error(
+      `layer partitions on ${presentFields.length} facet fields; wrap XOR grid allows at most 2`,
+    );
+  }
   const buckets: RowBuckets =
     presentFields.length === 1
       ? { fields: 1, byA: partitionByField(filteredTable, presentFields[0]!) }
@@ -130,8 +142,8 @@ export function createLayerPanelSlicer(
         : (buckets.byAB.get(wantedFor(presentFields[0]!))?.get(wantedFor(presentFields[1]!)) ?? []);
 
     // Keeping every row returns the original table instance — SourceRegistry
-    // namespaces on object identity. This also covers the empty table, where
-    // the old scan returned the original rather than an empty subset.
+    // namespaces on object identity. An empty table takes this path too, so it
+    // is never handed an empty subset.
     if (keep.length === filteredTable.rowCount) {
       return { table: filteredTable, globalSourceRows: allGlobals };
     }
@@ -140,16 +152,4 @@ export function createLayerPanelSlicer(
       globalSourceRows: keep.map((i) => allGlobals[i]!),
     };
   };
-}
-
-/**
- * Slice `sourceTable` (unfiltered) for one panel, after optional filter remap.
- *
- * Prefer {@link createLayerPanelSlicer} when slicing a layer into every panel;
- * this rebuilds the layer grouping on each call.
- */
-export function sliceLayerForPanel(
-  input: LayerPanelSlicerInput & { panel: FacetPanelDef },
-): LayerPanelSlice {
-  return createLayerPanelSlicer(input)(input.panel);
 }

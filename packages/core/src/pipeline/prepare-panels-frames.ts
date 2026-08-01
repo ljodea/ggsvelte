@@ -316,9 +316,6 @@ export function buildPanelFrames(input: {
   const binRanges = computePanelBinRanges(bindings, filteredLayerTables, faceted, freeX);
   const functionDomains = computeFunctionPeerDomains(bindings, filteredLayerTables);
   const xDiscreteRisk = xDiscreteRiskOf(bindings, filteredLayerTables, normalized.scales?.x?.type);
-  // Group each layer's rows by facet key once. The panels partition the rows,
-  // so slicing per panel from the grouping costs one pass over the layer
-  // instead of one pass per panel.
   const layerSlicers = layerContexts.map((ctx) =>
     createLayerPanelSlicer({
       filteredTable: ctx.filteredTable,
