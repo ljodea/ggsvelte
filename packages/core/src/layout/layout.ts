@@ -31,6 +31,7 @@
 
 import type { AxisGuidePlan } from "./guide-plan-types.js";
 import type { TextMeasurer } from "./measure.js";
+import { BAND_THIN_MIN_CATEGORIES, MIN_BAND_LABEL_GAP_PX } from "./band-label-layout.js";
 import { deriveTicks, type AxisTicks, type DeriveTicksContext } from "./layout-derive-ticks.js";
 import { truncateToFit } from "./truncate.js";
 import {
@@ -80,6 +81,34 @@ function applyBandLabelEvery(axis: AxisTicks, every: number): void {
   for (let i = 0; i < axis.ticks.length; i++) {
     axis.ticks[i]!.labeled = i % every === 0;
   }
+}
+
+/**
+ * Probe higher band `labelEvery` values until max labeled width shrinks.
+ * Restores the prior every when no probe improves width (#1356).
+ */
+function thinBandForWidth(
+  axis: AxisTicks,
+  every: number,
+  currentW: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): { every: number; width: number; improved: boolean } {
+  if (every * 2 >= axis.ticks.length) {
+    return { every, width: currentW, improved: false };
+  }
+  let probe = every * 2;
+  for (;;) {
+    applyBandLabelEvery(axis, probe);
+    const nextW = maxLabeledWidth(axis, measurer, fontSize);
+    if (nextW < currentW) {
+      return { every: probe, width: nextW, improved: true };
+    }
+    if (probe * 2 >= axis.ticks.length) break;
+    probe *= 2;
+  }
+  applyBandLabelEvery(axis, every);
+  return { every, width: currentW, improved: false };
 }
 
 /** Measure preserved labels without mutating the semantic guide plan. */
@@ -221,11 +250,16 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     // Degrade 1: tick thinning.
     // Band axes: only the labeled flag depends on every — flip flags in place
     // instead of re-deriving and re-formatting all k ticks each doubling (#1335).
+    // Commit a doubling only when max labeled width actually shrinks; probe
+    // further doublings when the next step is a no-op (widest at an even index)
+    // before falling through to truncation (#1356).
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
-        if (yEvery * 2 >= y.ticks.length) break;
-        yEvery *= 2;
-        applyBandLabelEvery(y, yEvery);
+        const thinned = thinBandForWidth(y, yEvery, yLabelW, measurer, fontSize);
+        if (!thinned.improved) break;
+        yEvery = thinned.every;
+        yLabelW = thinned.width;
+        degradations.push("y:thin");
       } else {
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
@@ -233,9 +267,9 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
           deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
           yPreserve,
         );
+        degradations.push("y:thin");
+        yLabelW = maxLabeledWidth(y, measurer, fontSize);
       }
-      degradations.push("y:thin");
-      yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
     // Degrade 2: truncation.
     if (yLabelW + leftFixed > capLeft) {
@@ -250,6 +284,49 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
       degradations.push("y:truncate");
       yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
+  }
+
+  // Vertical density for band Y (legacy path only — measured planner owns
+  // horizontal collision). Independent of the width loop so #1356 can truncate
+  // over-wide survivors without stripping short siblings, while crowded tall
+  // lists still thin to label height + min gap.
+  if (
+    yLabelsVisible &&
+    !yPreserve &&
+    !y.empty &&
+    input.y.type === "band" &&
+    y.guidePlan === undefined &&
+    y.ticks.length >= BAND_THIN_MIN_CATEGORIES
+  ) {
+    const n = y.ticks.length;
+    // Pitch from the full domain unit times the minimum domainIndex gap between
+    // consecutive ticks. Full-domain ticks → gap 1; sparse authored breaks keep
+    // their larger on-screen spacing so we do not thin them away.
+    const categoryCount = Math.max(1, input.y.categories.length);
+    const bandUnit = innerH / categoryCount;
+    let minIndexGap = 1;
+    const hasDomainIndex = y.ticks.every((t) => t.domainIndex !== undefined);
+    if (hasDomainIndex && n >= 2) {
+      const idxs = y.ticks.map((t) => t.domainIndex!).toSorted((a, b) => a - b);
+      minIndexGap = Infinity;
+      for (let i = 1; i < idxs.length; i++) {
+        const gap = idxs[i]! - idxs[i - 1]!;
+        if (gap > 0 && gap < minIndexGap) minIndexGap = gap;
+      }
+      if (!Number.isFinite(minIndexGap) || minIndexGap < 1) minIndexGap = 1;
+    }
+    const displayStep = bandUnit * minIndexGap;
+    const minStep = labelH + MIN_BAND_LABEL_GAP_PX;
+    let densityThinned = false;
+    while (yEvery * displayStep < minStep) {
+      if (yEvery * 2 >= n) break;
+      yEvery *= 2;
+      applyBandLabelEvery(y, yEvery);
+      degradations.push("y:thin");
+      densityThinned = true;
+    }
+    // Hidden labels must not keep reserving left-margin width.
+    if (densityThinned) yLabelW = maxLabeledWidth(y, measurer, fontSize);
   }
 
   // --- x axis → bottom margin (one label line) + right margin (overhang of
