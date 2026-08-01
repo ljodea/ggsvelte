@@ -75,6 +75,13 @@ function maxLabeledWidth(axis: AxisTicks, measurer: TextMeasurer, fontSize: numb
   return max;
 }
 
+/** Retag band ticks for a new labelEvery without rebuilding values or labels (#1335). */
+function applyBandLabelEvery(axis: AxisTicks, every: number): void {
+  for (let i = 0; i < axis.ticks.length; i++) {
+    axis.ticks[i]!.labeled = i % every === 0;
+  }
+}
+
 /** Measure preserved labels without mutating the semantic guide plan. */
 function presentForLayout(axis: AxisTicks, preserve: boolean): AxisTicks {
   if (!preserve) return axis;
@@ -212,18 +219,21 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     yLabelW + leftFixed > capLeft
   ) {
     // Degrade 1: tick thinning.
+    // Band axes: only the labeled flag depends on every — flip flags in place
+    // instead of re-deriving and re-formatting all k ticks each doubling (#1335).
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
         if (yEvery * 2 >= y.ticks.length) break;
         yEvery *= 2;
+        applyBandLabelEvery(y, yEvery);
       } else {
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
+        y = presentForLayout(
+          deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
+          yPreserve,
+        );
       }
-      y = presentForLayout(
-        deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
-        yPreserve,
-      );
       degradations.push("y:thin");
       yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
@@ -267,16 +277,19 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     for (;;) {
       if (lastXLabelW <= capRight) break;
       if (input.x.type === "band") {
+        // Unreachable when the measured band planner set guidePlan, but the
+        // legacy simple-band path (no domain.band) still enters here.
         if (xEvery * 2 >= x.ticks.length) break;
         xEvery *= 2;
+        applyBandLabelEvery(x, xEvery);
       } else {
         if (xCount <= 2) break;
         xCount = Math.max(2, Math.floor(xCount / 2));
+        x = presentForLayout(
+          deriveTicks(input.x, xCount, input.formatX, xEvery, xContext),
+          xPreserve,
+        );
       }
-      x = presentForLayout(
-        deriveTicks(input.x, xCount, input.formatX, xEvery, xContext),
-        xPreserve,
-      );
       degradations.push("x:thin");
       computeXEndWidths();
     }
