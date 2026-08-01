@@ -4,7 +4,7 @@
  * Size-class layout stays closure-private.
  */
 import { StaticQuadtree } from "./dom/quadtree.js";
-import { createHitGeometry } from "./candidate-hit-geometry.js";
+import type { HitGeometry } from "./candidate-hit-geometry.js";
 import type { CandidateInspectMode } from "./candidate-store-types.js";
 import type { CandidateStoreIndexes } from "./candidate-store-indexes.js";
 
@@ -37,9 +37,8 @@ export type SpatialIndex = {
 };
 
 /** Build shortlist indexes and shortlist helpers for an eager store. */
-export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex {
+export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeometry): SpatialIndex {
   const { scene, n, hitTolerance, flip, batchIds, primitiveIds, xs, ys } = indexes;
-  const hit = createHitGeometry(indexes);
 
   // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
   // candidates shortlist via the tree; rects/segments/paths/glyphs use

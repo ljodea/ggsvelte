@@ -21,22 +21,20 @@ import type { GeometryBatch } from "./scene.js";
 
 type Aabb = readonly [minX: number, minY: number, maxX: number, maxY: number];
 
+/** Hit predicates for one probe point; owns its fill-containment cache. */
+export type HitProbePoint = {
+  distance(id: number): number | null;
+  contains(id: number): boolean;
+};
+
+/** Hit predicate for one probe rect; owns its rect-center containment cache. */
+type HitProbeRect = {
+  intersects(id: number): boolean;
+};
+
 export type HitGeometry = {
-  distance(
-    id: number,
-    px: number,
-    py: number,
-    pathContainment: Map<string, boolean>,
-  ): number | null;
-  contains(id: number, px: number, py: number, pathContainment: Map<string, boolean>): boolean;
-  intersects(
-    id: number,
-    loX: number,
-    loY: number,
-    hiX: number,
-    hiY: number,
-    rectContainment: Map<string, boolean>,
-  ): boolean;
+  probePoint(px: number, py: number): HitProbePoint;
+  probeRect(loX: number, loY: number, hiX: number, hiY: number): HitProbeRect;
   aabb(id: number, pathAabbCache?: Map<string, Aabb>): Aabb;
 };
 
@@ -440,12 +438,23 @@ const MARK_HIT_GEOMETRY = {
 export function createHitGeometry(indexes: CandidateStoreIndexes): HitGeometry {
   const opsFor = (id: number): KindOps => MARK_HIT_GEOMETRY[batchAt(indexes, id).kind];
   return {
-    distance: (id, px, py, pathContainment) =>
-      opsFor(id).distance(indexes, id, px, py, pathContainment),
-    contains: (id, px, py, pathContainment) =>
-      opsFor(id).contains(indexes, id, px, py, pathContainment),
-    intersects: (id, loX, loY, hiX, hiY, rectContainment) =>
-      opsFor(id).intersects(indexes, id, loX, loY, hiX, hiY, rectContainment),
+    probePoint(px, py) {
+      // Point-containment verdicts are identical for every candidate on a
+      // subpath, so the probe caches them — and only for this (px, py).
+      const pathContainment = new Map<string, boolean>();
+      return {
+        distance: (id) => opsFor(id).distance(indexes, id, px, py, pathContainment),
+        contains: (id) => opsFor(id).contains(indexes, id, px, py, pathContainment),
+      };
+    },
+    probeRect(loX, loY, hiX, hiY) {
+      // Rect-CENTER containment is a different predicate than point
+      // containment; the probe scopes its cache to this one rect.
+      const rectContainment = new Map<string, boolean>();
+      return {
+        intersects: (id) => opsFor(id).intersects(indexes, id, loX, loY, hiX, hiY, rectContainment),
+      };
+    },
     aabb: (id, pathAabbCache) => opsFor(id).aabb(indexes, id, pathAabbCache),
   };
 }

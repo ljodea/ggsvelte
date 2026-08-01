@@ -1,13 +1,15 @@
 import { describe, expect, it } from "bun:test";
 
+import { createHitGeometry } from "../../src/candidate-hit-geometry.ts";
 import { resolveTopmostHit } from "../../src/candidate-hit-resolve.ts";
 import { buildCandidateStoreIndexes } from "../../src/candidate-store-indexes.ts";
-import { buildCandidateSpatialQuery } from "../../src/candidate-store-spatial.ts";
+import { buildSpatialIndex } from "../../src/candidate-store-spatial-index.ts";
 import { scene } from "./fixtures.ts";
 
 function resolve(plot: ReturnType<typeof scene>, px: number, py: number, hitTolerance = 3) {
   const indexes = buildCandidateStoreIndexes(plot, { hitTolerance });
-  const query = buildCandidateSpatialQuery(indexes);
+  const hit = createHitGeometry(indexes);
+  const query = buildSpatialIndex(indexes, hit);
   return resolveTopmostHit(
     {
       scene: indexes.scene,
@@ -21,7 +23,7 @@ function resolve(plot: ReturnType<typeof scene>, px: number, py: number, hitTole
       addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
         query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
       },
-      exactDistance: (id, x, y, pathContainment) => query.exactDistance(id, x, y, pathContainment),
+      probePoint: (x, y) => hit.probePoint(x, y),
       fact: (id) => indexes.fact(id),
     },
     px,
