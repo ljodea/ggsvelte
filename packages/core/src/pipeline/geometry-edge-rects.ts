@@ -132,6 +132,12 @@ function emitBandTiles(input: {
   const keptRows = new Uint32Array(n);
   let kept = 0;
   let removed = 0;
+  // resolution() scans the whole column into a Set and sorts the distinct
+  // values, and the loop never writes xNumeric/yNumeric, so derive each axis
+  // default once. Band axes keep paying nothing: 1 is the same literal they
+  // pass today, so they never reach resolution().
+  const defaultW = fx.xScale.type === "band" ? 1 : defaultResolution(frame.xNumeric);
+  const defaultH = fx.yScale.type === "band" ? 1 : defaultResolution(frame.yNumeric);
   for (let row = 0; row < n; row++) {
     let centerX: number | undefined;
     let centerY: number | undefined;
@@ -152,13 +158,7 @@ function emitBandTiles(input: {
         removed++;
         continue;
       }
-      const w = sizeAt(
-        frame,
-        frame.binding.widthField,
-        widthParam,
-        defaultResolution(frame.xNumeric),
-        row,
-      );
+      const w = sizeAt(frame, frame.binding.widthField, widthParam, defaultW, row);
       if (!(w > 0) || !Number.isFinite(w)) {
         removed++;
         continue;
@@ -188,13 +188,7 @@ function emitBandTiles(input: {
         removed++;
         continue;
       }
-      const h = sizeAt(
-        frame,
-        frame.binding.heightField,
-        heightParam,
-        defaultResolution(frame.yNumeric),
-        row,
-      );
+      const h = sizeAt(frame, frame.binding.heightField, heightParam, defaultH, row);
       if (!(h > 0) || !Number.isFinite(h)) {
         removed++;
         continue;

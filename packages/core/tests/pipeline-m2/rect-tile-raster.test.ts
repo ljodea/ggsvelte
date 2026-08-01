@@ -121,6 +121,39 @@ describe("geom tile", () => {
     expect(batch.rects.length / 4).toBe(4);
   });
 
+  it("sizes continuous tiles from the minimum positive gap on both axes", () => {
+    // Heatmap shape: continuous x and y, no width/height given, so each axis
+    // falls back to resolution(). Duplicated values must not shrink the gap.
+    const model = runPipeline(
+      gg(
+        { x: [0, 2, 4, 0, 2, 4], y: [0, 0, 0, 5, 5, 5], z: [1, 2, 3, 4, 5, 6] },
+        aes({ x: "x", y: "y", fill: "z" }),
+      )
+        .geomTile()
+        .scales({
+          x: { type: "linear", domain: [-2, 6], expand: { mult: 0, add: 0 }, nice: false },
+          y: { type: "linear", domain: [-5, 10], expand: { mult: 0, add: 0 }, nice: false },
+        })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as RectsBatch;
+    expect(batch.rects.length / 4).toBe(6);
+    // x gap 2 over an 8-unit domain, y gap 5 over a 15-unit domain.
+    const widths: number[] = [];
+    const heights: number[] = [];
+    for (let i = 0; i < batch.rects.length; i += 4) {
+      widths.push(batch.rects[i + 2]!);
+      heights.push(batch.rects[i + 3]!);
+    }
+    expect(widths.every((w) => Math.abs(w - widths[0]!) < 1e-6)).toBe(true);
+    expect(heights.every((h) => Math.abs(h - heights[0]!) < 1e-6)).toBe(true);
+    expect(widths[0]! / heights[0]!).toBeCloseTo(
+      (2 / 8 / (5 / 15)) * (size.width / size.height),
+      1,
+    );
+  });
+
   it("applies width after log transform (params.width is transformed-space span)", () => {
     const model = runPipeline(
       gg({ x: [1, 10, 100], y: [1, 1, 1] }, aes({ x: "x", y: "y" }))
