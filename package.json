@@ -78,6 +78,10 @@
     "bench:budgets": "cd benchmarks && bun run bench:budgets",
     "bench:memory": "cd benchmarks && bun run bench:memory",
     "bench:memory:check": "cd benchmarks && bun run bench:memory:check",
+    "bench:competitive": "cd benchmarks/competitive && bun run measure",
+    "bench:competitive:bundles": "cd benchmarks/competitive && bun run measure:bundles",
+    "bench:competitive:browser": "cd benchmarks/competitive && bun run measure:browser",
+    "bench:competitive:full": "cd benchmarks/competitive && bun run measure:bundles:full && bun run measure:browser:full",
     "evals": "bun tests/evals/run.ts",
     "render:fresh": "bun scripts/render-fresh.ts",
     "render:theme-evidence": "bun scripts/render-theme-evidence.ts && Rscript scripts/render-theme-references.R"
