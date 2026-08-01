@@ -723,4 +723,142 @@ describe("RenderModel semantic viewport", () => {
     model.dispose();
     model.dispose();
   });
+
+  // --- #1332: project() normalizes only the domain extremes, not every key ---
+
+  it("projects a band selection by normalizing only the domain extremes (#1332)", () => {
+    const categories = Array.from({ length: 200 }, (_, i) => `c${i}`);
+    const model = runPipeline(
+      gg(
+        categories.map((category, i) => ({ category, y: i })),
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scale = model.scales.panels[0]?.x ?? model.scales.x;
+    let normalizeCalls = 0;
+    const original = scale.normalize.bind(scale);
+    scale.normalize = (value: unknown) => {
+      normalizeCalls += 1;
+      return original(value);
+    };
+    const panel = model.viewport.panel(model.scene.panels[0]!.id)!;
+    const keys = categories.map((category) => encodeKey(category));
+    const pixels = panel.project({ x: { kind: "band", keys } });
+    // Contiguous full domain: two extremes, one normalize each.
+    expect(normalizeCalls).toBe(2);
+    expect(pixels.x0).toBeCloseTo(model.scene.panels[0]!.x, 10);
+    expect(pixels.x1).toBeCloseTo(model.scene.panels[0]!.x + model.scene.panels[0]!.width, 10);
+    model.dispose();
+  });
+
+  it("projects non-contiguous band keys from domain extremes, not list ends (#1332)", () => {
+    // Keys ordered b, a, d — list ends are b and d, but the selection's domain
+    // extremes are a and d. The span must cover a→d.
+    const model = runPipeline(
+      gg(
+        [
+          { category: "a", y: 1 },
+          { category: "b", y: 2 },
+          { category: "c", y: 3 },
+          { category: "d", y: 4 },
+        ],
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+    const shuffled = panel.project({
+      x: {
+        kind: "band",
+        keys: [encodeKey("b"), encodeKey("a"), encodeKey("d")],
+      },
+    });
+    const full = panel.project({
+      x: {
+        kind: "band",
+        keys: [encodeKey("a"), encodeKey("b"), encodeKey("c"), encodeKey("d")],
+      },
+    });
+    // a is the leftmost category; d the rightmost. Missing c does not shrink
+    // the outer extent when a and d are both selected.
+    expect(shuffled.x0).toBeCloseTo(full.x0, 10);
+    expect(shuffled.x1).toBeCloseTo(full.x1, 10);
+    expect(shuffled.x0).toBeCloseTo(scenePanel.x, 10);
+    expect(shuffled.x1).toBeCloseTo(scenePanel.x + scenePanel.width, 10);
+    model.dispose();
+  });
+
+  it("projects a reversed band axis from the same extremes (#1332)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { category: "a", y: 1 },
+          { category: "b", y: 2 },
+          { category: "c", y: 3 },
+          { category: "d", y: 4 },
+        ],
+        aes({ x: "category", y: "y" }),
+      )
+        .geomPoint()
+        .scales({ x: { reverse: true } })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+    // Contiguous b,c under reverse: a is rightmost in screen space.
+    const pixels = panel.project({
+      x: { kind: "band", keys: [encodeKey("b"), encodeKey("c")] },
+    });
+    // Domain indices 1 and 2 of 4; reverse flips centers. Edge-to-edge of b,c
+    // is the middle half of the panel still — reverse swaps left/right but
+    // the expanded half-step span width is the same.
+    expect(pixels.x1 - pixels.x0).toBeCloseTo(scenePanel.width * 0.5, 10);
+    expect(pixels.x0).toBeCloseTo(scenePanel.x + scenePanel.width * 0.25, 10);
+    expect(pixels.x1).toBeCloseTo(scenePanel.x + scenePanel.width * 0.75, 10);
+    model.dispose();
+  });
+
+  it("projects a band y selection the same way (#1332)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, category: "a" },
+          { x: 2, category: "b" },
+          { x: 3, category: "c" },
+          { x: 4, category: "d" },
+        ],
+        aes({ x: "x", y: "category" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+    const scale = model.scales.panels[0]?.y ?? model.scales.y;
+    let normalizeCalls = 0;
+    const original = scale.normalize.bind(scale);
+    scale.normalize = (value: unknown) => {
+      normalizeCalls += 1;
+      return original(value);
+    };
+    const pixels = panel.project({
+      y: {
+        kind: "band",
+        keys: [encodeKey("d"), encodeKey("a"), encodeKey("c")],
+      },
+    });
+    expect(normalizeCalls).toBe(2);
+    // a..d cover the full y band domain.
+    expect(pixels.y0).toBeCloseTo(scenePanel.y, 10);
+    expect(pixels.y1).toBeCloseTo(scenePanel.y + scenePanel.height, 10);
+    model.dispose();
+  });
 });

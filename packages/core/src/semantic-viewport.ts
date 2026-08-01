@@ -142,13 +142,22 @@ function semanticDomain(
   return first <= last ? [first, last] : [last, first];
 }
 
-function bandValueIndex(scale: PositionScale): ReadonlyMap<string, CellValue> {
-  const valuesByKey = new Map<string, CellValue>();
+/** Band key lookup: domain value plus its domain index (for extent without re-normalize). */
+type BandKeyEntry = {
+  readonly value: CellValue;
+  readonly index: number;
+};
+
+function bandValueIndex(scale: PositionScale): ReadonlyMap<string, BandKeyEntry> {
+  const valuesByKey = new Map<string, BandKeyEntry>();
   if (scale.type !== "band") return valuesByKey;
+  let index = 0;
   for (const value of scale.rawDomain) {
     const cell = value as CellValue;
     const key = encodeKey(cell);
-    if (!valuesByKey.has(key)) valuesByKey.set(key, cell);
+    // First-seen wins, matching trainBand's index map.
+    if (!valuesByKey.has(key)) valuesByKey.set(key, { value: cell, index });
+    index += 1;
   }
   return valuesByKey;
 }
@@ -163,23 +172,23 @@ function bandValueIndex(scale: PositionScale): ReadonlyMap<string, CellValue> {
  * step dropped it.
  */
 function bandSpanForKeys(
-  valuesByKey: ReadonlyMap<string, CellValue>,
+  valuesByKey: ReadonlyMap<string, BandKeyEntry>,
   keys: readonly string[],
 ): readonly [CellValue, CellValue] | undefined {
   let firstIndex = -1;
   let first: CellValue | undefined;
   for (let i = 0; i < keys.length; i++) {
-    const value = valuesByKey.get(keys[i]!);
-    if (value !== undefined) {
-      first = value;
+    const entry = valuesByKey.get(keys[i]!);
+    if (entry !== undefined) {
+      first = entry.value;
       firstIndex = i;
       break;
     }
   }
   if (firstIndex === -1) return undefined;
   for (let i = keys.length - 1; i > firstIndex; i--) {
-    const value = valuesByKey.get(keys[i]!);
-    if (value !== undefined) return [first!, value];
+    const entry = valuesByKey.get(keys[i]!);
+    if (entry !== undefined) return [first!, entry.value];
   }
   // Only one key landed on the axis; it is both ends.
   return [first!, first!];
@@ -189,28 +198,41 @@ function projectedSpan(
   scale: PositionScale,
   selection: SemanticViewportAxisSelection | undefined,
   coord: PanelCoordProjector["x"] | undefined,
-  bandValuesByKey: ReadonlyMap<string, CellValue>,
+  bandValuesByKey: ReadonlyMap<string, BandKeyEntry>,
 ): readonly [number, number] {
   if (selection === undefined) return [0, 1];
   let first: number | undefined;
   let last: number | undefined;
   if (selection.kind === "band") {
     if (scale.type !== "band") return [0, 1];
-    // One pass over the keys, never `Math.min(...centers)`: `keys` is caller-
-    // supplied and unbounded, and spreading it passes one argument per key,
-    // which RangeErrors on a wide enough band brush (same hazard grouping.ts
-    // avoids for `Math.max(...groups)`).
-    let minCenter = Infinity;
-    let maxCenter = -Infinity;
+    // Span is min/max of band centers, expanded by half a step. Centers are
+    // monotone in domain index (including reverse), so track the extreme
+    // indices and normalize only those two values — not every selected key
+    // (#1332). Still one pass over keys: non-contiguous selections can put
+    // extremes anywhere in the list. Never `Math.min(...centers)`: spreading
+    // unbounded keys RangeErrors (same hazard as grouping.ts).
+    let minIndex = Infinity;
+    let maxIndex = -Infinity;
+    let minValue: CellValue | undefined;
+    let maxValue: CellValue | undefined;
     for (const key of selection.keys) {
-      const value = bandValuesByKey.get(key);
-      if (value === undefined) continue;
-      const center = scale.normalize(value);
-      if (center === undefined) continue;
-      if (center < minCenter) minCenter = center;
-      if (center > maxCenter) maxCenter = center;
+      const entry = bandValuesByKey.get(key);
+      if (entry === undefined) continue;
+      if (entry.index < minIndex) {
+        minIndex = entry.index;
+        minValue = entry.value;
+      }
+      if (entry.index > maxIndex) {
+        maxIndex = entry.index;
+        maxValue = entry.value;
+      }
     }
-    if (minCenter === Infinity) return [0, 1];
+    if (minValue === undefined || maxValue === undefined) return [0, 1];
+    const c0 = scale.normalize(minValue);
+    const c1 = minIndex === maxIndex ? c0 : scale.normalize(maxValue);
+    if (c0 === undefined || c1 === undefined) return [0, 1];
+    const minCenter = Math.min(c0, c1);
+    const maxCenter = Math.max(c0, c1);
     const halfStep = scale.step / 2;
     first = Math.max(0, minCenter - halfStep);
     last = Math.min(1, maxCenter + halfStep);
@@ -266,7 +288,7 @@ function createPanel(
   coord: PanelCoordProjector | undefined,
   flipped: boolean,
   candidates: CandidateStore,
-  indexFor: (scale: PositionScale) => ReadonlyMap<string, CellValue>,
+  indexFor: (scale: PositionScale) => ReadonlyMap<string, BandKeyEntry>,
 ): SemanticViewportPanel {
   const xBandValuesByKey = indexFor(scales.x);
   const yBandValuesByKey = indexFor(scales.y);
@@ -322,7 +344,7 @@ function createPanel(
       const resolveAxis = (
         scale: PositionScale,
         axis: SemanticViewportAxisSelection | undefined,
-        bandValuesByKey: ReadonlyMap<string, CellValue>,
+        bandValuesByKey: ReadonlyMap<string, BandKeyEntry>,
       ): readonly [CellValue, CellValue] | undefined => {
         if (axis === undefined) return undefined;
         if (axis.kind === "continuous") return axis.domain;
@@ -387,8 +409,8 @@ export function createSemanticViewport(input: CreateSemanticViewportInput): Sema
   // a copy of it per panel. Key on the object: free scales give each panel its
   // own scale, so they still get their own index. The map is local to this
   // viewport and never written after it is built, so panels can share it.
-  const bandIndexByScale = new WeakMap<PositionScale, ReadonlyMap<string, CellValue>>();
-  const indexFor = (scale: PositionScale): ReadonlyMap<string, CellValue> => {
+  const bandIndexByScale = new WeakMap<PositionScale, ReadonlyMap<string, BandKeyEntry>>();
+  const indexFor = (scale: PositionScale): ReadonlyMap<string, BandKeyEntry> => {
     let index = bandIndexByScale.get(scale);
     if (index === undefined) {
       index = bandValueIndex(scale);
