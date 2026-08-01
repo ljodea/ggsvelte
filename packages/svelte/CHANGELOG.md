@@ -1,5 +1,56 @@
 # @ggsvelte/svelte
 
+## 0.24.0
+
+### Patch Changes
+
+- 95818e8: # Resolve tooltip lineage keys by row index
+
+  Migration: none — internal
+
+  Building a tooltip snapshot materialized one row object per source row in a
+  candidate's lineage, then threw it away. `model.row` copies every column on each
+  call and has no cache, while the key resolver production wires in only ever
+  needs the index. For an aggregate or `geom_smooth` mark the lineage is the whole
+  group, so hovering one mark over a large group allocated a row per group member.
+
+  The coordinator now takes an index-keyed resolver, matching what production
+  already passed, and the lineage walk asks it directly. Measured on a 60-row
+  smooth: 120 row materializations before, at most 2 after.
+
+  `resolveInspection` keeps its row-shaped `keyOf` and builds the materializing
+  adapter itself, so its output is unchanged. That adapter memoizes one index, so
+  reading a member's own row for the snapshot and then asking for its key does not
+  copy the row twice.
+
+- 375f0d2: # Bucket batches by panel once per render
+
+  Migration: none — additive
+
+  `SceneView` nested a loop over batches inside its loop over panels, deciding
+  membership with a per-pair `batch.panelIndex === i`. Batch count itself grows
+  with panel count — the pipeline emits per layer per panel — so the product grew
+  roughly with layers times panels squared.
+
+  The SVG-string renderer and the canvas renderer already grouped once (issue 185) through `groupBatchesByPanel`, which was reachable only from
+  `@ggsvelte/core/dom`. It is pure, so it now sits on `@ggsvelte/core` and all
+  three renderers share one copy of the routing rule rather than three.
+
+  Measured element reads of the batch list per render, with 24 batches: 2 panels
+  48, 4 panels 96, 12 panels 288, 24 panels 576 before; 24 at every panel count
+  after.
+
+- Updated dependencies [a3de79e]
+- Updated dependencies [12da8b8]
+- Updated dependencies [8c9685f]
+- Updated dependencies [8f75979]
+- Updated dependencies [375f0d2]
+- Updated dependencies [f8e379c]
+- Updated dependencies [e28fa5f]
+- Updated dependencies [4d23a25]
+  - @ggsvelte/core@0.24.0
+  - @ggsvelte/spec@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes
