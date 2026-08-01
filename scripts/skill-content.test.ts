@@ -136,6 +136,45 @@ describe("skill Svelte fences use v0.20 interaction children", () => {
 });
 
 /**
+ * v0.21 row identity: default id-column / row-index; prefer identity on
+ * Inspect / Select / createPlotInteraction. Plot-level key is deprecated.
+ * SKILL.md must not teach key as a first-class prop or as the required
+ * identity surface (#1286 / #1254 / #1257).
+ */
+describe("skill teaches v0.21 row identity, not plot-level key", () => {
+  const skill = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+  const interactions = FILES.find((f) => f.name === "references/interactions.md");
+
+  it("SKILL.md nowhere recommends plot-level key without a deprecation note", () => {
+    // Bare first-class listing from pre-0.21 skill (the #1286 bug).
+    expect(skill).not.toMatch(/`layers`, `key`, `width`/);
+    expect(skill).not.toMatch(/Always give a stable `key`/);
+    // Every remaining backtick-key mention in SKILL.md is the deprecation note.
+    const keyMentions = [...skill.matchAll(/`key`/g)];
+    expect(keyMentions.length).toBeGreaterThan(0);
+    for (const match of keyMentions) {
+      const start = Math.max(0, match.index! - 40);
+      const end = Math.min(skill.length, match.index! + match[0].length + 40);
+      expect(skill.slice(start, end).toLowerCase()).toMatch(/deprecat/);
+    }
+  });
+
+  it("SKILL.md Interactions section teaches identity defaults", () => {
+    expect(skill).toMatch(/Row identity for selection/);
+    expect(skill).toMatch(/`id` column when present/);
+    expect(skill).toMatch(/`identity` on `<Inspect>`/);
+    expect(skill).toMatch(/Plot-level `key` is deprecated/);
+  });
+
+  it("interactions.md marks plot-level key deprecated and prefers identity", () => {
+    expect(interactions).toBeDefined();
+    expect(interactions!.markdown).toMatch(/Plot-level `key` is deprecated/);
+    expect(interactions!.markdown).toMatch(/\| `key`\s*\|[^\n]*\*\*deprecated\*\* since 0\.21/);
+    expect(interactions!.markdown).toMatch(/Prefer this over plot-level `key`/);
+  });
+});
+
+/**
  * #1200 postmortem: an agent read PortableSpec.layers[] (marks only) plus a
  * false "are not layers" comment and filed issues claiming Scale/Theme/Guide/
  * Labs/Coord/Facet/Legend were "non-layer grammar components." They are Layer
