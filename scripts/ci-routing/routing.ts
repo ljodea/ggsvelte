@@ -76,6 +76,8 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
   "apps/docs/src/lib/components/LessonFinishedChart.svelte",
   "apps/docs/src/lib/generated/search-index.ts",
   "apps/docs/src/lib/generated/routes.ts",
+  // Split from routes.ts: sidebar labels only (no pixels).
+  "apps/docs/src/lib/generated/guide-navigation.ts",
   "apps/docs/src/lib/generated/gallery-previews.ts",
   // Inventory projection only; static SVGs under apps/docs/static/lesson stay fail-closed.
   "apps/docs/src/lib/generated/lesson-charts.ts",

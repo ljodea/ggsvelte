@@ -151,6 +151,7 @@ describe("classifyChangedPaths", () => {
       // Sibling generated inventory modules are content-only (#784 lesson-charts).
       "apps/docs/src/lib/generated/lesson-charts.ts",
       "apps/docs/src/lib/generated/routes.ts",
+      "apps/docs/src/lib/generated/guide-navigation.ts",
       "apps/docs/src/lib/generated/search-index.ts",
       "apps/docs/src/lib/generated/gallery-previews.ts",
     ]) {

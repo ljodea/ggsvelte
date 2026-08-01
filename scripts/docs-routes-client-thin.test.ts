@@ -24,6 +24,22 @@ describe("docs routes client thin catalog", () => {
     expect(nav).not.toMatch(/findDocsRoute|guideSequence|sitemapRoutes/);
   });
 
+  it("loads GUIDE_NAVIGATION from its own generated module, not routes.ts", () => {
+    // Same ESM module as DOCS_ROUTES forced the full ~120KB catalog into every
+    // layout client chunk (routes-nav only needs the sidebar map).
+    const nav = read("lib/routes-nav.ts");
+    expect(nav).toMatch(/from\s*["']\.\/generated\/guide-navigation(?:\.js)?["']/);
+    expect(nav).not.toMatch(/from\s*["']\.\/generated\/routes(?:\.js)?["']/);
+
+    const guideNav = read("lib/generated/guide-navigation.ts");
+    expect(guideNav).toContain("export const GUIDE_NAVIGATION");
+    expect(guideNav).not.toContain("DOCS_ROUTES");
+
+    const routesGen = read("lib/generated/routes.ts");
+    expect(routesGen).toContain("export const DOCS_ROUTES");
+    expect(routesGen).not.toContain("GUIDE_NAVIGATION");
+  });
+
   it("loads DocsShell and SiteHeader from routes-nav, not the full routes module", () => {
     const shell = read("lib/components/DocsShell.svelte");
     expect(shell).toContain("$lib/routes-nav");
