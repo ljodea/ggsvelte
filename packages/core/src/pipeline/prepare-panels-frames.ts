@@ -12,7 +12,7 @@ import { styleBinExtent } from "./frame-group-columns.js";
 import { buildFrame } from "./frame.js";
 import { xDiscreteRiskOf } from "./frame-stats-align.js";
 import { finalizeFrameSourceRows } from "./source-row-lineage.js";
-import { sliceLayerForPanel } from "./layer-panel-data.js";
+import { createLayerPanelSlicer } from "./layer-panel-data.js";
 import { applyPosition } from "./position.js";
 import { resolveColumnTransform } from "./position-program.js";
 import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
@@ -316,18 +316,19 @@ export function buildPanelFrames(input: {
   const binRanges = computePanelBinRanges(bindings, filteredLayerTables, faceted, freeX);
   const functionDomains = computeFunctionPeerDomains(bindings, filteredLayerTables);
   const xDiscreteRisk = xDiscreteRiskOf(bindings, filteredLayerTables, normalized.scales?.x?.type);
+  const layerSlicers = layerContexts.map((ctx) =>
+    createLayerPanelSlicer({
+      filteredTable: ctx.filteredTable,
+      filteredToSource: ctx.filteredToSource,
+      sourceId: ctx.sourceId,
+      registry,
+      facetFields,
+      faceted,
+    }),
+  );
   for (let p = 0; p < facetPanels.length; p++) {
     for (let index = 0; index < bindings.length; index++) {
-      const ctx = layerContexts[index]!;
-      const slice = sliceLayerForPanel({
-        filteredTable: ctx.filteredTable,
-        filteredToSource: ctx.filteredToSource,
-        sourceId: ctx.sourceId,
-        registry,
-        panel: facetPanels[p]!,
-        facetFields,
-        faceted,
-      });
+      const slice = layerSlicers[index]!(facetPanels[p]!);
       const frame = buildFrame(
         bindings[index]!,
         slice.table,

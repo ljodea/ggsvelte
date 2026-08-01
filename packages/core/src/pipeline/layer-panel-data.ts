@@ -6,9 +6,9 @@
  * - layer has a subset (grid) → match present fields, replicate across missing
  * - layer has none → replicate full table into every panel
  */
-import { encodeKey } from "../scales/state.js";
 import type { ColumnTable } from "../table.js";
 
+import { partitionByField, partitionByFields } from "./facets-tokens.js";
 import type { FacetPanelDef } from "./facets-types.js";
 import type { SourceRegistry } from "./source-registry.js";
 
@@ -16,9 +16,11 @@ export interface LayerPanelSlice {
   table: ColumnTable;
   /**
    * Panel-local row → global source-row id (SourceRegistry).
-   * null only when the slice is identity over an empty mapping (unused).
+   *
+   * Readonly because panels that take the whole table share one array; the
+   * consumer ({@link finalizeFrameSourceRows}) copies before it stores.
    */
-  globalSourceRows: number[];
+  globalSourceRows: readonly number[];
 }
 
 /**
@@ -50,69 +52,104 @@ function panelFacetEncodedValues(panel: FacetPanelDef): Map<string, string> {
   return out;
 }
 
-/**
- * Slice `sourceTable` (unfiltered) for one panel, after optional filter remap.
- *
- * `filteredToSource` maps filtered-local index → unfiltered local index
- * (null = identity). `sourceId` + registry produce global ids.
- */
-export function sliceLayerForPanel(input: {
+export interface LayerPanelSlicerInput {
   filteredTable: ColumnTable;
   filteredToSource: number[] | null;
   sourceId: number;
   registry: SourceRegistry;
-  panel: FacetPanelDef;
   facetFields: readonly string[];
   faceted: boolean;
-}): LayerPanelSlice {
-  const { filteredTable, filteredToSource, sourceId, registry, panel, facetFields, faceted } =
-    input;
+}
 
-  if (!faceted || facetFields.length === 0) {
-    // Single panel: filtered table rows → global via filter remap.
-    const globalSourceRows: number[] = [];
-    for (let i = 0; i < filteredTable.rowCount; i++) {
-      const local = filteredToSource?.[i] ?? i;
-      globalSourceRows.push(registry.toGlobal(sourceId, local));
-    }
-    return { table: filteredTable, globalSourceRows };
-  }
+/**
+ * Row buckets for one layer, keyed by the facet fields that layer actually
+ * carries. `assertFacetForm` allows wrap XOR grid, so there are at most two.
+ */
+type RowBuckets =
+  | { fields: 1; byA: Map<string, number[]> }
+  | { fields: 2; byAB: Map<string, Map<string, number[]>> };
 
-  const presentFields = facetFields.filter((f) => filteredTable.has(f));
-  const panelEncoded = panelFacetEncodedValues(panel);
+/**
+ * Prepare a layer for slicing into every panel of a facet layout.
+ *
+ * Grouping the layer's rows by facet key once costs O(rows) for the whole
+ * layer, where answering each panel by scanning cost O(rows) per panel. Rows
+ * still replicate into several panels when the layer carries only some of the
+ * facet fields; the key is those fields, so replication falls out of the
+ * lookup rather than needing a scan.
+ *
+ * `filteredToSource` maps filtered-local index → unfiltered local index
+ * (null = identity). `sourceId` + registry produce global ids.
+ */
+export function createLayerPanelSlicer(
+  input: LayerPanelSlicerInput,
+): (panel: FacetPanelDef) => LayerPanelSlice {
+  const { filteredTable, filteredToSource, sourceId, registry, facetFields, faceted } = input;
 
-  // No facet fields on this layer → full table in every panel (replicate).
-  if (presentFields.length === 0) {
-    const globalSourceRows: number[] = [];
-    for (let i = 0; i < filteredTable.rowCount; i++) {
-      const local = filteredToSource?.[i] ?? i;
-      globalSourceRows.push(registry.toGlobal(sourceId, local));
-    }
-    return { table: filteredTable, globalSourceRows };
-  }
-
-  // Match present fields to panel values; missing facet dims replicate.
-  const keep: number[] = [];
-  const globalSourceRows: number[] = [];
+  // Indexed by filtered-table row, not panel row: panel slices index into this
+  // through their kept-row list.
+  const allGlobals: number[] = [];
   for (let i = 0; i < filteredTable.rowCount; i++) {
-    let match = true;
-    for (const field of presentFields) {
-      const wanted = panelEncoded.get(field);
-      if (wanted === undefined) continue;
-      const cell = filteredTable.column(field)[i]!;
-      if (encodeKey(cell) !== wanted) {
-        match = false;
-        break;
-      }
-    }
-    if (!match) continue;
-    keep.push(i);
-    const local = filteredToSource?.[i] ?? i;
-    globalSourceRows.push(registry.toGlobal(sourceId, local));
+    allGlobals.push(registry.toGlobal(sourceId, filteredToSource?.[i] ?? i));
   }
 
-  if (keep.length === filteredTable.rowCount) {
-    return { table: filteredTable, globalSourceRows };
+  const presentFields =
+    faceted && facetFields.length > 0 ? facetFields.filter((f) => filteredTable.has(f)) : [];
+
+  // Unfaceted, or no facet field on this layer → every panel takes the whole
+  // table. finalizeFrameSourceRows copies globalSourceRows, so one shared slice
+  // cannot leak between panels.
+  if (presentFields.length === 0) {
+    const whole: LayerPanelSlice = { table: filteredTable, globalSourceRows: allGlobals };
+    return () => whole;
   }
-  return { table: filteredTable.subset(keep), globalSourceRows };
+
+  // Both impossible-by-construction cases fail loudly rather than one throwing
+  // and the other silently dropping fields: see the RowBuckets note above.
+  if (presentFields.length > 2) {
+    throw new Error(
+      `layer partitions on ${presentFields.length} facet fields; wrap XOR grid allows at most 2`,
+    );
+  }
+  const buckets: RowBuckets =
+    presentFields.length === 1
+      ? { fields: 1, byA: partitionByField(filteredTable, presentFields[0]!) }
+      : {
+          fields: 2,
+          byAB: partitionByFields(filteredTable, presentFields[0]!, presentFields[1]!),
+        };
+
+  return (panel: FacetPanelDef): LayerPanelSlice => {
+    const panelEncoded = panelFacetEncodedValues(panel);
+    // Every declared facet field appears on every panel identity (facets-wrap
+    // and facets-grid build them all from the same fields), and presentFields
+    // is a subset of those, so a miss here means the layout invariant broke.
+    const wantedFor = (field: string): string => {
+      const wanted = panelEncoded.get(field);
+      if (wanted === undefined) {
+        throw new Error(
+          `facet panel identity is missing the facet field "${field}" the layer partitions on`,
+        );
+      }
+      return wanted;
+    };
+
+    // A key with no rows is an empty panel, not an error: closed facet levels
+    // and sparse grid combinations both name values the layer never sees.
+    const keep =
+      buckets.fields === 1
+        ? (buckets.byA.get(wantedFor(presentFields[0]!)) ?? [])
+        : (buckets.byAB.get(wantedFor(presentFields[0]!))?.get(wantedFor(presentFields[1]!)) ?? []);
+
+    // Keeping every row returns the original table instance — SourceRegistry
+    // namespaces on object identity. An empty table takes this path too, so it
+    // is never handed an empty subset.
+    if (keep.length === filteredTable.rowCount) {
+      return { table: filteredTable, globalSourceRows: allGlobals };
+    }
+    return {
+      table: filteredTable.subset(keep),
+      globalSourceRows: keep.map((i) => allGlobals[i]!),
+    };
+  };
 }
