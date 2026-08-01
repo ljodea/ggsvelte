@@ -16,6 +16,7 @@ import {
   pathSubpathAabb,
   pathVertexStrokeAabb,
 } from "./candidate-path-geometry.js";
+import { MAX_DRAWN_EDGE_POINTS, drawnEdgeInto } from "./path-step.js";
 import type { CandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { GeometryBatch } from "./scene.js";
 
@@ -334,18 +335,31 @@ const pathsOps: KindOps = {
     let d = Infinity;
     const semanticRange = pathSemanticNeighborRange(batch, i);
     if (range !== null && semanticRange !== null) {
+      // Walk the drawn polyline so a stepped stroke measures against the stairs
+      // the renderer draws, not the chord between authored vertices.
+      const drawn: number[] = Array.from({ length: MAX_DRAWN_EDGE_POINTS * 2 }, () => 0);
       for (let edge = semanticRange[0]; edge < semanticRange[1]; edge++) {
-        d = Math.min(
-          d,
-          segmentDistance(
-            x,
-            y,
-            batch.positions[edge * 2]!,
-            batch.positions[edge * 2 + 1]!,
-            batch.positions[(edge + 1) * 2]!,
-            batch.positions[(edge + 1) * 2 + 1]!,
-          ),
+        const points = drawnEdgeInto(
+          drawn,
+          batch.positions[edge * 2]!,
+          batch.positions[edge * 2 + 1]!,
+          batch.positions[(edge + 1) * 2]!,
+          batch.positions[(edge + 1) * 2 + 1]!,
+          batch.curve,
         );
+        for (let leg = 0; leg + 1 < points; leg++) {
+          d = Math.min(
+            d,
+            segmentDistance(
+              x,
+              y,
+              drawn[leg * 2]!,
+              drawn[leg * 2 + 1]!,
+              drawn[(leg + 1) * 2]!,
+              drawn[(leg + 1) * 2 + 1]!,
+            ),
+          );
+        }
       }
     }
     const subpath = pathSubpathIndex(batch.pathOffsets, i);
