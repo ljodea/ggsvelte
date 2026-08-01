@@ -4,6 +4,7 @@ import {
   segmentDistance,
   segmentIntersectsRect,
 } from "./candidate-geometry.js";
+import { MAX_DRAWN_EDGE_POINTS, drawnEdgeInto } from "./path-step.js";
 import type { GeometryBatch } from "./scene.js";
 
 /** Plot-space AABB for a path subpath range, padded by stroke half-width + hit tol. */
@@ -37,6 +38,10 @@ export function pathSubpathAabb(
   return [minX - pad, minY - pad, maxX + pad, maxY + pad];
 }
 
+/**
+ * Whether any drawn stroke in `range` crosses the query box. Walks the drawn
+ * polyline so a stepped path brushes against its stairs, not the chord.
+ */
 export function pathSegmentsIntersectRect(
   batch: Extract<GeometryBatch, { kind: "paths" }>,
   panelX: number,
@@ -47,16 +52,41 @@ export function pathSegmentsIntersectRect(
   hiX: number,
   hiY: number,
 ): boolean {
+  const drawn: number[] = Array.from({ length: MAX_DRAWN_EDGE_POINTS * 2 }, () => 0);
   for (let edge = range[0]; edge < range[1]; edge++) {
-    const x1 = panelX + batch.positions[edge * 2]!;
-    const y1 = panelY + batch.positions[edge * 2 + 1]!;
-    const x2 = panelX + batch.positions[(edge + 1) * 2]!;
-    const y2 = panelY + batch.positions[(edge + 1) * 2 + 1]!;
-    if (segmentIntersectsRect(x1, y1, x2, y2, loX, loY, hiX, hiY)) return true;
+    const points = drawnEdgeInto(
+      drawn,
+      panelX + batch.positions[edge * 2]!,
+      panelY + batch.positions[edge * 2 + 1]!,
+      panelX + batch.positions[(edge + 1) * 2]!,
+      panelY + batch.positions[(edge + 1) * 2 + 1]!,
+      batch.curve,
+    );
+    for (let leg = 0; leg + 1 < points; leg++) {
+      if (
+        segmentIntersectsRect(
+          drawn[leg * 2]!,
+          drawn[leg * 2 + 1]!,
+          drawn[(leg + 1) * 2]!,
+          drawn[(leg + 1) * 2 + 1]!,
+          loX,
+          loY,
+          hiX,
+          hiY,
+        )
+      )
+        return true;
+    }
   }
   return false;
 }
 
+/**
+ * First authored edge in `range` whose drawn stroke is within `slop` of (x,y).
+ *
+ * Walks the drawn polyline, not the chord between authored vertices, so a
+ * stepped path hit-tests against the stairs the user sees.
+ */
 export function closestPathEdge(
   batch: Extract<GeometryBatch, { kind: "paths" }>,
   range: readonly [number, number] | null,
@@ -66,18 +96,31 @@ export function closestPathEdge(
 ): number {
   if (range === null) return Infinity;
   let closest = Infinity;
+  const drawn: number[] = Array.from({ length: MAX_DRAWN_EDGE_POINTS * 2 }, () => 0);
   for (let edge = range[0]; edge < range[1]; edge++) {
-    if (
-      segmentDistance(
-        x,
-        y,
-        batch.positions[edge * 2]!,
-        batch.positions[edge * 2 + 1]!,
-        batch.positions[(edge + 1) * 2]!,
-        batch.positions[(edge + 1) * 2 + 1]!,
-      ) <= slop
-    )
-      closest = Math.min(closest, edge);
+    const points = drawnEdgeInto(
+      drawn,
+      batch.positions[edge * 2]!,
+      batch.positions[edge * 2 + 1]!,
+      batch.positions[(edge + 1) * 2]!,
+      batch.positions[(edge + 1) * 2 + 1]!,
+      batch.curve,
+    );
+    for (let leg = 0; leg + 1 < points; leg++) {
+      if (
+        segmentDistance(
+          x,
+          y,
+          drawn[leg * 2]!,
+          drawn[leg * 2 + 1]!,
+          drawn[(leg + 1) * 2]!,
+          drawn[(leg + 1) * 2 + 1]!,
+        ) <= slop
+      ) {
+        closest = Math.min(closest, edge);
+        break;
+      }
+    }
   }
   return closest;
 }
