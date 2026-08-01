@@ -22,7 +22,7 @@ describe("planBasicAxis band domain reuse (#1340)", () => {
       scale,
       ticks: scale.domain.map((value, domainIndex) => ({
         value: domainIndex,
-        label: String(value),
+        label: value,
         labeled: true,
         domainIndex,
       })),
