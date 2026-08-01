@@ -130,6 +130,24 @@ describe("vertical band y: over-wide label does not hide short siblings (#1356)"
     expect(r.y.ticks.filter((t) => t.labeled).length).toBeLessThan(cats.length);
   });
 
+  it("does not density-thin sparse authored breaks that already have room", () => {
+    // 200 categories, 16 evenly spaced breaks — on-screen pitch is large enough
+    // that every break label should stay labeled.
+    const categories = Array.from({ length: 200 }, (_, i) => `Cat ${i}`);
+    const breaks = Array.from({ length: 16 }, (_, i) => categories[i * 12]!);
+    const r = layout(
+      base({
+        width: 400,
+        height: 400,
+        x: lin(0, 10),
+        y: { type: "band", categories, breaks },
+      }),
+    );
+    expect(r.y.ticks).toHaveLength(breaks.length);
+    expect(r.y.labelEvery).toBe(1);
+    expect(r.y.ticks.every((t) => t.labeled)).toBe(true);
+  });
+
   it("does not reserve left margin for a wide label that density hides", () => {
     // Wide label only at odd indices; density (every≥2) hides it. Left margin
     // must reflect the short survivors, not the hidden long name.

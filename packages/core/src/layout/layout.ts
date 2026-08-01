@@ -299,13 +299,26 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     y.ticks.length >= BAND_THIN_MIN_CATEGORIES
   ) {
     const n = y.ticks.length;
-    // Band pitch is over the full category domain (breaks are a subset of
-    // domainIndex slots) — matches planBandAxis's categoryCount denominator.
+    // Pitch from the full domain unit times the minimum domainIndex gap between
+    // consecutive ticks. Full-domain ticks → gap 1; sparse authored breaks keep
+    // their larger on-screen spacing so we do not thin them away.
     const categoryCount = Math.max(1, input.y.categories.length);
-    const bandStep = innerH / categoryCount;
+    const bandUnit = innerH / categoryCount;
+    let minIndexGap = 1;
+    const hasDomainIndex = y.ticks.every((t) => t.domainIndex !== undefined);
+    if (hasDomainIndex && n >= 2) {
+      const idxs = y.ticks.map((t) => t.domainIndex!).toSorted((a, b) => a - b);
+      minIndexGap = Infinity;
+      for (let i = 1; i < idxs.length; i++) {
+        const gap = idxs[i]! - idxs[i - 1]!;
+        if (gap > 0 && gap < minIndexGap) minIndexGap = gap;
+      }
+      if (!Number.isFinite(minIndexGap) || minIndexGap < 1) minIndexGap = 1;
+    }
+    const displayStep = bandUnit * minIndexGap;
     const minStep = labelH + MIN_BAND_LABEL_GAP_PX;
     let densityThinned = false;
-    while (yEvery * bandStep < minStep) {
+    while (yEvery * displayStep < minStep) {
       if (yEvery * 2 >= n) break;
       yEvery *= 2;
       applyBandLabelEvery(y, yEvery);
