@@ -1,18 +1,19 @@
 <script lang="ts">
   /**
    * Example detail frame: paint the gallery PNG first, then upgrade to the
-   * live Example.svelte chart near the viewport so first paint / LCP do not
-   * wait on the chart stack.
+   * live Example.svelte chart only after user intent (hover/focus/button) so
+   * SPA nav and scroll stay responsive. Near-viewport auto-upgrade pulled the
+   * full chart stack as soon as a specimen approached the fold.
    *
    * `?vr` forces an immediate upgrade so visual regression can wait on
-   * `.gg-plot-root[data-gg-ready]` without racing IntersectionObserver.
+   * `.gg-plot-root[data-gg-ready]` without racing intent handlers.
    */
   import { base } from "$app/paths";
   import { onMount } from "svelte";
   import type { Component } from "svelte";
 
   import { loadExampleComponent } from "$lib/examples";
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
 
   const {
     exampleId,
@@ -44,7 +45,7 @@
   }
 
   // Kick off the VR import as soon as the client module runs (before paint
-  // settles). onMount still owns near-viewport upgrades for normal visits.
+  // settles). onMount still owns intent-gated upgrades for normal visits.
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     if (params.has("vr")) startLoad();
@@ -63,9 +64,7 @@
         cancelled = true;
       };
     }
-    const stop = observeNearViewport(el, startLoad, {
-      rootMargin: "480px 0px",
-    });
+    const stop = observeUserIntent(el, startLoad);
     return () => {
       cancelled = true;
       stop();
@@ -91,11 +90,15 @@
       decoding="async"
       fetchpriority="high"
     />
+    <button type="button" class="load-interactive" onclick={startLoad}>
+      Load interactive chart
+    </button>
   {/if}
 </div>
 
 <style>
   .gg-example-frame {
+    position: relative;
     margin: 2.5rem 0;
     width: 100%;
     max-width: var(--example-vr-width);
@@ -111,5 +114,25 @@
     width: 100%;
     height: auto;
     background: #fff;
+  }
+
+  .load-interactive {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--line, #ccc);
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--paper, #fff) 92%, transparent);
+    color: var(--ink, #111);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .load-interactive:focus-visible {
+    outline: 2px solid var(--ink, #111);
+    outline-offset: 2px;
   }
 </style>

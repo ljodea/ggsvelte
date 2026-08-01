@@ -22,7 +22,7 @@
     LESSON_CHART_WIDTH,
     sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
   import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 
@@ -123,11 +123,24 @@
     return `${mon} ${day}, ${yearPart}`;
   }
 
+  let loadStarted = false;
+  let cancelled = false;
+
+  function loadLivePlot(): void {
+    if (loadStarted || LivePlot !== null) return;
+    loadStarted = true;
+    void import("@ggsvelte/svelte").then((mod) => {
+      if (!cancelled) {
+        LivePlot = mod.GGPlot;
+        LiveInspect = mod.Inspect;
+      }
+    });
+  }
+
   onMount(() => {
     const target = host;
     if (target === undefined) return;
-    let cancelled = false;
-    let loadStarted = false;
+    cancelled = false;
 
     const observer =
       typeof ResizeObserver === "undefined"
@@ -141,29 +154,15 @@
           });
     observer?.observe(target);
 
-    const loadLivePlot = (): void => {
-      if (loadStarted || cancelled) return;
-      loadStarted = true;
-      void import("@ggsvelte/svelte").then((mod) => {
-        if (!cancelled) {
-          LivePlot = mod.GGPlot;
-          LiveInspect = mod.Inspect;
-        }
-      });
-    };
-
-    // Shared helper — no idle-load. An early dynamic import + fold still
-    // monopolizes the main thread and stalls header clicks (#972).
-    // When IntersectionObserver is missing (SSR/tests), observeNearViewport
-    // fires immediately so the chart still upgrades, matching ThemeSpecimen.
-    const stopNear = observeNearViewport(target, loadLivePlot, {
-      rootMargin: "240px 0px",
-    });
+    // Intent only — near-viewport auto-upgrade still folded 838 points as
+    // soon as the chart approached the fold and stalled chrome (#972).
+    // Match ThemeSpecimen / ExampleLiveFrame: static shell until hover/focus.
+    const stopIntent = observeUserIntent(target, loadLivePlot);
 
     return () => {
       cancelled = true;
       observer?.disconnect();
-      stopNear();
+      stopIntent();
     };
   });
 </script>
@@ -201,11 +200,15 @@
       height={LESSON_CHART_HEIGHT}
       alt={ariaLabel}
     />
+    <button type="button" class="load-interactive" onclick={loadLivePlot}>
+      Load interactive chart
+    </button>
   {/if}
 </div>
 
 <style>
   .lesson-output {
+    position: relative;
     min-width: 0;
     overflow: hidden;
     background: #fff;
@@ -225,6 +228,26 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .load-interactive {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #c5cad6;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, #fff 92%, transparent);
+    color: #172033;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .load-interactive:focus-visible {
+    outline: 2px solid #172033;
+    outline-offset: 2px;
   }
 
   .sakura-tooltip {
