@@ -61,7 +61,9 @@ describe("lineage source keys", () => {
     // walk adds nothing: it covers far more rows than the member count.
     const members = snapshot.members.length;
     expect(snapshot.focus.sourceKeys.length).toBeGreaterThan(members);
-    expect(spy.mock.calls.length).toBeLessThanOrEqual(members + 1);
+    // Exactly zero, not a slack bound: these members have no source row, so any
+    // row read at all would mean the lineage walk is materializing again.
+    expect(spy.mock.calls.length).toBe(0);
     spy.mockRestore();
     model.dispose();
   });
@@ -127,6 +129,62 @@ describe("lineage source keys", () => {
     });
     expect(inspection.focus.sourceKeys.length).toBeGreaterThan(0);
     expect((inspection.focus.sourceKeys as string[]).every((k) => k.startsWith("r"))).toBe(true);
+    model.dispose();
+  });
+
+  it("reads a row-backed member's own row once, not twice", () => {
+    // geom_point members are real source rows, so datum must read each one for
+    // PlotDatum.row -- and only once. The legacy adapter reads a row to answer
+    // by key, which without care doubles that.
+    const data = Array.from({ length: 6 }, (_, i) => ({ id: `p${i}`, x: 1, y: i }));
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+      { width: 480, height: 320 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const target = resolvedTarget(model, seed, "x")!;
+    const withRows = target.members.filter((m) => m.rowIndex !== null).length;
+
+    const spy = vi.spyOn(model, "row");
+    resolveInspection({
+      model,
+      seed,
+      mode: "x",
+      state: "transient",
+      source: "pointer",
+      keyOf: (row) => row["id"] as string,
+    });
+    // Each member's own row plus the lineage walk, which for identity marks is
+    // one row per member. Reading a member's row twice breaks this.
+    expect(withRows).toBeGreaterThan(0);
+    // Each datum reads its member's own row for PlotDatum.row, and the adapter
+    // answers the key from that same row rather than copying it again. Dropping
+    // the adapter's one-slot memo doubles this to 6.
+    expect(spy.mock.calls.length).toBe(3);
+    spy.mockRestore();
+    model.dispose();
+  });
+
+  it("gives a member no key when its row does not resolve", () => {
+    // The resolver hands back a key for every index; the row gate is the only
+    // thing stopping a dead row from carrying one. sourceKeys deliberately
+    // still take the resolver's word, so the asymmetry is visible here.
+    const model = smoothModel(6);
+    const seed = model.candidates.candidate(0)!;
+    const target = resolvedTarget(model, seed, "x")!;
+    vi.spyOn(model, "row").mockReturnValue(null);
+    const snapshot = materializeInspection(
+      { model, seed, mode: "x", state: "transient", source: "pointer" },
+      target,
+      "complete",
+      () => "ghost",
+    );
+    expect(snapshot.focus.key).toBeNull();
+    expect(snapshot.focus.row).toBeNull();
+    expect([...snapshot.focus.sourceKeys]).toEqual(["ghost"]);
+    vi.restoreAllMocks();
     model.dispose();
   });
 });

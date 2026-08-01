@@ -17,4 +17,6 @@ already passed, and the lineage walk asks it directly. Measured on a 60-row
 smooth: 120 row materializations before, at most 2 after.
 
 `resolveInspection` keeps its row-shaped `keyOf` and builds the materializing
-adapter itself, so that entry point is unchanged.
+adapter itself, so its output is unchanged. That adapter memoizes one index, so
+reading a member's own row for the snapshot and then asking for its key does not
+copy the row twice.

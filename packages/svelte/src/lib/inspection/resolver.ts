@@ -125,9 +125,19 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
   // This entry point takes a row-shaped keyOf, so it materializes each row to
   // ask for its key. The coordinated path passes an index-keyed resolver and
   // skips that entirely.
+  //
+  // One slot of memo, because datum reads a member's own row for the gate and
+  // then asks for its key by index — without this the legacy path would copy
+  // that row twice. Distinct lineage indexes miss the slot and materialize as
+  // they always did.
+  let lastIndex = -1;
+  let lastRow: Row | null = null;
   const keyAt = (index: number): Key | null => {
-    const row = model.row(index) as Row | null;
-    return row === null ? null : keyOf(row, index);
+    if (index !== lastIndex) {
+      lastIndex = index;
+      lastRow = model.row(index) as Row | null;
+    }
+    return lastRow === null ? null : keyOf(lastRow, index);
   };
   const target = resolvedTarget(model, seed, mode);
   // The legacy direct constructor remains total for callers that already hold
