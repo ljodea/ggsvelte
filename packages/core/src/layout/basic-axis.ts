@@ -39,7 +39,9 @@ export function planBasicAxis(input: {
     temporalKind: null,
     domain:
       input.scale.type === "band"
-        ? Object.freeze(input.scale.rawDomain.map((value) => value as CellValue))
+        ? Object.isFrozen(input.scale.rawDomain)
+          ? (input.scale.rawDomain as readonly CellValue[])
+          : Object.freeze(input.scale.rawDomain.map((value) => value as CellValue))
         : Object.freeze([input.scale.domain[0], input.scale.domain[1]] as const),
     direction: input.config?.reverse === true ? ("descending" as const) : ("ascending" as const),
     source,

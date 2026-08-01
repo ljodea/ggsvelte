@@ -106,7 +106,10 @@ function bandGuidePlan(
     scaleType: "band" as const,
     transform: "identity" as const,
     temporalKind: null,
-    domain: Object.freeze(rawCategories.map((value) => value as CellValue)),
+    // Reuse frozen scale.rawDomain across fixed-scale facet panels (#1340).
+    domain: Object.isFrozen(rawCategories)
+      ? (rawCategories as readonly CellValue[])
+      : Object.freeze(rawCategories.map((value) => value as CellValue)),
     direction: reverse ? ("descending" as const) : ("ascending" as const),
     source: context.config.breaks === undefined ? ("automatic" as const) : ("explicit" as const),
     interval: null,
