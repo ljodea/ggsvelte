@@ -127,7 +127,10 @@ export function createGroupedInspectionRetentionFixture() {
   );
   const seed = model.candidates.candidate(0);
   if (seed === null) throw new Error("grouped inspection retention seed is missing");
-  const coordinator = createInspectionCoordinator<Row, string>((row) => row.id);
+  const coordinator = createInspectionCoordinator<Row, string>((index) => {
+    const row = model.row(index) as Row | null;
+    return row === null ? null : row.id;
+  });
   const shared = {
     model,
     seed,

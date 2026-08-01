@@ -18,6 +18,16 @@ function sameKindBatchOrdinal(model: RenderModel, seed: CandidateFacts): number 
   );
 }
 
+/**
+ * Index-keyed source-row keys, the shape the coordinator takes. Production
+ * passes a prebuilt semantic-key bag, so this reads the authored rows rather
+ * than materializing model rows — a resolver that read rows would put back
+ * the very cost these tests bound.
+ */
+function idKeys(rows: readonly { id: string }[]): (index: number) => string | null {
+  return (index) => rows[index]?.id ?? null;
+}
+
 describe("clearInspectionFingerprint", () => {
   it("scopes clear dedupe tokens by interaction source", () => {
     expect(clearInspectionFingerprint("pointer")).toBe("clear:pointer");
@@ -41,7 +51,7 @@ describe("inspection coordinator", () => {
         .spec(),
       { width: 480, height: 320 },
     );
-    const coordinator = createInspectionCoordinator((row) => row.id as string);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     const base = {
       model,
       seed: model.candidates.candidate(0)!,
@@ -78,7 +88,7 @@ describe("inspection coordinator", () => {
         },
       );
     const first = makeModel(400);
-    const coordinator = createInspectionCoordinator((row) => row.id as string);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     coordinator.resolve({
       model: first,
       seed: first.candidates.candidate(0)!,
@@ -110,8 +120,12 @@ describe("inspection coordinator", () => {
           height: 300,
         },
       );
-    const first = makeModel([{ id: "a", x: 1, y: 2 }]);
-    const keyed = createInspectionCoordinator((row) => row.id as string);
+    const data = [{ id: "a", x: 1, y: 2 }];
+    // Production rebuilds its key bag per identity epoch, so the resolver must
+    // follow the active rows rather than close over the first model's.
+    let activeRows: { id: string }[] = data;
+    const first = makeModel(data);
+    const keyed = createInspectionCoordinator((index) => activeRows[index]?.id ?? null);
     keyed.resolve({
       model: first,
       seed: first.candidates.candidate(0)!,
@@ -121,7 +135,9 @@ describe("inspection coordinator", () => {
       identityEpoch: 1,
       layoutEpoch: 1,
     });
-    const moved = makeModel([{ id: "a", x: 4, y: 8 }], 600);
+    const movedRows = [{ id: "a", x: 4, y: 8 }];
+    const moved = makeModel(movedRows, 600);
+    activeRows = movedRows;
     const movedPin = keyed.reconcilePinned({
       model: moved,
       identityEpoch: 2,
@@ -168,10 +184,11 @@ describe("inspection coordinator", () => {
       }),
     ).toBeNull();
 
-    const ambiguous = makeModel([
+    const ambiguousRows = [
       { id: "a", x: 4, y: 8 },
       { id: "a", x: 5, y: 9 },
-    ]);
+    ];
+    const ambiguous = makeModel(ambiguousRows);
     keyed.resolve({
       model: moved,
       seed: moved.candidates.candidate(0)!,
@@ -181,6 +198,7 @@ describe("inspection coordinator", () => {
       identityEpoch: 2,
       layoutEpoch: 2,
     });
+    activeRows = ambiguousRows;
     expect(
       keyed.reconcilePinned({
         model: ambiguous,
@@ -311,7 +329,7 @@ describe("inspection coordinator", () => {
       rowReads++;
       return originalRow(index);
     });
-    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     rowReads = 0;
     const resolved = coordinator.resolve({
       model,
@@ -357,9 +375,9 @@ describe("inspection coordinator", () => {
       ["a", Symbol("a")],
       ["b", Symbol("b")],
     ]);
-    const coordinator = createInspectionCoordinator((row) => {
-      const id = String(row.id);
-      return symbols.get(id) ?? null;
+    const coordinator = createInspectionCoordinator((index) => {
+      const id = idKeys(data)(index);
+      return id === null ? null : (symbols.get(id) ?? null);
     });
     const epoch = Symbol("layout");
     const resolved = coordinator.resolve({
@@ -397,13 +415,14 @@ describe("inspection coordinator", () => {
     model.dispose();
   });
   it("returns null from reconcilePinned when no pin is active", () => {
+    const data = [{ id: "a", x: 1, y: 2 }];
     const model = runPipeline(
-      gg([{ id: "a", x: 1, y: 2 }], aes({ x: "x", y: "y" }))
+      gg(data, aes({ x: "x", y: "y" }))
         .geomPoint()
         .spec(),
       { width: 300, height: 200 },
     );
-    const coordinator = createInspectionCoordinator((row) => row.id as string);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     expect(
       coordinator.reconcilePinned({
         model,
@@ -511,7 +530,7 @@ describe("inspection coordinator", () => {
     const resized = makeModel(700);
     expect(resized.candidates.size).toBe(count);
 
-    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     coordinator.resolve({
       model: first,
       seed: first.candidates.candidate(0)!,
@@ -550,7 +569,7 @@ describe("inspection coordinator", () => {
         .spec(),
       { width: 400, height: 300 },
     );
-    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
+    const coordinator = createInspectionCoordinator(idKeys(data));
     const seed = points.candidates.candidate(0)!;
     expect(seed.kind).toBe("points");
     coordinator.resolve({

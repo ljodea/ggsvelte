@@ -59,17 +59,20 @@ export function resolvedTarget(
 function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
   model: RenderModel,
   candidate: CandidateFacts,
-  keyOf: (row: Row, index: number) => Key | null,
+  keyAt: (index: number) => Key | null,
 ): PlotDatum<Row, Key> {
   const row = candidate.rowIndex === null ? null : (model.row(candidate.rowIndex) as Row | null);
-  const key = row === null || candidate.rowIndex === null ? null : keyOf(row, candidate.rowIndex);
+  // The row gate stays: a member whose row does not resolve has no key, even
+  // when the resolver would hand one back for that index.
+  const key = row === null || candidate.rowIndex === null ? null : keyAt(candidate.rowIndex);
   // Set-based first-seen dedup (O(R)) — same pattern as selection helpers.
   // Array#includes here was O(R²) for large aggregate/stat lineages (#200).
-  const sourceKeys = uniqueKeysFromRowIndexes(model.lineage.keys(candidate.lineage), (rowIndex) => {
-    const source = model.row(rowIndex);
-    if (source === null) return null;
-    return keyOf(source as Row, rowIndex);
-  }) as Key[];
+  // Resolving by index keeps this O(R) lookups rather than O(R) row copies:
+  // model.row rebuilds an object per call, and the key never needed it.
+  const sourceKeys = uniqueKeysFromRowIndexes(
+    model.lineage.keys(candidate.lineage),
+    keyAt,
+  ) as Key[];
   const candidateValue = (channel: string): CellValue => {
     switch (channel) {
       case "x":
@@ -119,11 +122,28 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
   input: ResolveInspectionInput<Row, Key>,
 ): PlotInspectionChange<Row, Key> {
   const { model, seed, mode, state, source, keyOf } = input;
+  // This entry point takes a row-shaped keyOf, so it materializes each row to
+  // ask for its key. The coordinated path passes an index-keyed resolver and
+  // skips that entirely.
+  //
+  // One slot of memo, because datum reads a member's own row for the gate and
+  // then asks for its key by index — without this the legacy path would copy
+  // that row twice. Distinct lineage indexes miss the slot and materialize as
+  // they always did.
+  let lastIndex = -1;
+  let lastRow: Row | null = null;
+  const keyAt = (index: number): Key | null => {
+    if (index !== lastIndex) {
+      lastIndex = index;
+      lastRow = model.row(index) as Row | null;
+    }
+    return lastRow === null ? null : keyOf(lastRow, index);
+  };
   const target = resolvedTarget(model, seed, mode);
   // The legacy direct constructor remains total for callers that already hold
   // a seed. Coordinated dominant-axis lookup rejects invalid buckets instead.
   if (target === null) {
-    const single = datum<Row, Key>(model, seed, keyOf);
+    const single = datum<Row, Key>(model, seed, keyAt);
     return Object.freeze({
       type: "inspect",
       phase: "change",
@@ -141,7 +161,7 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       ),
     });
   }
-  return materializeInspection(input, target, "complete");
+  return materializeInspection(input, target, "complete", keyAt);
 }
 
 /** Package-internal: coordinator reuses the same materialize path as resolve. */
@@ -149,12 +169,16 @@ export function materializeInspection<
   Row extends Record<string, CellValue>,
   Key extends PropertyKey,
 >(
-  input: ResolveInspectionInput<Row, Key>,
+  /** keyOf is deliberately absent: keys arrive through `keyAt`. */
+  input: Omit<ResolveInspectionInput<Row, Key>, "keyOf">,
   target: ResolvedTarget,
   completeness: InspectionSnapshotCompleteness,
+  /** Source-row key by index. The coordinated path passes its own index-keyed
+   * bag; resolveInspection passes an adapter over its row-shaped keyOf. */
+  keyAt: (index: number) => Key | null,
 ): PlotInspectionChange<Row, Key> {
-  const { model, seed, mode, state, source, keyOf } = input;
-  const single = datum<Row, Key>(model, seed, keyOf);
+  const { model, seed, mode, state, source } = input;
+  const single = datum<Row, Key>(model, seed, keyAt);
   if (mode === "exact" || mode === "xy") {
     return Object.freeze({
       type: "inspect",
@@ -174,12 +198,12 @@ export function materializeInspection<
     completeness === "transient"
       ? completeCandidates.slice(0, TRANSIENT_MEMBER_LIMIT)
       : completeCandidates;
-  const members = memberCandidates.map((candidate) => datum<Row, Key>(model, candidate, keyOf));
+  const members = memberCandidates.map((candidate) => datum<Row, Key>(model, candidate, keyAt));
   const focusIndex = memberCandidates.findIndex((candidate) => candidate.id === group.focusId);
   const focus =
     focusIndex >= 0
       ? members[focusIndex]!
-      : datum<Row, Key>(model, model.candidates.candidate(group.focusId) ?? seed, keyOf);
+      : datum<Row, Key>(model, model.candidates.candidate(group.focusId) ?? seed, keyAt);
   const nonempty = (members.length === 0 ? [focus] : members) as [
     PlotDatum<Row, Key>,
     ...PlotDatum<Row, Key>[],

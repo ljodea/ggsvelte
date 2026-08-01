@@ -101,7 +101,7 @@ function candidateBatchRole(model: RenderModel, candidate: CandidateFacts): stri
 export function createInspectionCoordinator<
   Row extends Record<string, CellValue>,
   Key extends PropertyKey,
->(keyOf: (row: Row, index: number) => Key | null) {
+>(keyAt: (index: number) => Key | null) {
   type Slot = Readonly<{
     key: string;
     value: CoordinatedInspection<Row, Key>;
@@ -161,8 +161,7 @@ export function createInspectionCoordinator<
         : target.members.slice(0, TRANSIENT_MEMBER_LIMIT);
     const semanticMembers = fingerprintMembers.map((candidate) => {
       const row = candidate.rowIndex === null ? null : input.model.row(candidate.rowIndex);
-      const key =
-        row === null || candidate.rowIndex === null ? null : keyOf(row as Row, candidate.rowIndex);
+      const key = row === null || candidate.rowIndex === null ? null : keyAt(candidate.rowIndex);
       const fallback = `lineage:${input.model.lineage.keys(candidate.lineage).join(",")}`;
       const payload =
         row === null
@@ -172,9 +171,7 @@ export function createInspectionCoordinator<
     });
     const focusRow = input.seed.rowIndex === null ? null : input.model.row(input.seed.rowIndex);
     const focusKey =
-      focusRow === null || input.seed.rowIndex === null
-        ? null
-        : keyOf(focusRow as Row, input.seed.rowIndex);
+      focusRow === null || input.seed.rowIndex === null ? null : keyAt(input.seed.rowIndex);
     const focusIdentity = semanticKeyToken(
       focusKey,
       `lineage:${input.model.lineage.keys(input.seed.lineage).join(",")}`,
@@ -210,7 +207,7 @@ export function createInspectionCoordinator<
     const cacheKey = `${epochToken(input.layoutEpoch)}|${presentationIdentity}|${semanticFingerprint}|${completeness}|${input.source}`;
     const current = input.state === "pinned" ? pinned : transient;
     if (current?.key === cacheKey) return current.value;
-    const snapshot = materializeInspection({ ...input, keyOf }, target, completeness);
+    const snapshot = materializeInspection<Row, Key>(input, target, completeness, keyAt);
     const value = Object.freeze({
       seed: input.seed,
       snapshot,
@@ -252,11 +249,12 @@ export function createInspectionCoordinator<
     return logicalIdentity === prior.seedLogicalIdentity;
   };
 
-  /** Keyed pin match: layer + non-null row whose keyOf equals the pinned key. */
+  /** Keyed pin match: layer + non-null row whose key equals the pinned key. */
   const keyedPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
     if (candidate.layerIndex !== prior.layerIndex || candidate.rowIndex === null) return false;
+    // Both gates stay: keyed rebind needs a live row AND a matching key.
     const row = model.row(candidate.rowIndex);
-    return row !== null && keyOf(row as Row, candidate.rowIndex) === prior.seedKey;
+    return row !== null && keyAt(candidate.rowIndex) === prior.seedKey;
   };
 
   /**
