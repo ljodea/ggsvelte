@@ -52,7 +52,10 @@ export function collectStyleValues(input: {
         anyDiscrete = true;
       }
       if (binding.field !== null) anyIndexable = true;
-      values.push(...mapped);
+      // One push per element — never spread a row-length column into push.
+      // Spread hits the engine argument limit (RangeError) on large data (#1338).
+      // Match the colour path in scale-color-collect.ts.
+      for (const v of mapped) values.push(v);
     }
     if (binding.scaledConstant !== null) {
       anyField = true;
