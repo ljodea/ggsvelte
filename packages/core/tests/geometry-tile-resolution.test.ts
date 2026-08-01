@@ -45,7 +45,7 @@ function counting(values: Float64Array): { array: Float64Array; reads: () => num
       if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
       return Reflect.get(target, prop) as unknown;
     },
-  }) as Float64Array;
+  });
   return { array, reads: () => reads };
 }
 
