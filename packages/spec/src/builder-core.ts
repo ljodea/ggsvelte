@@ -63,10 +63,10 @@ export function layerFrom(
   },
 ): LayerInput {
   const { aes: layerAes, render, position, positionParams, stat, data, ...params } = options;
-  // Snapshot authoring data immediately so later mutation of the caller's array
-  // cannot leak into the builder; portable Date→ISO conversion happens in .spec().
-  const withData =
-    data === undefined ? {} : { data: toAuthoringDataRef(data) as LayerInput["data"] };
+  // Do not snapshot here: every geom sugar path is `this.layer(layerFrom(...))`,
+  // and `layer()` is the single defensive-copy point (#1280). Snapshotting in
+  // both places deep-copied every row twice on `geom*({ data })`.
+  const withData = data === undefined ? {} : { data: data as LayerInput["data"] };
   return {
     geom,
     ...(stat !== undefined && { stat }),
@@ -104,13 +104,15 @@ export class GGBuilderCore {
 
   /** Add a layer (canonical form — the geom* methods are sugar for this). */
   layer(layer: LayerInput): GGBuilder {
-    // Snapshot authoring data at insertion (same as geom* sugar via layerFrom)
-    // so later mutation of caller-owned arrays cannot leak into .spec().
+    // Sole snapshot for layer data: geom sugar and direct `.layer({ data })`
+    // both land here. Later mutation of caller-owned arrays cannot leak into
+    // `.spec()`; portable Date→ISO conversion still happens in `toPortable`.
     if (layer.data === undefined) {
       return this.#with({ layers: [...this.#state.layers, layer] });
     }
-    // layer.data is AuthoringDataRef at rest; cast through DataInput for snapshot.
-    const data: DataInput = layer.data;
+    // layer.data may be raw DataInput (geom sugar) or an AuthoringDataRef
+    // already; toAuthoringDataRef accepts both.
+    const data: DataInput = layer.data as DataInput;
     const snapped = { ...layer, data: toAuthoringDataRef(data) } as LayerInput;
     return this.#with({ layers: [...this.#state.layers, snapped] });
   }
@@ -214,7 +216,7 @@ export class GGBuilderCore {
     const calendarFields = calendarDateFields(this.#state);
     const portableLayers = layers.map((layer) => {
       if (layer.data === undefined) return layer;
-      // layerFrom stores AuthoringDataRef snapshots as LayerInput.data; portable
+      // layer() stores AuthoringDataRef snapshots as LayerInput.data; portable
       // ISO conversion runs here with the final calendar-date field set.
       return {
         ...layer,
