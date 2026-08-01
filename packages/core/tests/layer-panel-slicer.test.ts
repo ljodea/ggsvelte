@@ -227,6 +227,26 @@ describe("createLayerPanelSlicer matches the per-panel scan", () => {
   });
 });
 
+describe("createLayerPanelSlicer invariant tripwires", () => {
+  // Neither state is reachable through the pipeline: assertFacetForm rejects
+  // wrap mixed with grid, and every panel identity carries every declared
+  // facet field. Both fail loudly so a future layout change cannot quietly
+  // mis-slice instead.
+  it("rejects a layer partitioning on more facet fields than a form allows", () => {
+    const table = ColumnTable.fromColumns({ g: ["a"], h: ["b"], k: ["c"] });
+    expect(() => createLayerPanelSlicer(inputFor(table, ["g", "h", "k"], null))).toThrow(
+      /partitions on 3 facet fields/,
+    );
+  });
+
+  it("rejects a panel identity missing a field its layer partitions on", () => {
+    const table = ColumnTable.fromColumns({ g: ["a", "b"], v: [1, 2] });
+    const slicer = createLayerPanelSlicer(inputFor(table, ["g"], null));
+    // A panel that names a different field than the layer partitions on.
+    expect(() => slicer(wrapPanel("other", "a"))).toThrow(/missing the facet field "g"/);
+  });
+});
+
 describe("createLayerPanelSlicer cost", () => {
   it("visits the rows once for the layer, not once per panel", () => {
     // 40 facet values x 200 rows. The old scan read 200 cells per panel (8000);
