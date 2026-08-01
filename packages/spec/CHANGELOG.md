@@ -1,5 +1,32 @@
 # @ggsvelte/spec
 
+## 0.23.0
+
+### Minor Changes
+
+- e57bdbf: # Lean render path
+
+  Migration: none — additive
+
+  Add lean chart import paths that drop TypeBox validation and the Temporal polyfill from identity-chart client bundles.
+
+  - `@ggsvelte/core/render` — pipeline + SVG with basic geoms only (no heavy stats).
+  - `@ggsvelte/core/temporal` — optional install for time scales / Temporal polyfill.
+  - `@ggsvelte/spec/portable` — fluent builder that finishes with normalize only.
+  - `GGBuilder.toPortable()` on the full package; `.spec()` still TypeBox-validates.
+
+  Measured lean scatter path: ~327 KB → ~140 KB gzip (−57%). Full package default entry stays complete.
+
+### Patch Changes
+
+- 58356ea: <!-- markdownlint-disable MD041 -->
+
+  perf(spec): scan stacked-area-negative y column once per field, not per layer
+
+- 1a9ec15: <!-- markdownlint-disable MD041 -->
+
+  perf(spec): skip interpreted per-layer schema re-check on valid specs
+
 ## 0.22.0
 
 ### Patch Changes

@@ -1,5 +1,44 @@
 # @ggsvelte/cli
 
+## 0.23.0
+
+### Minor Changes
+
+- 50e9292: # CLI split: ggsvelte-render moves to @ggsvelte/cli
+
+  The `ggsvelte-render` CLI moves to its own package, `@ggsvelte/cli` (ADR 0022).
+
+  - `@ggsvelte/cli` (new): owns the `ggsvelte-render` bin; depends only on
+    `@ggsvelte/core`, so agent sandboxes install the spec feedback loop without
+    the Svelte component library. Also re-exports `runCLI`/`CLIIO` for
+    spawn-free embedding.
+  - `@ggsvelte/svelte` (breaking, pre-1.0 minor): no longer ships the
+    `ggsvelte-render` bin. Migrate with `npm install -g @ggsvelte/cli` (or add
+    `@ggsvelte/cli` as a dependency) — the command name and behavior are
+    unchanged. `ggsvelte-codemod` still ships with `@ggsvelte/svelte`.
+  - `@ggsvelte/core`: the `--version` help text no longer names
+    `@ggsvelte/svelte`; `runCLI` reports the version its caller passes.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#cli-moved-to-ggsvelte-cli>
+
+### Patch Changes
+
+- Updated dependencies [50e9292]
+- Updated dependencies [1d68bcc]
+- Updated dependencies [322bc60]
+- Updated dependencies [97f739a]
+- Updated dependencies [8987d9c]
+- Updated dependencies [ccdab47]
+- Updated dependencies [c8d7484]
+- Updated dependencies [e57bdbf]
+- Updated dependencies [9e43af7]
+- Updated dependencies [488f170]
+- Updated dependencies [a54207b]
+- Updated dependencies [9ae7909]
+- Updated dependencies [4870c0c]
+- Updated dependencies [146c2c8]
+  - @ggsvelte/core@0.23.0
+
 ## 0.22.0
 
 Initial extraction: the `ggsvelte-render` bin moved here from
