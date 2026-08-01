@@ -1,7 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { componentNameForGeom } from "@ggsvelte/spec";
 
+  import { componentNameForGeom } from "$lib/component-name-for-geom";
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
   import { plotAesLiteral } from "$lib/reference-snippets";
 

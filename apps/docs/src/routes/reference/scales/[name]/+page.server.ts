@@ -4,7 +4,7 @@ import { SCALE_REFERENCE, knownScaleSlugs, type ScaleReferenceEntry } from "@ggs
 
 import { EXAMPLES } from "$lib/examples-manifest";
 
-import type { EntryGenerator, PageLoad } from "./$types";
+import type { EntryGenerator, PageServerLoad } from "./$types";
 
 const SLUG_SET = new Set(knownScaleSlugs());
 
@@ -37,7 +37,7 @@ function relatedExamples(entry: ScaleReferenceEntry) {
   }).slice(0, 8);
 }
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageServerLoad = ({ params }) => {
   const name = params.name;
   if (!SLUG_SET.has(name)) {
     error(404, `No scale reference for "${name}".`);
@@ -46,8 +46,10 @@ export const load: PageLoad = ({ params }) => {
   if (entry === undefined) {
     error(404, `No scale reference for "${name}".`);
   }
+  const aliasTarget = entry.aliasOf === undefined ? undefined : SCALE_REFERENCE[entry.aliasOf];
   return {
     entry,
+    aliasTarget,
     examples: relatedExamples(entry).map((ex) => ({
       id: ex.id,
       title: ex.title,
