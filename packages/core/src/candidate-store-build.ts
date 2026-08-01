@@ -65,61 +65,72 @@ export function assembleCandidateStore(
 
   /**
    * Expand a filled-path subpath representative to the best candidate in its
-   * span for the active inspect mode (#1342). Filled paths stay axis-snap /
-   * exact-containment — never promote via containment hypot under auto (#770).
+   * span (#1342). Per-vertex autoMode / axis-token filters apply inside the
+   * span (not only on the rep). Scans high→low id so exact (distance, orth)
+   * ties keep the topmost candidate, matching the descending shortlist contract.
+   * Never promote filled paths via containment hypot under auto (#770).
    */
   const bestFilledInSpan = (
     repId: number,
-    candidateMode: ResolvedCandidateInspectMode,
+    isAuto: boolean,
+    explicitMode: ResolvedCandidateInspectMode,
     px: number,
     py: number,
     maxDistance: number,
     probe: ReturnType<typeof hit.probePoint>,
-  ): { id: number; distance: number; orth: number } | null => {
+  ): { id: number; distance: number; orth: number; mode: ResolvedCandidateInspectMode } | null => {
     const start = filledSpanStart[repId]!;
     const end = filledSpanEnd[repId]!;
     if (start < 0 || end <= start) return null;
-    if (candidateMode === "exact") {
-      // Containment is identical for every vertex on the subpath.
-      if (probe.distance(repId) === null) return null;
-      let bestId = start;
-      let bestDistance = Math.hypot(xs[start]! - px, ys[start]! - py);
-      let bestOrth = 0;
-      for (let id = start + 1; id < end; id++) {
-        const distance = Math.hypot(xs[id]! - px, ys[id]! - py);
-        if (distance < bestDistance) {
-          bestId = id;
-          bestDistance = distance;
-        }
-      }
-      return { id: bestId, distance: bestDistance, orth: bestOrth };
-    }
+    // Containment is identical for every vertex on the subpath — compute once
+    // when any vertex may take exact mode.
+    let contained: boolean | null = null;
+    const isContained = (): boolean => {
+      if (contained === null) contained = probe.distance(repId) !== null;
+      return contained;
+    };
     let bestId = -1;
     let bestDistance = Infinity;
     let bestOrth = Infinity;
-    for (let id = start; id < end; id++) {
-      const distance =
-        candidateMode === "x"
-          ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-          : candidateMode === "y"
-            ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
-            : Math.hypot(xs[id]! - px, ys[id]! - py);
-      if (distance > maxDistance) continue;
-      const orth =
-        candidateMode === "x"
-          ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
-          : candidateMode === "y"
-            ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-            : 0;
+    let bestMode: ResolvedCandidateInspectMode = explicitMode;
+    // Descending: first equal (distance, orth) wins → highest id (topmost).
+    for (let id = end - 1; id >= start; id--) {
+      const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : explicitMode;
+      if (
+        (candidateMode === "x" && xTokenIds[id] === -1) ||
+        (candidateMode === "y" && yTokenIds[id] === -1)
+      )
+        continue;
+      let distance: number | null;
+      let orth: number;
+      if (candidateMode === "exact") {
+        if (!isContained()) continue;
+        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        orth = 0;
+      } else if (candidateMode === "x") {
+        distance = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
+        if (distance > maxDistance) continue;
+        orth = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
+      } else if (candidateMode === "y") {
+        distance = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
+        if (distance > maxDistance) continue;
+        orth = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
+      } else {
+        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        if (distance > maxDistance) continue;
+        orth = 0;
+      }
       if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
         bestId = id;
         bestDistance = distance;
         bestOrth = orth;
+        bestMode = candidateMode;
       }
     }
-    return bestId < 0 ? null : { id: bestId, distance: bestDistance, orth: bestOrth };
+    return bestId < 0
+      ? null
+      : { id: bestId, distance: bestDistance, orth: bestOrth, mode: bestMode };
   };
-
   return {
     epoch,
     size: n,
@@ -170,28 +181,24 @@ export function assembleCandidateStore(
       for (const id of ids) {
         if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
           continue;
-        const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : mode;
-        if (
-          (candidateMode === "x" && xTokenIds[id] === -1) ||
-          (candidateMode === "y" && yTokenIds[id] === -1)
-        )
-          continue;
 
-        // Filled-path shortlist entries are subpath reps (#1342) — expand to
-        // the best vertex in the span for this mode before global ranking.
+        // Filled-path shortlist entries are subpath reps (#1342) — expand with
+        // per-vertex mode/token filters before global ranking.
         if (isFilledPath[id] === 1) {
           // Only process the representative once (span start equals rep id).
           if (filledSpanStart[id] !== id) continue;
-          const expanded = bestFilledInSpan(id, candidateMode, px, py, search.maxDistance, probe);
+          const expanded = bestFilledInSpan(id, isAuto, mode, px, py, search.maxDistance, probe);
           if (expanded === null) continue;
-          // Filled paths use autoMode "x" (tier 2) — never geometric under auto.
-          const geometric = isAuto && candidateMode === "exact";
+          // Exact-mode vertices in a filled span are rare (override datum);
+          // default filled autoMode is "x" (tier 2) — do not promote via
+          // containment hypot under auto (#770).
+          const geometric = isAuto && expanded.mode === "exact";
           if (isAuto) {
             if (geometric && !bestGeometric) {
               best = expanded.id;
               bestDistance = expanded.distance;
               bestOrth = expanded.orth;
-              resultMode = candidateMode;
+              resultMode = expanded.mode;
               bestGeometric = true;
               continue;
             }
@@ -204,11 +211,18 @@ export function assembleCandidateStore(
             best = expanded.id;
             bestDistance = expanded.distance;
             bestOrth = expanded.orth;
-            resultMode = candidateMode;
+            resultMode = expanded.mode;
             if (isAuto) bestGeometric = geometric;
           }
           continue;
         }
+
+        const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : mode;
+        if (
+          (candidateMode === "x" && xTokenIds[id] === -1) ||
+          (candidateMode === "y" && yTokenIds[id] === -1)
+        )
+          continue;
 
         const distance =
           candidateMode === "exact"

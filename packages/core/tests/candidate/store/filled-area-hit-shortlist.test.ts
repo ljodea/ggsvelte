@@ -315,6 +315,81 @@ describe("filled-area hit shortlist (#1342)", () => {
     expect(nearestMs).toBeLessThan(2);
   });
 
+  it("nearest prefers the higher id on an exact (distance, orth) tie inside a filled span", () => {
+    // Zero-height band: upper and lower vertices share (x,y). Descending
+    // shortlist contract → highest id wins the tie (topmost).
+    const plot = scene();
+    plot.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([
+          0,
+          50,
+          50,
+          50,
+          100,
+          50, // upper
+          100,
+          50,
+          50,
+          50,
+          0,
+          50, // lower (coincident)
+        ]),
+        rowIndex: new Uint32Array([0, 1, 2, 2, 1, 0]),
+        pathOffsets: new Uint32Array([0, 6]),
+        fills: [null],
+        strokes: [null],
+        closed: true,
+        linewidth: 0,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const store = areaStore(plot);
+    const hit = store.nearest(50, 50, { mode: "x", maxDistance: 24 });
+    expect(hit).not.toBeNull();
+    // Coincident at x=50: ids 1 (upper mid) and 4 (lower mid). Prefer 4.
+    expect(hit!.id).toBe(4);
+  });
+
+  it("nearest mode x skips filled vertices without an x token, not the whole subpath", () => {
+    const plot = scene();
+    plot.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([20, 40, 60, 40, 100, 40, 100, 80, 60, 80, 20, 80]),
+        rowIndex: new Uint32Array([0, 1, 2, 2, 1, 0]),
+        pathOffsets: new Uint32Array([0, 6]),
+        fills: [null],
+        strokes: [null],
+        closed: true,
+        linewidth: 0,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    // Rep (id 0) has no x token; later vertices do — whole subpath must still snap.
+    const store = buildCandidateStore(plot, {
+      datum: ({ primitiveIndex }) =>
+        primitiveIndex === 0
+          ? { xValue: null, yValue: 40, autoMode: "x" as const }
+          : {
+              xValue: [20, 60, 100, 100, 60, 20][primitiveIndex],
+              yValue: [40, 40, 40, 80, 80, 80][primitiveIndex],
+              autoMode: "x" as const,
+            },
+    });
+    const hit = store.nearest(60, 30, { mode: "x", maxDistance: 24 });
+    expect(hit).not.toBeNull();
+    expect(hit!.id).not.toBe(0);
+    expect(hit!.id).toBe(1);
+  });
+
   it("picks the nearest upper-edge anchor inside a single filled band", () => {
     // Triangle-like band so anchors are not uniform — nearest vertex is non-obvious.
     const plot = scene();
