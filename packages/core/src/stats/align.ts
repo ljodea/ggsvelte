@@ -125,18 +125,33 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
     const series = seriesFromRows(x, y, rows);
     if (series === null) continue;
     const rep = rows[0]!;
-    // Grid and series are both ascending; a merge pointer finds the group's
-    // own samples so those output rows keep their source-row lineage.
+    // Grid and series are both ascending. One merge cursor advances to the
+    // first sample with xs[cursor] >= xq and supplies both source-row lineage
+    // and the interpolation bracket (right endpoint, or exact hit). That
+    // replaces a binary search per grid point (#1336).
     let cursor = 0;
+    const xs = series.xs;
+    const ys = series.ys;
+    const n = xs.length;
     for (let i = 0; i < grid.length; i++) {
       const xq = grid[i]!;
+      while (cursor < n && xs[cursor]! < xq) cursor++;
+      let yq = 0;
+      if (cursor < n && xs[cursor] === xq) {
+        yq = ys[cursor]!;
+      } else if (cursor > 0 && cursor < n) {
+        const x0 = xs[cursor - 1]!;
+        const y0 = ys[cursor - 1]!;
+        const x1 = xs[cursor]!;
+        const y1 = ys[cursor]!;
+        const t = (xq - x0) / (x1 - x0);
+        yq = y0 + t * (y1 - y0);
+      }
+      // else: cursor === 0 (before first) or cursor === n (after last) → 0
       outX.push(xq);
-      outY.push(lerpSeries(series.xs, series.ys, xq));
+      outY.push(yq);
       outG.push(g);
-      while (cursor < series.xs.length && series.xs[cursor]! < xq) cursor++;
-      outRow.push(
-        cursor < series.xs.length && series.xs[cursor] === xq ? series.rows[cursor]! : -1,
-      );
+      outRow.push(cursor < n && xs[cursor] === xq ? series.rows[cursor]! : -1);
       for (const key of Object.keys(carriedOut)) {
         carriedOut[key]!.push(carried[key]![rep]!);
       }
