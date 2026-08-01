@@ -17,14 +17,15 @@ export function bucketByGroup(
   // filter (no band / column normalize branch). Still call normalizeTransformed
   // so projected panel scales (coord log/sqrt/etc.) that map out-of-range
   // fractions to NaN are dropped with removed-missing — same as positionOf.
-  const continuous =
+  if (
     fx.xScale.type !== "band" &&
     fx.yScale.type !== "band" &&
     frame.xNumeric !== null &&
-    (yNumericOverride !== null || frame.yNumeric !== null);
-  if (continuous) {
-    const xNum = frame.xNumeric!;
+    (yNumericOverride !== null || frame.yNumeric !== null)
+  ) {
+    const xNum = frame.xNumeric;
     const yNum = yNumericOverride ?? frame.yNumeric!;
+    // PositionScale is ContinuousScale | BandScale; type guards above exclude band.
     const xScale = fx.xScale;
     const yScale = fx.yScale;
     for (let row = 0; row < frame.n; row++) {
