@@ -111,7 +111,6 @@ describe("decideChangesetComment", () => {
         "apps/docs/src/routes/+page.svelte",
         "packages/core/tests/scales.test.ts",
         "packages/svelte/vitest.config.ts",
-        "packages/spec/README.md",
         "packages/spec/CHANGELOG.md",
         ".github/workflows/ci.yml",
         "scripts/ci-routing.ts",
@@ -119,6 +118,12 @@ describe("decideChangesetComment", () => {
       PACKAGES,
     );
     expect(decision.verdict).toBe("not-needed");
+  });
+
+  it("treats package README.md as shipped (npm always packs it)", () => {
+    const decision = decideChangesetComment(["packages/spec/README.md"], PACKAGES);
+    expect(decision.verdict).toBe("missing");
+    expect(decision.touched).toEqual(["packages/spec/README.md"]);
   });
 
   it("stays quiet for test files colocated inside shipped dirs", () => {

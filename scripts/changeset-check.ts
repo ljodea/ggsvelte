@@ -177,6 +177,9 @@ function introducesChangeset(entry: DiffEntry): boolean {
 
 function isShippedPath(path: string, pkg: PublishedPackage): boolean {
   if (path === `${pkg.dir}/package.json`) return true;
+  // npm always packs README (and LICENSE) at the package root even when they
+  // are omitted from the `files` field — the package page is the front door.
+  if (path === `${pkg.dir}/README.md` || path === `${pkg.dir}/LICENSE`) return true;
   // Colocated test files live under src/ but are not part of the consumer
   // surface a changelog entry describes.
   if (/\.(test|spec)\.[jt]sx?$/.test(path)) return false;

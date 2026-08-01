@@ -131,18 +131,17 @@ Instance methods: `resetScales()`, `setZoom()`.
 Precedence: `spec` wins over everything else. For mark layers, an explicit
 `layers` prop wins over geom children — use it for dynamic layer lists (a keyed
 `{#each}` reorder does not preserve z-order). For grammar families, children
-win over the deprecated props. Coord/facet/theme REPLACE (last wins); scales
-merge per channel; labs/guides/legend merge per key. Duplicates emit
-`DUPLICATE_PLOT_LAYER` / `DUPLICATE_SCALE_CHANNEL` / `DUPLICATE_MERGE_KEY`
-advisories — full semantics in
+win. Coord/facet/theme REPLACE (last wins); scales merge per channel;
+labs/guides/legend merge per key. Duplicates emit `DUPLICATE_PLOT_LAYER` /
+`DUPLICATE_SCALE_CHANNEL` / `DUPLICATE_MERGE_KEY` advisories — full semantics
+in
 [references/composition-surfaces.md](references/composition-surfaces.md).
 
-**Deprecated (since 0.11.0, planned removal in 0.13.0):** the seven `<GGPlot>`
-grammar props `facet`, `coord`, `scales`, `guides`, `legend`, `theme`, `labs`.
-Compose them as children instead; `spec`, `data`, `aes`, and `layers` stay
-first-class. Migrate existing code with `npx ggsvelte-codemod --write src`
-(dry-run without `--write`). Using a deprecated prop fires a
-`DEPRECATED_PLOT_PROP` advisory via `ondiagnostic`.
+**Removed in 0.13.0** (deprecated since 0.11.0): the seven `<GGPlot>` grammar
+props `facet`, `coord`, `scales`, `guides`, `legend`, `theme`, `labs`. Compose
+them as children instead; `spec`, `data`, `aes`, and `layers` stay first-class.
+Migrate old sources with `npx ggsvelte-codemod --write src` (dry-run without
+`--write`).
 
 ## Which geom for which data
 
