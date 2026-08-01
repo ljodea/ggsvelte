@@ -81,7 +81,7 @@ export function filterRepresentedSourceRows(input: {
   sourceRowsByGroupBin?: Map<string, number[]>;
   /** Precomputed finite-y rows per `${panel}:${layer}:${group}` (smooth/summary/boxplot). */
   sourceRowsByGroupY?: Map<string, number[]>;
-}): number[] {
+}): readonly number[] {
   const { frame, table, frameRow } = input;
   const stat = frame.binding.layer.stat ?? "identity";
   const aggregateXField = frame.binding.xField;
@@ -132,6 +132,11 @@ export function filterRepresentedSourceRows(input: {
     const indexed = input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`);
     if (indexed !== undefined) return indexed;
   }
+
+  // Nothing to narrow: hand back the shared frozen bucket, exactly as the
+  // indexed arms above do. A clone is not frozen and so misses LineageStore's
+  // identity cache, which made every mark re-tokenize its whole group.
+  if (!needsX && !needsBin && !needsY) return input.baseRows;
 
   // Fallback without index maps: clone then filter (parity with pure filters).
   let representedRows = [...input.baseRows];
