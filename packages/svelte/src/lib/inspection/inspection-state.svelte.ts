@@ -216,7 +216,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
-    (_row, index) => deps.keyAt(index),
+    (index) => deps.keyAt(index),
   );
 
   let reconciledRun = -1;
