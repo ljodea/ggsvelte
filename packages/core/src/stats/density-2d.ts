@@ -7,8 +7,9 @@
  * Bandwidth: MASS::bandwidth.nrd then kde2d's h/4 scaling (fixture-oriented).
  * Grid: n×n over data range expanded by 5% each side (approx ggplot expand).
  * Contour levels: contourLevels(breaks | bins | binwidth) of the density surface.
- * KDE surface: sorted-x sliding window (same ±8σ product kernel as a full
- * G²·n scan; fewer examinations when bandwidth is local).
+ * KDE surface: sorted-x sliding window plus a per-row y gather (same ±8σ
+ * product kernel as a full G²·n scan; visits only the pairs inside both
+ * windows, so a local bandwidth cuts the work on both axes).
  *
  * Filled v1 (#802 phase 2): closed isoline rings only (open rings dropped).
  * True isobands between consecutive levels deferred.

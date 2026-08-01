@@ -57,8 +57,8 @@ function naiveProductKdeGrid(
  * `naiveProductKdeGrid` above sums in input order instead, which is why it only
  * agrees to 1e-12.
  *
- * Predicates are written negated (`!(… > w)`) to match production, so a NaN
- * coordinate is admitted rather than dropped.
+ * Both windows reject with `> w` rather than admitting with `<= w`, so a NaN
+ * coordinate is admitted rather than dropped — the contract production keeps.
  */
 function sortedProductKdeGrid(
   xs: Float64Array,
@@ -207,8 +207,9 @@ describe("productKdeGrid", () => {
   });
 
   it("stays exact when the y window covers every row", () => {
-    // Fat bandwidth: no y pruning is possible, so the gather must not change
-    // the surface (nor be re-run per row).
+    // Wide bandwidth: no row can exclude a sample, so production reads the
+    // sorted arrays directly instead of gathering. That choice is invisible
+    // from outside, so this pins the surface, not which branch ran.
     const { xs, ys } = normalCloud(300);
     const gx = evenGrid(-3, 3, 24);
     const gy = evenGrid(-3, 3, 24);
