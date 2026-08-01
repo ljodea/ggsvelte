@@ -221,11 +221,22 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     // Degrade 1: tick thinning.
     // Band axes: only the labeled flag depends on every — flip flags in place
     // instead of re-deriving and re-formatting all k ticks each doubling (#1335).
+    // Commit a doubling only when max labeled width actually shrinks; otherwise
+    // fall through to truncation. Width overflow on a vertical band is a
+    // truncation problem, not a density problem (#1356).
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
         if (yEvery * 2 >= y.ticks.length) break;
-        yEvery *= 2;
-        applyBandLabelEvery(y, yEvery);
+        const nextEvery = yEvery * 2;
+        applyBandLabelEvery(y, nextEvery);
+        const nextW = maxLabeledWidth(y, measurer, fontSize);
+        if (nextW >= yLabelW) {
+          applyBandLabelEvery(y, yEvery);
+          break;
+        }
+        yEvery = nextEvery;
+        yLabelW = nextW;
+        degradations.push("y:thin");
       } else {
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
@@ -233,9 +244,9 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
           deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
           yPreserve,
         );
+        degradations.push("y:thin");
+        yLabelW = maxLabeledWidth(y, measurer, fontSize);
       }
-      degradations.push("y:thin");
-      yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
     // Degrade 2: truncation.
     if (yLabelW + leftFixed > capLeft) {

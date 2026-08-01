@@ -38,7 +38,9 @@ describe("band y thinning rebuild cost (#1335)", () => {
     expect(formats).toBe(k);
   });
 
-  it("keeps the same chosen labelEvery, labeled mask, and degradation order", () => {
+  it("does not thin uniform long labels when doubling cannot shrink width (#1356)", () => {
+    // Every category is over-wide; index 0 always stays labeled, so thinning never
+    // reduces maxLabeledWidth. Truncate in place with every=1 instead.
     const k = 64;
     const cats = longCategories(k);
     const r = layout(
@@ -49,20 +51,28 @@ describe("band y thinning rebuild cost (#1335)", () => {
         y: band(...cats),
       }),
     );
-    // Characterisation of the current thinning outcome (must not change).
-    expect(r.y.labelEvery).toBe(32);
+    expect(r.y.labelEvery).toBe(1);
     expect(r.y.ticks).toHaveLength(k);
     expect(r.y.ticks.map((t) => t.value)).toEqual(cats);
-    for (let i = 0; i < k; i++) {
-      expect(r.y.ticks[i]!.labeled).toBe(i % r.y.labelEvery === 0);
-    }
-    expect(r.degradations[0]).toBe("y:thin");
+    expect(r.y.ticks.every((t) => t.labeled)).toBe(true);
+    expect(r.degradations).not.toContain("y:thin");
     expect(r.degradations).toContain("y:truncate");
+    expect(r.y.truncated).toBe(true);
   });
 
   it("stops doubling when the next every would cover the whole tick list", () => {
-    // Very tight capLeft forces the loop to the break arm rather than fitting.
-    const cats = longCategories(8);
+    // Surviving labels get shorter at each doubling so width keeps falling, yet
+    // the tinest cap still overflows — until every*2 >= length forces the break.
+    const cats = [
+      "WWWWWWWW", // 0
+      "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 1 longest
+      "YYYYYYYYYYYYYYYY", // 2 mid-long
+      "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 3
+      "ZZZZZZZZZZ", // 4 mid
+      "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 5
+      "AAAAAAAA", // 6 short
+      "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 7
+    ];
     const r = layout(
       base({
         width: 80,
