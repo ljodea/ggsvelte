@@ -50,12 +50,14 @@ describe("ringCuts", () => {
 
   it("degenerate windows still return a well-formed pair", () => {
     expect(ringCuts([5], 7, 7)).toEqual([7, 7]);
+    expect(ringCuts([5], 9, 3)).toEqual([9, 3]);
   });
 
   it("matches the linear filter on every window of an ascending array", () => {
+    // Includes inverted windows (end < start) and bounds outside the array.
     const ringStarts = [2, 5, 9, 9, 13, 21, 34, 55];
-    for (let start = 0; start <= 60; start++) {
-      for (let end = start; end <= 60; end += 7) {
+    for (let start = -3; start <= 60; start++) {
+      for (let end = -3; end <= 60; end += 7) {
         expect(ringCuts(ringStarts, start, end)).toEqual(linearCuts(ringStarts, start, end));
       }
     }

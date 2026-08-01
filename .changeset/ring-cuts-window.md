@@ -4,14 +4,21 @@
 
 # Window polygon hole rings instead of rescanning the batch
 
-Migration: none — internal
+Migration: none — internal, except a narrowed input contract on `pathData`
 
 Every consumer of `PathsBatch.ringStarts` scanned the whole batch-wide array to
-find the ring breaks inside one subpath, so a filled polygon batch with S
-subpaths and R hole rings paid O(S x R) per SVG render, per canvas frame, and
-per pointer probe. A shared `ringCuts` helper binary-searches the window
-instead, giving O(log R + k) per subpath.
+find the ring breaks inside one subpath. A shared `ringCuts` helper binary-
+searches the window instead, so a batch with S filled subpaths and R hole rings
+drops from O(S x R) to O(S log R) per SVG render, per canvas frame, and on the
+brush path through hit-testing.
 
-The `ringStarts` ascending order is now documented on `PathsBatch` and on the
-exported `pathData` — rings come from consecutive cut pairs, so consumers
-already depended on it.
+This only bites maps whose parts carry holes: with no holes the batch omits
+`ringStarts` and every call site short-circuits ahead of the helper. Where holes
+are common, R grows with S — 3000 counties with a lake each cost 9 million
+compares per frame before.
+
+`ringStarts` ascending order is now documented on `PathsBatch` and on the
+exported `pathData`. Both producers emit it ascending, so every in-tree caller
+is unaffected. A caller hand-building an unsorted array for `pathData` used to
+get its out-of-order breaks anyway (paired into the wrong rings); those breaks
+are now dropped instead.

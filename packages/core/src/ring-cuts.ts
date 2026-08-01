@@ -4,11 +4,13 @@
  * SVG serialization, canvas tracing, hit-testing, and coord projection each
  * need the ring boundaries inside one subpath window. Every one of them used
  * to scan the whole batch-wide `ringStarts` array per subpath, so a batch with
- * S subpaths and R ring starts paid O(S x R) per render pass or pointer probe.
+ * S subpaths and R hole rings paid O(S x R) per render pass.
+ *
+ * A cursor carried across an ascending subpath loop would reach O(S + R), but
+ * not every caller qualifies: hit-testing windows one subpath at a time in
+ * probe order, and the canvas focus pass traces an arbitrary subset. A search
+ * that stands alone per call serves all of them.
  */
-// Every export needs a lifecycle tag; the header default is read
-// into lifecycle.json by scripts/gen-lifecycle.ts.
-// @lifecycle-default internal
 
 /**
  * Cut points for the subpath `[start, end)`: `start`, then every `ringStarts`
