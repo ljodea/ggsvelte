@@ -131,9 +131,12 @@ function snapshotLayerInput(layer: LayerInput): LayerInput {
 /**
  * Materialize authoring data (Date → ISO) then normalize — TypeBox validate
  * stays on builder.spec() / validate(), not the GGPlot assemble path.
+ *
+ * Layers are already snapshotted in `assemblePortableSpec` before fold; do not
+ * re-snapshot here (#1327). `foldPlotLayer` never mutates mark layer data.
  */
 function materializeAndNormalize(draft: AssembleDraft): PortableSpec {
-  const layers = draft.layers.map(snapshotLayerInput);
+  const layers = draft.layers;
   const authoringData =
     draft.data === undefined ? undefined : toAuthoringDataRef(draft.data as DataInput);
   const calendarFields = calendarDateFields({
@@ -143,7 +146,7 @@ function materializeAndNormalize(draft: AssembleDraft): PortableSpec {
   });
   const portableLayers: LayerInput[] = layers.map((layer) => {
     if (layer.data === undefined) return layer;
-    // layerFrom/snapshot stores AuthoringDataRef; portable ISO conversion here.
+    // assemblePortableSpec stores AuthoringDataRef; portable ISO conversion here.
     const data = toDataRef(layer.data, calendarFields);
     return { ...layer, data };
   });

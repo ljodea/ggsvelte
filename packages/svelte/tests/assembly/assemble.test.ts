@@ -358,6 +358,32 @@ describe("assemblePortableSpec", () => {
     expect(assembled!.data).toBeUndefined();
   });
 
+  it("rebuilds each layer row once for snapshot plus once for portable materialize (#1327)", () => {
+    // snapshotRows and portableRows each call Object.entries once per row.
+    // A second snapshot in materializeAndNormalize would add another R entries.
+    const layerRows = Array.from({ length: 20 }, (_, i) => ({ x: i, y: i }));
+    let entries = 0;
+    const original = Object.entries;
+    Object.entries = ((value: object) => {
+      entries += 1;
+      return original(value);
+    }) as typeof Object.entries;
+    try {
+      const assembled = assemblePortableSpec({
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point", data: layerRows }],
+      });
+      expect(assembled).not.toBeNull();
+      expect(assembled!.layers[0]?.data).toEqual({
+        values: layerRows,
+      });
+    } finally {
+      Object.entries = original;
+    }
+    // 20 snapshot + 20 portable materialize — not 40 snapshot + 20 portable.
+    expect(entries).toBe(40);
+  });
+
   it("materializes Date cells in per-layer data to portable ISO strings", () => {
     const day = new Date("2020-06-01T00:00:00.000Z");
     const assembled = assemblePortableSpec({
