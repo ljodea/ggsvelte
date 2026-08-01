@@ -152,6 +152,3 @@ function mountBars(data: BarsColumns, root: HTMLElement) {
   }
   return { markHint: data.category.length };
 }
-
-// Bundle-side re-exports keep d3-shape in the graph for line/area/bar entries.
-export { mountD3 as bundleMountD3 };

@@ -20,8 +20,6 @@ export const COLORS = [
 
 export type ScenarioId = "scatter-color" | "line-multiseries" | "area-multiseries" | "bars-stacked";
 
-export type ScenarioKind = ScenarioId;
-
 /** Point budget / series shape for a concrete case. */
 export type ScenarioCase = {
   readonly id: string;
