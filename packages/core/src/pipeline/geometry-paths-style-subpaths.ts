@@ -11,7 +11,9 @@ export function splitStyleSubpaths(
     const style = frame.binding[aesthetic];
     return style.field !== null || style.statColumn !== null || style.scaledConstant !== null;
   });
-  if (!hasMappedStyle) return groupedRows.map((rows) => [...rows]);
+  // Constant stroke style: reuse the group arrays. Callers only read them
+  // (writeLineSubpaths / style vectors); copying 30k indices per series was free waste.
+  if (!hasMappedStyle) return groupedRows as number[][];
 
   const styleKey = (row: number): string =>
     JSON.stringify([

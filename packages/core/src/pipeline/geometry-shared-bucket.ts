@@ -13,20 +13,53 @@ export function bucketByGroup(
 ): number[][] {
   const groupRows: number[][] = [];
   let removed = 0;
-  for (let row = 0; row < frame.n; row++) {
-    const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-    const ty = positionOf(
-      fx.yScale,
-      yNumericOverride ?? frame.yNumeric,
-      yNumericOverride instanceof Float64Array ? null : frame.yValues,
-      row,
-    );
-    if (Number.isNaN(tx) || Number.isNaN(ty)) {
-      removed++;
-      continue;
+  // Continuous × continuous: monomorphic numeric + normalizeTransformed finite
+  // filter (no band / column normalize branch). Still call normalizeTransformed
+  // so projected panel scales (coord log/sqrt/etc.) that map out-of-range
+  // fractions to NaN are dropped with removed-missing — same as positionOf.
+  if (
+    fx.xScale.type !== "band" &&
+    fx.yScale.type !== "band" &&
+    frame.xNumeric !== null &&
+    (yNumericOverride !== null || frame.yNumeric !== null)
+  ) {
+    const xNum = frame.xNumeric;
+    const yNum = yNumericOverride ?? frame.yNumeric!;
+    // PositionScale is ContinuousScale | BandScale; type guards above exclude band.
+    const xScale = fx.xScale;
+    const yScale = fx.yScale;
+    for (let row = 0; row < frame.n; row++) {
+      const xv = xNum[row];
+      const yv = yNum[row];
+      if (xv === undefined || yv === undefined || !Number.isFinite(xv) || !Number.isFinite(yv)) {
+        removed++;
+        continue;
+      }
+      const tx = xScale.normalizeTransformed(xv);
+      const ty = yScale.normalizeTransformed(yv);
+      if (Number.isNaN(tx) || Number.isNaN(ty)) {
+        removed++;
+        continue;
+      }
+      const g = frame.groups[row]!;
+      (groupRows[g] ??= []).push(row);
     }
-    const g = frame.groups[row]!;
-    (groupRows[g] ??= []).push(row);
+  } else {
+    for (let row = 0; row < frame.n; row++) {
+      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
+      const ty = positionOf(
+        fx.yScale,
+        yNumericOverride ?? frame.yNumeric,
+        yNumericOverride instanceof Float64Array ? null : frame.yValues,
+        row,
+      );
+      if (Number.isNaN(tx) || Number.isNaN(ty)) {
+        removed++;
+        continue;
+      }
+      const g = frame.groups[row]!;
+      (groupRows[g] ??= []).push(row);
+    }
   }
   removedWarning(removed, frame.binding.index, warnings);
   return groupRows.filter((rows) => rows !== undefined && rows.length > 0);
@@ -74,9 +107,24 @@ export function sortGroupRowsByX(
     for (let row = 0; row < frame.n; row++) {
       keys[row] = fx.xScale.indexOf(xValues?.[row] ?? null) ?? Number.MAX_SAFE_INTEGER;
     }
-    for (const rows of groupRows) rows.sort((a, b) => keys[a]! - keys[b]!);
+    for (const rows of groupRows) {
+      if (isNonDecreasing(rows, keys)) continue;
+      rows.sort((a, b) => keys[a]! - keys[b]!);
+    }
     return;
   }
   const x = frame.xNumeric!;
-  for (const rows of groupRows) rows.sort((a, b) => x[a]! - x[b]!);
+  for (const rows of groupRows) {
+    // Multi-series long form is usually already x-sorted within each group
+    // after bucketByGroup's ascending row walk — O(n) check beats O(n log n).
+    if (isNonDecreasing(rows, x)) continue;
+    rows.sort((a, b) => x[a]! - x[b]!);
+  }
+}
+
+function isNonDecreasing(rows: readonly number[], keys: ArrayLike<number>): boolean {
+  for (let i = 1; i < rows.length; i++) {
+    if (keys[rows[i]!]! < keys[rows[i - 1]!]!) return false;
+  }
+  return true;
 }
