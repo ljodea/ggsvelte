@@ -73,37 +73,85 @@ function candidateValueContribution(
 }
 
 /**
- * Stack total for the default tooltip (#1274).
+ * Bound column for the value axis on a candidate's layer (y when grouping by
+ * x, x when grouping by y). Distinguishes multi-column overlays (sales vs
+ * target) while leaving line+point on the same field collapsible.
+ */
+function valueFieldName(model: RenderModel, member: CandidateFacts, groupAxis: "x" | "y"): string {
+  const channel = groupAxis === "x" ? "y" : "x";
+  for (const field of model.layerFields[member.layerIndex] ?? []) {
+    if (field.channel === channel) return field.field;
+  }
+  return "";
+}
+
+/**
+ * Identity for one stack-total / overflow contribution (#1274 / #1389).
  *
- * Only candidates on `focusLayerIndex` contribute, one per `seriesId`. That
- * keeps line+point (or col+text) from double-counting, and avoids treating
- * `seriesId` as global across layers (it is a per-layer group index).
+ * - Source-backed: row + mapped value field. Same field on the same row
+ *   (line+point, col+text) collapses; different fields (sales vs target)
+ *   stay distinct even when the numbers happen to match.
+ * - Aggregates (null rowIndex): seriesId + field + contribution so double-
+ *   painted summaries collapse while distinct values under a colliding
+ *   per-layer series index still count separately.
+ */
+function contributionIdentity(
+  member: CandidateFacts,
+  contribution: number | null,
+  valueField: string,
+): string {
+  if (member.rowIndex !== null) return `r:${member.rowIndex}:f:${valueField}`;
+  const valueToken = contribution === null ? "" : String(contribution);
+  return `s:${member.seriesId}:f:${valueField}:v:${valueToken}`;
+}
+
+/**
+ * Stack total for the default tooltip (#1274 / #1389).
+ *
+ * Sums unique series contributions across the full axis group (every layer),
+ * not only the focus layer — so a thin overlay over a high-n stack still
+ * reports a total that matches the listed rows. Dedup prevents line+point
+ * (and col+text) double-counting of the same source series.
  */
 function groupMagnitudeTotal(
+  model: RenderModel,
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
-  focusLayerIndex: number,
 ): number | null {
-  const bySeries = new Map<number, number>();
+  const byIdentity = new Map<string, number>();
   for (const member of members) {
-    if (member.layerIndex !== focusLayerIndex) continue;
-    if (bySeries.has(member.seriesId)) continue;
     const contribution = candidateValueContribution(member, groupAxis);
     if (contribution === null) continue;
-    bySeries.set(member.seriesId, contribution);
+    const key = contributionIdentity(
+      member,
+      contribution,
+      valueFieldName(model, member, groupAxis),
+    );
+    if (byIdentity.has(key)) continue;
+    byIdentity.set(key, contribution);
   }
-  if (bySeries.size === 0) return null;
+  if (byIdentity.size === 0) return null;
   let sum = 0;
-  for (const value of bySeries.values()) sum += value;
+  for (const value of byIdentity.values()) sum += value;
   return sum;
 }
 
-/** Unique series count on the focus layer in the full axis group. */
-function groupSeriesCount(members: readonly CandidateFacts[], focusLayerIndex: number): number {
-  const seen = new Set<number>();
+/**
+ * Unique series-contribution count in the full axis group (#1274 / #1389).
+ * Drives "+N more" after display collapse; must span layers so a thin
+ * overlay focus does not hide truncation of a large stack beneath it.
+ */
+function groupSeriesCount(
+  model: RenderModel,
+  members: readonly CandidateFacts[],
+  groupAxis: "x" | "y",
+): number {
+  const seen = new Set<string>();
   for (const member of members) {
-    if (member.layerIndex !== focusLayerIndex) continue;
-    seen.add(member.seriesId);
+    const contribution = candidateValueContribution(member, groupAxis);
+    // Count series even when the value is non-numeric so overflow still
+    // reflects listed display rows (Total may be null separately).
+    seen.add(contributionIdentity(member, contribution, valueFieldName(model, member, groupAxis)));
   }
   return seen.size;
 }
@@ -345,10 +393,11 @@ export function materializeInspection<
     members: Object.freeze(nonempty),
     axisValue: group.axisValue,
     axisLabel: axisLabel(model, mode, group.axisValue),
-    // Focus-layer series total + count — independent of the hover cap so Total
-    // and "+N more" stay honest when members were truncated (#1274).
-    groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis, seed.layerIndex),
-    groupMemberCount: groupSeriesCount(completeCandidates, seed.layerIndex),
+    // Full-group series total + count (deduped across layers) — independent of
+    // the hover cap so Total and "+N more" stay honest when members were
+    // truncated or the focus layer is a thin overlay (#1274 / #1389).
+    groupTotal: groupMagnitudeTotal(model, completeCandidates, groupAxis),
+    groupMemberCount: groupSeriesCount(model, completeCandidates, groupAxis),
   });
 }
 

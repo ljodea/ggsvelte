@@ -67,18 +67,19 @@ export type PlotInspectionChange<Row, Key> =
       readonly axisValue: CellValue;
       readonly axisLabel: string;
       /**
-       * Sum of numeric contributions on the value axis for series on the
-       * focus member's layer (y when mode is x, x when mode is y). Used by
+       * Sum of numeric contributions on the value axis for unique series in
+       * the full axis group (y when mode is x, x when mode is y). Used by
        * the default tooltip Total row; independent of the hover member cap
-       * (#1274). One contribution per seriesId on that layer so multi-layer
-       * paints of the same series do not double-count. `null` when none of
-       * those members has a finite numeric contribution.
+       * (#1274 / #1389). Multi-layer paints of the same source series
+       * (line+point, col+text) contribute once; distinct series on other
+       * layers (e.g. a trend over a stack) are included. `null` when no
+       * member has a finite numeric contribution.
        */
       readonly groupTotal: number | null;
       /**
-       * Unique series count on the focus layer in the full axis-group.
-       * Drives the default tooltip "+N more" line when hover rows were
-       * truncated (#1274).
+       * Unique series-contribution count in the full axis group (all layers,
+       * deduped). Drives the default tooltip "+N more" line when hover rows
+       * were truncated (#1274 / #1389).
        */
       readonly groupMemberCount: number;
     });
