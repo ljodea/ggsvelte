@@ -38,6 +38,8 @@
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
   let liveReady = $state(false);
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
   let loadStarted = false;
   let cancelled = false;
 
@@ -47,6 +49,44 @@
     void loadExampleComponent(exampleId).then((component) => {
       if (!cancelled) Live = component;
     });
+  }
+
+  function onShellFocusIn(): void {
+    if (!liveReady) restoreKeyboardFocus = true;
+  }
+
+  function onShellFocusOut(event: FocusEvent): void {
+    // User tabbed away while loading — do not snatch focus back on ready.
+    // relatedTarget === null means blur from unmount (keep restore pending).
+    const next = event.relatedTarget;
+    if (next === null) return;
+    if (next instanceof Node && host !== null && host.contains(next)) return;
+    restoreKeyboardFocus = false;
+  }
+
+  function focusAfterUpgrade(root: HTMLElement): boolean {
+    const capture = root.querySelector<HTMLElement>(".gg-capture");
+    const target =
+      capture ??
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]');
+    if (target === null) return false;
+    // Only restore when focus is still in this shell or was dropped to body.
+    const active = document.activeElement;
+    if (
+      active !== null &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      !root.contains(active)
+    ) {
+      return true; // user moved on — clear without focusing
+    }
+    if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+      target.tabIndex = -1;
+    }
+    queueMicrotask(() => {
+      target.focus({ preventScroll: true });
+    });
+    return true;
   }
 
   // Kick off the VR import as soon as the client module runs (before paint
@@ -103,6 +143,14 @@
     });
     return () => observer.disconnect();
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (!liveReady || host === null || !restoreKeyboardFocus) return;
+    if (!focusAfterUpgrade(host)) return;
+    restoreKeyboardFocus = false;
+  });
 </script>
 
 <div
@@ -110,6 +158,8 @@
   class:full-width={fullWidth}
   class:live-ready={liveReady}
   bind:this={host}
+  onfocusin={onShellFocusIn}
+  onfocusout={onShellFocusOut}
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
   {#if !liveReady}
@@ -123,11 +173,16 @@
       decoding="async"
       fetchpriority="high"
     />
-    {#if Live === null}
-      <button type="button" class="load-interactive" onclick={startLoad}>
-        Load interactive chart
-      </button>
-    {/if}
+    <!-- Stay mounted and focusable while the import resolves (no disabled blur). -->
+    <button
+      type="button"
+      class="load-interactive"
+      onclick={startLoad}
+      aria-disabled={Live !== null}
+      aria-busy={Live !== null}
+    >
+      {Live === null ? "Load interactive chart" : "Loading…"}
+    </button>
   {/if}
   {#if Live !== null}
     <div class="live-host" class:revealed={liveReady}>

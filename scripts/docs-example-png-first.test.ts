@@ -53,10 +53,35 @@ describe("docs example PNG-first (PR3)", () => {
     expect(frame).toContain("MutationObserver");
   });
 
+  it("hands keyboard focus to the plot after an intent upgrade (#1362)", () => {
+    // Tabbing into "Load interactive chart" must not drop focus to <body> when
+    // the shell unmounts. Prefer .gg-capture; fall back to ready plot root.
+    const frame = read("lib/components/ExampleLiveFrame.svelte");
+    expect(frame).toContain("restoreKeyboardFocus");
+    expect(frame).toContain("focusAfterUpgrade");
+    expect(frame).toContain(".gg-capture");
+    expect(frame).toContain("gg-plot-root");
+    expect(frame).toMatch(/\.focus\(/);
+    expect(frame).toContain("onfocusout");
+    // Keep the load control focusable while the import resolves (no disabled blur).
+    expect(frame).toMatch(/Loading/);
+    expect(frame).toContain("aria-disabled");
+    expect(frame).not.toMatch(/[^\w-]disabled=\{Live/);
+  });
+
   it("keeps loadExample for callers that still need the full bundle", () => {
     const examples = read("lib/examples.ts");
     expect(examples).toContain("export async function loadExampleSources");
     expect(examples).toContain("export async function loadExampleComponent");
     expect(examples).toContain("export async function loadExample");
+  });
+
+  it("drains load buttons by count so multi-chart pages complete (#1362)", () => {
+    // Click one, wait for "Load interactive chart" count to drop (Loading… label
+    // or unmount). Avoid frozen nth indices and .first()+detached re-resolve.
+    const helper = readFileSync(path.join(root, "tests/visual/helpers/deterministic.ts"), "utf8");
+    expect(helper).toContain('getByRole("button", { name: "Load interactive chart" })');
+    expect(helper).toContain("toHaveCount");
+    expect(helper).not.toMatch(/loadButtons\.nth\(/);
   });
 });

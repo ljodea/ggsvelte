@@ -125,6 +125,8 @@
 
   let loadStarted = false;
   let cancelled = false;
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
 
   function loadLivePlot(): void {
     if (loadStarted || LivePlot !== null) return;
@@ -135,6 +137,43 @@
         LiveInspect = mod.Inspect;
       }
     });
+  }
+
+  function onShellFocusIn(): void {
+    if (LivePlot === null) restoreKeyboardFocus = true;
+  }
+
+  function onShellFocusOut(event: FocusEvent): void {
+    // relatedTarget === null means blur from unmount (keep restore pending).
+    const next = event.relatedTarget;
+    if (next === null) return;
+    if (next instanceof Node && host !== undefined && host.contains(next))
+      return;
+    restoreKeyboardFocus = false;
+  }
+
+  function focusAfterUpgrade(root: HTMLElement): boolean {
+    const capture = root.querySelector<HTMLElement>(".gg-capture");
+    const target =
+      capture ??
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]');
+    if (target === null) return false;
+    const active = document.activeElement;
+    if (
+      active !== null &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      !root.contains(active)
+    ) {
+      return true;
+    }
+    if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+      target.tabIndex = -1;
+    }
+    queueMicrotask(() => {
+      target.focus({ preventScroll: true });
+    });
+    return true;
   }
 
   onMount(() => {
@@ -165,6 +204,32 @@
       stopIntent();
     };
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (LivePlot === null || host === undefined || !restoreKeyboardFocus)
+      return;
+    const root = host;
+    const tryFocus = (): boolean => {
+      if (!focusAfterUpgrade(root)) return false;
+      restoreKeyboardFocus = false;
+      return true;
+    };
+    if (tryFocus()) return;
+    const mo = new MutationObserver(() => {
+      if (tryFocus()) mo.disconnect();
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      restoreKeyboardFocus = false;
+    }, 30_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
+  });
 </script>
 
 {#snippet sakuraTooltip(
@@ -180,7 +245,12 @@
   {/if}
 {/snippet}
 
-<div class="finished-chart lesson-output" bind:this={host}>
+<div
+  class="finished-chart lesson-output"
+  bind:this={host}
+  onfocusin={onShellFocusIn}
+  onfocusout={onShellFocusOut}
+>
   {#if LivePlot && finished}
     <LivePlot spec={finished.spec} height={liveHeight} {ariaLabel}>
       {#if finished.inspect && LiveInspect}

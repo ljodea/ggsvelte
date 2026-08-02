@@ -23,14 +23,23 @@ export async function settleVisualState(page: Page, expectedPlots = 1): Promise<
   // there (they race the upgrade and can hang Playwright's actionability checks).
   const hasVr = await page.evaluate(() => new URL(location.href).searchParams.has("vr"));
   if (!hasVr) {
-    const loadButtons = page.getByRole("button", { name: "Load interactive chart" });
-    const n = await loadButtons.count();
-    for (let i = 0; i < n; i += 1) {
-      const btn = loadButtons.nth(i);
-      if (await btn.isVisible().catch(() => false)) {
-        await btn.click({ timeout: 5_000 }).catch(() => {
-          /* button may unmount mid-upgrade */
-        });
+    // Drain by count: click the current first match, then wait until the
+    // "Load interactive chart" count drops (label → Loading… or unmount).
+    // Indexed nth after a frozen count races removals; .first()+detached
+    // re-resolves to the next button and can stop early.
+    for (;;) {
+      const buttons = page.getByRole("button", { name: "Load interactive chart" });
+      const n = await buttons.count();
+      if (n === 0) break;
+      const first = buttons.nth(0);
+      if (!(await first.isVisible().catch(() => false))) break;
+      await first.click({ timeout: 5_000 }).catch(() => {
+        /* may unmount mid-upgrade */
+      });
+      try {
+        await expect(buttons).toHaveCount(n - 1, { timeout: 15_000 });
+      } catch {
+        break;
       }
     }
   }
