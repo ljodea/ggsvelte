@@ -252,7 +252,7 @@ export const GALLERY_PREVIEWS = [
     id: "label/basic",
     filename: "label-basic-light.png",
     path: "/previews/label-basic-light.png",
-    sha256: "1cb489788a14c0c2fbecfa66ac281e83b8d3909dc330542bbeb6793b4592431c",
+    sha256: "5a3d929a2ce23ac559af8a05c20c60454df84dad557f70d2b61cb5acba0eaab6",
   },
   {
     id: "line/ecdf",
@@ -504,7 +504,7 @@ export const GALLERY_PREVIEWS = [
     id: "text/labels",
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",
-    sha256: "bde79ad1536251a9c462f6f788b1746b3d78a7f08362d09618e7b65c4f74f242",
+    sha256: "bcfe694084682546a68f3e5f9df7b831f2d741d2ea37d6c8515e5450f3496589",
   },
   {
     id: "tile/heatmap",

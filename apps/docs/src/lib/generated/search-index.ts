@@ -19914,14 +19914,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-321",
+    id: "heading:guide-lifecycle:experimental-322",
     kind: "heading",
-    title: "experimental (321)",
+    title: "experimental (322)",
     summary:
-      "experimental (321) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-321",
+      "experimental (322) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-322",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (321)"],
+    exact: ["experimental (322)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -21136,12 +21136,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:label:basic",
     kind: "example",
-    title: "Text with rounded background boxes",
+    title: "Boxed labels",
     summary:
-      "Boxed labels when names need a rounded background so they stay legible over other marks.",
+      "A few large rounded boxes behind short names so GeomLabel reads at index thumbnail size.",
     href: "/examples/label/basic",
-    keywords: ["Text with rounded background boxes", "Labels & text", "label", "text", "point"],
-    exact: ["Text with rounded background boxes"],
+    keywords: ["Boxed labels", "Labels & text", "label", "text", "point"],
+    exact: ["Boxed labels"],
   },
   {
     id: "example:line:ecdf",
@@ -21850,11 +21850,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:text:labels",
     kind: "example",
-    title: "Bare text labels on points",
-    summary: "Text geoms when the label is the primary mark, with no background box.",
+    title: "Bare text labels",
+    summary: "A few large bare text marks — short names so the geom reads at index thumbnail size.",
     href: "/examples/text/labels",
-    keywords: ["Bare text labels on points", "Labels & text", "text", "point", "labels"],
-    exact: ["Bare text labels on points"],
+    keywords: ["Bare text labels", "Labels & text", "text", "point", "labels"],
+    exact: ["Bare text labels"],
   },
   {
     id: "example:tile:heatmap",
@@ -32752,6 +32752,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["isISODateString"],
+  },
+  {
+    id: "api:ggsvelte-core:labelBoxOrigin",
+    kind: "api",
+    title: "labelBoxOrigin",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["labelBoxOrigin"],
   },
   {
     id: "api:ggsvelte-core:layout",

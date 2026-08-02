@@ -1,25 +1,30 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, scaleXContinuous, scaleYContinuous } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { langren1644 } from "./data.js";
+import { langrenLabels } from "./data.js";
 
 export default defineExample(
-  gg(langren1644, aes({ x: "longitude", y: "rank" }))
-    // Thumbnail contract: bare text is the mark. No color legend, no boxes —
-    // names sit next to faint anchors so GeomText reads as ink-only labels.
-    .geomPoint({ size: 2.2, alpha: 0.4, aes: aes({ color: { value: "#4a5568" } }) })
+  gg(langrenLabels, aes({ x: "longitude", y: "rank" }))
+    // Thumbnail contract: few short names, large, above points so bare ink
+    // reads at the 96×96 geoms-index crop. No boxes — that is GeomLabel's job.
+    .scales(scaleXContinuous({ limits: [18, 30] }), scaleYContinuous({ limits: [0.2, 3.8] }))
+    .geomPoint({
+      size: 4,
+      alpha: 0.5,
+      aes: aes({ color: { value: "#4a5568" } }),
+    })
     .geomText({
       aes: aes({ label: "name", color: { value: "#1a202c" } }),
-      anchor: "start",
-      dx: 7,
-      size: 12,
+      anchor: "middle",
+      dy: -18,
+      size: 20,
     })
     .theme("minimal")
     .labs({
-      title: "Bare text labels on points",
-      subtitle: "Each estimate is a name; labels draw exactly where they are placed",
-      x: "Estimated Toledo–Rome longitude (°)",
-      y: "Ordered by estimate",
+      title: "Bare text labels",
+      subtitle: "Three short names — ink only, no box",
+      x: "Estimated longitude (°)",
+      y: "Order",
     })
     .spec(),
 );

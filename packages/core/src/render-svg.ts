@@ -35,7 +35,7 @@ import { runPipeline } from "./pipeline/run-pipeline.js";
 import { countMarks } from "./render-svg-marks.js";
 import { sceneToSVGString } from "./render-svg-scene.js";
 
-export { countMarks, pathData } from "./render-svg-marks.js";
+export { countMarks, labelBoxOrigin, pathData } from "./render-svg-marks.js";
 export { sceneLabel, sceneToSVGString } from "./render-svg-scene.js";
 
 export interface RenderSVGOptions extends Omit<RunOptions, "height"> {

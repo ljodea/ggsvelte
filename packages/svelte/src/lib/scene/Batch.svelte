@@ -13,6 +13,7 @@
     ThemeTokens,
   } from "@ggsvelte/core";
   import {
+    labelBoxOrigin,
     pathData,
     pointShapeGeometry,
     pointShapePathD,
@@ -224,20 +225,65 @@
     fill: string;
     size: number;
     alpha: number;
+    /** Present only for geom_label / sf_label visual chrome. */
+    box:
+      | {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+          fill: string;
+          stroke: string;
+          strokeWidth: number;
+          radius: number;
+        }
+      | undefined;
   }
 
   const glyphs: Glyph[] = $derived.by(() => {
     if (batch.kind !== "glyphs") return [];
+    // Measured extents alone do not paint a box (geom_text measures for
+    // inspect hover/hit). Visual chrome is geom_label / sf_label only —
+    // parity with packages/core render-svg-marks renderGlyphs.
+    const hasBox =
+      batch.boxWidths !== undefined &&
+      batch.boxHeights !== undefined &&
+      (batch.boxRadius !== undefined ||
+        batch.boxFill !== undefined ||
+        batch.boxFills !== undefined ||
+        batch.boxStroke !== undefined ||
+        batch.boxStrokes !== undefined);
+    const paper = themeVar("paper", theme);
     return batch.texts.map((text, j) => {
       const mark = resolveGlyphMark(batch, j, ink);
+      const x = batch.positions[j * 2]!;
+      const y = batch.positions[j * 2 + 1]!;
+      let box: Glyph["box"];
+      if (hasBox) {
+        const width = batch.boxWidths![j]!;
+        const height = batch.boxHeights![j]!;
+        const pad = batch.boxPadding ?? 0;
+        const origin = labelBoxOrigin(x, y, width, height, batch.anchor, pad);
+        box = {
+          x: styleNumber(origin.x),
+          y: styleNumber(origin.y),
+          width: styleNumber(width),
+          height: styleNumber(height),
+          fill: batch.boxFills?.[j] ?? batch.boxFill ?? paper,
+          stroke: batch.boxStrokes?.[j] ?? batch.boxStroke ?? ink,
+          strokeWidth: styleNumber(batch.boxStrokeWidth ?? 0.5),
+          radius: styleNumber(batch.boxRadius ?? 0),
+        };
+      }
       return {
         index: j,
-        x: batch.positions[j * 2]!,
-        y: batch.positions[j * 2 + 1]!,
+        x,
+        y,
         text,
         fill: mark.fill,
         size: styleNumber(mark.size),
         alpha: styleNumber(mark.alpha),
+        box,
       };
     });
   });
@@ -412,6 +458,21 @@
   >
     {#each presentationOrder(glyphs) as presented (presented.item.index)}
       {@const glyph = presented.item}
+      {#if glyph.box !== undefined}
+        <rect
+          x={glyph.box.x}
+          y={glyph.box.y}
+          width={glyph.box.width}
+          height={glyph.box.height}
+          rx={glyph.box.radius}
+          ry={glyph.box.radius}
+          fill={glyph.box.fill}
+          stroke={glyph.box.stroke}
+          stroke-width={glyph.box.strokeWidth}
+          opacity={itemOpacity(glyph.alpha, presented.focused)}
+          data-gg-focused={focusMask === null ? undefined : presented.focused}
+        />
+      {/if}
       <text
         x={glyph.x}
         y={glyph.y}

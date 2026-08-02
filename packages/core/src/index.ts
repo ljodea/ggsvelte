@@ -349,6 +349,7 @@ export type { Stratum } from "./strata.js";
 // SVG renderer (pure)
 export {
   countMarks,
+  labelBoxOrigin,
   pathData,
   renderToSVGString, // @lifecycle stable-intent
   sceneLabel,
