@@ -19853,14 +19853,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-908",
+    id: "heading:guide-lifecycle:experimental-909",
     kind: "heading",
-    title: "experimental (908)",
+    title: "experimental (909)",
     summary:
-      "experimental (908) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-908",
+      "experimental (909) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-909",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (908)"],
+    exact: ["experimental (909)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -26988,6 +26988,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["effectiveChannel"],
+  },
+  {
+    id: "api:ggsvelte-spec:ensureTemporalPolyfill",
+    kind: "api",
+    title: "ensureTemporalPolyfill",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["ensureTemporalPolyfill"],
   },
   {
     id: "api:ggsvelte-spec:fillPaintLinear",
