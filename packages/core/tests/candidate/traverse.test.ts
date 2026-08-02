@@ -80,4 +80,41 @@ describe("candidate traversal hot path", () => {
     void hot.x;
     expect(hot.traverse(0, "right")).toBe(3);
   });
+
+  it("treats anchors that overflow float32 to ±Infinity as non-finite in ordering", () => {
+    // ±1e39 are finite as doubles but narrow to ±Infinity in the Float32
+    // position columns. Ordering decisions must read the STORED (narrowed)
+    // values: overflowed points sort after every finite anchor for
+    // left/right navigation, exactly like any other non-finite anchor.
+    const hot = buildCandidateStore(
+      sceneWithPoints([
+        [10, 0],
+        [20, 0],
+        [1e39, 0],
+        [30, 0],
+        [-1e39, 0],
+      ]),
+      {
+        datum: ({ primitiveIndex }) => ({
+          xValue: primitiveIndex,
+          yValue: 0,
+        }),
+      },
+    );
+    void hot.x;
+    // Directional right walks finite anchors in x order, skipping both
+    // overflowed points (ids 2 and 4) entirely.
+    expect(hot.traverse(0, "right")).toBe(1);
+    expect(hot.traverse(1, "right")).toBe(3);
+    expect(hot.traverse(3, "right")).toBe(3);
+    expect(hot.traverse(3, "left")).toBe(1);
+    expect(hot.traverse(0, "left")).toBe(0);
+    // Sequential order is y-then-x: 10, 20, 30, then the non-finite anchors
+    // in id order (+Inf id 2 before -Inf id 4 — the historical comparator
+    // ties non-finite primaries and falls to candidate id).
+    expect(hot.traverse(1, "next")).toBe(3);
+    expect(hot.traverse(3, "next")).toBe(2);
+    expect(hot.traverse(2, "next")).toBe(4);
+    expect(hot.traverse(4, "next")).toBe(0);
+  });
 });
