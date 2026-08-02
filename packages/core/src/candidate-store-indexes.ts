@@ -2,6 +2,7 @@ import { compareTokens } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
   defaultAutoMode,
+  candidatePrimitiveCount,
   isCandidatePrimitive,
   localAnchor,
   primitiveCount,
@@ -123,7 +124,11 @@ export function buildCandidateStoreIndexes(
   for (const batch of scene.batches) {
     if (scene.panels[batch.panelIndex] === undefined) continue;
     if (uninspectable?.has(batch.layerIndex) === true) continue;
-    capacity += primitiveCount(batch);
+    // Exact candidate count (not primitiveCount): path batches reserve per
+    // ANCHOR, not per tessellated vertex, and candidates:false batches
+    // reserve nothing — otherwise map/area layers briefly reserve memory
+    // for every vertex and pay 15 slice() copies to shrink it back.
+    capacity += candidatePrimitiveCount(batch);
   }
   const batchIdsBuf = new Uint32Array(capacity);
   const primitiveIdsBuf = new Uint32Array(capacity);
