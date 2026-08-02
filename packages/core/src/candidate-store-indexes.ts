@@ -1,7 +1,8 @@
-import { canonicalAxisToken, compareTokens, tokenKey } from "./candidate-axis-token.js";
+import { compareTokens } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
   defaultAutoMode,
+  candidatePrimitiveCount,
   isCandidatePrimitive,
   localAnchor,
   primitiveCount,
@@ -18,6 +19,11 @@ import type { CellValue } from "./table.js";
 const NO_ROW = 0xffffffff;
 
 const AUTO_MODE_CODE = { exact: 0, x: 1, y: 2, xy: 3 } as const;
+
+/** Anchor equality matching the old `${x}` string-key grouping: ±0 equal, NaN ≈ NaN. */
+function sameAnchorCoord(u: number, v: number): boolean {
+  return u === v || (Number.isNaN(u) && Number.isNaN(v));
+}
 export const AUTO_MODES = [
   "exact",
   "x",
@@ -69,7 +75,7 @@ export type CandidateStoreIndexes = {
   readonly coincidentStack: (Uint32Array | undefined)[];
   readonly coincidentAt: Uint32Array;
   readonly permutations: Record<"x" | "y", Uint32Array>;
-  readonly buckets: Record<"x" | "y", Map<string, BucketBoundary>>;
+  readonly buckets: Record<"x" | "y", Map<number, BucketBoundary>>;
   logicalValue(id: number, axis: "x" | "y"): CellValue;
   fact(id: number): CandidateFacts | null;
 };
@@ -79,6 +85,29 @@ export type CandidateStoreIndexes = {
  * group() bucket permutations. Growable construction buffers are cleared at
  * the end of this function (retained-memory budget boundary).
  */
+/**
+ * Exclusive end of the (layer, series) run starting at `from` within
+ * `valid[0..end)` — extracted to keep the bucket walk under the nesting
+ * budget and to give the hot scan a tight local frame.
+ */
+function seriesRunEnd(
+  valid: number[],
+  from: number,
+  end: number,
+  layerPerCandidate: Uint32Array,
+  series: Uint32Array,
+  layerIndex: number,
+  seriesId: number,
+): number {
+  let cursor = from + 1;
+  while (cursor < end) {
+    const id = valid[cursor]!;
+    if (layerPerCandidate[id]! !== layerIndex || series[id] !== seriesId) break;
+    cursor++;
+  }
+  return cursor;
+}
+
 export function buildCandidateStoreIndexes(
   scene: Scene,
   options: CandidateStoreOptions = {},
@@ -86,44 +115,100 @@ export function buildCandidateStoreIndexes(
   const epoch = options.epoch ?? 0;
   const flip = options.flip ?? false;
   const hitTolerance = options.hitTolerance ?? 3;
-  const batchList: number[] = [];
-  const primitiveList: number[] = [];
-  const panelList: number[] = [];
-  const rowList: number[] = [];
-  const seriesList: number[] = [];
-  const rankList: number[] = [];
-  const sourceList: number[] = [];
-  const lineageList: number[] = [];
-  const autoModeList: number[] = [];
-  const xList: number[] = [];
-  const yList: number[] = [];
-  const xTokenList: number[] = [];
-  const yTokenList: number[] = [];
-  const xDateList: number[] = [];
-  const yDateList: number[] = [];
+  const uninspectable = options.uninspectableLayers;
+  // Capacity-first construction: growable number[] buffers paid a push
+  // (with capacity doubling) plus a full typed-array conversion copy per
+  // candidate column. Upper-bound the candidate count up front and write
+  // the final typed arrays directly; trim to the exact count at the end.
+  let capacity = 0;
+  for (const batch of scene.batches) {
+    if (scene.panels[batch.panelIndex] === undefined) continue;
+    if (uninspectable?.has(batch.layerIndex) === true) continue;
+    // Exact candidate count (not primitiveCount): path batches reserve per
+    // ANCHOR, not per tessellated vertex, and candidates:false batches
+    // reserve nothing — otherwise map/area layers briefly reserve memory
+    // for every vertex and pay 15 slice() copies to shrink it back.
+    capacity += candidatePrimitiveCount(batch);
+  }
+  const batchIdsBuf = new Uint32Array(capacity);
+  const primitiveIdsBuf = new Uint32Array(capacity);
+  const panelIdsBuf = new Uint32Array(capacity);
+  const rowsBuf = new Uint32Array(capacity);
+  const seriesBuf = new Uint32Array(capacity);
+  const ranksBuf = new Uint32Array(capacity);
+  const sourcesBuf = new Uint32Array(capacity);
+  const lineagesBuf = new Uint32Array(capacity);
+  const autoModesBuf = new Uint8Array(capacity);
+  const xsBuf = new Float32Array(capacity);
+  const ysBuf = new Float32Array(capacity);
+  const xTokenIdsBuf = new Int32Array(capacity);
+  const yTokenIdsBuf = new Int32Array(capacity);
+  const xDatesBuf = new Uint8Array(capacity);
+  const yDatesBuf = new Uint8Array(capacity);
   const invalidX = new Map<number, CellValue>();
   const invalidY = new Map<number, CellValue>();
+  // NaN / ±Infinity plot-px anchors make the traversal comparator's
+  // subtraction unstable; tracked here so coincident grouping can pick a
+  // finite-only fast path.
+  let anyNonFiniteAnchor = false;
   const sizeValues: CellValue[] = [];
   const linewidthValues: CellValue[] = [];
   const alphaValues: CellValue[] = [];
   const shapeValues: CellValue[] = [];
   const linetypeValues: CellValue[] = [];
   const tokens: CanonicalAxisToken[] = [];
-  const tokenIndex = new Map<string, number>();
+  // Kind-dispatched interning: the previous single Map keyed on tokenKey()
+  // strings paid one `n:${value}` / `s:${len}:${value}` allocation per
+  // candidate per axis; per-kind maps key on the value itself. Intern order
+  // (first-seen id) is unchanged, so downstream token ids are identical.
+  const numberTokenIndex = new Map<number, number>();
+  const stringTokenIndex = new Map<string, number>();
+  const booleanTokenIndex = new Map<boolean, number>();
+  // Peek by raw value before allocating a CanonicalAxisToken: a repeat hit
+  // (dense plots repeat axis values constantly) then costs one Map lookup
+  // and no object allocation. Misses allocate the same token
+  // canonicalAxisToken would build (Date → epoch number, -0 → 0).
   const remember = (value: CellValue): number => {
-    const token = canonicalAxisToken(value);
-    if (token === null) return -1;
-    const key = tokenKey(token);
-    const prior = tokenIndex.get(key);
-    if (prior !== undefined) return prior;
-    const id = tokens.length;
-    tokens.push(token);
-    tokenIndex.set(key, id);
-    return id;
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) return -1;
+      const canonical = Object.is(value, -0) ? 0 : value;
+      const prior = numberTokenIndex.get(canonical);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "number", value: canonical });
+      numberTokenIndex.set(canonical, id);
+      return id;
+    }
+    if (typeof value === "string") {
+      const prior = stringTokenIndex.get(value);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "string", value });
+      stringTokenIndex.set(value, id);
+      return id;
+    }
+    if (typeof value === "boolean") {
+      const prior = booleanTokenIndex.get(value);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "boolean", value });
+      booleanTokenIndex.set(value, id);
+      return id;
+    }
+    if (value instanceof Date) {
+      const time = value.getTime();
+      if (!Number.isFinite(time)) return -1;
+      const prior = numberTokenIndex.get(time);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "number", value: time });
+      numberTokenIndex.set(time, id);
+      return id;
+    }
+    return -1;
   };
 
-  const uninspectable = options.uninspectableLayers;
-
+  let n = 0;
   for (let batchIndex = 0; batchIndex < scene.batches.length; batchIndex++) {
     const batch = scene.batches[batchIndex]!;
     const panel = scene.panels[batch.panelIndex];
@@ -132,7 +217,7 @@ export function buildCandidateStoreIndexes(
     if (uninspectable?.has(batch.layerIndex) === true) continue;
     for (let primitiveIndex = 0; primitiveIndex < primitiveCount(batch); primitiveIndex++) {
       if (!isCandidatePrimitive(batch, primitiveIndex)) continue;
-      const candidateIndex = batchList.length;
+      const candidateIndex = n;
       const raw = batch.rowIndex[primitiveIndex] ?? NO_ROW;
       const rowIndex = raw === NO_ROW ? null : raw;
       const [lx, ly] = localAnchor(batch, primitiveIndex);
@@ -158,45 +243,56 @@ export function buildCandidateStoreIndexes(
       alphaValues.push(datum.alphaValue ?? null);
       shapeValues.push(datum.shapeValue ?? null);
       linetypeValues.push(datum.linetypeValue ?? null);
-      batchList.push(batchIndex);
-      primitiveList.push(primitiveIndex);
-      panelList.push(batch.panelIndex);
-      rowList.push(rowIndex ?? NO_ROW);
-      xList.push(panel.x + lx);
-      yList.push(panel.y + ly);
+      batchIdsBuf[n] = batchIndex;
+      primitiveIdsBuf[n] = primitiveIndex;
+      panelIdsBuf[n] = batch.panelIndex;
+      rowsBuf[n] = rowIndex ?? NO_ROW;
+      const ax = panel.x + lx;
+      const ay = panel.y + ly;
+      xsBuf[n] = ax;
+      ysBuf[n] = ay;
+      // Read the NARROWED f32 values back: a finite double that overflows
+      // float32 (e.g. 1e39) is stored as ±Infinity, and the fast paths below
+      // must see the same (non-)finiteness the stored columns carry.
+      if (!Number.isFinite(xsBuf[n]!) || !Number.isFinite(ysBuf[n]!)) anyNonFiniteAnchor = true;
       const xToken = remember(xValue);
       const yToken = remember(yValue);
-      xTokenList.push(xToken);
-      yTokenList.push(yToken);
-      xDateList.push(xValue instanceof Date ? 1 : 0);
-      yDateList.push(yValue instanceof Date ? 1 : 0);
+      xTokenIdsBuf[n] = xToken;
+      yTokenIdsBuf[n] = yToken;
+      xDatesBuf[n] = xValue instanceof Date ? 1 : 0;
+      yDatesBuf[n] = yValue instanceof Date ? 1 : 0;
       if (xToken === -1 && xValue !== null) invalidX.set(candidateIndex, xValue);
       if (yToken === -1 && yValue !== null) invalidY.set(candidateIndex, yValue);
       const series = datum.seriesId ?? 0;
-      seriesList.push(series);
-      rankList.push(datum.seriesRank ?? series);
-      sourceList.push(datum.sourceOrder ?? rowIndex ?? primitiveIndex);
-      lineageList.push(datum.lineage ?? 0);
-      autoModeList.push(AUTO_MODE_CODE[datum.autoMode ?? defaultAutoMode(batch, primitiveIndex)]);
+      seriesBuf[n] = series;
+      ranksBuf[n] = datum.seriesRank ?? series;
+      sourcesBuf[n] = datum.sourceOrder ?? rowIndex ?? primitiveIndex;
+      lineagesBuf[n] = datum.lineage ?? 0;
+      autoModesBuf[n] = AUTO_MODE_CODE[datum.autoMode ?? defaultAutoMode(batch, primitiveIndex)]!;
+      n++;
     }
   }
 
-  const n = batchList.length;
-  const batchIds = Uint32Array.from(batchList);
-  const primitiveIds = Uint32Array.from(primitiveList);
-  const panelIds = Uint32Array.from(panelList);
-  const rows = Uint32Array.from(rowList);
-  const series = Uint32Array.from(seriesList);
-  const ranks = Uint32Array.from(rankList);
-  const sources = Uint32Array.from(sourceList);
-  const lineages = Uint32Array.from(lineageList);
-  const autoModes = Uint8Array.from(autoModeList);
-  const xs = Float32Array.from(xList);
-  const ys = Float32Array.from(yList);
-  const xTokenIds = Int32Array.from(xTokenList);
-  const yTokenIds = Int32Array.from(yTokenList);
-  const xDates = Uint8Array.from(xDateList);
-  const yDates = Uint8Array.from(yDateList);
+  // Exact-count trim: when eligibility skipped primitives the capacity was
+  // an upper bound, so slice the tails off (a view when exact — the common
+  // all-candidates case — a copy otherwise).
+  const trim = <T extends { slice(start: number, end: number): T; length: number }>(arr: T): T =>
+    n === arr.length ? arr : arr.slice(0, n);
+  const batchIds = trim(batchIdsBuf);
+  const primitiveIds = trim(primitiveIdsBuf);
+  const panelIds = trim(panelIdsBuf);
+  const rows = trim(rowsBuf);
+  const series = trim(seriesBuf);
+  const ranks = trim(ranksBuf);
+  const sources = trim(sourcesBuf);
+  const lineages = trim(lineagesBuf);
+  const autoModes = trim(autoModesBuf);
+  const xs = trim(xsBuf);
+  const ys = trim(ysBuf);
+  const xTokenIds = trim(xTokenIdsBuf);
+  const yTokenIds = trim(yTokenIdsBuf);
+  const xDates = trim(xDatesBuf);
+  const yDates = trim(yDatesBuf);
 
   const logicalValue = (id: number, axis: "x" | "y"): CellValue => {
     const ids = axis === "x" ? xTokenIds : yTokenIds;
@@ -283,38 +379,101 @@ export function buildCandidateStoreIndexes(
   const coincidentStack: (Uint32Array | undefined)[] = Array.from({ length: n });
   const coincidentAt = new Uint32Array(n);
   {
-    const groups = new Map<string, number[]>();
-    for (let id = 0; id < n; id++) {
-      const key = `${panelIds[id]!}|${xs[id]!}|${ys[id]!}`;
-      let members = groups.get(key);
-      if (members === undefined) {
-        members = [];
-        groups.set(key, members);
+    const emitCoincidentRun = (ids: Uint32Array, runStart: number, runEnd: number): void => {
+      const length = runEnd - runStart;
+      if (length < 2) return;
+      // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
+      // Members are ascending id (candidate ids are assigned in batch-then-
+      // primitive order, the traversal sort's trailing keys), matching the old
+      // id-order push sequence.
+      const stack = new Uint32Array(length);
+      for (let j = 0; j < length; j++) stack[j] = ids[runStart + j]!;
+      for (let j = 0; j < length; j++) {
+        const id = stack[j]!;
+        coincidentStack[id] = stack;
+        coincidentAt[id] = j;
       }
-      members.push(id);
-    }
-    for (const members of groups.values()) {
-      if (members.length >= 2) {
-        // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
-        const stack = Uint32Array.from(members);
-        for (let i = 0; i < members.length; i++) {
-          const id = members[i]!;
-          coincidentStack[id] = stack;
-          coincidentAt[id] = i;
-        }
+    };
+    if (anyNonFiniteAnchor) {
+      // Non-finite anchors: the traversal comparator's subtraction is unstable
+      // on NaN, so group with explicit string-key-equivalent semantics —
+      // String() is injective on widened Float32 values, String(-0) === "0"
+      // groups ±0, and "NaN" groups NaN anchors with NaN anchors.
+      const cmpCoord = (u: number, v: number): number => {
+        if (sameAnchorCoord(u, v)) return 0;
+        if (Number.isNaN(u)) return -1;
+        if (Number.isNaN(v)) return 1;
+        return u < v ? -1 : 1;
+      };
+      const byCoincidence = Uint32Array.from({ length: n }, (_, id) => id);
+      byCoincidence.sort(
+        (a, b) =>
+          panelIds[a]! - panelIds[b]! ||
+          cmpCoord(xs[a]!, xs[b]!) ||
+          cmpCoord(ys[a]!, ys[b]!) ||
+          a - b,
+      );
+      let runStart = 0;
+      for (let i = 1; i <= n; i++) {
+        const first = byCoincidence[runStart]!;
+        const current = i < n ? byCoincidence[i]! : -1;
+        if (
+          i < n &&
+          panelIds[current] === panelIds[first] &&
+          sameAnchorCoord(xs[current]!, xs[first]!) &&
+          sameAnchorCoord(ys[current]!, ys[first]!)
+        )
+          continue;
+        emitCoincidentRun(byCoincidence, runStart, i);
+        runStart = i;
       }
-      members.length = 0;
+    } else {
+      // Fast path: with all-finite anchors, traversal order (panel, y, x,
+      // batch, primitive) makes coincident (panel, x, y) runs contiguous —
+      // zero extra sorting. ±0 pairs are equal under the comparator's
+      // subtraction, matching the old string-key grouping.
+      let runStart = 0;
+      for (let i = 1; i <= n; i++) {
+        const first = traversal[runStart]!;
+        const current = i < n ? traversal[i]! : -1;
+        if (
+          i < n &&
+          panelIds[current] === panelIds[first] &&
+          xs[current] === xs[first] &&
+          ys[current] === ys[first]
+        )
+          continue;
+        emitCoincidentRun(traversal, runStart, i);
+        runStart = i;
+      }
     }
-    groups.clear();
   }
   const permutations: Record<"x" | "y", Uint32Array> = {
     x: new Uint32Array(0),
     y: new Uint32Array(0),
   };
-  const buckets: Record<"x" | "y", Map<string, BucketBoundary>> = {
-    x: new Map<string, BucketBoundary>(),
-    y: new Map<string, BucketBoundary>(),
+  const buckets: Record<"x" | "y", Map<number, BucketBoundary>> = {
+    x: new Map<number, BucketBoundary>(),
+    y: new Map<number, BucketBoundary>(),
   };
+  // Rank tokens once (m log m, m = unique tokens) so the permutation sort's
+  // hot comparator is arithmetic instead of compareTokens object dispatch.
+  // Ranks preserve compareTokens order exactly.
+  const tokenRank = new Int32Array(tokens.length);
+  {
+    const tokenOrder = Array.from({ length: tokens.length }, (_, id) => id);
+    tokenOrder.sort((a, b) => compareTokens(tokens[a]!, tokens[b]!));
+    for (let rank = 0; rank < tokenOrder.length; rank++) tokenRank[tokenOrder[rank]!] = rank;
+  }
+  // Per-candidate layer ids, read once — the permutation comparator and the
+  // bucket boundary walk otherwise chase scene.batches[…].layerIndex per
+  // comparison.
+  const layerPerCandidate = new Uint32Array(n);
+  for (let id = 0; id < n; id++) layerPerCandidate[id] = scene.batches[batchIds[id]!]!.layerIndex;
+  // Bucket maps key on panel * tokenCount + tokenId (numeric, no per-bucket
+  // `${panel}|${key}` strings — dense plots have O(n) buckets).
+  const tokenCount = Math.max(tokens.length, 1);
+  const bucketKey = (panel: number, tokenId: number): number => panel * tokenCount + tokenId;
   for (const axis of ["x", "y"] as const) {
     const keys = axis === "x" ? xTokenIds : yTokenIds,
       orth = axis === "x" ? (flip ? xs : ys) : flip ? ys : xs;
@@ -322,9 +481,9 @@ export function buildCandidateStoreIndexes(
     valid.sort(
       (a, b) =>
         panelIds[a]! - panelIds[b]! ||
-        compareTokens(tokens[keys[a]!]!, tokens[keys[b]!]!) ||
+        tokenRank[keys[a]!]! - tokenRank[keys[b]!]! ||
         ranks[a]! - ranks[b]! ||
-        scene.batches[batchIds[a]!]!.layerIndex - scene.batches[batchIds[b]!]!.layerIndex ||
+        layerPerCandidate[a]! - layerPerCandidate[b]! ||
         series[a]! - series[b]! ||
         orth[a]! - orth[b]! ||
         batchIds[a]! - batchIds[b]! ||
@@ -342,50 +501,41 @@ export function buildCandidateStoreIndexes(
       const seriesBoundaries: SeriesBoundary[] = [];
       for (let seriesStart = start; seriesStart < end;) {
         const seriesFirst = valid[seriesStart]!;
-        const layerIndex = scene.batches[batchIds[seriesFirst]!]!.layerIndex;
+        const layerIndex = layerPerCandidate[seriesFirst]!;
         const seriesId = series[seriesFirst]!;
-        let seriesEnd = seriesStart + 1;
-        while (
-          seriesEnd < end &&
-          scene.batches[batchIds[valid[seriesEnd]!]!]!.layerIndex === layerIndex &&
-          series[valid[seriesEnd]!] === seriesId
-        )
-          seriesEnd++;
+        const seriesEnd = seriesRunEnd(
+          valid,
+          seriesStart,
+          end,
+          layerPerCandidate,
+          series,
+          layerIndex,
+          seriesId,
+        );
         seriesBoundaries.push({ start: seriesStart, end: seriesEnd, layerIndex, seriesId });
         seriesStart = seriesEnd;
       }
-      buckets[axis].set(`${panel}|${key}`, {
+      // The boundaries array is built locally and never mutated after this
+      // point; treat as immutable by convention (same contract as the
+      // coincident stacks) instead of paying one Object.freeze per bucket —
+      // dense plots have O(n) buckets.
+      buckets[axis].set(bucketKey(panel, key), {
         start,
         end,
-        series: Object.freeze(seriesBoundaries),
+        series: seriesBoundaries,
       });
       start = end;
     }
   }
 
-  // Do not retain the growable construction buffers beside their compact
-  // typed-array replacements (the 100k-candidate retained-memory budget is
-  // measured after this boundary).
-  for (const buffer of [
-    batchList,
-    primitiveList,
-    panelList,
-    rowList,
-    seriesList,
-    rankList,
-    sourceList,
-    lineageList,
-    autoModeList,
-    xList,
-    yList,
-    xTokenList,
-    yTokenList,
-    xDateList,
-    yDateList,
-    order,
-  ])
-    buffer.length = 0;
-  tokenIndex.clear();
+  // Do not retain construction scratch beside the store (the 100k-candidate
+  // retained-memory budget is measured after this boundary). The per-
+  // candidate columns were written into their final typed arrays directly,
+  // so only the permutation scratch order and the interning maps remain.
+  order.length = 0;
+  numberTokenIndex.clear();
+  stringTokenIndex.clear();
+  booleanTokenIndex.clear();
   return {
     scene,
     epoch,

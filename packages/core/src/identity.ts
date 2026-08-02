@@ -13,6 +13,8 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
   readonly #ids = new Map<Key, number>();
   /** Identity cache for frozen shared membership arrays (e.g. smooth finite-y lists). */
   readonly #byArray = new WeakMap<object, LineageRef>();
+  /** Direct key → ref index for singleton memberships (one per candidate row). */
+  readonly #singletonRefs = new Map<Key, LineageRef>();
 
   intern(keys: Iterable<Key>): LineageRef {
     // Shared frozen arrays (identity-index buckets) intern once; skip re-sort/tokenize.
@@ -22,8 +24,17 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
     // avoid. Only frozen arrays are ever stored below, and freezing cannot be
     // undone, so a hit is still sound.
     if (Array.isArray(keys)) {
-      const cached = this.#byArray.get(keys);
+      // Array.isArray narrows Iterable<Key> to any[] — re-type explicitly so
+      // indexed reads stay checked.
+      const arr: readonly Key[] = keys;
+      const cached = this.#byArray.get(arr);
       if (cached !== undefined) return cached;
+      // Singleton fast path: identity geoms intern [sourceRow] once per
+      // candidate, so the general path's Set + sort + join tokenization ran
+      // per mark. One Map hit per repeat; first-seen singletons register in
+      // #refs under the same token the general path computes, so a membership
+      // keeps ONE ref however it is interned.
+      if (arr.length === 1) return this.#internSingleton(arr[0]!);
     }
 
     const unique: Key[] = [];
@@ -45,6 +56,26 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
     this.#members.push(Object.freeze(unique));
     this.#refs.set(token, ref);
     if (Array.isArray(keys) && Object.isFrozen(keys)) this.#byArray.set(keys, ref);
+    return ref;
+  }
+
+  #internSingleton(key: Key): LineageRef {
+    const prior = this.#singletonRefs.get(key);
+    if (prior !== undefined) return prior;
+    const token = String(this.#id(key));
+    const shared = this.#refs.get(token);
+    if (shared !== undefined) {
+      this.#singletonRefs.set(key, shared);
+      return shared;
+    }
+    const ref = this.#members.length;
+    // Not frozen: dense identity plots intern one singleton per row, so a
+    // freeze per row showed up in profiles. The array is never exposed for
+    // mutation (keys() consumers get it read-only by type) — immutable by
+    // convention, as with candidate coincident stacks.
+    this.#members.push([key]);
+    this.#refs.set(token, ref);
+    this.#singletonRefs.set(key, ref);
     return ref;
   }
 

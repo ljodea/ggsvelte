@@ -155,11 +155,20 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
   // This mirrors paint batches while remaining private to CandidateStore.
   // maxRadius is fixed at build so hitTest never O(P)-scans batch.sizes (#978).
   const pointBatchIndexes = [...pointIdsByBatch.entries()].map(([batchIndex, ids]) => {
-    const pointXs = new Float64Array(ids.length);
-    const pointYs = new Float64Array(ids.length);
-    for (let i = 0; i < ids.length; i++) {
-      pointXs[i] = xs[ids[i]!]!;
-      pointYs[i] = ys[ids[i]!]!;
+    // When one points batch covers every candidate, its tree is coordinate-
+    // identical to the main anchor tree (ids[j] === j, no filled-path NaN
+    // stripping possible) — reuse it instead of building a second O(n) tree
+    // over the same points.
+    const reuseMain = ids.length === n && spatial !== null;
+    let batchSpatial = spatial;
+    if (!reuseMain) {
+      const pointXs = new Float64Array(ids.length);
+      const pointYs = new Float64Array(ids.length);
+      for (let i = 0; i < ids.length; i++) {
+        pointXs[i] = xs[ids[i]!]!;
+        pointYs[i] = ys[ids[i]!]!;
+      }
+      batchSpatial = new StaticQuadtree(pointXs, pointYs);
     }
     const batch = scene.batches[batchIndex]!;
     let maxRadius = 0;
@@ -173,7 +182,7 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
     return {
       batchIndex,
       ids,
-      spatial: new StaticQuadtree(pointXs, pointYs),
+      spatial: batchSpatial!,
       maxRadius,
     };
   });

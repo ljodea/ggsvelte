@@ -299,7 +299,10 @@ export function assembleCandidateStore(
       const key = keys[seedId];
       if (key === -1 || key === undefined) return null;
       const panel = panelIds[seedId]!;
-      const tuple: BucketBoundary | undefined = buckets[axis].get(`${panel}|${key}`);
+      // Numeric composite key mirrors the build side (panel * tokenCount + tokenId).
+      const tuple: BucketBoundary | undefined = buckets[axis].get(
+        panel * Math.max(tokens.length, 1) + key,
+      );
       if (tuple === undefined) return null;
       const { start, end } = tuple;
       const permutation = permutations[axis];

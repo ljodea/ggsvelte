@@ -19,13 +19,6 @@ export function canonicalAxisToken(value: CellValue): CanonicalAxisToken | null 
   return null;
 }
 
-/** Compact map key for a canonical axis token (package-internal). */
-export function tokenKey(token: CanonicalAxisToken): string {
-  if (token.kind === "number") return `n:${token.value}`;
-  if (token.kind === "string") return `s:${token.value.length}:${token.value}`;
-  return token.value ? "b:1" : "b:0";
-}
-
 const KIND_RANK = { number: 0, string: 1, boolean: 2 } as const;
 
 /** Total order over canonical axis tokens (package-internal). */
