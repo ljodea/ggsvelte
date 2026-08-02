@@ -55,8 +55,6 @@ export function assembleCandidateStore(
     orderByX,
     coincidentStack,
     coincidentAt,
-    permutations,
-    buckets,
   } = indexes;
   const hit = createHitGeometry(indexes);
   const query = buildSpatialIndex(indexes, hit);
@@ -299,6 +297,9 @@ export function assembleCandidateStore(
       const key = keys[seedId];
       if (key === -1 || key === undefined) return null;
       const panel = panelIds[seedId]!;
+      // Axis-group tables build lazily — group() is their only consumer, so
+      // first-hover sessions never pay the token sort / bucket walk.
+      const { permutations, buckets } = indexes.axisGroups();
       // Numeric composite key mirrors the build side (panel * tokenCount + tokenId).
       const tuple: BucketBoundary | undefined = buckets[axis].get(
         panel * Math.max(tokens.length, 1) + key,
