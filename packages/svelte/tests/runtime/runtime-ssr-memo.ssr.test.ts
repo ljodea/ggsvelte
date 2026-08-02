@@ -53,8 +53,9 @@ function makeCountingDeps(options?: { zoom?: boolean; initialSpec?: PortableSpec
       effectiveLegendFilters: () => [],
       root: () => null,
       resetZoom: () => {},
+      // Getter returns the optional host callback; none registered in this fixture.
       onrender: () => {
-        return;
+        /* no onrender callback */
       },
     },
   };
