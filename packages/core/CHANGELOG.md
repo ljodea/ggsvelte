@@ -1,5 +1,76 @@
 # @ggsvelte/core
 
+## 0.26.2
+
+### Patch Changes
+
+- b6d495a: # Faster density and loess stats
+
+  Migration: none. Internal algorithm work; outputs preserved within the
+  repo's existing parity contracts (R fixtures unchanged and green).
+
+  Measured on a loaded x86_64 box:
+
+  - `pipeline density 100k`: **~749 → ~42 ms** (budget 150 ms). Groups well
+    above the grid size now evaluate the KDE by linear binning onto the
+    evaluation grid plus an exact discrete gaussian convolution — O(n +
+    grid × taps) instead of O(n × grid) pairwise kernel evaluations.
+    Binning conserves mass and uses the same ±8·bw-truncated kernel values
+    as the direct window sum, so the paths agree to binning error — well
+    under the 5e-4 R-parity tolerance (R itself approximates by binned
+    FFT). Small groups keep the exact direct path, so the R fixtures are
+    unaffected. New characterization tests pin agreement with an
+    independent direct evaluation, mass conservation, and weight
+    normalization.
+  - `pipeline loess 5k`: **~703 → ~239 ms** (budget 710 ms). The
+    statistics loop's nearest-q window slides right monotonically across
+    the sorted evaluation points (amortized O(n)) with a cold-selection
+    fallback for single-x windows, and the weighted normal-equation
+    moments accumulate once in scalar locals (bit-identical) instead of a
+    per-point powers array plus a matrix rebuild per attempted degree.
+
+- add63a4: # Faster small-chart fixed overhead
+
+  Migration: none. Internal changes; outputs preserved (differential-tested
+  and snapshot-green).
+
+  Measured on a loaded x86_64 box, min-of-many: `pipeline stacked-bars 50x4`
+  **~1.7 → ~1.1 ms** (budget 1.1 ms), `svg render stacked-bars 50x4`
+  **~2.1 → ~1.1 ms** (budget 1.3 ms).
+
+  - Tick labels no longer pay one `toLocaleString` ICU call per label per
+    render. `formatEnUS` rounds the shortest decimal representation half-up
+    — matching ICU exactly, including the `1.005 → "1.01"` case `toFixed`
+    gets wrong — with exponential-repr values delegating to ICU; wired into
+    `defaultTickFormat`, `defaultLogTickFormat`, and the `scales.*.labels`
+    format-string helper. Differential-tested over 1M+ cases.
+  - Multi-column group interactions (category × fill) intern each column
+    raw and fold per-row intern ids into one numeric key instead of
+    building per-row `cellKey` join strings; tuple identity and first-seen
+    group numbering match the canonical path exactly, with fallback for
+    non-primitive columns.
+
+- 3b5b07f: # Faster SVG mark emission
+
+  Migration: none. Internal renderer changes; emitted SVG is byte-identical
+  (snapshot suite green).
+
+  Measured on a loaded x86_64 box, min-of-many: `svg render scatter 100k`
+  **~177 → ~88 ms** (budget 130 ms); `svg render scatter 10k` **~26 → ~12 ms**
+  (budget 15 ms).
+
+  - `renderPoints` grows one string monomorphically (the existing
+    `pathRingData` pattern) instead of a 100k-slot parts array plus final
+    join, reads style fields inline exactly as `resolvePointMark` does, and
+    emits circles — the scatter default — directly with the opacity
+    attribute composed in place. The old path computed
+    `pointShapeGeometry` twice per mark (once in `resolvePointMark`, once
+    in `pointShape`) and applied opacity via a per-mark string `.replace`.
+    Non-circle shapes keep the exact `pointShape` + replace path.
+  - Rect, segment, and glyph emitters get the same parts-array →
+    single-string conversion.
+  - @ggsvelte/spec@0.26.2
+
 ## 0.26.1
 
 ### Patch Changes
