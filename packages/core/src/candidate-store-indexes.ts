@@ -354,10 +354,14 @@ export function buildCandidateStoreIndexes(
         seriesBoundaries.push({ start: seriesStart, end: seriesEnd, layerIndex, seriesId });
         seriesStart = seriesEnd;
       }
+      // The boundaries array is built locally and never mutated after this
+      // point; treat as immutable by convention (same contract as the
+      // coincident stacks) instead of paying one Object.freeze per bucket —
+      // dense plots have O(n) buckets.
       buckets[axis].set(`${panel}|${key}`, {
         start,
         end,
-        series: Object.freeze(seriesBoundaries),
+        series: seriesBoundaries,
       });
       start = end;
     }
