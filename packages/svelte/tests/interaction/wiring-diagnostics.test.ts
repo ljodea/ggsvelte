@@ -9,8 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import type { InteractionDiagnostic } from "../../src/lib/interaction/interaction.js";
-import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import { render } from "../helpers/render.js";
+import { collect, settled } from "./diagnostic-harness.js";
 
 const rows = [
   { id: "a", x: 1, y: 10 },
@@ -25,28 +25,6 @@ const base = {
   // Default identity: rows expose `id` — no plot-level `key` (deprecated).
   ...size,
 };
-
-function collect(): {
-  diagnostics: PlotDiagnostic[];
-  ondiagnostic: (diagnostic: PlotDiagnostic) => void;
-} {
-  const diagnostics: PlotDiagnostic[] = [];
-  return {
-    diagnostics,
-    ondiagnostic: (diagnostic) => {
-      diagnostics.push(diagnostic);
-    },
-  };
-}
-
-async function settled(container: Element): Promise<void> {
-  await expect.poll(() => container.querySelector("svg") !== null).toBe(true);
-  // One extra macrotask drain so pending $effect flushes cannot race the
-  // absence assertions below.
-  await new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
 
 describe("scope-without-controller advisory", () => {
   it("advises when interactionScope is supplied without a controller", async () => {
