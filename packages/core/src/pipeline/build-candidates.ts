@@ -67,7 +67,7 @@ function createRawCandidateDatumResolver(
     const binding = bindings[layerIndex]!;
     const styleRead = (style: LayerBinding["size"]): StyleRead =>
       style.field === null
-        ? { column: null, constant: (style.scaledConstant ?? style.constant) as CellValue }
+        ? { column: null, constant: style.scaledConstant ?? style.constant }
         : table === null
           ? { column: null, constant: null }
           : { column: table.column(style.field), constant: null };

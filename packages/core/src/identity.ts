@@ -24,14 +24,17 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
     // avoid. Only frozen arrays are ever stored below, and freezing cannot be
     // undone, so a hit is still sound.
     if (Array.isArray(keys)) {
-      const cached = this.#byArray.get(keys);
+      // Array.isArray narrows Iterable<Key> to any[] — re-type explicitly so
+      // indexed reads stay checked.
+      const arr: readonly Key[] = keys;
+      const cached = this.#byArray.get(arr);
       if (cached !== undefined) return cached;
       // Singleton fast path: identity geoms intern [sourceRow] once per
       // candidate, so the general path's Set + sort + join tokenization ran
       // per mark. One Map hit per repeat; first-seen singletons register in
       // #refs under the same token the general path computes, so a membership
       // keeps ONE ref however it is interned.
-      if (keys.length === 1) return this.#internSingleton(keys[0]!);
+      if (arr.length === 1) return this.#internSingleton(arr[0]!);
     }
 
     const unique: Key[] = [];
