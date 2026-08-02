@@ -46,7 +46,7 @@ export const TRANSIENT_MEMBER_LIMIT = 8;
  * Magnitude used to rank hover slots for high-n stacks (#1274).
  * Group by x → rank on |y|; group by y → rank on |x|. Non-numeric → 0.
  */
-export function candidateValueMagnitude(candidate: CandidateFacts, groupAxis: "x" | "y"): number {
+function candidateValueMagnitude(candidate: CandidateFacts, groupAxis: "x" | "y"): number {
   const value = groupAxis === "x" ? candidate.yValue : candidate.xValue;
   if (typeof value === "number" && Number.isFinite(value)) return Math.abs(value);
   if (value instanceof Date) {
@@ -59,7 +59,7 @@ export function candidateValueMagnitude(candidate: CandidateFacts, groupAxis: "x
 /**
  * Signed numeric contribution for stack totals (#1274). Non-numeric → null.
  */
-export function candidateValueContribution(
+function candidateValueContribution(
   candidate: CandidateFacts,
   groupAxis: "x" | "y",
 ): number | null {
@@ -77,7 +77,7 @@ export function candidateValueContribution(
  * One value per `seriesId` (first-seen) so multi-layer compositions that paint
  * the same series twice (line+point, col+text) do not inflate the total (#1274).
  */
-export function groupMagnitudeTotal(
+function groupMagnitudeTotal(
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
 ): number | null {

@@ -4,12 +4,11 @@
 
 # Default tooltip content policy for high-n stacks
 
-Migration: none for hosts that use pin / custom content. Axis-group
-(`mode: "x"` / `"y"`) inspections now expose `groupTotal` (sum of numeric
-contributions across the full group). Default hover presentation already
-capped at 8 members; the selection is top-k by absolute value with the
-focused series force-included, plus a Total row and overflow line. Pin still
-lists the full group in the scrollable panel; `<Inspect content>` and
-`oninspect` remain the opt-in for custom full listings. A new advisory,
-`INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE`, fires when inspect is on and
-an ordinal color/fill domain has at least 16 levels.
+Migration: none — additive public surface only (`groupTotal` /
+`groupMemberCount` on axis-group inspections; new
+`INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE` diagnostic). Existing hosts
+keep working; pin / custom content / `oninspect` still cover full listings.
+
+Axis-group default hover selects top-k by absolute value (focused series
+always included), shows a stack Total row, and an overflow line when members
+are truncated. Pin still lists the full group in the scrollable panel.

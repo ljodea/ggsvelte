@@ -171,7 +171,7 @@ export function tooltipDisplayPayloadToken(
  * Magnitude for hover ranking of a display member (#1274).
  * Group by x → |y|; group by y → |x|. Non-numeric → 0.
  */
-export function memberValueMagnitude(
+function memberValueMagnitude(
   member: { readonly fields: readonly TooltipField[] },
   mode: "x" | "y",
 ): number {
