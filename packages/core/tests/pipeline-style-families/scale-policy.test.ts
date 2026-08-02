@@ -172,6 +172,77 @@ describe("style scale policy and validation", () => {
     expect(model.warnings.some((warning) => warning.code === "style-unknown-values")).toBe(false);
   });
 
+  // #1311: sequential style warn path must index the batch semantic array.
+  it("counts unknown sequential style values for null, unparseable, and OOB (#1311)", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 10 },
+            { x: 2, y: 2, amount: null },
+            { x: 3, y: 3, amount: "nope" },
+            { x: 4, y: 4, amount: 200 },
+            { x: 5, y: 5, amount: Number.POSITIVE_INFINITY },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: {
+          size: {
+            type: "sequential",
+            domain: [0, 100],
+            range: [2, 10],
+            naValue: 1,
+            unknownValue: 99,
+          },
+        },
+      }),
+      viewport,
+    );
+    // null → NA; "nope", 200 (OOB), Infinity → unknown.
+    expect(model.warnings.filter((warning) => warning.code === "style-na-values")).toEqual([
+      { code: "style-na-values", message: "1 size value(s) use the NA style." },
+    ]);
+    expect(model.warnings.filter((warning) => warning.code === "style-unknown-values")).toEqual([
+      { code: "style-unknown-values", message: "3 size value(s) use the unknown style." },
+    ]);
+  });
+
+  it("counts unknown binned style values without counting null as unknown (#1311)", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 2 },
+            { x: 2, y: 2, amount: null },
+            { x: 3, y: 3, amount: "nope" },
+            { x: 4, y: 4, amount: 50 },
+            { x: 5, y: 5, amount: 150 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: {
+          size: {
+            type: "binned",
+            breaks: [0, 10, 100],
+            range: [2, 10],
+            naValue: 1,
+            unknownValue: 99,
+          },
+        },
+      }),
+      viewport,
+    );
+    // null → NA; "nope" and 150 (above last break) → unknown; 2 and 50 in bins.
+    expect(model.warnings.filter((warning) => warning.code === "style-na-values")).toEqual([
+      { code: "style-na-values", message: "1 size value(s) use the NA style." },
+    ]);
+    expect(model.warnings.filter((warning) => warning.code === "style-unknown-values")).toEqual([
+      { code: "style-unknown-values", message: "2 size value(s) use the unknown style." },
+    ]);
+  });
+
   it("cycles finite shapes past the palette when onExhaust is cycle", () => {
     const model = runPipeline(
       fromAny({
