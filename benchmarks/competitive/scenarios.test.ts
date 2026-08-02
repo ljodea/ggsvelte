@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 
 import {
   CASES,
@@ -90,5 +91,21 @@ describe("competitive scenario catalog", () => {
       expect(libSupports(lib, "scatter-color")).toBe(true);
       expect(libSupports(lib, "line-multiseries")).toBe(true);
     }
+  });
+
+  test("area-multiseries ggsvelte adapters force identity position (fair vs competitors) (#1357)", () => {
+    // Competitors draw overlaid areas; geomArea defaults to stack.
+    const svg = readFileSync(new URL("./adapters/ggsvelte-svg.ts", import.meta.url), "utf8");
+    const canvas = readFileSync(new URL("./adapters/ggsvelte-canvas.ts", import.meta.url), "utf8");
+    expect(svg).toMatch(/geomArea\(\s*\{\s*position:\s*["']identity["']/);
+    expect(canvas).toMatch(/geomArea\(\s*\{[^}]*position:\s*["']identity["']/s);
+  });
+
+  test("browser harness does not re-sample replace as a second mount loop (#1357)", () => {
+    // replaceLib is a full remount alias of mountLib; re-running medianMs doubles
+    // wall time with no new information until in-place setData exists.
+    const harness = readFileSync(new URL("./measure-browser.ts", import.meta.url), "utf8");
+    expect(harness).not.toMatch(/competitiveBench\.replace/);
+    expect(harness).toMatch(/replaceMedianMs:\s*mountStats\.median|replaceMedianMs:\s*mountStats/);
   });
 });

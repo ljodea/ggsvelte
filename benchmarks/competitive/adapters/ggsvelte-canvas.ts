@@ -30,8 +30,9 @@ function lineSpec(data: SeriesColumns) {
 }
 
 function areaSpec(data: SeriesColumns) {
+  // Identity (not stack): competitors overlay series; default geomArea is stack.
   return gg(data, aes({ x: "x", y: "y", fill: "series", group: "series" }))
-    .geomArea({ render: "canvas" })
+    .geomArea({ position: "identity", render: "canvas" })
     .toPortable();
 }
 

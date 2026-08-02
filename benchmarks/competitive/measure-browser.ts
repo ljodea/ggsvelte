@@ -2,7 +2,8 @@
  * Browser paint competitive bench (Playwright Chromium).
  *
  * Matrix: browser-enabled libs × scenario cases (default subset, or COMPETITIVE_FULL=1).
- * Metrics per cell: cold mount median ms (includes double-rAF) and full remount median ms.
+ * Metrics per cell: cold mount median ms (includes double-rAF). replace* columns
+ * mirror mount until in-place setData exists (full remount is not re-sampled).
  *
  *   bun run measure-browser.ts
  *   COMPETITIVE_FULL=1 bun run measure-browser.ts
@@ -143,17 +144,9 @@ for (const cell of matrix) {
       );
       return r.ms;
     });
-    process.stderr.write(`bench replace ${label}...\n`);
-    const replaceStats = await medianMs(async () => {
-      const r = await page.evaluate(
-        async ({ library, caseId }) => {
-          const w = window as unknown as { competitiveBench: BenchApi };
-          return w.competitiveBench.replace(library, caseId);
-        },
-        { library: cell.lib.id, caseId: cell.caseId },
-      );
-      return r.ms;
-    });
+    // replaceLib is a full remount alias of mountLib today — re-running the
+    // median loop doubles wall time with no new information (#1357). Mirror
+    // mount stats until a real in-place setData metric lands.
     results.push({
       lib: cell.lib.id,
       caseId: cell.caseId,
@@ -163,9 +156,9 @@ for (const cell of matrix) {
       mountMedianMs: mountStats.median,
       mountMeanMs: mountStats.mean,
       mountP95Ms: mountStats.p95,
-      replaceMedianMs: replaceStats.median,
-      replaceMeanMs: replaceStats.mean,
-      replaceP95Ms: replaceStats.p95,
+      replaceMedianMs: mountStats.median,
+      replaceMeanMs: mountStats.mean,
+      replaceP95Ms: mountStats.p95,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
