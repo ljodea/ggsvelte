@@ -9,7 +9,11 @@
  * into lifecycle.json by scripts/gen-lifecycle.ts.
  */
 // @lifecycle-default experimental
-import "./install-temporal.js";
+import { installTemporal } from "./install-temporal.js";
+
+// Side-effect contract of this subpath: importing `@ggsvelte/core/temporal`
+// installs the Temporal polyfill parse path + guide planner.
+installTemporal();
 
 export { installTemporal } from "./install-temporal.js";
 export { installTemporalRuntime, getTemporalRuntime } from "./temporal-runtime.js";

@@ -120,5 +120,3 @@ export function registerAllGeomBatches(): void {
     return single(polygonBatch(frame, fx, color, fill, styles, warnings));
   });
 }
-
-registerAllGeomBatches();

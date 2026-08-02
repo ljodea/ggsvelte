@@ -2,15 +2,12 @@
 saveTextLockfile = true
 exact = false
 
-# Core unit tests import modules without going through the package barrel;
+# Core unit tests import modules without going through a registering entry;
 # install full temporal + grammar so ColumnTable/pipeline BC tests see the
 # complete runtime (lean `@ggsvelte/core/render` still omits this side effect).
 [test]
 preload = [
   # Spec-src graph: unit tests import packages/spec/src/*.ts directly.
   "./packages/spec/src/temporal-polyfill.ts",
-  "./packages/core/src/install-temporal.ts",
-  "./packages/core/src/install-candidates.ts",
-  "./packages/core/src/pipeline/frame-stats-register-all.ts",
-  "./packages/core/src/pipeline/geometry-register-all.ts",
+  "./packages/core/tests/setup-full-grammar.ts",
 ]

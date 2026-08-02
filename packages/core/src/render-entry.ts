@@ -11,8 +11,13 @@
  * into lifecycle.json by scripts/gen-lifecycle.ts.
  */
 // @lifecycle-default experimental
-import "./pipeline/geometry-register-basic.js";
-import "./pipeline/frame-stats-register-basic.js";
+// Side-effect contract of this subpath: importing `@ggsvelte/core/render`
+// registers basic geom batches + basic stat frames (identity charts).
+import { registerBasicStatFrames } from "./pipeline/frame-stats-register-basic.js";
+import { registerBasicGeomBatches } from "./pipeline/geometry-register-basic.js";
+
+registerBasicStatFrames();
+registerBasicGeomBatches();
 
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
 export { runPipeline } from "./pipeline/run-pipeline.js";

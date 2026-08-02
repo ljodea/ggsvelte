@@ -14,13 +14,16 @@
 // Panel routing shared by every renderer (SVG string, canvas, Svelte scene).
 export { groupBatchesByPanel } from "./group-batches-by-panel.js";
 
-// Full grammar: register every stat frame builder and geom batch.
-import "./pipeline/frame-stats-register-all.js";
-import "./pipeline/geometry-register-all.js";
-// Full temporal: Temporal polyfill parsing + guide planner.
-import "./install-temporal.js";
-// Interaction candidates: lazy candidate-store construction (#1421).
-import "./install-candidates.js";
+// Registration is explicit (#1420): this barrel has NO module-scope side
+// effects. Call `registerAll()` for the full grammar (the pre-#1420 barrel
+// behavior), `registerBasic()` for identity charts, or per-family
+// `register<Family>()` functions. `@ggsvelte/core/render` keeps basic
+// auto-registration on import for lean identity-chart graphs. Interaction
+// candidates install explicitly too (#1421): `installCandidates()` — GGPlot
+// calls it; headless renderers never need it.
+export { registerAll, registerBasic } from "./register.js";
+export { installTemporal } from "./install-temporal.js";
+export { installCandidates } from "./install-candidates.js";
 
 // Data binding
 export {
@@ -275,7 +278,8 @@ export type {
 } from "./legend.js";
 
 // Pipeline
-export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError, runPipeline } from "./pipeline.js";
+export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
+export { runPipeline } from "./pipeline/run-pipeline.js";
 export type {
   Advisory,
   AxisValueFormatter,
@@ -291,7 +295,7 @@ export type {
   ScaleDiagnosticFix,
   TrainedScales,
   ScaleDomainSnapshot,
-} from "./pipeline.js";
+} from "./pipeline/public-api.js";
 export { LineageStore } from "./identity.js";
 export type { LineageRef } from "./identity.js";
 export { buildCandidateStore, canonicalAxisToken } from "./candidate-store.js";

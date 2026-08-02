@@ -1,8 +1,9 @@
 /**
- * Side-effect module: wire candidate-store construction into the pipeline.
- * Imported by the full `@ggsvelte/core` barrel (and the test preload) so
- * `RenderModel.candidates` resolves; the lean `@ggsvelte/core/render` entry
- * omits it and never carries the candidate-store graph (#1421).
+ * Explicit candidate install (#1421, made call-site-explicit in #1420):
+ * wire candidate-store construction into the pipeline so
+ * `RenderModel.candidates` resolves. Called by GGPlot's runtime and the test
+ * preload; the lean `@ggsvelte/core/render` entry omits it and never carries
+ * the candidate-store graph.
  */
 import { installCandidateRuntime, getCandidateRuntime } from "./candidate-runtime.js";
 import type { CandidateBuildRuntime } from "./candidate-runtime.js";
@@ -21,5 +22,3 @@ export function installCandidates(): void {
   if (getCandidateRuntime() === REAL_RUNTIME) return;
   installCandidateRuntime(REAL_RUNTIME);
 }
-
-installCandidates();

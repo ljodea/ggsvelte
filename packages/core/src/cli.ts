@@ -29,6 +29,7 @@ import { lintSpec, SpecValidationError, validate } from "@ggsvelte/spec";
 import type { CLIDiagnosticCode } from "./diagnostics.js";
 import type { NamedData } from "./pipeline.js";
 import { PipelineError, runPipeline } from "./pipeline.js";
+import { registerAll } from "./register.js";
 import { countMarks, sceneToSVGString } from "./render-svg.js";
 
 export interface CLIIO {
@@ -212,6 +213,9 @@ export async function runCLI(
   io: CLIIO,
   options: CLIRunOptions = {},
 ): Promise<number> {
+  // The CLI always runs the full grammar (#1420): headless spec rendering has
+  // no component layer to self-register specialty geoms/stats.
+  registerAll();
   let args: ParsedArgs;
   try {
     args = parseArgs(argv);

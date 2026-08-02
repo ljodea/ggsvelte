@@ -72,5 +72,3 @@ export function registerBasicGeomBatches(): void {
   );
   registerGeomBatch("blank", () => []);
 }
-
-registerBasicGeomBatches();

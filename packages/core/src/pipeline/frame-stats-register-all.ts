@@ -116,5 +116,3 @@ export function registerAllStatFrames(): void {
     buildQqLineFrame(binding, table, groups, warnings),
   );
 }
-
-registerAllStatFrames();
