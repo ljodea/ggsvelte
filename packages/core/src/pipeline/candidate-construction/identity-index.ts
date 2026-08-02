@@ -7,6 +7,7 @@ import {
   appendSourceRowByGroupKey,
   appendSourceRowByGroupX,
   buildBinLineageBuckets,
+  resolveAggregateLineageXView,
 } from "./identity-buckets.js";
 import { globalSourceRowForInputRow } from "../source-row-lineage.js";
 
@@ -81,12 +82,17 @@ export function buildCandidateIdentityIndex(
               frame.binding.xTransform,
             )
           : null;
+      // Resolve conversion/parsed/position columns once per frame (#1307).
+      const lineageXView =
+        bucketByX && xField !== null
+          ? resolveAggregateLineageXView(frame.table, xField, frame.binding)
+          : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
         const sourceRow = globalSourceRowForInputRow(frame, localRow);
         const key = `${frameKey}:${group}`;
         appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
-        if (bucketByX && xField !== null) {
+        if (lineageXView !== null && xField !== null) {
           // Summary/boxplot: only finite y belongs in the final represented
           // membership. Always create the group×x key (include=false) so an
           // all-non-finite bucket is an empty frozen array, not a map miss.
@@ -96,7 +102,7 @@ export function buildCandidateIdentityIndex(
             panelIndex,
             layerIndex,
             group,
-            xKey: aggregateLineageXKey(frame.table, xField, localRow, frame.binding),
+            xKey: aggregateLineageXKey(frame.table, xField, localRow, frame.binding, lineageXView),
             sourceRow,
             include: includeInX,
           });
