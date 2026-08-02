@@ -1,6 +1,6 @@
 {
   "title": "Parts of a whole within each group",
-  "description": "Dodged or stacked proportions for composition inside categories.",
+  "description": "Bars stacked to a full height so each segment reads as a share of its group.",
   "tags": ["bar", "fill", "proportion", "legend", "weight", "theme"],
   "docsSection": "Bars & columns"
 }

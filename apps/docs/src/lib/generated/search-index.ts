@@ -20588,7 +20588,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:proportions",
     kind: "example",
     title: "Parts of a whole within each group",
-    summary: "Dodged or stacked proportions for composition inside categories.",
+    summary: "Bars stacked to a full height so each segment reads as a share of its group.",
     href: "/examples/bar/proportions",
     keywords: [
       "Parts of a whole within each group",
@@ -20930,7 +20930,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:errorbar:mean-se",
     kind: "example",
     title: "Mean and standard error by group",
-    summary: "Mean ± SE when the experiment is the classic two-group comparison.",
+    summary: "Mean ± SE for a control and three hypnotic treatments.",
     href: "/examples/errorbar/mean-se",
     keywords: [
       "Mean and standard error by group",

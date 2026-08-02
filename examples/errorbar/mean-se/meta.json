@@ -1,6 +1,6 @@
 {
   "title": "Mean and standard error by group",
-  "description": "Mean \u00b1 SE when the experiment is the classic two-group comparison.",
+  "description": "Mean \u00b1 SE for a control and three hypnotic treatments.",
   "tags": ["errorbar", "summary", "mean-se", "jitter"],
   "docsSection": "Statistical summaries"
 }
