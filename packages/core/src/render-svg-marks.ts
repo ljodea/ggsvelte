@@ -9,7 +9,6 @@ import {
   pointShapePathD,
   resolveGlyphMark,
   resolvePathMark,
-  resolvePointMark,
   resolveRectMark,
   resolveSegmentMark,
 } from "./mark-style.js";
@@ -24,6 +23,8 @@ import type {
 import type { PointShape } from "./scales/style.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
+import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+
 import { stepCorners } from "./path-step.js";
 import { ringCuts } from "./ring-cuts.js";
 import { escapeXML, px } from "./render-svg-format.js";
@@ -90,25 +91,33 @@ function alphaAttr(alpha: number): string {
 }
 
 function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
-  const parts: string[] = [
-    `<g class="gg-batch gg-points" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`,
-  ];
   const n = batch.rowIndex.length;
   const themeInk = themeVar("ink", theme);
+  // Monomorphic string growth (no per-mark array slots + final join) — the
+  // same pattern pathRingData uses for dense lines. Style fields are read
+  // inline exactly as resolvePointMark reads them; circles (the scatter
+  // default) emit directly instead of building geometry twice (the old
+  // path computed pointShapeGeometry in resolvePointMark AND in
+  // pointShape) and running a per-mark opacity .replace.
+  let out = `<g class="gg-batch gg-points" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`;
+  const positions = batch.positions;
   for (let j = 0; j < n; j++) {
-    const style = resolvePointMark(batch, j, themeInk);
-    const opacity = batch.alphas === undefined ? "" : alphaAttr(style.alpha);
-    const mark = pointShape(
-      style.shape,
-      batch.positions[j * 2]!,
-      batch.positions[j * 2 + 1]!,
-      style.size,
-      style.fill,
-    );
-    parts.push(opacity === "" ? mark : mark.replace("/>", `${opacity}/>`));
+    const size = batch.sizes?.[j] ?? batch.size;
+    const shape =
+      batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
+    const fill = batch.colors?.[j] ?? batch.fill ?? themeInk;
+    const opacity = batch.alphas === undefined ? "" : alphaAttr(batch.alphas?.[j] ?? 1);
+    const x = positions[j * 2]!;
+    const y = positions[j * 2 + 1]!;
+    if (shape === "circle") {
+      out += `<circle class="gg-shape-circle" cx="${px(x)}" cy="${px(y)}" r="${px(size)}" fill="${fill}"${opacity}/>`;
+    } else {
+      const mark = pointShape(shape, x, y, size, fill);
+      out += opacity === "" ? mark : mark.replace("/>", `${opacity}/>`);
+    }
   }
-  parts.push("</g>");
-  return parts.join("");
+  out += "</g>";
+  return out;
 }
 
 /** Path data for one closed/open ring span (step-hv / step-vh / step-mid bends). */
