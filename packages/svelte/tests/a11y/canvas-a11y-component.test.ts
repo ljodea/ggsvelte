@@ -115,6 +115,10 @@ describe("CanvasA11y", () => {
     await until(() => view.container.querySelector(".gg-a11y-table") !== null);
     expect(row).toHaveBeenCalled();
     expect(view.container.querySelectorAll(".gg-a11y-table tbody tr").length).toBe(4);
+    // Open path reuses table.total for aria — still 4 marks, one materialise.
+    expect(view.container.querySelector(".gg-canvas-a11y")?.getAttribute("aria-label")).toContain(
+      "4 canvas-rendered marks",
+    );
   });
 
   it("renders field headers and body rows from a11yRows", async () => {

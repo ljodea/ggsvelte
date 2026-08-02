@@ -6,6 +6,20 @@
  */
 
 /**
+ * O(R) order fingerprint for a row array — length + per-row source ids.
+ * Builds via `join` (one final string) rather than `token +=` growth (#1329).
+ */
+function rowRefOrderToken(
+  rows: readonly unknown[],
+  sourceIdentity: (value: unknown) => string,
+): string {
+  if (rows.length === 0) return "v:0";
+  const parts: string[] = [`v:${String(rows.length)}`];
+  for (let index = 0; index < rows.length; index++) parts.push(sourceIdentity(rows[index]));
+  return parts.join(":");
+}
+
+/**
  * O(R) order fingerprint for plot data — row *references* and length, not
  * deep cell values. In-place reverse bumps the token; in-place cell edits on
  * the same row objects do not (hosts should replace rows/arrays for identity).
@@ -17,11 +31,7 @@ export function dataContentOrderToken(
   sourceIdentity: (value: unknown) => string,
 ): string {
   if (data === null || data === undefined) return "null";
-  if (Array.isArray(data)) {
-    let token = `v:${data.length}`;
-    for (let index = 0; index < data.length; index++) token += `:${sourceIdentity(data[index])}`;
-    return token;
-  }
+  if (Array.isArray(data)) return rowRefOrderToken(data, sourceIdentity);
   if (typeof data === "object") {
     const record = data as Record<string, unknown>;
     const fieldKeys = Object.keys(record);
@@ -29,11 +39,7 @@ export function dataContentOrderToken(
     // A bare column map may own a field named `values`/`columns` alongside
     // other arrays and must not short-circuit (Codex P2).
     if (fieldKeys.length === 1 && fieldKeys[0] === "values" && Array.isArray(record["values"])) {
-      const values = record["values"] as unknown[];
-      let token = `v:${values.length}`;
-      for (let index = 0; index < values.length; index++)
-        token += `:${sourceIdentity(values[index])}`;
-      return token;
+      return rowRefOrderToken(record["values"] as unknown[], sourceIdentity);
     }
     if (
       fieldKeys.length === 1 &&

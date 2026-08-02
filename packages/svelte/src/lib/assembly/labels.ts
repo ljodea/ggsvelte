@@ -46,20 +46,43 @@ export function zoomAnnouncement(domains: ReadonlyZoomDomains | null): string {
   return domains === null ? "Zoom reset." : "Zoom complete.";
 }
 
+/**
+ * Unique mapped field names across layers (first-seen order).
+ * Hosts that label many marks should call once per model and close over the
+ * result — `markLabel` / `datumLabel` recompute it per call (#1329).
+ */
+export function uniqueMappedFields(model: RenderModel): readonly string[] {
+  const seen = new Set<string>();
+  const fields: string[] = [];
+  for (const layer of model.layerFields) {
+    if (layer === undefined) continue;
+    for (const mapped of layer) {
+      if (seen.has(mapped.field)) continue;
+      seen.add(mapped.field);
+      fields.push(mapped.field);
+    }
+  }
+  return fields;
+}
+
+/** Label parts from a precomputed unique field list and a row record. */
+export function labelFromFields(
+  fields: readonly string[],
+  values: Record<string, CellValue>,
+  emptyFallback: string,
+): string {
+  if (fields.length === 0) return emptyFallback;
+  const parts: string[] = [];
+  for (const field of fields) parts.push(`${field} ${String(values[field] ?? "")}`);
+  return parts.join(", ");
+}
+
 /** Accessible per-mark label from the layer's mapped fields. */
 export function markLabel(model: RenderModel | null, row: number): string {
   if (model === null) return `data point ${row + 1}`;
   const values = model.row(row);
   if (values === null) return `data point ${row + 1}`;
-  const fields = model.layerFields.flat();
-  const seen = new Set<string>();
-  const parts: string[] = [];
-  for (const f of fields) {
-    if (seen.has(f.field)) continue;
-    seen.add(f.field);
-    parts.push(`${f.field} ${String(values[f.field] ?? "")}`);
-  }
-  return parts.join(", ") || `data point ${row + 1}`;
+  return labelFromFields(uniqueMappedFields(model), values, `data point ${row + 1}`);
 }
 
 export function datumLabel(
@@ -67,15 +90,8 @@ export function datumLabel(
   values: Record<string, CellValue> | null,
 ): string {
   if (values === null) return "No active datum";
-  const fields = model?.layerFields.flat() ?? [];
-  const seen = new Set<string>();
-  const parts: string[] = [];
-  for (const field of fields) {
-    if (seen.has(field.field)) continue;
-    seen.add(field.field);
-    parts.push(`${field.field} ${String(values[field.field] ?? "")}`);
-  }
-  return parts.join(", ") || "Active datum";
+  if (model === null) return labelFromFields([], values, "Active datum");
+  return labelFromFields(uniqueMappedFields(model), values, "Active datum");
 }
 
 export function inspectionLiveText(
