@@ -94,8 +94,8 @@ and Windows.
     values={["#d14d41", "#014d64", "#4385be"]}
   />
   <Labs
-    title="Deaths in the Crimea, 1854–56"
-    subtitle="Annual rate per 1,000 — disease dwarfs combat, then collapses"
+    title="Stacked deaths by cause over time"
+    subtitle="Monthly rates split so each band is one cause of death"
     x="Month"
     y="Deaths per 1,000 per year"
     fill="Cause"
@@ -131,8 +131,8 @@ and Windows.
     values={["#8b7ec8", "#3aa99f"]}
   />
   <Labs
-    title="Heights of Galton's 934 adult children"
-    subtitle="Two overlapping distributions, separated at the means"
+    title="Two densities on one axis"
+    subtitle="Heights for sons and daughters; the means separate while the ranges overlap"
     x="Height (inches)"
     y="Density"
     fill="Child"
@@ -209,8 +209,8 @@ and Windows.
   <ThemeGgplot2 />
   <FacetWrap field="pair" ncol={2} />
   <Labs
-    title="4,892 English children, measured by Pearson and Lee"
-    subtitle="Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent"
+    title="One panel per parent–child pair type"
+    subtitle="Child height histograms for father→son, father→daughter, mother→son, mother→daughter"
     x="Child's height (inches)"
     y="Children"
   />
@@ -246,8 +246,8 @@ and Windows.
     values={["#c14a3d", "#3c6e8f"]}
   />
   <Labs
-    title="Who sailed with the Armada, 1588"
-    subtitle="Soldiers outnumber sailors everywhere except the galleys and the light pataches"
+    title="Parts of a whole within each group"
+    subtitle="Share of soldiers and sailors in each squadron"
     x="Squadron"
     y="Share of complement"
     fill="Role"
@@ -281,8 +281,8 @@ and Windows.
   <CoordFixed />
   <ScaleColorContinuous scheme="viridis" labels="d" />
   <Labs
-    title="Eleven maps of the Great Lakes, 1688–1818"
-    subtitle="White crosses are the 39 true positions; each dot is one map's attempt at one of them"
+    title="Map attempts against true positions"
+    subtitle="White crosses are truth; each dot is one historical map's attempt at a point"
     x="Longitude (°)"
     y="Latitude (°)"
     color="Map year"
@@ -326,8 +326,8 @@ Guides are separate from scale math:
   <ThemeFew />
   <ScaleXDiscrete domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]} />
   <Labs
-    title="Michelson's five runs, 1879"
-    subtitle="Twenty measurements each — the runs disagree more than the readings within them"
+    title="Boxplots for five runs of the same experiment"
+    subtitle="Twenty measurements per run; the boxes show the runs disagree more than readings within a run"
     x="Run"
     y="Velocity (km/s − 299,000)"
   />
@@ -356,8 +356,8 @@ Guides are separate from scale math:
 <GGPlot data={britishExports} aes={{ x: "year", y: "value" }}>
   <ThemeFivethirtyeight />
   <Labs
-    title="British and Irish exports, 1855–1899"
-    subtitle="Raw four-digit strings infer a calendar scale"
+    title="Years inferred from raw four-digit strings"
+    subtitle="Export totals over time without pre-parsing dates in the table"
     x="Year"
     y="£ millions"
   />
@@ -389,8 +389,8 @@ Guides are separate from scale math:
   <ThemeFivethirtyeight />
   <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
   <Labs
-    title="The Salk vaccine field trial, 1954"
-    subtitle="Paralytic polio per 100,000 children in the randomised arm"
+    title="Columns with the rate printed on each bar"
+    subtitle="Paralytic polio per 100,000 children in each arm of the trial"
     x="Group"
     y="Cases per 100,000"
   />

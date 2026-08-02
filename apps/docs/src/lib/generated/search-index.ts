@@ -20961,11 +20961,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:facet:wrap",
     kind: "example",
-    title: "One panel per parent height class",
-    summary: "Facet wrap when a third variable should become a grid of small multiples.",
+    title: "One panel per parent–child pair type",
+    summary: "Facet wrap when a grouping field should become a grid of small multiples.",
     href: "/examples/facet/wrap",
     keywords: [
-      "One panel per parent height class",
+      "One panel per parent–child pair type",
       "Facets",
       "facet",
       "histogram",
@@ -20973,7 +20973,7 @@ export const DOCS_SEARCH_INDEX = [
       "wrap",
       "weight",
     ],
-    exact: ["One panel per parent height class"],
+    exact: ["One panel per parent–child pair type"],
   },
   {
     id: "example:facet:wrap-free-y",

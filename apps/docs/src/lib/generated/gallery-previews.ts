@@ -156,7 +156,7 @@ export const GALLERY_PREVIEWS = [
     id: "errorbar/mean-se",
     filename: "errorbar-mean-se-light.png",
     path: "/previews/errorbar-mean-se-light.png",
-    sha256: "0554bb8fb1e18d064b4c969d3f91274ee7d52d143a9d8a3f226b73ec78ab6662",
+    sha256: "30706502d9de99c9899db0de8f7eea94f39067247fa3e4c6d2af902550a02470",
   },
   {
     id: "errorbar/summary-bin",
@@ -174,7 +174,7 @@ export const GALLERY_PREVIEWS = [
     id: "facet/wrap",
     filename: "facet-wrap-light.png",
     path: "/previews/facet-wrap-light.png",
-    sha256: "8e4f9bb03a884ec65fb99ce77df870b0a9cd2f560f42ed142e01a20a8a3ee05e",
+    sha256: "f08045be64ded75bd55b8ce671eee6ada203fefa4604c30e18d14a5c5feac2c5",
   },
   {
     id: "facet/wrap-free-y",

@@ -19,8 +19,8 @@
   <ThemeGgplot2 />
   <FacetWrap field="pair" ncol={2} />
   <Labs
-    title="One panel per parent height class"
-    subtitle="Child height against the other parent; panels step through the first parent's height"
+    title="One panel per parent–child pair type"
+    subtitle="Child height histograms for father→son, father→daughter, mother→son, mother→daughter"
     x="Child's height (inches)"
     y="Children"
   />

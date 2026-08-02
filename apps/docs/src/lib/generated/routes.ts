@@ -12596,8 +12596,8 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/facet/wrap",
-    title: "One panel per parent height class — ggsvelte gallery",
-    description: "Facet wrap when a third variable should become a grid of small multiples.",
+    title: "One panel per parent–child pair type — ggsvelte gallery",
+    description: "Facet wrap when a grouping field should become a grid of small multiples.",
     canonicalPath: "/examples/facet/wrap",
     kind: "page",
     index: true,

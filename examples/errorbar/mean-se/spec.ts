@@ -18,7 +18,8 @@ export default defineExample(
     .theme("hrbr")
     .labs({
       title: "Mean and standard error by group",
-      subtitle: "Sleep gain under two drugs, with bars for the standard error of each mean",
+      subtitle:
+        "Extra sleep under a control and three hypnotics, with bars for the SE of each mean",
       x: "Treatment",
       y: "Extra sleep (hours)",
     })

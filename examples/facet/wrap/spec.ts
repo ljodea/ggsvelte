@@ -12,9 +12,9 @@ export default defineExample(
     .facet({ wrap: "pair", ncol: 2 })
     .theme("ggplot2")
     .labs({
-      title: "One panel per parent height class",
+      title: "One panel per parent–child pair type",
       subtitle:
-        "Child height against the other parent; panels step through the first parent's height",
+        "Child height histograms for father→son, father→daughter, mother→son, mother→daughter",
       x: "Child's height (inches)",
       y: "Children",
     })
