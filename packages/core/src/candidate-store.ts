@@ -29,8 +29,10 @@ import type { Scene } from "./scene.js";
 export { canonicalAxisToken } from "./candidate-axis-token.js";
 export type { CanonicalAxisToken } from "./candidate-axis-token.js";
 export type {
+  CandidateBatchFacts,
   CandidateBuildFacts,
   CandidateDatum,
+  CandidateDatumColumns,
   CandidateFacts,
   CandidateGroup,
   CandidateInspectMode,
@@ -38,6 +40,7 @@ export type {
   CandidateRange,
   CandidateStore,
   CandidateStoreOptions,
+  CandidateStyleColumn,
   ResolvedCandidateInspectMode,
   TraversalDirection,
 } from "./candidate-store-types.js";

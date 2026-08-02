@@ -6,7 +6,16 @@
  * details of this module.
  */
 import { buildCandidateStore } from "../candidate-store.js";
-import type { CandidateBuildFacts, CandidateDatum, CandidateStore } from "../candidate-store.js";
+import type {
+  CandidateBatchFacts,
+  CandidateBuildFacts,
+  CandidateDatum,
+  CandidateDatumColumns,
+  CandidateStore,
+  CandidateStyleColumn,
+} from "../candidate-store.js";
+import { defaultAutoMode } from "../candidate-geometry.js";
+import { AUTO_MODE_CODE } from "../candidate-store-indexes.js";
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 import type { CellValue, ColumnTable } from "../table.js";
@@ -16,6 +25,7 @@ import { createLazyIdentityIndex } from "./candidate-construction/identity-index
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
+import { NO_ROW } from "./types-no-row.js";
 import type {
   FinalizedLayerFrame,
   LayerBinding,
@@ -45,13 +55,15 @@ type LayerTableState = {
   fill: readonly CellValue[] | null;
 };
 
-function createRawCandidateDatumResolver(
+/**
+ * Hoisted (layer, table) state shared by the per-candidate and columnar
+ * resolvers so both read the same columns, constants, and rank scales.
+ */
+function createRawResolverState(
   bindings: readonly LayerBinding[],
-  sources: SourceRegistry,
   color: ResolvedColorScale | null,
   fill: ResolvedColorScale | null,
-  lineage: LineageStore<number>,
-): (facts: CandidateBuildFacts) => CandidateDatum {
+) {
   // Grouping is derived per (layer, owning table) and indexed by the LOCAL row,
   // for the same reason value reads route through `sources.locate`: a layer
   // with its own DataRef (#589) has fields the plot's table does not. Deriving
@@ -120,6 +132,19 @@ function createRawCandidateDatumResolver(
   };
   const colorOrdinal = color?.kind === "ordinal" || color?.kind === "manual" ? color : null;
   const fillOrdinal = fill?.kind === "ordinal" || fill?.kind === "manual" ? fill : null;
+  return { stateFor, constantsFor, colorOrdinal, fillOrdinal };
+}
+
+function createRawCandidateDatumResolver(
+  bindings: readonly LayerBinding[],
+  sources: SourceRegistry,
+  color: ResolvedColorScale | null,
+  fill: ResolvedColorScale | null,
+  lineage: LineageStore<number>,
+  shared?: ReturnType<typeof createRawResolverState>,
+): (facts: CandidateBuildFacts) => CandidateDatum {
+  const { stateFor, constantsFor, colorOrdinal, fillOrdinal } =
+    shared ?? createRawResolverState(bindings, color, fill);
   return (facts) => {
     const binding = bindings[facts.layerIndex];
     const sourceRow = facts.rowIndex;
@@ -169,6 +194,279 @@ function createRawCandidateDatumResolver(
   };
 }
 
+/** All-default columns (binding missing): mirrors the `{}` per-candidate return. */
+const EMPTY_DATUM_COLUMNS: CandidateDatumColumns = {
+  xValue: null,
+  yValue: null,
+  sizeValue: null,
+  linewidthValue: null,
+  alphaValue: null,
+  shapeValue: null,
+  linetypeValue: null,
+  seriesId: null,
+  seriesRank: null,
+  sourceOrder: null,
+  lineage: null,
+  autoMode: null,
+};
+
+type OrdinalRankScale = NonNullable<ReturnType<typeof createRawResolverState>>["colorOrdinal"];
+
+/** Per-batch memo for ordinal `indexOf`: dense plots repeat values. */
+function rankMemo(scale: OrdinalRankScale): ((value: CellValue) => number) | null {
+  if (scale === null) return null;
+  const memo = new Map<CellValue, number>();
+  return (value) => {
+    const prior = memo.get(value);
+    if (prior !== undefined) return prior;
+    const rank = scale.scale.indexOf(value) ?? -1;
+    memo.set(value, rank);
+    return rank;
+  };
+}
+
+/** One style channel as a batch column: null-elided, constant, or a sliced source column. */
+function styleColumn(
+  style: StyleRead,
+  slice: <T>(column: readonly T[]) => readonly T[],
+): CandidateStyleColumn {
+  if (style.column === null) {
+    // Unmapped styles carry an undefined constant — elide to the null
+    // column so the store skips the writes (callback pushes undefined,
+    // which `fact()` also reads back as null).
+    return style.constant === undefined || style.constant === null
+      ? null
+      : { kind: "constant", value: style.constant };
+  }
+  return { kind: "column", values: slice(style.column) };
+}
+
+/** Batch autoMode codes: whole-batch answers fill once; only `rule` varies. */
+function autoModeColumn(binding: LayerBinding, facts: CandidateBatchFacts): Uint8Array | null {
+  const count = facts.primitiveIds.length;
+  const first = candidateAutoMode(binding, facts.semanticIds[0] ?? 0);
+  // Undefined (spoke/segment → geometry default in the store) and constant
+  // modes are whole-batch answers; only `rule` varies within a batch.
+  if (first === undefined) return null;
+  const code = AUTO_MODE_CODE[first];
+  let constant = true;
+  for (let i = 1; i < count; i++) {
+    if (candidateAutoMode(binding, facts.semanticIds[i]!) !== first) {
+      constant = false;
+      break;
+    }
+  }
+  if (constant) return new Uint8Array(count).fill(code);
+  const column = new Uint8Array(count);
+  for (let i = 0; i < count; i++) {
+    column[i] = AUTO_MODE_CODE[candidateAutoMode(binding, facts.semanticIds[i]!) ?? first]!;
+  }
+  return column;
+}
+
+/** Null-only scratch reads as the null column (elided writes in the store). */
+function styleColumnFrom(values: CellValue[]): CandidateStyleColumn {
+  return values.every((v) => v === null) ? null : { kind: "column", values };
+}
+
+/**
+ * Columnar twin of {@link createRawCandidateDatumResolver}: resolves the same
+ * values a batch at a time, so dense source-backed layers never materialize
+ * per-candidate objects. Two shapes:
+ *
+ * - CONTIGUOUS (all rows backed, ascending, one table — the dense common
+ *   case): x/y/style/series columns are the table's own arrays (whole-column
+ *   reuse) or ONE native slice per column; lineage is a single typed-array
+ *   fill through `internSingleton`; ordinal ranks memoize `indexOf` per
+ *   unique value.
+ * - SCATTERED (NO_ROW gaps, multi-table, non-monotonic): per-candidate
+ *   resolution mirroring the callback line-for-line, written into columns.
+ *
+ * Both reproduce the callback's observable semantics exactly, including the
+ * early-`{}` cases: NO_ROW rows take store defaults everywhere (constants
+ * dropped), while locatable-miss rows keep constants and singleton lineage.
+ */
+function createRawCandidateDatumColumnsResolver(input: {
+  scene: Scene;
+  bindings: readonly LayerBinding[];
+  sources: SourceRegistry;
+  color: ResolvedColorScale | null;
+  fill: ResolvedColorScale | null;
+  lineage: LineageStore<number>;
+  shared: ReturnType<typeof createRawResolverState>;
+}): (facts: CandidateBatchFacts) => CandidateDatumColumns | null {
+  const { scene, bindings, sources, lineage, shared } = input;
+  const { stateFor, constantsFor, colorOrdinal, fillOrdinal } = shared;
+
+  const contiguousColumns = (
+    binding: LayerBinding,
+    facts: CandidateBatchFacts,
+    table: ColumnTable,
+    localStart: number,
+  ): CandidateDatumColumns | null => {
+    const count = facts.primitiveIds.length;
+    const state = stateFor(facts.layerIndex, table);
+    // Slice semantics degrade exactly like the callback's out-of-bounds reads
+    // (`column[localRow]` → undefined → null / `?? 0`), so columns shorter
+    // than the run need no special-casing.
+    const slice = <T>(column: readonly T[]): readonly T[] =>
+      localStart === 0 && count === column.length
+        ? column
+        : column.slice(localStart, localStart + count);
+    const localRow = (i: number): number => localStart + i;
+
+    // Series: the groups array itself when the batch spans the table.
+    const seriesId: ArrayLike<number> = slice(state.groups);
+
+    // Ordinal ranks with the full colorRank → fillRank → group precedence.
+    const colorRankOf =
+      binding.color.field === null || state.color === null ? null : rankMemo(colorOrdinal);
+    const fillRankOf =
+      binding.fill.field === null || state.fill === null ? null : rankMemo(fillOrdinal);
+    let seriesRank: ArrayLike<number> | null = null;
+    if (colorRankOf !== null || fillRankOf !== null) {
+      const ranks = Array.from<number>({ length: count });
+      for (let i = 0; i < count; i++) {
+        const row = localRow(i);
+        const cr =
+          colorRankOf === null || state.color === null ? -1 : colorRankOf(state.color[row]!);
+        const fr = fillRankOf === null || state.fill === null ? -1 : fillRankOf(state.fill[row]!);
+        const group = state.groups[row] ?? 0;
+        ranks[i] = cr >= 0 ? cr : fr >= 0 ? fr : group;
+      }
+      seriesRank = ranks;
+    }
+
+    const lineageCol = new Uint32Array(count);
+    for (let i = 0; i < count; i++) lineageCol[i] = lineage.internSingleton(facts.rowIds[i]!);
+
+    return {
+      xValue: state.x === null ? null : slice(state.x),
+      yValue: state.y === null ? null : slice(state.y),
+      sizeValue: styleColumn(state.size, slice),
+      linewidthValue: styleColumn(state.linewidth, slice),
+      alphaValue: styleColumn(state.alpha, slice),
+      shapeValue: styleColumn(state.shape, slice),
+      linetypeValue: styleColumn(state.linetype, slice),
+      seriesId,
+      seriesRank,
+      sourceOrder: facts.rowIds,
+      lineage: lineageCol,
+      autoMode: autoModeColumn(binding, facts),
+    };
+  };
+
+  const scatteredColumns = (
+    binding: LayerBinding,
+    facts: CandidateBatchFacts,
+  ): CandidateDatumColumns => {
+    const count = facts.primitiveIds.length;
+    const batch = scene.batches[facts.batchIndex]!;
+    const colorRankOf = binding.color.field === null ? null : rankMemo(colorOrdinal);
+    const fillRankOf = binding.fill.field === null ? null : rankMemo(fillOrdinal);
+    const xValues: CellValue[] = Array.from<CellValue>({ length: count }).fill(null);
+    const yValues: CellValue[] = Array.from<CellValue>({ length: count }).fill(null);
+    const styleScratch: Record<"size" | "linewidth" | "alpha" | "shape" | "linetype", CellValue[]> =
+      {
+        size: Array.from<CellValue>({ length: count }).fill(null),
+        linewidth: Array.from<CellValue>({ length: count }).fill(null),
+        alpha: Array.from<CellValue>({ length: count }).fill(null),
+        shape: Array.from<CellValue>({ length: count }).fill(null),
+        linetype: Array.from<CellValue>({ length: count }).fill(null),
+      };
+    const seriesCol = new Uint32Array(count);
+    const rankCol = new Uint32Array(count);
+    const sourceOrderCol = new Uint32Array(count);
+    const lineageCol = new Uint32Array(count);
+    const autoModeCol = new Uint8Array(count);
+    for (let i = 0; i < count; i++) {
+      const rowId = facts.rowIds[i]!;
+      const primitiveIndex = facts.primitiveIds[i]!;
+      if (rowId === NO_ROW) {
+        // Early `{}` return in the callback: store defaults everywhere.
+        sourceOrderCol[i] = primitiveIndex;
+        autoModeCol[i] = AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]!;
+        continue;
+      }
+      const located = sources.locate(rowId);
+      const state =
+        located === null
+          ? constantsFor(facts.layerIndex)
+          : stateFor(facts.layerIndex, located.table);
+      const localRow = located?.localRow ?? -1;
+      const read = (column: readonly CellValue[] | null): CellValue =>
+        column === null || localRow < 0 ? null : column[localRow]!;
+      const readStyle = (style: StyleRead): CellValue =>
+        style.column === null ? style.constant : localRow < 0 ? null : style.column[localRow]!;
+      xValues[i] = read(state.x);
+      yValues[i] = read(state.y);
+      styleScratch.size[i] = readStyle(state.size) ?? null;
+      styleScratch.linewidth[i] = readStyle(state.linewidth) ?? null;
+      styleScratch.alpha[i] = readStyle(state.alpha) ?? null;
+      styleScratch.shape[i] = readStyle(state.shape) ?? null;
+      styleScratch.linetype[i] = readStyle(state.linetype) ?? null;
+      const group = localRow < 0 ? 0 : (state.groups[localRow] ?? 0);
+      const cr =
+        colorRankOf === null
+          ? -1
+          : colorRankOf(localRow < 0 || state.color === null ? null : state.color[localRow]!);
+      const fr =
+        fillRankOf === null
+          ? -1
+          : fillRankOf(localRow < 0 || state.fill === null ? null : state.fill[localRow]!);
+      seriesCol[i] = group;
+      rankCol[i] = cr >= 0 ? cr : fr >= 0 ? fr : group;
+      sourceOrderCol[i] = rowId;
+      lineageCol[i] = lineage.internSingleton(rowId);
+      const mode = candidateAutoMode(binding, facts.semanticIds[i]!);
+      autoModeCol[i] =
+        mode === undefined
+          ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]
+          : AUTO_MODE_CODE[mode];
+    }
+    return {
+      xValue: xValues,
+      yValue: yValues,
+      sizeValue: styleColumnFrom(styleScratch.size),
+      linewidthValue: styleColumnFrom(styleScratch.linewidth),
+      alphaValue: styleColumnFrom(styleScratch.alpha),
+      shapeValue: styleColumnFrom(styleScratch.shape),
+      linetypeValue: styleColumnFrom(styleScratch.linetype),
+      seriesId: seriesCol,
+      seriesRank: rankCol,
+      sourceOrder: sourceOrderCol,
+      lineage: lineageCol,
+      autoMode: autoModeCol,
+    };
+  };
+
+  return (facts) => {
+    const binding = bindings[facts.layerIndex];
+    const count = facts.primitiveIds.length;
+    if (binding === undefined || count === 0) return EMPTY_DATUM_COLUMNS;
+    // Contiguity probe: every row backed and ascending by one, both ends in
+    // the same table with matching local-row stride.
+    const rowIds = facts.rowIds;
+    let contiguous = rowIds[0] !== NO_ROW;
+    for (let i = 1; contiguous && i < count; i++) {
+      if (rowIds[i] !== rowIds[i - 1]! + 1) contiguous = false;
+    }
+    if (contiguous) {
+      const first = sources.locate(rowIds[0]!);
+      const last = sources.locate(rowIds[count - 1]!);
+      if (
+        first !== null &&
+        last !== null &&
+        first.table === last.table &&
+        last.localRow - first.localRow === count - 1
+      ) {
+        return contiguousColumns(binding, facts, first.table, first.localRow);
+      }
+    }
+    return scatteredColumns(binding, facts);
+  };
+}
+
 /**
  * Layers the author marked `inspect: false` (#1065). Both candidate strategies
  * pass this through, so the opt-out holds whichever one a spec takes.
@@ -204,11 +502,21 @@ function buildSourceBackedCandidates(input: {
   lineage: LineageStore<number>;
 }): CandidateStore {
   const { scene, runId, flip, bindings, sources, color, fill, lineage } = input;
+  const shared = createRawResolverState(bindings, color, fill);
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
     uninspectableLayers: uninspectableLayers(bindings),
-    datum: createRawCandidateDatumResolver(bindings, sources, color, fill, lineage),
+    datum: createRawCandidateDatumResolver(bindings, sources, color, fill, lineage, shared),
+    datumColumns: createRawCandidateDatumColumnsResolver({
+      scene,
+      bindings,
+      sources,
+      color,
+      fill,
+      lineage,
+      shared,
+    }),
   });
 }
 

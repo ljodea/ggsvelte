@@ -3882,11 +3882,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CandidateBatchFacts": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CandidateBuildFacts": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "CandidateDatum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateDatumColumns": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3915,6 +3923,10 @@
           "lifecycle": "experimental"
         },
         "CandidateStoreOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateStyleColumn": {
           "kind": "type",
           "lifecycle": "experimental"
         },

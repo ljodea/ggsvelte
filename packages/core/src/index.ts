@@ -294,13 +294,16 @@ export { LineageStore } from "./identity.js";
 export type { LineageRef } from "./identity.js";
 export { buildCandidateStore, canonicalAxisToken } from "./candidate-store.js";
 export type {
+  CandidateBatchFacts,
   CandidateBuildFacts,
   CandidateDatum,
+  CandidateDatumColumns,
   CandidateFacts,
   CandidateGroup,
   CandidateInspectMode,
   CandidateMatch,
   CandidateRange,
+  CandidateStyleColumn,
   ResolvedCandidateInspectMode,
   CandidateStore,
   CandidateStoreOptions,

@@ -59,6 +59,16 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
     return ref;
   }
 
+  /**
+   * Allocation-free twin of `intern([key])` for the dense-identity hot path
+   * (one singleton membership per candidate row). Shares the singleton and
+   * token caches with `intern` in both directions, so a membership keeps one
+   * ref however it is interned.
+   */
+  internSingleton(key: Key): LineageRef {
+    return this.#internSingleton(key);
+  }
+
   #internSingleton(key: Key): LineageRef {
     const prior = this.#singletonRefs.get(key);
     if (prior !== undefined) return prior;

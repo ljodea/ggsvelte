@@ -125,8 +125,11 @@ describe("source-backed candidate locate once (#1308)", () => {
       }
     });
 
-    // One locate per mark — not one per field + groupFor (was ~7× here).
-    expect(locateCalls).toBe(model.candidates.size);
-    expect(locateCalls).toBe(ROW_COUNT);
+    // At most one locate per mark — not one per field + groupFor (was ~7×
+    // here). The columnar resolver does far better on contiguous batches: a
+    // first/last probe (2 calls) proves the whole run's table ownership, so
+    // NO per-row locate happens at all.
+    expect(locateCalls).toBeLessThanOrEqual(model.candidates.size);
+    expect(locateCalls).toBeLessThanOrEqual(2);
   });
 });
