@@ -1,7 +1,8 @@
 /**
- * Content contract for the shipped agent skill (skills/ggsvelte/).
+ * Content contract for the published agent skill (packages/skill/, npm:
+ * @ggsvelte/skill)..
  *
- * The skill ships inside the ggsvelte npm package and teaches agents the
+ * The skill ships as the @ggsvelte/skill npm package and teaches agents the
  * grammar; a stale or broken claim there produces broken charts downstream.
  * Four guards:
  *
@@ -51,7 +52,7 @@ import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-at
 import { codeBlocks } from "./guide-code-contract.ts";
 
 const ROOT = join(import.meta.dir, "..");
-const SKILL_DIR = join(ROOT, "skills", "ggsvelte");
+const SKILL_DIR = join(ROOT, "packages", "skill");
 
 function markdownFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

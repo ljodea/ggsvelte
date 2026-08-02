@@ -12122,6 +12122,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-26-to-0-27",
+        title: "0.26 to 0.27",
+        level: 2,
+      },
+      {
+        id: "skill-moved-to-ggsvelte-skill",
+        title: "Skill moved to @ggsvelte/skill",
+        level: 3,
+      },
+      {
         id: "0-22-to-0-23",
         title: "0.22 to 0.23",
         level: 2,

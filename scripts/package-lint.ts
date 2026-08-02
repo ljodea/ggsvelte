@@ -28,6 +28,9 @@ const targets: Target[] = [
   { dir: "packages/core", attw: true },
   { dir: "packages/svelte", attw: false }, // .svelte d.ts imports (see header)
   { dir: "packages/cli", attw: true },
+  // packages/skill is deliberately absent: markdown-only (no exports, no
+  // dist), publint/attw have nothing to validate. Its pack shape is guarded
+  // by scripts/skill-package.test.ts instead.
 ];
 
 const root = process.cwd();

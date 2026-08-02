@@ -3,9 +3,10 @@
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-svelte)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fsvelte)
 
 Svelte 5 components for ggsvelte. Re-exports `@ggsvelte/spec` and
-`@ggsvelte/core`. Ships the agent skill at `skills/ggsvelte`. The
-`ggsvelte-render` CLI is a separate package —
-[`@ggsvelte/cli`](https://www.npmjs.com/package/@ggsvelte/cli) — install it in
+`@ggsvelte/core`. The agent skill ships separately as
+[`@ggsvelte/skill`](https://www.npmjs.com/package/@ggsvelte/skill), and the
+`ggsvelte-render` CLI as
+[`@ggsvelte/cli`](https://www.npmjs.com/package/@ggsvelte/cli) — install both in
 every sandbox where an agent authors specs.
 
 ```sh
@@ -54,7 +55,11 @@ DOM. Prefer `<Inspect />` and `<GuideLegend channel focus>` /
 
 ## Agent skill
 
-Published path: `node_modules/@ggsvelte/svelte/skills/ggsvelte/SKILL.md`.
+Published separately as
+[`@ggsvelte/skill`](https://www.npmjs.com/package/@ggsvelte/skill):
+`node_modules/@ggsvelte/skill/SKILL.md`. Copy it into your agent's skills
+directory as `ggsvelte/` and re-copy on version bumps — dependabot surfaces
+those. (Removed from this package in 0.27.0.)
 
 Emit PortableSpec JSON, run `validate()`, apply `fix.example` at `path`,
 re-validate, then render with `<GGPlot spec={…} />`, `renderToSVGString`, or

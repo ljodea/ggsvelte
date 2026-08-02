@@ -48,7 +48,13 @@ describe("package README npm front doors", () => {
   const readmes = packageReadmes();
 
   it("covers every publishable package", () => {
-    expect(readmes.map((r) => r.name).toSorted()).toEqual(["cli", "core", "spec", "svelte"]);
+    expect(readmes.map((r) => r.name).toSorted()).toEqual([
+      "cli",
+      "core",
+      "skill",
+      "spec",
+      "svelte",
+    ]);
   });
 
   for (const { name, markdown } of readmes) {

@@ -1,0 +1,37 @@
+{
+  "name": "@ggsvelte/skill",
+  "version": "0.26.2",
+  "description": "The ggsvelte agent skill (SKILL.md + references): teaches coding agents the ggsvelte grammar of graphics — Svelte 5 child-component composition, PortableSpec JSON, and the validate/render feedback loop. Versioned in lock-step with @ggsvelte/spec, @ggsvelte/core, @ggsvelte/svelte, and @ggsvelte/cli.",
+  "keywords": [
+    "agent-skill",
+    "agents",
+    "charts",
+    "claude-code",
+    "dataviz",
+    "ggplot2",
+    "grammar-of-graphics",
+    "llm",
+    "plot",
+    "skill",
+    "svelte",
+    "visualization"
+  ],
+  "homepage": "https://ggsvelte.sh/",
+  "bugs": "https://github.com/ljodea/ggsvelte/issues",
+  "license": "MIT",
+  "author": "Liam O'Dea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljodea/ggsvelte.git",
+    "directory": "packages/skill"
+  },
+  "files": [
+    "SKILL.md",
+    "references"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

@@ -408,8 +408,8 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(true);
   });
 
-  test("root skill source changes schedule unit (skill-sync) and svelte package surface", () => {
-    const plan = planJobs(classifyChangedPaths(["skills/ggsvelte/SKILL.md"]));
+  test("skill source changes schedule unit (skill content guards) and svelte package surface", () => {
+    const plan = planJobs(classifyChangedPaths(["packages/skill/SKILL.md"]));
     expect(plan.unit).toBe(true);
     expect(plan.component).toBe(true);
     expect(plan.build).toBe(true);
@@ -419,7 +419,7 @@ describe("planJobs", () => {
   test("skill reference changes route like the skill itself", () => {
     // The references/ tree ships in the npm package; a glob regression that
     // narrowed routing to SKILL.md alone must fail here, not in production.
-    const plan = planJobs(classifyChangedPaths(["skills/ggsvelte/references/geoms-and-stats.md"]));
+    const plan = planJobs(classifyChangedPaths(["packages/skill/references/geoms-and-stats.md"]));
     expect(plan.unit).toBe(true);
     expect(plan.component).toBe(true);
     expect(plan.build).toBe(true);
@@ -1148,6 +1148,7 @@ describe("unit content inputs cover actionlint config", () => {
       "packages/core/README.md",
       "packages/svelte/README.md",
       "packages/cli/README.md",
+      "packages/skill/README.md",
     ]) {
       expect(JOB_CONTENT_INPUTS.unit).toContain(path);
       const flags = classifyChangedPaths([path]);

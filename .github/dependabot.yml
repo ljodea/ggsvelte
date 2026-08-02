@@ -29,6 +29,7 @@ updates:
       - "/"
       - "/packages/cli"
       - "/packages/core"
+      - "/packages/skill"
       - "/packages/spec"
       - "/packages/svelte"
       - "/apps/docs"

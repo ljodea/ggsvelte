@@ -97,7 +97,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     ".github/ISSUE_TEMPLATE/**",
     ".github/DISCUSSION_TEMPLATE/**",
     ".changeset/**",
-    "skills/**",
+    "packages/skill/**",
     "lifecycle.json",
     "apps/docs/**",
     "examples/**",
@@ -117,6 +117,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/core/README.md",
     "packages/svelte/README.md",
     "packages/cli/README.md",
+    "packages/skill/README.md",
   ],
   // Package build + knip + type-aware + publint + examples tsc (no vite docs site).
   // apps/docs stays hashed: knip + oxlint --type-aware still cover the docs app,
@@ -135,7 +136,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "tests/evals/**",
     // build re-enters `bun run check` plus repo-wide type-aware lint + knip.
     "workers/**",
-    "skills/**",
+    "packages/skill/**",
     "lifecycle.json",
     "support-matrix.json",
     ".oxlintrc.json",
@@ -196,7 +197,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/core/**",
     "packages/svelte/**",
     "packages/cli/**",
-    "skills/ggsvelte/**",
+    "packages/skill/**",
   ],
   // Same inputs as component_svelte (shared packages/svelte tree); distinct
   // execution key so chromium+coverage and firefox+webkit cache independently.
@@ -206,7 +207,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/core/**",
     "packages/svelte/**",
     "packages/cli/**",
-    "skills/ggsvelte/**",
+    "packages/skill/**",
   ],
   component_spikes: [
     ...UNIVERSAL_CONTENT_INPUTS,
@@ -225,7 +226,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "apps/docs/**",
     "examples/**",
     "tests/visual/**",
-    "skills/ggsvelte/**",
+    "packages/skill/**",
     "lifecycle.json",
     // Docs generators that schedule docs_journeys must bust this cache
     // (Codex P2: content-only scripts were omitting gen-docs-search / gallery).
