@@ -399,3 +399,126 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
     model.dispose();
   });
 });
+
+describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
+  function axisInspection(
+    model: ReturnType<typeof runPipeline>,
+    seed: NonNullable<ReturnType<typeof model.candidates.candidate>>,
+  ) {
+    const target = resolvedTarget(model, seed, "x")!;
+    return materializeInspection(
+      {
+        model,
+        seed,
+        mode: "x",
+        state: "transient",
+        source: "pointer",
+      },
+      target,
+      "transient",
+      (index) => (model.row(index) as { id: string } | null)?.id ?? null,
+    );
+  }
+
+  function candidateOnLayer(
+    model: ReturnType<typeof runPipeline>,
+    layerIndex: number,
+  ): NonNullable<ReturnType<typeof model.candidates.candidate>> {
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate !== null && candidate.layerIndex === layerIndex) return candidate;
+    }
+    throw new Error(`no candidate on layer ${layerIndex}`);
+  }
+
+  it("does not double-count line+point paints of the same series", () => {
+    const data = [
+      { id: "a1", x: 1, y: 3, series: "a" },
+      { id: "b1", x: 1, y: 7, series: "b" },
+      { id: "a2", x: 2, y: 4, series: "a" },
+      { id: "b2", x: 2, y: 8, series: "b" },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "series" }))
+        .geomLine()
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    // Focus either layer at x=1 — total is 3+7 once, not twice.
+    for (const layerIndex of [0, 1]) {
+      const seed = candidateOnLayer(model, layerIndex);
+      // Prefer an x=1 seed when the first layer candidate is elsewhere.
+      let focus = seed;
+      for (let id = 0; id < model.candidates.size; id++) {
+        const c = model.candidates.candidate(id)!;
+        if (c.layerIndex === layerIndex && c.xValue === 1) {
+          focus = c;
+          break;
+        }
+      }
+      const inspection = axisInspection(model, focus);
+      expect(inspection.mode).toBe("x");
+      if (inspection.mode === "x" || inspection.mode === "y") {
+        expect(inspection.groupTotal).toBe(10);
+        expect(inspection.groupMemberCount).toBe(2);
+      }
+    }
+    model.dispose();
+  });
+
+  it("includes every distinct multi-layer series when focus is a thin overlay", () => {
+    // 12-series stacked columns + one-series trend line. Focus the line:
+    // Total and overflow must reflect the full display group (13), not only
+    // the overlay layer (1). Stack sum 1..12 = 78; trend y = 50 → 128.
+    const stackData = Array.from({ length: 12 }, (_, index) => ({
+      id: `s${index}`,
+      x: "A",
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const trendData = [{ id: "trend", x: "A", y: 50, series: "trend" }];
+    const model = runPipeline(
+      gg(stackData, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "stack" })
+        .geomLine({ data: trendData, aes: { x: "x", y: "y", color: "series" } })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const trendSeed = candidateOnLayer(model, 1);
+    const inspection = axisInspection(model, trendSeed);
+    expect(inspection.mode).toBe("x");
+    if (inspection.mode === "x" || inspection.mode === "y") {
+      expect(inspection.groupTotal).toBe(128);
+      expect(inspection.groupMemberCount).toBe(13);
+    }
+    // Transient cap still applies to listed members; overflow signal uses full count.
+    expect(inspection.members.length).toBeLessThanOrEqual(TRANSIENT_MEMBER_LIMIT);
+    model.dispose();
+  });
+
+  it("includes the overlay series when focus is on the stacked layer", () => {
+    const stackData = Array.from({ length: 12 }, (_, index) => ({
+      id: `s${index}`,
+      x: "A",
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const trendData = [{ id: "trend", x: "A", y: 50, series: "trend" }];
+    const model = runPipeline(
+      gg(stackData, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "stack" })
+        .geomLine({ data: trendData, aes: { x: "x", y: "y", color: "series" } })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const stackSeed = candidateOnLayer(model, 0);
+    const inspection = axisInspection(model, stackSeed);
+    expect(inspection.mode).toBe("x");
+    if (inspection.mode === "x" || inspection.mode === "y") {
+      expect(inspection.groupTotal).toBe(128);
+      expect(inspection.groupMemberCount).toBe(13);
+    }
+    model.dispose();
+  });
+});
