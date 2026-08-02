@@ -12370,7 +12370,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/bar/proportions",
     title: "Parts of a whole within each group — ggsvelte gallery",
-    description: "Dodged or stacked proportions for composition inside categories.",
+    description: "Bars stacked to a full height so each segment reads as a share of its group.",
     canonicalPath: "/examples/bar/proportions",
     kind: "page",
     index: true,
@@ -12577,7 +12577,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/errorbar/mean-se",
     title: "Mean and standard error by group — ggsvelte gallery",
-    description: "Mean ± SE when the experiment is the classic two-group comparison.",
+    description: "Mean ± SE for a control and three hypnotic treatments.",
     canonicalPath: "/examples/errorbar/mean-se",
     kind: "page",
     index: true,
