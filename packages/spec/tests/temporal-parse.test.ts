@@ -189,7 +189,7 @@ describe("strict temporal parsing", () => {
 
 describe("timezoneValidationFailure (hot-path cache)", () => {
   it("treats undefined and UTC aliases as valid without a failure object", () => {
-    expect(timezoneValidationFailure(undefined)).toBeNull();
+    expect(timezoneValidationFailure()).toBeNull();
     expect(timezoneValidationFailure("UTC")).toBeNull();
     expect(timezoneValidationFailure("Etc/UTC")).toBeNull();
     expect(timezoneValidationFailure("Z")).toBeNull();
