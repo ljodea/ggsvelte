@@ -109,7 +109,8 @@ export function sortGroupRowsByX(
     }
     for (const rows of groupRows) {
       if (isNonDecreasing(rows, keys)) continue;
-      rows.sort((a, b) => compareSortKeys(keys[a]!, keys[b]!));
+      // Band ranks are always finite (unknown → MAX_SAFE_INTEGER).
+      rows.sort((a, b) => keys[a]! - keys[b]!);
     }
     return;
   }
@@ -118,7 +119,10 @@ export function sortGroupRowsByX(
     // Multi-series long form is usually already x-sorted within each group
     // after bucketByGroup's ascending row walk — O(n) check beats O(n log n).
     if (isNonDecreasing(rows, x)) continue;
-    rows.sort((a, b) => compareSortKeys(x[a]!, x[b]!));
+    // Ribbon calls this *before* its finite filter and uses non-finite slots
+    // to split runs (ggplot2 NA gaps). Sort only finite-keyed rows in place so
+    // NaN/missing positions stay put and still break the band.
+    sortFiniteSlotsInPlace(rows, x);
   }
 }
 
@@ -131,12 +135,23 @@ function isNonDecreasing(rows: readonly number[], keys: ArrayLike<number>): bool
   return true;
 }
 
-/** Ascending compare; NaN sorts after every finite key (ribbon pre-filter). */
-function compareSortKeys(a: number, b: number): number {
-  const aNan = Number.isNaN(a);
-  const bNan = Number.isNaN(b);
-  if (aNan && bNan) return 0;
-  if (aNan) return 1;
-  if (bNan) return -1;
-  return a - b;
+/**
+ * Ascending sort of finite-keyed row indices only; leave non-finite slots in
+ * their original positions so ribbon gap splitting still sees them mid-group.
+ */
+function sortFiniteSlotsInPlace(rows: number[], keys: ArrayLike<number>): void {
+  const slots: number[] = [];
+  const finiteRows: number[] = [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]!;
+    if (Number.isFinite(keys[row]!)) {
+      slots.push(i);
+      finiteRows.push(row);
+    }
+  }
+  if (finiteRows.length < 2) return;
+  finiteRows.sort((a, b) => keys[a]! - keys[b]!);
+  for (let j = 0; j < slots.length; j++) {
+    rows[slots[j]!] = finiteRows[j]!;
+  }
 }
