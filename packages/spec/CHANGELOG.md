@@ -1,5 +1,36 @@
 # @ggsvelte/spec
 
+## 0.25.0
+
+### Minor Changes
+
+- 1fbbf45: # Drop Temporal polyfill from lean render bundles
+
+  Migration: none — additive public `ensureTemporalPolyfill` and lean-render size win.
+
+  Identity / numeric charts on `@ggsvelte/core/render` need no call-site change. Apps that parse non-UTC values from `@ggsvelte/spec` alone still get the polyfill via the public temporal facade (`parseTemporal`, column helpers) or `ensureTemporalPolyfill()`. Full `@ggsvelte/core` / `@ggsvelte/core/temporal` and agent `validate()` also register it.
+
+  The polyfill is no longer a static import on the shared parse foundation. Lean client graphs keep ISO/UTC calendar helpers without shipping Temporal + jsbi (~50KB+ gzip).
+
+### Patch Changes
+
+- d731a33: # Builder geom sugar deep-copies layer data once, not twice
+
+  Migration: none — same `.spec()` output and mutation isolation; one less
+  O(rows×cols) snapshot on `geom*({ data })`.
+
+  `layerFrom` no longer calls `toAuthoringDataRef`. Every geom sugar path is
+  `this.layer(layerFrom(...))`, and `layer()` remains the single defensive copy.
+
+- b6b8a61: # Hoist timezone validation off the per-row parse path
+
+  Migration: none — same parse results and failure messages; fewer allocations
+  when a column shares one timezone option.
+
+  `timezoneValidationFailure` uses a module-level UTC-alias Set and caches the
+  full `TemporalParseResult` (or null) so repeated checks for the same zone do
+  not rebuild the alias array or re-allocate invalid-zone failures.
+
 ## 0.24.3
 
 ## 0.24.2

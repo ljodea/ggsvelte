@@ -1,5 +1,72 @@
 # @ggsvelte/core
 
+## 0.25.0
+
+### Minor Changes
+
+- 1fbbf45: # Drop Temporal polyfill from lean render bundles
+
+  Migration: none — additive public `ensureTemporalPolyfill` and lean-render size win.
+
+  Identity / numeric charts on `@ggsvelte/core/render` need no call-site change. Apps that parse non-UTC values from `@ggsvelte/spec` alone still get the polyfill via the public temporal facade (`parseTemporal`, column helpers) or `ensureTemporalPolyfill()`. Full `@ggsvelte/core` / `@ggsvelte/core/temporal` and agent `validate()` also register it.
+
+  The polyfill is no longer a static import on the shared parse foundation. Lean client graphs keep ISO/UTC calendar helpers without shipping Temporal + jsbi (~50KB+ gzip).
+
+### Patch Changes
+
+- 36efe51: # Hoist source-backed candidate row locate once per mark
+
+  Migration: none — candidate datum fields stay byte-identical; only repeated
+  `SourceRegistry.locate` work for the same global row is removed from the
+  source-backed datum resolver.
+
+- 7d92209: # Index guide plans by aesthetic once when assembling the render model
+
+  Migration: none — same guidePlanIds assignment and plan-list order on every scale decision.
+
+  Pre-bucket plan ids by aesthetic so each decision indexes the bucket instead of rescanning the full guide plan list (O(D×P) → O(P+D)).
+
+- 8074811: # Hoist per-iteration invariants in stats and frame helpers
+
+  Migration: none — identical stat output and facet panel order.
+
+  Hoist `Object.keys` / column resolution / encode-band keys above hot loops, store hex-bin cell coords at insert time, and drop the redundant all-true contour mask (#1312).
+
+- 072640f: # Hoist candidate identity x-key column views once per frame
+
+  Migration: none — group×x bucket keys and lineage membership stay byte-identical;
+  only per-row conversion/parsed/position column work is removed from the identity index loop.
+
+- 120b5de: # Index batch semantics when counting unknown scale values
+
+  Binned color and sequential/binned numeric style scales count unknown training
+  values from the batch-parsed `view.semantic` array instead of re-deriving each
+  row via `semanticOf` (which re-paid encodeKey lookup or single-row parseColumn
+  on temporal misses). Warning counts stay the same.
+
+- d15954d: # Speed up multi-series line geometry and SVG path strings
+
+  Migration: none — same path vertices, group order, style-split rules, and SVG d strings for linear and step curves.
+
+  Cut redundant work on the competitive `line-3×N` path: continuous bucket finite-check without double normalize, skip x-sort when groups are already ordered, reuse style subpath arrays when stroke style is constant, monomorphic continuous position write, and a linear `pathData` fast path for dense SVG lines.
+
+- 7c748ec: # Batch paint-vector resolution in geometry emitters
+
+  Migration: none — same stroke and fill colours; fewer paint-vector calls and allocations per batch.
+
+  Geometry emitters that already accumulate style-row indices now resolve colour once per batch instead of once per item (segments, line subpaths, curves, polygons, ribbons, area/density groups).
+
+- 86c36ab: # Vertical band axes: truncate over-wide labels instead of hiding short ones
+
+  Migration: none — same tick values and formatters; only which category labels stay visible under a left-margin width cap when thinning cannot shrink measured width, plus density thinning for crowded tall lists.
+
+  When a categorical Y axis (native band Y, or categorical-on-Y after `coord_flip`) overflowed the left-margin cap, layout doubled `labelEvery` until almost every label was gone, even when the widest survivor never left the labeled set. Width-driven doubling now commits only when `maxLabeledWidth` actually shrinks (probing further doublings when a single step is a no-op); otherwise the path truncates with ellipsis and keeps short siblings labeled. A separate density pass still raises `labelEvery` when band step is below label height + min gap so crowded lists do not stack.
+
+- Updated dependencies [d731a33]
+- Updated dependencies [1fbbf45]
+- Updated dependencies [b6b8a61]
+  - @ggsvelte/spec@0.25.0
+
 ## 0.24.3
 
 ### Patch Changes
