@@ -173,7 +173,7 @@
     },
     "interaction/facet-intervals": {
       "filename": "interaction-facet-intervals-light.png",
-      "sourceSha256": "77c1ab0270c3569ad9f1febd57fc42a9783ce1cec13baedb62d786c73cf5eace",
+      "sourceSha256": "1c10ad4a1a4bbf1c52f515ffabe2b4584ae93c166dadf98c987861ab60fa771b",
       "pngSha256": "2ef27b680fc409704cfee02f0d871f3452878b92475ae3f4671101a655b35aba"
     },
     "interaction/legend-filter": {
@@ -183,7 +183,7 @@
     },
     "interaction/legend-focus": {
       "filename": "interaction-legend-focus-light.png",
-      "sourceSha256": "81a87303f9457347c95bfbd7239b65be4ab4504bdd79c643567daad54775cd50",
+      "sourceSha256": "4a106f302d14742584140458c767415ada280e29f5d7c081212367d763ad8d72",
       "pngSha256": "cf25582bd5eeed529539e0a59a0d9f9998acd184992a88de6256b34f70079624"
     },
     "interaction/linked-views": {
@@ -193,7 +193,7 @@
     },
     "interaction/tooltip": {
       "filename": "interaction-tooltip-light.png",
-      "sourceSha256": "e4d66647873d4bd3f257c72a746939a594a3aa7fac41a43121f9cc88848db85b",
+      "sourceSha256": "f3c9b2fe799cfae9b047d3aae77b2733a13ed91388f6964ee4a540e89d024531",
       "pngSha256": "f9b45994446101f5e782f2009d5511b3e87a571226b9416327959fd8c0f69830"
     },
     "jitter/basic": {
