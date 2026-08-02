@@ -73,16 +73,20 @@ function candidateValueContribution(
 }
 
 /**
- * Sum of finite contributions across the full axis group (not the hover cap).
- * One value per `seriesId` (first-seen) so multi-layer compositions that paint
- * the same series twice (line+point, col+text) do not inflate the total (#1274).
+ * Stack total for the default tooltip (#1274).
+ *
+ * Only candidates on `focusLayerIndex` contribute, one per `seriesId`. That
+ * keeps line+point (or col+text) from double-counting, and avoids treating
+ * `seriesId` as global across layers (it is a per-layer group index).
  */
 function groupMagnitudeTotal(
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
+  focusLayerIndex: number,
 ): number | null {
   const bySeries = new Map<number, number>();
   for (const member of members) {
+    if (member.layerIndex !== focusLayerIndex) continue;
     if (bySeries.has(member.seriesId)) continue;
     const contribution = candidateValueContribution(member, groupAxis);
     if (contribution === null) continue;
@@ -92,6 +96,16 @@ function groupMagnitudeTotal(
   let sum = 0;
   for (const value of bySeries.values()) sum += value;
   return sum;
+}
+
+/** Unique series count on the focus layer in the full axis group. */
+function groupSeriesCount(members: readonly CandidateFacts[], focusLayerIndex: number): number {
+  const seen = new Set<number>();
+  for (const member of members) {
+    if (member.layerIndex !== focusLayerIndex) continue;
+    seen.add(member.seriesId);
+  }
+  return seen.size;
 }
 
 /**
@@ -265,6 +279,7 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       axisValue,
       axisLabel: axisLabel(model, mode, axisValue),
       groupTotal: candidateValueContribution(seed, mode),
+      // Single-member fallback — one series on the seed layer.
       groupMemberCount: 1,
     });
   }
@@ -330,10 +345,10 @@ export function materializeInspection<
     members: Object.freeze(nonempty),
     axisValue: group.axisValue,
     axisLabel: axisLabel(model, mode, group.axisValue),
-    // Full-group total + size — independent of the hover cap so Total and
-    // "+N more" stay honest when members were truncated (#1274).
-    groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis),
-    groupMemberCount: completeCandidates.length,
+    // Focus-layer series total + count — independent of the hover cap so Total
+    // and "+N more" stay honest when members were truncated (#1274).
+    groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis, seed.layerIndex),
+    groupMemberCount: groupSeriesCount(completeCandidates, seed.layerIndex),
   });
 }
 
