@@ -70,12 +70,15 @@ ${body}`;
   }
 }
 
-if (import.meta.main) {
-  const repoRoot = join(import.meta.dir, "..");
-  await defineArtifact({
+export function plotSpecValidatorArtifact(repoRoot: string) {
+  return defineArtifact({
     path: join(repoRoot, REL),
     label: REL,
     regenerateWith: "validator:gen",
     build: () => formatGeneratedSource(join(repoRoot, REL), buildValidatorSource()),
-  }).cli();
+  });
+}
+
+if (import.meta.main) {
+  await plotSpecValidatorArtifact(join(import.meta.dir, "..")).cli();
 }
