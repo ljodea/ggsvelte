@@ -49,8 +49,19 @@ describe("docs example PNG-first (PR3)", () => {
     const frame = read("lib/components/ExampleLiveFrame.svelte");
     expect(frame).toContain('data-gg-ready="true"');
     expect(frame).toContain("liveReady");
-    expect(frame).toContain("aspect-ratio");
     expect(frame).toContain("MutationObserver");
+  });
+
+  it("sizes the shell from the in-flow preview, not invalid px aspect-ratio (#1363)", () => {
+    // aspect-ratio with 640px/400px is invalid CSS; with both children absolute
+    // the frame collapses to 0 height during upgrade. Keep the PNG in flow for
+    // size, lift only the live host, and drop overflow clipping once ready.
+    const frame = read("lib/components/ExampleLiveFrame.svelte");
+    expect(frame).not.toMatch(/aspect-ratio:\s*var\(--example-vr-width\)/);
+    expect(frame).not.toContain("under-live");
+    expect(frame).toMatch(/\.live-ready[\s\S]*overflow:\s*visible/);
+    // Bound the ready wait so a never-ready plot still reveals.
+    expect(frame).toMatch(/setTimeout|READY_FALLBACK|readyFallback|fallbackMs/);
   });
 
   it("hands keyboard focus to the plot after an intent upgrade (#1362)", () => {

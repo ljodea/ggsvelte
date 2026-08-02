@@ -117,21 +117,26 @@
   });
 
   // When Live mounts, keep the shell until data-gg-ready flips true.
+  // READY_FALLBACK_MS: reveal even if the plot never reports ready (#1363).
+  const READY_FALLBACK_MS = 10_000;
   $effect(() => {
     if (Live === null || host === null) {
       liveReady = false;
       return;
     }
     const root = host;
+    const markReady = (): void => {
+      liveReady = true;
+    };
     const already = root.querySelector('.gg-plot-root[data-gg-ready="true"]');
     if (already !== null) {
-      liveReady = true;
+      markReady();
       return;
     }
     liveReady = false;
     const observer = new MutationObserver(() => {
       if (root.querySelector('.gg-plot-root[data-gg-ready="true"]') !== null) {
-        liveReady = true;
+        markReady();
         observer.disconnect();
       }
     });
@@ -141,7 +146,11 @@
       subtree: true,
       childList: true,
     });
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(markReady, READY_FALLBACK_MS);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   });
 
   // After keyboard-triggered upgrade, move focus into the plot so Tab order
@@ -163,9 +172,10 @@
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
   {#if !liveReady}
+    <!-- Keep the PNG in normal flow so the frame height stays real while the
+         live host is absolutely positioned under it (#1363). -->
     <img
       class="example-preview"
-      class:under-live={Live !== null}
       src={`${base}${previewPath}`}
       alt={title}
       {width}
@@ -198,8 +208,15 @@
     width: 100%;
     max-width: var(--example-vr-width);
     min-width: 0;
-    /* Reserve the live plot box so layout does not jump while the shell upgrades. */
-    aspect-ratio: var(--example-vr-width) / var(--example-vr-height);
+    /* No aspect-ratio: --example-vr-* are lengths (…px); aspect-ratio only
+       accepts unitless numbers, and a permanent ratio clips tool-rail /
+       legend chrome once live. Size from the in-flow PNG instead (#1363). */
+  }
+
+  /* app.css sets overflow:hidden on .gg-example-frame; lift it once live so
+     taller interactive chrome (tool rail, a11y table) is not clipped. */
+  .gg-example-frame.live-ready {
+    overflow: visible;
   }
 
   .gg-example-frame.full-width {
@@ -211,15 +228,6 @@
     width: 100%;
     height: auto;
     background: #fff;
-  }
-
-  .example-preview.under-live {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    z-index: 1;
   }
 
   .load-interactive {
@@ -245,11 +253,10 @@
 
   .live-host {
     width: 100%;
-    height: 100%;
   }
 
   .live-host:not(.revealed) {
-    /* Keep the plot in the layout tree so it can measure, but hide the flash. */
+    /* Overlay the in-flow PNG while the plot measures; do not contribute height. */
     position: absolute;
     inset: 0;
     opacity: 0;
