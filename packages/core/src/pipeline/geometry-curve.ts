@@ -73,7 +73,6 @@ export function curveBatch(
   const semanticAnchors = new Uint8Array(totalVerts);
   const semanticIndex = new Uint32Array(totalVerts);
   const pathOffsets = new Uint32Array(sampled.length + 1);
-  const strokes: (string | null)[] = [];
   const styleRows: number[] = [];
 
   let cursor = 0;
@@ -81,7 +80,6 @@ export function curveBatch(
     pathOffsets[s] = cursor;
     const { row, positions: pts, count } = sampled[s]!;
     styleRows.push(row);
-    strokes.push(paintVector(frame, "color", color, [row])[0]!);
     const sourceRow = frame.rowIndex[row]!;
     for (let i = 0; i < count; i++) {
       positions[cursor * 2] = pts[i * 2]!;
@@ -94,6 +92,9 @@ export function curveBatch(
     }
   }
   pathOffsets[sampled.length] = cursor;
+
+  // One paint vector for all kept curve rows (#1309).
+  const strokes = paintVector(frame, "color", color, styleRows);
 
   const paint = layerPaintFromParams(binding.layer.params);
   const strokePaintResolved =

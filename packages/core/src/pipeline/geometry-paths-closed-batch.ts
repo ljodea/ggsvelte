@@ -11,7 +11,7 @@ export function writeClosedPathGroups(input: {
   groupRows: readonly (readonly number[])[];
   yTop: Float64Array;
   yBottom: Float64Array;
-  fillOf: (rows: readonly number[]) => string | null;
+  fillOf: (rows: readonly number[], groupIndex: number) => string | null;
 }): {
   positions: Float32Array;
   rowIndex: Uint32Array;
@@ -44,7 +44,7 @@ export function writeClosedPathGroups(input: {
       yTop,
       yBottom,
     });
-    fills.push(fillOf(rows));
+    fills.push(fillOf(rows, s));
     strokes.push(null);
   }
   pathOffsets[groupRows.length] = cursor;

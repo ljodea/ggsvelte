@@ -27,7 +27,7 @@ export function writeLineSubpaths(input: {
   const rowIndex = new Uint32Array(total);
   const frameRowIndex = includeFrameRows ? new Uint32Array(total) : undefined;
   const pathOffsets = new Uint32Array(subpaths.length + 1);
-  const strokes: (string | null)[] = [];
+  const styleRows = new Uint32Array(subpaths.length);
   let cursor = 0;
 
   // Continuous multi-series: monomorphic normalize + pixel map (no band/offset branch).
@@ -43,6 +43,7 @@ export function writeLineSubpaths(input: {
     for (let s = 0; s < subpaths.length; s++) {
       pathOffsets[s] = cursor;
       const rows = subpaths[s]!;
+      styleRows[s] = rows[0]!;
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i]!;
         const tx = xScale.normalizeTransformed(xNum[row]!);
@@ -53,12 +54,12 @@ export function writeLineSubpaths(input: {
         if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
         cursor++;
       }
-      strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
     }
   } else {
     for (let s = 0; s < subpaths.length; s++) {
       pathOffsets[s] = cursor;
       const rows = subpaths[s]!;
+      styleRows[s] = rows[0]!;
       for (const row of rows) {
         const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
         const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
@@ -68,10 +69,11 @@ export function writeLineSubpaths(input: {
         if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
         cursor++;
       }
-      strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
     }
   }
   pathOffsets[subpaths.length] = cursor;
+  // One paint vector for all subpath representative rows (#1309).
+  const strokes = paintVector(frame, "color", color, styleRows);
   return {
     positions,
     rowIndex,

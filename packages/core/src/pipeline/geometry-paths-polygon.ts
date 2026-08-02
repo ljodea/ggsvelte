@@ -16,7 +16,7 @@ import {
   paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
-import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
+import { areaGroupFillsOf } from "./geometry-paths-area-fill.js";
 
 export function polygonBatch(
   frame: LayerFrame,
@@ -42,6 +42,11 @@ export function polygonBatch(
       ? undefined
       : resolveGradientPaint(paint.strokePaint, binding.index, "stroke");
   const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
+
+  // Representative rows first so fill/stroke resolve in one vector each (#1309).
+  const styleRows = groupRows.map((rows) => rows[0]!);
+  const fillPaints = areaGroupFillsOf(frame, fill, styleRows);
+  const strokePaints = paintVector(frame, "color", color, styleRows);
 
   let total = 0;
   for (const rows of groupRows) total += rows.length;
@@ -75,8 +80,8 @@ export function polygonBatch(
       closedFrameRows[cursor] = row;
       cursor++;
     }
-    fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
-    let stroke = paintVector(frame, "color", color, [rows[0]!])[0]!;
+    fills.push(fillPaints[s] ?? fillPaintResolved?.fallback ?? null);
+    let stroke = strokePaints[s]!;
     if (stroke === null && strokePaintResolved !== undefined) {
       stroke = strokePaintResolved.fallback;
     }
@@ -89,7 +94,6 @@ export function polygonBatch(
     alpha?: number;
     linewidth?: number;
   };
-  const styleRows = groupRows.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
