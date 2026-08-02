@@ -11,6 +11,27 @@ function bindingOf(binding: LayerBinding, aesthetic: StyleAesthetic) {
   return binding[aesthetic];
 }
 
+/**
+ * Catalog walk for one mapped column. One encodeKey per row (not two —
+ * indexableKeys and the catalog dedupe keyed separately); this walk
+ * dominates mapped-style profiles.
+ */
+function walkCatalogColumn(
+  column: readonly CellValue[],
+  indexableKeys: Set<string>,
+  seen: Set<string>,
+  catalog: CellValue[],
+): void {
+  for (let i = 0; i < column.length; i++) {
+    const key = encodeKey(column[i]!);
+    indexableKeys.add(key);
+    if (!seen.has(key)) {
+      seen.add(key);
+      catalog.push(column[i]!);
+    }
+  }
+}
+
 export function collectStyleValues(input: {
   aesthetic: StyleAesthetic;
   frames: readonly LayerFrame[];
@@ -113,17 +134,7 @@ export function collectStyleValues(input: {
       anyIndexable = true;
       if (catalogTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
       if (walkCatalog) {
-        // One encodeKey per row (not two — indexableKeys and the catalog
-        // dedupe keyed separately); this walk dominates mapped-style profiles.
-        const column = catalogTable.column(mapped.field);
-        for (let i = 0; i < column.length; i++) {
-          const key = encodeKey(column[i]!);
-          indexableKeys.add(key);
-          if (!seen.has(key)) {
-            seen.add(key);
-            catalog.push(column[i]!);
-          }
-        }
+        walkCatalogColumn(catalogTable.column(mapped.field), indexableKeys, seen, catalog);
       }
     }
     if (mapped.scaledConstant !== null) {
