@@ -138,6 +138,20 @@ describe("ribbon geom", () => {
     expect(batch.pathOffsets.length - 1).toBe(1);
   });
 
+  it("keeps a gap when the running y is missing mid-group (#1371)", () => {
+    const model = runPipeline(
+      gg(
+        { y: [5, null, 1, 2], lo: [0, 0, 0, 0], hi: [1, 1, 1, 1] },
+        aes({ y: "y", xmin: "lo", xmax: "hi" }),
+      )
+        .geomRibbon()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.pathOffsets.length - 1).toBe(1);
+  });
+
   it("survives coord flip", () => {
     const model = runPipeline(
       gg({ x: [1, 2, 3], lo: [1, 2, 1], hi: [3, 4, 3] }, aes({ x: "x", ymin: "lo", ymax: "hi" }))

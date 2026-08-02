@@ -138,8 +138,9 @@ function isNonDecreasing(rows: readonly number[], keys: ArrayLike<number>): bool
 /**
  * Ascending sort of finite-keyed row indices only; leave non-finite slots in
  * their original positions so ribbon gap splitting still sees them mid-group.
+ * Exported for y-oriented ribbon running-coord sorts.
  */
-function sortFiniteSlotsInPlace(rows: number[], keys: ArrayLike<number>): void {
+export function sortFiniteSlotsInPlace(rows: number[], keys: ArrayLike<number>): void {
   const slots: number[] = [];
   const finiteRows: number[] = [];
   for (let i = 0; i < rows.length; i++) {
