@@ -53,7 +53,9 @@ function makeCountingDeps(options?: { zoom?: boolean; initialSpec?: PortableSpec
       effectiveLegendFilters: () => [],
       root: () => null,
       resetZoom: () => {},
-      onrender: () => undefined,
+      onrender: () => {
+        return;
+      },
     },
   };
 }
