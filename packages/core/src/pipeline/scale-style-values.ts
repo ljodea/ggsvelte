@@ -96,7 +96,18 @@ export function resolveNumericStyleValueView(input: {
     config?.timezone !== undefined ||
     config?.disambiguation !== undefined;
   if (!requestsTemporal) {
-    const semantic = Float64Array.from(values, (value) => cellToNumber(value));
+    // Dense plots feed all-number columns; a per-element cellToNumber
+    // callback inside Float64Array.from does not inline well. Single fused
+    // pass with a coercion fallback on the first non-number.
+    const semantic = new Float64Array(values.length);
+    for (let i = 0; i < values.length; i++) {
+      const value = values[i]!;
+      if (typeof value !== "number") {
+        for (let j = i; j < values.length; j++) semantic[j] = cellToNumber(values[j]!);
+        break;
+      }
+      semantic[i] = value;
+    }
     return {
       semantic,
       temporalKind: null,
