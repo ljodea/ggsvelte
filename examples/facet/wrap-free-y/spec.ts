@@ -18,8 +18,8 @@ export default defineExample(
     .guides({ color: guideNone() })
     .theme("fivethirtyeight")
     .labs({
-      title: "London's bills of mortality, 1629–1710",
-      subtitle: "The ratio never once falls below 1 — Arbuthnot's argument, on its own scale",
+      title: "Facets with free y scales",
+      subtitle: "Christenings and burials on their own vertical ranges so neither series flattens",
       x: "Year",
       y: "",
     })

@@ -19,8 +19,8 @@
   <ThemeLinedraw />
   <ScaleXContinuous nice={false} />
   <Labs
-    title="Chests of 5,738 Scottish soldiers"
-    subtitle="theme_linedraw — black grid and border on white panel"
+    title="The same columns under a linedraw theme"
+    subtitle="Same chest counts with hard black lines and no grey fill"
     x="Chest circumference (inches)"
     y="Soldiers"
   />

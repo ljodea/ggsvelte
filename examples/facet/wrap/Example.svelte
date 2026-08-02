@@ -19,8 +19,8 @@
   <ThemeGgplot2 />
   <FacetWrap field="pair" ncol={2} />
   <Labs
-    title="4,892 English children, measured by Pearson and Lee"
-    subtitle="Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent"
+    title="One panel per parent height class"
+    subtitle="Child height against the other parent; panels step through the first parent's height"
     x="Child's height (inches)"
     y="Children"
   />

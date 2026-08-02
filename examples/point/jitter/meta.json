@@ -1,6 +1,6 @@
 {
   "title": "The same calories, with position jitter",
-  "description": "The fast-food calorie scatter again, using position_jitter on geom_point instead of the dedicated jitter geom.",
+  "description": "The fast-food calorie scatter again, with jitter on the point position instead of the dedicated jitter geom.",
   "tags": ["point", "jitter", "position", "scatter", "categorical"],
   "docsSection": "Points & scatter"
 }

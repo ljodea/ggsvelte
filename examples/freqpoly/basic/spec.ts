@@ -11,8 +11,8 @@ export default defineExample(
     .geomRule({ xintercept: 734.5, linewidth: 1.2, aes: aes({ color: { value: "#d14d41" } }) })
     .theme("fivethirtyeight")
     .labs({
-      title: "Michelson measures the speed of light, 1879",
-      subtitle: "Frequency polygon through bin centers — same data as the histogram",
+      title: "Frequency polygon through bin centres",
+      subtitle: "Same speed-of-light runs as the histogram, joined at the tops of the bins",
       x: "Velocity (km/s − 299,000)",
       y: "Runs",
     })

@@ -14,8 +14,8 @@ export default defineExample(
     .scaleColorManual({ domain: ["Astronomy", "Map"], values: ["#205ea6", "#a02f6f"] })
     .theme("tufte")
     .labs({
-      title: "Every name on the first statistical graph",
-      subtitle: "Van Langren, 1644 — the labels are the data: he named who got it wrong",
+      title: "Text as the data mark",
+      subtitle: "Each estimate is a name; the chart is a labelled strip of who made it",
       x: "Estimated Toledo–Rome longitude (°)",
       y: "Ordered by estimate",
       color: "Derived from",

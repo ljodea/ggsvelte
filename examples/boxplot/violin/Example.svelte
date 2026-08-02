@@ -24,8 +24,8 @@
     values={["#4c78a8", "#f58518", "#e45756", "#72b7b2", "#54a24b"]}
   />
   <Labs
-    title="Michelson's five runs, 1879 — violin view"
-    subtitle="Mirrored kernel density of velocity per run (geom_violin)"
+    title="Violin plots for the same five runs"
+    subtitle="Mirrored density of velocity so the shape of each run is visible"
     x="Run"
     y="Velocity (km/s − 299,000)"
     fill=""

@@ -16,8 +16,8 @@ export default defineExample(
     })
     .theme("tufte")
     .labs({
-      title: "Cavendish weighs the world, 1798",
-      subtitle: "geom_hline marks the modern earth density (5.517)",
+      title: "A horizontal rule at a known value",
+      subtitle: "Twenty-nine density readings with a line at the modern earth density 5.517",
       x: "Determination",
       y: "Density of the earth (water = 1)",
     })

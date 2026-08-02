@@ -136,7 +136,7 @@ ${QUICKSTART_BUILDER_FRAGMENT}
 
 ## Bundled data
 
-\`@ggsvelte/svelte/data\` exports three cited teaching tables (each also served
+\`@ggsvelte/svelte/data\` exports seven cited teaching tables (each also served
 as JSON under the same name on the docs site):
 
 - \`kyotoSakura\` — 838 peak cherry-blossom dates for Kyoto, 812-2026 CE
@@ -148,6 +148,19 @@ as JSON under the same name on the docs site):
 - \`mpg\` — 234 EPA fuel-economy rows for 38 popular models, 1999/2008
   (\`manufacturer\`, \`model\`, \`displ\`, \`class\`, \`drv\`, \`cty\`, \`hwy\`, …).
   Categorical comparison. Cite \`MPG_CITATION\`.
+
+- \`chocolateBars\` — 2,530 Flavors of Cacao bar reviews (\`cocoaPercent\`,
+  \`rating\`, company location, bean origin). Dense scatter and heatmaps.
+  Via TidyTuesday 2022-01-18; cite \`CHOCOLATE_BARS_CITATION\`.
+- \`coffeeRatings\` — 1,338 Coffee Quality Institute cupping lots
+  (\`totalCupPoints\`, aroma/flavor, origin, processing). Distributions and
+  continuous scatter. Via TidyTuesday 2020-07-07; cite \`COFFEE_RATINGS_CITATION\`.
+- \`beerProduction\` — 36 US national beer-production totals by package type,
+  2008–2019 (\`year\`, \`package\`, \`barrelsMillions\`). Dodged multi-series bars.
+  Via TidyTuesday 2020-03-31; cite \`BEER_PRODUCTION_CITATION\`.
+- \`fastfoodMenu\` — 515 US fast-food entrée nutrition rows (\`restaurant\`,
+  \`calories\`, fat/protein/sodium). Categorical scatter and jitter. Via
+  TidyTuesday 2018-09-04; cite \`FASTFOOD_MENU_CITATION\`.
 
 ## Grammar vocabulary
 

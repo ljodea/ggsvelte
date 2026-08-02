@@ -12,8 +12,8 @@ export default defineExample(
     })
     .theme("minimal")
     .labs({
-      title: "Heights of Galton's 934 adult children",
-      subtitle: "Two overlapping distributions, separated at the means",
+      title: "Two densities on one axis",
+      subtitle: "Heights for sons and daughters; the means separate while the ranges overlap",
       x: "Height (inches)",
       y: "Density",
       fill: "Child",

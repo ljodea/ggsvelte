@@ -9,8 +9,8 @@ export default defineExample(
     .scales(scaleFillContinuous({ scheme: "viridis" }))
     .theme("minimal")
     .labs({
-      title: "A thousand earthquakes off Fiji",
-      subtitle: "Every event above magnitude 4 since 1964, counted into hexagons",
+      title: "Hex bins for a dense cloud",
+      subtitle: "A thousand earthquakes by location off Fiji",
       x: "Longitude (°E)",
       y: "Latitude (°)",
       fill: "Events",

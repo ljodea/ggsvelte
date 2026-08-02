@@ -1,6 +1,6 @@
 {
-  "title": "How the Armada was loaded",
-  "description": "Ten squadrons of 1588 by ships and men aboard. Ten unordered categories are exactly what an even walk around the colour wheel is for.",
+  "title": "Scatter coloured by discrete group",
+  "description": "Discrete hue when categories are unordered and equal visual weight matters.",
   "tags": ["point", "color", "hue", "discrete", "scale"],
   "docsSection": "Points & scatter"
 }

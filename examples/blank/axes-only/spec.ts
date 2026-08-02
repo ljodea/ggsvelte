@@ -14,8 +14,8 @@ export default defineExample(
     })
     .theme("classic")
     .labs({
-      title: "The frame before the chart",
-      subtitle: "Two corner rows pin the axes of Halley's life table; nothing is drawn on them",
+      title: "Axes without marks",
+      subtitle: "The trained frame alone, before any geometry is drawn",
       x: "Age",
       y: "Surviving",
     })

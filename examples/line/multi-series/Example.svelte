@@ -30,8 +30,8 @@
     values={["#ed111a", "#014d64"]}
   />
   <Labs
-    title="Playfair's wheat and wages, 1565–1821"
-    subtitle="Shillings — the price swings, the wage only climbs"
+    title="Two series on one panel"
+    subtitle="Wheat price and a mechanic's weekly wage in shillings; the price swings, the wage climbs"
     x="Year"
     y="Shillings"
     color="Series"

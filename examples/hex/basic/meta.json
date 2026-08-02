@@ -1,6 +1,6 @@
 {
-  "title": "Fiji earthquakes in hexagons",
-  "description": "A thousand seismic events binned by where they struck: the counts pick out the plate junction and the Tonga trench running south towards New Zealand.",
+  "title": "Hex bins for a dense cloud",
+  "description": "Hex bins as an alternative to rectangular 2D bins.",
   "tags": ["hex", "heatmap", "density"],
   "docsSection": "Distributions"
 }

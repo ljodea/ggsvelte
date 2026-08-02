@@ -1,6 +1,6 @@
 {
-  "title": "Darwin's maize, pair by pair",
-  "description": "Fifteen paired height differences from Darwin's 1876 fertilisation trial, drawn as stairs from precomputed coordinates. Where the line crosses zero is his result.",
+  "title": "Step ECDF of paired differences",
+  "description": "Step ECDFs for cumulative distributions of differences or measurements.",
   "tags": ["step", "ecdf", "line", "geom"],
   "docsSection": "Lines & time"
 }

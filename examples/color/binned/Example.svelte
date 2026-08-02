@@ -24,8 +24,8 @@
   />
   <GuideColorsteps channel="color" position="bottom" direction="horizontal" />
   <Labs
-    title="How many beans can you see at once?"
-    subtitle="Jevons threw beans into a box 1,027 times — never wrong up to four"
+    title="How many items you can tell apart at once"
+    subtitle="Binned colour so nearby values share a fill step"
     x="Beans actually thrown"
     y="Beans estimated"
     color="Trials"

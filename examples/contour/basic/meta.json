@@ -1,6 +1,6 @@
 {
-  "title": "Maunga Whau in contour lines",
-  "description": "Heights across an Auckland volcano, drawn the way a topographic map draws them: rings of equal height, closing on the crater.",
+  "title": "Contours of height on a grid",
+  "description": "Contours when the input is a continuous surface on a grid.",
   "tags": ["contour", "stat", "path", "grid", "surface", "theme"],
   "docsSection": "Surfaces & grids"
 }

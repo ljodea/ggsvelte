@@ -21,8 +21,8 @@
   <CoordFixed />
   <ScaleColorContinuous scheme="viridis" labels="d" />
   <Labs
-    title="Eleven maps of the Great Lakes, 1688–1818"
-    subtitle="White crosses are the 39 true positions; each dot is one map's attempt at one of them"
+    title="Map attempts against true positions"
+    subtitle="White crosses are truth; each dot is one historical map's attempt at a point"
     x="Longitude (°)"
     y="Latitude (°)"
     color="Map year"

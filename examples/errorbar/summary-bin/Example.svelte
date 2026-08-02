@@ -19,7 +19,7 @@
 >
   <ThemeClassic />
   <Labs
-    title="Galton's children regress towards the middle"
+    title="Mean and standard error in each x class"
     subtitle="Mean child height ± one standard error in each one-inch class of mid-parent height"
     x="Mid-parent height (inches)"
     y="Child height (inches)"

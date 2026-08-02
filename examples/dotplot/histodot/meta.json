@@ -1,6 +1,6 @@
 {
-  "title": "Cavendish weighs the world",
-  "description": "Twenty-nine torsion-balance runs from 1798, one dot each, stacked where they fall. At this sample size a dotplot shows every measurement and still gives the shape.",
+  "title": "One dot per measurement, stacked in bins",
+  "description": "Dotplots when the sample is small enough that every observation should stay visible.",
   "tags": ["dotplot", "bindot", "stat", "bin", "point", "stack", "theme"],
   "docsSection": "Distributions"
 }

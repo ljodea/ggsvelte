@@ -19,8 +19,8 @@ export default defineExample(
     })
     .theme("classic")
     .labs({
-      title: "Quetelet's soldiers and the error curve",
-      subtitle: "5,738 Scottish chests against a normal with the same mean and spread",
+      title: "Observed counts against a fitted curve",
+      subtitle: "Chest measurements with a normal of the same mean and spread drawn through them",
       x: "Chest circumference (inches)",
       y: "Share of soldiers",
     })

@@ -23,8 +23,8 @@
     values={["#3a7d44", "#bc5215"]}
   />
   <Labs
-    title="Darwin's maize, curved"
-    subtitle="Fifteen pairs; each curve runs self → cross (geom_curve)"
+    title="Paired points joined by a curve"
+    subtitle="Each curve runs from the self-fertilised plant to its cross-fertilised pair"
     x="Pair"
     y="Final height (inches)"
     color=""

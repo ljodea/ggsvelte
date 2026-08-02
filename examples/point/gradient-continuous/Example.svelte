@@ -21,8 +21,8 @@
   <ScaleColorGradient low="#132B43" high="#56B1F7" />
   <ScaleXContinuous breaks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} />
   <Labs
-    title="Forty-three years of one register, stacked by month"
-    subtitle="Paris, 1812 to 1854; the ramp is the only thing separating the years"
+    title="Many years folded onto one seasonal axis"
+    subtitle="Monthly counts stacked by year; the colour ramp is what separates the years"
     x="Month"
     y="Women on the register"
     color="Year"

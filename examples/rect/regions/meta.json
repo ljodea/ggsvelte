@@ -1,6 +1,6 @@
 {
-  "title": "The price of wheat under twelve reigns",
-  "description": "Playfair's wheat series with each monarch's reign drawn as a shaded band behind it, the way Playfair drew them himself.",
+  "title": "Background rectangles for eras",
+  "description": "Rect regions when historical or policy eras should sit behind a series.",
   "tags": ["rect", "regions", "bands", "layers"],
   "docsSection": "Rectangles & grids"
 }

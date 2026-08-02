@@ -33,8 +33,8 @@
     <ThemeFivethirtyeight />
     <ScaleXContinuous labels="d" />
     <Labs
-      title="Playfair's fiscal three, 1770–1824"
-      subtitle="Filter any series; restored groups keep their original color"
+      title="Filter series from the legend"
+      subtitle="Debt, revenue, and expenditure; restored groups keep their original colour"
       x="Year"
       y="Playfair's index units"
       color="Series"

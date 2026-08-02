@@ -1,6 +1,6 @@
 {
-  "title": "Opening the axis down to water",
-  "description": "Cavendish's twenty-nine readings cover one unit, so on their own they say nothing about the claim they were made for. A blank row at water's density fixes that.",
+  "title": "Expanded domain with no marks",
+  "description": "Domain expansion when a reference value must stay inside the plot area.",
   "tags": ["blank", "point", "scales", "domain", "theme"],
   "docsSection": "Annotations & rules"
 }

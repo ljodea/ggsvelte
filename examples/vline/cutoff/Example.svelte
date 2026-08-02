@@ -19,8 +19,8 @@
 >
   <ThemeTufte />
   <Labs
-    title="Cavendish weighs the world, 1798"
-    subtitle="geom_vline: he refits the balance with a stiffer wire after trial 6"
+    title="A vertical rule at a known index"
+    subtitle="Determinations in reported order; the rule marks the trial after which the wire changed"
     x="Determination"
     y="Density of the earth (water = 1)"
   />

@@ -24,8 +24,8 @@
     values={["#c14a3d", "#3c6e8f"]}
   />
   <Labs
-    title="Who sailed with the Armada, 1588"
-    subtitle="Soldiers outnumber sailors everywhere except the galleys and the light pataches"
+    title="Parts of a whole within each group"
+    subtitle="Share of soldiers and sailors in each squadron"
     x="Squadron"
     y="Share of complement"
     fill="Role"

@@ -1,6 +1,6 @@
 {
-  "title": "Quetelet's soldiers and the error curve",
-  "description": "The chest measurements Quetelet used to claim human variation follows the astronomers' error curve, with that curve drawn over them.",
+  "title": "Observed counts against a fitted curve",
+  "description": "Function lines when theory (or a fit) should sit on top of the data.",
   "tags": ["function", "dnorm", "overlay", "line"],
   "docsSection": "Lines & rules"
 }

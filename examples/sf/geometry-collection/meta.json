@@ -1,6 +1,6 @@
 {
-  "title": "One feature, two pieces of ground",
-  "description": "Everything above 180 metres on Maunga Whau: the summit ridge and a separate rise, carried in one GeometryCollection and expanded into two closed parts.",
+  "title": "One feature with two separate polygons",
+  "description": "Geometry collections when one logical feature spans disconnected pieces.",
   "tags": ["sf", "geojson", "geometrycollection", "polygon", "fill", "map", "geom"],
   "docsSection": "Maps & spatial"
 }

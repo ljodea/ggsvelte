@@ -20,8 +20,8 @@
   <ThemeFew />
   <ScaleColorDiscrete scheme="tableau10" />
   <Labs
-    title="Literacy and crime in France, 1833"
-    subtitle="Guerry found no tidy relationship — higher means fewer crimes per head"
+    title="Two measures coloured by region"
+    subtitle="Literacy against crime rate; colour marks the region of each department"
     x="Literate conscripts (%)"
     y="Population per crime against persons"
     color="Region"

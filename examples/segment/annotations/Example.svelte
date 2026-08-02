@@ -23,8 +23,8 @@
     values={["#3a7d44", "#bc5215"]}
   />
   <Labs
-    title="Darwin's maize, 1876"
-    subtitle="Fifteen pairs grown side by side; the segment runs self → cross"
+    title="Segments from start to end of each pair"
+    subtitle="Each segment runs from the self-fertilised height to the cross-fertilised height"
     x="Pair"
     y="Final height (inches)"
     color=""

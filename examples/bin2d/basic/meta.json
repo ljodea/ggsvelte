@@ -1,6 +1,6 @@
 {
-  "title": "Old Faithful's two eruption modes",
-  "description": "Eruption length against the wait that follows, counted into rectangular cells: the Yellowstone geyser has a short mode and a long one, and little in between.",
+  "title": "Two-dimensional bins for a dense cloud",
+  "description": "2D bins when a scatter is too dense for individual points.",
   "tags": ["bin2d", "heatmap", "density"],
   "docsSection": "Distributions"
 }

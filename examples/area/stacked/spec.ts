@@ -17,8 +17,8 @@ export default defineExample(
     .scales({ x: { labels: "%b %Y" } })
     .theme("economist")
     .labs({
-      title: "Deaths in the Crimea, 1854–56",
-      subtitle: "Annual rate per 1,000 — disease dwarfs combat, then collapses",
+      title: "Stacked deaths by cause over time",
+      subtitle: "Monthly rates split so each band is one cause of death",
       x: "Month",
       y: "Deaths per 1,000 per year",
       fill: "Cause",

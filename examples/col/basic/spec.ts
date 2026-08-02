@@ -9,8 +9,8 @@ export default defineExample(
     .scales({ x: { nice: false } })
     .theme("classic")
     .labs({
-      title: "Chests of 5,738 Scottish soldiers",
-      subtitle: "The measurements that made the normal curve a claim about people",
+      title: "Counts across ordered chest sizes",
+      subtitle: "How many men fell in each chest-measure class",
       x: "Chest circumference (inches)",
       y: "Soldiers",
     })

@@ -14,8 +14,8 @@
   <ThemeClassic />
   <CoordFixed />
   <Labs
-    title="One feature, two pieces of ground"
-    subtitle="Everything on Maunga Whau above 180 m: the summit ridge and a rise east of it"
+    title="One feature with two separate polygons"
+    subtitle="Land above 180 m as a single collection: the summit ridge and a rise east of it"
     fill=""
   />
   <GeomSf alpha={0.85} linewidth={0.9} />

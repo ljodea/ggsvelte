@@ -1,6 +1,6 @@
 {
-  "title": "928 heights, 102 places to put them",
-  "description": "Galton recorded parents and children to the nearest inch, so most of his table hides under a few hundred dots. Sizing each mark by its count puts it back.",
+  "title": "Overlapping points sized by how many share a cell",
+  "description": "Count stat on points when discrete rounding collapses many rows onto few coordinates.",
   "tags": ["point", "count", "size", "overplot", "stat"],
   "docsSection": "Points & scatter"
 }

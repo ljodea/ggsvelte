@@ -13,8 +13,8 @@
 <GGPlot data={michelson} aes={{ x: "velocity" }} width={640} height={400}>
   <ThemeFivethirtyeight />
   <Labs
-    title="Michelson measures the speed of light, 1879"
-    subtitle="100 runs, km/s less 299,000 — the true value sits off the centre"
+    title="Histogram of a hundred experimental runs"
+    subtitle="Speed of light in km/s less 299,000; the modern value sits off the centre"
     x="Velocity (km/s − 299,000)"
     y="Runs"
   />

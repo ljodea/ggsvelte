@@ -16,8 +16,8 @@
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />
   <Labs
-    title="Maunga Whau as three simple features"
-    subtitle="The ground above 130, 140 and 150 metres, one GeoJSON polygon per row"
+    title="Simple features as filled polygons"
+    subtitle="Elevation bands on a hill drawn from simple-feature rings"
     fill="Metres"
   />
   <GeomSf alpha={0.55} linewidth={0.9} />

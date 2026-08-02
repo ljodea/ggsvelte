@@ -12,9 +12,9 @@ export default defineExample(
     .facet({ wrap: "pair", ncol: 2 })
     .theme("ggplot2")
     .labs({
-      title: "4,892 English children, measured by Pearson and Lee",
+      title: "One panel per parent height class",
       subtitle:
-        "Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent",
+        "Child height against the other parent; panels step through the first parent's height",
       x: "Child's height (inches)",
       y: "Children",
     })

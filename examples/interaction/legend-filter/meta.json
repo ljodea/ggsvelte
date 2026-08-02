@@ -1,6 +1,6 @@
 {
-  "title": "Playfair's fiscal three, 1770 to 1824",
-  "description": "Debt, revenue and expenditure. Filter any series from the legend and the ones that come back keep the colour they had.",
+  "title": "Filter series from the legend",
+  "description": "Legend filter when readers need to hide series without losing colour identity.",
   "tags": ["interaction", "legend", "filter", "stable-color", "keyboard", "touch"],
   "docsSection": "Interaction",
   "vrHeight": 720,

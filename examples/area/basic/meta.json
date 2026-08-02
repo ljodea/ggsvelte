@@ -1,6 +1,6 @@
 {
-  "title": "Halley's life table, 1693",
-  "description": "Survivors from a cohort of a thousand born in Breslau, drawn as the filled area the first life table implies.",
+  "title": "Survivors from a cohort of one thousand",
+  "description": "A single series drawn as a filled area under the curve. Use this when the area itself carries the quantity.",
   "tags": ["area", "line", "layers", "theme"],
   "docsSection": "Areas"
 }

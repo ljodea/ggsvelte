@@ -11,8 +11,8 @@ export default defineExample(
     .scales(scaleColorHue())
     .theme("minimal")
     .labs({
-      title: "How the Armada was loaded",
-      subtitle: "Ten squadrons, ships against men aboard; the galleys carried theirs in four hulls",
+      title: "Scatter coloured by discrete group",
+      subtitle: "Ten squadrons by ships and men aboard; each squadron gets its own hue",
       x: "Ships",
       y: "Soldiers and sailors",
       color: "Squadron",

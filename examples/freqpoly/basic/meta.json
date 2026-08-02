@@ -1,6 +1,6 @@
 {
-  "title": "Michelson's speed of light as a frequency polygon",
-  "description": "The same hundred runs as the histogram, joined through the bin centres instead of drawn as bars.",
+  "title": "Frequency polygon through bin centres",
+  "description": "Frequency polygons when you want a histogram's bins without the solid bars.",
   "tags": ["freqpoly", "bin", "line", "stat", "rule", "annotation", "theme"],
   "docsSection": "Distributions"
 }

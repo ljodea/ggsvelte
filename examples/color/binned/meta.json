@@ -1,6 +1,6 @@
 {
-  "title": "How many beans can you see at once?",
-  "description": "Jevons threw beans into a box 1,027 times and guessed the count without pausing. He was never wrong up to four, and increasingly wrong above it.",
+  "title": "How many items you can tell apart at once",
+  "description": "Binned continuous colour when discrete steps read clearer than a smooth ramp.",
   "tags": ["point", "color", "binned", "colorsteps", "legend"],
   "docsSection": "Color & legends"
 }

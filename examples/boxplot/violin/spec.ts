@@ -14,8 +14,8 @@ export default defineExample(
     .scales({ x: { domain: ["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"] } })
     .theme("few")
     .labs({
-      title: "Michelson's five runs, 1879 — violin view",
-      subtitle: "Mirrored kernel density of velocity per run (geom_violin)",
+      title: "Violin plots for the same five runs",
+      subtitle: "Mirrored density of velocity so the shape of each run is visible",
       x: "Run",
       y: "Velocity (km/s − 299,000)",
       fill: "",

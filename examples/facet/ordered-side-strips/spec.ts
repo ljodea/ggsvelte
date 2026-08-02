@@ -21,8 +21,8 @@ export default defineExample(
     .guides({ fill: guideNone() })
     .theme("light")
     .labs({
-      title: "Counting yeast under a microscope",
-      subtitle: "Gosset, 1907: cells per haemacytometer square, 400 squares per sample",
+      title: "Facets with ordered side strips",
+      subtitle: "Yeast counts under a microscope, one panel per dilution",
       x: "Cells in a square",
       y: "Squares",
     })

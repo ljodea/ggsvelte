@@ -1,6 +1,6 @@
 {
-  "title": "Halley's Breslau burials, 1687 to 1691",
-  "description": "Five years of burial records by age, with the band showing the observed year-to-year range at each age around the mean.",
+  "title": "A ribbon for year-to-year range",
+  "description": "Ribbons for uncertainty or observed range around a central series.",
   "tags": ["ribbon", "interval", "bounds", "sqrt"],
   "docsSection": "Areas"
 }

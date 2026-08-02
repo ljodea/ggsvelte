@@ -22,8 +22,8 @@
     domain={["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"]}
   />
   <Labs
-    title="The data the t-test was invented on"
-    subtitle="Cushny and Peebles, 1905: extra hours of sleep in eleven patients (mean ± se)"
+    title="Mean and standard error by group"
+    subtitle="Sleep gain under two drugs, with bars for the standard error of each mean"
     x="Treatment"
     y="Extra sleep (hours)"
   />

@@ -1,6 +1,6 @@
 {
-  "title": "Chests of 5,738 Scottish soldiers",
-  "description": "The measurements Quetelet used to argue that human variation follows the astronomers' error curve, and so the data behind the average man.",
+  "title": "Counts across ordered chest sizes",
+  "description": "Simple columns for discrete counts along one ordered axis.",
   "tags": ["col", "bars", "identity", "theme"],
   "docsSection": "Bars & columns"
 }

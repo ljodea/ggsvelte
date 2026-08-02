@@ -1,6 +1,6 @@
 {
-  "title": "Cavendish's readings against the modern value",
-  "description": "Twenty-nine torsion-balance determinations of the earth's density with a horizontal rule at the modern value of 5.517.",
+  "title": "A horizontal rule at a known value",
+  "description": "Horizontal rules for thresholds, targets, or modern reference values.",
   "tags": ["hline", "rule", "annotation", "line", "theme"],
   "docsSection": "Annotations & rules"
 }

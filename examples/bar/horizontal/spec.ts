@@ -9,8 +9,8 @@ export default defineExample(
     .coordFlip()
     .theme("fivethirtyeight")
     .labs({
-      title: "Armada tonnage by squadron, 1588",
-      subtitle: "Ordered smallest to largest, so coord flip reads bottom-up",
+      title: "Category totals, flipped so labels read across",
+      subtitle: "Ordered smallest to largest so the flip reads bottom-up",
       x: "Squadron",
       y: "Tons",
     })

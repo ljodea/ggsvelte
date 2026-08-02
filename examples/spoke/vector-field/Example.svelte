@@ -20,8 +20,8 @@
   <ThemeClassic />
   <CoordFixed />
   <Labs
-    title="Which way the water runs off Maunga Whau"
-    subtitle="Downhill direction at 140 points, arrow length by how steep the ground is"
+    title="Direction and length from each point"
+    subtitle="Flow off a hillside as angle and radius from each cell"
     x="Metres east"
     y="Metres north"
   />
