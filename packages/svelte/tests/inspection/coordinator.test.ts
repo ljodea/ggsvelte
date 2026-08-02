@@ -555,6 +555,58 @@ describe("inspection coordinator", () => {
     first.dispose();
     resized.dispose();
   });
+  it("keyed identity-change rebind does not build a row per candidate (#1318)", () => {
+    // Identity-epoch change skips the seedId fast path and full-scans. keyedPinMatch
+    // used to call model.row for every layer candidate (O(C·F) allocations). Row
+    // builds must stay O(matches + materialize), not O(C).
+    const count = 400;
+    const data = Array.from({ length: count }, (_, index) => ({
+      id: `r${index}`,
+      x: index,
+      y: (index % 11) + 1,
+    }));
+    const makeModel = () =>
+      runPipeline(
+        gg(data, aes({ x: "x", y: "y" }))
+          .geomPoint()
+          .spec(),
+        { width: 400, height: 300 },
+      );
+    const first = makeModel();
+    const next = makeModel();
+    expect(next.candidates.size).toBe(count);
+
+    const coordinator = createInspectionCoordinator(idKeys(data));
+    coordinator.resolve({
+      model: first,
+      seed: first.candidates.candidate(0)!,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: 1,
+      layoutEpoch: 1,
+    });
+
+    const originalRow = next.row.bind(next);
+    let rowReads = 0;
+    vi.spyOn(next, "row").mockImplementation((index: number) => {
+      rowReads++;
+      return originalRow(index);
+    });
+    const reconciled = coordinator.reconcilePinned({
+      model: next,
+      identityEpoch: 2,
+      layoutEpoch: 2,
+    });
+    expect(reconciled).not.toBeNull();
+    expect(reconciled!.snapshot.focus.key).toBe("r0");
+    // Full-scan keyed match must not allocate a row for every candidate. Materialize
+    // still reads focus (+ members); a pre-fix pass is ~C (+ materialize) row reads.
+    expect(rowReads).toBeLessThan(40);
+    expect(rowReads).toBeLessThan(count / 5);
+    first.dispose();
+    next.dispose();
+  });
   it("rejects keyed seedId fast path when primitive role no longer matches", () => {
     const data = [{ id: "a", x: 1, y: 2, ymin: 1, ymax: 3 }];
     const points = runPipeline(
