@@ -5201,6 +5201,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Stratum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "TrainedScales": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -5214,6 +5218,10 @@
           "lifecycle": "experimental"
         },
         "pathData": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "planStrata": {
           "kind": "value",
           "lifecycle": "experimental"
         },

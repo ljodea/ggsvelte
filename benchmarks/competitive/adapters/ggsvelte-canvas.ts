@@ -1,11 +1,10 @@
 /**
  * Canvas-mark ggsvelte mounts (pipeline + planStrata + drawStratum).
- * Note: importing planStrata from @ggsvelte/core (not /render) until strata
- * is re-exported from the lean entry.
+ * All imports stay on the lean graph (@ggsvelte/core/render + /dom) so canvas
+ * charts never install the Temporal polyfill.
  */
-import { planStrata } from "@ggsvelte/core";
 import { cssColorResolver, drawStratum, sizeCanvasForDpr } from "@ggsvelte/core/dom";
-import { runPipeline } from "@ggsvelte/core/render";
+import { planStrata, runPipeline } from "@ggsvelte/core/render";
 import { aes, gg } from "@ggsvelte/spec/portable";
 
 import {

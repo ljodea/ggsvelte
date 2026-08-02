@@ -19953,14 +19953,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core (./render)"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-41",
+    id: "heading:guide-lifecycle:experimental-43",
     kind: "heading",
-    title: "experimental (41)",
+    title: "experimental (43)",
     summary:
-      "experimental (41) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-41",
+      "experimental (43) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-43",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (41)"],
+    exact: ["experimental (43)"],
   },
   {
     id: "heading:guide-lifecycle:ggsvelte-core-temporal",
@@ -33526,6 +33526,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["SegmentsBatch"],
   },
   {
+    id: "api:ggsvelte-core-render:Stratum",
+    kind: "api",
+    title: "Stratum",
+    summary: "@ggsvelte/core ./render · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core-render",
+    keywords: ["@ggsvelte/core", "./render", "type", "experimental"],
+    exact: ["Stratum"],
+  },
+  {
     id: "api:ggsvelte-core-render:TrainedScales",
     kind: "api",
     title: "TrainedScales",
@@ -33560,6 +33569,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core-render",
     keywords: ["@ggsvelte/core", "./render", "value", "experimental"],
     exact: ["pathData"],
+  },
+  {
+    id: "api:ggsvelte-core-render:planStrata",
+    kind: "api",
+    title: "planStrata",
+    summary: "@ggsvelte/core ./render · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core-render",
+    keywords: ["@ggsvelte/core", "./render", "value", "experimental"],
+    exact: ["planStrata"],
   },
   {
     id: "api:ggsvelte-core-render:registerGeomBatch",
