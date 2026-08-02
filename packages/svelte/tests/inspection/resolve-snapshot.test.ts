@@ -347,10 +347,10 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
     expect(selected).toHaveLength(TRANSIENT_MEMBER_LIMIT);
     expect(selected.some((c) => c.id === focus.id)).toBe(true);
     // Non-focus slots: y = 20..14 (largest seven). Focus (y=1) is force-included.
-    const nonFocusYs = selected
-      .filter((c) => c.id !== focus.id)
-      .map((c) => c.yValue as number)
-      .toSorted((a, b) => b - a);
+    // Prefer .sort over .toSorted here: this package's TS lib target does not
+    // declare Array#toSorted (oxlint type-aware treats it as error).
+    const nonFocusYs = selected.filter((c) => c.id !== focus.id).map((c) => Number(c.yValue));
+    nonFocusYs.sort((a, b) => b - a);
     expect(nonFocusYs).toEqual([20, 19, 18, 17, 16, 15, 14]);
     model.dispose();
   });
@@ -387,8 +387,8 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
     expect(inspection.members.some((m) => m.key === "s0")).toBe(true);
     const nonFocusY = inspection.members
       .filter((m) => m.key !== "s0")
-      .map((m) => m.fields.find((f) => f.channel === "y")?.value as number)
-      .toSorted((a, b) => b - a);
+      .map((m) => Number(m.fields.find((f) => f.channel === "y")?.value));
+    nonFocusY.sort((a, b) => b - a);
     expect(nonFocusY).toEqual([20, 19, 18, 17, 16, 15, 14]);
     // Full-group stack total (sum 1..20), not the capped window.
     expect(inspection.mode).toBe("x");

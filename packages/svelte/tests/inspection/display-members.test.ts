@@ -318,7 +318,9 @@ describe("selectHoverDisplayMembers (#1274)", () => {
         fields: [field("y", "y", i + 1)],
       }),
     );
-    const selected = selectHoverDisplayMembers(members, members[0]!, {
+    const focus = members[0];
+    if (focus === undefined) throw new Error("expected members[0]");
+    const selected = selectHoverDisplayMembers(members, focus, {
       mode: "x",
       limit: TRANSIENT_MEMBER_LIMIT,
     });
@@ -333,19 +335,19 @@ describe("selectHoverDisplayMembers (#1274)", () => {
         fields: [field("y", "y", i + 1)],
       }),
     );
-    const focus = members[0]!;
+    const focus = members[0];
+    if (focus === undefined) throw new Error("expected members[0]");
     const selected = selectHoverDisplayMembers(members, focus, {
       mode: "x",
       limit: TRANSIENT_MEMBER_LIMIT,
     });
     expect(selected).toHaveLength(TRANSIENT_MEMBER_LIMIT);
     expect(selected[0]).toBe(focus);
-    expect(
-      selected
-        .slice(1)
-        .map((m) => m.fields[0]?.value as number)
-        .toSorted((a, b) => b - a),
-    ).toEqual([12, 11, 10, 9, 8, 7, 6]);
+    // Prefer .sort over .toSorted: this package's TS lib target does not
+    // declare Array#toSorted (oxlint type-aware treats it as error).
+    const nonFocusY = selected.slice(1).map((m) => Number(m.fields[0]?.value));
+    nonFocusY.sort((a, b) => b - a);
+    expect(nonFocusY).toEqual([12, 11, 10, 9, 8, 7, 6]);
   });
 });
 
