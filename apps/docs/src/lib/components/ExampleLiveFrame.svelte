@@ -279,6 +279,7 @@
 
   .live-host {
     width: 100%;
+    height: 100%;
   }
 
   .live-host:not(.revealed) {
@@ -293,5 +294,21 @@
   .live-host.revealed {
     position: relative;
     opacity: 1;
+  }
+
+  /* Live pages: grow with tool-rail / a11y chrome. VR forces a fixed frame
+     size via app.css — keep height:100% there so pixel baselines stay stable. */
+  :global(html:not([data-vr]):not([data-visual-test]))
+    .gg-example-frame.live-ready
+    .live-host.revealed {
+    height: auto;
+  }
+
+  /* Narrow non-VR viewports: keep fixed-width example SVGs inside the frame. */
+  :global(html:not([data-vr]):not([data-visual-test]))
+    .live-host
+    :global(.gg-plot-root),
+  :global(html:not([data-vr]):not([data-visual-test])) .live-host :global(svg) {
+    max-width: 100%;
   }
 </style>
