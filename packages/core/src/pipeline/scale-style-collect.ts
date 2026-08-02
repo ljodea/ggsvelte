@@ -47,7 +47,7 @@ export function collectStyleValues(input: {
    */
   catalogMode: "always" | "auto" | "never";
 }): {
-  values: CellValue[];
+  values: readonly CellValue[];
   catalog: CellValue[];
   anyField: boolean;
   anyDiscrete: boolean;
@@ -55,6 +55,22 @@ export function collectStyleValues(input: {
   nonInteractiveValues: CellValue[];
 } {
   const { aesthetic, frames, bindings, table, sourceTable, catalogMode } = input;
+  // Sole-contributor fast path: a single mapped frame run (the common case)
+  // aliases the frame's values array instead of paying one push per row.
+  // Consumers never mutate `values` (missing-count filter, scale training).
+  // Float64Array frame columns are not aliasable (readonly CellValue[]
+  // return type) and keep the historical copy.
+  let contributions = 0;
+  let soleRun: readonly CellValue[] | null = null;
+  for (const frame of frames) {
+    const binding = bindingOf(frame.binding, aesthetic);
+    const mapped = styleFrameValues(frame, aesthetic);
+    if ((binding.field !== null || binding.statColumn !== null) && mapped !== null) {
+      contributions++;
+      soleRun = mapped instanceof Float64Array ? null : mapped;
+    }
+    if (binding.scaledConstant !== null) contributions++;
+  }
   const values: CellValue[] = [];
   let anyField = false;
   let anyDiscrete = false;
@@ -81,10 +97,12 @@ export function collectStyleValues(input: {
         anyDiscrete = true;
       }
       if (binding.field !== null) anyIndexable = true;
-      // One push per element — never spread a row-length column into push.
-      // Spread hits the engine argument limit (RangeError) on large data (#1338).
-      // Match the colour path in scale-color-collect.ts.
-      for (const v of mapped) values.push(v);
+      if (contributions !== 1 || soleRun === null) {
+        // One push per element — never spread a row-length column into push.
+        // Spread hits the engine argument limit (RangeError) on large data (#1338).
+        // Match the colour path in scale-color-collect.ts.
+        for (const v of mapped) values.push(v);
+      }
     }
     if (binding.scaledConstant !== null) {
       anyField = true;
@@ -159,5 +177,12 @@ export function collectStyleValues(input: {
   const nonInteractiveValues = anyIndexable
     ? annotationConstants.filter((value) => !indexableKeys.has(encodeKey(value)))
     : [];
-  return { values, catalog, anyField, anyDiscrete, anyIndexable, nonInteractiveValues };
+  return {
+    values: contributions === 1 && soleRun !== null ? soleRun : values,
+    catalog,
+    anyField,
+    anyDiscrete,
+    anyIndexable,
+    nonInteractiveValues,
+  };
 }
