@@ -148,8 +148,19 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     return m;
   }
   const model: RenderModel | null = $derived.by(resolveModel);
-  const currentModel = (): RenderModel | null =>
-    typeof window === "undefined" ? resolveModel() : model;
+  // SSR: one lazy memo for the whole server pass (#1328). Children register
+  // before markup reads model (GGPlot renders `{@render children}` first), so
+  // the first getter hit sees the complete registry. Recomputing on every
+  // model/strata/hasCanvas read re-ran the full pipeline ~20× per render.
+  // Client keeps $derived caching. The memo is instance-local — one runtime
+  // construction is one SSR render — and must not outlive that pass.
+  let ssrModel: RenderModel | null | undefined;
+  let ssrStrata: readonly Stratum[] | undefined;
+  const currentModel = (): RenderModel | null => {
+    if (typeof window !== "undefined") return model;
+    if (ssrModel === undefined) ssrModel = resolveModel();
+    return ssrModel;
+  };
 
   // ---------------------------------------------------------- strata plan
   const resolveStrata = () => {
@@ -157,7 +168,11 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     return current === null ? [] : planStrata(current.scene, current.layerBackends);
   };
   const strata = $derived(resolveStrata());
-  const currentStrata = () => (typeof window === "undefined" ? resolveStrata() : strata);
+  const currentStrata = (): readonly Stratum[] => {
+    if (typeof window !== "undefined") return strata;
+    if (ssrStrata === undefined) ssrStrata = resolveStrata();
+    return ssrStrata;
+  };
   const canvasCount = $derived(currentStrata().filter((s) => s.backend === "canvas").length);
   const hasCanvas = $derived(canvasCount > 0);
 
