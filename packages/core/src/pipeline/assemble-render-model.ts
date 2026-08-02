@@ -228,6 +228,27 @@ function bandLabelAdvisories(guidePlans: AssembleRenderModelInput["guidePlans"])
   return out;
 }
 
+/**
+ * One plan-list pass buckets guide plan ids by aesthetic so each scale decision
+ * indexes rather than rescanning the full plan list (#1310). Append order
+ * matches guidePlans order — that order is user-visible through guide assignment.
+ */
+function guidePlanIdsByAesthetic(
+  guidePlans: AssembleRenderModelInput["guidePlans"],
+): ReadonlyMap<"x" | "y", readonly string[]> {
+  const buckets: { x: string[]; y: string[] } = { x: [], y: [] };
+  for (const plan of guidePlans) {
+    if (plan.aesthetic === "x" || plan.aesthetic === "y") {
+      buckets[plan.aesthetic].push(plan.id);
+    }
+  }
+  // Freeze so decisions that share an aesthetic cannot mutate each other's list.
+  return new Map<"x" | "y", readonly string[]>([
+    ["x", Object.freeze(buckets.x)],
+    ["y", Object.freeze(buckets.y)],
+  ]);
+}
+
 export function assembleRenderModel(input: AssembleRenderModelInput): RenderModel {
   const { scene, candidates } = input;
   const scales = buildRenderModelScales(input);
@@ -239,6 +260,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
   });
   const advisories = [...input.advisories, ...bandLabelAdvisories(input.guidePlans)];
   const diagnostics = dedupeRenderModelDiagnostics(input.warnings, advisories);
+  const planIdsByAesthetic = guidePlanIdsByAesthetic(input.guidePlans);
 
   return {
     scene,
@@ -253,9 +275,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     scaleDecisions: input.scaleDecisions.map((decision) => ({
       ...decision,
       domain: decision.aesthetic === "x" ? [...input.xScale.domain] : [...input.yScale.domain],
-      guidePlanIds: input.guidePlans
-        .filter((plan) => plan.aesthetic === decision.aesthetic)
-        .map((plan) => plan.id),
+      guidePlanIds: planIdsByAesthetic.get(decision.aesthetic) ?? [],
     })),
     guidePlans: input.guidePlans,
     coordProjectors: input.coordProjectors,
