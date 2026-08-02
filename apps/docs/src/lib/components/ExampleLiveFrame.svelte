@@ -68,7 +68,9 @@
     const capture = root.querySelector<HTMLElement>(".gg-capture");
     const target =
       capture ??
-      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]');
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]') ??
+      root.querySelector<HTMLElement>(".gg-plot-root") ??
+      root.querySelector<HTMLElement>(".live-host");
     if (target === null) return false;
     // Only restore when focus is still in this shell or was dropped to body.
     const active = document.activeElement;
@@ -155,10 +157,31 @@
 
   // After keyboard-triggered upgrade, move focus into the plot so Tab order
   // does not jump to <body> when the load button unmounts (#1362).
+  // Retry after READY_FALLBACK_MS reveals before the plot has a focus target.
   $effect(() => {
     if (!liveReady || host === null || !restoreKeyboardFocus) return;
-    if (!focusAfterUpgrade(host)) return;
-    restoreKeyboardFocus = false;
+    const root = host;
+    if (focusAfterUpgrade(root)) {
+      restoreKeyboardFocus = false;
+      return;
+    }
+    const mo = new MutationObserver(() => {
+      if (focusAfterUpgrade(root)) {
+        restoreKeyboardFocus = false;
+        mo.disconnect();
+      }
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      if (!restoreKeyboardFocus) return;
+      focusAfterUpgrade(root);
+      restoreKeyboardFocus = false;
+    }, 15_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
   });
 </script>
 
@@ -209,18 +232,21 @@
     max-width: var(--example-vr-width);
     min-width: 0;
     /* No aspect-ratio: --example-vr-* are lengths (…px); aspect-ratio only
-       accepts unitless numbers, and a permanent ratio clips tool-rail /
-       legend chrome once live. Size from the in-flow PNG instead (#1363). */
-  }
-
-  /* app.css sets overflow:hidden on .gg-example-frame; lift it once live so
-     taller interactive chrome (tool rail, a11y table) is not clipped. */
-  .gg-example-frame.live-ready {
-    overflow: visible;
+       accepts unitless numbers, and a permanent ratio fixed height so
+       overflow:hidden clipped tool-rail / legend chrome. Size from the
+       in-flow PNG instead; height grows with live content so app.css
+       overflow:hidden only clips horizontal overflow on narrow screens (#1363). */
   }
 
   .gg-example-frame.full-width {
     max-width: none;
+  }
+
+  /* Fixed-width example SVGs can exceed the frame on narrow viewports; keep
+     them inside the (overflow:hidden) frame without horizontal page scroll. */
+  .live-host :global(.gg-plot-root),
+  .live-host :global(svg) {
+    max-width: 100%;
   }
 
   .example-preview {
