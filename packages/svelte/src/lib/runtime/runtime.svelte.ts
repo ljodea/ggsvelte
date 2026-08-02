@@ -148,18 +148,23 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     return m;
   }
   const model: RenderModel | null = $derived.by(resolveModel);
-  // SSR: one lazy memo for the whole server pass (#1328). Children register
-  // before markup reads model (GGPlot renders `{@render children}` first), so
-  // the first getter hit sees the complete registry. Recomputing on every
+  // SSR: one lazy memo for the whole server pass (#1328). Recomputing on every
   // model/strata/hasCanvas read re-ran the full pipeline ~20× per render.
-  // Client keeps $derived caching. The memo is instance-local — one runtime
-  // construction is one SSR render — and must not outlive that pass.
+  // Client keeps $derived caching.
+  //
+  // Never latch a null model: Svelte's one-pass SSR can evaluate plot getters
+  // before declaration children register (same reason as ssrSafeDerived). An
+  // early null must not freeze a blank chart for the rest of the pass; only a
+  // non-null result is memoized. Memo is instance-local (one runtime = one
+  // SSR render) and cleared by resetScales.
   let ssrModel: RenderModel | null | undefined;
   let ssrStrata: readonly Stratum[] | undefined;
   const currentModel = (): RenderModel | null => {
     if (typeof window !== "undefined") return model;
-    if (ssrModel === undefined) ssrModel = resolveModel();
-    return ssrModel;
+    if (ssrModel !== undefined) return ssrModel;
+    const next = resolveModel();
+    if (next !== null) ssrModel = next;
+    return next;
   };
 
   // ---------------------------------------------------------- strata plan
@@ -170,8 +175,12 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   const strata = $derived(resolveStrata());
   const currentStrata = (): readonly Stratum[] => {
     if (typeof window !== "undefined") return strata;
-    if (ssrStrata === undefined) ssrStrata = resolveStrata();
-    return ssrStrata;
+    // Freeze strata only once the model memo is set — otherwise an early empty
+    // plan would stick after children register and model resolves.
+    if (ssrStrata !== undefined) return ssrStrata;
+    const next = resolveStrata();
+    if (ssrModel !== undefined) ssrStrata = next;
+    return next;
   };
   const canvasCount = $derived(currentStrata().filter((s) => s.backend === "canvas").length);
   const hasCanvas = $derived(canvasCount > 0);
@@ -195,6 +204,8 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   function resetScales(): void {
     scaleBox.runId = -1;
     scaleBox.scales = undefined;
+    ssrModel = undefined;
+    ssrStrata = undefined;
     deps.resetZoom();
     scaleEpoch++;
   }

@@ -26,21 +26,28 @@ const minimalSpec: PortableSpec = gg(
   .geomPoint()
   .spec();
 
-function makeCountingDeps(options?: { zoom?: boolean }): {
+function makeCountingDeps(options?: { zoom?: boolean; initialSpec?: PortableSpec | null }): {
   deps: Parameters<typeof createPlotRuntime>[0];
   effectiveSpecReads: () => number;
+  setEffectiveSpec: (spec: PortableSpec | null) => void;
 } {
   let effectiveSpecReads = 0;
-  const zoomDomains = options?.zoom ? { x: [0.5, 1.5] as const, y: [5, 15] as const } : null;
+  let effectiveSpec: PortableSpec | null =
+    options?.initialSpec === undefined ? minimalSpec : options.initialSpec;
+  const zoomDomains =
+    options?.zoom === true ? { x: [0.5, 1.5] as const, y: [5, 15] as const } : null;
   return {
     effectiveSpecReads: () => effectiveSpecReads,
+    setEffectiveSpec: (spec) => {
+      effectiveSpec = spec;
+    },
     deps: {
       widthProp: () => 480,
       heightProp: () => 320,
-      assembled: () => minimalSpec,
+      assembled: () => effectiveSpec,
       effectiveSpec: () => {
         effectiveSpecReads += 1;
-        return minimalSpec;
+        return effectiveSpec;
       },
       effectiveZoomDomains: () => zoomDomains,
       effectiveLegendFilters: () => [],
@@ -93,5 +100,30 @@ describe("createPlotRuntime SSR pipeline memo (#1328)", () => {
     // inside that single resolve, not a second resolve from getter thrash.
     expect(effectiveSpecReads()).toBe(1);
     expect(runtime.model).not.toBeNull();
+  });
+
+  it("does not latch an early null before children register a real spec", () => {
+    expect(typeof window).toBe("undefined");
+
+    // Mimic the empty-registry window: first reads see null assembled, later
+    // reads (after declaration children register) see the complete spec.
+    const { deps, effectiveSpecReads, setEffectiveSpec } = makeCountingDeps({
+      initialSpec: null,
+    });
+    const runtime = createPlotRuntime(deps);
+
+    expect(runtime.model).toBeNull();
+    expect(runtime.strata).toEqual([]);
+    expect(runtime.hasCanvas).toBe(false);
+    const earlyReads = effectiveSpecReads();
+    expect(earlyReads).toBeGreaterThan(0);
+
+    setEffectiveSpec(minimalSpec);
+    hammerGetters(runtime);
+
+    // After the first non-null resolve, thrashing does not re-run the pipeline.
+    expect(runtime.model).not.toBeNull();
+    expect(runtime.model!.candidates.size).toBe(2);
+    expect(effectiveSpecReads()).toBe(earlyReads + 1);
   });
 });
