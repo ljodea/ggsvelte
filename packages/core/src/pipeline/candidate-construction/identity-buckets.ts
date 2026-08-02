@@ -1,11 +1,58 @@
 import { bandKey } from "../../scales/train.js";
+import type { CellValue } from "../../table.js";
 import { ColumnTable } from "../../table.js";
 import { binIndexOf } from "../../stats/bin-breaks.js";
-import { assignBinId } from "../binned-scale.js";
+import { assignBinId, type BinnedBoundaries } from "../binned-scale.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { positionColumn, xConversionOf } from "../temporal-position.js";
 import type { FinalizedLayerFrame, LayerBinding } from "../types.js";
 import { globalSourceRowForInputRow } from "../source-row-lineage.js";
+
+/**
+ * Loop-invariant column views for group×x lineage keys (#1307).
+ * Resolve once per frame; index each input row without re-deriving columns.
+ */
+export type AggregateLineageXView =
+  | {
+      readonly kind: "binned";
+      readonly transformed: Float64Array;
+      readonly xBinning: BinnedBoundaries;
+    }
+  | { readonly kind: "semantic"; readonly semantic: Float64Array; readonly valid: Uint8Array }
+  | { readonly kind: "raw"; readonly column: readonly CellValue[] };
+
+/** Resolve conversion/parsed/position columns once for a frame's x field. */
+export function resolveAggregateLineageXView(
+  table: ColumnTable,
+  field: string,
+  binding: LayerBinding,
+): AggregateLineageXView {
+  // Only count aggregates on bin ids (frame.bin.xId). Summary/boxplot still
+  // aggregate on actual x values even when a binned scale is attached.
+  if (binding.xBinning !== undefined && (binding.layer.stat ?? "identity") === "count") {
+    return {
+      kind: "binned",
+      transformed: positionColumn(table, field, xConversionOf(binding), binding.xTransform),
+      xBinning: binding.xBinning,
+    };
+  }
+  const conversion = xConversionOf(binding);
+  const parsed = table.parsed(field, conversion.sourceParser, conversion.options);
+  if (shouldAggregateOnSemanticTemporalX(binding, parsed.decision.status)) {
+    return { kind: "semantic", semantic: parsed.semantic, valid: parsed.valid };
+  }
+  return { kind: "raw", column: table.column(field) };
+}
+
+function aggregateLineageXKeyFromView(view: AggregateLineageXView, localRow: number): string {
+  if (view.kind === "binned") {
+    return bandKey(assignBinId(view.transformed[localRow]!, view.xBinning));
+  }
+  if (view.kind === "semantic") {
+    return bandKey(view.valid[localRow] === 1 ? view.semantic[localRow] : null);
+  }
+  return bandKey(view.column[localRow]);
+}
 
 /** Key used for count/summary/boxplot group×x lineage buckets (matches frame xValues). */
 export function aggregateLineageXKey(
@@ -13,19 +60,12 @@ export function aggregateLineageXKey(
   field: string,
   localRow: number,
   binding: LayerBinding,
+  view?: AggregateLineageXView,
 ): string {
-  // Only count aggregates on bin ids (frame.bin.xId). Summary/boxplot still
-  // aggregate on actual x values even when a binned scale is attached.
-  if (binding.xBinning !== undefined && (binding.layer.stat ?? "identity") === "count") {
-    const transformed = positionColumn(table, field, xConversionOf(binding), binding.xTransform);
-    return bandKey(assignBinId(transformed[localRow]!, binding.xBinning));
-  }
-  const conversion = xConversionOf(binding);
-  const parsed = table.parsed(field, conversion.sourceParser, conversion.options);
-  if (shouldAggregateOnSemanticTemporalX(binding, parsed.decision.status)) {
-    return bandKey(parsed.valid[localRow] === 1 ? parsed.semantic[localRow] : null);
-  }
-  return bandKey(table.column(field)[localRow]);
+  return aggregateLineageXKeyFromView(
+    view ?? resolveAggregateLineageXView(table, field, binding),
+    localRow,
+  );
 }
 
 export function appendSourceRowByGroupX(input: {
