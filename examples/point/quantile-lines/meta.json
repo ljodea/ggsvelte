@@ -1,6 +1,6 @@
 {
-  "title": "Earthquake strength by depth",
-  "description": "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
-  "tags": ["point", "quantile", "stat", "line", "regression", "theme"],
+  "title": "Flavor against aroma in cupping scores",
+  "description": "Quantile lines through coffee cupping scores. Use this when a mean smooth hides how the spread of y moves with x.",
+  "tags": ["point", "quantile", "scatter", "stat"],
   "docsSection": "Points & scatter"
 }

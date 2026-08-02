@@ -7,21 +7,21 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { fijiQuakes } from "./data.js";
+  import { coffeeRatings } from "./data.js";
 </script>
 
 <GGPlot
-  data={fijiQuakes}
-  aes={{ x: "depth", y: "mag" }}
+  data={coffeeRatings}
+  aes={{ x: "aroma", y: "flavor" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
   <Labs
-    title="How strong an earthquake gets, by how deep it is"
-    subtitle="Lower quartile, median and upper quartile of magnitude through the crust off Fiji"
-    x="Depth (km)"
-    y="Richter magnitude"
+    title="Flavor against aroma in cupping scores"
+    subtitle="Lower quartile, median, and upper quartile of flavor as aroma rises"
+    x="Aroma"
+    y="Flavor"
   />
   <GeomPoint alpha={0.3} size={2} />
   <GeomQuantile linewidth={1.4} />

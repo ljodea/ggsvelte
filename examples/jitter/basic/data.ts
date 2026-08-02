@@ -1,85 +1,12 @@
 /**
- * Karl Pearson's 1910 study of drink and wages: 70 trades, each assigned a wage
- * class, with the number of drinking workmen and the average weekly wage in
- * shillings.
+ * Fast-food entrée calories for a jitter demo.
  *
- * Pearson set out to test the temperance movement's claim that drink caused
- * poverty, and reported the association was far weaker than asserted - which
- * got him publicly attacked for it. The source labels the wage classes only as
- * A, B and C, so they are left unglossed here.
+ * Re-exported from the bundled fastfoodMenu table so the example, the package
+ * data export, and the docs JSON asset stay one table. Import the source
+ * module (not `@ggsvelte/svelte/data`) so `check:scripts` typechecks before
+ * packages/svelte dist is built.
  *
- * Pearson, "A First Study of the Influence of Parental Alcoholism" (1910), via
- * HistData::DrinksWages (see NOTICE); 70 trades.
+ * Source: fastfoodnutrition.org via TidyTuesday 2018-09-04 (CC0 curation).
+ * See NOTICE and FASTFOOD_MENU_CITATION in @ggsvelte/svelte/data.
  */
-export const drinksWages = [
-  { trade: "papercutter", wageClass: "A", wage: 24.0, drinkers: 1 },
-  { trade: "cabmen", wageClass: "A", wage: 18.42, drinkers: 10 },
-  { trade: "goldbeater", wageClass: "A", wage: 21.5, drinkers: 1 },
-  { trade: "stablemen", wageClass: "A", wage: 21.17, drinkers: 5 },
-  { trade: "millworker", wageClass: "A", wage: 19.0, drinkers: 0 },
-  { trade: "porter", wageClass: "A", wage: 20.5, drinkers: 8 },
-  { trade: "warehouse", wageClass: "A", wage: 24.33, drinkers: 2 },
-  { trade: "maltmen", wageClass: "A", wage: 23.0, drinkers: 5 },
-  { trade: "chimneysweep", wageClass: "A", wage: 17.33, drinkers: 7 },
-  { trade: "carter", wageClass: "A", wage: 22.17, drinkers: 23 },
-  { trade: "barman", wageClass: "A", wage: 23.67, drinkers: 0 },
-  { trade: "brassfounder", wageClass: "A", wage: 21.5, drinkers: 4 },
-  { trade: "shoemaker", wageClass: "A", wage: 22.83, drinkers: 9 },
-  { trade: "scavenger", wageClass: "A", wage: 22.83, drinkers: 2 },
-  { trade: "stonecutter", wageClass: "A", wage: 23.0, drinkers: 1 },
-  { trade: "cellarman", wageClass: "A", wage: 24.17, drinkers: 2 },
-  { trade: "french polisher", wageClass: "A", wage: 13.5, drinkers: 0 },
-  { trade: "wagon examiner", wageClass: "A", wage: 20.0, drinkers: 0 },
-  { trade: "surfaceman", wageClass: "A", wage: 18.5, drinkers: 0 },
-  { trade: "gardener", wageClass: "A", wage: 20.5, drinkers: 0 },
-  { trade: "platelayer", wageClass: "A", wage: 18.0, drinkers: 2 },
-  { trade: "hammerman", wageClass: "A", wage: 20.0, drinkers: 1 },
-  { trade: "factory worker", wageClass: "A", wage: 12.0, drinkers: 3 },
-  { trade: "billposter", wageClass: "A", wage: 18.0, drinkers: 0 },
-  { trade: "general labourer", wageClass: "A", wage: 18.5, drinkers: 85 },
-  { trade: "sadler", wageClass: "B", wage: 25.0, drinkers: 3 },
-  { trade: "turnroom", wageClass: "B", wage: 25.0, drinkers: 0 },
-  { trade: "shop hand", wageClass: "B", wage: 25.0, drinkers: 3 },
-  { trade: "typecaster", wageClass: "B", wage: 26.0, drinkers: 5 },
-  { trade: "clerk", wageClass: "B", wage: 27.0, drinkers: 1 },
-  { trade: "ironmoulder", wageClass: "B", wage: 28.42, drinkers: 5 },
-  { trade: "coachbuilder", wageClass: "B", wage: 28.0, drinkers: 1 },
-  { trade: "wellsinker", wageClass: "B", wage: 30.0, drinkers: 0 },
-  { trade: "tailors", wageClass: "B", wage: 27.0, drinkers: 15 },
-  { trade: "coopers", wageClass: "B", wage: 28.5, drinkers: 4 },
-  { trade: "linesman", wageClass: "B", wage: 26.0, drinkers: 2 },
-  { trade: "timekeeper", wageClass: "B", wage: 30.0, drinkers: 0 },
-  { trade: "jeweller", wageClass: "B", wage: 28.0, drinkers: 0 },
-  { trade: "butcher", wageClass: "B", wage: 30.0, drinkers: 1 },
-  { trade: "painter", wageClass: "B", wage: 25.5, drinkers: 23 },
-  { trade: "pipelayer", wageClass: "B", wage: 27.67, drinkers: 1 },
-  { trade: "sailor", wageClass: "B", wage: 30.0, drinkers: 1 },
-  { trade: "baker", wageClass: "B", wage: 26.17, drinkers: 10 },
-  { trade: "bottler", wageClass: "B", wage: 27.25, drinkers: 0 },
-  { trade: "railway porter", wageClass: "B", wage: 28.0, drinkers: 2 },
-  { trade: "gasworker", wageClass: "B", wage: 27.0, drinkers: 0 },
-  { trade: "tramdriver", wageClass: "B", wage: 27.0, drinkers: 1 },
-  { trade: "letterpresser", wageClass: "C", wage: 34.0, drinkers: 0 },
-  { trade: "lithographer", wageClass: "C", wage: 36.5, drinkers: 2 },
-  { trade: "bookbinder", wageClass: "C", wage: 30.25, drinkers: 6 },
-  { trade: "upholsterer", wageClass: "C", wage: 36.0, drinkers: 2 },
-  { trade: "ironfounder", wageClass: "C", wage: 32.58, drinkers: 4 },
-  { trade: "wireworker", wageClass: "C", wage: 32.5, drinkers: 1 },
-  { trade: "plasterer", wageClass: "C", wage: 37.0, drinkers: 0 },
-  { trade: "cabinetmaker", wageClass: "C", wage: 33.5, drinkers: 1 },
-  { trade: "joiner", wageClass: "C", wage: 30.83, drinkers: 9 },
-  { trade: "stream crane", wageClass: "C", wage: 30.83, drinkers: 1 },
-  { trade: "mason", wageClass: "C", wage: 34.08, drinkers: 17 },
-  { trade: "blacksmith", wageClass: "C", wage: 38.83, drinkers: 5 },
-  { trade: "engineer", wageClass: "C", wage: 30.17, drinkers: 2 },
-  { trade: "printer", wageClass: "C", wage: 31.08, drinkers: 16 },
-  { trade: "stoker", wageClass: "C", wage: 31.58, drinkers: 1 },
-  { trade: "plumber", wageClass: "C", wage: 34.5, drinkers: 5 },
-  { trade: "rivetter", wageClass: "C", wage: 40.0, drinkers: 0 },
-  { trade: "tinsmith", wageClass: "C", wage: 31.58, drinkers: 4 },
-  { trade: "slater", wageClass: "C", wage: 36.08, drinkers: 2 },
-  { trade: "chemist", wageClass: "C", wage: 36.5, drinkers: 0 },
-  { trade: "picture framer", wageClass: "C", wage: 31.08, drinkers: 2 },
-  { trade: "postman", wageClass: "C", wage: 32.0, drinkers: 2 },
-  { trade: "glassmaker", wageClass: "C", wage: 40.0, drinkers: 0 },
-] as const;
+export { fastfoodMenu } from "../../../packages/svelte/src/lib/data/fastfood-menu.js";

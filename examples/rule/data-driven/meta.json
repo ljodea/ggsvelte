@@ -1,6 +1,6 @@
 {
-  "title": "The first statistical graph was a rug",
-  "description": "Van Langren's 1644 longitude estimates, one rule per determination, which is the form his own chart took.",
+  "title": "A rug of every cupping score",
+  "description": "One vertical rule per coffee lot on total cup points. Use this when you want a 1-D sample drawn as a strip of marks.",
   "tags": ["rule", "distribution", "rug"],
   "docsSection": "Annotations & rules"
 }

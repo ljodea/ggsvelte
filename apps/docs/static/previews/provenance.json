@@ -13,23 +13,23 @@
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "b19e80d042b716b2f93fbe5c3711f3a75f32b8fa0277ac33b5a9957e938a40ad",
-      "pngSha256": "8cb6896fb9bbc0a416a68469e855b558087867d8b1930b4ad1eade6037ecd7de"
+      "sourceSha256": "69639e2508ec13b2bb23aec4329c3e0a62d58078fa01f4d6d3f51ea5ad29fbfd",
+      "pngSha256": "dc33edb3d1d9841ff5cfdaf5961bb77d0941e01e9f98b0e02219bbd527405ed0"
     },
     "bar/horizontal": {
       "filename": "bar-horizontal-light.png",
       "sourceSha256": "b76bb354a608543033e8345258e2f9c5a361ea4ac3dbd79defb25c4c62b1c07f",
-      "pngSha256": "2000b9829d71ee6792788401ad342070f8998b4d1331d74fc0af920916d9cf11"
+      "pngSha256": "9a13a24e6b2dc4f8dccccf019065433f57134676364b10824ac328935f12de4b"
     },
     "bar/proportions": {
       "filename": "bar-proportions-light.png",
       "sourceSha256": "11d2ccfc8bf8de42a872f91a60385a373290fabadc64e205de663e5e5eb92e50",
-      "pngSha256": "bd234b71ef3c12b3371b8fb211342c8a222e51517ded229eef79e69e5644fc35"
+      "pngSha256": "dd7fe03f7bdef3624fc708e2d12e07e432458877b178fc0ae247d8e36e2bb23e"
     },
     "bar/stacked": {
       "filename": "bar-stacked-light.png",
       "sourceSha256": "badf6ab7653c7a73ba11a107177733adba325d4d90334b7e67554a24dd627354",
-      "pngSha256": "4c0a7f0b20fcdf9adb777a3c31ec25fbf6d60f30ced058a8f00f22a52bfa4dfd"
+      "pngSha256": "30deb40c15ef6b7a3094b3595512184642be89deffb894f5264850ea7bc05c93"
     },
     "bin2d/basic": {
       "filename": "bin2d-basic-light.png",
@@ -198,8 +198,8 @@
     },
     "jitter/basic": {
       "filename": "jitter-basic-light.png",
-      "sourceSha256": "ba37ffe2110f6225676814530e9fb87be29c661c85b90b3d100793067c54a2f4",
-      "pngSha256": "94d7613b3b2bffe79fbf2cb85f4b3b929a1250055a26e29cdeb30cb600a918e4"
+      "sourceSha256": "21ecbbf7ca0aa771ac5035bd62fbb8a93cea6a7a25987019a4e96ae79d5f0465",
+      "pngSha256": "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4"
     },
     "label/basic": {
       "filename": "label-basic-light.png",
@@ -249,82 +249,82 @@
     "point/abline-identity": {
       "filename": "point-abline-identity-light.png",
       "sourceSha256": "b8c72166fe8c2e9f2a8c2e24f334e64c2335fb3b808038f970a61953da5404d6",
-      "pngSha256": "e5ea0046af48541329137172b451ade9d7e13fdee082bae009903919bb2a2fe3"
+      "pngSha256": "bc78df537e2d10a88412f7df41a4c4f12517dbc8ee0bf29b24f7466c63899ce3"
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",
       "sourceSha256": "64eb1c851a636bae33dedd9147601b17165b349ddd4f98a7f764248bf0f58244",
-      "pngSha256": "737b17a43f1cc32e903793f0bab0d359da6446e642c993bcc952da4b97ba6263"
+      "pngSha256": "834408b42545e258b4e549bb30bf5fe0cee7341fd3332e51941e20d302720ae1"
     },
     "point/count": {
       "filename": "point-count-light.png",
       "sourceSha256": "c0993d6eac67040271811ed005b7d04942c5c5e86e53b428d5385157d2b055a9",
-      "pngSha256": "830bf8a87d78123bc7ae8c8e267e2c2a7b321a9516353b773d9c8dc9445bdb9d"
+      "pngSha256": "54362ac23faf9a2d36346db92e780ae07a4e76097be1f0d10f27e208f3f335e6"
     },
     "point/fixed-aspect": {
       "filename": "point-fixed-aspect-light.png",
       "sourceSha256": "10a2e0c2af8dc865ccd37b47c7e6802fcc283e6e4ebeb0e897721534a97d5711",
-      "pngSha256": "b27b71af05a72cd5b246fdd6dafc50b3faaa48d110bc9f05799af78a76118cf0"
+      "pngSha256": "6bc1ccd7c5b17f8d0cff0df6ba25e96319973182240230e3fce2a94f255ab8d5"
     },
     "point/gradient-continuous": {
       "filename": "point-gradient-continuous-light.png",
       "sourceSha256": "83ab07fdef9cdb42f47592dc18231faa7686216d5fc2d832e51060d21b439644",
-      "pngSha256": "0e6f2b815d73aae127dc05c7944f35d324cd3dacc4e12d67345f81e0ef0b41d1"
+      "pngSha256": "44956b70d30be2e22a77551f0ae290813457cd3a5cf4017a5163606a5420561b"
     },
     "point/hue-discrete": {
       "filename": "point-hue-discrete-light.png",
       "sourceSha256": "764bc27b63ec6137e534c8ebc092649b6a5508aba2dd7d038b7391d94707d568",
-      "pngSha256": "8673f811fb6621b012f4bc47ba917cd4aafecb2209ed7f4751c12b811e1cacfe"
+      "pngSha256": "c9001ecfe456b66f881a29ef9833102171ac83fa074d3d0e75eb3407533c3b49"
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
-      "sourceSha256": "5d0ca49481bbdc02302cf9931a85c05c1be56189ed3c07042b431828ca94ee50",
-      "pngSha256": "98d2f842636550baf6fb9869c7d20c74b98717c3b2783e17b6a3280d37e9028f"
+      "sourceSha256": "84446933e59337c87d8f3981ba7aa4915b42a54fb05c77b2c2168e7071790f2f",
+      "pngSha256": "a7b100e7cd1e0ef48acf1ba1e64d4cc4c22a9ff728844e86e75905f2e8abe181"
     },
     "point/layer-data-bands": {
       "filename": "point-layer-data-bands-light.png",
       "sourceSha256": "9f68a5bc40995a7ee2804b70cab1d5de93569897ba23445eb38677bc2156a765",
-      "pngSha256": "086e355ed5fd2e06e161f2527261ee6cd2f267feb143e51b5bebfd8e688639ae"
+      "pngSha256": "5bf51db10dc6552267728c4db1863d8099876101d48a6fcf421b7fcb604d3960"
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
       "sourceSha256": "343d6c869b8cce2e82d8700175b000003b8b3aacfb3a156aff72a758e46b4521",
-      "pngSha256": "e4cca5e252e49ced88e85a92ff84016533cbbc0fbad7d705fbecbd6e9c84c8a2"
+      "pngSha256": "446b067575fb43c0a7121c8ea752406bb41c8d48f179126ae7e6242f7d3286c6"
     },
     "point/quantile-lines": {
       "filename": "point-quantile-lines-light.png",
-      "sourceSha256": "e81db4a111aa98c036c2b99ad3833442d41bbf01b148088e848f2757cb2a7f18",
-      "pngSha256": "ec69509af042bf0acc531d76990eb8a1eb56bbea22f4077d7d1755731121d8bc"
+      "sourceSha256": "6eebf9c2ec3fc8796de2bd141c0f91f1552ad648b8a1fe0f5a9ca6987823f192",
+      "pngSha256": "db8e483720567e3d6bf182d1837cb3b5da4a8069c518a2e4ff2e969c4fddc03f"
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
       "sourceSha256": "1e2581fecc4836b895314f1fe74130ff6e9900fedf3bad4bb2d459b6483e9abd",
-      "pngSha256": "9bbe802827346cc004c03894c8aa27819493a6d7b6bb61ec16eb0b6120b75dd4"
+      "pngSha256": "1de365e46e48910522550b3462dac329b2d3b81f973d2ff7eac548f06d24c405"
     },
     "point/stat-manual-mean": {
       "filename": "point-stat-manual-mean-light.png",
       "sourceSha256": "b83b2c6b1bbe30340def6f60ed0f43d0cf6ddb1f8f856d7db5438dc4312ab9a8",
-      "pngSha256": "8b130f7b7b14b7134f230721e87aecd81000215f1a8f0390c621dace5fad1117"
+      "pngSha256": "90862c848951ca50e4c4cc47403699e4dd30f8c1b1628abbbb0270d9f720b332"
     },
     "point/stat-unique": {
       "filename": "point-stat-unique-light.png",
       "sourceSha256": "38ab7e7fc464321512c3e4c3b42725e0ec1cb0b8276041987b39ac6887ac768d",
-      "pngSha256": "56b56e397b70d19d41431f44e2d3676a942fdef55ecf880f1cd88711bb20212a"
+      "pngSha256": "ef1a5278c0454dc709a9ddc163cd52402ab51a6ed239246fa7153a0029a9c3be"
     },
     "point/steps-binned": {
       "filename": "point-steps-binned-light.png",
       "sourceSha256": "61524085932957371ac7533f0ba3a6fd746adaaca38fe919d8ad271d2437e771",
-      "pngSha256": "399360293a783d412c10d377ce302dca5f1d70df6d67cc30dcf69f6aa5a9a251"
+      "pngSha256": "16094b61079140080cc999bc8b0ba2b85bb3f836246a9153c98caa9e72aa0070"
     },
     "point/style-scales": {
       "filename": "point-style-scales-light.png",
       "sourceSha256": "0c6339c8216dcdde1ef7cd9879f4806f9ee2660d3b6e6d861fee36e0cd821488",
-      "pngSha256": "7634bb3fedc89f48ab1ebdfad730ff34a98095c69848df862c3789ecc3b4d687"
+      "pngSha256": "eb208f47bc7a270d033e7ebf9295327eb1a75af6fc7853acebd61d6adc84b672"
     },
     "point/void-chrome": {
       "filename": "point-void-chrome-light.png",
       "sourceSha256": "73089f6e326eb33f53180a9b386b9e2bf0cb7d5cfe5bdc877e537bbf0c4406c1",
-      "pngSha256": "41dccddd67cbd3ed2b924a5ef8d41274cea5a0d5757f9dadeb22550707db8cc9"
+      "pngSha256": "0b22feabbd0ae6dc351a8dfb448d685a65bd483f786a405e2eb5923be31daf62"
     },
     "polygon/regions": {
       "filename": "polygon-regions-light.png",
@@ -338,8 +338,8 @@
     },
     "raster/grid": {
       "filename": "raster-grid-light.png",
-      "sourceSha256": "c74964fd8bc9265f6dd2852f1d72a9cd44688cde5eafa995b19ff7acf7aa829f",
-      "pngSha256": "bf86abf581011336426511aac7435cf4ae160e89bd18e95c101b8b3c0d65b25b"
+      "sourceSha256": "9a14fc0f669125fd44012ab79cd85fd96ed67529bd73b85f58dcbeb4fbc87211",
+      "pngSha256": "437d19b43f75ec428f4d13f563c7de7d145e172c598b8eba31a25d7d406d54b4"
     },
     "rect/regions": {
       "filename": "rect-regions-light.png",
@@ -359,12 +359,12 @@
     "rule/annotation": {
       "filename": "rule-annotation-light.png",
       "sourceSha256": "39b489d3bf55fffedbd40412afd192d9fe2cd143929310655359725c555d4166",
-      "pngSha256": "7ad3050e710d89eae102c7c570ea06545217c73439e96d931331ee21b84889d8"
+      "pngSha256": "12f961edf5a77c41b6804fad1bb273a9e4859e79c00a350797ffdd722f91dc0a"
     },
     "rule/data-driven": {
       "filename": "rule-data-driven-light.png",
-      "sourceSha256": "e6949882ac3419c662054afd5b5ba0afc03e2eb536bbf5ddf7a5aa2babb312e7",
-      "pngSha256": "a83217322538c19d4afbfc3b28cce6a5a2278b378a75cc40e31af18b78d35ed1"
+      "sourceSha256": "0c6088c30f06fe690de18270f7fd3546a5b15ae97acdf38608231b39c03ee60c",
+      "pngSha256": "d77dbfed1af5e92d8f0383e32c6b9805b3ceda58ca6bffe7a5a7d57c346b3297"
     },
     "segment/annotations": {
       "filename": "segment-annotations-light.png",
@@ -398,8 +398,8 @@
     },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
-      "sourceSha256": "38d04ea322f3b09e9f419d790253d17024f092e33cd5d8490422c107b60a4ee1",
-      "pngSha256": "0f8c19b62b1ba6bb18c2db17f28adfed14ebbfc0a6fa8db4ae1f1607d53247d1"
+      "sourceSha256": "d441d72bda507e5b8171128bb51743d9f222ac726173a55cdc2f6bacba3896d2",
+      "pngSha256": "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72"
     },
     "spoke/vector-field": {
       "filename": "spoke-vector-field-light.png",

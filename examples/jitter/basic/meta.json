@@ -1,6 +1,6 @@
 {
-  "title": "Wages across 70 trades, 1910",
-  "description": "Pearson's study of drink and wages. The trades share a handful of wage classes, so jitter is what separates them into readable marks.",
-  "tags": ["jitter", "point", "position", "overplotting", "theme"],
+  "title": "Menu calories, spread so items do not stack",
+  "description": "Jittered entrée calories by restaurant. Use this when many points share a category and would otherwise cover each other.",
+  "tags": ["jitter", "scatter", "categorical", "overplotting"],
   "docsSection": "Points & scatter"
 }

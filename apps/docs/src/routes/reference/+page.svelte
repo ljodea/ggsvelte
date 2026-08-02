@@ -100,9 +100,11 @@
     <a href={`${base}/kyoto-sakura.json`}>
       <strong><code>@ggsvelte/svelte/data</code></strong>
       <span>
-        Bundled datasets. <code>kyotoSakura</code> (time series),
-        <code>palmerPenguins</code> (distribution / groups),
-        <code>mpg</code> (categorical comparison). Also served as JSON.
+        Bundled datasets. <code>kyotoSakura</code>, <code>palmerPenguins</code>,
+        <code>mpg</code>, <code>chocolateBars</code>,
+        <code>coffeeRatings</code>,
+        <code>beerProduction</code>, <code>fastfoodMenu</code>. Also served as
+        JSON.
       </span>
     </a>
     <a href={`${base}/schema/v0.json`}>

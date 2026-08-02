@@ -1,6 +1,6 @@
 {
-  "title": "Deaths in six English counties, 1876 to 1882",
-  "description": "The two-way table Edgeworth used to develop the analysis of variance, drawn as side-by-side bars decades before Fisher named the method.",
+  "title": "US beer production by package type",
+  "description": "Dodged bars of national production by year and package. Copy this when categories share an x-axis and need side-by-side comparison.",
   "tags": ["bar", "count", "dodge", "fill", "legend", "weight", "theme", "palette"],
   "docsSection": "Bars & columns"
 }
