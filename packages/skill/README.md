@@ -16,7 +16,7 @@ npm-check-updates) tell you when the bundled skill in your repo is stale.
 
 ## Install
 
-```sh fragment
+```sh
 bun add -D @ggsvelte/skill
 # or: npm install --save-dev @ggsvelte/skill
 ```
@@ -30,7 +30,7 @@ directory name.
 Point your agent at the skill, or copy/symlink it into your agent's skills
 directory under the name `ggsvelte`:
 
-```sh fragment
+```sh
 # Claude Code
 cp -R node_modules/@ggsvelte/skill .claude/skills/ggsvelte
 
