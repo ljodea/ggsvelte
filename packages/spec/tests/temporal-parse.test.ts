@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
+import { timezoneValidationFailure } from "../src/temporal-parse-core.ts";
 import { parseTemporal, parseTemporalColumn } from "../src/temporal.ts";
 
 describe("strict temporal parsing", () => {
@@ -183,5 +184,43 @@ describe("strict temporal parsing", () => {
       Date.parse("2024-03-10T06:30:00.000Z"),
       Date.parse("2024-03-10T07:30:00.000Z"),
     ]);
+  });
+});
+
+describe("timezoneValidationFailure (hot-path cache)", () => {
+  it("treats undefined and UTC aliases as valid without a failure object", () => {
+    expect(timezoneValidationFailure(undefined)).toBeNull();
+    expect(timezoneValidationFailure("UTC")).toBeNull();
+    expect(timezoneValidationFailure("Etc/UTC")).toBeNull();
+    expect(timezoneValidationFailure("Z")).toBeNull();
+  });
+
+  it("accepts a real IANA zone and rejects an unknown one with a stable message", () => {
+    expect(timezoneValidationFailure("America/New_York")).toBeNull();
+    const failure = timezoneValidationFailure("Not/A_Zone");
+    expect(failure).toMatchObject({
+      ok: false,
+      reason: 'invalid or unsupported timezone "Not/A_Zone"',
+    });
+  });
+
+  it("returns the same failure object on repeated invalid-zone checks (no per-row alloc)", () => {
+    const first = timezoneValidationFailure("Not/A_Zone");
+    const second = timezoneValidationFailure("Not/A_Zone");
+    expect(first).not.toBeNull();
+    expect(second).toBe(first);
+  });
+
+  it("keeps parseTemporal results aligned with the validator for aliases and invalid zones", () => {
+    for (const timezone of ["UTC", "Etc/UTC", "Z"] as const) {
+      expect(parseTemporal("2024-01-01", "iso", { timezone })).toMatchObject({ ok: true });
+    }
+    const once = parseTemporal("2024-01-01", "iso", { timezone: "Not/A_Zone" });
+    const twice = parseTemporal("2024-01-01", "iso", { timezone: "Not/A_Zone" });
+    expect(once).toMatchObject({
+      ok: false,
+      reason: 'invalid or unsupported timezone "Not/A_Zone"',
+    });
+    expect(twice).toBe(once);
   });
 });
