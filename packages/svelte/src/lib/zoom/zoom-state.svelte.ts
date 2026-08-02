@@ -6,17 +6,10 @@
  * NOT read model/announce (later-declared / handler-only;
  * construction-order DAG). Those are handler-only deferred getters.
  */
-import type { CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { PlotInteractionController } from "../interaction/controller.svelte.js";
-import type {
-  InteractionSource,
-  PlotInteractionEvent,
-  PlotInteractionScope,
-  ResolvedInteractionConfig,
-  ZoomEvent,
-} from "../interaction/interaction.js";
+import type { InteractionContext } from "../interaction/interaction-context.svelte.js";
+import type { InteractionSource, ResolvedInteractionConfig } from "../interaction/interaction.js";
 import { createScopedStore } from "../interaction/scoped-store.svelte.js";
 import { frozenZoomDomains, type ContinuousZoomDomains } from "../scene/geometry.js";
 import { zoomAnnouncement } from "../assembly/labels.js";
@@ -35,23 +28,14 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-export type PlotZoomStateDeps = {
-  interaction: () => PlotInteractionController<PropertyKey> | undefined;
-  resolvedInteractionScope: () => PlotInteractionScope;
+/**
+ * Zoom-specific options beyond the shared InteractionContext. zoomConfig is
+ * the narrow `interactionConfig.zoom` slice; assembled feeds effectiveSpec.
+ */
+export type PlotZoomStateOptions = {
   /** Narrow getter over `interactionConfig.zoom` (mode + null gate). */
-  zoomConfig: () => ResolvedInteractionConfig["zoom"];
-  assembled: () => PortableSpec | null;
-  /**
-   * Deferred: the runtime model alias and the coord-flip derived are declared
-   * after createPlotRuntime in the host — handler-only reads.
-   */
-  model: () => RenderModel | null;
-  onzoom: () => ((event: ZoomEvent) => void) | undefined;
-  oninteraction: () =>
-    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
-    | undefined;
-  /** Stable sink; announcer is declared later — handler-only. */
-  announce: (message: string) => void;
+  readonly zoomConfig: () => ResolvedInteractionConfig["zoom"];
+  readonly assembled: () => PortableSpec | null;
 };
 
 export type PlotZoomState = {
@@ -84,22 +68,28 @@ export type PlotZoomState = {
  * earlier host bindings). Handlers may read later-declared bindings via
  * deferred getters (`model`, `announce`).
  */
-export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
+export function createPlotZoomState(
+  context: InteractionContext,
+  options: PlotZoomStateOptions,
+): PlotZoomState {
   // Memoize prior bag so selection/emphasis revisions do not retrain zoom.
   let previousEffectiveZoomDomains: ContinuousZoomDomains | null = null;
 
   const zoomDomains = createScopedStore<ContinuousZoomDomains | null>({
     initial: null,
     empty: null,
-    controller: deps.interaction,
-    scope: deps.resolvedInteractionScope,
+    controller: context.interaction,
+    scope: context.resolvedInteractionScope,
     read: (controller, scope) =>
       // Gate shared domains by this plot's resolved zoom mode (null when
       // disabled / faceted-unsupported) so x-only plots ignore y domains.
-      filterZoomDomainsByMode(controller.zoom(scope), deps.zoomConfig()?.mode ?? null),
+      filterZoomDomainsByMode(controller.zoom(scope), options.zoomConfig()?.mode ?? null),
     write: (controller, next, scope, source) => {
       // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
-      const mutationScope = filterScopeChannelsByZoomMode(scope, deps.zoomConfig()?.mode ?? null);
+      const mutationScope = filterScopeChannelsByZoomMode(
+        scope,
+        options.zoomConfig()?.mode ?? null,
+      );
       if (next === null) {
         const transition = controller.resetZoom({ scope: mutationScope, source });
         return transition === null ? null : { value: null };
@@ -118,7 +108,7 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
     },
     clearShared: (controller, scope, source) =>
       controller.resetZoom({
-        scope: filterScopeChannelsByZoomMode(scope, deps.zoomConfig()?.mode ?? null),
+        scope: filterScopeChannelsByZoomMode(scope, options.zoomConfig()?.mode ?? null),
         source,
       }) !== null,
   });
@@ -130,7 +120,7 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   });
 
   function resolveEffectiveSpec(): PortableSpec | null {
-    const assembled = deps.assembled();
+    const assembled = options.assembled();
     if (assembled === null || effectiveZoomDomains === null) return assembled;
     return applyZoomToSpec(assembled, effectiveZoomDomains);
   }
@@ -140,9 +130,9 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
     const committed = zoomDomains.set(domains, source);
     if (committed === null) return;
     const event = buildZoomEvent(committed.value, source);
-    deps.announce(zoomAnnouncement(committed.value));
-    deps.onzoom()?.(event);
-    deps.oninteraction()?.(event);
+    context.announce(zoomAnnouncement(committed.value));
+    context.onzoom()?.(event);
+    context.oninteraction()?.(event);
   }
 
   function resetZoom(source: InteractionSource = "programmatic"): void {
@@ -151,13 +141,13 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   }
 
   function setZoomDomains(domains: Partial<ContinuousZoomDomains>): void {
-    const next = sanitizePartialZoomDomains(domains, deps.model()?.scales, effectiveZoomDomains);
+    const next = sanitizePartialZoomDomains(domains, context.model()?.scales, effectiveZoomDomains);
     if (next === null) return;
     commitZoom(frozenZoomDomains(next), "programmatic");
   }
 
   function onDblClick(): void {
-    if (deps.zoomConfig() === null) return;
+    if (options.zoomConfig() === null) return;
     resetZoom("pointer");
   }
 
@@ -178,9 +168,9 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   ): void {
     // Pure owns null/multi-panel gate, invert, and freeze for commit.
     const next = resolveBrushZoomFromModel({
-      model: deps.model(),
+      model: context.model(),
       rect,
-      mode: deps.zoomConfig()?.mode ?? "xy",
+      mode: options.zoomConfig()?.mode ?? "xy",
       current: effectiveZoomDomains,
     });
     if (next === null) return;

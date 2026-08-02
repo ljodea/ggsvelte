@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { createPlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
 import {
@@ -33,19 +34,22 @@ describe("runtime + zoom real cycle", () => {
       // Host wiring: zoom factory BEFORE createPlotRuntime; runtime deps
       // wired to controller aliases.
       const assembledBox = reactiveBox<PortableSpec | null>(initialSpec);
-      const zoom = createPlotZoomState({
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        zoomConfig: xyZoomConfig,
-        assembled: () => assembledBox.value,
-        model: () => runtime.model,
-        coordFlipped: () => false,
-        onzoom: () => (event) => {
-          zoomEvents.push(event);
+      const zoom = createPlotZoomState(
+        testInteractionContext({
+          interaction: noController,
+          resolvedInteractionScope: () => defaultScope,
+          model: () => runtime.model,
+          onzoom: () => (event) => {
+            zoomEvents.push(event);
+          },
+          oninteraction: noInteractionCallback,
+          announce: () => {},
+        }),
+        {
+          zoomConfig: xyZoomConfig,
+          assembled: () => assembledBox.value,
         },
-        oninteraction: noInteractionCallback,
-        announce: () => {},
-      });
+      );
       // Host aliases (construction-order DAG).
       const effectiveZoomDomains = () => zoom.effectiveZoomDomains;
       const effectiveSpec = () => zoom.effectiveSpec;

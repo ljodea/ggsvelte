@@ -6,6 +6,7 @@ import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import {
   continuousSpec,
   createPlotInteraction,
@@ -25,33 +26,31 @@ import {
 describe("createPlotZoomState construction", () => {
   it("does not invoke armed later-declared getters during construction (before first flush)", () => {
     let modelCalls = 0;
-    let coordFlippedCalls = 0;
     let announceCalls = 0;
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createPlotZoomState({
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        zoomConfig: xyZoomConfig,
-        assembled: () => continuousSpec(),
-        model: () => {
-          modelCalls++;
-          return null;
+      createPlotZoomState(
+        testInteractionContext({
+          interaction: noController,
+          resolvedInteractionScope: () => defaultScope,
+          model: () => {
+            modelCalls++;
+            return null;
+          },
+          onzoom: noZoomCallback,
+          oninteraction: noInteractionCallback,
+          announce: () => {
+            announceCalls++;
+          },
+        }),
+        {
+          zoomConfig: xyZoomConfig,
+          assembled: () => continuousSpec(),
         },
-        coordFlipped: () => {
-          coordFlippedCalls++;
-          return false;
-        },
-        onzoom: noZoomCallback,
-        oninteraction: noInteractionCallback,
-        announce: () => {
-          announceCalls++;
-        },
-      }),
+      ),
     );
 
     expect(modelCalls).toBe(0);
-    expect(coordFlippedCalls).toBe(0);
     expect(announceCalls).toBe(0);
     // Deriveds are lazy on client and server at the 5.33.1 floor, so this
     // guard proves the exposed accessors reach no armed getter (reads + one
@@ -61,7 +60,6 @@ describe("createPlotZoomState construction", () => {
     expect(state.effectiveSpec).not.toBeNull();
     flushSync();
     expect(modelCalls).toBe(0);
-    expect(coordFlippedCalls).toBe(0);
     expect(announceCalls).toBe(0);
     destroy();
   });

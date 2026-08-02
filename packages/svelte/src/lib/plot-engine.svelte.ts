@@ -11,29 +11,28 @@
  *
  * Construction / effect-order contract
  * ------------------------------------
- * Construction order is the topological order of direct construction-time
- * reads; effect registration sequence is load-bearing. Deferred thunks break
- * the runtime cycles (surface ↔ inspection ↔ interval ↔ selection). This
- * module preserves the pre-S11 top-to-bottom declaration order from GGPlot.
+ * The five interaction controllers (zoom / selection / interval / surface /
+ * inspection) are constructed by the two-phase interaction assembly
+ * (interaction/interaction-states.svelte.ts): phase 1 builds zoom before the
+ * legend-filter / runtime chain; phase 2 (`complete`) builds the model-
+ * reading controllers after the runtime + semantic-key service, because SSR
+ * evaluates $derived eagerly at construction. The assembly owns sibling
+ * ports internally. Shared deps flow through one InteractionContext
+ * (interaction/interaction-context.svelte.ts) instead of per-factory
+ * hand-wired bags. Leaf modules register their own effects at
+ * construction; the engine only wires host-held deriveds into catalog
+ * reconcile where data is not available at leaf construction time.
  *
  * Residual late bindings (definite-assignment / late hooks only where the
  * cycle is real):
- * - surfaceState! — inspection needs the surface reducer; surface needs
- *   inspection handlers
  * - semanticCandidateProjection! — interval consumptionCandidates close over
- *   the projection built after legend focus
+ *   the projection, which itself reads the assembled states
  * - legendFocusState.installHostDerivedEffects() — host $derived entry lists
  *   require this factory's compute* methods (#627)
  *
  * Surface tool enablement (`availableTools`, point-select) is host-derived
- * before surface construction so chrome is not a surface construction-time
- * dep (#1082). Chrome recomputes the same pure formulas for UI consumers.
- *
- * Cross-module transition side effects (e.g. inspection dismiss → brush/tool)
- * are applied via `applyInspectionDismissSideEffects` at the surface call site
- * (#627). Leaf modules register their own effects at construction; the engine
- * only wires host-held deriveds into catalog reconcile where data is not
- * available at leaf construction time.
+ * before the assembly so chrome is not a surface construction-time dep
+ * (#1082). Chrome recomputes the same pure formulas for UI consumers.
  *
  * Call `createPlotEngine` once during component init so every `$effect`
  * registers in the component effect tree. No `$props`, `$props.id()`, or
@@ -74,6 +73,8 @@ import {
   type PlotInteractionScope,
   type ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
+import { resolveInteractionContext } from "./interaction/interaction-context.svelte.js";
+import { createInteractionAssembly } from "./interaction/interaction-states.svelte.js";
 import {
   createCapabilityResolution,
   ssrSafeDerived,
@@ -83,9 +84,7 @@ import {
   duplicateInspectCapabilityDiagnostics,
 } from "./interaction/resolve-inspect-capability.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
-import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
-import { createIntervalState } from "./interval/interval-state.svelte.js";
 import type { IntervalState } from "./interval/interval-state.svelte.js";
 import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
 import { createLegendFilterState } from "./legend/filter-state.svelte.js";
@@ -115,11 +114,7 @@ import {
   dataIdentityEpochToken,
 } from "./runtime/semantic-data-identity.js";
 import { createSourceIdentityTracker } from "./runtime/semantic-source-identity.js";
-import {
-  createSemanticKeyService,
-  type SemanticKeyService,
-} from "./runtime/semantic-keys.svelte.js";
-import { createSelectionState } from "./selection/selection-state.svelte.js";
+import { createSemanticKeyService } from "./runtime/semantic-keys.svelte.js";
 import type { SelectionState } from "./selection/selection-state.svelte.js";
 import {
   hoverChromeForKind,
@@ -131,9 +126,7 @@ import {
   glyphExtentsFromBatch,
   type CrosshairGapBox,
 } from "./scene/geometry.js";
-import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import type { SurfaceState } from "./surface/surface-state.svelte.js";
-import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
 import type { PlotZoomState } from "./zoom/zoom-state.svelte.js";
 
 // ---------------------------------------------------------------------------
@@ -494,23 +487,54 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     announcer.announce(message);
   };
 
-  // Construction order is the topological order of direct construction-time
-  // reads. Cross-module dismiss tails go through transition-owner at the
-  // surface call site; leaf effects register at construction (#627).
+  // Cross-module dismiss tails go through transition-owner at the surface
+  // call site; leaf effects register at construction (#627). The interaction
+  // assembly owns controller construction order.
 
-  // ------------------------------------------------------------ zoom respec
-  // Construction-time deriveds read interaction/scope/zoomConfig/assembled
-  // only — model/announce are deferred getters (later-declared).
-  const zoomState = createPlotZoomState({
+  // ------------------------------------------------- interaction deriveds
+  // Shared enablement predicates (avoid re-typing the same config gates).
+  const interactive = $derived(interactionConfig().interactive);
+  const surfaceInteractive = $derived(interactionConfig().availableTools.length > 0);
+  const inspectEnabled = $derived(interactionConfig().inspect !== null);
+  const legendFocusEnabled = $derived(interactionConfig().legendFocus !== null);
+  const coordFlipped = $derived(assembled()?.coord?.type === "flip");
+  let tooltipHovered = $state(false);
+
+  // ------------------------------------------------- interaction context
+  // One shared bag replaces the ~60 hand-wired dep fields the five controller
+  // factories used to declare individually. Model / semantic-key getters are
+  // handler-only deferred closures over later declarations (runtime,
+  // semanticKeys) — never read at construction.
+  const interactionContext = resolveInteractionContext({
+    model: () => runtime.model,
+    root: host.root,
+    captureSurface: host.captureSurface,
     interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
-    zoomConfig: () => interactionConfig().zoom,
-    assembled,
-    // Model is declared after the runtime; handlers only.
-    model: () => runtime.model,
-    onzoom: () => host.props.onzoom,
-    oninteraction: () => host.props.oninteraction,
+    selectConfig: () => interactionConfig().select,
+    inspectConfig: () => interactionConfig().inspect,
+    tooltipHovered: () => tooltipHovered,
     announce: announceSink,
+    oninteraction: () => host.props.oninteraction,
+    oninspect: () => host.props.oninspect,
+    onselect: () => host.props.onselect,
+    onzoom: () => host.props.onzoom,
+    ontoolchange: () => host.props.ontoolchange,
+    keyAt: (index) => semanticKeys.keyAt(index),
+    semanticKey: (row, index) => semanticKeys.semanticKey(row, index),
+    candidateSemanticKeys: (candidate) => semanticKeys.candidateSemanticKeys(candidate),
+  });
+
+  // ------------------------------------------------- interaction assembly (phase 1)
+  // Zoom is the only controller the legend-filter / runtime chain reads.
+  // SSR evaluates $derived eagerly at construction, so the model-reading
+  // controllers (selection / interval / surface / inspection) must wait for
+  // the runtime — phase 2 (`complete`) runs after semanticKeys below.
+  const interactionAssembly = createInteractionAssembly(interactionContext, {
+    zoom: {
+      zoomConfig: () => interactionConfig().zoom,
+      assembled,
+    },
   });
 
   // Source identity/order epoch: O(R) row-ref order over data/spec *props*
@@ -540,7 +564,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // Construction-time deriveds read legendFilter/effectiveSpec only —
   // model is deferred (declared after the runtime).
   const legendFilterState = createLegendFilterState({
-    effectiveSpec: () => zoomState.effectiveSpec,
+    effectiveSpec: () => interactionAssembly.zoom.effectiveSpec,
     // GuideLegend children (or deprecated plot prop) — not plot prop alone.
     legendFilterProp: () => legendFilterResolved().configInput,
     onlegendfilter: () => host.props.onlegendfilter,
@@ -553,18 +577,18 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   });
 
   // ------------------------------------------------- plot runtime
-  // Factory sits after zoom-respec and legend-filter so every direct
+  // Factory sits after the interaction assembly and legend-filter so every direct
   // construction-time dep is already initialized (TDZ).
   const runtime = createPlotRuntime({
     widthProp: () => host.props.width,
     heightProp: () => host.props.height,
     assembled,
-    effectiveSpec: () => zoomState.effectiveSpec,
-    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
+    effectiveSpec: () => interactionAssembly.zoom.effectiveSpec,
+    effectiveZoomDomains: () => interactionAssembly.zoom.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
     root: host.root,
     resetZoom: () => {
-      zoomState.resetForScales();
+      interactionAssembly.zoom.resetForScales();
     },
     onrender: () => host.props.onrender,
   });
@@ -580,10 +604,6 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
     deliverDiagnostic,
   });
-  const semanticKey: SemanticKeyService["semanticKey"] = (...args) =>
-    semanticKeys.semanticKey(...args);
-  const candidateSemanticKeys: SemanticKeyService["candidateSemanticKeys"] = (...args) =>
-    semanticKeys.candidateSemanticKeys(...args);
 
   // Legend entry → key index (lifted from semantic-keys in S16). Same relative
   // construction position as the derived it replaces — after semanticKeys,
@@ -593,84 +613,13 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     keyAt: (i) => semanticKeys.keyAt(i),
   });
 
-  // ---------------------------------------------------------- interaction
   // source rows/spec -> pipeline/scene + CandidateStore -> semantic resolver
   // -> chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
   // consumes one resolved inspection and never reconstructs grouping itself.
-  const interactive = $derived(interactionConfig().interactive);
-  const surfaceInteractive = $derived(interactionConfig().availableTools.length > 0);
 
-  // Shared enablement predicates (avoid re-typing the same config gates).
-  const inspectEnabled = $derived(interactionConfig().inspect !== null);
-  const legendFocusEnabled = $derived(interactionConfig().legendFocus !== null);
-  const coordFlipped = $derived(assembled()?.coord?.type === "flip");
-  let tooltipHovered = $state(false);
-
-  // ------------------------------------------------- selection
-  // Before surface so emit/toggle are direct (not deferred sibling getters).
-  const selectionState = createSelectionState({
-    interaction: () => host.props.interaction,
-    resolvedInteractionScope: () => resolvedInteractionScope,
-    selectConfig: () => interactionConfig().select,
-    onselect: () => host.props.onselect,
-    oninteraction: () => host.props.oninteraction,
-    announce: announceSink,
-  });
-
-  // ------------------------------------------------- inspection
-  // Reducer is still owned by surface (created next). Inspection takes a
-  // deferred reducer getter only for that TDZ edge; clearBrush/chooseTool are
-  // NOT wired here — surface applies dismiss plan tails via transition-owner.
-  let surfaceState!: ReturnType<typeof createSurfaceState>;
-  const inspectionState = createInspectionState({
-    model: () => runtime.model,
-    reducer: () => surfaceState.reducer,
-    inspectConfig: () => interactionConfig().inspect,
-    inspectEnabled: () => inspectEnabled,
-    dataIdentityEpoch: () => dataIdentityEpoch,
-    keyAt: (index) => semanticKeys.keyAt(index),
-    root: host.root,
-    captureSurface: host.captureSurface,
-    plotId: () => host.plotId,
-    tooltipHovered: () => tooltipHovered,
-    clearTooltipHovered: () => {
-      tooltipHovered = false;
-    },
-    oninspect: () => host.props.oninspect,
-    oninteraction: () => host.props.oninteraction,
-    announce: announceSink,
-    clearAnnouncement: () => {
-      announcer.clear();
-    },
-  });
-
-  // ------------------------------------------------- interval selection
-  // Before surface so finishBrushSelect is a direct ref (not deferred).
-  // consumptionCandidates still late-binds the projection module.
-  let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
-  const intervalState = createIntervalState({
-    model: () => runtime.model,
-    interaction: () => host.props.interaction,
-    resolvedInteractionScope: () => resolvedInteractionScope,
-    selectConfig: () => interactionConfig().select,
-    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
-    commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
-      zoomState.commitZoom(...args);
-    },
-    captureSurface: host.captureSurface,
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
-    inspectionPanel: () => inspectionState.inspectionPanel,
-    emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
-      selectionState.emitSelection(...args);
-    },
-    announce: announceSink,
-  });
-
-  // ------------------------------------------------- surface
-  // Inspection + interval + selection already constructed — no sibling TDZ
-  // getters for those. Tool enablement is host-derived (same pure formulas as
-  // chrome) so surface does not close over later chromeState (#1082).
+  // Surface tool enablement is host-derived (same pure formulas as chrome) so
+  // surface does not close over later chromeState (#1082). Declared after the
+  // runtime (direct model read); the assembly reads them lazily via options.
   const surfaceAvailableTools = $derived(
     resolveFilteredAvailableTools(
       interactionConfig().availableTools,
@@ -679,30 +628,35 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     ),
   );
   const surfacePointSelectEnabled = $derived(canPublishPointSelection(interactionConfig().select));
-  surfaceState = createSurfaceState({
-    model: () => runtime.model,
-    root: host.root,
-    toolProp: () => host.props.tool,
-    initialTool: () => interactionConfig().initialTool,
-    availableTools: () => surfaceAvailableTools,
-    inspectConfig: () => interactionConfig().inspect,
-    selectConfig: () => interactionConfig().select,
-    pointSelectEnabled: () => surfacePointSelectEnabled,
-    ontoolchange: () => host.props.ontoolchange,
-    surfaceInteractive: () => surfaceInteractive,
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    inspection: () => inspectionState,
-    interval: () => intervalState,
-    zoom: () => zoomState,
-    emitSelection: (event) => {
-      selectionState.emitSelection(event);
+
+  // ------------------------------------------------- interaction assembly (phase 2)
+  // selection → interval → surface → inspection, sibling ports wired inside
+  // the assembly. The projection is the one remaining late binding: interval
+  // consumption closes over it, and it needs the assembled states —
+  // handler-only reads (#165 pattern).
+  let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
+  const states = interactionAssembly.complete({
+    interval: {
+      consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
     },
-    semanticKey: (row, index) => semanticKey(row, index),
-    togglePointKeys: (keys, source) => {
-      selectionState.togglePointKeys(keys, source);
+    surface: {
+      toolProp: () => host.props.tool,
+      initialTool: () => interactionConfig().initialTool,
+      availableTools: () => surfaceAvailableTools,
+      pointSelectEnabled: () => surfacePointSelectEnabled,
+      surfaceInteractive: () => surfaceInteractive,
     },
-    tooltipHovered: () => tooltipHovered,
-    announce: announceSink,
+    inspection: {
+      inspectEnabled: () => inspectEnabled,
+      dataIdentityEpoch: () => dataIdentityEpoch,
+      plotId: () => host.plotId,
+      clearTooltipHovered: () => {
+        tooltipHovered = false;
+      },
+      clearAnnouncement: () => {
+        announcer.clear();
+      },
+    },
   });
 
   // ------------------------------------------------- legend focus
@@ -724,14 +678,14 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   });
   semanticCandidateProjection = createSemanticCandidateProjection({
     model: () => runtime.model,
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    selectedKeys: () => selectionState.effectiveSelectedKeys,
-    intervalKeys: () => intervalState.effectiveIntervalKeys,
-    intervals: () => intervalState.effectiveIntervals,
+    candidateSemanticKeys: (candidate) => semanticKeys.candidateSemanticKeys(candidate),
+    selectedKeys: () => states.selection.effectiveSelectedKeys,
+    intervalKeys: () => states.interval.effectiveIntervalKeys,
+    intervals: () => states.interval.effectiveIntervals,
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     muteSiblingsOnInspect: () => interactionConfig().inspect?.muteSiblings === true,
     // Inspection owns the projection (#1080); wiring no longer re-assembles it.
-    inspectionFocus: () => inspectionState.presentationFocus,
+    inspectionFocus: () => states.inspection.presentationFocus,
   });
   // ------------------------------------------------- plot chrome
   // All host bindings earlier-declared. Pure construction-time deriveds —
@@ -745,9 +699,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     configuredAvailableTools: () => interactionConfig().availableTools,
     interactionDiagnostics: () => interactionConfig().diagnostics,
     interactive: () => interactive,
-    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
-    effectiveIntervals: () => intervalState.effectiveIntervals,
-    effectiveSelectedKeys: () => selectionState.effectiveSelectedKeys,
+    effectiveZoomDomains: () => states.zoom.effectiveZoomDomains,
+    effectiveIntervals: () => states.interval.effectiveIntervals,
+    effectiveSelectedKeys: () => states.selection.effectiveSelectedKeys,
     effectiveEmphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     legendFocusEnabled: () => legendFocusEnabled,
     hasCanvas: () => runtime.hasCanvas,
@@ -811,7 +765,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     readonly height: number;
     readonly textAnchor: "start" | "middle" | "end";
   } | null {
-    const seed = inspectionState.inspectionSeed;
+    const seed = states.inspection.inspectionSeed;
     const model = runtime.model;
     if (seed === null || model === null || seed.kind !== "glyphs") return null;
     const batch = model.scene.batches[seed.batchIndex];
@@ -826,7 +780,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const EMPTY_CROSSHAIR_GAP_OBSTACLES: readonly CrosshairGapBox[] = Object.freeze([]);
   const crosshairGapObstacles = $derived.by((): readonly CrosshairGapBox[] => {
     const model = runtime.model;
-    const panel = inspectionState.inspectionPanel;
+    const panel = states.inspection.inspectionPanel;
     if (model === null || panel === null) return EMPTY_CROSSHAIR_GAP_OBSTACLES;
     return crosshairGlyphObstacles(model.scene.batches, model.scene.panels, panel.id);
   });
@@ -835,14 +789,14 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   legendFocusState.installHostDerivedEffects();
 
   return {
-    zoomState,
+    zoomState: states.zoom,
     legendFilterState,
     runtime,
-    inspectionState,
-    surfaceState,
-    selectionState,
+    inspectionState: states.inspection,
+    surfaceState: states.surface,
+    selectionState: states.selection,
     legendFocusState,
-    intervalState,
+    intervalState: states.interval,
     chromeState,
     announcer,
 
@@ -874,9 +828,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       // Hover chrome is separate from selection/emphasis anchor rings: open
       // path strokes still gap the crosshair; rects and closed path fills
       // (areas) mute (#1270). Null inspection → default ring.
-      const focus = inspectionState.presentationFocus;
+      const focus = states.inspection.presentationFocus;
       if (focus === null) return "ring";
-      const seed = inspectionState.inspectionSeed;
+      const seed = states.inspection.inspectionSeed;
       const batch = seed === null ? undefined : runtime.model?.scene.batches[seed.batchIndex];
       const closedPath = batch?.kind === "paths" && batch.closed === true;
       return hoverChromeForKind(focus.kind, closedPath);

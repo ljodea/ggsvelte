@@ -21,22 +21,18 @@
 import {
   decodeKey,
   encodeKey,
-  type CandidateFacts,
-  type RenderModel,
   type ScenePanel,
   type SemanticViewportSelection,
 } from "@ggsvelte/core";
 import type { TemporalScaleKind } from "@ggsvelte/spec";
 
-import type { PlotInteractionController } from "../interaction/controller.svelte.js";
+import type { InteractionContext } from "../interaction/interaction-context.svelte.js";
 import type {
   InteractionSource,
   IntervalSelection,
   PlotInteractionInterval,
-  PlotInteractionScope,
   PlotSelection,
   ReadonlyIntervalDomains,
-  ResolvedInteractionConfig,
   SemanticIntervalAxis,
 } from "../interaction/interaction.js";
 import { createIntervalScopedStore } from "../interaction/scoped-store.svelte.js";
@@ -60,33 +56,27 @@ import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bou
 // Public types
 // ---------------------------------------------------------------------------
 
-export type IntervalStateDeps = {
-  model: () => RenderModel | null;
-  interaction: () => PlotInteractionController<PropertyKey> | undefined;
-  resolvedInteractionScope: () => PlotInteractionScope;
-  /** Narrow getter over `interactionConfig.select`. */
-  selectConfig: () => ResolvedInteractionConfig["select"];
-  /** Host alias over the S4 zoom controller (construction-safe). */
-  effectiveZoomDomains: () => ContinuousZoomDomains | null;
-  /** S4 controller write path for the bounds-editor zoom branch (stable fn). */
-  commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
-  captureSurface: () => HTMLDivElement | null;
-  /** Used by the precise-bounds lineage projection. */
-  candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
+/**
+ * Interval-specific ports beyond the shared InteractionContext. Sibling
+ * controllers are wired by the assembly (interaction-states.svelte.ts).
+ */
+export type IntervalStateOptions = {
+  /** Alias over the zoom controller (construction-safe). */
+  readonly effectiveZoomDomains: () => ContinuousZoomDomains | null;
+  /** Zoom controller write path for the bounds-editor zoom branch (stable fn). */
+  readonly commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
   /**
    * Deferred semantic Candidate view for non-union interval consumption.
    * Projection ownership stays outside interval behavior.
    */
-  consumptionCandidates: () => readonly IntervalConsumptionCandidate<PropertyKey>[];
+  readonly consumptionCandidates: () => readonly IntervalConsumptionCandidate<PropertyKey>[];
   /**
-   * Handler-only: `openBoundsEditor` select branch reads the host's inspection
-   * panel id as its fallback target. Host derived is earlier than the factory
-   * and returns bounds + id (or null).
+   * Handler-only: `openBoundsEditor` select branch reads the inspection
+   * controller's panel id as its fallback target.
    */
-  inspectionPanel: () => Readonly<{ id: string }> | null;
-  /** Hoisted host fn (shared with point selection until S7/S8). */
-  emitSelection: (event: PlotSelection) => void;
-  announce: (message: string) => void;
+  readonly inspectionPanel: () => Readonly<{ id: string }> | null;
+  /** Selection controller write path (stable fn). */
+  readonly emitSelection: (event: PlotSelection) => void;
 };
 
 export type IntervalState = {
@@ -161,14 +151,17 @@ function viewportSelection(domains: ReadonlyIntervalDomains): SemanticViewportSe
  * construction (original host positions relative to the runtime model effects
  * and the later semantic-key diagnostics effects).
  */
-export function createIntervalState(deps: IntervalStateDeps): IntervalState {
+export function createIntervalState(
+  context: InteractionContext,
+  options: IntervalStateOptions,
+): IntervalState {
   let committedInterval = $state<IntervalSelection | null>(null);
   // Semantic snapshot of the record backing `committedInterval`, so external
   // same-panel replacements are detected by content, not just presence.
   let committedIntervalRecord = $state<PlotInteractionInterval<PropertyKey> | null>(null);
   const committedIntervals = createIntervalScopedStore({
-    controller: deps.interaction,
-    scope: deps.resolvedInteractionScope,
+    controller: context.interaction,
+    scope: context.resolvedInteractionScope,
   });
   let boundsEditor = $state<{
     action: "select" | "zoom";
@@ -181,7 +174,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   const effectiveIntervals = $derived(committedIntervals.value);
 
   const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
-    const model = deps.model();
+    const model = context.model();
     if (model === null || effectiveIntervals.length === 0) return [];
     // Union consumes only stored record keys, and this derived re-runs on
     // every controller revision — skip the O(candidates) semantic projection
@@ -196,7 +189,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     return consumeIntervalKeys({
       records: effectiveIntervals,
       panels: model.scene.panels,
-      candidates: deps.consumptionCandidates(),
+      candidates: options.consumptionCandidates(),
     });
   });
 
@@ -212,7 +205,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   });
 
   const currentIntervalPanel = $derived.by((): ScenePanel | undefined => {
-    const model = deps.model();
+    const model = context.model();
     if (currentIntervalRecord === null || model === null) {
       // Explicit undefined keeps consistent-return happy on the .ts surface
       // (host .svelte used bare `return`; type-aware lint only runs on .ts).
@@ -240,7 +233,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
 
   function intervalPanelLabel(panel: ScenePanel): string {
     const display = panel.strip.trim() || "panel";
-    const model = deps.model();
+    const model = context.model();
     if (
       model === null ||
       model.scene.panels.filter((candidate) => candidate.strip.trim() === panel.strip.trim())
@@ -254,7 +247,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   }
 
   const currentIntervalTargetLabel = $derived.by((): string | undefined => {
-    if (currentIntervalRecord === null || deps.model() === null) {
+    if (currentIntervalRecord === null || context.model() === null) {
       return undefined;
     }
     if (currentIntervalPanel === undefined) return "unavailable panel";
@@ -269,8 +262,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
 
   const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
     const editor = boundsEditor;
-    if (editor === null || deps.model() === null) return null;
-    const model = deps.model()!;
+    if (editor === null || context.model() === null) return null;
+    const model = context.model()!;
     // Axis guide plans carry temporalKind (including monthDay); the trained
     // continuous scale does not. Use the first matching axis plan so the
     // bounds editor can format drafts without the reference year.
@@ -286,7 +279,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       if (viewportPanel === undefined) return null;
       const scale = viewportPanel.axisEditModel(editor.axis);
       if (scale.kind === "band") return null;
-      const bounds = deps.effectiveZoomDomains()?.[editor.axis] ?? scale.domain;
+      const bounds = options.effectiveZoomDomains()?.[editor.axis] ?? scale.domain;
       return boundsEditorInputForScale({
         axis: editor.axis,
         action: "zoom",
@@ -324,8 +317,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     // capture surface is the stable recovery target for reactive cancellation;
     // explicit Apply/Cancel still restores the initiating button.
     queueMicrotask(() => {
-      deps.captureSurface()?.focus();
-      deps.announce(`Bounds editing cancelled because ${target} is no longer available.`);
+      context.captureSurface()?.focus();
+      context.announce(`Bounds editing cancelled because ${target} is no longer available.`);
     });
   });
 
@@ -339,7 +332,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     committedIntervals.clear(source);
     const event = clearIntervalSelectionEvent(
       current ?? {
-        mode: deps.selectConfig()?.mode ?? "xy",
+        mode: context.selectConfig()?.mode ?? "xy",
         panelId: null,
         pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
       },
@@ -347,7 +340,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     );
     committedInterval = null;
     committedIntervalRecord = null;
-    deps.emitSelection(event);
+    options.emitSelection(event);
   }
 
   function clearCurrentPanelInterval(source: InteractionSource): void {
@@ -356,7 +349,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     committedIntervals.remove(intervalPanelId, source);
     const event = clearIntervalSelectionEvent(
       committedInterval ?? {
-        mode: deps.selectConfig()?.mode ?? "xy",
+        mode: context.selectConfig()?.mode ?? "xy",
         panelId: intervalPanelId,
         pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
       },
@@ -364,7 +357,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     );
     committedInterval = null;
     committedIntervalRecord = null;
-    deps.emitSelection(event);
+    options.emitSelection(event);
   }
 
   function semanticAxis(
@@ -372,8 +365,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     axis: "x" | "y",
     bounds: readonly [unknown, unknown] | undefined,
   ): SemanticIntervalAxis | undefined {
-    if (bounds === undefined || deps.model() === null) return undefined;
-    const viewportPanel = deps.model()!.viewport.panel(panelId);
+    if (bounds === undefined || context.model() === null) return undefined;
+    const viewportPanel = context.model()!.viewport.panel(panelId);
     if (viewportPanel === null) return undefined;
     const scale = viewportPanel.axisEditModel(axis);
     if (scale.kind === "band") {
@@ -400,7 +393,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     targetPanelId: string,
     domains: ReadonlyIntervalDomains,
   ): { readonly keys: readonly PropertyKey[]; readonly lineageCount: number } {
-    const model = deps.model();
+    const model = context.model();
     if (model === null) return { keys: Object.freeze([]), lineageCount: 0 };
     type ProjectionCandidate =
       RecomputePanelIntervalProjectionInput<PropertyKey>["candidates"][number];
@@ -416,7 +409,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         panelId: candidate.panelId,
         xValue: candidate.xValue,
         yValue: candidate.yValue,
-        keys: deps.candidateSemanticKeys(candidate),
+        keys: context.candidateSemanticKeys(candidate),
         sourceRows,
       });
     }
@@ -430,8 +423,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   /** Private — no remaining external consumer (codex P2-7). */
   function commitIntervalSelection(event: IntervalSelection, source: InteractionSource): void {
     const targetPanelId = event.panelId;
-    if (targetPanelId === null || deps.model() === null) return;
-    const model = deps.model()!;
+    if (targetPanelId === null || context.model() === null) return;
+    const model = context.model()!;
     if (model.viewport.panel(targetPanelId) === null) return;
     const x = semanticAxis(targetPanelId, "x", event.domain.x);
     const y = semanticAxis(targetPanelId, "y", event.domain.y);
@@ -441,7 +434,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     if (x === undefined && y === undefined) return;
     const record: PlotInteractionInterval<PropertyKey> = Object.freeze({
       panelId: targetPanelId,
-      preset: deps.selectConfig()?.preset ?? "independent",
+      preset: context.selectConfig()?.preset ?? "independent",
       domains: Object.freeze({
         ...(x !== undefined && { x }),
         ...(y !== undefined && { y }),
@@ -454,7 +447,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
 
   function finishBrushSelect(eventValue: IntervalSelection, source: InteractionSource): void {
     // Snapshot once (drift-safe under reactive selectConfig replacement).
-    const persistent = deps.selectConfig()?.persistent;
+    const persistent = context.selectConfig()?.persistent;
     committedInterval = persistentSelectionOrNull(persistent, eventValue);
     // TRUTHY guard — untyped JS consumers may pass truthy non-boolean
     // `persistent` values, which the config normalizer forwards unchanged.
@@ -462,7 +455,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     // truthiness is identical.
     if (persistent ?? false) commitIntervalSelection(eventValue, source);
     // Emit after writes so listeners observe committed state (load-bearing).
-    deps.emitSelection(eventValue);
+    options.emitSelection(eventValue);
   }
 
   function openBoundsEditor(
@@ -472,11 +465,11 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   ): void {
     boundsReturnFocus = trigger;
     if (action === "select") {
-      const model = deps.model();
+      const model = context.model();
       const panel =
         currentIntervalRecord === null
           ? (() => {
-              const inspectionTarget = deps.inspectionPanel();
+              const inspectionTarget = options.inspectionPanel();
               if (inspectionTarget !== null && model !== null) {
                 return model.scene.panels.find((candidate) => candidate.id === inspectionTarget.id);
               }
@@ -498,9 +491,9 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
     if (event.action === "zoom") {
       if (event.scale === "band") return;
-      deps.commitZoom(
+      options.commitZoom(
         frozenZoomDomains({
-          ...deps.effectiveZoomDomains(),
+          ...options.effectiveZoomDomains(),
           [event.axis]: [...event.bounds],
         }),
         event.inputSource,
@@ -510,8 +503,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     }
     const prior = currentIntervalRecord;
     const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
-    if (targetPanelId === null || targetPanelId === undefined || deps.model() === null) return;
-    const model = deps.model()!;
+    if (targetPanelId === null || targetPanelId === undefined || context.model() === null) return;
+    const model = context.model()!;
     if (model.viewport.panel(targetPanelId) === null) return;
     const axis = semanticAxis(targetPanelId, event.axis, event.bounds);
     if (axis === undefined) return;
@@ -524,14 +517,14 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const { keys, lineageCount } = recomputePanelIntervalSelection(targetPanelId, domains);
     const next: PlotInteractionInterval<PropertyKey> = Object.freeze({
       panelId: targetPanelId,
-      preset: prior?.preset ?? deps.selectConfig()?.preset ?? "independent",
+      preset: prior?.preset ?? context.selectConfig()?.preset ?? "independent",
       domains,
       keys,
     });
     // Precise bounds persist exactly like the brush path: with
     // `persistent: false` the end event still fires, but no durable record,
     // committed rectangle, or clear-selection controls appear.
-    const persistent = deps.selectConfig()?.persistent === true;
+    const persistent = context.selectConfig()?.persistent === true;
     if (persistent) {
       committedIntervalRecord = next;
       committedIntervals.upsert(next, event.inputSource);
@@ -541,7 +534,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const selection = viewportSelection(domains);
     const eventValue = buildIntervalSelection({
       phase: "end",
-      mode: deps.selectConfig()?.mode ?? "xy",
+      mode: context.selectConfig()?.mode ?? "xy",
       panelId: targetPanelId,
       domain: viewportPanel.resolve(selection),
       // The overlay must depict the interval that was actually applied, so
@@ -552,8 +545,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       lineageCount,
       source: event.inputSource,
     });
-    committedInterval = persistentSelectionOrNull(deps.selectConfig()?.persistent, eventValue);
-    deps.emitSelection(eventValue);
+    committedInterval = persistentSelectionOrNull(context.selectConfig()?.persistent, eventValue);
+    options.emitSelection(eventValue);
     boundsEditor = null;
   }
 

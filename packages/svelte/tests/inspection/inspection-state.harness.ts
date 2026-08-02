@@ -12,11 +12,10 @@ import type {
 } from "../../src/lib/interaction/interaction.js";
 import { normalizeInteractionConfig } from "../../src/lib/interaction/interaction.js";
 import { createInteractionReducer } from "../../src/lib/interaction/reducer.js";
-import {
-  createInspectionState,
-  type InspectionStateDeps,
-} from "../../src/lib/inspection/inspection-state.svelte.js";
+import type { InteractionContext } from "../../src/lib/interaction/interaction-context.svelte.js";
+import { createInspectionState } from "../../src/lib/inspection/inspection-state.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { modelFor } from "../helpers/model.js";
 
 const continuousRows = [
@@ -146,7 +145,7 @@ function createDeferredFrameScheduler(): {
 
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
- * getter (mirroring InspectionStateDeps). Harness owns the component-held
+ * getter (context + options split). Harness owns the component-held
  * reducer and passes a getter. Effects register inside the factory (#627).
  *
  * When `deferredFrames` is true, owns a deferred scheduler and wires
@@ -165,8 +164,8 @@ export function mountInspectionController(
     plotId?: () => string;
     tooltipHovered?: () => boolean;
     clearTooltipHovered?: () => void;
-    oninspect?: InspectionStateDeps["oninspect"];
-    oninteraction?: InspectionStateDeps["oninteraction"];
+    oninspect?: InteractionContext["oninspect"];
+    oninteraction?: InteractionContext["oninteraction"];
     announce?: (message: string) => void;
     clearAnnouncement?: () => void;
     /** Wire deferred frame + onInspectPointerFrame (for schedulePointerInspect). */
@@ -200,28 +199,32 @@ export function mountInspectionController(
   const getReducer = options.reducer ?? (() => ownedReducer!);
 
   const { value: state, destroy } = withFlushedEffectRoot(() => {
-    const controller = createInspectionState({
-      model: options.model ?? (() => defaultModel),
-      reducer: getReducer,
-      inspectConfig: options.inspectConfig ?? defaultInspect,
-      inspectEnabled: options.inspectEnabled ?? (() => true),
-      dataIdentityEpoch: options.dataIdentityEpoch ?? (() => "epoch-1"),
-      keyAt:
-        options.keyAt ??
-        ((index) => {
-          const model = options.model?.() ?? defaultModel;
-          return keyAtForModel(model)(index);
-        }),
-      root: options.root ?? (() => null),
-      captureSurface: options.captureSurface ?? (() => null),
-      plotId: options.plotId ?? (() => "plot-test"),
-      tooltipHovered: options.tooltipHovered ?? (() => false),
-      clearTooltipHovered: options.clearTooltipHovered ?? (() => {}),
-      oninspect: options.oninspect ?? noInspect,
-      oninteraction: options.oninteraction ?? noInteraction,
-      announce: options.announce ?? (() => {}),
-      clearAnnouncement: options.clearAnnouncement ?? (() => {}),
-    });
+    const controller = createInspectionState(
+      testInteractionContext({
+        model: options.model ?? (() => defaultModel),
+        inspectConfig: options.inspectConfig ?? defaultInspect,
+        keyAt:
+          options.keyAt ??
+          ((index) => {
+            const model = options.model?.() ?? defaultModel;
+            return keyAtForModel(model)(index);
+          }),
+        root: options.root ?? (() => null),
+        captureSurface: options.captureSurface ?? (() => null),
+        tooltipHovered: options.tooltipHovered ?? (() => false),
+        oninspect: options.oninspect ?? noInspect,
+        oninteraction: options.oninteraction ?? noInteraction,
+        announce: options.announce ?? (() => {}),
+      }),
+      {
+        reducer: getReducer,
+        inspectEnabled: options.inspectEnabled ?? (() => true),
+        dataIdentityEpoch: options.dataIdentityEpoch ?? (() => "epoch-1"),
+        plotId: options.plotId ?? (() => "plot-test"),
+        clearTooltipHovered: options.clearTooltipHovered ?? (() => {}),
+        clearAnnouncement: options.clearAnnouncement ?? (() => {}),
+      },
+    );
     controllerRef = controller;
     return controller;
   });
@@ -239,4 +242,4 @@ export function mountInspectionController(
 // Re-exports used by construction / armed-getter suites
 export { createInspectionState, createInteractionReducer, modelFor };
 export { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
-export type { InspectionStateDeps, RenderModel, CandidateFacts, PortableSpec };
+export type { RenderModel, CandidateFacts, PortableSpec };

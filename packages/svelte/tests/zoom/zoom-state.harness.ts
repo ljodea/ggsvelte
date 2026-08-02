@@ -18,6 +18,7 @@ import type {
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import { createPlotZoomState } from "../../src/lib/zoom/zoom-state.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { modelFor } from "../helpers/model.js";
 
 const zoomRows = [
@@ -93,7 +94,7 @@ export type ZoomHarness = {
 
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
- * getter (mirroring PlotZoomStateDeps). Tests that need reactivity pass
+ * getter (context + options split). Tests that need reactivity pass
  * getters over their own reactive boxes; omitted options get static defaults.
  */
 export function mountZoomController(
@@ -103,7 +104,6 @@ export function mountZoomController(
     zoomConfig?: () => ZoomConfig;
     assembled?: () => PortableSpec | null;
     model?: () => RenderModel | null;
-    coordFlipped?: () => boolean;
     onzoom?: () => ZoomCb;
     oninteraction?: () => InteractionCb;
     announce?: (message: string) => void;
@@ -113,17 +113,20 @@ export function mountZoomController(
   const defaultModel = modelFor(defaultAssembled);
 
   const { value: state, destroy } = withFlushedEffectRoot(() =>
-    createPlotZoomState({
-      interaction: options.interaction ?? noController,
-      resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
-      zoomConfig: options.zoomConfig ?? xyZoomConfig,
-      assembled: options.assembled ?? (() => defaultAssembled),
-      model: options.model ?? (() => defaultModel),
-      coordFlipped: options.coordFlipped ?? (() => false),
-      onzoom: options.onzoom ?? noZoomCallback,
-      oninteraction: options.oninteraction ?? noInteractionCallback,
-      announce: options.announce ?? (() => {}),
-    }),
+    createPlotZoomState(
+      testInteractionContext({
+        interaction: options.interaction ?? noController,
+        resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
+        model: options.model ?? (() => defaultModel),
+        onzoom: options.onzoom ?? noZoomCallback,
+        oninteraction: options.oninteraction ?? noInteractionCallback,
+        announce: options.announce ?? (() => {}),
+      }),
+      {
+        zoomConfig: options.zoomConfig ?? xyZoomConfig,
+        assembled: options.assembled ?? (() => defaultAssembled),
+      },
+    ),
   );
 
   return { state, destroy };

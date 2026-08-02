@@ -33,9 +33,10 @@ import { createPlotZoomState, type PlotZoomState } from "../../src/lib/zoom/zoom
 import {
   createSurfaceState,
   type SurfaceState,
-  type SurfaceStateDeps,
+  type SurfaceStateOptions,
 } from "../../src/lib/surface/surface-state.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { identityCandidateKeys, testInteractionContext } from "../helpers/interaction-context.js";
 import { modelFor } from "../helpers/model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
@@ -94,11 +95,6 @@ function identityKeyAt(model: RenderModel): (index: number) => PropertyKey | nul
     const id = row["id"];
     return id === undefined || id === null ? String(index) : String(id);
   };
-}
-
-function identityCandidateKeys(candidate: CandidateFacts): PropertyKey[] {
-  if (candidate.rowIndex === null) return [];
-  return [String(candidate.rowIndex)];
 }
 
 function identitySemanticKey(): (
@@ -270,67 +266,62 @@ export function mountSurfaceComposite(
   const semanticKey = identitySemanticKey();
 
   const { value: bundle, destroy: destroyRoot } = withFlushedEffectRoot(() => {
-    // Production order: zoom → inspection → surface → interval → effects.
-    // Deferred getters close over later const bindings (handler/effect only).
-    let surface!: SurfaceState;
-    let interval!: IntervalState;
-
-    // 1. zoom (pre-existing)
-    const zoom = createPlotZoomState({
-      interaction: noController,
-      resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y" }),
-      zoomConfig: () => config.zoom,
-      assembled: () => options.spec ?? continuousSpec(),
+    // One shared context; per-factory options carry ports + host-derived
+    // enablement. Deferred getters close over later const bindings
+    // (handler/effect only).
+    const context = testInteractionContext({
       model: () => model,
-      onzoom: () => {
-        /* no callback */
+      root: () => root,
+      captureSurface: () => capture,
+      interaction: noController,
+      resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y", intervals: "plot" }),
+      selectConfig: () => config.select,
+      inspectConfig: () => config.inspect,
+      tooltipHovered: () => false,
+      announce: (message) => {
+        announcements.push(message);
       },
       oninteraction: () => {
         /* no callback */
       },
-      announce: (message) => {
-        announcements.push(message);
-      },
-    });
-
-    // 2. inspection (before surface — reversed reducer dep)
-    const inspection = createInspectionState({
-      model: () => model,
-      reducer: () => surface.reducer,
-      inspectConfig: () => config.inspect,
-      inspectEnabled: () => config.inspect !== null,
-      dataIdentityEpoch: () => "epoch-1",
-      keyAt,
-      root: () => root,
-      captureSurface: () => capture,
-      plotId: () => "plot-test",
-      tooltipHovered: () => false,
-      clearTooltipHovered: () => {},
       oninspect: () => {
         /* no callback */
       },
-      oninteraction: () => {
+      onzoom: () => {
         /* no callback */
       },
-      announce: (message) => {
-        announcements.push(message);
-      },
+      ontoolchange: () => onToolChangeBox.value,
+      keyAt,
+      semanticKey,
+      candidateSemanticKeys: identityCandidateKeys,
+    });
+
+    let surface!: SurfaceState;
+    let interval!: IntervalState;
+
+    // 1. zoom
+    const zoom = createPlotZoomState(context, {
+      zoomConfig: () => config.zoom,
+      assembled: () => options.spec ?? continuousSpec(),
+    });
+
+    // 2. inspection (before surface — reversed reducer dep)
+    const inspection = createInspectionState(context, {
+      reducer: () => surface.reducer,
+      inspectEnabled: () => config.inspect !== null,
+      dataIdentityEpoch: () => "epoch-1",
+      plotId: () => "plot-test",
+      clearTooltipHovered: () => {},
       clearAnnouncement: () => {},
     });
 
     // 3. surface (owns reducer). Global rAF is the deferred suite pump.
-    surface = createSurfaceState({
-      model: () => model,
-      root: () => root,
+    surface = createSurfaceState(context, {
       toolProp: () => toolPropBox.value,
       initialTool: () => config.initialTool,
       availableTools: () => config.availableTools,
-      inspectConfig: () => config.inspect,
-      selectConfig: () => config.select,
       pointSelectEnabled: () => config.select?.type === "point",
-      ontoolchange: () => onToolChangeBox.value,
       surfaceInteractive: () => options.surfaceInteractive ?? true,
-      candidateSemanticKeys: identityCandidateKeys,
       inspection: () => inspection,
       interval: () => interval,
       zoom: () => zoom,
@@ -346,28 +337,17 @@ export function mountSurfaceComposite(
         }
         selectionEvents.push(event);
       },
-      semanticKey,
       togglePointKeys: (keys, source) => {
         toggleCalls.push({ keys, source });
-      },
-      tooltipHovered: () => false,
-      announce: (message) => {
-        announcements.push(message);
       },
     });
 
     // 4. interval AFTER surface (production order — deferred surface→interval)
-    interval = createIntervalState({
-      model: () => model,
-      interaction: noController,
-      resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y", intervals: "plot" }),
-      selectConfig: () => config.select,
+    interval = createIntervalState(context, {
       effectiveZoomDomains: () => zoom.effectiveZoomDomains,
       commitZoom: (domains, source) => {
         zoom.commitZoom(domains, source);
       },
-      captureSurface: () => capture,
-      candidateSemanticKeys: identityCandidateKeys,
       consumptionCandidates: () => {
         const candidates = [];
         for (let id = 0; id < model.candidates.size; id++) {
@@ -394,9 +374,6 @@ export function mountSurfaceComposite(
           selectionOrderLog.push(`emit:${event.phase}`);
         }
         selectionEvents.push(event);
-      },
-      announce: (message) => {
-        announcements.push(message);
       },
     });
 
@@ -460,4 +437,4 @@ void originalCaf;
 
 // Re-exports used by construction-armed tests
 export { fromAny, createSurfaceState, normalizeInteractionConfig, modelFor };
-export type { SurfaceStateDeps, InteractionTool };
+export type { SurfaceStateOptions, InteractionTool };

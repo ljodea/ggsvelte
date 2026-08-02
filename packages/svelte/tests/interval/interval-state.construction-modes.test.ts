@@ -8,6 +8,7 @@ import type { RenderModel } from "@ggsvelte/core";
 import { encodeKey } from "@ggsvelte/core";
 
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
   bandXSpec,
@@ -39,39 +40,42 @@ describe("createIntervalState construction", () => {
     const constructionModel = modelFor(continuousSpec());
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createIntervalState({
-        model: () => constructionModel,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        selectConfig: persistentSelect,
-        effectiveZoomDomains: () => null,
-        commitZoom: () => {
-          commitZoomCalls++;
+      createIntervalState(
+        testInteractionContext({
+          model: () => constructionModel,
+          interaction: noController,
+          resolvedInteractionScope: () => defaultScope,
+          selectConfig: persistentSelect,
+          captureSurface: () => null,
+          // Issue #165 history: under the retired eager-SSR floor, a
+          // pre-populated non-union controller + non-null model reached this
+          // at construction. Deriveds are lazy at the 5.33.1 floor, so this
+          // guard pins the common empty-intervals construction path only.
+          candidateSemanticKeys: (candidate) => {
+            candidateSemanticKeysCalls++;
+            return identityCandidateKeys(candidate);
+          },
+          announce: () => {
+            announceCalls++;
+          },
+        }),
+        {
+          effectiveZoomDomains: () => null,
+          commitZoom: () => {
+            commitZoomCalls++;
+          },
+          consumptionCandidates: () => {
+            throw new Error("consumptionCandidates must remain lazy for empty intervals");
+          },
+          inspectionPanel: () => {
+            inspectionPanelCalls++;
+            return null;
+          },
+          emitSelection: () => {
+            emitCalls++;
+          },
         },
-        coordFlipped: () => false,
-        captureSurface: () => null,
-        // Issue #165 history: under the retired eager-SSR floor, a
-        // pre-populated non-union controller + non-null model reached this
-        // at construction. Deriveds are lazy at the 5.33.1 floor, so this
-        // guard pins the common empty-intervals construction path only.
-        candidateSemanticKeys: (candidate) => {
-          candidateSemanticKeysCalls++;
-          return identityCandidateKeys(candidate);
-        },
-        consumptionCandidates: () => {
-          throw new Error("consumptionCandidates must remain lazy for empty intervals");
-        },
-        inspectionPanel: () => {
-          inspectionPanelCalls++;
-          return null;
-        },
-        emitSelection: () => {
-          emitCalls++;
-        },
-        announce: () => {
-          announceCalls++;
-        },
-      }),
+      ),
     );
 
     expect(emitCalls).toBe(0);

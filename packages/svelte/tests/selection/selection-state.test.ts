@@ -17,6 +17,7 @@ import { createPlotInteraction } from "../../src/lib/interaction/controller.svel
 import { buildPointSelectionEvent } from "../../src/lib/selection/selection.js";
 import { createSelectionState } from "../../src/lib/selection/selection-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 type SelectConfig = ResolvedInteractionConfig["select"];
@@ -71,14 +72,16 @@ function mountSelectionController(
   } = {},
 ): SelectionHarness {
   const { value: state, destroy } = withFlushedEffectRoot(() =>
-    createSelectionState({
-      interaction: options.interaction ?? noController,
-      resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
-      selectConfig: options.selectConfig ?? pointSelectSingle,
-      onselect: options.onselect ?? noSelectCb,
-      oninteraction: options.oninteraction ?? noInteractionCb,
-      announce: options.announce ?? (() => {}),
-    }),
+    createSelectionState(
+      testInteractionContext({
+        interaction: options.interaction ?? noController,
+        resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
+        selectConfig: options.selectConfig ?? pointSelectSingle,
+        onselect: options.onselect ?? noSelectCb,
+        oninteraction: options.oninteraction ?? noInteractionCb,
+        announce: options.announce ?? (() => {}),
+      }),
+    ),
   );
   return { state, destroy };
 }
@@ -90,22 +93,24 @@ describe("createSelectionState construction", () => {
     let announceCalls = 0;
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createSelectionState({
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        selectConfig: pointSelectSingle,
-        onselect: (): SelectCb => {
-          onselectCalls++;
-          return noSelectCb();
-        },
-        oninteraction: (): InteractionCb => {
-          oninteractionCalls++;
-          return noInteractionCb();
-        },
-        announce: () => {
-          announceCalls++;
-        },
-      }),
+      createSelectionState(
+        testInteractionContext({
+          interaction: noController,
+          resolvedInteractionScope: () => defaultScope,
+          selectConfig: pointSelectSingle,
+          onselect: (): SelectCb => {
+            onselectCalls++;
+            return noSelectCb();
+          },
+          oninteraction: (): InteractionCb => {
+            oninteractionCalls++;
+            return noInteractionCb();
+          },
+          announce: () => {
+            announceCalls++;
+          },
+        }),
+      ),
     );
 
     expect(state.effectiveSelectedKeys).toEqual([]);
