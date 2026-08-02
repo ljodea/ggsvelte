@@ -933,4 +933,16 @@ describe("release.yml concurrent-merge race recovery", () => {
     expect(yml).not.toMatch(/secrets\.NPM_TOKEN/);
     expect(yml).not.toMatch(/NPM_TOKEN:\s*\$\{\{/);
   });
+
+  it("checks out full history so recovery release tags resolve to version-introducing commits", () => {
+    // stage-github-releases uses `git log -S` per package version. Default
+    // actions/checkout depth is 1, so the pickaxe always falls back to HEAD and
+    // recovery tags point at unrelated tip work (post-merge review on #1353).
+    const yml = release();
+    const checkoutAt = yml.indexOf("actions/checkout@");
+    expect(checkoutAt).toBeGreaterThan(-1);
+    const nextUses = yml.indexOf("\n      - uses:", checkoutAt + 1);
+    const checkoutBlock = nextUses === -1 ? yml.slice(checkoutAt) : yml.slice(checkoutAt, nextUses);
+    expect(checkoutBlock).toMatch(/fetch-depth:\s*0/);
+  });
 });
