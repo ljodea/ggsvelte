@@ -11,21 +11,66 @@ function bindingOf(binding: LayerBinding, aesthetic: StyleAesthetic) {
   return binding[aesthetic];
 }
 
+/**
+ * Catalog walk for one mapped column. One encodeKey per row (not two —
+ * indexableKeys and the catalog dedupe keyed separately); this walk
+ * dominates mapped-style profiles.
+ */
+function walkCatalogColumn(
+  column: readonly CellValue[],
+  indexableKeys: Set<string>,
+  seen: Set<string>,
+  catalog: CellValue[],
+): void {
+  for (let i = 0; i < column.length; i++) {
+    const key = encodeKey(column[i]!);
+    indexableKeys.add(key);
+    if (!seen.has(key)) {
+      seen.add(key);
+      catalog.push(column[i]!);
+    }
+  }
+}
+
 export function collectStyleValues(input: {
   aesthetic: StyleAesthetic;
   frames: readonly LayerFrame[];
   bindings: readonly LayerBinding[];
   table: ColumnTable;
   sourceTable: ColumnTable;
+  /**
+   * Whether the source catalog (a full-column dedupe walk per mapped field)
+   * is needed at all. Sequential/binned/identity resolutions never read the
+   * catalog, so the caller passes "never" when the scale type is explicitly
+   * continuous and "auto" to let this walk decide from field discreteness
+   * metadata. "always" preserves the historical walk.
+   */
+  catalogMode: "always" | "auto" | "never";
 }): {
-  values: CellValue[];
+  values: readonly CellValue[];
   catalog: CellValue[];
   anyField: boolean;
   anyDiscrete: boolean;
   anyIndexable: boolean;
   nonInteractiveValues: CellValue[];
 } {
-  const { aesthetic, frames, bindings, table, sourceTable } = input;
+  const { aesthetic, frames, bindings, table, sourceTable, catalogMode } = input;
+  // Sole-contributor fast path: a single mapped frame run (the common case)
+  // aliases the frame's values array instead of paying one push per row.
+  // Consumers never mutate `values` (missing-count filter, scale training).
+  // Float64Array frame columns are not aliasable (readonly CellValue[]
+  // return type) and keep the historical copy.
+  let contributions = 0;
+  let soleRun: readonly CellValue[] | null = null;
+  for (const frame of frames) {
+    const binding = bindingOf(frame.binding, aesthetic);
+    const mapped = styleFrameValues(frame, aesthetic);
+    if ((binding.field !== null || binding.statColumn !== null) && mapped !== null) {
+      contributions++;
+      soleRun = mapped instanceof Float64Array ? null : mapped;
+    }
+    if (binding.scaledConstant !== null) contributions++;
+  }
   const values: CellValue[] = [];
   let anyField = false;
   let anyDiscrete = false;
@@ -52,10 +97,12 @@ export function collectStyleValues(input: {
         anyDiscrete = true;
       }
       if (binding.field !== null) anyIndexable = true;
-      // One push per element — never spread a row-length column into push.
-      // Spread hits the engine argument limit (RangeError) on large data (#1338).
-      // Match the colour path in scale-color-collect.ts.
-      for (const v of mapped) values.push(v);
+      if (contributions !== 1 || soleRun === null) {
+        // One push per element — never spread a row-length column into push.
+        // Spread hits the engine argument limit (RangeError) on large data (#1338).
+        // Match the colour path in scale-color-collect.ts.
+        for (const v of mapped) values.push(v);
+      }
     }
     if (binding.scaledConstant !== null) {
       anyField = true;
@@ -77,6 +124,25 @@ export function collectStyleValues(input: {
     seen.add(key);
     catalog.push(value);
   };
+  // Metadata pass: flags and the walk decision come from field discreteness,
+  // never from row data, so they are computed before (and independently of)
+  // the full-column catalog walk.
+  const walkCatalog = (() => {
+    if (catalogMode === "never") return false;
+    if (catalogMode === "always") return true;
+    for (const binding of bindings) {
+      const mapped = bindingOf(binding, aesthetic);
+      const catalogTable = binding.sourceTable ?? sourceTable;
+      if (
+        (mapped.field !== null &&
+          catalogTable.has(mapped.field) &&
+          catalogTable.discreteness(mapped.field) === "discrete") ||
+        mapped.scaledConstant !== null
+      )
+        return true;
+    }
+    return anyDiscrete;
+  })();
   for (const binding of bindings) {
     const mapped = bindingOf(binding, aesthetic);
     // Prefer the layer's own source table so multi-table catalogs union correctly (#589).
@@ -85,9 +151,8 @@ export function collectStyleValues(input: {
       anyField = true;
       anyIndexable = true;
       if (catalogTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
-      for (const value of catalogTable.column(mapped.field)) {
-        indexableKeys.add(encodeKey(value));
-        add(value);
+      if (walkCatalog) {
+        walkCatalogColumn(catalogTable.column(mapped.field), indexableKeys, seen, catalog);
       }
     }
     if (mapped.scaledConstant !== null) {
@@ -99,7 +164,7 @@ export function collectStyleValues(input: {
         anyIndexable = true;
         indexableKeys.add(encodeKey(mapped.scaledConstant));
       }
-      add(mapped.scaledConstant);
+      if (walkCatalog) add(mapped.scaledConstant);
     }
   }
   // In a mixed legend (a data-backed mapping makes the whole scale interactive
@@ -112,5 +177,12 @@ export function collectStyleValues(input: {
   const nonInteractiveValues = anyIndexable
     ? annotationConstants.filter((value) => !indexableKeys.has(encodeKey(value)))
     : [];
-  return { values, catalog, anyField, anyDiscrete, anyIndexable, nonInteractiveValues };
+  return {
+    values: contributions === 1 && soleRun !== null ? soleRun : values,
+    catalog,
+    anyField,
+    anyDiscrete,
+    anyIndexable,
+    nonInteractiveValues,
+  };
 }

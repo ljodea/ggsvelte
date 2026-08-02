@@ -115,6 +115,45 @@ function fieldDiscreteness(
 }
 
 /**
+ * Single-column interning without per-row key strings. A raw-value Map
+ * (SameValueZero) groups strings/numbers/booleans/bigint/null exactly as
+ * cellKey does — including NaN and ±0 — so the `typeof${SEP}String(v)` key
+ * is only needed to tell TYPES apart within one column and to group Dates
+ * by epoch ms. Homogeneous primitive columns (the common case: one string
+ * group column) therefore intern directly; the first Date (or mixed
+ * primitive types, which cellKey would separate) falls back to the
+ * canonical key path.
+ */
+function canonicalGroupsSingleColumn(
+  n: number,
+  column: readonly CellValue[],
+): { groups: number[]; groupCount: number } | null {
+  const groups = Array.from<number>({ length: n });
+  const ids = new Map<CellValue, number>();
+  let kind: "string" | "number" | "boolean" | "bigint" | "null" | null = null;
+  for (let i = 0; i < n; i++) {
+    const v = column[i]!;
+    const t = typeof v;
+    const vKind =
+      v === null
+        ? ("null" as const)
+        : t === "string" || t === "number" || t === "boolean" || t === "bigint"
+          ? t
+          : null;
+    if (vKind === null) return null; // Date (or any object): epoch-ms grouping
+    if (kind === null) kind = vKind;
+    else if (kind !== vKind) return null; // mixed types: cellKey separates them
+    let id = ids.get(v);
+    if (id === undefined) {
+      id = ids.size;
+      ids.set(v, id);
+    }
+    groups[i] = id;
+  }
+  return { groups, groupCount: ids.size };
+}
+
+/**
  * Canonicalize row keys to group ids numbered by first occurrence.
  * `groupCount` is the Map size (O(1) after the O(R) pass) — never re-derived
  * via `Math.max(...groups)`, which re-scans R rows and can RangeError when
@@ -163,7 +202,8 @@ export function deriveGroups(
       throw new Error(`deriveGroups: unknown field "${groupChannel.field}" in aes.group`);
     }
     // Group by value regardless of discreteness (matches ggplot2's id()).
-    const { groups, groupCount } = canonicalGroups(n, (i) => cellKey(column[i]!));
+    const { groups, groupCount } =
+      canonicalGroupsSingleColumn(n, column) ?? canonicalGroups(n, (i) => cellKey(column[i]!));
     return {
       groups,
       groupCount,
@@ -209,11 +249,17 @@ export function deriveGroups(
   }
 
   const constantKey = constantParts.join(SEP);
-  const { groups, groupCount } = canonicalGroups(n, (i) => {
-    const parts = discreteColumns.map(({ column }) => cellKey(column[i]!));
-    if (constantKey !== "") parts.push(constantKey);
-    return parts.join(SEP);
-  });
+  const single =
+    discreteColumns.length === 1 && constantKey === ""
+      ? canonicalGroupsSingleColumn(n, discreteColumns[0]!.column)
+      : null;
+  const { groups, groupCount } =
+    single ??
+    canonicalGroups(n, (i) => {
+      const parts = discreteColumns.map(({ column }) => cellKey(column[i]!));
+      if (constantKey !== "") parts.push(constantKey);
+      return parts.join(SEP);
+    });
   return {
     groups,
     groupCount,
