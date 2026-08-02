@@ -1,4 +1,5 @@
 import { canonicalAxisToken, compareTokens } from "./candidate-axis-token.js";
+import { float32SortKey, radixSortByWords } from "./radix-sort.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
   defaultAutoMode,
@@ -267,38 +268,53 @@ export function buildCandidateStoreIndexes(
     };
   };
 
-  const order = Array.from({ length: n }, (_, id) => id);
-  const traversal = Uint32Array.from(
-    order.toSorted(
+  let traversal: Uint32Array;
+  let orderByX: Uint32Array;
+  if (anyNonFiniteAnchor) {
+    // Comparator path: subtraction comparators are NaN-tolerant only in the
+    // engines' de-facto "NaN → 0" reading, so non-finite scenes keep the
+    // historical code path verbatim.
+    traversal = Uint32Array.from({ length: n }, (_, id) => id);
+    traversal.sort(
       (a, b) =>
         panelIds[a]! - panelIds[b]! ||
         ys[a]! - ys[b]! ||
         xs[a]! - xs[b]! ||
         batchIds[a]! - batchIds[b]! ||
         primitiveIds[a]! - primitiveIds[b]!,
-    ),
-  );
+    );
+    orderByX = Uint32Array.from({ length: n }, (_, id) => id);
+    orderByX.sort((a, b) => {
+      const panelDelta = panelIds[a]! - panelIds[b]!;
+      if (panelDelta !== 0) return panelDelta;
+      const xa = xs[a]!;
+      const xb = xs[b]!;
+      const aFinite = Number.isFinite(xa);
+      const bFinite = Number.isFinite(xb);
+      if (aFinite && bFinite) {
+        const d = xa - xb;
+        if (d !== 0) return d;
+      } else if (aFinite !== bFinite) return aFinite ? -1 : 1;
+      return a - b;
+    });
+  } else {
+    // Radix path (finite anchors): order-preserving uint32 keys, stable LSD
+    // passes — ascending candidate id supplies the trailing (batch,
+    // primitive) tie-breaks, since ids are assigned in batch-then-primitive
+    // order. `+ 0` folds -0 into +0 so ±0 keys tie exactly as the
+    // subtraction comparator treated them.
+    const xKeys = new Uint32Array(n);
+    const yKeys = new Uint32Array(n);
+    for (let i = 0; i < n; i++) {
+      xKeys[i] = float32SortKey(xs[i]! + 0);
+      yKeys[i] = float32SortKey(ys[i]! + 0);
+    }
+    traversal = radixSortByWords([xKeys, yKeys, panelIds], n);
+    orderByX = radixSortByWords([xKeys, panelIds], n);
+  }
   // Dense inverse of `traversal`: candidate id → sequential rank (O(1) next/previous).
   const traversalRank = new Uint32Array(n);
   for (let i = 0; i < n; i++) traversalRank[traversal[i]!] = i;
-
-  // Panel-then-x order for left/right directional traverse (O(log n + k)).
-  // Up/down reuses `traversal` (already sorted panel → y → x → …).
-  // Non-finite primary coords sort after finite so lower_bound stays valid.
-  const orderByX = Uint32Array.from({ length: n }, (_, id) => id);
-  orderByX.sort((a, b) => {
-    const panelDelta = panelIds[a]! - panelIds[b]!;
-    if (panelDelta !== 0) return panelDelta;
-    const xa = xs[a]!;
-    const xb = xs[b]!;
-    const aFinite = Number.isFinite(xa);
-    const bFinite = Number.isFinite(xb);
-    if (aFinite && bFinite) {
-      const d = xa - xb;
-      if (d !== 0) return d;
-    } else if (aFinite !== bFinite) return aFinite ? -1 : 1;
-    return a - b;
-  });
 
   // Coincident multi-member stacks by (panel, x, y) in paint/source order (ascending id).
   // Singletons are omitted so dense plots do not retain n one-element Uint32Arrays;
@@ -396,6 +412,7 @@ export function buildCandidateStoreIndexes(
   // `${panel}|${key}` strings — dense plots have O(n) buckets).
   const tokenCount = Math.max(tokens.length, 1);
   const bucketKey = (panel: number, tokenId: number): number => panel * tokenCount + tokenId;
+  const order = Array.from({ length: n }, (_, id) => id);
   for (const axis of ["x", "y"] as const) {
     const keys = axis === "x" ? xTokenIds : yTokenIds,
       orth = axis === "x" ? (flip ? xs : ys) : flip ? ys : xs;
