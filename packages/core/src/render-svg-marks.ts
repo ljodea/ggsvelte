@@ -249,15 +249,14 @@ function renderPaths(
 }
 
 function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
-  const parts: string[] = [
-    `<g class="gg-batch gg-rects" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`,
-  ];
   const n = batch.rects.length / 4;
   const themeColors = {
     accent: themeVar("accent", theme),
     paper: themeVar("paper", theme),
     ink: themeVar("ink", theme),
   };
+  // Monomorphic string growth (same pattern as renderPoints/pathRingData).
+  let out = `<g class="gg-batch gg-rects" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`;
   for (let j = 0; j < n; j++) {
     const style = resolveRectMark(batch, j, themeColors);
     const strokeAttr =
@@ -265,12 +264,10 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
         ? ""
         : ` stroke="${style.stroke}" stroke-width="${px(style.strokeWidth)}"${dashAttrFromDash(style.dash)}`;
     const opacity = batch.alphas === undefined ? "" : alphaAttr(style.alpha);
-    parts.push(
-      `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${style.fill}"${strokeAttr}${opacity}/>`,
-    );
+    out += `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${style.fill}"${strokeAttr}${opacity}/>`;
   }
-  parts.push("</g>");
-  return parts.join("");
+  out += "</g>";
+  return out;
 }
 
 function renderSegments(
@@ -278,11 +275,9 @@ function renderSegments(
   theme: ThemeTokens,
   mode: PaintRenderMode = "full",
 ): string {
-  const parts: string[] = [
-    `<g class="gg-batch gg-segments" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}${glowAttr(batch.glow, mode)}>`,
-  ];
   const n = batch.segments.length / 4;
   const themeInk = themeVar("ink", theme);
+  let out = `<g class="gg-batch gg-segments" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}${glowAttr(batch.glow, mode)}>`;
   for (let j = 0; j < n; j++) {
     const mark = resolveSegmentMark(batch, j, themeInk);
     const stroke = paintStroke(mark.stroke, batch.strokePaint, mode);
@@ -296,17 +291,13 @@ function renderSegments(
         batch.renderPathOffsets[j + 1]!,
         "linear",
       );
-      parts.push(
-        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(linewidth)}"${style}/>`,
-      );
+      out += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(linewidth)}"${style}/>`;
     } else {
-      parts.push(
-        `<line x1="${px(batch.segments[j * 4]!)}" y1="${px(batch.segments[j * 4 + 1]!)}" x2="${px(batch.segments[j * 4 + 2]!)}" y2="${px(batch.segments[j * 4 + 3]!)}" stroke="${stroke}" stroke-width="${px(linewidth)}"${style}/>`,
-      );
+      out += `<line x1="${px(batch.segments[j * 4]!)}" y1="${px(batch.segments[j * 4 + 1]!)}" x2="${px(batch.segments[j * 4 + 2]!)}" y2="${px(batch.segments[j * 4 + 3]!)}" stroke="${stroke}" stroke-width="${px(linewidth)}"${style}/>`;
     }
   }
-  parts.push("</g>");
-  return parts.join("");
+  out += "</g>";
+  return out;
 }
 
 /** Panel-local box origin for a glyph anchor + box size (geom_label / sf_label). */
@@ -325,9 +316,7 @@ export function labelBoxOrigin(
 }
 
 function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
-  const parts: string[] = [
-    `<g class="gg-batch gg-glyphs" data-layer="${batch.layerIndex}" font-size="${px(batch.size)}" text-anchor="${batch.anchor}"${alphaAttr(batch.alpha)}>`,
-  ];
+  let out = `<g class="gg-batch gg-glyphs" data-layer="${batch.layerIndex}" font-size="${px(batch.size)}" text-anchor="${batch.anchor}"${alphaAttr(batch.alpha)}>`;
   const n = batch.texts.length;
   const themeInk = themeVar("ink", theme);
   const themePaper = themeVar("paper", theme);
@@ -356,16 +345,12 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
       const boxStroke = batch.boxStrokes?.[j] ?? batch.boxStroke ?? themeInk;
       const sw = batch.boxStrokeWidth ?? 0.5;
       const rx = batch.boxRadius ?? 0;
-      parts.push(
-        `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
-      );
+      out += `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`;
     }
-    parts.push(
-      `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${mark.fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
-    );
+    out += `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${mark.fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`;
   }
-  parts.push("</g>");
-  return parts.join("");
+  out += "</g>";
+  return out;
 }
 
 /** Dispatch one geometry batch to its emitter (internal to the pure renderer). */
