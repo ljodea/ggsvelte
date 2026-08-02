@@ -2284,6 +2284,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "ensureTemporalPolyfill": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "fillPaintLinear": {
           "kind": "value",
           "lifecycle": "experimental"

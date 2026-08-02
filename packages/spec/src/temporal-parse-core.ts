@@ -4,8 +4,30 @@
  *
  * Engines: temporal-parse-format.ts (exact format), temporal-parse.ts (named parsers + dispatcher).
  * Facade: temporal.ts.
+ *
+ * **No static import of `@js-temporal/polyfill` here.** Lean render graphs import this
+ * module for ISO/UTC calendar math and config errors without paying the polyfill.
+ * Full temporal installs register the polyfill via {@link registerTemporalPolyfill}
+ * (`temporal-polyfill.ts` → `ensureTemporalPolyfill`).
  */
-import { Temporal as PolyfillTemporal } from "@js-temporal/polyfill";
+
+/**
+ * Runtime Temporal namespace shape (native or `@js-temporal/polyfill`).
+ * Type-only import path — no runtime edge to the polyfill package.
+ */
+export type TemporalNamespace = (typeof import("@js-temporal/polyfill"))["Temporal"];
+
+let registeredPolyfill: TemporalNamespace | null = null;
+
+/** Wire `@js-temporal/polyfill` (or a test double). Called from temporal-polyfill.ts. */
+export function registerTemporalPolyfill(impl: TemporalNamespace): void {
+  registeredPolyfill = impl;
+}
+
+/** Test-only: drop the registered polyfill so lean graphs can be asserted. */
+export function resetTemporalPolyfillForTests(): void {
+  registeredPolyfill = null;
+}
 
 export const TEMPORAL_PARSER_NAMES = [
   "iso",
@@ -184,11 +206,28 @@ function parseOffset(offset: string): number | null {
   return match[1] === "+" ? total : -total;
 }
 
-/** @internal Shared native-first Temporal implementation for spec-owned calendar semantics. */
-export function temporalImplementation(): typeof PolyfillTemporal {
-  const nativeTemporal = (globalThis as typeof globalThis & { Temporal?: typeof PolyfillTemporal })
+/**
+ * Native-first Temporal implementation for spec-owned calendar semantics.
+ * Returns `globalThis.Temporal` when present, else the polyfill registered via
+ * {@link registerTemporalPolyfill}. Throws when neither is available — lean
+ * render never reaches this for pure numeric/UTC-ISO identity charts.
+ */
+export function temporalImplementation(): TemporalNamespace {
+  const nativeTemporal = (globalThis as typeof globalThis & { Temporal?: TemporalNamespace })
     .Temporal;
-  return nativeTemporal ?? PolyfillTemporal;
+  if (nativeTemporal !== undefined) return nativeTemporal;
+  if (registeredPolyfill !== null) return registeredPolyfill;
+  throw new Error(
+    "Temporal is not available. Import @ggsvelte/core (full) or @ggsvelte/core/temporal, or call ensureTemporalPolyfill() from @ggsvelte/spec.",
+  );
+}
+
+/** True when native Temporal or a registered polyfill can run calendar ops. */
+export function hasTemporalImplementation(): boolean {
+  if ((globalThis as typeof globalThis & { Temporal?: TemporalNamespace }).Temporal !== undefined) {
+    return true;
+  }
+  return registeredPolyfill !== null;
 }
 
 /** Allocation-free UTC aliases — same three names as partsToEpoch. */
@@ -205,6 +244,13 @@ export function timezoneValidationFailure(
   timezone: string | undefined,
 ): TemporalParseResult | null {
   if (timezone === undefined || UTC_TIMEZONE_ALIASES.has(timezone)) return null;
+  // Do not cache "no Temporal" as zone invalidity — ensureTemporalPolyfill may
+  // register later in the same process (tests / late install).
+  if (!hasTemporalImplementation()) {
+    return temporalParseFailure(
+      `timezone ${JSON.stringify(timezone)} requires Temporal (import @ggsvelte/core or @ggsvelte/core/temporal)`,
+    );
+  }
   const cached = TIMEZONE_VALIDITY_CACHE.get(timezone);
   if (cached !== undefined) return cached;
 

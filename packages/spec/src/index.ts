@@ -384,6 +384,8 @@ export type {
   TemporalPrecision,
 } from "./temporal.js";
 export { MONTH_DAY_REFERENCE_YEAR } from "./temporal.js";
+/** Registers `@js-temporal/polyfill` for full temporal graphs (not lean render). */
+export { ensureTemporalPolyfill } from "./temporal-polyfill.js";
 export {
   MAX_TEMPORAL_CANDIDATES,
   MAX_TEMPORAL_MAJOR_TICKS,

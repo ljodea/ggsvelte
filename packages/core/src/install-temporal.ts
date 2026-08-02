@@ -4,6 +4,7 @@
  */
 import {
   canonicalTemporalParserKey,
+  ensureTemporalPolyfill,
   parseTemporalColumn,
   type TemporalParserSpec,
 } from "@ggsvelte/spec";
@@ -20,6 +21,8 @@ export function installTemporal(): void {
   // Re-install after test-only runtime clears; skip when already wired.
   if (installed && getTemporalRuntime() !== null) return;
   installed = true;
+  // Pull `@js-temporal/polyfill` into this full-core graph only (not lean render).
+  ensureTemporalPolyfill();
   installTemporalRuntime({
     parseColumn: (raw: readonly CellValue[], parser: TemporalParserSpec | "auto", options) => {
       const parsed = parseTemporalColumn(raw, parser, {
