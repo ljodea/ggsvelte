@@ -300,7 +300,7 @@ describe("ribbonBatches paint batch (#1309)", () => {
     expect(paintCalls.length).toBeLessThanOrEqual(2);
     expect(paintCalls.some((c) => c[1] === "fill")).toBe(true);
     expect(paintCalls.some((c) => c[1] === "color")).toBe(true);
-    const closed = batches.find((b) => b.closed);
+    const closed = batches.find((b) => b.closed === true);
     expect(closed?.fills).toEqual(["#ff0000", "#00ff00"]);
     paintSpy.mockRestore();
   });
