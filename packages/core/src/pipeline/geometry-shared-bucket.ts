@@ -124,7 +124,9 @@ export function sortGroupRowsByX(
 
 function isNonDecreasing(rows: readonly number[], keys: ArrayLike<number>): boolean {
   for (let i = 1; i < rows.length; i++) {
-    if (keys[rows[i]!]! < keys[rows[i - 1]!]!) return false;
+    // NaN keys (ribbon sorts before its finite filter) are never "ordered":
+    // every comparison involving NaN is false, so `a < b` would skip sort.
+    if (!(keys[rows[i]!]! >= keys[rows[i - 1]!]!)) return false;
   }
   return true;
 }

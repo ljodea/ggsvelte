@@ -103,4 +103,24 @@ describe("sortGroupRowsByX", () => {
     expect(groupRows[0]).toEqual([1, 0]);
     expect(groupRows[1]).toEqual([3, 2]);
   });
+
+  it("does not treat NaN keys as already-ordered (ribbon sorts before finite filter) (#1371)", () => {
+    // isNonDecreasing used `a < b`, which is false for any NaN comparison, so
+    // groups like [5, NaN, 1] skipped sort and finite survivors kept raw order.
+    const linear = trainContinuous([[0, 1, 5]], {});
+    const xNumeric = Float64Array.of(5, Number.NaN, 1);
+    const frame = fromAny<LayerFrame>({
+      n: 3,
+      xValues: null,
+      xNumeric,
+      groups: [0, 0, 0],
+    });
+    const fx = fromPartial<Frame>({ xScale: linear });
+    const groupRows = [[0, 1, 2]];
+    sortGroupRowsByX(groupRows, frame, fx);
+    // Finite x values must end up non-decreasing among themselves (NaN placement
+    // is implementation-defined; check the finite subsequence).
+    const finiteOrder = groupRows[0]!.filter((row) => Number.isFinite(xNumeric[row]!));
+    expect(finiteOrder.map((row) => xNumeric[row]!)).toEqual([1, 5]);
+  });
 });
