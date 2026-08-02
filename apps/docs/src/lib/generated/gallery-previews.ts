@@ -462,7 +462,7 @@ export const GALLERY_PREVIEWS = [
     id: "sf/boxed-labels",
     filename: "sf-boxed-labels-light.png",
     path: "/previews/sf-boxed-labels-light.png",
-    sha256: "c5307fdfbaf3149ae33a74542ed9ab92665fbff48b70be24b01c0cb241696d43",
+    sha256: "97219b225c360dffd66ed50e0fd16ef8b079137637091e7ad8fbd4c0919be306",
   },
   {
     id: "sf/geometry-collection",
