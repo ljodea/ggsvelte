@@ -365,8 +365,9 @@ short, package-specific, and correct — not a second docs site.
   contract dumps are what drifts.
 - **Guards:** `scripts/package-readme.test.ts` runs TypeScript fences for
   `@ggsvelte/spec` and `@ggsvelte/core`, bans monorepo-relative links, and
-  blocks removed grammar-prop examples in `@ggsvelte/svelte`. Root README
-  showcase stays in `scripts/readme-showcase.test.ts`.
+  blocks removed grammar-prop examples in `@ggsvelte/svelte`. The root README
+  stays short and links out to ggsvelte.sh (no embedded gallery or theme
+  grids) — enforced by `scripts/readme-showcase.test.ts`.
 - **Ship with a patch** when the example or install path changes — package
   README is a shipped surface for `scripts/changeset-check.ts` even though
   npm packs it outside the `files` field.
@@ -389,9 +390,8 @@ Authoring a new example:
      `<GeomX>` children), importing data from `./data.js`. Give the corpus
      file an explicit `width={640} height={400}` (or `height={vrHeight}` if
      you set one) so VR captures at a fixed size. These props are VR
-     plumbing, not the recommended authoring style: README and npm snippets
-     omit them (`scripts/readme-showcase.test.ts` strips root size props
-     before comparing), and user code should too — omitted width is
+     plumbing, not the recommended authoring style: package README and
+     docs snippets omit them, and user code should too — omitted width is
      container-responsive, omitted height is 400.
    - **`meta.json`** — `{ title, description, tags, docsSection, vrHeight? }`
      (validated by the generator; `docsSection` groups the gallery).
