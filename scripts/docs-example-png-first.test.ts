@@ -52,19 +52,17 @@ describe("docs example PNG-first (PR3)", () => {
     expect(frame).toContain("MutationObserver");
   });
 
-  it("sizes the shell from the in-flow preview, not invalid px aspect-ratio (#1363)", () => {
-    // aspect-ratio with 640px/400px is invalid CSS; with both children absolute
-    // the frame collapses to 0 height during upgrade. Keep the PNG in flow for
-    // size and lift only the live host. Height then grows with live chrome so
-    // app.css overflow:hidden does not clip tool rails vertically.
+  it("reserves shell height with unitless aspect-ratio only until live (#1363)", () => {
+    // aspect-ratio rejects length tokens (640px); use unitless --example-vr-w/h
+    // while loading, then drop the ratio so live chrome is not clipped.
     const frame = read("lib/components/ExampleLiveFrame.svelte");
+    expect(frame).toContain("--example-vr-w:");
+    expect(frame).toContain("--example-vr-h:");
+    expect(frame).toMatch(/aspect-ratio:\s*var\(--example-vr-w\)\s*\/\s*var\(--example-vr-h\)/);
     expect(frame).not.toMatch(/aspect-ratio:\s*var\(--example-vr-width\)/);
-    expect(frame).not.toContain("under-live");
-    expect(frame).not.toMatch(/overflow:\s*visible/);
-    expect(frame).toMatch(/max-width:\s*100%/);
-    // Bound the ready wait so a never-ready plot still reveals; retry focus.
+    expect(frame).toContain("under-live");
+    expect(frame).toMatch(/:not\(\.live-ready\)/);
     expect(frame).toContain("READY_FALLBACK_MS");
-    expect(frame).toMatch(/MutationObserver/);
   });
 
   it("hands keyboard focus to the plot after an intent upgrade (#1362)", () => {

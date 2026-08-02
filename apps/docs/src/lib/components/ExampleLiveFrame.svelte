@@ -192,13 +192,12 @@
   bind:this={host}
   onfocusin={onShellFocusIn}
   onfocusout={onShellFocusOut}
-  style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
+  style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px;--example-vr-w:${String(width)};--example-vr-h:${String(height)}`}
 >
   {#if !liveReady}
-    <!-- Keep the PNG in normal flow so the frame height stays real while the
-         live host is absolutely positioned under it (#1363). -->
     <img
       class="example-preview"
+      class:under-live={Live !== null}
       src={`${base}${previewPath}`}
       alt={title}
       {width}
@@ -231,22 +230,20 @@
     width: 100%;
     max-width: var(--example-vr-width);
     min-width: 0;
-    /* No aspect-ratio: --example-vr-* are lengths (…px); aspect-ratio only
-       accepts unitless numbers, and a permanent ratio fixed height so
-       overflow:hidden clipped tool-rail / legend chrome. Size from the
-       in-flow PNG instead; height grows with live content so app.css
-       overflow:hidden only clips horizontal overflow on narrow screens (#1363). */
+  }
+
+  /*
+   * Reserve height while the shell upgrades. Use unitless --example-vr-w/h —
+   * aspect-ratio rejects length tokens (…px), which made the prior declaration
+   * invalid and collapsed the frame when both children were absolute (#1363).
+   * Drop the ratio once live so tool-rail / a11y chrome are not clipped.
+   */
+  .gg-example-frame:not(.live-ready) {
+    aspect-ratio: var(--example-vr-w) / var(--example-vr-h);
   }
 
   .gg-example-frame.full-width {
     max-width: none;
-  }
-
-  /* Fixed-width example SVGs can exceed the frame on narrow viewports; keep
-     them inside the (overflow:hidden) frame without horizontal page scroll. */
-  .live-host :global(.gg-plot-root),
-  .live-host :global(svg) {
-    max-width: 100%;
   }
 
   .example-preview {
@@ -254,6 +251,15 @@
     width: 100%;
     height: auto;
     background: #fff;
+  }
+
+  .example-preview.under-live {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 1;
   }
 
   .load-interactive {
@@ -283,7 +289,7 @@
   }
 
   .live-host:not(.revealed) {
-    /* Overlay the in-flow PNG while the plot measures; do not contribute height. */
+    /* Keep the plot in the layout tree so it can measure, but hide the flash. */
     position: absolute;
     inset: 0;
     opacity: 0;
@@ -294,21 +300,7 @@
   .live-host.revealed {
     position: relative;
     opacity: 1;
-  }
-
-  /* Live pages: grow with tool-rail / a11y chrome. VR forces a fixed frame
-     size via app.css — keep height:100% there so pixel baselines stay stable. */
-  :global(html:not([data-vr]):not([data-visual-test]))
-    .gg-example-frame.live-ready
-    .live-host.revealed {
+    /* Grow with chrome once live; VR still pins the outer frame height. */
     height: auto;
-  }
-
-  /* Narrow non-VR viewports: keep fixed-width example SVGs inside the frame. */
-  :global(html:not([data-vr]):not([data-visual-test]))
-    .live-host
-    :global(.gg-plot-root),
-  :global(html:not([data-vr]):not([data-visual-test])) .live-host :global(svg) {
-    max-width: 100%;
   }
 </style>
