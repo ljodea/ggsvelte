@@ -1,5 +1,77 @@
 # @ggsvelte/core
 
+## 0.26.1
+
+### Patch Changes
+
+- 3828c57: # Faster candidate-store build
+
+  Migration: none. Internal-only performance work in the candidate-store build
+  path; no public API or behavior changes.
+
+  Measured on a loaded x86_64 box (budgets were baselined on Apple Silicon),
+  min-of-many reps:
+
+  - hit-index build 100k: ~289 ms → ~208 ms
+  - canvas cold scatter 100k: ~1161 ms → ~1150 ms (noisy; CPU profiles show the
+    candidate-build share shrinking across every slice)
+
+  Slices:
+
+  - Coincident stacks derive from traversal-order runs instead of a
+    `${panel}|${x}|${y}` string-keyed Map (NaN/±0-aware fallback preserved).
+  - Per-bucket `Object.freeze` and singleton-lineage `Object.freeze` dropped;
+    immutable by convention, matching the coincident-stack precedent.
+  - Axis-token interning is kind-dispatched (number/string/boolean Maps keyed
+    on the raw value) with peek-before-allocate, eliminating per-candidate
+    `tokenKey()` strings and token objects on repeat hits.
+  - Fast-path gating for non-finite anchors reads the NARROWED float32 column
+    values, so doubles that overflow float32 to ±Infinity take the same
+    historical ordering path as any other non-finite anchor.
+  - Permutation-sort comparator reads precomputed token ranks and per-candidate
+    layer ids — no `compareTokens` dispatch, no `scene.batches[…]` chases.
+  - Single-batch all-points scenes reuse the main anchor quadtree instead of
+    building an identical second tree.
+  - Singleton lineage interning fast-paths through a direct key→ref Map while
+    registering the same membership token as the general path.
+  - The source-backed datum resolver hoists column arrays, style reads, and
+    grouping per (layer, owning table) instead of seven `table.column(field)`
+    walks plus cache probes per primitive.
+  - Per-candidate columns are written into capacity-preallocated final typed
+    arrays instead of growable `number[]` buffers plus conversion copies.
+
+- 4e775d9: # Sort ribbon/area groups when x keys include missing values
+
+  Migration: none. Ribbon/area groups with non-finite running coordinates no
+  longer skip x-sorting, and finite rows sort in place so missing slots still
+  split shaded bands into separate runs (ggplot2 NA gaps).
+
+- 9b51ddf: # Faster mapped-style scale training and collection
+
+  Migration: none. Internal-only performance work; no public API or behavior
+  changes.
+
+  Measured on a loaded x86_64 box, min-of-20 reps of `pipeline mapped-style
+100k` (budget 132 ms): **~124 → ~56 ms**.
+
+  - The source-catalog walk encodes each value once per row (was twice:
+    `indexableKeys` and the catalog dedupe kept separate `Set` addictions).
+  - Provably-continuous aesthetics (sequential/binned/identity numeric style
+    scales) skip the full-column catalog dedupe walk entirely — the discrete
+    resolutions that read the catalog are unreachable, decided from field
+    discreteness metadata, never row data.
+  - A single mapped frame (the common case) aliases its value column instead
+    of rebuilding it with one push per row; multi-frame plots and
+    Float64Array frame columns keep the historical concatenation.
+  - `deriveGroups` interns homogeneous primitive single columns directly
+    (SameValueZero groups exactly like the `cellKey` string, NaN/±0
+    included), falling back to the canonical key path on the first Date or
+    mixed-type column.
+  - All-number style value columns convert to their semantic Float64 view in
+    one fused loop instead of a per-element `cellToNumber` callback inside
+    `Float64Array.from`.
+  - @ggsvelte/spec@0.26.1
+
 ## 0.26.0
 
 ### Minor Changes
