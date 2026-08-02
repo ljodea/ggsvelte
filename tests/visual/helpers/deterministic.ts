@@ -23,18 +23,24 @@ export async function settleVisualState(page: Page, expectedPlots = 1): Promise<
   // there (they race the upgrade and can hang Playwright's actionability checks).
   const hasVr = await page.evaluate(() => new URL(location.href).searchParams.has("vr"));
   if (!hasVr) {
-    // Drain by always targeting the current first match. An indexed nth(i)
-    // after count() races button removal (index shift / detach hang).
+    // Drain by count: click the current first match, then wait until the
+    // "Load interactive chart" count drops (label → Loading… or unmount).
+    // Indexed nth after a frozen count races removals; .first()+detached
+    // re-resolves to the next button and can stop early.
     for (;;) {
-      const btn = page.getByRole("button", { name: "Load interactive chart" }).first();
-      if (!(await btn.isVisible().catch(() => false))) break;
-      await btn.click({ timeout: 5_000 }).catch(() => {
-        /* button may unmount mid-upgrade */
+      const buttons = page.getByRole("button", { name: "Load interactive chart" });
+      const n = await buttons.count();
+      if (n === 0) break;
+      const first = buttons.nth(0);
+      if (!(await first.isVisible().catch(() => false))) break;
+      await first.click({ timeout: 5_000 }).catch(() => {
+        /* may unmount mid-upgrade */
       });
-      await btn.waitFor({ state: "detached", timeout: 10_000 }).catch(() => {
-        /* import may leave a Loading… control; stop if still present */
-      });
-      if (await btn.isVisible().catch(() => false)) break;
+      try {
+        await expect(buttons).toHaveCount(n - 1, { timeout: 15_000 });
+      } catch {
+        break;
+      }
     }
   }
   // 30s: cold-import of the chart stack after a PNG placeholder. First smoke

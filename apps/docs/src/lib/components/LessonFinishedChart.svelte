@@ -143,6 +143,39 @@
     if (LivePlot === null) restoreKeyboardFocus = true;
   }
 
+  function onShellFocusOut(event: FocusEvent): void {
+    // relatedTarget === null means blur from unmount (keep restore pending).
+    const next = event.relatedTarget;
+    if (next === null) return;
+    if (next instanceof Node && host !== undefined && host.contains(next))
+      return;
+    restoreKeyboardFocus = false;
+  }
+
+  function focusAfterUpgrade(root: HTMLElement): boolean {
+    const capture = root.querySelector<HTMLElement>(".gg-capture");
+    const target =
+      capture ??
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]');
+    if (target === null) return false;
+    const active = document.activeElement;
+    if (
+      active !== null &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      !root.contains(active)
+    ) {
+      return true;
+    }
+    if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+      target.tabIndex = -1;
+    }
+    queueMicrotask(() => {
+      target.focus({ preventScroll: true });
+    });
+    return true;
+  }
+
   onMount(() => {
     const target = host;
     if (target === undefined) return;
@@ -179,12 +212,8 @@
       return;
     const root = host;
     const tryFocus = (): boolean => {
-      const capture = root.querySelector<HTMLElement>(".gg-capture");
-      if (capture === null) return false;
+      if (!focusAfterUpgrade(root)) return false;
       restoreKeyboardFocus = false;
-      queueMicrotask(() => {
-        capture.focus({ preventScroll: true });
-      });
       return true;
     };
     if (tryFocus()) return;
@@ -192,7 +221,14 @@
       if (tryFocus()) mo.disconnect();
     });
     mo.observe(root, { childList: true, subtree: true, attributes: true });
-    return () => mo.disconnect();
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      restoreKeyboardFocus = false;
+    }, 30_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
   });
 </script>
 
@@ -213,6 +249,7 @@
   class="finished-chart lesson-output"
   bind:this={host}
   onfocusin={onShellFocusIn}
+  onfocusout={onShellFocusOut}
 >
   {#if LivePlot && finished}
     <LivePlot spec={finished.spec} height={liveHeight} {ariaLabel}>
