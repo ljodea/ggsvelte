@@ -1,6 +1,6 @@
 {
-  "title": "Text with rounded background boxes",
-  "description": "Boxed labels when names need a rounded background so they stay legible over other marks.",
+  "title": "Boxed labels",
+  "description": "A few large rounded boxes behind short names so GeomLabel reads at index thumbnail size.",
   "tags": ["label", "text", "point"],
   "docsSection": "Labels & text"
 }

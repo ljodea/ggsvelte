@@ -12732,9 +12732,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/label/basic",
-    title: "Text with rounded background boxes — ggsvelte gallery",
+    title: "Boxed labels — ggsvelte gallery",
     description:
-      "Boxed labels when names need a rounded background so they stay legible over other marks.",
+      "A few large rounded boxes behind short names so GeomLabel reads at index thumbnail size.",
     canonicalPath: "/examples/label/basic",
     kind: "page",
     index: true,
@@ -13173,8 +13173,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/text/labels",
-    title: "Bare text labels on points — ggsvelte gallery",
-    description: "Text geoms when the label is the primary mark, with no background box.",
+    title: "Bare text labels — ggsvelte gallery",
+    description:
+      "A few large bare text marks — short names so the geom reads at index thumbnail size.",
     canonicalPath: "/examples/text/labels",
     kind: "page",
     index: true,

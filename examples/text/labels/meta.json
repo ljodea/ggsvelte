@@ -1,6 +1,6 @@
 {
-  "title": "Bare text labels on points",
-  "description": "Text geoms when the label is the primary mark, with no background box.",
+  "title": "Bare text labels",
+  "description": "A few large bare text marks — short names so the geom reads at index thumbnail size.",
   "tags": ["text", "point", "labels"],
   "docsSection": "Labels & text"
 }

@@ -21136,12 +21136,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:label:basic",
     kind: "example",
-    title: "Text with rounded background boxes",
+    title: "Boxed labels",
     summary:
-      "Boxed labels when names need a rounded background so they stay legible over other marks.",
+      "A few large rounded boxes behind short names so GeomLabel reads at index thumbnail size.",
     href: "/examples/label/basic",
-    keywords: ["Text with rounded background boxes", "Labels & text", "label", "text", "point"],
-    exact: ["Text with rounded background boxes"],
+    keywords: ["Boxed labels", "Labels & text", "label", "text", "point"],
+    exact: ["Boxed labels"],
   },
   {
     id: "example:line:ecdf",
@@ -21850,11 +21850,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:text:labels",
     kind: "example",
-    title: "Bare text labels on points",
-    summary: "Text geoms when the label is the primary mark, with no background box.",
+    title: "Bare text labels",
+    summary: "A few large bare text marks — short names so the geom reads at index thumbnail size.",
     href: "/examples/text/labels",
-    keywords: ["Bare text labels on points", "Labels & text", "text", "point", "labels"],
-    exact: ["Bare text labels on points"],
+    keywords: ["Bare text labels", "Labels & text", "text", "point", "labels"],
+    exact: ["Bare text labels"],
   },
   {
     id: "example:tile:heatmap",

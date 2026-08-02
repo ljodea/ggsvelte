@@ -4,30 +4,34 @@
     GeomText,
     GGPlot,
     Labs,
+    ScaleXContinuous,
+    ScaleYContinuous,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { langren1644 } from "./data.js";
+  import { langrenLabels } from "./data.js";
 </script>
 
 <GGPlot
-  data={langren1644}
+  data={langrenLabels}
   aes={{ x: "longitude", y: "rank" }}
   width={640}
   height={400}
 >
   <ThemeMinimal />
+  <ScaleXContinuous limits={[18, 30]} />
+  <ScaleYContinuous limits={[0.2, 3.8]} />
   <Labs
-    title="Bare text labels on points"
-    subtitle="Each estimate is a name; labels draw exactly where they are placed"
-    x="Estimated Toledo–Rome longitude (°)"
-    y="Ordered by estimate"
+    title="Bare text labels"
+    subtitle="Three short names — ink only, no box"
+    x="Estimated longitude (°)"
+    y="Order"
   />
-  <GeomPoint size={2.2} alpha={0.4} aes={{ color: { value: "#4a5568" } }} />
+  <GeomPoint size={4} alpha={0.5} aes={{ color: { value: "#4a5568" } }} />
   <GeomText
     aes={{ label: "name", color: { value: "#1a202c" } }}
-    anchor="start"
-    dx={7}
-    size={12}
+    anchor="middle"
+    dy={-18}
+    size={20}
   />
 </GGPlot>

@@ -203,7 +203,9 @@ const cases: readonly GeomCase[] = [
     geomProps: { size: 12, padding: 4, radius: 2 },
     paramKey: "padding",
     paramValue: 4,
-    markSelector: ".gg-glyphs text",
+    // Label chrome paints rounded rects before text (Batch.svelte parity
+    // with the SVG-string serializer).
+    markSelector: ".gg-glyphs rect",
   },
   {
     name: "GeomHistogram",
@@ -414,4 +416,43 @@ describe("Geom* declaration components (parameterized)", () => {
       expect(container.querySelector(c.markSelector)).not.toBeNull();
     },
   );
+});
+
+describe("GeomLabel box chrome (Svelte scene parity)", () => {
+  it("paints rounded rects before text for geom_label", () => {
+    const { container } = render(SingleGeomPlot, {
+      Geom: GeomLabel,
+      geomProps: {
+        size: 12,
+        padding: 4,
+        radius: 3,
+        linewidth: 1.5,
+        aes: { fill: { value: "#b8c9e0" }, color: { value: "#0f172a" } },
+      },
+      data: xy,
+      aes: { x: "x", y: "y", label: "label" },
+    });
+
+    const boxes = container.querySelectorAll(".gg-glyphs rect");
+    const texts = container.querySelectorAll(".gg-glyphs text");
+    expect(boxes.length).toBe(xy.length);
+    expect(texts.length).toBe(xy.length);
+    const first = boxes.item(0);
+    expect(first).not.toBeNull();
+    expect(first.getAttribute("fill")).toBe("#b8c9e0");
+    expect(first.getAttribute("stroke")).toBe("#0f172a");
+    expect(first.getAttribute("rx")).toBe("3");
+  });
+
+  it("does not paint label boxes for geom_text", () => {
+    const { container } = render(SingleGeomPlot, {
+      Geom: GeomText,
+      geomProps: { size: 12 },
+      data: xy,
+      aes: { x: "x", y: "y", label: "label" },
+    });
+
+    expect(container.querySelectorAll(".gg-glyphs text").length).toBe(xy.length);
+    expect(container.querySelectorAll(".gg-glyphs rect").length).toBe(0);
+  });
 });

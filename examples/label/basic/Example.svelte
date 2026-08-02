@@ -4,37 +4,41 @@
     GeomLabel,
     GGPlot,
     Labs,
+    ScaleXContinuous,
+    ScaleYContinuous,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { langren1644 } from "./data.js";
+  import { langrenLabels } from "./data.js";
 </script>
 
 <GGPlot
-  data={langren1644}
+  data={langrenLabels}
   aes={{ x: "longitude", y: "rank" }}
   width={640}
   height={400}
 >
   <ThemeMinimal />
+  <ScaleXContinuous limits={[18, 30]} />
+  <ScaleYContinuous limits={[0.2, 3.8]} />
   <Labs
-    title="Text with rounded background boxes"
-    subtitle="Same labels as GeomText, with a measured box behind each name"
-    x="Estimated Toledo–Rome longitude (°)"
-    y="Ordered by estimate"
+    title="Boxed labels"
+    subtitle="Same three names, each in a rounded box"
+    x="Estimated longitude (°)"
+    y="Order"
   />
-  <GeomPoint size={2.2} alpha={0.4} aes={{ color: { value: "#4a5568" } }} />
+  <GeomPoint size={4} alpha={0.5} aes={{ color: { value: "#4a5568" } }} />
   <GeomLabel
     aes={{
       label: "name",
-      fill: { value: "#dbe4f0" },
+      fill: { value: "#b8c9e0" },
       color: { value: "#0f172a" },
     }}
-    anchor="start"
-    dx={7}
-    size={12}
-    padding={5}
-    radius={5}
-    linewidth={1.8}
+    anchor="middle"
+    dy={-18}
+    size={20}
+    padding={7}
+    radius={6}
+    linewidth={2.2}
   />
 </GGPlot>
