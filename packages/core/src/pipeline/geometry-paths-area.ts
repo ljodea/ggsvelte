@@ -9,7 +9,7 @@ import type { Frame } from "./geometry-shared.js";
 import { constantStyle, numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { bucketByGroup, sortGroupRowsByX, warnSingleObservationGroups } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
-import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
+import { areaGroupFillsOf } from "./geometry-paths-area-fill.js";
 
 export function areaBatch(
   frame: LayerFrame,
@@ -32,6 +32,10 @@ export function areaBatch(
       : resolveGradientPaint(paint.fillPaint, binding.index, "fill");
   const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
 
+  // One fill paint vector for all groups (#1309).
+  const styleRows = groupRows.map((rows) => rows[0]!);
+  const fillPaints = areaGroupFillsOf(frame, fill, styleRows);
+
   // Draw later-stacked groups first so the first-seen group paints on top.
   const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } =
     writeClosedPathGroups({
@@ -40,19 +44,14 @@ export function areaBatch(
       groupRows,
       yTop: frame.ymax,
       yBottom: frame.ymin,
-      fillOf: (rows) => areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null,
+      fillOf: (_rows, index) => fillPaints[index] ?? fillPaintResolved?.fallback ?? null,
     });
 
   const params: { alpha?: number } =
     binding.layer.geom === "area" || binding.layer.geom === "density"
       ? (binding.layer.params ?? {})
       : {};
-  const mappedAlphas = numericStyleVector(
-    frame,
-    "alpha",
-    groupRows.map((rows) => rows[0]!),
-    styles,
-  );
+  const mappedAlphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const subpathCount = pathOffsets.length - 1;
   const constantAlpha = constantStyle(binding, params, "alpha", 1);
   // Multi-group closed fills must carry alpha per subpath. SVG group opacity

@@ -44,9 +44,13 @@ export function emitDataSegments(input: {
     }
     if (buffers.kept > before) {
       styleRows[before] = row;
-      if (wantsColors && color !== null && strokes !== null) {
-        strokes[before] = mappedPaintVector(frame, "color", color, [row])[0]!;
-      }
+    }
+  }
+  // One mapped paint vector for all kept style rows (#1309).
+  if (wantsColors && color !== null && strokes !== null && buffers.kept > 0) {
+    const painted = mappedPaintVector(frame, "color", color, styleRows.subarray(0, buffers.kept));
+    for (let i = 0; i < buffers.kept; i++) {
+      strokes[i] = painted[i]!;
     }
   }
 }

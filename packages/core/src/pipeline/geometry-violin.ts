@@ -22,7 +22,7 @@ import {
   paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
-import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
+import { areaGroupFillsOf } from "./geometry-paths-area-fill.js";
 
 function sortRowsByY(rows: number[], y: Float64Array): number[] {
   return rows.toSorted((a, b) => y[a]! - y[b]!);
@@ -110,6 +110,10 @@ export function violinBatch(
   const pathOffsets = new Uint32Array(sortedGroups.length + 1);
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
+  // One fill/stroke paint vector for all violins (#1309).
+  const styleRows = sortedGroups.map((rows) => rows[0]!);
+  const fillPaints = areaGroupFillsOf(frame, fill, styleRows);
+  const strokePaints = paintVector(frame, "color", color, styleRows);
   let cursor = 0;
 
   for (let s = 0; s < sortedGroups.length; s++) {
@@ -147,8 +151,8 @@ export function violinBatch(
       closedFrameRows[cursor] = row;
       cursor++;
     }
-    fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
-    let stroke = paintVector(frame, "color", color, [rows[0]!])[0]!;
+    fills.push(fillPaints[s] ?? fillPaintResolved?.fallback ?? null);
+    let stroke = strokePaints[s]!;
     if (stroke === null && strokePaintResolved !== undefined) {
       stroke = strokePaintResolved.fallback;
     }
@@ -156,12 +160,7 @@ export function violinBatch(
   }
   pathOffsets[sortedGroups.length] = cursor;
 
-  const mappedAlphas = numericStyleVector(
-    frame,
-    "alpha",
-    sortedGroups.map((rows) => rows[0]!),
-    styles,
-  );
+  const mappedAlphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const subpathCount = pathOffsets.length - 1;
   const constantAlpha = constantStyle(binding, params, "alpha", 1);
   const alphas =

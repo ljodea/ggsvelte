@@ -22,7 +22,7 @@ import {
   type ResolvedStyleScales,
 } from "./geometry-style.js";
 // paint helpers imported below
-import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
+import { areaGroupFillsOf } from "./geometry-paths-area-fill.js";
 
 type Outline = "both" | "upper" | "lower" | "full";
 type LineCap = "butt" | "round" | "square";
@@ -210,8 +210,8 @@ function writeClosedRuns(input: {
   fx: Frame;
   orientation: "x" | "y";
   runs: readonly RibbonRun[];
-  fillOf: (rows: readonly number[]) => string | null;
-  strokeOf: (rows: readonly number[]) => string | null;
+  fillOf: (runIndex: number) => string | null;
+  strokeOf: (runIndex: number) => string | null;
   strokeWidth: number;
 }): {
   positions: Float32Array;
@@ -265,8 +265,8 @@ function writeClosedRuns(input: {
       closedFrameRows[cursor] = row;
       cursor++;
     }
-    fills.push(fillOf(rows));
-    strokes.push(strokeWidth > 0 ? strokeOf(rows) : null);
+    fills.push(fillOf(s));
+    strokes.push(strokeWidth > 0 ? strokeOf(s) : null);
   }
   pathOffsets[runs.length] = cursor;
   return { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes };
@@ -278,7 +278,7 @@ function writeOpenEdges(input: {
   orientation: "x" | "y";
   runs: readonly RibbonRun[];
   edge: "upper" | "lower" | "both";
-  strokeOf: (rows: readonly number[]) => string | null;
+  strokeOf: (runIndex: number) => string | null;
 }): {
   positions: Float32Array;
   rowIndex: Uint32Array;
@@ -301,7 +301,8 @@ function writeOpenEdges(input: {
   const strokes: (string | null)[] = [];
   let cursor = 0;
   let sub = 0;
-  for (const run of runs) {
+  for (let r = 0; r < runs.length; r++) {
+    const run = runs[r]!;
     for (const which of edges) {
       pathOffsets[sub] = cursor;
       const bound = which === "upper" ? hi : lo;
@@ -319,7 +320,7 @@ function writeOpenEdges(input: {
         frameRowIndex[cursor] = row;
         cursor++;
       }
-      strokes.push(strokeOf(run.rows));
+      strokes.push(strokeOf(r));
       sub++;
     }
   }
@@ -327,23 +328,9 @@ function writeOpenEdges(input: {
   return { positions, rowIndex, frameRowIndex, pathOffsets, strokes };
 }
 
-function explicitStrokeColor(
-  frame: LayerFrame,
-  color: ResolvedColorScale | null,
-  rows: readonly number[],
-): string | null {
-  const { binding } = frame;
-  // Outline only when color is explicitly supplied (mapped or constant).
-  if (
-    binding.color.field === null &&
-    binding.color.constant === null &&
-    binding.color.scaledConstant === null
-  ) {
-    return null;
-  }
-  const first = rows[0];
-  if (first === undefined) return binding.color.constant;
-  return paintVector(frame, "color", color, [first])[0]!;
+function hasExplicitColorBinding(frame: LayerFrame): boolean {
+  const { color } = frame.binding;
+  return color.field !== null || color.constant !== null || color.scaledConstant !== null;
 }
 
 export function ribbonBatches(
@@ -386,15 +373,23 @@ export function ribbonBatches(
       : resolveGradientPaint(paint.strokePaint, layerIndex, "stroke");
   const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, layerIndex);
 
-  const strokeOf = (rows: readonly number[]) => {
-    const solid = explicitStrokeColor(frame, color, rows);
-    if (solid !== null) return solid;
+  // One fill vector + one stroke vector for all ribbon runs (#1309).
+  const fillPaints = areaGroupFillsOf(frame, fill, styleRows);
+  const solidStrokes = hasExplicitColorBinding(frame)
+    ? paintVector(frame, "color", color, styleRows)
+    : null;
+  const strokeOf = (runIndex: number) => {
+    if (solidStrokes !== null) {
+      const solid = solidStrokes[runIndex]!;
+      if (solid !== null) return solid;
+    }
     // strokePaint supplies a solid fallback so outlines can activate without
     // aes.color (within-mark paint is not a data scale).
     return strokePaintResolved?.fallback ?? null;
   };
   const hasExplicitColor =
-    strokePaintResolved !== undefined || runs.some((run) => strokeOf(run.rows) !== null);
+    strokePaintResolved !== undefined ||
+    (solidStrokes !== null && solidStrokes.some((s) => s !== null));
   const outlineWidth = constantStyle(frame.binding, params, "linewidth", DEFAULT_LINEWIDTH);
 
   const out: PathsBatch[] = [];
@@ -404,10 +399,7 @@ export function ribbonBatches(
     fx,
     orientation,
     runs,
-    fillOf: (rows) => {
-      const solid = areaGroupFillOf(frame, fill, rows);
-      return solid ?? fillPaintResolved?.fallback ?? null;
-    },
+    fillOf: (runIndex) => fillPaints[runIndex] ?? fillPaintResolved?.fallback ?? null,
     strokeOf,
     strokeWidth: fullStroke ? outlineWidth : 0,
   });
