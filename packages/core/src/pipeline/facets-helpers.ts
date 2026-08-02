@@ -141,8 +141,10 @@ export function facetValues(
     return {
       value,
       enc,
-      // bandKey is only used for non-null nominal tiers; nulls sort last.
-      band: value === null ? "" : bandKey(value),
+      // bandKey only on the nominal tier (matches pre-hoist short-circuit).
+      // Numeric/temporal never read `band`; calling bandKey on Invalid Date
+      // would throw via toISOString (Devin #1386).
+      band: numeric || value === null ? "" : bandKey(value),
       num: numeric ? (numericByKey.get(enc) ?? NaN) : 0,
     };
   });
