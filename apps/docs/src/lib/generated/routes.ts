@@ -2953,6 +2953,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -3985,6 +3990,11 @@ export const DOCS_ROUTES = [
       {
         id: "compatible-geoms",
         title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -12778,6 +12788,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/jitter/spread",
+    title: "Jittered points by group — ggsvelte gallery",
+    description:
+      "Twelve large points in three columns with wide horizontal jitter — the alias mark that reads at index thumbnail size.",
+    canonicalPath: "/examples/jitter/spread",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/label/basic",
     title: "Boxed labels — ggsvelte gallery",
     description:
@@ -13074,10 +13095,32 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/qq/cloud",
+    title: "Sparse Q–Q cloud — ggsvelte gallery",
+    description:
+      "Twelve large sample quantiles vs theoretical normal — the scatter mark that reads at index thumbnail size.",
+    canonicalPath: "/examples/qq/cloud",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/qq/normal",
     title: "Sample quantiles against the normal — ggsvelte gallery",
     description: "Normal QQ plots for a quick normality check.",
     canonicalPath: "/examples/qq/normal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/qq_line/match",
+    title: "Q–Q reference line — ggsvelte gallery",
+    description:
+      "Thick line through the sample/theoretical quartile match — the mark that reads at index thumbnail size.",
+    canonicalPath: "/examples/qq_line/match",
     kind: "page",
     index: true,
     sitemap: true,
@@ -13120,6 +13163,17 @@ export const DOCS_ROUTES = [
     description:
       "The paint options a ribbon can carry, on a precomputed interval: a portable gradient across the band, a stroked edge and a glow beneath.",
     canonicalPath: "/examples/ribbon/paint",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/rug/ticks",
+    title: "Bottom-edge rug ticks — ggsvelte gallery",
+    description:
+      "Ten long thick ticks along the panel bottom — the marginal mark that reads at index thumbnail size.",
+    canonicalPath: "/examples/rug/ticks",
     kind: "page",
     index: true,
     sitemap: true,
@@ -13221,6 +13275,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/spoke/rays",
+    title: "Eight rays from one origin — ggsvelte gallery",
+    description:
+      "Eight long thick spokes at equal angles — the mark shape that reads at index thumbnail size.",
+    canonicalPath: "/examples/spoke/rays",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/spoke/vector-field",
     title: "Direction and length from each point — ggsvelte gallery",
     description: "Spokes for vector fields with origin, angle, and radius.",
@@ -13235,6 +13300,17 @@ export const DOCS_ROUTES = [
     title: "Step ECDF of paired differences — ggsvelte gallery",
     description: "Step ECDFs for cumulative distributions of differences or measurements.",
     canonicalPath: "/examples/step/ecdf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/step/stairs",
+    title: "Thick staircase — ggsvelte gallery",
+    description:
+      "Five vertices joined with hv steps — the stair mark that reads at index thumbnail size.",
+    canonicalPath: "/examples/step/stairs",
     kind: "page",
     index: true,
     sitemap: true,

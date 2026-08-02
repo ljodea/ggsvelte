@@ -61,13 +61,14 @@ export const GEOM_THUMBNAIL_EXAMPLE = {
   sf_text: "sf/labels",
   sf_label: "sf/boxed-labels",
   blank: "blank/axes-only",
-  jitter: "jitter/basic",
-  spoke: "spoke/vector-field",
-  // Van Langren longitude rug (rules along x) is the closest mark shape.
-  rug: "rule/data-driven",
-  step: "step/ecdf",
-  qq: "qq/normal",
-  qq_line: "qq/normal",
+  // Dedicated sparse specimens so each mark reads at the 96×96 geoms-index
+  // crop (dense menu/field/ECDF/Michelson charts collapsed into grey blobs).
+  jitter: "jitter/spread",
+  spoke: "spoke/rays",
+  rug: "rug/ticks",
+  step: "step/stairs",
+  qq: "qq/cloud",
+  qq_line: "qq_line/match",
 } as const satisfies Record<GeomName, string>;
 
 const previewPathById = new Map(

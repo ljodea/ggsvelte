@@ -1,0 +1,37 @@
+<script lang="ts">
+  import {
+    CoordFixed,
+    GeomSpoke,
+    GGPlot,
+    Labs,
+    ScaleXContinuous,
+    ScaleYContinuous,
+    ThemeMinimal,
+  } from "@ggsvelte/svelte";
+
+  import { rays } from "./data.js";
+</script>
+
+<GGPlot
+  data={rays}
+  aes={{ x: "x", y: "y", angle: "angle", radius: "radius" }}
+  width={640}
+  height={400}
+>
+  <ThemeMinimal />
+  <CoordFixed />
+  <ScaleXContinuous limits={[-5, 5]} />
+  <ScaleYContinuous limits={[-5, 5]} />
+  <Labs
+    title="Eight rays from one origin"
+    subtitle="One finite segment per angle; radius is length in data units"
+    x="x"
+    y="y"
+  />
+  <GeomSpoke
+    linewidth={3.2}
+    lineend="round"
+    alpha={1}
+    aes={{ color: { value: "#1a202c" } }}
+  />
+</GGPlot>
