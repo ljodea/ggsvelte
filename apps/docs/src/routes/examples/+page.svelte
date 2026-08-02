@@ -145,16 +145,17 @@
           <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
             <figure>
               <div class="preview-paper">
-                <!-- First six cover a typical first screen; the rest stay lazy
-                     so cold gallery transfers do not pull ~2MB of PNG up front. -->
+                <!-- Eager the first two (covers a phone row + desktop start).
+                     Only the LCP candidate gets fetchpriority=high so the
+                     signal is not diluted across a full desktop row. -->
                 <img
                   src={`${base}${entry.previewPath}`}
                   alt=""
                   width="640"
                   height={entry.vrHeight ?? 400}
-                  loading={index < 6 ? "eager" : "lazy"}
+                  loading={index < 2 ? "eager" : "lazy"}
                   decoding="async"
-                  fetchpriority={index < 6 ? "high" : "low"}
+                  fetchpriority={index === 0 ? "high" : "low"}
                 />
               </div>
             </figure>
@@ -188,8 +189,11 @@
   }
 
   .example-grid > li {
+    /* content-visibility implies paint containment; pad so the global
+       outline-offset focus ring is not clipped (#1364). */
     content-visibility: auto;
     contain-intrinsic-size: auto 14rem;
+    padding: 0.4rem;
   }
 
   figure {
