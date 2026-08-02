@@ -2,10 +2,7 @@
 
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ljodea/ggsvelte)
 
-ggplot2's layered grammar for Svelte 5. Author with components; agents emit the
-same chart as PortableSpec JSON — validate, apply the fix, render headless.
-The agent skill is the [`@ggsvelte/skill`](packages/skill) package (`SKILL.md` +
-`references/` at the package root).
+A layered grammar of graphics in Svelte for agents. Inspired by ggplot.
 
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started)
