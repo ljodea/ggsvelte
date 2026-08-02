@@ -15,7 +15,91 @@ import { describe, expect, it } from "bun:test";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
+import { getStatFrameBuilder } from "../src/pipeline/frame-stats-registry.ts";
+import { getGeomBatchBuilder } from "../src/pipeline/geometry-registry.ts";
 import { registerAll, registerBasic } from "../src/index.ts";
+
+/** The complete pre-#1420 auto-registered grammar — the composition must not shrink it. */
+const ALL_GEOMS = [
+  // basic tier
+  "point",
+  "count",
+  "line",
+  "step",
+  "path",
+  "col",
+  "bar",
+  "area",
+  "density",
+  "rule",
+  "segment",
+  "text",
+  "label",
+  "rect",
+  "ribbon",
+  "blank",
+  // specialty tier
+  "qq",
+  "dotplot",
+  "function",
+  "qq_line",
+  "quantile",
+  "contour",
+  "density_2d",
+  "density_2d_filled",
+  "bin_2d",
+  "tile",
+  "raster",
+  "spoke",
+  "abline",
+  "curve",
+  "rug",
+  "polygon",
+  "map",
+  "sf_text",
+  "sf_label",
+  "smooth",
+  "boxplot",
+  "errorbar",
+  "violin",
+  "linerange",
+  "pointrange",
+  "crossbar",
+  "hex",
+  "sf",
+];
+
+const ALL_STATS = [
+  // basic tier
+  "count",
+  "sum",
+  // specialty tier
+  "sf",
+  "sf_coordinates",
+  "unique",
+  "manual",
+  "align",
+  "connect",
+  "ellipse",
+  "bin",
+  "bin_hex",
+  "summary_bin",
+  "bindot",
+  "bin_2d",
+  "density",
+  "ydensity",
+  "ecdf",
+  "density_2d",
+  "density_2d_filled",
+  "smooth",
+  "quantile",
+  "contour",
+  "boxplot",
+  "summary",
+  "function",
+  "qq",
+  "qq_line",
+];
 
 describe("explicit registration API (Seam A)", () => {
   it("exports registerAll + registerBasic as idempotent functions", () => {
@@ -25,6 +109,16 @@ describe("explicit registration API (Seam A)", () => {
     expect(() => registerBasic()).not.toThrow();
     expect(() => registerAll()).not.toThrow();
     expect(() => registerAll()).not.toThrow();
+  });
+
+  it("registerAll() covers the complete pre-#1420 grammar", () => {
+    registerAll();
+    for (const geom of ALL_GEOMS) {
+      expect(getGeomBatchBuilder(geom), `geom ${geom}`).toBeDefined();
+    }
+    for (const stat of ALL_STATS) {
+      expect(getStatFrameBuilder(stat), `stat ${stat}`).toBeDefined();
+    }
   });
 });
 

@@ -36,24 +36,11 @@
  * values with a warning and REFUSE non-positive explicit domains.
  */
 
-// Re-export the public pipeline contract (import path stability).
-export type {
-  Advisory,
-  AxisValueFormatter,
-  LayerBackend,
-  MappedField,
-  NamedData,
-  PipelineWarning,
-  RenderModel,
-  ResolvedColorScale,
-  RunOptions,
-  ScaleDecision,
-  ScaleDiagnostic,
-  ScaleDiagnosticFix,
-  ScaleDomainSnapshot,
-  TrainedScales,
-} from "./pipeline/public-api.js";
-export { CANVAS_AUTO_THRESHOLD, PipelineError, batchMarkCount } from "./pipeline/public-api.js";
+// Re-export the pipeline contract pieces this barrel's remaining consumers
+// (unit tests, cli.ts, strata.ts) import. The package barrel re-exports the
+// full surface from public-api.js / run-pipeline.js directly (#1420).
+export type { LayerBackend, NamedData } from "./pipeline/public-api.js";
+export { PipelineError, batchMarkCount } from "./pipeline/public-api.js";
 
 // Registration is explicit (#1420): this barrel has no module-scope side
 // effects. Call registerBasic()/registerAll() (from "./register.js" or the

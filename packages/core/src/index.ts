@@ -22,8 +22,51 @@ export { groupBatchesByPanel } from "./group-batches-by-panel.js";
 // candidates install explicitly too (#1421): `installCandidates()` — GGPlot
 // calls it; headless renderers never need it.
 export { registerAll, registerBasic } from "./register.js";
+export { registerAllStatFrames } from "./pipeline/frame-stats-register-all.js";
+export { registerAllGeomBatches } from "./pipeline/geometry-register-all.js";
 export { installTemporal } from "./install-temporal.js";
 export { installCandidates } from "./install-candidates.js";
+
+// Per-family registration: granular opt-in for spec-driven apps, and the
+// mechanism <Geom*> components use to self-register (#1422-generated shells).
+export { registerAbline } from "./pipeline/register-abline.js";
+export { registerAlign } from "./pipeline/register-align.js";
+export { registerBin } from "./pipeline/register-bin.js";
+export { registerBin2d } from "./pipeline/register-bin-2d.js";
+export { registerBoxplot } from "./pipeline/register-boxplot.js";
+export { registerConnect } from "./pipeline/register-connect.js";
+export { registerContour } from "./pipeline/register-contour.js";
+export { registerCrossbar } from "./pipeline/register-crossbar.js";
+export { registerCurve } from "./pipeline/register-curve.js";
+export { registerDensity } from "./pipeline/register-density.js";
+export { registerDensity2d } from "./pipeline/register-density-2d.js";
+export { registerDensity2dFilled } from "./pipeline/register-density-2d-filled.js";
+export { registerDotplot } from "./pipeline/register-dotplot.js";
+export { registerEcdf } from "./pipeline/register-ecdf.js";
+export { registerEllipse } from "./pipeline/register-ellipse.js";
+export { registerErrorbar } from "./pipeline/register-errorbar.js";
+export { registerFunction } from "./pipeline/register-function.js";
+export { registerHex } from "./pipeline/register-hex.js";
+export { registerLinerange } from "./pipeline/register-linerange.js";
+export { registerManual } from "./pipeline/register-manual.js";
+export { registerMap } from "./pipeline/register-map.js";
+export { registerPointrange } from "./pipeline/register-pointrange.js";
+export { registerPolygon } from "./pipeline/register-polygon.js";
+export { registerQq } from "./pipeline/register-qq.js";
+export { registerQqLine } from "./pipeline/register-qq-line.js";
+export { registerQuantile } from "./pipeline/register-quantile.js";
+export { registerRaster } from "./pipeline/register-raster.js";
+export { registerRug } from "./pipeline/register-rug.js";
+export { registerSf } from "./pipeline/register-sf.js";
+export { registerSfLabel } from "./pipeline/register-sf-label.js";
+export { registerSfText } from "./pipeline/register-sf-text.js";
+export { registerSmooth } from "./pipeline/register-smooth.js";
+export { registerSpoke } from "./pipeline/register-spoke.js";
+export { registerSummary } from "./pipeline/register-summary.js";
+export { registerSummaryBin } from "./pipeline/register-summary-bin.js";
+export { registerTile } from "./pipeline/register-tile.js";
+export { registerUnique } from "./pipeline/register-unique.js";
+export { registerViolin } from "./pipeline/register-violin.js";
 
 // Data binding
 export {

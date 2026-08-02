@@ -1,118 +1,75 @@
 /**
- * Side-effect registration of every non-identity stat frame builder.
- * Imported by the full `@ggsvelte/core` package entry only.
+ * Full stat frame registration — a composition over the granular
+ * register-*.ts modules (#1420), so each stat family has exactly one source
+ * of truth. Called by `registerAll()` (src/register.ts); NOT a module-scope
+ * side effect anymore.
  */
-import { buildAlignFrame } from "./frame-stats-align.js";
-import { buildBindotFrame } from "./frame-stats-bindot.js";
-import { buildBinFrame } from "./frame-stats-bin.js";
-import { buildBin2dFrame } from "./frame-stats-bin-2d.js";
-import { buildBinHexFrame } from "./frame-stats-bin-hex.js";
-import { buildBoxplotFrame } from "./frame-stats-boxplot.js";
-import { buildConnectFrame } from "./frame-stats-connect.js";
-import { buildContourFrame } from "./frame-stats-contour.js";
-import { buildCountFrame } from "./frame-stats-count.js";
-import { buildDensityFrame } from "./frame-stats-density.js";
-import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
-import { buildEcdfFrame } from "./frame-stats-ecdf.js";
-import { buildEllipseFrame } from "./frame-stats-ellipse.js";
-import { buildFunctionFrame } from "./frame-stats-function.js";
-import { buildManualFrame } from "./frame-stats-manual.js";
-import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
-import { buildQuantileFrame } from "./frame-stats-quantile.js";
-import { registerStatFrame } from "./frame-stats-registry.js";
-import { buildSfCoordinatesFrame } from "./frame-stats-sf-coordinates.js";
-import { buildSfFrame } from "./frame-stats-sf.js";
-import { buildSmoothFrame } from "./frame-stats-smooth.js";
-import { buildSumFrame } from "./frame-stats-sum.js";
-import { buildSummaryFrame } from "./frame-stats-summary.js";
-import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
-import { buildUniqueFrame } from "./frame-stats-unique.js";
-import { buildYDensityFrame } from "./frame-stats-ydensity.js";
+import { registerBasicStatFrames } from "./frame-stats-register-basic.js";
+import { registerAlign } from "./register-align.js";
+import { registerBin } from "./register-bin.js";
+import { registerBin2d } from "./register-bin-2d.js";
+import { registerBoxplot } from "./register-boxplot.js";
+import { registerConnect } from "./register-connect.js";
+import { registerContour } from "./register-contour.js";
+import { registerDensity } from "./register-density.js";
+import { registerDensity2d } from "./register-density-2d.js";
+import { registerDensity2dFilled } from "./register-density-2d-filled.js";
+import { registerDotplot } from "./register-dotplot.js";
+import { registerEcdf } from "./register-ecdf.js";
+import { registerEllipse } from "./register-ellipse.js";
+import { registerFunction } from "./register-function.js";
+import { registerHex } from "./register-hex.js";
+import { registerManual } from "./register-manual.js";
+import { registerQq } from "./register-qq.js";
+import { registerQqLine } from "./register-qq-line.js";
+import { registerQuantile } from "./register-quantile.js";
+import { registerSf } from "./register-sf.js";
+import { registerSfLabel } from "./register-sf-label.js";
+import { registerSfText } from "./register-sf-text.js";
+import { registerSmooth } from "./register-smooth.js";
+import { registerSummary } from "./register-summary.js";
+import { registerSummaryBin } from "./register-summary-bin.js";
+import { registerUnique } from "./register-unique.js";
+import { registerViolin } from "./register-violin.js";
 
 let registered = false;
 
-/** Idempotent: safe to import from the package barrel more than once. */
+/**
+ * Register every non-identity stat frame builder. Family functions also
+ * register their paired geom batch where one exists — harmless here
+ * (registries are plain Maps) and required when this composition runs from
+ * registerAll() alongside registerAllGeomBatches(). Idempotent.
+ */
 export function registerAllStatFrames(): void {
   if (registered) return;
   registered = true;
 
-  registerStatFrame("sf", (binding, table, groups, warnings) =>
-    buildSfFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("sf_coordinates", (binding, table, groups, warnings) =>
-    buildSfCoordinatesFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("unique", (binding, table, groups) => buildUniqueFrame(binding, table, groups));
-  registerStatFrame("manual", (binding, table, groups, warnings) =>
-    buildManualFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("align", (binding, table, groups, warnings) =>
-    buildAlignFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("connect", (binding, table, groups, warnings) =>
-    buildConnectFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("ellipse", (binding, table, groups, warnings) =>
-    buildEllipseFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("count", (binding, table, groups, warnings) =>
-    buildCountFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("bin", (binding, table, groups, warnings, advisories, binRange) =>
-    buildBinFrame(binding, table, groups, warnings, advisories, binRange),
-  );
-  registerStatFrame("bin_hex", (binding, table, groups, warnings, advisories) =>
-    buildBinHexFrame(binding, table, groups, warnings, advisories),
-  );
-  registerStatFrame("summary_bin", (binding, table, groups, warnings, advisories, binRange) =>
-    buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange),
-  );
-  registerStatFrame("bindot", (binding, table, groups, warnings, advisories, binRange) =>
-    buildBindotFrame(binding, table, groups, warnings, advisories, binRange),
-  );
-  registerStatFrame("bin_2d", (binding, table, groups, warnings, advisories) =>
-    buildBin2dFrame(binding, table, groups, warnings, advisories),
-  );
-  registerStatFrame("density", (binding, table, groups, warnings) =>
-    buildDensityFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("sum", (binding, table, groups, warnings) =>
-    buildSumFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("ydensity", (binding, table, groups, warnings) =>
-    buildYDensityFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("ecdf", (binding, table, groups, warnings) =>
-    buildEcdfFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("density_2d", (binding, table, groups, warnings) =>
-    buildDensity2dFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("density_2d_filled", (binding, table, groups, warnings) =>
-    buildDensity2dFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("smooth", (binding, table, groups, warnings, advisories) =>
-    buildSmoothFrame(binding, table, groups, warnings, advisories),
-  );
-  registerStatFrame("quantile", (binding, table, groups, warnings) =>
-    buildQuantileFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("contour", (binding, table, groups, warnings) =>
-    buildContourFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("boxplot", (binding, table, groups, warnings) =>
-    buildBoxplotFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("summary", (binding, table, groups, warnings) =>
-    buildSummaryFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("function", (binding, table, _groups, warnings, _adv, _bin, functionDomain) =>
-    buildFunctionFrame(binding, table, warnings, functionDomain),
-  );
-  registerStatFrame("qq", (binding, table, groups, warnings) =>
-    buildQqFrame(binding, table, groups, warnings),
-  );
-  registerStatFrame("qq_line", (binding, table, groups, warnings) =>
-    buildQqLineFrame(binding, table, groups, warnings),
-  );
+  registerBasicStatFrames();
+
+  registerAlign();
+  registerBin();
+  registerBin2d();
+  registerBoxplot();
+  registerConnect();
+  registerContour();
+  registerDensity();
+  registerDensity2d();
+  registerDensity2dFilled();
+  registerDotplot();
+  registerEcdf();
+  registerEllipse();
+  registerFunction();
+  registerHex();
+  registerManual();
+  registerQq();
+  registerQqLine();
+  registerQuantile();
+  registerSf();
+  registerSfLabel();
+  registerSfText();
+  registerSmooth();
+  registerSummary();
+  registerSummaryBin();
+  registerUnique();
+  registerViolin();
 }
