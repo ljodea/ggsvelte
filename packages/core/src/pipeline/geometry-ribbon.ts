@@ -12,6 +12,7 @@ import {
   DEFAULT_LINEWIDTH,
   positionOf,
   removedWarning,
+  sortFiniteSlotsInPlace,
   sortGroupRowsByX,
 } from "./geometry-shared.js";
 import {
@@ -109,8 +110,9 @@ function sortGroupRowsByRunning(
     for (const rows of groupRows) rows.sort((a, b) => keys[a]! - keys[b]!);
     return;
   }
+  // Gap-preserving continuous sort (same as x path via sortGroupRowsByX).
   const y = frame.yNumeric!;
-  for (const rows of groupRows) rows.sort((a, b) => y[a]! - y[b]!);
+  for (const rows of groupRows) sortFiniteSlotsInPlace(rows, y);
 }
 
 /**

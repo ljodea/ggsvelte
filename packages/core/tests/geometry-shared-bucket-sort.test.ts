@@ -103,4 +103,23 @@ describe("sortGroupRowsByX", () => {
     expect(groupRows[0]).toEqual([1, 0]);
     expect(groupRows[1]).toEqual([3, 2]);
   });
+
+  it("sorts finite x keys in place without moving NaN gap slots (#1371)", () => {
+    // isNonDecreasing used `a < b`, which is false for any NaN comparison, so
+    // groups like [5, NaN, 1] skipped sort. Sorting must order finite rows but
+    // keep the NaN slot mid-group so ribbon can still split runs on the gap.
+    const linear = trainContinuous([[0, 1, 5]], {});
+    const xNumeric = Float64Array.of(5, Number.NaN, 1);
+    const frame = fromAny<LayerFrame>({
+      n: 3,
+      xValues: null,
+      xNumeric,
+      groups: [0, 0, 0],
+    });
+    const fx = fromPartial<Frame>({ xScale: linear });
+    const groupRows = [[0, 1, 2]];
+    sortGroupRowsByX(groupRows, frame, fx);
+    expect(groupRows[0]!.map((row) => xNumeric[row]!)).toEqual([1, Number.NaN, 5]);
+    expect(Number.isNaN(xNumeric[groupRows[0]![1]!]!)).toBe(true);
+  });
 });

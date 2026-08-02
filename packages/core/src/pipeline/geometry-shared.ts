@@ -16,6 +16,7 @@ export {
 } from "./geometry-shared-position.js";
 export {
   bucketByGroup,
+  sortFiniteSlotsInPlace,
   sortGroupRowsByX,
   warnSingleObservationGroups,
 } from "./geometry-shared-bucket.js";
