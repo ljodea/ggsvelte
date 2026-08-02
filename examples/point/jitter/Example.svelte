@@ -13,7 +13,7 @@
   <ThemeClean />
   <Labs
     title="The same calories, with position jitter"
-    subtitle="position_jitter on geom_point instead of the dedicated jitter geom"
+    subtitle="Jitter applied through the point position, not the dedicated jitter geom"
     x="Restaurant"
     y="Calories"
   />

@@ -13,8 +13,8 @@
 <GGPlot data={earthDensity} aes={{ x: "density" }} width={640} height={400}>
   <ThemeClassic />
   <Labs
-    title="Cavendish weighs the world, 29 times"
-    subtitle="One dot per run of the torsion balance; the modern value is 5.517"
+    title="One dot per measurement, stacked in bins"
+    subtitle="Twenty-nine runs of a torsion balance; the modern density sits at 5.517"
     x="Density of the earth, water = 1"
     y="Runs"
   />

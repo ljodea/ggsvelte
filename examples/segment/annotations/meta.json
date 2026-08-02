@@ -1,6 +1,6 @@
 {
-  "title": "Darwin's maize, 1876",
-  "description": "Fifteen pairs grown side by side, each drawn as a segment from the self-fertilised height to the cross-fertilised one, so the direction is the result.",
+  "title": "Segments from start to end of each pair",
+  "description": "Segments when each row is a directed change between two points.",
   "tags": ["segment", "annotation", "leader", "slope"],
   "docsSection": "Lines & rules"
 }

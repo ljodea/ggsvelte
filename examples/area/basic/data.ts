@@ -1,4 +1,5 @@
 /**
+ * VR smoke seat; title-only copy pass.
  * Halley's life table (1693) — survivors by age from the Breslau bills of
  * mortality, the first published life table and the basis of his method for
  * pricing life annuities.

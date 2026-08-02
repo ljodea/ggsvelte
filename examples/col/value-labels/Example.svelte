@@ -20,8 +20,8 @@
   <ThemeFivethirtyeight />
   <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
   <Labs
-    title="The Salk vaccine field trial, 1954"
-    subtitle="Paralytic polio per 100,000 children in the randomised arm"
+    title="Columns with the rate printed on each bar"
+    subtitle="Paralytic polio per 100,000 children in each arm of the trial"
     x="Group"
     y="Cases per 100,000"
   />

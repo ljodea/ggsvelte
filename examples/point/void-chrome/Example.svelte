@@ -18,8 +18,8 @@
 >
   <ThemeVoid />
   <Labs
-    title="British exports, 1855 to 1899, as a sparkline"
-    subtitle="theme_void keeps the marks and drops every axis, tick and grid line"
+    title="A sparkline without axes or grid"
+    subtitle="Exports over decades reduced to a thin line with no chart furniture"
     x=""
     y=""
   />

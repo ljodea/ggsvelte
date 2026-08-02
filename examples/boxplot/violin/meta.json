@@ -1,6 +1,6 @@
 {
-  "title": "Michelson's five runs as violins",
-  "description": "The same hundred measurements with a mirrored kernel density per run, so the shape of each block of twenty is visible rather than summarised.",
+  "title": "Violin plots for the same five runs",
+  "description": "Violins when the full shape of each group matters more than the five-number summary alone.",
   "tags": ["violin", "density", "distribution", "boxplot"],
   "docsSection": "Boxes & distributions"
 }

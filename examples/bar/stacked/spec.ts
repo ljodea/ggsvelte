@@ -33,8 +33,8 @@ export default defineExample(
     })
     .theme("light")
     .labs({
-      title: "The Trial of the Pyx, 1848",
-      subtitle: "Each bag of 1,000 sovereigns, split by deviation from standard weight",
+      title: "Stacked counts inside each bag",
+      subtitle: "Each bar is one group, split by how far the coins miss standard weight",
       x: "Bag",
       y: "Sovereigns",
       fill: "Deviation",

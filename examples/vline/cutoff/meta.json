@@ -1,6 +1,6 @@
 {
-  "title": "Where Cavendish refitted the balance",
-  "description": "The twenty-nine determinations in the order he reported them, with a vertical rule at the run where he fitted a stiffer wire.",
+  "title": "A vertical rule at a known index",
+  "description": "Vertical rules for cutoffs along a sequence or continuous x.",
   "tags": ["vline", "rule", "annotation", "line", "theme"],
   "docsSection": "Annotations & rules"
 }

@@ -23,7 +23,7 @@
   <GuideNone channel="fill" />
   <Labs
     title="The same names, on paper"
-    subtitle="geom_sf_label backs each pump's name with a measured box"
+    subtitle="Each pump name sits on a measured box so the map stays readable"
   />
   <GeomSf alpha={0.75} linewidth={0.8} />
   <GeomSfLabel padding={3} radius={2} size={11} />

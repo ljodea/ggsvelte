@@ -17,8 +17,9 @@ export default defineExample(
     .scales(scaleXDiscrete({ domain: ["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"] }))
     .theme("hrbr")
     .labs({
-      title: "The data the t-test was invented on",
-      subtitle: "Cushny and Peebles, 1905: extra hours of sleep in eleven patients (mean ± se)",
+      title: "Mean and standard error by group",
+      subtitle:
+        "Extra sleep under a control and three hypnotics, with bars for the SE of each mean",
       x: "Treatment",
       y: "Extra sleep (hours)",
     })

@@ -1,6 +1,6 @@
 {
-  "title": "Literacy and crime in France, 1833",
-  "description": "Guerry's 86 departments, coloured by region. His uncomfortable finding was that more literate departments did not have less crime.",
+  "title": "Two measures coloured by region",
+  "description": "Scatter with a discrete colour when geography or group is the third channel.",
   "tags": ["point", "color", "legend", "scatter", "theme", "palette"],
   "docsSection": "Points & scatter"
 }

@@ -13,8 +13,8 @@
 <GGPlot data={michelson} aes={{ x: "velocity" }} width={640} height={400}>
   <ThemeFivethirtyeight />
   <Labs
-    title="Michelson measures the speed of light, 1879"
-    subtitle="Frequency polygon through bin centers — same data as the histogram"
+    title="Frequency polygon through bin centres"
+    subtitle="Same speed-of-light runs as the histogram, joined at the tops of the bins"
     x="Velocity (km/s − 299,000)"
     y="Runs"
   />

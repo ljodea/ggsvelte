@@ -19,8 +19,8 @@
   <ThemeClassic />
   <ScaleColorDiscrete scheme="tableau10" />
   <Labs
-    title="Michelson's five runs, and where each settled"
-    subtitle="Twenty measurements per run in faint marks; the solid mark is that run's mean"
+    title="Raw points with a manual mean per group"
+    subtitle="Twenty faint measurements per run; the solid mark is that run's mean"
     x="Measurement, 1 to 100"
     y="Speed of light, km/s less 299,000"
     color="Run"

@@ -1,6 +1,6 @@
 {
-  "title": "The Trial of the Pyx, 1848",
-  "description": "Ten thousand gold sovereigns drawn from the Royal Mint and weighed, each bag stacked by how far its coins deviated from the standard.",
+  "title": "Stacked counts inside each bag",
+  "description": "Stacked bars when you need counts and composition in the same mark.",
   "tags": ["bar", "stack", "fill", "legend", "weight", "theme", "palette"],
   "docsSection": "Bars & columns"
 }

@@ -1,6 +1,6 @@
 {
-  "title": "One register, forty-three years deep",
-  "description": "Monthly counts from the Paris register of 1812 to 1854, folded onto a single year. A two-stop colour ramp is what pulls the decades back apart.",
+  "title": "Many years folded onto one seasonal axis",
+  "description": "Continuous colour gradients when a third continuous channel carries identity.",
   "tags": ["point", "color", "gradient", "sequential", "scale"],
   "docsSection": "Points & scatter"
 }

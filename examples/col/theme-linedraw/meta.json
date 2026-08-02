@@ -1,6 +1,6 @@
 {
-  "title": "The same chests under theme_linedraw",
-  "description": "Quetelet's chest measurements again, so the black grid and border of theme_linedraw can be compared against the default and classic chrome.",
+  "title": "The same columns under a linedraw theme",
+  "description": "Theme swap on a column chart without changing the data or geometry.",
   "tags": ["col", "bars", "theme", "linedraw"],
   "docsSection": "Bars & columns"
 }

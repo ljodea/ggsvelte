@@ -1,6 +1,6 @@
 {
-  "title": "4,892 English children, measured by Pearson and Lee",
-  "description": "The 1903 family-height study split into one panel per parent's height, so the shift from panel to panel is the inheritance.",
+  "title": "One panel per parent–child pair type",
+  "description": "Facet wrap when a grouping field should become a grid of small multiples.",
   "tags": ["facet", "histogram", "bin", "wrap", "weight"],
   "docsSection": "Facets"
 }

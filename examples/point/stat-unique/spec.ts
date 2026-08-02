@@ -11,9 +11,8 @@ export default defineExample(
     .geomPoint({ stat: "unique", size: 3, alpha: 0.8 })
     .theme("classic")
     .labs({
-      title: "779 rows of war, 321 marks",
-      subtitle:
-        "Richardson counted belligerent pairs, so a war repeats: 28 of them read (1941, 7.3)",
+      title: "Collapse duplicate coordinates to unique marks",
+      subtitle: "One row per belligerent pair becomes one mark per distinct (year, magnitude)",
       x: "Year the quarrel began",
       y: "Magnitude (log10 killed)",
     })

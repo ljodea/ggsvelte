@@ -11,8 +11,8 @@ export default defineExample(
     .geomPoint({ size: 2.6, alpha: 0.85 })
     .theme("classic")
     .labs({
-      title: "Darwin's fifteen pairs of maize",
-      subtitle: "How much taller the cross-fertilised plant grew; two pairs went the other way",
+      title: "Step ECDF of paired differences",
+      subtitle: "How much taller the cross-fertilised plant grew; two pairs go the other way",
       x: "Cross-fertilised height less self-fertilised (inches)",
       y: "Share of pairs at or below",
     })

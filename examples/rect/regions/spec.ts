@@ -30,9 +30,8 @@ export default defineExample(
     .scales({ x: { labels: "d" } })
     .theme("economist")
     .labs({
-      title: "The price of wheat under twelve reigns",
-      subtitle:
-        "Playfair, 1821 — he drew the reigns on the chart because his argument was political",
+      title: "Background rectangles for eras",
+      subtitle: "Wheat prices with a band for each reign that covered those years",
       x: "Year",
       y: "Shillings per quarter",
       fill: "",

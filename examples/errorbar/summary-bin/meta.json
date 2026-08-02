@@ -1,6 +1,6 @@
 {
-  "title": "Galton's regression to the middle",
-  "description": "Mean child height with a standard error in each class of mid-parent height. The means rise with the parents but not as fast, which is the observation that named regression.",
+  "title": "Mean and standard error in each x class",
+  "description": "Summary error bars after binning x when you need mean and uncertainty together.",
   "tags": ["errorbar", "summary_bin", "bin", "mean-se", "line", "stat"],
   "docsSection": "Statistical summaries"
 }

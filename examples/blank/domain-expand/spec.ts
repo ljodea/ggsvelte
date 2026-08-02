@@ -12,8 +12,8 @@ export default defineExample(
     .geomBlank({ data: waterDensity, aes: aes({ x: "trial", y: "density" }) })
     .theme("classic")
     .labs({
-      title: "Five and a half times the density of water",
-      subtitle: "A blank row at water's own density opens the axis down to 1",
+      title: "Expanded domain with no marks",
+      subtitle: "Domain opened so a known constant sits inside the frame",
       x: "Determination",
       y: "Density of the earth, water = 1",
     })

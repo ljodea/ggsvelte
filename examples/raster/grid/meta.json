@@ -1,6 +1,6 @@
 {
   "title": "Where chocolate reviews cluster",
-  "description": "A complete cocoa-percent × rating grid of bar counts. Use geom_raster when your table is already a regular grid of fill values.",
+  "description": "A complete cocoa-percent × rating grid of bar counts. Use a raster when your table is already a regular grid of fill values.",
   "tags": ["raster", "heatmap", "fill", "grid"],
   "docsSection": "Rectangles & grids"
 }

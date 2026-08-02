@@ -1,6 +1,6 @@
 {
-  "title": "Playfair's wheat and wages, 1565 to 1821",
-  "description": "Two series in shillings on one panel: the price of a quarter of wheat swings, and the weekly wage of a good mechanic only climbs.",
+  "title": "Two series on one panel",
+  "description": "Multi-series lines for comparing series that share units.",
   "tags": ["line", "point", "color", "legend", "layers", "theme", "palette"],
   "docsSection": "Lines & time"
 }

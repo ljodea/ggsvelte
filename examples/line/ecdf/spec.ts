@@ -10,8 +10,8 @@ export default defineExample(
     .geomLine({ stat: "ecdf", curve: "step-hv", linewidth: 1.8, pad: true })
     .theme("classic")
     .labs({
-      title: "How deadly was the average quarrel?",
-      subtitle: "779 pairs of belligerents, 1807 to 1949, by Richardson's log10 death toll",
+      title: "Empirical distribution of event sizes",
+      subtitle: "How many wars reach each magnitude on a step from zero to one",
       x: "Magnitude (log10 killed)",
       y: "Share of quarrels at or below",
     })

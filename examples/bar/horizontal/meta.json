@@ -1,6 +1,6 @@
 {
-  "title": "Armada tonnage by squadron, 1588",
-  "description": "The Spanish fleet's tonnage from the muster before it sailed, flipped so the category labels read across and the order runs bottom-up.",
+  "title": "Category totals, flipped so labels read across",
+  "description": "Horizontal bars when category labels are long and the ranking matters.",
   "tags": ["bar", "col", "coord", "flip", "horizontal", "theme"],
   "docsSection": "Bars & columns"
 }

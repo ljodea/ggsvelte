@@ -20,8 +20,8 @@
   <ThemeClean />
   <ScaleYSqrt />
   <Labs
-    title="Halley's Breslau burials, 1687–1691"
-    subtitle="Five years of records; the band is the observed year-to-year range at each age"
+    title="A ribbon for year-to-year range"
+    subtitle="Mean burials by age with a band from the lowest to highest year at each age"
     x="Age at death"
     y="Burials per year (square-root scale)"
   />

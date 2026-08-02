@@ -1,6 +1,6 @@
 {
-  "title": "The Salk vaccine field trial, 1954",
-  "description": "Paralytic polio per 100,000 children in the randomised arm, with the rate printed on each column because that number is the result.",
+  "title": "Columns with the rate printed on each bar",
+  "description": "Value labels when the exact number is the point of the chart.",
   "tags": ["col", "text", "labels", "annotation", "theme"],
   "docsSection": "Bars & columns"
 }

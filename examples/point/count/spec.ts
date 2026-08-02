@@ -11,8 +11,8 @@ export default defineExample(
     .geomCount({ alpha: 0.7 })
     .theme("classic")
     .labs({
-      title: "928 heights, 102 places to put them",
-      subtitle: "Galton rounded to the inch; each mark is sized by how many families landed on it",
+      title: "Overlapping points sized by how many share a cell",
+      subtitle: "Heights rounded to the inch; each mark grows with the number of families on it",
       x: "Mid-parent height (inches)",
       y: "Child height (inches)",
       size: "Children",

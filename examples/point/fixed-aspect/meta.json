@@ -1,6 +1,6 @@
 {
-  "title": "Equal units stay circular",
-  "description": "A unit circle drawn under coord_fixed, which pins one pixel to one data unit on both axes so a circle cannot arrive as an ellipse.",
+  "title": "Equal data units on both axes",
+  "description": "Fixed aspect when shape in data units must not stretch with the panel.",
   "tags": ["point", "coordinates", "fixed-aspect", "responsive"],
   "docsSection": "Scatter plots"
 }

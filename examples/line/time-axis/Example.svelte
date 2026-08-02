@@ -17,8 +17,8 @@
 >
   <ThemeFivethirtyeight />
   <Labs
-    title="British and Irish exports, 1855–1899"
-    subtitle="Raw four-digit strings infer a calendar scale"
+    title="Years inferred from raw four-digit strings"
+    subtitle="Export totals over time without pre-parsing dates in the table"
     x="Year"
     y="£ millions"
   />

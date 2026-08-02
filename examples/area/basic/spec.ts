@@ -13,8 +13,8 @@ export default defineExample(
     })
     .theme("classic")
     .labs({
-      title: "Halley's life table, 1693",
-      subtitle: "Survivors from a cohort of 1,000 born in Breslau",
+      title: "Survivors from a cohort of one thousand",
+      subtitle: "Filled area under a life table from birth to old age",
       x: "Age",
       y: "Surviving",
     })

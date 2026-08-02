@@ -1,6 +1,6 @@
 {
-  "title": "Who sailed with the Armada, 1588",
-  "description": "Soldiers against sailors in each squadron as a share of the men aboard. They outnumber the sailors everywhere except the galleys and the light pataches.",
+  "title": "Parts of a whole within each group",
+  "description": "Dodged or stacked proportions for composition inside categories.",
   "tags": ["bar", "fill", "proportion", "legend", "weight", "theme"],
   "docsSection": "Bars & columns"
 }

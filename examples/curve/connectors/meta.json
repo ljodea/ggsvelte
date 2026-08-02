@@ -1,6 +1,6 @@
 {
-  "title": "Darwin's maize, curved",
-  "description": "Fifteen pairs of seedlings, one cross-fertilised and one self-fertilised, joined by a curve running from the self-fertilised height to the crossed one.",
+  "title": "Paired points joined by a curve",
+  "description": "Curved connectors when straight segments would crowd and you want origin\u2192end pairs.",
   "tags": ["curve", "annotation", "connector", "bezier"],
   "docsSection": "Lines & rules"
 }

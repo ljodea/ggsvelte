@@ -8,8 +8,8 @@ export default defineExample(
     .geomPoint({ size: 3 })
     .coordFixed()
     .labs({
-      title: "Equal units stay circular",
-      subtitle: "coord_fixed preserves one CSS pixel per x and y data unit",
+      title: "Equal data units on both axes",
+      subtitle: "A circular cloud stays circular when the aspect ratio locks x and y",
       x: "x",
       y: "y",
     })

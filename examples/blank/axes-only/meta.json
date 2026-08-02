@@ -1,6 +1,6 @@
 {
-  "title": "The frame before the chart",
-  "description": "Two corner rows fix the axes of Halley's life table and draw nothing, which is how a panel keeps another chart's scale or holds its shape before the data arrives.",
+  "title": "Axes without marks",
+  "description": "Blank axes when you need the trained domain without a geom.",
   "tags": ["blank", "scales", "domain", "theme"],
   "docsSection": "Annotations & rules"
 }

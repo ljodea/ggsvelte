@@ -19,8 +19,8 @@
   <ThemeClassic />
   <CoordFixed />
   <Labs
-    title="Maunga Whau, height by height"
-    subtitle="Ten levels between 94 m and 191 m, each drawn as a line of equal height"
+    title="Contours of height on a grid"
+    subtitle="Elevation bands on Maunga Whau from a regular height matrix"
     x="Metres east"
     y="Metres north"
   />

@@ -14,8 +14,8 @@ export default defineExample(
     })
     .theme("minimal")
     .labs({
-      title: "Forty-three years of one register, stacked by month",
-      subtitle: "Paris, 1812 to 1854; the ramp is the only thing separating the years",
+      title: "Many years folded onto one seasonal axis",
+      subtitle: "Monthly counts stacked by year; the colour ramp is what separates the years",
       x: "Month",
       y: "Women on the register",
       color: "Year",

@@ -1,6 +1,6 @@
 {
-  "title": "Two sleeping drugs against y = x",
-  "description": "Extra hours of sleep under each of two hypnotics, patient by patient. The identity line is the claim being tested, and almost every patient sits above it.",
+  "title": "Points against the identity line",
+  "description": "Identity ablines when agreement with y = x is the claim.",
   "tags": ["point", "abline", "annotation", "reference"],
   "docsSection": "Points & scatter"
 }

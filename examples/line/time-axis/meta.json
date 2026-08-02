@@ -1,6 +1,6 @@
 {
-  "title": "British and Irish exports, 1855 to 1899",
-  "description": "Bowley's export series with the years left as raw four-digit strings, so the calendar meaning is inferred rather than declared.",
+  "title": "Years inferred from raw four-digit strings",
+  "description": "Temporal scales from plain year strings when the calendar meaning is obvious.",
   "tags": ["line", "time", "scales", "inference", "theme"],
   "docsSection": "Lines & time"
 }

@@ -18,8 +18,8 @@
 >
   <ThemeMinimal />
   <Labs
-    title="One drug beat the other for ten of eleven patients"
-    subtitle="Cushny and Peebles, 1905: points above the line slept longer on hyoscine"
+    title="Points against the identity line"
+    subtitle="Ten of eleven patients improve more on one drug than the other"
     x="Extra sleep on L-hyoscyamine (hours)"
     y="Extra sleep on L-hyoscine (hours)"
   />

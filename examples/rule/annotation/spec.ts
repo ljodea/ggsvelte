@@ -21,9 +21,8 @@ export default defineExample(
     .geomPoint({ size: 2.5 })
     .theme("tufte")
     .labs({
-      title: "Cavendish weighs the world, 1798",
-      subtitle:
-        "Vertical rule: he refits the balance with a stiffer wire. Horizontal: the modern value.",
+      title: "Reference rules on a one-dimensional sample",
+      subtitle: "Vertical rule where the apparatus changed; horizontal rule at the modern value",
       x: "Determination",
       y: "Density of the earth (water = 1)",
     })

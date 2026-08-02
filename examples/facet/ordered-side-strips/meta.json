@@ -1,6 +1,6 @@
 {
-  "title": "Counting yeast under a microscope",
-  "description": "Gosset's 1907 haemacytometer counts, 400 squares per sample, in ordered small multiples with the strip labels down the side.",
+  "title": "Facets with ordered side strips",
+  "description": "Facet strips ordered to match the sample order of the experiment.",
   "tags": ["facet", "order", "labels", "strip", "wrap", "col"],
   "docsSection": "Facets"
 }

@@ -15,7 +15,7 @@ export default defineExample(
     .theme("classic")
     .labs({
       title: "The same names, on paper",
-      subtitle: "geom_sf_label backs each pump's name with a measured box",
+      subtitle: "Each pump name sits on a measured box so the map stays readable",
     })
     .spec(),
 );

@@ -13,8 +13,8 @@ export default defineExample(
     .scales({ color: { type: "ordinal", scheme: "tableau10" } })
     .theme("classic")
     .labs({
-      title: "Three penguins, three ellipses",
-      subtitle: "95% bivariate normal rings around each species at Palmer Station",
+      title: "Confidence ellipses around groups",
+      subtitle: "95% bivariate normal rings for three species in bill and flipper length",
       x: "Bill length (mm)",
       y: "Flipper length (mm)",
       color: "Species",
