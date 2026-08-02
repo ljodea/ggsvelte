@@ -46,12 +46,13 @@ export function buildBindotFrame(
   const col = columnOf(result, null);
 
   // Per-observation aesthetics from source rows (not group-constant only).
+  // Resolve columns once — field names are invariant for the binding.
   const colorField = binding.color.field;
   const fillField = binding.fill.field;
-  const colorValues =
-    colorField === null ? null : result.sourceRows.map((row) => table.column(colorField)[row]!);
-  const fillValues =
-    fillField === null ? null : result.sourceRows.map((row) => table.column(fillField)[row]!);
+  const colorCol = colorField === null ? null : table.column(colorField);
+  const fillCol = fillField === null ? null : table.column(fillField);
+  const colorValues = colorCol === null ? null : result.sourceRows.map((row) => colorCol[row]!);
+  const fillValues = fillCol === null ? null : result.sourceRows.map((row) => fillCol[row]!);
 
   return statLayerFrame({
     binding,

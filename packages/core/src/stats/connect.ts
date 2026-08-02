@@ -105,7 +105,8 @@ export function statConnect(input: StatConnectInput): StatConnectResult {
   const outY: number[] = [];
   const outG: number[] = [];
   const carriedOut: Record<string, CellValue[]> = {};
-  for (const key of Object.keys(carried)) carriedOut[key] = [];
+  const carriedKeys = Object.keys(carried);
+  for (const key of carriedKeys) carriedOut[key] = [];
 
   // Preserve first-seen group order (stable with input traversal).
   for (const g of byGroup.keys()) {
@@ -119,7 +120,7 @@ export function statConnect(input: StatConnectInput): StatConnectResult {
     if (rows.length === 0) continue;
 
     const pushCarried = (sourceRow: number) => {
-      for (const key of Object.keys(carriedOut)) {
+      for (const key of carriedKeys) {
         carriedOut[key]!.push(carried[key]![sourceRow]!);
       }
     };

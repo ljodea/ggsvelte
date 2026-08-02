@@ -14,6 +14,7 @@ import { encodeKey } from "../src/scales/state.ts";
 import { PipelineError } from "../src/pipeline.ts";
 import { resolveFacet, SINGLE_PANEL } from "../src/pipeline/facets.ts";
 import { assertFacetForm, facetFreeFlags } from "../src/pipeline/facets-form.ts";
+import { facetValues } from "../src/pipeline/facets-helpers.ts";
 import { partitionByField, partitionByFields } from "../src/pipeline/facets-tokens.ts";
 import { ColumnTable } from "../src/table.ts";
 
@@ -155,6 +156,32 @@ describe("resolveFacet — grid", () => {
       expect(e).toBeInstanceOf(PipelineError);
       expect((e as PipelineError).code).toBe("facet-form-missing");
     }
+  });
+});
+
+describe("facetValues — decorate-sort (#1312)", () => {
+  it("orders temporal levels by semantic time (numeric tier, no bandKey)", () => {
+    // Temporal columns take the numeric sort tier; bandKey is only for nominal.
+    // The decorate step must not call bandKey on this path — Invalid Date would
+    // throw via toISOString (Devin on #1386).
+    const t = ColumnTable.fromRows([
+      { d: "2020-01-03", x: 1 },
+      { d: "2020-01-01", x: 2 },
+      { d: "2020-01-02", x: 3 },
+    ]);
+    expect(t.fieldType("d")).toBe("temporal");
+    expect(facetValues(t, "d")).toEqual(["2020-01-01", "2020-01-02", "2020-01-03"]);
+  });
+
+  it("orders quantitative levels ascending with null last", () => {
+    const t = ColumnTable.fromRows([
+      { n: 3, x: 1 },
+      { n: 1, x: 2 },
+      { n: null, x: 3 },
+      { n: 2, x: 4 },
+    ]);
+    expect(t.fieldType("n")).not.toBe("nominal");
+    expect(facetValues(t, "n")).toEqual([1, 2, 3, null]);
   });
 });
 

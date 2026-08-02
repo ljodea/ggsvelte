@@ -140,12 +140,15 @@ function hexBinKey(gs: number, q: number, r: number): string {
   return `${gs}:${q}:${r}`;
 }
 
+/** Occupied (or lattice-filled) hex cell with coords stored at insert time. */
+type HexCell = { gs: number; q: number; r: number; count: number };
+
 /**
  * Materialize zero-count axial cells whose centres sit in a one-hex pad of the
  * unit square, for every group slot. Extracted so `statBinHex` stays under the
  * max nesting depth for type-aware lint.
  */
-function fillEmptyLatticeCells(counts: Map<string, number>, groupCount: number, s: number): void {
+function fillEmptyLatticeCells(counts: Map<string, HexCell>, groupCount: number, s: number): void {
   const pad = Math.max(Math.sqrt(3) * s, 2 * s);
   const sampleCorners: Array<readonly [number, number]> = [
     [0, 0],
@@ -180,7 +183,7 @@ function fillEmptyLatticeCells(counts: Map<string, number>, groupCount: number, 
         const { x: ux, y: uy } = axialToPixel(q, r, s);
         if (ux < -pad || ux > 1 + pad || uy < -pad || uy > 1 + pad) continue;
         const key = hexBinKey(gs, q, r);
-        if (!counts.has(key)) counts.set(key, 0);
+        if (!counts.has(key)) counts.set(key, { gs, q, r, count: 0 });
       }
     }
   }
@@ -234,8 +237,9 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
     }
   }
 
-  // Key: groupSlot | q | r  → count
-  const counts = new Map<string, number>();
+  // Key: groupSlot | q | r  → cell (coords stored at insert so collect never
+  // re-parses the composite string key).
+  const counts = new Map<string, HexCell>();
   let dropped = 0;
 
   for (let i = 0; i < nIn; i++) {
@@ -255,7 +259,9 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
     if (weights !== null && weights !== undefined) {
       w = Number.isFinite(weights[i]!) ? weights[i]! : 0;
     }
-    counts.set(key, (counts.get(key) ?? 0) + w);
+    const existing = counts.get(key);
+    if (existing === undefined) counts.set(key, { gs, q, r, count: w });
+    else existing.count += w;
   }
 
   // drop:false — materialize the full axial lattice over the unit square so
@@ -265,18 +271,11 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
     fillEmptyLatticeCells(counts, groupOrder.length, s);
   }
 
-  // Collect cells.
-  type Cell = { gs: number; q: number; r: number; count: number };
-  const cells: Cell[] = [];
-  for (const [key, count] of counts) {
-    if (drop && count === 0) continue;
-    const [gsStr, qStr, rStr] = key.split(":");
-    cells.push({
-      gs: Number(gsStr),
-      q: Number(qStr),
-      r: Number(rStr),
-      count,
-    });
+  // Collect cells (coords already known — no key.split / Number re-parse).
+  const cells: HexCell[] = [];
+  for (const cell of counts.values()) {
+    if (drop && cell.count === 0) continue;
+    cells.push(cell);
   }
   if (cells.length === 0) return empty(dropped);
 

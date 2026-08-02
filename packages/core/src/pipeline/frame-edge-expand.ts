@@ -3,6 +3,7 @@
  * sees xmin/xmax/ymin/ymax. Band tile leaves edges null (centers train).
  */
 import { resolution as resolutionOf } from "../stats/numeric.js";
+import type { CellValue } from "../table.js";
 
 import { positionFieldType } from "./temporal-position.js";
 import type { LayerFrame, PipelineWarning } from "./types.js";
@@ -11,15 +12,14 @@ import { PipelineError } from "./types.js";
 const RASTER_SPACING_EPS = Math.sqrt(Number.EPSILON);
 
 function sizeAt(
-  frame: LayerFrame,
-  field: string | null,
+  sizeColumn: readonly CellValue[] | null,
   param: number | undefined,
   defaultSize: number,
   row: number,
 ): number {
-  if (field !== null) {
+  if (sizeColumn !== null) {
     // Panel-local table after faceting — index by frame row, not source id.
-    const raw = frame.table.column(field)[row]!;
+    const raw = sizeColumn[row]!;
     const n = typeof raw === "number" ? raw : Number(raw);
     return Number.isFinite(n) ? n : NaN;
   }
@@ -89,12 +89,17 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
     const params = frame.binding.layer.params ?? {};
     const defW = defaultResolution(frame.xNumeric);
     const defH = defaultResolution(frame.yNumeric);
+    // Resolve size columns once — field names are invariant for the frame.
+    const widthCol =
+      frame.binding.widthField === null ? null : frame.table.column(frame.binding.widthField);
+    const heightCol =
+      frame.binding.heightField === null ? null : frame.table.column(frame.binding.heightField);
     if (xType !== "nominal") {
       const left = new Float64Array(frame.n);
       const right = new Float64Array(frame.n);
       for (let row = 0; row < frame.n; row++) {
         const cx = frame.xNumeric[row]!;
-        const w = sizeAt(frame, frame.binding.widthField, params.width, defW, row);
+        const w = sizeAt(widthCol, params.width, defW, row);
         if (!Number.isFinite(cx) || !(w > 0) || !Number.isFinite(w)) {
           left[row] = NaN;
           right[row] = NaN;
@@ -111,7 +116,7 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
       const top = new Float64Array(frame.n);
       for (let row = 0; row < frame.n; row++) {
         const cy = frame.yNumeric[row]!;
-        const h = sizeAt(frame, frame.binding.heightField, params.height, defH, row);
+        const h = sizeAt(heightCol, params.height, defH, row);
         if (!Number.isFinite(cy) || !(h > 0) || !Number.isFinite(h)) {
           bottom[row] = NaN;
           top[row] = NaN;
