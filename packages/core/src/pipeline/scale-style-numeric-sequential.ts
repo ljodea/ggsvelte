@@ -158,12 +158,15 @@ export function numericSequentialResolution(input: {
     }
     return numericMappedValue(aesthetic, t, range, config?.sizeUnit);
   };
+  // Index the batch semantic array (index-aligned when values is non-empty;
+  // empty values skip this loop). Avoid semanticOf on the warn path so temporal
+  // misses do not re-call parseColumn one row at a time.
   let unknownCount = 0;
-  for (const value of values) {
-    if (value === null) continue;
-    const semantic = view.semanticOf(value);
+  for (let index = 0; index < values.length; index++) {
+    if (values[index] === null) continue;
+    const semantic = view.semantic[index]!;
     if (
-      semantic === undefined ||
+      !Number.isFinite(semantic) ||
       (config?.oob !== "squish" && (semantic < low || semantic > high))
     ) {
       unknownCount++;

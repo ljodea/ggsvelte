@@ -129,4 +129,61 @@ describe("binned color scales", () => {
       }),
     );
   });
+
+  // #1311: warn path must count from the batch semantic array (index-aligned),
+  // not re-parse each row via semanticOf. These cases lock the observable counts.
+  it("counts unknown binned colors for null, unparseable, and out-of-domain values (#1311)", () => {
+    const model = runPipeline(
+      pointSpec([5, null, 50, "nope", 1500, Number.POSITIVE_INFINITY, -10], {
+        type: "binned",
+        breaks: [1, 10, 100, 1000],
+        range: ["#111", "#777", "#eee"],
+      }),
+      size,
+    );
+    // null → NA (separate warning); "nope", Infinity, 1500, -10 → unknown.
+    expect(model.warnings.filter((warning) => warning.code === "color-na-values")).toEqual([
+      { code: "color-na-values", message: "1 color value(s) use the NA color." },
+    ]);
+    expect(model.warnings.filter((warning) => warning.code === "color-unknown-values")).toEqual([
+      { code: "color-unknown-values", message: "4 color value(s) use the unknown color." },
+    ]);
+  });
+
+  it("counts unknown binned colors when the transform rejects semantic values (#1311)", () => {
+    const model = runPipeline(
+      pointSpec([1, 0, 10, -5, 100], {
+        type: "binned",
+        transform: "log10",
+        breaks: [1, 10, 100],
+        range: ["#111", "#eee"],
+      }),
+      size,
+    );
+    // 0 and -5 are invalid for log10; in-domain values stay known.
+    expect(model.warnings.filter((warning) => warning.code === "color-unknown-values")).toEqual([
+      { code: "color-unknown-values", message: "2 color value(s) use the unknown color." },
+    ]);
+  });
+
+  it("counts unknown temporal binned colors without treating null as unknown (#1311)", () => {
+    const model = runPipeline(
+      pointSpec(["2024-01-01", null, "not-a-date", "2024-06-01", "2024-12-31"], {
+        type: "binned",
+        temporalKind: "date",
+        parse: "iso",
+        parseFailure: "censor",
+        breaks: ["2024-01-01", "2024-07-01", "2024-12-31"],
+        range: ["#111", "#eee"],
+      }),
+      size,
+    );
+    expect(model.warnings.some((warning) => warning.code === "color-temporal-censored")).toBe(true);
+    expect(model.warnings.filter((warning) => warning.code === "color-na-values")).toEqual([
+      { code: "color-na-values", message: "1 color value(s) use the NA color." },
+    ]);
+    expect(model.warnings.filter((warning) => warning.code === "color-unknown-values")).toEqual([
+      { code: "color-unknown-values", message: "1 color value(s) use the unknown color." },
+    ]);
+  });
 });

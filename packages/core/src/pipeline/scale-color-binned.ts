@@ -165,16 +165,18 @@ export function resolveBinnedColorScale(input: {
       return semantic === undefined ? unknownValue : semanticColorOf(semantic);
     },
   });
-  warnUnknownColors(
-    name,
-    values.filter((value) => {
-      if (value === null) return false;
-      const semantic = view.semanticOf(value);
-      if (semantic === undefined) return true;
-      return transformedOf(semantic) === undefined;
-    }).length,
-    warnings,
-  );
+  // Index the batch semantic array (same alignment as sequential-train). Do not
+  // re-derive rows via semanticOf — that re-pays encodeKey/Map lookup or a
+  // single-row parseColumn on temporal misses the batch already recorded.
+  let unknownCount = 0;
+  for (let index = 0; index < values.length; index++) {
+    if (values[index] === null) continue;
+    const semantic = view.semantic[index]!;
+    if (!Number.isFinite(semantic) || transformedOf(semantic) === undefined) {
+      unknownCount++;
+    }
+  }
+  warnUnknownColors(name, unknownCount, warnings);
   const formatStep = minAdjacentWidth(breaks);
   const formatter = resolveBinnedLegendFormat({
     domain,
