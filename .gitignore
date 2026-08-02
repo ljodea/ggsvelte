@@ -34,3 +34,5 @@ tests/evals/out/
 benchmarks/competitive/results/
 benchmarks/competitive/node_modules/
 packages/core/tests/.tmp-lean-bundle/
+/.pi-loop.json
+/.pi-loop.json.lock

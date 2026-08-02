@@ -54,8 +54,11 @@ primary audience — agents, and the developers who bundle skills for them:
 
 Same constraint as 0022 (npm/cli#8544): trusted publishing cannot first-publish
 a package. The maintainer hand-publishes `@ggsvelte/skill@0.26.2` once from the
-PR branch before merge (`NPM_CONFIG_PROVENANCE=false npm publish --access
-public`), configures the trusted publisher on npmjs.com (repo
+PR branch before merge (`npm publish --access public --no-provenance`
+— the provenance opt-out must be a CLI flag: npm applies `publishConfig`
+over env vars and only filters keys explicitly set as CLI flags, so
+`NPM_CONFIG_PROVENANCE=false` loses to `publishConfig.provenance: true`
+(npm 11 EUSAGE "provider: null" outside CI)), configures the trusted publisher on npmjs.com (repo
 `ljodea/ggsvelte`, workflow `release.yml`), and only then merges. On the merge
 commit `publish-unpublished.ts` sees 0.26.2 on npm and no-ops; the next Version
 Packages PR bumps all five packages to 0.27.0 and OIDC publishes them together
