@@ -249,12 +249,16 @@ export function createInspectionCoordinator<
     return logicalIdentity === prior.seedLogicalIdentity;
   };
 
-  /** Keyed pin match: layer + non-null row whose key equals the pinned key. */
+  /**
+   * Keyed pin match: layer + non-null row whose key equals the pinned key.
+   * Key first — `model.row` allocates a full Record (O(F)). Identity-change
+   * full-scans must not pay that for every candidate in the layer (#1318).
+   */
   const keyedPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
     if (candidate.layerIndex !== prior.layerIndex || candidate.rowIndex === null) return false;
-    // Both gates stay: keyed rebind needs a live row AND a matching key.
-    const row = model.row(candidate.rowIndex);
-    return row !== null && keyAt(candidate.rowIndex) === prior.seedKey;
+    if (keyAt(candidate.rowIndex) !== prior.seedKey) return false;
+    // Live-row gate stays: key bag can outlive a dropped source index.
+    return model.row(candidate.rowIndex) !== null;
   };
 
   /**
