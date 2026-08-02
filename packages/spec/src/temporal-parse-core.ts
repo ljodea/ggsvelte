@@ -191,18 +191,23 @@ export function temporalImplementation(): typeof PolyfillTemporal {
   return nativeTemporal ?? PolyfillTemporal;
 }
 
-const TIMEZONE_VALIDITY_CACHE = new Map<string, boolean>();
+/** Allocation-free UTC aliases — same three names as partsToEpoch. */
+const UTC_TIMEZONE_ALIASES = new Set(["UTC", "Etc/UTC", "Z"]);
+
+/**
+ * null = valid zone; TemporalParseResult = memoized failure for invalid zones.
+ * Avoids per-row array allocation on the alias check and per-row failure objects
+ * when the same invalid zone is checked across a column parse.
+ */
+const TIMEZONE_VALIDITY_CACHE = new Map<string, TemporalParseResult | null>();
 
 export function timezoneValidationFailure(
   timezone: string | undefined,
 ): TemporalParseResult | null {
-  if (timezone === undefined || ["UTC", "Etc/UTC", "Z"].includes(timezone)) return null;
+  if (timezone === undefined || UTC_TIMEZONE_ALIASES.has(timezone)) return null;
   const cached = TIMEZONE_VALIDITY_CACHE.get(timezone);
-  if (cached !== undefined) {
-    return cached
-      ? null
-      : temporalParseFailure(`invalid or unsupported timezone ${JSON.stringify(timezone)}`);
-  }
+  if (cached !== undefined) return cached;
+
   let valid = true;
   try {
     const Temporal = temporalImplementation();
@@ -220,10 +225,11 @@ export function timezoneValidationFailure(
     const oldest = TIMEZONE_VALIDITY_CACHE.keys().next().value;
     if (oldest !== undefined) TIMEZONE_VALIDITY_CACHE.delete(oldest);
   }
-  TIMEZONE_VALIDITY_CACHE.set(timezone, valid);
-  return valid
+  const result = valid
     ? null
     : temporalParseFailure(`invalid or unsupported timezone ${JSON.stringify(timezone)}`);
+  TIMEZONE_VALIDITY_CACHE.set(timezone, result);
+  return result;
 }
 
 export function partsToEpoch(
@@ -247,7 +253,7 @@ export function partsToEpoch(
   // Calendar dates are timezone-free values. Keep them on UTC calendar
   // boundaries so ticks preserve their represented date.
   const timezone = kind === "date" || kind === "time" ? "UTC" : (options.timezone ?? "UTC");
-  if (timezone === "UTC" || timezone === "Etc/UTC" || timezone === "Z") {
+  if (UTC_TIMEZONE_ALIASES.has(timezone)) {
     const epochMs = utcEpoch(parts);
     return Number.isFinite(epochMs)
       ? { ok: true, epochMs, kind: "date", precision: "date" }
