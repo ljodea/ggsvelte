@@ -15,6 +15,7 @@ import { aes, gg } from "@ggsvelte/spec";
 
 import { LineageStore } from "../../src/identity.ts";
 import { runPipeline } from "../../src/pipeline.ts";
+import type { CellValue } from "../../src/cell-value.ts";
 
 const ROW_COUNT = 24;
 
@@ -72,7 +73,7 @@ describe("source-backed columnar datum resolution", () => {
     const facts = Array.from({ length: store.size }, (_, id) => store.candidate(id));
     // Golden tuples: [xValue, yValue, sizeValue, alphaValue, seriesRank, lineageSize]
     // captured from the per-candidate resolver (pre-columnar) on this spec.
-    const golden = facts.map((fact) => [
+    const golden: (CellValue | undefined)[][] = facts.map((fact) => [
       fact?.xValue,
       fact?.yValue,
       fact?.sizeValue,

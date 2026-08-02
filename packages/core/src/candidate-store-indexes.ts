@@ -323,8 +323,8 @@ export function buildCandidateStoreIndexes(
         lineagesBuf[n] = lineageCol === null ? 0 : (lineageCol[i] ?? 0);
         autoModesBuf[n] =
           autoModeCol === null
-            ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]!
-            : (autoModeCol[i] ?? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]!);
+            ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]
+            : (autoModeCol[i] ?? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]);
         n++;
       }
       continue;

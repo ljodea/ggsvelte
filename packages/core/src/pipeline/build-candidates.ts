@@ -421,8 +421,8 @@ function createRawCandidateDatumColumnsResolver(input: {
       const mode = candidateAutoMode(binding, facts.semanticIds[i]!);
       autoModeCol[i] =
         mode === undefined
-          ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]!
-          : AUTO_MODE_CODE[mode]!;
+          ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]
+          : AUTO_MODE_CODE[mode];
     }
     return {
       xValue: xValues,
