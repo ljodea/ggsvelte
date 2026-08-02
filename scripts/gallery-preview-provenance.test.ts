@@ -10,6 +10,7 @@ import {
   exampleSourceDigest,
   listSourceFiles,
   loadProvenance,
+  packageDataSourcePaths,
   provenanceEntryFor,
   provenancePath,
   pruneProvenanceToIds,
@@ -105,6 +106,32 @@ describe("exampleSourceDigest", () => {
       expect(exampleSourceDigest(root, "point/canvas")).toBe(before);
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("hashes packages/svelte teaching-data imports so package edits invalidate previews (#1359)", () => {
+    // Monorepo layout: <tmp>/examples + <tmp>/packages/svelte/src/lib/data
+    const monorepo = mkdtempSync(join(tmpdir(), "ggsvelte-prov-pkg-"));
+    const examples = join(monorepo, "examples");
+    const dataDir = join(monorepo, "packages/svelte/src/lib/data");
+    mkdirSync(dataDir, { recursive: true });
+    try {
+      writeFileSync(join(dataDir, "chocolate-bars.ts"), "export const chocolateBars = [{ n: 1 }]");
+      writeExample(examples, "smooth/loess", {
+        "Example.svelte": "x",
+        "spec.ts": "export default {}",
+        "meta.json": "{}",
+        "data.ts":
+          'import { chocolateBars } from "../../../packages/svelte/src/lib/data/chocolate-bars.js";\nexport const sample = chocolateBars',
+      });
+      expect(packageDataSourcePaths(join(examples, "smooth/loess"), examples)).toEqual([
+        "packages/svelte/src/lib/data/chocolate-bars.ts",
+      ]);
+      const before = exampleSourceDigest(examples, "smooth/loess");
+      writeFileSync(join(dataDir, "chocolate-bars.ts"), "export const chocolateBars = [{ n: 2 }]");
+      expect(exampleSourceDigest(examples, "smooth/loess")).not.toBe(before);
+    } finally {
+      rmSync(monorepo, { recursive: true, force: true });
     }
   });
 });

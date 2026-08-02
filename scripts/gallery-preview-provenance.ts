@@ -99,11 +99,42 @@ export function sharedExampleSourcePaths(exampleDir: string, examplesRoot: strin
 }
 
 /**
+ * Repo-relative paths of `@ggsvelte/svelte/data` teaching tables imported from
+ * an example (e.g. `packages/svelte/src/lib/data/chocolate-bars.ts`). Hashed so
+ * gallery provenance notices package-data edits that change rendered previews.
+ */
+export function packageDataSourcePaths(exampleDir: string, examplesRoot: string): string[] {
+  const repoRoot = resolve(examplesRoot, "..");
+  const dataRoot = resolve(repoRoot, "packages/svelte/src/lib/data");
+  const dataRootPrefix = dataRoot + sep;
+  const found = new Set<string>();
+  const importRe = /from\s+["'](\.\.[^"']+)["']/g;
+  for (const rel of listSourceFiles(exampleDir)) {
+    const text = readFileSync(join(exampleDir, rel), "utf8");
+    for (const match of text.matchAll(importRe)) {
+      const spec = match[1];
+      if (spec === undefined) continue;
+      const resolved = resolve(exampleDir, dirname(rel), spec);
+      const candidates = [resolved];
+      if (resolved.endsWith(".js")) candidates.push(resolved.slice(0, -3) + ".ts");
+      for (const candidate of candidates) {
+        if (!existsSync(candidate) || !statSync(candidate).isFile()) continue;
+        if (candidate !== dataRoot && !candidate.startsWith(dataRootPrefix)) continue;
+        found.add(relative(repoRoot, candidate).split(sep).join("/"));
+        break;
+      }
+    }
+  }
+  return [...found].toSorted();
+}
+
+/**
  * Deterministic sha256 over the whole example directory tree plus any
  * in-repo shared sources it imports (sorted path labels, raw bytes).
  */
 export function exampleSourceDigest(examplesRoot: string, exampleId: string): string {
   const exampleDir = join(examplesRoot, ...exampleId.split("/"));
+  const repoRoot = resolve(examplesRoot, "..");
   const hash = createHash("sha256");
   for (const rel of listSourceFiles(exampleDir)) {
     hash.update(rel);
@@ -115,6 +146,12 @@ export function exampleSourceDigest(examplesRoot: string, exampleId: string): st
     hash.update(`shared:${shared}`);
     hash.update("\0");
     hash.update(readFileSync(join(examplesRoot, shared)));
+    hash.update("\0");
+  }
+  for (const pkg of packageDataSourcePaths(exampleDir, examplesRoot)) {
+    hash.update(`pkg:${pkg}`);
+    hash.update("\0");
+    hash.update(readFileSync(join(repoRoot, pkg)));
     hash.update("\0");
   }
   return hash.digest("hex");
