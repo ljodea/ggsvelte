@@ -23,7 +23,7 @@
     },
     "bar/proportions": {
       "filename": "bar-proportions-light.png",
-      "sourceSha256": "73f7f8152b9ee966e89c16152df0a66a426fe75b71fac1395654fd17ebd2721c",
+      "sourceSha256": "b19b1518e92022daceeca8ede947d4c2fd476daed002f0ae8101e3ecbe863394",
       "pngSha256": "cb978daa83b902869fa69acb9452738170cdb2423ca813fc8c4674fde55d1e92"
     },
     "bar/stacked": {
@@ -123,7 +123,7 @@
     },
     "errorbar/mean-se": {
       "filename": "errorbar-mean-se-light.png",
-      "sourceSha256": "a2f8dd4dd092c7dea66f92f8cd8b155ba0d87fc60720496d12321596a548279e",
+      "sourceSha256": "497c67e756aa09a28fcc5641b46e2513a5dbbc0ab2205ad8ab97fb90bd4ce86c",
       "pngSha256": "30706502d9de99c9899db0de8f7eea94f39067247fa3e4c6d2af902550a02470"
     },
     "errorbar/summary-bin": {
