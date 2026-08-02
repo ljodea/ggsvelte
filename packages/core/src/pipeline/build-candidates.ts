@@ -38,9 +38,11 @@ function createRawCandidateDatumResolver(
   // layer, and — where it happened not to throw — indexed a plot-length array
   // with a global row id, silently collapsing those rows into one group.
   const groupsByLayer = new Map<number, WeakMap<ColumnTable, readonly number[]>>();
-  const groupFor = (layerIndex: number, sourceRow: number): number => {
+  const groupFor = (
+    layerIndex: number,
+    located: { table: ColumnTable; localRow: number } | null,
+  ): number => {
     const binding = bindings[layerIndex];
-    const located = sources.locate(sourceRow);
     // Group 0 is the single-group default, which is what a primitive with no
     // locatable source row (annotations, synthesized marks) should carry.
     if (binding === undefined || located === null) return 0;
@@ -60,16 +62,16 @@ function createRawCandidateDatumResolver(
     const binding = bindings[facts.layerIndex];
     const sourceRow = facts.rowIndex;
     if (binding === undefined || sourceRow === null) return {};
-    // Global row id -> the table that owns it: a layer with its own DataRef
-    // has fields the plot table does not (#589).
+    // One locate per mark (#1308): value() and groupFor close over the same
+    // row ownership. Colour/fill ranks stay lazy thunks but re-use `located`.
+    const located = sources.locate(sourceRow);
     const value = (field: string | null): CellValue => {
       if (field === null) return null;
-      const located = sources.locate(sourceRow);
       return located === null ? null : located.table.column(field)[located.localRow]!;
     };
     const styleValue = (style: LayerBinding["size"]): CellValue =>
       style.field === null ? (style.scaledConstant ?? style.constant) : value(style.field);
-    const group = groupFor(facts.layerIndex, sourceRow);
+    const group = groupFor(facts.layerIndex, located);
     const colorRank = ordinalColorRank(color, binding.color.field, () =>
       value(binding.color.field),
     );
