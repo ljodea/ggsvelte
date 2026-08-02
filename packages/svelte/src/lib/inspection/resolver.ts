@@ -42,6 +42,94 @@ export interface ResolvedTarget {
  */
 export const TRANSIENT_MEMBER_LIMIT = 8;
 
+/**
+ * Magnitude used to rank hover slots for high-n stacks (#1274).
+ * Group by x → rank on |y|; group by y → rank on |x|. Non-numeric → 0.
+ */
+export function candidateValueMagnitude(candidate: CandidateFacts, groupAxis: "x" | "y"): number {
+  const value = groupAxis === "x" ? candidate.yValue : candidate.xValue;
+  if (typeof value === "number" && Number.isFinite(value)) return Math.abs(value);
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? Math.abs(time) : 0;
+  }
+  return 0;
+}
+
+/**
+ * Signed numeric contribution for stack totals (#1274). Non-numeric → null.
+ */
+export function candidateValueContribution(
+  candidate: CandidateFacts,
+  groupAxis: "x" | "y",
+): number | null {
+  const value = groupAxis === "x" ? candidate.yValue : candidate.xValue;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+  return null;
+}
+
+/** Sum of finite contributions across the full axis group (not the hover cap). */
+export function groupMagnitudeTotal(
+  members: readonly CandidateFacts[],
+  groupAxis: "x" | "y",
+): number | null {
+  let sum = 0;
+  let any = false;
+  for (const member of members) {
+    const contribution = candidateValueContribution(member, groupAxis);
+    if (contribution === null) continue;
+    sum += contribution;
+    any = true;
+  }
+  return any ? sum : null;
+}
+
+/**
+ * Select ≤ `limit` axis-group candidates for a transient hover snapshot (#1274).
+ *
+ * - When the group fits in the limit, preserve input (stack / series) order.
+ * - When over the limit: force-include `focusId`, fill remaining slots with
+ *   the largest |value| on the orthogonal axis, focus first then by magnitude.
+ */
+export function selectTransientMembers(
+  members: readonly CandidateFacts[],
+  focusId: number,
+  options: {
+    readonly groupAxis: "x" | "y";
+    readonly limit?: number;
+  },
+): readonly CandidateFacts[] {
+  const limit = options.limit ?? TRANSIENT_MEMBER_LIMIT;
+  if (limit <= 0) return [];
+  if (members.length <= limit) return members;
+
+  const groupAxis = options.groupAxis;
+  let focus: CandidateFacts | null = null;
+  const others: CandidateFacts[] = [];
+  for (const member of members) {
+    if (member.id === focusId) focus = member;
+    else others.push(member);
+  }
+
+  others.sort((left, right) => {
+    const delta =
+      candidateValueMagnitude(right, groupAxis) - candidateValueMagnitude(left, groupAxis);
+    if (delta !== 0) return delta;
+    // Stable-ish: lower candidate id wins ties (deterministic, not stack order).
+    return left.id - right.id;
+  });
+
+  if (focus === null) {
+    return others.slice(0, limit);
+  }
+  if (limit === 1) return [focus];
+  return [focus, ...others.slice(0, limit - 1)];
+}
+
 export function resolvedTarget(
   model: RenderModel,
   seed: CandidateFacts,
@@ -143,7 +231,22 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
   // The legacy direct constructor remains total for callers that already hold
   // a seed. Coordinated dominant-axis lookup rejects invalid buckets instead.
   if (target === null) {
+    // resolvedTarget only returns null for axis modes when the group bucket
+    // is missing; exact/xy always yield a single-member target.
     const single = datum<Row, Key>(model, seed, keyAt);
+    if (mode === "exact" || mode === "xy") {
+      return Object.freeze({
+        type: "inspect",
+        phase: "change",
+        state,
+        source,
+        mode,
+        panelId: seed.panelId,
+        focus: single,
+        members: [single] as const,
+      });
+    }
+    const axisValue = mode === "x" ? seed.xValue : seed.yValue;
     return Object.freeze({
       type: "inspect",
       phase: "change",
@@ -153,12 +256,9 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       panelId: seed.panelId,
       focus: single,
       members: [single] as const,
-      axisValue: mode === "x" ? seed.xValue : seed.yValue,
-      axisLabel: axisLabel(
-        model,
-        mode === "x" ? "x" : "y",
-        mode === "x" ? seed.xValue : seed.yValue,
-      ),
+      axisValue,
+      axisLabel: axisLabel(model, mode, axisValue),
+      groupTotal: candidateValueContribution(seed, mode),
     });
   }
   return materializeInspection(input, target, "complete", keyAt);
@@ -194,9 +294,13 @@ export function materializeInspection<
 
   const group = target.group!;
   const completeCandidates = target.members;
+  const groupAxis: "x" | "y" = mode === "y" ? "y" : "x";
   const memberCandidates =
     completeness === "transient"
-      ? completeCandidates.slice(0, TRANSIENT_MEMBER_LIMIT)
+      ? selectTransientMembers(completeCandidates, group.focusId, {
+          groupAxis,
+          limit: TRANSIENT_MEMBER_LIMIT,
+        })
       : completeCandidates;
   const members = memberCandidates.map((candidate) => datum<Row, Key>(model, candidate, keyAt));
   const focusIndex = memberCandidates.findIndex((candidate) => candidate.id === group.focusId);
@@ -219,6 +323,9 @@ export function materializeInspection<
     members: Object.freeze(nonempty),
     axisValue: group.axisValue,
     axisLabel: axisLabel(model, mode, group.axisValue),
+    // Full-group total — independent of the hover cap so "+N more" does not
+    // under-report the stack (#1274).
+    groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis),
   });
 }
 

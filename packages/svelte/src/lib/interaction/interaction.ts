@@ -11,7 +11,10 @@ export type {
   InteractionDiagnosticCode,
 } from "./interaction-diagnostics.js";
 export {
+  discreteColorFillDomainSizes,
+  HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   inspectAxisOnBarColDiagnostics,
+  inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "./inspect-geom-advisories.js";
 
@@ -63,6 +66,13 @@ export type PlotInspectionChange<Row, Key> =
       readonly mode: "x" | "y";
       readonly axisValue: CellValue;
       readonly axisLabel: string;
+      /**
+       * Sum of numeric contributions on the value axis across the full
+       * axis-group (y when mode is x, x when mode is y). Used by the default
+       * tooltip Total row; independent of the hover member cap (#1274).
+       * `null` when no member has a finite numeric contribution.
+       */
+      readonly groupTotal: number | null;
     });
 
 export interface PlotInspectionClear {

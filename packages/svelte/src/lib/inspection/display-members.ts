@@ -168,6 +168,75 @@ export function tooltipDisplayPayloadToken(
 }
 
 /**
+ * Magnitude for hover ranking of a display member (#1274).
+ * Group by x → |y|; group by y → |x|. Non-numeric → 0.
+ */
+export function memberValueMagnitude(
+  member: { readonly fields: readonly TooltipField[] },
+  mode: "x" | "y",
+): number {
+  const channel = mode === "x" ? "y" : "x";
+  for (const field of member.fields) {
+    if (field.channel !== channel) continue;
+    const value = field.value;
+    if (typeof value === "number" && Number.isFinite(value)) return Math.abs(value);
+    if (value instanceof Date) {
+      const time = value.getTime();
+      return Number.isFinite(time) ? Math.abs(time) : 0;
+    }
+    return 0;
+  }
+  return 0;
+}
+
+/**
+ * Hover window for the default tooltip when the public snapshot is complete
+ * (oninspect / custom content) but presentation still caps at `limit` (#1274).
+ *
+ * Focus is always included. Remaining slots prefer largest |value|. Under the
+ * limit, preserves input order. Pinned tooltips should pass members through
+ * without this helper (or with limit >= members.length).
+ */
+export function selectHoverDisplayMembers<Row, Key>(
+  members: readonly PlotDatum<Row, Key>[],
+  focus: PlotDatum<Row, Key>,
+  options: {
+    readonly mode: "exact" | "xy" | "x" | "y";
+    readonly limit?: number;
+  },
+): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
+  const limit = options.limit ?? 8;
+  if (members.length === 0) return [focus];
+  if (options.mode === "exact" || options.mode === "xy" || members.length <= limit) {
+    return members as NonEmptyReadonlyArray<PlotDatum<Row, Key>>;
+  }
+
+  const mode = options.mode;
+  let focusPresent = false;
+  const others: PlotDatum<Row, Key>[] = [];
+  for (const member of members) {
+    if (member === focus) {
+      focusPresent = true;
+      continue;
+    }
+    others.push(member);
+  }
+  others.sort((left, right) => {
+    const delta = memberValueMagnitude(right, mode) - memberValueMagnitude(left, mode);
+    if (delta !== 0) return delta;
+    return left.layerIndex - right.layerIndex;
+  });
+
+  if (!focusPresent) {
+    // Focus outside the collapsed list: force-include, drop the smallest slot.
+    const kept = others.slice(0, Math.max(0, limit - 1));
+    return [focus, ...kept];
+  }
+  if (limit === 1) return [focus];
+  return [focus, ...others.slice(0, limit - 1)];
+}
+
+/**
  * Collapse members that would render identical default field lists.
  * Prefer `focus` within each duplicate group; preserve first-seen order of
  * distinct payloads. If `focus` is missing from `members` but shares a payload

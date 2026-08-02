@@ -15,7 +15,7 @@ import type {
 import {
   materializeInspection,
   resolvedTarget,
-  TRANSIENT_MEMBER_LIMIT,
+  selectTransientMembers,
   type InspectionSnapshotCompleteness,
   type ResolveInspectionInput,
 } from "./resolver.js";
@@ -154,11 +154,13 @@ export function createInspectionCoordinator<
     const completeness =
       input.state === "pinned" ? "complete" : (input.completeness ?? "transient");
     // Pin/complete fingerprints the full group; transient matches materialize's
-    // TRANSIENT_MEMBER_LIMIT so pointer inspect is O(min(M,8)·F), not O(M·F log F).
+    // top-k window so pointer inspect is O(min(M,8)·F), not O(M·F log F) (#1274).
     const fingerprintMembers =
       completeness === "complete"
         ? target.members
-        : target.members.slice(0, TRANSIENT_MEMBER_LIMIT);
+        : selectTransientMembers(target.members, target.group?.focusId ?? input.seed.id, {
+            groupAxis: input.mode === "y" ? "y" : "x",
+          });
     const semanticMembers = fingerprintMembers.map((candidate) => {
       const row = candidate.rowIndex === null ? null : input.model.row(candidate.rowIndex);
       const key = row === null || candidate.rowIndex === null ? null : keyAt(candidate.rowIndex);

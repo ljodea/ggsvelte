@@ -310,7 +310,11 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
       defaultSeed.y,
     );
     await until(() => defaultPlot.container.querySelector(".gg-tooltip") !== null);
-    expect(defaultPlot.container.querySelectorAll(".gg-tooltip dl")).toHaveLength(8);
+    // 8 series rows + 1 stack Total row (#1274). Member cap is still 8.
+    expect(
+      defaultPlot.container.querySelectorAll(".gg-tooltip-members > dl:not(.gg-tooltip-total)"),
+    ).toHaveLength(8);
+    expect(defaultPlot.container.querySelector(".gg-tooltip-total")).not.toBeNull();
 
     let callbackModel: RenderModel | null = null;
     const changes: Array<{ members: readonly unknown[] }> = [];

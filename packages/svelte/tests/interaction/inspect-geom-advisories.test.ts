@@ -7,8 +7,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  discreteColorFillDomainSizes,
+  HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   INTERACTION_DIAGNOSTIC_CATALOG,
   inspectAxisOnBarColDiagnostics,
+  inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "../../src/lib/interaction/interaction.js";
 
@@ -90,9 +93,64 @@ describe("inspectAxisOnBarColDiagnostics", () => {
       "INTERACTION_INSPECT_X_ON_BAR",
       "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
     ] as const) {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[code].code).toBe(code);
     }
+  });
+});
+
+describe("inspectHighCardinalityDiagnostics (#1274)", () => {
+  it("is empty when inspect is off or domains are small", () => {
+    expect(
+      inspectHighCardinalityDiagnostics({
+        inspectEnabled: false,
+        domainSizes: [{ channel: "fill", size: 100 }],
+      }),
+    ).toEqual([]);
+    expect(
+      inspectHighCardinalityDiagnostics({
+        inspectEnabled: true,
+        domainSizes: [{ channel: "color", size: HIGH_CARDINALITY_DISCRETE_THRESHOLD - 1 }],
+      }),
+    ).toEqual([]);
+  });
+
+  it("advises per discrete channel at or above the threshold", () => {
+    const list = inspectHighCardinalityDiagnostics({
+      inspectEnabled: true,
+      domainSizes: [
+        { channel: "fill", size: HIGH_CARDINALITY_DISCRETE_THRESHOLD },
+        { channel: "color", size: HIGH_CARDINALITY_DISCRETE_THRESHOLD + 4 },
+      ],
+    });
+    expect(list).toHaveLength(2);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      severity: "advisory",
+      prop: "fill",
+      actual: HIGH_CARDINALITY_DISCRETE_THRESHOLD,
+    });
+    expect(list[1]).toMatchObject({
+      code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      prop: "color",
+      actual: HIGH_CARDINALITY_DISCRETE_THRESHOLD + 4,
+    });
+  });
+
+  it("reads only ordinal color/fill domain lengths", () => {
+    expect(
+      discreteColorFillDomainSizes({
+        color: { kind: "ordinal", scale: { domain: ["a", "b", "c"] } },
+        fill: { kind: "sequential", scale: { domain: [0, 1] } },
+      }),
+    ).toEqual([{ channel: "color", size: 3 }]);
+    expect(
+      discreteColorFillDomainSizes({
+        color: null,
+        fill: { kind: "ordinal", scale: { domain: Array.from({ length: 20 }, (_, i) => i) } },
+      }),
+    ).toEqual([{ channel: "fill", size: 20 }]);
   });
 });
 

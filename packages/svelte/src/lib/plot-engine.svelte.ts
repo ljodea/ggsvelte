@@ -65,7 +65,9 @@ import {
   resolveFilteredAvailableTools,
 } from "./interaction/capability.js";
 import {
+  discreteColorFillDomainSizes,
   inspectAxisOnBarColDiagnostics,
+  inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
   normalizeInteractionConfig,
   type InteractionDiagnostic,
@@ -761,6 +763,19 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   $effect(() => {
     for (const diagnostic of chromeState.legendDiagnostics) deliverDiagnostic(diagnostic);
   });
+
+  // High-cardinality discrete color/fill + inspect: default tooltip policy
+  // advisory (#1274). Needs trained scales (runtime.model); once-per-channel.
+  const inspectHighCardinality = $derived.by((): InteractionDiagnostic[] => {
+    if (interactionConfig().inspect === undefined) return [];
+    const model = runtime.model;
+    if (model === null) return [];
+    return inspectHighCardinalityDiagnostics({
+      inspectEnabled: true,
+      domainSizes: discreteColorFillDomainSizes(model.scales),
+    });
+  });
+  deliverAdvisoriesOnce(() => inspectHighCardinality);
 
   // Host-side deriveds kept outside the factory (construction-time free of
   // the model read). Channel filter: only aesthetics with GuideLegend focus

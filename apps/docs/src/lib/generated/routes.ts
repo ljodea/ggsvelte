@@ -10769,6 +10769,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-high-cardinality-discrete",
+        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+        level: 3,
+      },
+      {
         id: "accessibility",
         title: "Accessibility",
         level: 2,
@@ -11814,6 +11819,11 @@ export const DOCS_ROUTES = [
       {
         id: "interaction-duplicate-inspect-capability",
         title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-high-cardinality-discrete",
+        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
         level: 3,
       },
       {
