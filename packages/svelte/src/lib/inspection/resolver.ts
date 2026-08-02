@@ -75,16 +75,16 @@ function candidateValueContribution(
 /**
  * Identity for one stack-total / overflow contribution (#1274 / #1389).
  *
- * - Prefer source `rowIndex` when present so multi-layer paints of the same
- *   row (line+point, col+text) contribute once.
- * - When `rowIndex` is null (aggregates / stats), pair layer-local `seriesId`
- *   with the numeric contribution so double-painted summary series collapse
- *   while distinct values under a colliding per-layer series index still
- *   count separately (stack series 0 + overlay series 0 with different y).
+ * Always pairs identity with the numeric contribution so:
+ * - line+point / col+text (same row, same value) collapse to one contribution
+ * - multi-column layers on the same row (sales col + target line) both count
+ * - aggregates (null rowIndex) use layer-local seriesId + value so double-
+ *   painted summaries collapse while distinct colliding seriesIds do not
  */
 function contributionIdentity(member: CandidateFacts, contribution: number | null): string {
-  if (member.rowIndex !== null) return `r:${member.rowIndex}`;
-  return `s:${member.seriesId}:v:${contribution === null ? "" : String(contribution)}`;
+  const valueToken = contribution === null ? "" : String(contribution);
+  if (member.rowIndex !== null) return `r:${member.rowIndex}:v:${valueToken}`;
+  return `s:${member.seriesId}:v:${valueToken}`;
 }
 
 /**

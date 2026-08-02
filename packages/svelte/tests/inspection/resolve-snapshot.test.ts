@@ -521,4 +521,29 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
     }
     model.dispose();
   });
+
+  it("counts both columns when two layers map different y fields on the same rows", () => {
+    // sales col + target line share rowIndex but read different y fields.
+    // Total must be sales+target (25 at Jan), not only the first layer (10).
+    const data = [
+      { id: "jan", x: "Jan", sales: 10, target: 15 },
+      { id: "feb", x: "Feb", sales: 20, target: 18 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "x" }))
+        .geomCol({ aes: { y: "sales" } })
+        .geomLine({ aes: { y: "target" } })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.xValue).toBe("Jan");
+    const inspection = axisInspection(model, seed);
+    expect(inspection.mode).toBe("x");
+    if (inspection.mode === "x" || inspection.mode === "y") {
+      expect(inspection.groupTotal).toBe(25);
+      expect(inspection.groupMemberCount).toBe(2);
+    }
+    model.dispose();
+  });
 });
