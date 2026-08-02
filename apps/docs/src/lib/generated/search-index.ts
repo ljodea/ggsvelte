@@ -19914,14 +19914,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-322",
+    id: "heading:guide-lifecycle:experimental-321",
     kind: "heading",
-    title: "experimental (322)",
+    title: "experimental (321)",
     summary:
-      "experimental (322) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-322",
+      "experimental (321) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-321",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (322)"],
+    exact: ["experimental (321)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -32752,15 +32752,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["isISODateString"],
-  },
-  {
-    id: "api:ggsvelte-core:labelBoxOrigin",
-    kind: "api",
-    title: "labelBoxOrigin",
-    summary: "@ggsvelte/core · value · experimental.",
-    href: "/guide/lifecycle#ggsvelte-core",
-    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
-    exact: ["labelBoxOrigin"],
   },
   {
     id: "api:ggsvelte-core:layout",

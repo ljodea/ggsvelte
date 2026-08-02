@@ -437,7 +437,8 @@ describe("GeomLabel box chrome (Svelte scene parity)", () => {
     const texts = container.querySelectorAll(".gg-glyphs text");
     expect(boxes.length).toBe(xy.length);
     expect(texts.length).toBe(xy.length);
-    const first = boxes[0]!;
+    const first = boxes.item(0);
+    expect(first).not.toBeNull();
     expect(first.getAttribute("fill")).toBe("#b8c9e0");
     expect(first.getAttribute("stroke")).toBe("#0f172a");
     expect(first.getAttribute("rx")).toBe("3");
