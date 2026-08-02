@@ -19,7 +19,8 @@ import type { CellValue } from "./table.js";
 
 const NO_ROW = 0xffffffff;
 
-const AUTO_MODE_CODE = { exact: 0, x: 1, y: 2, xy: 3 } as const;
+/** ResolvedCandidateInspectMode → compact code; shared with pipeline candidate resolvers. */
+export const AUTO_MODE_CODE = { exact: 0, x: 1, y: 2, xy: 3 } as const;
 
 /** Anchor equality matching the old `${x}` string-key grouping: ±0 equal, NaN ≈ NaN. */
 function sameAnchorCoord(u: number, v: number): boolean {
