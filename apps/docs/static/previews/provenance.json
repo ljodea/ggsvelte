@@ -398,7 +398,7 @@
     },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
-      "sourceSha256": "49f0876d1e526b58f213002d52ed9b7d687b32466219927950e6134f62937662",
+      "sourceSha256": "d441d72bda507e5b8171128bb51743d9f222ac726173a55cdc2f6bacba3896d2",
       "pngSha256": "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72"
     },
     "spoke/vector-field": {
