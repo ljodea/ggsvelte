@@ -1,4 +1,4 @@
-import { canonicalAxisToken, compareTokens, tokenKey } from "./candidate-axis-token.js";
+import { canonicalAxisToken, compareTokens } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
   defaultAutoMode,
@@ -109,16 +109,27 @@ export function buildCandidateStoreIndexes(
   const shapeValues: CellValue[] = [];
   const linetypeValues: CellValue[] = [];
   const tokens: CanonicalAxisToken[] = [];
-  const tokenIndex = new Map<string, number>();
+  // Kind-dispatched interning: the previous single Map keyed on tokenKey()
+  // strings paid one `n:${value}` / `s:${len}:${value}` allocation per
+  // candidate per axis; per-kind maps key on the value itself. Intern order
+  // (first-seen id) is unchanged, so downstream token ids are identical.
+  const numberTokenIndex = new Map<number, number>();
+  const stringTokenIndex = new Map<string, number>();
+  const booleanTokenIndex = new Map<boolean, number>();
   const remember = (value: CellValue): number => {
     const token = canonicalAxisToken(value);
     if (token === null) return -1;
-    const key = tokenKey(token);
-    const prior = tokenIndex.get(key);
+    const index =
+      token.kind === "number"
+        ? numberTokenIndex
+        : token.kind === "string"
+          ? stringTokenIndex
+          : booleanTokenIndex;
+    const prior = index.get(token.value as number & string & boolean);
     if (prior !== undefined) return prior;
     const id = tokens.length;
     tokens.push(token);
-    tokenIndex.set(key, id);
+    index.set(token.value as number & string & boolean, id);
     return id;
   };
 
@@ -389,7 +400,9 @@ export function buildCandidateStoreIndexes(
     order,
   ])
     buffer.length = 0;
-  tokenIndex.clear();
+  numberTokenIndex.clear();
+  stringTokenIndex.clear();
+  booleanTokenIndex.clear();
   return {
     scene,
     epoch,
