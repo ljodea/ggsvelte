@@ -330,18 +330,32 @@ describe("docs route inventory", () => {
     });
   });
 
-  it("publishes the interactions demo with canonical acquisition metadata", () => {
-    expect(createDocsRouteInventory().find((entry) => entry.path === "/interactions")).toEqual({
-      path: "/interactions",
-      title: "Chart-local interaction — ggsvelte",
-      description:
-        "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
-      canonicalPath: "/interactions",
-      kind: "page",
-      index: true,
-      sitemap: true,
-      shell: "site",
-    });
+  it("does not publish a first-class /interactions route", () => {
+    expect(createDocsRouteInventory().find((entry) => entry.path === "/interactions")).toBe(
+      undefined,
+    );
+    expect(
+      createDocsRouteInventory().some((entry) => entry.path.startsWith("/interactions/")),
+    ).toBe(false);
+  });
+
+  it("publishes interaction expositions under /examples/interaction/*", () => {
+    for (const id of [
+      "interaction/brush-zoom",
+      "interaction/facet-intervals",
+      "interaction/linked-views",
+    ] as const) {
+      expect(createDocsRouteInventory().find((entry) => entry.path === `/examples/${id}`)).toEqual({
+        path: `/examples/${id}`,
+        title: expect.stringContaining("— ggsvelte gallery"),
+        description: expect.any(String),
+        canonicalPath: `/examples/${id}`,
+        kind: "page",
+        index: true,
+        sitemap: true,
+        shell: "site",
+      });
+    }
   });
 
   it("keeps aliases canonicalized, noindex, and out of the sitemap", () => {

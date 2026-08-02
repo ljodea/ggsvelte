@@ -19,11 +19,9 @@ describe("docs chart stack isolation (PR1)", () => {
   it("keeps gallery and pure list pages on the thin examples manifest", () => {
     const gallery = read("routes/examples/+page.svelte");
     const home = read("routes/+page.svelte");
-    const interactionsIndex = read("routes/interactions/+page.svelte");
     for (const [label, source] of [
       ["gallery", gallery],
       ["home", home],
-      ["interactions index", interactionsIndex],
     ] as const) {
       expect(source, label).toContain("$lib/examples-manifest");
       expect(source, label).not.toMatch(

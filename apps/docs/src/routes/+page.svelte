@@ -92,12 +92,6 @@
       </dd>
     </div>
     <div>
-      <dt>Interactions</dt>
-      <dd>
-        <a href={`${base}/interactions`}>Inspect, select, zoom, legend focus</a>
-      </dd>
-    </div>
-    <div>
       <dt>Headless SVG</dt>
       <dd>
         <a href={`${base}/guide/production`}>No-DOM renderer and CLI</a>

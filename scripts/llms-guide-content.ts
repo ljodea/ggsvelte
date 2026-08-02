@@ -1326,10 +1326,10 @@ semantic state (required, stable semantic scope via \`interactionScope\`).
 
 Examples: [inspect](/examples/interactions/inspection),
 [interval/zoom](/examples/interactions/interval-selection),
-[linked views](/interactions/linked-views),
+[linked views](/examples/interaction/linked-views),
 [legend focus](/examples/interaction/legend-focus),
 [legend filter](/examples/interaction/legend-filter),
-[facet intervals](/interactions/facet-intervals).
+[facet intervals](/examples/interaction/facet-intervals).
 Contracts: [interaction reference](/guide/interaction-reference).
 
 ## Inspection
@@ -1419,7 +1419,7 @@ indices. Choose a preset for the relationship between panels:
 \`cross-panel\` intersects the interval with each panel's domain when facet
 scales are free; a disjoint panel selects nothing instead of clamping to an
 unrelated edge. Panel identity survives row reordering and temporary absence.
-See the [runnable facet example](/interactions/facet-intervals).
+See the [runnable facet example](/examples/interaction/facet-intervals).
 
 ## Shared controlled state
 
@@ -1747,7 +1747,7 @@ Every mutation returns one immutable transition or \`null\` for a no-op. Passive
 consumers never republish controller state, preventing linked-view feedback
 loops. Do not mutate the controller inside its synchronous \`onchange\`
 callback; schedule a later Svelte application update instead. See the
-[linked views example](/interactions/linked-views).
+[linked views example](/examples/interaction/linked-views).
 
 ## Identity
 
@@ -2994,7 +2994,7 @@ Shared controller (new in 0.2, optional):
 <p>{selected.length} selected</p>
 \`\`\`
 
-See the [linked views example](/interactions/linked-views) and
+See the [linked views example](/examples/interaction/linked-views) and
 [Interactions](/guide/interactions) for the full controller contract.
 
 ### Deprecated type aliases

@@ -17,7 +17,6 @@
 import { CURRENT_EDITION, THEME_NAMES } from "@ggsvelte/spec";
 import sveltePackage from "../packages/svelte/package.json";
 import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
-import { interactionExpositionSlug } from "../apps/docs/src/lib/catalog/interaction-exposition";
 import { assertGuideCodeContract } from "./guide-code-contract";
 import {
   FACETS_COORDINATES_MD,
@@ -189,9 +188,7 @@ export function buildLlmsIndex(
       section = ex.docsSection;
       lines.push("", `### ${section}`, "");
     }
-    const expositionSlug = interactionExpositionSlug(ex.id);
-    const href =
-      typeof expositionSlug === "string" ? `/interactions/${expositionSlug}` : `/examples/${ex.id}`;
+    const href = `/examples/${ex.id}`;
     lines.push(
       ex.description.trim() === ""
         ? `- [${ex.title}](${href})`

@@ -20,7 +20,6 @@ describe("packed Pages link checks", () => {
     "guide/upgrading.html",
     "themes.html",
     "palettes.html",
-    "interactions.html",
     "reference/interactions.html",
     "reference/themes.html",
     "reference/palettes.html",
@@ -42,8 +41,8 @@ describe("packed Pages link checks", () => {
     "reference/guides/legend.html",
     "reference/guides/colorbar.html",
     "examples/interaction/tooltip.html",
-    "interactions/brush-zoom.html",
-    "interactions/linked-views.html",
+    "examples/interaction/brush-zoom.html",
+    "examples/interaction/linked-views.html",
     "examples/interactions/inspection.html",
     "examples/interactions/interval-selection.html",
     "llms.txt",
@@ -111,7 +110,9 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).not.toContain("playground.html");
     expect(requiredPages).toContain("themes.html");
     expect(requiredPages).toContain("palettes.html");
-    expect(requiredPages).toContain("interactions.html");
+    expect(requiredPages).not.toContain("interactions.html");
+    expect(requiredPages).toContain("examples/interaction/brush-zoom.html");
+    expect(requiredPages).toContain("examples/interaction/linked-views.html");
     expect(requiredPages).toContain("reference/interactions.html");
     expect(requiredPages).toContain("reference/themes.html");
     expect(requiredPages).toContain("reference/palettes.html");

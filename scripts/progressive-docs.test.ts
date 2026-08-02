@@ -32,7 +32,7 @@ describe("progressive Docs journey", () => {
 
   it("publishes the consolidated interaction and production chapters", () => {
     const expected = [
-      ["/guide/interactions", "Interaction", 20, "/interactions/linked-views"],
+      ["/guide/interactions", "Interaction", 20, "/examples/interaction/linked-views"],
       ["/guide/production", "Production", 30, "/reference/cli"],
     ] as const;
     const inventory = createDocsRouteInventory();

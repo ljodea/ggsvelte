@@ -409,7 +409,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
       touch: "Choose Select area, then drag or tap two corners inside one facet panel. Use Clear selection without resetting zoom or filters.",
       references: [
         { label: "Interaction guide", href: "/guide/interactions" },
-        { label: "Selection and zoom", href: "/interactions/brush-zoom" },
+        { label: "Selection and zoom", href: "/examples/interaction/brush-zoom" },
       ],
       svelteFirst: true,
       fullWidth: true,
@@ -454,7 +454,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
       touch: "Tap a legend entry to pin it across the SVG and canvas views; tap the active entry or Clear legend focus to reset.",
       references: [
         { label: "Interaction guide", href: "/guide/interactions" },
-        { label: "Linked views", href: "/interactions/linked-views" },
+        { label: "Linked views", href: "/examples/interaction/linked-views" },
       ],
       svelteFirst: true,
       fullWidth: true,
@@ -498,7 +498,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
       touch: "Tap an x group to pin its values; tap outside the chart to dismiss the inspection.",
       references: [
         { label: "Interaction guide and event reference", href: "/guide/interactions" },
-        { label: "Linked controlled-state example", href: "/interactions/linked-views" },
+        { label: "Linked controlled-state example", href: "/examples/interaction/linked-views" },
       ],
       svelteFirst: true,
       fullWidth: true,

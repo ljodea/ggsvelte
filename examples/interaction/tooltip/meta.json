@@ -15,7 +15,7 @@
       },
       {
         "label": "Linked controlled-state example",
-        "href": "/interactions/linked-views"
+        "href": "/examples/interaction/linked-views"
       }
     ],
     "svelteFirst": true,

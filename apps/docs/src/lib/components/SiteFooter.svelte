@@ -13,7 +13,6 @@
       <a href={`${base}/examples`}>Gallery</a>
       <a href={`${base}/themes`}>Themes</a>
       <a href={`${base}/palettes`}>Palettes</a>
-      <a href={`${base}/interactions`}>Interactions</a>
       <a href={`${base}/reference`}>Reference</a>
       <a href={`${base}/schema/v0.json`}>JSON Schema</a>
       <a href="https://github.com/ljodea/ggsvelte" rel="external">GitHub ↗</a>
