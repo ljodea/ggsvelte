@@ -42,8 +42,12 @@ bun add @ggsvelte/svelte
 them directly for spec-only or headless work. The \`ggsvelte-render\` CLI is
 its own package — install \`@ggsvelte/cli\` in every sandbox where an agent
 authors specs, so validation errors and chart-quality warnings surface
-before a chart ships. Bundled teaching data lives at
-\`@ggsvelte/svelte/data\`.
+before a chart ships. The agent skill is also its own package:
+\`@ggsvelte/skill\` (\`SKILL.md\` + \`references/\` at the package root) —
+install it and copy/symlink \`node_modules/@ggsvelte/skill\` into the agent's
+skills directory as \`ggsvelte/\` (or point the agent at
+\`node_modules/@ggsvelte/skill/SKILL.md\` directly). Bundled teaching data
+lives at \`@ggsvelte/svelte/data\`.
 
 ## A complete Svelte file
 
@@ -1947,7 +1951,7 @@ migration note here.
 
 ## Five-minute path
 
-- Check that linked \`@ggsvelte/svelte\`, core, and spec packages resolve to one compatible release.
+- Check that linked \`@ggsvelte/*\` packages (\`svelte\`, \`spec\`, \`core\`, \`cli\`, \`skill\`) resolve to one compatible release.
 - Read only the adjacent transition sections needed for the installed version.
 - Apply the before/after source change backed by the migration fixtures.
 - Run strict type, build, render, and visual checks before deploying.

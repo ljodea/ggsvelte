@@ -4,7 +4,8 @@
 
 ggplot2's layered grammar for Svelte 5. Author with components; agents emit the
 same chart as PortableSpec JSON — validate, apply the fix, render headless.
-The agent skill ships as [`@ggsvelte/skill`](packages/skill/SKILL.md).
+The agent skill is the [`@ggsvelte/skill`](packages/skill) package (`SKILL.md` +
+`references/` at the package root).
 
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started)
@@ -21,9 +22,10 @@ and Windows.
 
 ## Agents
 
-- Skill: [`@ggsvelte/skill`](packages/skill/SKILL.md) — published to npm so a
-  bundled copy in your repo gets dependabot update signals (install, then copy
-  `node_modules/@ggsvelte/skill` into your agent's skills dir as `ggsvelte/`)
+- Skill: [`@ggsvelte/skill`](packages/skill) — install from npm, then copy
+  `node_modules/@ggsvelte/skill` into your agent's skills dir as `ggsvelte/`
+  (dependabot surfaces version bumps for bundled copies). In-tree source:
+  [`packages/skill/SKILL.md`](packages/skill/SKILL.md)
 - Schema: [`schema/v0.json`](https://ggsvelte.sh/schema/v0.json)
 - Corpus: [`llms.txt`](https://ggsvelte.sh/llms.txt) ·
   [`llms-full.txt`](https://ggsvelte.sh/llms-full.txt)
