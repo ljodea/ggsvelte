@@ -24,11 +24,6 @@ export function registerTemporalPolyfill(impl: TemporalNamespace): void {
   registeredPolyfill = impl;
 }
 
-/** Test-only: drop the registered polyfill so lean graphs can be asserted. */
-export function resetTemporalPolyfillForTests(): void {
-  registeredPolyfill = null;
-}
-
 export const TEMPORAL_PARSER_NAMES = [
   "iso",
   "year",
@@ -223,7 +218,7 @@ export function temporalImplementation(): TemporalNamespace {
 }
 
 /** True when native Temporal or a registered polyfill can run calendar ops. */
-export function hasTemporalImplementation(): boolean {
+function hasTemporalImplementation(): boolean {
   if ((globalThis as typeof globalThis & { Temporal?: TemporalNamespace }).Temporal !== undefined) {
     return true;
   }
