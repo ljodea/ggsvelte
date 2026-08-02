@@ -19,6 +19,23 @@ describe("LineageStore", () => {
     expect(store.keys(shared)).toEqual(["a", "b"]);
     expect(store.count(shared)).toBe(2);
   });
+
+  it("gives one ref to a singleton however it is interned", () => {
+    const store = new LineageStore<number>();
+    const viaFreshArray = store.intern([7]);
+    const viaFrozenShared = store.intern(Object.freeze([7]));
+    const viaFrozenAgain = store.intern(Object.freeze([7]));
+
+    expect(viaFrozenShared).toBe(viaFreshArray);
+    expect(viaFrozenAgain).toBe(viaFreshArray);
+    expect(store.keys(viaFreshArray)).toEqual([7]);
+    expect(store.count(viaFreshArray)).toBe(1);
+
+    // Multi-element interning coexists and still dedupes by membership.
+    const pair = store.intern([7, 9]);
+    expect(store.intern([9, 7])).toBe(pair);
+    expect(store.keys(pair)).toEqual([7, 9]);
+  });
 });
 
 describe("pipeline semantic identity", () => {
