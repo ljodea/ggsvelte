@@ -1,6 +1,6 @@
-import { canonicalAxisToken, compareTokens } from "./candidate-axis-token.js";
-import { float32SortKey, radixSortByWords } from "./radix-sort.js";
+import { compareTokens } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
+import { float32SortKey, radixSortByWords } from "./radix-sort.js";
 import {
   defaultAutoMode,
   isCandidatePrimitive,
@@ -126,21 +126,48 @@ export function buildCandidateStoreIndexes(
   const numberTokenIndex = new Map<number, number>();
   const stringTokenIndex = new Map<string, number>();
   const booleanTokenIndex = new Map<boolean, number>();
+  // Peek by raw value before allocating a CanonicalAxisToken: a repeat hit
+  // (dense plots repeat axis values constantly) then costs one Map lookup
+  // and no object allocation. Misses allocate the same token
+  // canonicalAxisToken would build (Date → epoch number, -0 → 0).
   const remember = (value: CellValue): number => {
-    const token = canonicalAxisToken(value);
-    if (token === null) return -1;
-    const index =
-      token.kind === "number"
-        ? numberTokenIndex
-        : token.kind === "string"
-          ? stringTokenIndex
-          : booleanTokenIndex;
-    const prior = index.get(token.value as number & string & boolean);
-    if (prior !== undefined) return prior;
-    const id = tokens.length;
-    tokens.push(token);
-    index.set(token.value as number & string & boolean, id);
-    return id;
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) return -1;
+      const canonical = Object.is(value, -0) ? 0 : value;
+      const prior = numberTokenIndex.get(canonical);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "number", value: canonical });
+      numberTokenIndex.set(canonical, id);
+      return id;
+    }
+    if (typeof value === "string") {
+      const prior = stringTokenIndex.get(value);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "string", value });
+      stringTokenIndex.set(value, id);
+      return id;
+    }
+    if (typeof value === "boolean") {
+      const prior = booleanTokenIndex.get(value);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "boolean", value });
+      booleanTokenIndex.set(value, id);
+      return id;
+    }
+    if (value instanceof Date) {
+      const time = value.getTime();
+      if (!Number.isFinite(time)) return -1;
+      const prior = numberTokenIndex.get(time);
+      if (prior !== undefined) return prior;
+      const id = tokens.length;
+      tokens.push({ kind: "number", value: time });
+      numberTokenIndex.set(time, id);
+      return id;
+    }
+    return -1;
   };
 
   const uninspectable = options.uninspectableLayers;
@@ -408,6 +435,11 @@ export function buildCandidateStoreIndexes(
     tokenOrder.sort((a, b) => compareTokens(tokens[a]!, tokens[b]!));
     for (let rank = 0; rank < tokenOrder.length; rank++) tokenRank[tokenOrder[rank]!] = rank;
   }
+  // Per-candidate layer ids, read once — the permutation comparator and the
+  // bucket boundary walk otherwise chase scene.batches[…].layerIndex per
+  // comparison.
+  const layerPerCandidate = new Uint32Array(n);
+  for (let id = 0; id < n; id++) layerPerCandidate[id] = scene.batches[batchIds[id]!]!.layerIndex;
   // Bucket maps key on panel * tokenCount + tokenId (numeric, no per-bucket
   // `${panel}|${key}` strings — dense plots have O(n) buckets).
   const tokenCount = Math.max(tokens.length, 1);
@@ -422,7 +454,7 @@ export function buildCandidateStoreIndexes(
         panelIds[a]! - panelIds[b]! ||
         tokenRank[keys[a]!]! - tokenRank[keys[b]!]! ||
         ranks[a]! - ranks[b]! ||
-        scene.batches[batchIds[a]!]!.layerIndex - scene.batches[batchIds[b]!]!.layerIndex ||
+        layerPerCandidate[a]! - layerPerCandidate[b]! ||
         series[a]! - series[b]! ||
         orth[a]! - orth[b]! ||
         batchIds[a]! - batchIds[b]! ||
@@ -440,15 +472,15 @@ export function buildCandidateStoreIndexes(
       const seriesBoundaries: SeriesBoundary[] = [];
       for (let seriesStart = start; seriesStart < end;) {
         const seriesFirst = valid[seriesStart]!;
-        const layerIndex = scene.batches[batchIds[seriesFirst]!]!.layerIndex;
+        const layerIndex = layerPerCandidate[seriesFirst]!;
         const seriesId = series[seriesFirst]!;
         let seriesEnd = seriesStart + 1;
-        while (
-          seriesEnd < end &&
-          scene.batches[batchIds[valid[seriesEnd]!]!]!.layerIndex === layerIndex &&
-          series[valid[seriesEnd]!] === seriesId
-        )
+        while (seriesEnd < end) {
+          const continueId = valid[seriesEnd]!;
+          if (layerPerCandidate[continueId]! !== layerIndex || series[continueId] !== seriesId)
+            break;
           seriesEnd++;
+        }
         seriesBoundaries.push({ start: seriesStart, end: seriesEnd, layerIndex, seriesId });
         seriesStart = seriesEnd;
       }

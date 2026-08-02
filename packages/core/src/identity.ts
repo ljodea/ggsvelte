@@ -66,7 +66,11 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
       return shared;
     }
     const ref = this.#members.length;
-    this.#members.push(Object.freeze([key]));
+    // Not frozen: dense identity plots intern one singleton per row, so a
+    // freeze per row showed up in profiles. The array is never exposed for
+    // mutation (keys() consumers get it read-only by type) — immutable by
+    // convention, as with candidate coincident stacks.
+    this.#members.push([key]);
     this.#refs.set(token, ref);
     this.#singletonRefs.set(key, ref);
     return ref;
