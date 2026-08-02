@@ -21,8 +21,19 @@ export function resolveStyleScale(input: {
   title: string;
   warnings: PipelineWarning[];
 }): StyleResolution {
-  const collected = collectStyleValues(input);
   const { aesthetic, config, prevState, title, warnings } = input;
+  // Sequential/binned/identity resolutions never read the source catalog,
+  // so a provably-continuous numeric aesthetic skips the full-column dedupe
+  // walk (100k rows × encodeKey × Set per mapped field on dense plots).
+  const catalogMode =
+    aesthetic === "shape" || aesthetic === "linetype"
+      ? "always"
+      : config?.type === undefined
+        ? "auto"
+        : config.type === "sequential" || config.type === "binned" || config.type === "identity"
+          ? "never"
+          : "always";
+  const collected = collectStyleValues({ ...input, catalogMode });
   if (!collected.anyField) {
     return { aesthetic, resolved: null, legendInput: null, guidePlan: null, state: null };
   }

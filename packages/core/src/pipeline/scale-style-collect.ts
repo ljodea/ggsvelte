@@ -17,6 +17,14 @@ export function collectStyleValues(input: {
   bindings: readonly LayerBinding[];
   table: ColumnTable;
   sourceTable: ColumnTable;
+  /**
+   * Whether the source catalog (a full-column dedupe walk per mapped field)
+   * is needed at all. Sequential/binned/identity resolutions never read the
+   * catalog, so the caller passes "never" when the scale type is explicitly
+   * continuous and "auto" to let this walk decide from field discreteness
+   * metadata. "always" preserves the historical walk.
+   */
+  catalogMode: "always" | "auto" | "never";
 }): {
   values: CellValue[];
   catalog: CellValue[];
@@ -25,7 +33,7 @@ export function collectStyleValues(input: {
   anyIndexable: boolean;
   nonInteractiveValues: CellValue[];
 } {
-  const { aesthetic, frames, bindings, table, sourceTable } = input;
+  const { aesthetic, frames, bindings, table, sourceTable, catalogMode } = input;
   const values: CellValue[] = [];
   let anyField = false;
   let anyDiscrete = false;
@@ -77,6 +85,25 @@ export function collectStyleValues(input: {
     seen.add(key);
     catalog.push(value);
   };
+  // Metadata pass: flags and the walk decision come from field discreteness,
+  // never from row data, so they are computed before (and independently of)
+  // the full-column catalog walk.
+  const walkCatalog = (() => {
+    if (catalogMode === "never") return false;
+    if (catalogMode === "always") return true;
+    for (const binding of bindings) {
+      const mapped = bindingOf(binding, aesthetic);
+      const catalogTable = binding.sourceTable ?? sourceTable;
+      if (
+        (mapped.field !== null &&
+          catalogTable.has(mapped.field) &&
+          catalogTable.discreteness(mapped.field) === "discrete") ||
+        mapped.scaledConstant !== null
+      )
+        return true;
+    }
+    return anyDiscrete;
+  })();
   for (const binding of bindings) {
     const mapped = bindingOf(binding, aesthetic);
     // Prefer the layer's own source table so multi-table catalogs union correctly (#589).
@@ -85,15 +112,17 @@ export function collectStyleValues(input: {
       anyField = true;
       anyIndexable = true;
       if (catalogTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
-      // One encodeKey per row (not two — indexableKeys and the catalog
-      // dedupe keyed separately); this walk dominates mapped-style profiles.
-      const column = catalogTable.column(mapped.field);
-      for (let i = 0; i < column.length; i++) {
-        const key = encodeKey(column[i]!);
-        indexableKeys.add(key);
-        if (!seen.has(key)) {
-          seen.add(key);
-          catalog.push(column[i]!);
+      if (walkCatalog) {
+        // One encodeKey per row (not two — indexableKeys and the catalog
+        // dedupe keyed separately); this walk dominates mapped-style profiles.
+        const column = catalogTable.column(mapped.field);
+        for (let i = 0; i < column.length; i++) {
+          const key = encodeKey(column[i]!);
+          indexableKeys.add(key);
+          if (!seen.has(key)) {
+            seen.add(key);
+            catalog.push(column[i]!);
+          }
         }
       }
     }
@@ -106,7 +135,7 @@ export function collectStyleValues(input: {
         anyIndexable = true;
         indexableKeys.add(encodeKey(mapped.scaledConstant));
       }
-      add(mapped.scaledConstant);
+      if (walkCatalog) add(mapped.scaledConstant);
     }
   }
   // In a mixed legend (a data-backed mapping makes the whole scale interactive
