@@ -42,6 +42,56 @@ export interface CandidateBuildFacts {
   readonly x: number;
   readonly y: number;
 }
+
+/**
+ * Per-batch facts handed to the columnar datum seam. `primitiveIds` are the
+ * eligible (candidate-bearing) primitive indexes in candidate order;
+ * `semanticIds` are the datum-facing indexes (paths batches map through
+ * `semanticIndex`, matching `CandidateBuildFacts.primitiveIndex`; other kinds
+ * equal `primitiveIds`); `rowIds` carry the batch's `rowIndex` values with
+ * the `NO_ROW` sentinel where a primitive has no source row.
+ */
+export interface CandidateBatchFacts {
+  readonly batchIndex: number;
+  readonly layerIndex: number;
+  readonly panelIndex: number;
+  readonly primitiveIds: Uint32Array;
+  readonly semanticIds: Uint32Array;
+  readonly rowIds: Uint32Array;
+}
+
+/**
+ * One style value source for a whole batch, mirroring per-candidate
+ * resolution: a source `column` indexed by candidate position (with an
+ * optional `offset` into the column), a `constant` applied to every
+ * candidate, or `null` (all candidates read null).
+ */
+export type CandidateStyleColumn =
+  | { readonly kind: "column"; readonly values: ArrayLike<CellValue>; readonly offset?: number }
+  | { readonly kind: "constant"; readonly value: CellValue }
+  | null;
+
+/**
+ * Columnar counterpart of {@link CandidateDatum}: every member covers one
+ * batch's candidates in candidate order. A `null` member means "every
+ * candidate takes the default" (null value / series 0 / rank = series /
+ * sourceOrder = rowId ?? primitiveId / empty lineage / geometry default
+ * autoMode).
+ */
+export interface CandidateDatumColumns {
+  readonly xValue: ArrayLike<CellValue> | null;
+  readonly yValue: ArrayLike<CellValue> | null;
+  readonly sizeValue: CandidateStyleColumn;
+  readonly linewidthValue: CandidateStyleColumn;
+  readonly alphaValue: CandidateStyleColumn;
+  readonly shapeValue: CandidateStyleColumn;
+  readonly linetypeValue: CandidateStyleColumn;
+  readonly seriesId: ArrayLike<number> | null;
+  readonly seriesRank: ArrayLike<number> | null;
+  readonly sourceOrder: ArrayLike<number> | null;
+  readonly lineage: ArrayLike<number> | null;
+  readonly autoMode: ArrayLike<number> | null;
+}
 export interface CandidateStoreOptions {
   readonly epoch?: number;
   /** coord_flip maps semantic x to screen y and semantic y to screen x. */
@@ -61,6 +111,15 @@ export interface CandidateStoreOptions {
    */
   readonly uninspectableLayers?: ReadonlySet<number>;
   readonly datum?: (facts: CandidateBuildFacts) => CandidateDatum | undefined;
+  /**
+   * Columnar datum seam: consulted ONCE per batch (before any per-candidate
+   * work) and returns that batch's datum values as candidate-indexed columns,
+   * so dense source-backed layers never materialize per-candidate objects.
+   * A `null` (or `undefined`) return declines the batch, which then resolves
+   * through the per-candidate {@link CandidateStoreOptions.datum} callback.
+   * Observationally identical to resolving every candidate via `datum`.
+   */
+  readonly datumColumns?: (facts: CandidateBatchFacts) => CandidateDatumColumns | null;
 }
 export interface CandidateFacts extends CandidateBuildFacts {
   readonly id: number;
