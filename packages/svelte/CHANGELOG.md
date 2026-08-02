@@ -1,5 +1,73 @@
 # @ggsvelte/svelte
 
+## 0.25.0
+
+### Minor Changes
+
+- 0bc6748: # Add TidyTuesday teaching datasets; rewrite worst gallery examples
+
+  Migration: none — additive data exports and gallery example content only.
+
+  Bundle four politically neutral teaching tables under `@ggsvelte/svelte/data`
+  (`chocolateBars`, `coffeeRatings`, `beerProduction`, `fastfoodMenu`) from
+  TidyTuesday (CC0 curation; primary sources credited in NOTICE). Rewrite the
+  most egregious history-of-stats gallery examples to use them, with plain
+  capability-led titles and subtitles.
+
+- b6f6694: # Default tooltip content policy for high-n stacks
+
+  Migration: none — additive public surface only (`groupTotal` /
+  `groupMemberCount` on axis-group inspections; new
+  `INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE` diagnostic). Existing hosts
+  keep working; pin / custom content / `oninspect` still cover full listings.
+
+  Axis-group default hover selects top-k by absolute value (focused series
+  always included), shows a stack Total row, and an overflow line when members
+  are truncated. Pin still lists the full group in the scrollable panel.
+
+### Patch Changes
+
+- 085f9bf: # Assemble snapshots each layer once, not twice
+
+  Migration: none — same assembled PortableSpec and mutation isolation; one less
+  O(rows×cols) deep copy per layer with inline data on every assemble.
+
+  `assemblePortableSpec` already snapshots layers before folding non-mark
+  grammar children. `materializeAndNormalize` no longer re-snapshots them before
+  Date→ISO materialization.
+
+- a212fdd: # Align inspect tooltip Total and overflow with multi-layer groups
+
+  Migration: none — `groupTotal` / `groupMemberCount` on axis-mode inspection
+  snapshots still mean full-group unique series contributions; they now include
+  distinct series from every layer (not only the focus layer) while still
+  deduping multi-layer paints of the same source series (line+point, col+text).
+
+- 5530d29: # Drop repeated per-row work on render and interaction paths
+
+  Migration: none — same legend keys, pin rebind, a11y totals, mark labels, and identity epochs.
+
+  Hoists work that used to re-run over data-scaled collections: lineage-level legend visit keys, precomputed inspection batch roles, index-only keyed pin match, one a11y primitive scan when the table is open, unique mark-label fields closed over the model, and join-built data identity tokens.
+
+- b2e0a0c: # Memoize SSR plot model and strata for one server pass
+
+  Migration: none — same SSR markup; the server path no longer re-runs the
+  pipeline on every `model` / `strata` / `hasCanvas` getter read within a render.
+
+- Updated dependencies [d731a33]
+- Updated dependencies [36efe51]
+- Updated dependencies [7d92209]
+- Updated dependencies [8074811]
+- Updated dependencies [072640f]
+- Updated dependencies [120b5de]
+- Updated dependencies [1fbbf45]
+- Updated dependencies [d15954d]
+- Updated dependencies [7c748ec]
+- Updated dependencies [b6b8a61]
+- Updated dependencies [86c36ab]
+  - @ggsvelte/spec@0.25.0
+  - @ggsvelte/core@0.25.0
+
 ## 0.24.3
 
 ### Patch Changes
