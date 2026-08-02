@@ -2259,6 +2259,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-linerange:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
+    href: "/reference/geoms/linerange#examples",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-pointrange",
     kind: "page",
     title: "GeomPointrange",
@@ -2329,6 +2339,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-pointrange:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
+    href: "/reference/geoms/pointrange#examples",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-crossbar",
     kind: "page",
     title: "GeomCrossbar",
@@ -2397,6 +2417,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/crossbar#allowed-positions",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
+    href: "/reference/geoms/crossbar#examples",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-rect",
@@ -20768,6 +20798,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Contours of height on a grid"],
   },
   {
+    id: "example:crossbar:boxes",
+    kind: "example",
+    title: "Interval boxes with mid line",
+    summary:
+      "Three tall identity boxes with a mid horizontal line — crossbar's mark shape at index thumbnail size.",
+    href: "/examples/crossbar/boxes",
+    keywords: [
+      "Interval boxes with mid line",
+      "Statistical summaries",
+      "crossbar",
+      "identity",
+      "box",
+      "ymin",
+      "ymax",
+    ],
+    exact: ["Interval boxes with mid line"],
+  },
+  {
     id: "example:curve:connectors",
     kind: "example",
     title: "Paired points joined by a curve",
@@ -20858,6 +20906,24 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
     ],
     exact: ["One dot per measurement, stacked in bins"],
+  },
+  {
+    id: "example:errorbar:caps",
+    kind: "example",
+    title: "Capped error bars",
+    summary:
+      "Three tall identity intervals with end caps — the mark shape that reads at index thumbnail size.",
+    href: "/examples/errorbar/caps",
+    keywords: [
+      "Capped error bars",
+      "Statistical summaries",
+      "errorbar",
+      "identity",
+      "caps",
+      "ymin",
+      "ymax",
+    ],
+    exact: ["Capped error bars"],
   },
   {
     id: "example:errorbar:mean-se",
@@ -21210,6 +21276,24 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
     ],
     exact: ["Years inferred from raw four-digit strings"],
+  },
+  {
+    id: "example:linerange:stems",
+    kind: "example",
+    title: "Bare vertical stems",
+    summary:
+      "Three tall identity stems without end caps — linerange's mark shape at index thumbnail size.",
+    href: "/examples/linerange/stems",
+    keywords: [
+      "Bare vertical stems",
+      "Statistical summaries",
+      "linerange",
+      "identity",
+      "stem",
+      "ymin",
+      "ymax",
+    ],
+    exact: ["Bare vertical stems"],
   },
   {
     id: "example:map:choropleth",
@@ -21565,6 +21649,24 @@ export const DOCS_SEARCH_INDEX = [
       "chrome-free",
     ],
     exact: ["A sparkline without axes or grid"],
+  },
+  {
+    id: "example:pointrange:midpoints",
+    kind: "example",
+    title: "Stem plus mid point",
+    summary:
+      "Three tall identity stems with a large mid point — pointrange's mark shape at index thumbnail size.",
+    href: "/examples/pointrange/midpoints",
+    keywords: [
+      "Stem plus mid point",
+      "Statistical summaries",
+      "pointrange",
+      "identity",
+      "point",
+      "ymin",
+      "ymax",
+    ],
+    exact: ["Stem plus mid point"],
   },
   {
     id: "example:polygon:regions",
