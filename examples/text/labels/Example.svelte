@@ -4,8 +4,7 @@
     GeomText,
     GGPlot,
     Labs,
-    ScaleColorManual,
-    ThemeTufte,
+    ThemeMinimal,
   } from "@ggsvelte/svelte";
 
   import { langren1644 } from "./data.js";
@@ -17,18 +16,18 @@
   width={640}
   height={400}
 >
-  <ThemeTufte />
-  <ScaleColorManual
-    domain={["Astronomy", "Map"]}
-    values={["#205ea6", "#a02f6f"]}
-  />
+  <ThemeMinimal />
   <Labs
-    title="Text as the data mark"
-    subtitle="Each estimate is a name; the chart is a labelled strip of who made it"
+    title="Bare text labels on points"
+    subtitle="Each estimate is a name; labels draw exactly where they are placed"
     x="Estimated Toledo–Rome longitude (°)"
     y="Ordered by estimate"
-    color="Derived from"
   />
-  <GeomPoint size={3.5} aes={{ color: "source" }} />
-  <GeomText aes={{ label: "name" }} anchor="start" dx={7} size={10} />
+  <GeomPoint size={2.2} alpha={0.4} aes={{ color: { value: "#4a5568" } }} />
+  <GeomText
+    aes={{ label: "name", color: { value: "#1a202c" } }}
+    anchor="start"
+    dx={7}
+    size={12}
+  />
 </GGPlot>

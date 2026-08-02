@@ -1,6 +1,6 @@
 {
-  "title": "Named points with background boxes",
-  "description": "Boxed labels when names sit on top of other marks and must stay legible.",
+  "title": "Text with rounded background boxes",
+  "description": "Boxed labels when names need a rounded background so they stay legible over other marks.",
   "tags": ["label", "text", "point"],
   "docsSection": "Labels & text"
 }

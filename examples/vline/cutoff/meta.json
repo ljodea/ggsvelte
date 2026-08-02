@@ -1,6 +1,6 @@
 {
-  "title": "A vertical rule at a known index",
-  "description": "Vertical rules for cutoffs along a sequence or continuous x.",
+  "title": "One vertical cutoff",
+  "description": "Vertical rules for cutoffs along a sequence or continuous x across a panel.",
   "tags": ["vline", "rule", "annotation", "line", "theme"],
   "docsSection": "Annotations & rules"
 }

@@ -1,6 +1,6 @@
 {
-  "title": "Text as the data mark",
-  "description": "Text geoms when the label is the primary mark, not a decoration.",
+  "title": "Bare text labels on points",
+  "description": "Text geoms when the label is the primary mark, with no background box.",
   "tags": ["text", "point", "labels"],
   "docsSection": "Labels & text"
 }

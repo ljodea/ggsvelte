@@ -5,26 +5,29 @@ import { langren1644 } from "./data.js";
 
 export default defineExample(
   gg(langren1644, aes({ x: "longitude", y: "rank" }))
-    .geomPoint({ size: 3.5, aes: aes({ color: "source" }) })
+    // Thumbnail contract: boxes must read at 96px index size. Soft fill + dark
+    // stroke (not pure white) so GeomLabel is visually distinct from GeomText
+    // on the same layout.
+    .geomPoint({ size: 2.2, alpha: 0.4, aes: aes({ color: { value: "#4a5568" } }) })
     .geomLabel({
-      aes: aes({ label: "name", fill: "source" }),
+      aes: aes({
+        label: "name",
+        fill: { value: "#dbe4f0" },
+        color: { value: "#0f172a" },
+      }),
       anchor: "start",
       dx: 7,
-      size: 10,
-      padding: 3,
-      radius: 3,
+      size: 12,
+      padding: 5,
+      radius: 5,
+      linewidth: 1.8,
     })
-    .scaleColorManual({ domain: ["Astronomy", "Map"], values: ["#205ea6", "#a02f6f"] })
-    .scaleFillManual({ domain: ["Astronomy", "Map"], values: ["#e8f0fb", "#f8e8f0"] })
-    .theme("classic")
+    .theme("minimal")
     .labs({
-      title: "Named points with background boxes",
-      subtitle:
-        "Each estimate labelled with who made it; the box keeps text readable over the rule",
+      title: "Text with rounded background boxes",
+      subtitle: "Same labels as GeomText, with a measured box behind each name",
       x: "Estimated Toledo–Rome longitude (°)",
       y: "Ordered by estimate",
-      color: "Derived from",
-      fill: "",
     })
     .spec(),
 );

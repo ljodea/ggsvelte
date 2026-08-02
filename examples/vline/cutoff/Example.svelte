@@ -1,11 +1,10 @@
 <script lang="ts">
   import {
-    GeomLine,
     GeomPoint,
     GeomVline,
     GGPlot,
     Labs,
-    ThemeTufte,
+    ThemeMinimal,
   } from "@ggsvelte/svelte";
 
   import { earthDensity } from "./data.js";
@@ -17,14 +16,17 @@
   width={640}
   height={400}
 >
-  <ThemeTufte />
+  <ThemeMinimal />
   <Labs
-    title="A vertical rule at a known index"
+    title="One vertical cutoff"
     subtitle="Determinations in reported order; the rule marks the trial after which the wire changed"
     x="Determination"
     y="Density of the earth (water = 1)"
   />
-  <GeomLine linewidth={1.4} />
-  <GeomPoint size={2.5} />
-  <GeomVline xintercept={6.5} aes={{ color: { value: "#d4615c" } }} />
+  <GeomPoint size={2.2} alpha={0.55} />
+  <GeomVline
+    xintercept={6.5}
+    linewidth={2.6}
+    aes={{ color: { value: "#d4615c" } }}
+  />
 </GGPlot>
