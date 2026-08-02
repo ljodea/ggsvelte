@@ -43,12 +43,13 @@ Results: `results/bundles.json`, `results/browser.json`.
 1. **Apples and oranges by design.** uPlot is a lean canvas time-series painter with almost no grammar. ggsvelte runs a ggplot-like pipeline (scales, stats hooks, guides, candidates). Beating uPlot on raw line paint is a long game; the matrix shows the gap honestly.
 2. **ggsvelte-canvas harness draws mark strata only** (no axis/legend SVG chrome). That isolates mark cost; production `GGPlot` still composites SVG chrome.
 3. **ggsvelte-svg** is `renderToSVGString` innerHTML — full chart including axes.
-4. **`replace` is a full remount**, not in-place `setData`. Streaming / partial update is intentionally out of scope until a second metric lands (LightningChart's streaming score).
-5. **No interaction (mousemove) or max-capacity sweep yet.** uPlot's table and LC's capacity/stream metrics are the next expansion targets.
-6. **SveltePlot / LayerCake** remain bundle-only until component fixtures mount in Playwright.
-7. Compare **within one machine and one run**. Absolute ms are host-sensitive (same as internal budgets).
-8. **Paint-inclusive timing** waits two animation frames after mount, so small cases sit near a ~1–2 frame floor. Use denser cases (`line-3x10k`, `scatter-color-10k`, full matrix) to rank libraries.
-9. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
+4. **`replace` is a full remount**, not in-place `setData`. The browser harness therefore **does not re-sample** replace (it mirrors mount stats) until a real in-place update metric lands (LightningChart's streaming score).
+5. **`area-multiseries` is overlaid (identity), not stacked.** ggsvelte `geomArea` defaults to `stack`; adapters pass `position: "identity"` so ggsvelte matches D3/Chart.js/ECharts/uPlot overlays. `bars-stacked` remains the stack fairness cell.
+6. **No interaction (mousemove) or max-capacity sweep yet.** uPlot's table and LC's capacity/stream metrics are the next expansion targets.
+7. **SveltePlot / LayerCake** remain bundle-only until component fixtures mount in Playwright.
+8. Compare **within one machine and one run**. Absolute ms are host-sensitive (same as internal budgets).
+9. **Paint-inclusive timing** waits two animation frames after mount, so small cases sit near a ~1–2 frame floor. Use denser cases (`line-3x10k`, `scatter-color-10k`, full matrix) to rank libraries.
+10. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
 
 ## Scenario catalog
 
