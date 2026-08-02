@@ -21,11 +21,10 @@
     onToggle: () => void;
   } = $props();
 
-  // Closed: O(P) distinct-index count only (aria-label). Open: full sort +
-  // row materialisation for the capped table. Avoids O(R log R) + model.row
-  // work on every model update while the table stays closed.
-  const total = $derived(a11yMarkCount(batches));
+  // Closed: O(P) distinct-index count only (aria-label). Open: one full table
+  // build — reuse `table.total` so the primitive scan is not paid twice (#1329).
   const table = $derived(open ? a11yRows(model, batches) : null);
+  const total = $derived(table === null ? a11yMarkCount(batches) : table.total);
   const ariaLabel = $derived(
     `${sceneLabelText} — ${String(total)} canvas-rendered marks. Canvas marks are not individually focusable; use the data table.`,
   );

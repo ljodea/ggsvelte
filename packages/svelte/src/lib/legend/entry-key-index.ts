@@ -72,7 +72,9 @@ export type LegendKeyIndexAdapter = {
  *   channel (scaled constant aes) and match the constant against entries.
  * - Row membership = lineage row indexes (insertion order) then candidate
  *   rowIndex if not already present.
- * - Visit key is scale:layerIndex:field|const:rowIndex (dedupe repeated candidates).
+ * - Visit key is scale:layerIndex:aesthetic:field|const:lineageId (one expand
+ *   of the shared bag per lineage; candidate-local rowIndex outside the bag is
+ *   a separate one-shot). Drops per-row visited probes across smooth grids.
  * - Skip null rows (field path) / null keys; constant path only needs keys.
  * - Match entry values via pre-built token→index maps (NaN, Date, -0/0);
  *   O(E) prep + O(1) per row, not findIndex.
@@ -193,35 +195,12 @@ export function buildLegendEntryKeyIndex(
     return byChannel.get(scale);
   };
 
-  const visited = new Set<string>();
-  const indexAestheticRows = (input: {
-    sceneLegend: Extract<SceneLegend, { type: "discrete" }>;
-    candidate: LegendKeyCandidate;
-    aesthetic: string;
-    rowIndexes: () => Iterable<number>;
-  }): void => {
-    const { sceneLegend, candidate, aesthetic, rowIndexes } = input;
-    const field = fieldFor(candidate.layerIndex, aesthetic);
-    const scaledConstant =
-      field === undefined
-        ? adapter.layerScaledConstant?.(candidate.layerIndex, aesthetic)
-        : undefined;
-    if (field === undefined && scaledConstant === undefined) return;
-    const entryByToken = entryLookupByLegend.get(sceneLegend)!;
-    for (const rowIndex of rowIndexes()) {
-      const visitField = field ?? `const:${String(scaledConstant)}`;
-      const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${aesthetic}:${visitField}:${String(rowIndex)}`;
-      if (visited.has(visit)) continue;
-      visited.add(visit);
-      const key = adapter.semanticKey(rowIndex);
-      if (key === null || key === undefined) continue;
-      const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
-      if (matched.skip) continue;
-      const entryIndex = entryByToken.get(legendValueToken(matched.value));
-      if (entryIndex === undefined) continue;
-      index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
-    }
-  };
+  // Visit key is scale:layer:aesthetic:field|const:lineageId — one expand of
+  // the shared bag per lineage (smooth eval grids ~80 vertices), not per row
+  // per candidate (#1329). Candidate-local rowIndex outside the bag is a
+  // separate one-shot visit.
+  const visitedLineages = new Set<string>();
+  const visitedExtraRows = new Set<string>();
 
   // Lineage membership once per lineage id (smooth shares one bag across
   // the eval grid). Candidates may still append their own rowIndex.
@@ -235,31 +214,59 @@ export function buildLegendEntryKeyIndex(
     return rows;
   };
 
+  const indexRow = (input: {
+    sceneLegend: Extract<SceneLegend, { type: "discrete" }>;
+    field: string | undefined;
+    scaledConstant: unknown;
+    rowIndex: number;
+  }): void => {
+    const { sceneLegend, field, scaledConstant, rowIndex } = input;
+    const key = adapter.semanticKey(rowIndex);
+    if (key === null || key === undefined) return;
+    const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
+    if (matched.skip) return;
+    const entryIndex = entryLookupByLegend.get(sceneLegend)!.get(legendValueToken(matched.value));
+    if (entryIndex === undefined) return;
+    index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
+  };
+
+  const indexAesthetic = (input: {
+    sceneLegend: Extract<SceneLegend, { type: "discrete" }>;
+    candidate: LegendKeyCandidate;
+    aesthetic: string;
+    sharedRows: () => Set<number>;
+  }): void => {
+    const { sceneLegend, candidate, aesthetic, sharedRows } = input;
+    const field = fieldFor(candidate.layerIndex, aesthetic);
+    const scaledConstant =
+      field === undefined
+        ? adapter.layerScaledConstant?.(candidate.layerIndex, aesthetic)
+        : undefined;
+    if (field === undefined && scaledConstant === undefined) return;
+    const visitField = field ?? `const:${String(scaledConstant)}`;
+    const lineageVisit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${aesthetic}:${visitField}:${String(candidate.lineage)}`;
+    if (!visitedLineages.has(lineageVisit)) {
+      visitedLineages.add(lineageVisit);
+      for (const rowIndex of sharedRows())
+        indexRow({ sceneLegend, field, scaledConstant, rowIndex });
+    }
+    if (candidate.rowIndex === null || sharedRows().has(candidate.rowIndex)) return;
+    const extraVisit = `${lineageVisit}:r${String(candidate.rowIndex)}`;
+    if (visitedExtraRows.has(extraVisit)) return;
+    visitedExtraRows.add(extraVisit);
+    indexRow({ sceneLegend, field, scaledConstant, rowIndex: candidate.rowIndex });
+  };
+
   for (const candidate of adapter.candidates()) {
-    let sourceRows: Set<number> | null = null;
-    const rowsForCandidate = (): Set<number> => {
-      if (sourceRows === null) {
-        const shared = lineageRows(candidate.lineage);
-        if (candidate.rowIndex !== null && !shared.has(candidate.rowIndex)) {
-          // Copy only when we must attach a candidate-local row not already
-          // in the shared membership (identity marks). Shared smooth bags
-          // stay one Set for every eval-grid mark.
-          sourceRows = new Set([...shared, candidate.rowIndex]);
-        } else {
-          sourceRows = shared;
-        }
-      }
-      return sourceRows;
+    let shared: Set<number> | null = null;
+    const sharedRows = (): Set<number> => {
+      shared ??= lineageRows(candidate.lineage);
+      return shared;
     };
 
     for (const sceneLegend of discreteLegends) {
       for (const aesthetic of sceneLegend.aesthetics ?? [sceneLegend.scale])
-        indexAestheticRows({
-          sceneLegend,
-          candidate,
-          aesthetic,
-          rowIndexes: rowsForCandidate,
-        });
+        indexAesthetic({ sceneLegend, candidate, aesthetic, sharedRows });
     }
   }
   return new Map(

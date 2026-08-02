@@ -508,6 +508,8 @@ describe("buildLegendEntryKeyIndex", () => {
 
   it("expands a shared lineage once across many candidates (smooth eval grid)", () => {
     let lineageKeysCalls = 0;
+    let rowCalls = 0;
+    let semanticKeyCalls = 0;
     const sharedRows = Array.from({ length: 40 }, (_, i) => i);
     const index = buildLegendEntryKeyIndex({
       legends: [discreteFill],
@@ -518,12 +520,46 @@ describe("buildLegendEntryKeyIndex", () => {
         lineageKeysCalls += 1;
         return lineageId === 7 ? sharedRows : [];
       },
-      row: (rowIndex) => ({ channel: rowIndex % 2 === 0 ? "web" : "store" }),
-      semanticKey: (rowIndex) => `k${String(rowIndex)}`,
+      row: (rowIndex) => {
+        rowCalls += 1;
+        return { channel: rowIndex % 2 === 0 ? "web" : "store" };
+      },
+      semanticKey: (rowIndex) => {
+        semanticKeyCalls += 1;
+        return `k${String(rowIndex)}`;
+      },
     });
     expect(lineageKeysCalls).toBe(1);
+    // Lineage-level visit (#1329): one expand for the shared bag, not N×R
+    // probes across the 12 smooth eval-grid candidates.
+    expect(rowCalls).toBe(40);
+    expect(semanticKeyCalls).toBe(40);
     expect(index.get("fill:0")?.length).toBe(20);
     expect(index.get("fill:1")?.length).toBe(20);
+  });
+
+  it("appends a candidate-local row after a lineage already expanded by peers", () => {
+    // First candidates share lineage 1 (rows 0,1); a later identity candidate
+    // adds rowIndex 9 not in the lineage bag — must still index that row once.
+    const index = buildLegendEntryKeyIndex(
+      adapter({
+        candidates: [
+          { layerIndex: 0, lineage: 1, rowIndex: null },
+          { layerIndex: 0, lineage: 1, rowIndex: null },
+          { layerIndex: 0, lineage: 1, rowIndex: 9 },
+        ],
+        fields: { 0: [{ channel: "fill", field: "channel" }] },
+        lineages: { 1: [0, 1] },
+        rows: {
+          0: { channel: "web" },
+          1: { channel: "store" },
+          9: { channel: "web" },
+        },
+        keys: { 0: "a", 1: "b", 9: "extra" },
+      }),
+    );
+    expect(index.get("fill:0")).toEqual(["a", "extra"]);
+    expect(index.get("fill:1")).toEqual(["b"]);
   });
 
   it("does not call lineageKeys when no discrete legend applies to the candidate", () => {

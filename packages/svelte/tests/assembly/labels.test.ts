@@ -14,10 +14,12 @@ import {
   countLabel,
   datumLabel,
   inspectionLiveText,
+  labelFromFields,
   legendFocusAnnouncement,
   markLabel,
   resolveInteractionLiveText,
   selectionAnnouncement,
+  uniqueMappedFields,
   zoomAnnouncement,
 } from "../../src/lib/assembly/labels.js";
 
@@ -30,6 +32,25 @@ function model(opts: {
     row: (index: number) => opts.rows?.[index] ?? null,
   });
 }
+
+describe("uniqueMappedFields / labelFromFields", () => {
+  it("dedupes field names in first-seen order across layers", () => {
+    const m = model({
+      layerFields: [
+        [{ field: "x" }, { field: "y" }],
+        [{ field: "y" }, { field: "color" }],
+      ],
+    });
+    expect(uniqueMappedFields(m)).toEqual(["x", "y", "color"]);
+  });
+
+  it("formats a closed-over field list without re-walking layerFields", () => {
+    expect(labelFromFields(["x", "color"], { x: 1, color: "red" }, "fallback")).toBe(
+      "x 1, color red",
+    );
+    expect(labelFromFields([], { x: 1 }, "data point 1")).toBe("data point 1");
+  });
+});
 
 describe("markLabel", () => {
   it("falls back when model or row is missing", () => {

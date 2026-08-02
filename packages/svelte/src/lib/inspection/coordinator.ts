@@ -78,19 +78,40 @@ function rowCellPayload(row: Record<string, CellValue>): string {
   return parts.join(",");
 }
 
-/** Stable role within one layer's batches of the same geometry kind. Absolute
- * scene batch indices can shift when unrelated layers change, while this role
- * still distinguishes composite pieces such as a smooth ribbon/line or a
- * boxplot's whisker/median segments. */
-function candidateBatchRole(model: RenderModel, candidate: CandidateFacts): string {
-  let ordinal = 0;
-  for (let index = 0; index <= candidate.batchIndex; index++) {
-    const batch = model.scene.batches[index];
-    if (batch?.layerIndex !== candidate.layerIndex || batch.kind !== candidate.kind) continue;
-    if (index === candidate.batchIndex) return `${candidate.kind}:${ordinal}`;
-    ordinal++;
+/**
+ * Per-batch role token within one layer's batches of the same geometry kind.
+ * Absolute scene batch indices can shift when unrelated layers change; the
+ * role still distinguishes composite pieces (smooth ribbon/line, boxplot
+ * whisker/median). Built once per model — O(B) prep, O(1) lookup (#1329).
+ */
+function buildBatchRoles(model: RenderModel): readonly string[] {
+  const batches = model.scene.batches;
+  const roles: string[] = [];
+  const ordinalByLayerKind = new Map<string, number>();
+  for (let index = 0; index < batches.length; index++) {
+    const batch = batches[index]!;
+    const layerKind = `${String(batch.layerIndex)}\0${batch.kind}`;
+    const ordinal = ordinalByLayerKind.get(layerKind) ?? 0;
+    roles.push(`${batch.kind}:${ordinal}`);
+    ordinalByLayerKind.set(layerKind, ordinal + 1);
   }
-  return `${candidate.kind}:missing`;
+  return roles;
+}
+
+/** O(1) role for a candidate against a precomputed per-model role table. */
+function candidateBatchRole(
+  model: RenderModel,
+  candidate: CandidateFacts,
+  roles: readonly string[],
+): string {
+  const batch = model.scene.batches[candidate.batchIndex];
+  if (
+    batch === undefined ||
+    batch.layerIndex !== candidate.layerIndex ||
+    batch.kind !== candidate.kind
+  )
+    return `${candidate.kind}:missing`;
+  return roles[candidate.batchIndex] ?? `${candidate.kind}:missing`;
 }
 
 /**
@@ -122,6 +143,15 @@ export function createInspectionCoordinator<
   let lastSemanticFingerprint: string | null = null;
   let lastPresentationIdentity: string | null = null;
   let lastSlot: "transient" | "pinned" | null = null;
+  /** Last model whose batch-role table is cached (identity compare). */
+  let batchRoleModel: RenderModel | null = null;
+  let batchRoles: readonly string[] = [];
+  const rolesFor = (model: RenderModel): readonly string[] => {
+    if (batchRoleModel === model) return batchRoles;
+    batchRoles = buildBatchRoles(model);
+    batchRoleModel = model;
+    return batchRoles;
+  };
   const symbolIds = new Map<symbol, number>();
   const epochIds = new Map<symbol, number>();
   const epochToken = (value: PropertyKey): string => {
@@ -223,7 +253,7 @@ export function createInspectionCoordinator<
       seedKey: focusKey,
       seedRow: input.seed.rowIndex,
       seedKind: input.seed.kind,
-      seedBatchRole: candidateBatchRole(input.model, input.seed),
+      seedBatchRole: candidateBatchRole(input.model, input.seed, rolesFor(input.model)),
       seedPrimitiveIndex: input.seed.primitiveIndex,
       seedLogicalIdentity: `${axisToken(input.seed.xToken)}|${axisToken(input.seed.yToken)}|${input.model.lineage.keys(input.seed.lineage).join(",")}`,
       layerIndex: input.seed.layerIndex,
@@ -239,12 +269,17 @@ export function createInspectionCoordinator<
   };
 
   /** Keyless pin match: cheap filters then O(L) logical identity (#229). */
-  const keylessPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
+  const keylessPinMatch = (
+    model: RenderModel,
+    prior: Slot,
+    candidate: CandidateFacts,
+    roles: readonly string[],
+  ): boolean => {
     if (candidate.layerIndex !== prior.layerIndex) return false;
     if (candidate.rowIndex !== prior.seedRow) return false;
     if (candidate.kind !== prior.seedKind) return false;
     if (candidate.primitiveIndex !== prior.seedPrimitiveIndex) return false;
-    if (candidateBatchRole(model, candidate) !== prior.seedBatchRole) return false;
+    if (candidateBatchRole(model, candidate, roles) !== prior.seedBatchRole) return false;
     const logicalIdentity = `${axisToken(candidate.xToken)}|${axisToken(candidate.yToken)}|${model.lineage.keys(candidate.lineage).join(",")}`;
     return logicalIdentity === prior.seedLogicalIdentity;
   };
@@ -252,12 +287,12 @@ export function createInspectionCoordinator<
   /**
    * Keyed pin match: layer + non-null row whose key equals the pinned key.
    * Key first — `model.row` allocates a full Record (O(F)). Identity-change
-   * full-scans must not pay that for every candidate in the layer (#1318).
+   * full-scans must not pay that for every candidate in the layer (#1318 /
+   * #1329). Live-row gate stays: key bag can outlive a dropped source index.
    */
   const keyedPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
     if (candidate.layerIndex !== prior.layerIndex || candidate.rowIndex === null) return false;
     if (keyAt(candidate.rowIndex) !== prior.seedKey) return false;
-    // Live-row gate stays: key bag can outlive a dropped source index.
     return model.row(candidate.rowIndex) !== null;
   };
 
@@ -267,11 +302,16 @@ export function createInspectionCoordinator<
    * is not always pure layout — layer-prop swaps can keep the identity token
    * while changing primitives that reuse an id (Codex #272 P2).
    */
-  const keyedPinRoleMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean =>
+  const keyedPinRoleMatch = (
+    model: RenderModel,
+    prior: Slot,
+    candidate: CandidateFacts,
+    roles: readonly string[],
+  ): boolean =>
     keyedPinMatch(model, prior, candidate) &&
     candidate.kind === prior.seedKind &&
     candidate.primitiveIndex === prior.seedPrimitiveIndex &&
-    candidateBatchRole(model, candidate) === prior.seedBatchRole;
+    candidateBatchRole(model, candidate, roles) === prior.seedBatchRole;
 
   const reconcilePinned = (
     input: Readonly<{
@@ -285,6 +325,7 @@ export function createInspectionCoordinator<
     const prior = pinned;
     if (prior === null) return null;
     let seed: CandidateFacts | null = null;
+    const roles = rolesFor(input.model);
     // Same identityEpoch: O(1) seedId revalidation when id + role still match.
     // Keyed path requires kind/batch/primitive (not only layer+key) so geom
     // swaps that reuse seedId cannot pin the wrong primitive. Fall through to
@@ -294,8 +335,8 @@ export function createInspectionCoordinator<
       const preferred = input.model.candidates.candidate(prior.seedId);
       if (preferred !== null) {
         if (prior.seedKey === null) {
-          if (keylessPinMatch(input.model, prior, preferred)) seed = preferred;
-        } else if (keyedPinRoleMatch(input.model, prior, preferred)) {
+          if (keylessPinMatch(input.model, prior, preferred, roles)) seed = preferred;
+        } else if (keyedPinRoleMatch(input.model, prior, preferred, roles)) {
           seed = preferred;
         }
       }
@@ -314,7 +355,7 @@ export function createInspectionCoordinator<
       for (let id = 0; id < input.model.candidates.size; id++) {
         const candidate = input.model.candidates.candidate(id);
         if (candidate === null) continue;
-        if (!keylessPinMatch(input.model, prior, candidate)) continue;
+        if (!keylessPinMatch(input.model, prior, candidate, roles)) continue;
         matches.push(candidate);
       }
       seed = matches.length === 1 ? matches[0]! : null;
@@ -333,7 +374,7 @@ export function createInspectionCoordinator<
           const sameRole = matches.filter(
             (candidate) =>
               candidate.kind === prior.seedKind &&
-              candidateBatchRole(input.model, candidate) === prior.seedBatchRole &&
+              candidateBatchRole(input.model, candidate, roles) === prior.seedBatchRole &&
               candidate.primitiveIndex === prior.seedPrimitiveIndex,
           );
           seed = sameRole.length === 1 ? sameRole[0]! : null;
@@ -379,6 +420,8 @@ export function createInspectionCoordinator<
       lastSemanticFingerprint = null;
       lastPresentationIdentity = null;
       lastSlot = null;
+      batchRoleModel = null;
+      batchRoles = [];
       symbolIds.clear();
       epochIds.clear();
     },

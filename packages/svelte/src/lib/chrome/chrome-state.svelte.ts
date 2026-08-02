@@ -29,7 +29,12 @@ import {
   zoomSupportsChannel,
 } from "../interaction/capability.js";
 import type { ContinuousZoomDomains } from "../scene/geometry.js";
-import { datumLabel as datumLabelFor, markLabel as markLabelFor } from "../assembly/labels.js";
+import {
+  datumLabel as datumLabelFor,
+  labelFromFields,
+  markLabel as markLabelFor,
+  uniqueMappedFields,
+} from "../assembly/labels.js";
 import { isContainerWidthProp, plotRootInlineStyle } from "../assembly/layout.js";
 import { themeTokensToCss } from "./theme-css.js";
 
@@ -208,10 +213,18 @@ export function createPlotChromeState(deps: PlotChromeStateDeps): PlotChromeStat
     }),
   );
 
-  // Stable SceneView callback identity when model is unchanged.
+  // Stable SceneView callback identity when model is unchanged. Unique field
+  // list is built once per model so per-mark labels do not re-flatten
+  // layerFields (#1329).
   const markLabel = $derived.by(() => {
     const model = deps.model();
-    return (row: number) => markLabelFor(model, row);
+    if (model === null) return (row: number) => markLabelFor(null, row);
+    const fields = uniqueMappedFields(model);
+    return (row: number) => {
+      const values = model.row(row);
+      if (values === null) return `data point ${row + 1}`;
+      return labelFromFields(fields, values, `data point ${row + 1}`);
+    };
   });
 
   function datumLabel(values: Record<string, CellValue> | null): string {
