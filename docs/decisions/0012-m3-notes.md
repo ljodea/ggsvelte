@@ -101,6 +101,12 @@ authoring), links to schema + llms-full. A byte-identical copy ships inside
 the `@ggsvelte/svelte` package (`files: ["dist","bin","skills"]`),
 `scripts/skill-sync.test.ts` enforces sync.
 
+> **Location update (decision 0023, 2026-08-02):** the skill is no longer at
+> `skills/ggsvelte/` or inside `@ggsvelte/svelte`. It lives at `packages/skill/`
+> and publishes as [`@ggsvelte/skill`](https://www.npmjs.com/package/@ggsvelte/skill).
+> The dual-copy + skill-sync test above is historical; see 0023 for the current
+> packaging.
+
 ## Held-out eval harness (tests/evals)
 
 44 fresh cases (36 chart / 8 adversarial: 2 unsupported-refusal, 3
