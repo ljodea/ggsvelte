@@ -43,10 +43,10 @@ export interface ContourStatResult {
 
 type Pt = { x: number; y: number };
 
-function uniqueSorted(values: Float64Array, finiteMask: boolean[]): number[] {
+function uniqueSorted(values: Float64Array): number[] {
+  // Number.isFinite already drops non-finite samples; no separate mask needed.
   const set = new Set<number>();
   for (let i = 0; i < values.length; i++) {
-    if (finiteMask[i] !== true) continue;
     const v = values[i]!;
     if (Number.isFinite(v)) set.add(v);
   }
@@ -356,12 +356,11 @@ export function statContour(input: ContourStatInput): ContourStatResult {
 
   for (const g of groupOrder) {
     const rows = groupRows.get(g)!;
-    const mask = rows.map(() => true);
     const gx = Float64Array.from(rows, (r) => x[r]!);
     const gy = Float64Array.from(rows, (r) => y[r]!);
     const gz = Float64Array.from(rows, (r) => z[r]!);
-    const xs = uniqueSorted(gx, mask);
-    const ys = uniqueSorted(gy, mask);
+    const xs = uniqueSorted(gx);
+    const ys = uniqueSorted(gy);
     if (xs.length < 2 || ys.length < 2) {
       droppedGroups++;
       continue;

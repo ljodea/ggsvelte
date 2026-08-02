@@ -128,14 +128,30 @@ export function facetValues(
       if (!numericByKey.has(key)) numericByKey.set(key, semantic[index]!);
     }
   }
-  values.sort((a, b) => {
-    if (a === null) return b === null ? 0 : 1;
-    if (b === null) return -1;
-    if (numeric) return numericByKey.get(encodeKey(a))! - numericByKey.get(encodeKey(b))!;
-    const ka = bandKey(a);
-    const kb = bandKey(b);
-    if (ka === kb) return encodeKey(a).localeCompare(encodeKey(b), "en");
-    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  // Decorate-sort-undecorate: precompute all three comparator keys once so
+  // the O(k log k) sort never re-encodes or re-bandKeys a level (#1312).
+  type Decorated = {
+    value: CellValue;
+    enc: string;
+    band: string;
+    num: number;
+  };
+  const decorated: Decorated[] = values.map((value) => {
+    const enc = encodeKey(value);
+    return {
+      value,
+      enc,
+      // bandKey is only used for non-null nominal tiers; nulls sort last.
+      band: value === null ? "" : bandKey(value),
+      num: numeric ? (numericByKey.get(enc) ?? NaN) : 0,
+    };
   });
-  return values;
+  decorated.sort((a, b) => {
+    if (a.value === null) return b.value === null ? 0 : 1;
+    if (b.value === null) return -1;
+    if (numeric) return a.num - b.num;
+    if (a.band === b.band) return a.enc.localeCompare(b.enc, "en");
+    return a.band < b.band ? -1 : a.band > b.band ? 1 : 0;
+  });
+  return decorated.map((d) => d.value);
 }

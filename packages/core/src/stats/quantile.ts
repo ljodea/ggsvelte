@@ -240,7 +240,8 @@ export function statQuantile(input: StatQuantileInput): StatQuantileResult {
   const outG: number[] = [];
   const outQ: number[] = [];
   const carriedOut: Record<string, CellValue[]> = {};
-  for (const key of Object.keys(carried)) carriedOut[key] = [];
+  const carriedKeys = Object.keys(carried);
+  for (const key of carriedKeys) carriedOut[key] = [];
 
   let seriesId = 0;
   let droppedGroups = 0;
@@ -279,7 +280,7 @@ export function statQuantile(input: StatQuantileInput): StatQuantileResult {
         outY.push(fit.intercept + fit.slope * x0);
         outG.push(seriesId);
         outQ.push(tau);
-        for (const key of Object.keys(carriedOut)) {
+        for (const key of carriedKeys) {
           carriedOut[key]!.push(carried[key]![rep]!);
         }
       }

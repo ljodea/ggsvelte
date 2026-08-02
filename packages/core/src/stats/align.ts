@@ -117,7 +117,8 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
   const outG: number[] = [];
   const outRow: number[] = [];
   const carriedOut: Record<string, CellValue[]> = {};
-  for (const key of Object.keys(carried)) carriedOut[key] = [];
+  const carriedKeys = Object.keys(carried);
+  for (const key of carriedKeys) carriedOut[key] = [];
 
   const groupIds = [...byGroup.keys()].toSorted((a, b) => a - b);
   for (const g of groupIds) {
@@ -152,7 +153,7 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
       outY.push(yq);
       outG.push(g);
       outRow.push(cursor < n && xs[cursor] === xq ? series.rows[cursor]! : -1);
-      for (const key of Object.keys(carriedOut)) {
+      for (const key of carriedKeys) {
         carriedOut[key]!.push(carried[key]![rep]!);
       }
     }

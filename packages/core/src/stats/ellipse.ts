@@ -180,7 +180,8 @@ export function statEllipse(input: StatEllipseInput): StatEllipseResult {
   const outY: number[] = [];
   const outG: number[] = [];
   const carriedOut: Record<string, import("../table.js").CellValue[]> = {};
-  for (const key of Object.keys(carried)) carriedOut[key] = [];
+  const carriedKeys = Object.keys(carried);
+  for (const key of carriedKeys) carriedOut[key] = [];
 
   let droppedGroups = 0;
   const groupIds = [...byGroup.keys()].toSorted((a, b) => a - b);
@@ -200,7 +201,7 @@ export function statEllipse(input: StatEllipseInput): StatEllipseResult {
       outX.push(ring.x[i]!);
       outY.push(ring.y[i]!);
       outG.push(g);
-      for (const key of Object.keys(carriedOut)) {
+      for (const key of carriedKeys) {
         carriedOut[key]!.push(carried[key]![rep]!);
       }
     }
