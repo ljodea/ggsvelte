@@ -12587,7 +12587,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/facet/ordered-side-strips",
     title: "Facets with ordered side strips — ggsvelte gallery",
-    description: "Facet strips ordered to match the natural sequence of the experiment.",
+    description: "Facet strips ordered to match the sample order of the experiment.",
     canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,

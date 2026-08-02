@@ -168,7 +168,7 @@ export const GALLERY_PREVIEWS = [
     id: "facet/ordered-side-strips",
     filename: "facet-ordered-side-strips-light.png",
     path: "/previews/facet-ordered-side-strips-light.png",
-    sha256: "63e68210d360a12517862162522a54f360c4e267135eb54ca7a020c09e566be0",
+    sha256: "3f36a73a8162f736fa32faf648bed73401efdecc9733f84c23c8f1a316e17e87",
   },
   {
     id: "facet/wrap",

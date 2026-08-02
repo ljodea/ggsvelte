@@ -20944,7 +20944,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:facet:ordered-side-strips",
     kind: "example",
     title: "Facets with ordered side strips",
-    summary: "Facet strips ordered to match the natural sequence of the experiment.",
+    summary: "Facet strips ordered to match the sample order of the experiment.",
     href: "/examples/facet/ordered-side-strips",
     keywords: [
       "Facets with ordered side strips",

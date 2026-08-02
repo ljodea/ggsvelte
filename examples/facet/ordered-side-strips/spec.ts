@@ -22,7 +22,7 @@ export default defineExample(
     .theme("light")
     .labs({
       title: "Facets with ordered side strips",
-      subtitle: "Yeast counts under a microscope, one panel per dilution",
+      subtitle: "Yeast counts under a microscope, one panel per sample (A–D)",
       x: "Cells in a square",
       y: "Squares",
     })

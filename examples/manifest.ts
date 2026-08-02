@@ -307,7 +307,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "facet",
     name: "ordered-side-strips",
     title: "Facets with ordered side strips",
-    description: "Facet strips ordered to match the natural sequence of the experiment.",
+    description: "Facet strips ordered to match the sample order of the experiment.",
     tags: ["facet", "order", "labels", "strip", "wrap", "col"],
     docsSection: "Facets",
     hasData: true,
