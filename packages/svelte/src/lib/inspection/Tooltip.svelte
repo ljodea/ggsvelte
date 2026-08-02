@@ -8,10 +8,12 @@
     collapseIdenticalDisplayMembers,
     fieldsForDefaultTooltip,
     formatTooltipCell,
+    selectHoverDisplayMembers,
     tooltipFieldLabel,
     type TooltipAxisFormatters,
     type TooltipFieldLabs,
   } from "./display-members.js";
+  import { TRANSIENT_MEMBER_LIMIT } from "./resolver.js";
   import { shouldShowTooltipPinHint } from "./tooltip-chrome.js";
 
   const {
@@ -133,10 +135,37 @@
     ),
   );
 
+  // Transient hover: top-k by value (focus force-included). Pin lists all
+  // inside the scrollable panel (#1274 / #1269).
   const shownMembers = $derived(
     inspection.state === "transient"
-      ? displayMembers.slice(0, 8)
+      ? selectHoverDisplayMembers(displayMembers, inspection.focus, {
+          mode: inspection.mode,
+          limit: TRANSIENT_MEMBER_LIMIT,
+        })
       : displayMembers,
+  );
+
+  // Prefer the full axis-group size when present (transient snapshots are
+  // already capped upstream, so displayMembers.length alone is always ≤8).
+  const overflowCount = $derived(
+    inspection.state === "transient"
+      ? Math.max(
+          0,
+          (inspection.mode === "x" || inspection.mode === "y"
+            ? inspection.groupMemberCount
+            : displayMembers.length) - shownMembers.length,
+        )
+      : 0,
+  );
+
+  const stackTotal = $derived(
+    inspection.mode === "x" || inspection.mode === "y"
+      ? inspection.groupTotal
+      : null,
+  );
+  const showStackTotal = $derived(
+    stackTotal !== null && displayMembers.length > 1,
   );
 </script>
 
@@ -185,15 +214,21 @@
           {/each}
         </dl>
       {/each}
+      {#if showStackTotal && stackTotal !== null}
+        <dl class="gg-tooltip-total">
+          <dt>Total</dt>
+          <dd>{formatTooltipCell(stackTotal)}</dd>
+        </dl>
+      {/if}
     </div>
-    {#if inspection.state === "transient" && displayMembers.length > 8}
+    {#if overflowCount > 0}
       <!-- Overflow is a data-completeness signal; keep it even when the pin
            affordance is silent for flat chrome (#1069 / Devin). -->
       <p class="gg-tooltip-more">
         {#if showPinHint}
-          +{displayMembers.length - 8} more · pin to inspect all
+          +{overflowCount} more · pin to inspect all
         {:else}
-          +{displayMembers.length - 8} more
+          +{overflowCount} more
         {/if}
       </p>
     {:else if showPinHint && inspection.state === "transient"}
@@ -277,6 +312,12 @@
 
   .gg-tooltip-focus {
     font-weight: 600;
+  }
+
+  .gg-tooltip-total {
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+    padding-top: 4px;
+    margin-top: 2px;
   }
 
   dt {

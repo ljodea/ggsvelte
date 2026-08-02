@@ -5,7 +5,13 @@ import { aes, gg } from "@ggsvelte/spec";
 
 import { formatTooltipCell } from "../../src/lib/inspection/display-members.js";
 // Barrel path characterization: production + tests historically import via resolver.js
-import { resolveInspection } from "../../src/lib/inspection/resolver.js";
+import {
+  materializeInspection,
+  resolveInspection,
+  resolvedTarget,
+  selectTransientMembers,
+  TRANSIENT_MEMBER_LIMIT,
+} from "../../src/lib/inspection/resolver.js";
 
 describe("inspection snapshot resolve", () => {
   it("uses one core grouped target for focus, legend order, fields, and lineage", () => {
@@ -286,6 +292,110 @@ describe("inspection snapshot resolve", () => {
       linetype: "dashed",
       fill: null,
     });
+    model.dispose();
+  });
+});
+
+describe("selectTransientMembers top-k by value (#1274)", () => {
+  it("keeps stack order when the group fits in the hover limit", () => {
+    const data = Array.from({ length: 5 }, (_, index) => ({
+      id: `s${index}`,
+      x: 1,
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "series" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const target = resolvedTarget(model, seed, "x")!;
+    const selected = selectTransientMembers(target.members, seed.id, {
+      groupAxis: "x",
+      limit: TRANSIENT_MEMBER_LIMIT,
+    });
+    expect(selected.map((c) => c.id)).toEqual(target.members.map((c) => c.id));
+    model.dispose();
+  });
+
+  it("fills non-focus slots with the largest |y| values and always includes focus", () => {
+    // Stacking/group order is small→large (y = index+1). Focus the tiny first
+    // series so without top-k the hover window would be the eight smallest.
+    const data = Array.from({ length: 20 }, (_, index) => ({
+      id: `s${index}`,
+      x: 1,
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "series" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const focus = model.candidates.candidate(0)!; // y = 1
+    expect(focus.yValue).toBe(1);
+    const target = resolvedTarget(model, focus, "x")!;
+    expect(target.members.length).toBe(20);
+
+    const selected = selectTransientMembers(target.members, focus.id, {
+      groupAxis: "x",
+      limit: TRANSIENT_MEMBER_LIMIT,
+    });
+    expect(selected).toHaveLength(TRANSIENT_MEMBER_LIMIT);
+    expect(selected.some((c) => c.id === focus.id)).toBe(true);
+    // Non-focus slots: y = 20..14 (largest seven). Focus (y=1) is force-included.
+    // Prefer .sort over .toSorted here: this package's TS lib target does not
+    // declare Array#toSorted (oxlint type-aware treats it as error).
+    const nonFocusYs = selected.filter((c) => c.id !== focus.id).map((c) => Number(c.yValue));
+    nonFocusYs.sort((a, b) => b - a);
+    expect(nonFocusYs).toEqual([20, 19, 18, 17, 16, 15, 14]);
+    model.dispose();
+  });
+
+  it("materializeInspection transient path uses top-k selection, not first-N stack order", () => {
+    const data = Array.from({ length: 20 }, (_, index) => ({
+      id: `s${index}`,
+      x: 1,
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "series" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const target = resolvedTarget(model, seed, "x")!;
+    const inspection = materializeInspection(
+      {
+        model,
+        seed,
+        mode: "x",
+        state: "transient",
+        source: "pointer",
+      },
+      target,
+      "transient",
+      (index) => (model.row(index) as { id: string } | null)?.id ?? null,
+    );
+    expect(inspection.members).toHaveLength(TRANSIENT_MEMBER_LIMIT);
+    expect(inspection.focus.key).toBe("s0");
+    expect(inspection.members.some((m) => m.key === "s0")).toBe(true);
+    const nonFocusY = inspection.members
+      .filter((m) => m.key !== "s0")
+      .map((m) => Number(m.fields.find((f) => f.channel === "y")?.value));
+    nonFocusY.sort((a, b) => b - a);
+    expect(nonFocusY).toEqual([20, 19, 18, 17, 16, 15, 14]);
+    // Full-group stack total (sum 1..20), not the capped window.
+    expect(inspection.mode).toBe("x");
+    if (inspection.mode === "x" || inspection.mode === "y") {
+      expect(inspection.groupTotal).toBe(210);
+      expect(inspection.groupMemberCount).toBe(20);
+    }
     model.dispose();
   });
 });

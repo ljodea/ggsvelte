@@ -17446,6 +17446,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-inspect-high-cardinality-discrete",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    summary:
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-high-cardinality-discrete",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
+  },
+  {
     id: "heading:guide-interaction-reference:accessibility",
     kind: "heading",
     title: "Accessibility",
@@ -19513,6 +19523,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#interaction-duplicate-inspect-capability",
     keywords: ["Errors reference", "Reference"],
     exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-high-cardinality-discrete",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    summary:
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
   },
   {
     id: "heading:guide-errors:cli-diagnostics-ggsvelte-render",
@@ -42883,6 +42903,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
       "interaction:INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE · interaction",
+    summary:
+      "Inspect is enabled with a high-cardinality discrete color/fill domain; the default tooltip shows the focused series, the largest contributors at that x (or y), a stack total, and an overflow line — not every series.",
+    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
+    keywords: [
+      "interaction",
+      "advisory",
+      "Prep top-n data before plotting if only the largest series matter; Pass a custom content snippet on <Inspect content={…} /> for a full multi-series listing; Pin the tooltip to scroll the full group when every series must be readable",
+    ],
+    exact: [
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      "interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
     ],
   },
   {

@@ -11,7 +11,10 @@ export type {
   InteractionDiagnosticCode,
 } from "./interaction-diagnostics.js";
 export {
+  discreteColorFillDomainSizes,
+  HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   inspectAxisOnBarColDiagnostics,
+  inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "./inspect-geom-advisories.js";
 
@@ -63,6 +66,21 @@ export type PlotInspectionChange<Row, Key> =
       readonly mode: "x" | "y";
       readonly axisValue: CellValue;
       readonly axisLabel: string;
+      /**
+       * Sum of numeric contributions on the value axis for series on the
+       * focus member's layer (y when mode is x, x when mode is y). Used by
+       * the default tooltip Total row; independent of the hover member cap
+       * (#1274). One contribution per seriesId on that layer so multi-layer
+       * paints of the same series do not double-count. `null` when none of
+       * those members has a finite numeric contribution.
+       */
+      readonly groupTotal: number | null;
+      /**
+       * Unique series count on the focus layer in the full axis-group.
+       * Drives the default tooltip "+N more" line when hover rows were
+       * truncated (#1274).
+       */
+      readonly groupMemberCount: number;
     });
 
 export interface PlotInspectionClear {

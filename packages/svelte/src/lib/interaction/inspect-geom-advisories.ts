@@ -1,6 +1,7 @@
 /**
  * Inspect-mode × geom advisories: vertical axis guides that fight bar/col
- * geometry or bisect on-mark value labels.
+ * geometry or bisect on-mark value labels, plus high-cardinality discrete
+ * color/fill + inspect (#1274).
  *
  * Pure collection — plot-engine delivers once per code:prop when inspect.mode
  * is explicit x/xy and the assembled layers include bar/col (and optionally
@@ -11,6 +12,12 @@ import {
   INTERACTION_DIAGNOSTIC_CATALOG,
   type InteractionDiagnostic,
 } from "./interaction-diagnostics.js";
+
+/**
+ * Discrete color/fill domain size that triggers the default-tooltip content
+ * policy advisory when inspect is enabled (#1274).
+ */
+export const HIGH_CARDINALITY_DISCRETE_THRESHOLD = 16;
 
 /** Modes that draw a vertical (x) crosshair guide in non-flipped coords. */
 const X_GUIDE_MODES = new Set(["x", "xy"]);
@@ -69,4 +76,51 @@ export function layerGeomsFromSpecLayers(layers: unknown): readonly string[] {
     if (typeof geom === "string" && geom.length > 0) geoms.push(geom);
   }
   return geoms;
+}
+
+/**
+ * Advisory when inspect is on and a discrete color/fill domain is large enough
+ * that the default tooltip content policy (top-k + total + overflow) matters.
+ *
+ * `domainSizes` is the trained ordinal domain length per channel; continuous
+ * ramps are omitted by the caller. Fires once per channel over the threshold.
+ */
+export function inspectHighCardinalityDiagnostics(input: {
+  readonly inspectEnabled: boolean;
+  readonly domainSizes: ReadonlyArray<{
+    readonly channel: "color" | "fill";
+    readonly size: number;
+  }>;
+  readonly threshold?: number;
+}): InteractionDiagnostic[] {
+  if (!input.inspectEnabled) return [];
+  const threshold = input.threshold ?? HIGH_CARDINALITY_DISCRETE_THRESHOLD;
+  const list: InteractionDiagnostic[] = [];
+  for (const { channel, size } of input.domainSizes) {
+    if (size < threshold) continue;
+    list.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE,
+      prop: channel,
+      actual: size,
+    });
+  }
+  return list;
+}
+
+/** Ordinal color/fill domain lengths from a TrainedScales-like bag. */
+export function discreteColorFillDomainSizes(scales: {
+  readonly color: { readonly kind: string; readonly scale: unknown } | null;
+  readonly fill: { readonly kind: string; readonly scale: unknown } | null;
+}): ReadonlyArray<{ readonly channel: "color" | "fill"; readonly size: number }> {
+  const out: { channel: "color" | "fill"; size: number }[] = [];
+  for (const channel of ["color", "fill"] as const) {
+    const resolved = scales[channel];
+    if (resolved === null || resolved.kind !== "ordinal") continue;
+    const scale = resolved.scale;
+    if (scale === null || typeof scale !== "object") continue;
+    const domain = (scale as { readonly domain?: unknown }).domain;
+    if (!Array.isArray(domain)) continue;
+    out.push({ channel, size: domain.length });
+  }
+  return out;
 }

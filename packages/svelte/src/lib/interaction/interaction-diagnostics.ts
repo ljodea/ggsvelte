@@ -26,7 +26,8 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
   | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"
   | "INTERACTION_INSPECT_IDENTITY_DROPPED"
-  | "INTERACTION_DUPLICATE_INSPECT_CAPABILITY";
+  | "INTERACTION_DUPLICATE_INSPECT_CAPABILITY"
+  | "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE";
 
 export interface InteractionDiagnostic {
   readonly severity: "error" | "warning" | "advisory";
@@ -262,5 +263,19 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-inspect-capability",
+  },
+  INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    message:
+      "Inspect is enabled with a high-cardinality discrete color/fill domain; the default tooltip shows the focused series, the largest contributors at that x (or y), a stack total, and an overflow line — not every series.",
+    prop: "inspect",
+    suggestions: [
+      "Prep top-n data before plotting if only the largest series matter",
+      "Pass a custom content snippet on <Inspect content={…} /> for a full multi-series listing",
+      "Pin the tooltip to scroll the full group when every series must be readable",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-high-cardinality-discrete",
   },
 });

@@ -124,6 +124,28 @@ The exported `Tooltip` component is the same positioned shell for advanced
 custom rendering. `TooltipContext` is a deprecated (0.1.0) alias of
 `PlotInspectionChange`.
 
+### Default content policy (high-n stacks)
+
+For axis-group inspection (`mode: "x"` / `"y"`), the **default** hover tooltip
+does not dump every series:
+
+1. **Focused series** is always included (the band under the pointer).
+2. Up to **7 more** members are chosen by **largest absolute value** at that
+   axis position (y when grouping by x, x when grouping by y) — not by stacking
+   order — so tiny early series cannot crowd out the large contributors.
+3. A **Total** row sums all numeric contributions in the full group (not just
+   the capped hover window).
+4. An overflow line (`+N more · pin to inspect all`) appears when the group is
+   larger than eight display members.
+
+**Pin** the tooltip (click, or keyboard pin) to scroll the full group inside the
+320px panel. **Opt into a full custom listing** with
+`<Inspect content={snippet} />` or `oninspect` — public `members` still lists
+the complete group when those paths request complete snapshots. With a large
+discrete color/fill domain and inspect enabled, an advisory
+(`INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE`) suggests top-n data prep or a
+custom content snippet.
+
 ## Diagnostics
 
 `ondiagnostic` receives `PlotDiagnostic`, the union of three catalogs (each
@@ -137,7 +159,9 @@ entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
   `INTERACTION_INSPECT_X_ON_COL` / `INTERACTION_INSPECT_X_ON_BAR` (vertical
   guide through columns/bars), `INTERACTION_INSPECT_X_BISECTS_COL_LABELS` /
   `INTERACTION_INSPECT_X_BISECTS_BAR_LABELS` (same guide through on-bar value
-  labels), and the two wiring advisories named above.
+  labels), `INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE` (discrete color/fill
+  domain ≥ 16 with inspect on — default tooltip is top-k + total, not a full
+  dump), and the two wiring advisories named above.
 - `DEPRECATION_DIAGNOSTIC_CATALOG` — one code, `DEPRECATED_PLOT_PROP`, for
   every grammar prop deprecated in 0.11.0 (`prop` carries the name).
 - `COMPOSITION_DIAGNOSTIC_CATALOG` — child-layer composition collisions:
