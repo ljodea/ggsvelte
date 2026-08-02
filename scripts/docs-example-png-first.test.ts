@@ -49,8 +49,20 @@ describe("docs example PNG-first (PR3)", () => {
     const frame = read("lib/components/ExampleLiveFrame.svelte");
     expect(frame).toContain('data-gg-ready="true"');
     expect(frame).toContain("liveReady");
-    expect(frame).toContain("aspect-ratio");
     expect(frame).toContain("MutationObserver");
+  });
+
+  it("reserves shell height with unitless aspect-ratio only until live (#1363)", () => {
+    // aspect-ratio rejects length tokens (640px); use unitless --example-vr-w/h
+    // while loading, then drop the ratio so live chrome is not clipped.
+    const frame = read("lib/components/ExampleLiveFrame.svelte");
+    expect(frame).toContain("--example-vr-w:");
+    expect(frame).toContain("--example-vr-h:");
+    expect(frame).toMatch(/aspect-ratio:\s*var\(--example-vr-w\)\s*\/\s*var\(--example-vr-h\)/);
+    expect(frame).not.toMatch(/aspect-ratio:\s*var\(--example-vr-width\)/);
+    expect(frame).toContain("under-live");
+    expect(frame).toMatch(/:not\(\.live-ready\)/);
+    expect(frame).toContain("READY_FALLBACK_MS");
   });
 
   it("hands keyboard focus to the plot after an intent upgrade (#1362)", () => {

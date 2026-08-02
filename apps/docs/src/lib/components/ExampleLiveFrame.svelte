@@ -68,7 +68,9 @@
     const capture = root.querySelector<HTMLElement>(".gg-capture");
     const target =
       capture ??
-      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]');
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]') ??
+      root.querySelector<HTMLElement>(".gg-plot-root") ??
+      root.querySelector<HTMLElement>(".live-host");
     if (target === null) return false;
     // Only restore when focus is still in this shell or was dropped to body.
     const active = document.activeElement;
@@ -117,21 +119,26 @@
   });
 
   // When Live mounts, keep the shell until data-gg-ready flips true.
+  // READY_FALLBACK_MS: reveal even if the plot never reports ready (#1363).
+  const READY_FALLBACK_MS = 10_000;
   $effect(() => {
     if (Live === null || host === null) {
       liveReady = false;
       return;
     }
     const root = host;
+    const markReady = (): void => {
+      liveReady = true;
+    };
     const already = root.querySelector('.gg-plot-root[data-gg-ready="true"]');
     if (already !== null) {
-      liveReady = true;
+      markReady();
       return;
     }
     liveReady = false;
     const observer = new MutationObserver(() => {
       if (root.querySelector('.gg-plot-root[data-gg-ready="true"]') !== null) {
-        liveReady = true;
+        markReady();
         observer.disconnect();
       }
     });
@@ -141,15 +148,40 @@
       subtree: true,
       childList: true,
     });
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(markReady, READY_FALLBACK_MS);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   });
 
   // After keyboard-triggered upgrade, move focus into the plot so Tab order
   // does not jump to <body> when the load button unmounts (#1362).
+  // Retry after READY_FALLBACK_MS reveals before the plot has a focus target.
   $effect(() => {
     if (!liveReady || host === null || !restoreKeyboardFocus) return;
-    if (!focusAfterUpgrade(host)) return;
-    restoreKeyboardFocus = false;
+    const root = host;
+    if (focusAfterUpgrade(root)) {
+      restoreKeyboardFocus = false;
+      return;
+    }
+    const mo = new MutationObserver(() => {
+      if (focusAfterUpgrade(root)) {
+        restoreKeyboardFocus = false;
+        mo.disconnect();
+      }
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      if (!restoreKeyboardFocus) return;
+      focusAfterUpgrade(root);
+      restoreKeyboardFocus = false;
+    }, 15_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
   });
 </script>
 
@@ -160,7 +192,7 @@
   bind:this={host}
   onfocusin={onShellFocusIn}
   onfocusout={onShellFocusOut}
-  style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
+  style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px;--example-vr-w:${String(width)};--example-vr-h:${String(height)}`}
 >
   {#if !liveReady}
     <img
@@ -198,8 +230,16 @@
     width: 100%;
     max-width: var(--example-vr-width);
     min-width: 0;
-    /* Reserve the live plot box so layout does not jump while the shell upgrades. */
-    aspect-ratio: var(--example-vr-width) / var(--example-vr-height);
+  }
+
+  /*
+   * Reserve height while the shell upgrades. Use unitless --example-vr-w/h —
+   * aspect-ratio rejects length tokens (…px), which made the prior declaration
+   * invalid and collapsed the frame when both children were absolute (#1363).
+   * Drop the ratio once live so tool-rail / a11y chrome are not clipped.
+   */
+  .gg-example-frame:not(.live-ready) {
+    aspect-ratio: var(--example-vr-w) / var(--example-vr-h);
   }
 
   .gg-example-frame.full-width {
@@ -260,5 +300,7 @@
   .live-host.revealed {
     position: relative;
     opacity: 1;
+    /* Grow with chrome once live; VR still pins the outer frame height. */
+    height: auto;
   }
 </style>
