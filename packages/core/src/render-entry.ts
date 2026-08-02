@@ -42,6 +42,11 @@ export {
 } from "./render-svg.js";
 export type { RenderSVGOptions } from "./render-svg.js";
 
+// Strata planning is pure (no DOM, no temporal install) — lean canvas charts
+// compose it with @ggsvelte/core/dom drawStratum.
+export { planStrata } from "./strata.js";
+export type { Stratum } from "./strata.js";
+
 export type {
   GeometryBatch,
   GlyphsBatch,
