@@ -38,6 +38,8 @@
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
   let liveReady = $state(false);
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
   let loadStarted = false;
   let cancelled = false;
 
@@ -47,6 +49,10 @@
     void loadExampleComponent(exampleId).then((component) => {
       if (!cancelled) Live = component;
     });
+  }
+
+  function onShellFocusIn(): void {
+    if (!liveReady) restoreKeyboardFocus = true;
   }
 
   // Kick off the VR import as soon as the client module runs (before paint
@@ -103,6 +109,18 @@
     });
     return () => observer.disconnect();
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (!liveReady || host === null || !restoreKeyboardFocus) return;
+    const capture = host.querySelector<HTMLElement>(".gg-capture");
+    if (capture === null) return;
+    restoreKeyboardFocus = false;
+    queueMicrotask(() => {
+      capture.focus({ preventScroll: true });
+    });
+  });
 </script>
 
 <div
@@ -110,6 +128,7 @@
   class:full-width={fullWidth}
   class:live-ready={liveReady}
   bind:this={host}
+  onfocusin={onShellFocusIn}
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
   {#if !liveReady}
@@ -123,11 +142,16 @@
       decoding="async"
       fetchpriority="high"
     />
-    {#if Live === null}
-      <button type="button" class="load-interactive" onclick={startLoad}>
-        Load interactive chart
-      </button>
-    {/if}
+    <!-- Stay mounted while the import resolves so keyboard focus has a home. -->
+    <button
+      type="button"
+      class="load-interactive"
+      onclick={startLoad}
+      disabled={Live !== null}
+      aria-busy={Live !== null}
+    >
+      {Live === null ? "Load interactive chart" : "Loading…"}
+    </button>
   {/if}
   {#if Live !== null}
     <div class="live-host" class:revealed={liveReady}>

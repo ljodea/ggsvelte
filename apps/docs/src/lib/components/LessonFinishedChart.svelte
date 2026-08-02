@@ -125,6 +125,8 @@
 
   let loadStarted = false;
   let cancelled = false;
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
 
   function loadLivePlot(): void {
     if (loadStarted || LivePlot !== null) return;
@@ -135,6 +137,10 @@
         LiveInspect = mod.Inspect;
       }
     });
+  }
+
+  function onShellFocusIn(): void {
+    if (LivePlot === null) restoreKeyboardFocus = true;
   }
 
   onMount(() => {
@@ -165,6 +171,29 @@
       stopIntent();
     };
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (LivePlot === null || host === undefined || !restoreKeyboardFocus)
+      return;
+    const root = host;
+    const tryFocus = (): boolean => {
+      const capture = root.querySelector<HTMLElement>(".gg-capture");
+      if (capture === null) return false;
+      restoreKeyboardFocus = false;
+      queueMicrotask(() => {
+        capture.focus({ preventScroll: true });
+      });
+      return true;
+    };
+    if (tryFocus()) return;
+    const mo = new MutationObserver(() => {
+      if (tryFocus()) mo.disconnect();
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    return () => mo.disconnect();
+  });
 </script>
 
 {#snippet sakuraTooltip(
@@ -180,7 +209,11 @@
   {/if}
 {/snippet}
 
-<div class="finished-chart lesson-output" bind:this={host}>
+<div
+  class="finished-chart lesson-output"
+  bind:this={host}
+  onfocusin={onShellFocusIn}
+>
   {#if LivePlot && finished}
     <LivePlot spec={finished.spec} height={liveHeight} {ariaLabel}>
       {#if finished.inspect && LiveInspect}
