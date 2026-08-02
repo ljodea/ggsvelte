@@ -85,7 +85,9 @@ for (const job of uniqueJobs) {
       configFile: false,
       logLevel: "error",
       plugins:
-        job.lib.id === "svelteplot" || job.lib.id === "layercake"
+        job.lib.id === "svelteplot" ||
+        job.lib.id === "layercake" ||
+        job.lib.id === "ggsvelte-ggplot"
           ? [svelte({ compilerOptions: { css: "injected" }, emitCss: false })]
           : [],
       build: {

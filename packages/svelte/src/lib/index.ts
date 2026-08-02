@@ -1006,6 +1006,8 @@ export type {
 export {
   PipelineError,
   planStrata,
+  registerAll, // @lifecycle experimental
+  registerBasic, // @lifecycle experimental
   renderToSVGString, // @lifecycle stable-intent
   runPipeline,
 } from "@ggsvelte/core";

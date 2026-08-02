@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Unit tests for createPointerInspectQueue — schedule / cancel / onFrame
  * routing without mounting GGPlot.

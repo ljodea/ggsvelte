@@ -7,7 +7,10 @@
  * whole design rests on, so it is asserted against a real render (earlier
  * dates must sit ABOVE later ones), not against the spec that requested it.
  */
-import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { registerAll, renderToSVGString, runPipeline } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 import { validate } from "@ggsvelte/spec";
 import { describe, expect, it } from "bun:test";
 

@@ -12,7 +12,10 @@ same grammar — never build SVG or canvas output yourself:
   `<GeomPoint/>`, `<ThemeMinimal/>`, `<ScaleXLog10/>`, `<FacetWrap/>`, `<Labs/>`.
 - **Agents / headless:** emit a JSON `PortableSpec`, check it with
   `validate(spec)`, render with `renderToSVGString(spec, {width, height})`
-  (Node-safe), `ggsvelte-render spec.json > out.svg` (CLI), or `<GGPlot spec>`.
+  (Node-safe; call `registerAll()` once first — the core barrel is
+  side-effect-free since 0.27), `ggsvelte-render spec.json > out.svg` (CLI),
+  or `<GGPlot spec>` (spec-driven GGPlot also needs one `registerAll()` for
+  specialty geoms/stats; `<Geom*>` children self-register).
   A third skin, the `gg()` builder, produces the same spec in TypeScript.
   The CLI is part of the install contract for agent-driven chart generation:
   install `@ggsvelte/cli` in every sandbox where an agent authors specs

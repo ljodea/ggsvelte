@@ -9,10 +9,12 @@ import { join } from "node:path";
 import { KNOWN_GEOMS } from "@ggsvelte/spec";
 
 import {
+  BASIC_SHELL_GEOMS,
   componentNameForGeom,
   expectedGeoms,
   manifestGeoms,
   SHELL_MANIFEST,
+  SHELL_REGISTRATION,
 } from "./gen-geom-children-manifest.ts";
 import {
   GENERATED_HEADER,
@@ -56,6 +58,23 @@ describe("SHELL_MANIFEST completeness", () => {
     const special = SHELL_MANIFEST.filter((s) => s.kind !== "default");
     expect(special.map((s) => s.geom)).toEqual(["jitter"]);
   });
+
+  it("every geom is exactly one of basic-tier or self-registering (#1420)", () => {
+    const basic = new Set(BASIC_SHELL_GEOMS);
+    const registering = new Set(Object.keys(SHELL_REGISTRATION));
+    for (const g of KNOWN_GEOMS) {
+      const isBasic = basic.has(g);
+      const selfRegisters = registering.has(g);
+      expect(
+        isBasic !== selfRegisters,
+        `geom ${g}: basic=${String(isBasic)} selfRegisters=${String(selfRegisters)} (need exactly one)`,
+      ).toBe(true);
+    }
+    // Manifest shells carry the registration name through.
+    for (const s of SHELL_MANIFEST) {
+      expect(s.registration).toBe(SHELL_REGISTRATION[s.geom]);
+    }
+  });
 });
 
 describe("renderShell", () => {
@@ -71,6 +90,31 @@ describe("renderShell", () => {
     expect(src).not.toContain("paramKeys");
     expect(src).toContain('from "@ggsvelte/spec"');
     expect(src).toContain('from "./factory.svelte.js"');
+  });
+
+  it("specialty shells emit a <script module> self-registration block (#1420)", () => {
+    const hex = SHELL_MANIFEST.find((s) => s.geom === "hex")!;
+    const src = renderShell(hex);
+    expect(src).toContain('<script module lang="ts">');
+    expect(src).toContain('import { registerHex } from "@ggsvelte/core";');
+    expect(src).toContain("registerHex();");
+    // Module script precedes the instance script.
+    expect(src.indexOf("<script module")).toBeLessThan(src.indexOf('<script lang="ts">'));
+  });
+
+  it("basic-tier shells emit no registration block", () => {
+    const point = SHELL_MANIFEST.find((s) => s.geom === "point")!;
+    const src = renderShell(point);
+    expect(src).not.toContain("<script module");
+    expect(src).not.toContain("register");
+  });
+
+  it("histogram/freqpoly register the bin stat (default stat, not geom name)", () => {
+    for (const geom of ["histogram", "freqpoly"] as const) {
+      const shell = SHELL_MANIFEST.find((s) => s.geom === geom)!;
+      const src = renderShell(shell);
+      expect(src).toContain('import { registerBin } from "@ggsvelte/core";');
+    }
   });
 
   it("emits the jitter merge for flat width/height/seed", () => {

@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Unit tests for createSemanticKeyService (rune-backed).
  * Factories own effects — instantiate under `$effect.root` and destroy.

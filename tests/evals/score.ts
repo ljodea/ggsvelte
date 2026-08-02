@@ -37,7 +37,10 @@
  */
 import type { DataProfile, PortableSpec, SpecError, SpecInput } from "@ggsvelte/spec";
 import { GEOM_DEFAULTS, normalize, validate } from "@ggsvelte/spec";
-import { renderToSVGString } from "@ggsvelte/core";
+import { registerAll, renderToSVGString } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 
 import type { EvalCase, RefusalReply, Row, StructuralScore } from "./types.ts";
 

@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 import { withGrammarAsSpec } from "../helpers/ggplot-input.js";

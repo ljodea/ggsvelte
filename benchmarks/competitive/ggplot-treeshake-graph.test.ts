@@ -27,27 +27,37 @@ async function buildFixture(fixtureName: string): Promise<{
   const outDir = path.join(root, "results", "bundles", `_ggplot-treeshake-${fixtureName}`);
   mkdirSync(outDir, { recursive: true });
 
-  const result = await build({
-    configFile: false,
-    logLevel: "error",
-    plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
-    build: {
-      lib: {
-        entry: path.join(root, "fixtures", fixtureName, "entry.ts"),
-        formats: ["es"],
-        fileName: () => "bundle.js",
+  // bun test exports NODE_ENV=test, which flips esm-env/vite-plugin-svelte to
+  // dev builds (~210KB extra). Measure the production graph consumers get.
+  const prevNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  let result;
+  try {
+    result = await build({
+      configFile: false,
+      logLevel: "error",
+      plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
+      build: {
+        lib: {
+          entry: path.join(root, "fixtures", fixtureName, "entry.ts"),
+          formats: ["es"],
+          fileName: () => "bundle.js",
+        },
+        outDir,
+        emptyOutDir: true,
+        minify: "esbuild",
+        target: "es2022",
+        rollupOptions: { external: [] },
+        write: true,
       },
-      outDir,
-      emptyOutDir: true,
-      minify: "esbuild",
-      target: "es2022",
-      rollupOptions: { external: [] },
-      write: true,
-    },
-    resolve: {
-      conditions: ["svelte", "browser", "import", "module", "default"],
-    },
-  });
+      resolve: {
+        conditions: ["svelte", "browser", "import", "module", "default"],
+      },
+    });
+  } finally {
+    if (prevNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = prevNodeEnv;
+  }
 
   const outputs = (Array.isArray(result) ? result : [result]).flatMap((item) => item.output ?? []);
   const chunk = outputs.find((item) => item.type === "chunk");
@@ -86,8 +96,8 @@ describe("GGPlot point/line bundle (#1420)", () => {
     for (const pattern of SPECIALTY_MODULE_PATTERNS) {
       expect(included(moduleIds, pattern)).toEqual([]);
     }
-    // Size ceiling set from the post-fix measurement; pre-fix this fixture
-    // bundles the full grammar (see PR body for before/after numbers).
+    // Post-fix production raw is ~1237KB (pre-fix: ~1542KB with the full
+    // grammar force-bundled). Ceiling leaves ~5% headroom.
     expect(rawBytes).toBeLessThan(GGPLOT_SCATTER_MAX_RAW_BYTES);
   }, 120_000);
 });
@@ -100,6 +110,4 @@ describe("GGPlot smooth bundle (positive control)", () => {
   }, 120_000);
 });
 
-// Placeholder until the post-fix measurement lands; the pre-fix fixture is
-// expected to FAIL the exclusions above regardless of this constant.
-const GGPLOT_SCATTER_MAX_RAW_BYTES = 1_000_000;
+const GGPLOT_SCATTER_MAX_RAW_BYTES = 1_300_000;

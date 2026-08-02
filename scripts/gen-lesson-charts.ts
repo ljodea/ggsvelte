@@ -17,7 +17,10 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { registerAll, renderToSVGString, runPipeline } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import { kyotoSakura } from "../packages/svelte/src/lib/data/index.js";

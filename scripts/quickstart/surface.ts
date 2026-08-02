@@ -76,8 +76,10 @@ export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `${JSON.stringify(
   2,
 )}\n`;
 
-export const QUICKSTART_HEADLESS_FRAGMENT = `import { renderToSVGString } from "@ggsvelte/core";
+export const QUICKSTART_HEADLESS_FRAGMENT = `import { registerAll, renderToSVGString } from "@ggsvelte/core";
 
+// Headless/spec-driven rendering opts into the full grammar explicitly (#1420).
+registerAll();
 const svg = renderToSVGString(spec, { width: 900, height: 360 });`;
 
 export const QUICKSTART_CLI_FRAGMENT = "ggsvelte-render spec.json > chart.svg 2> diagnostics.jsonl";

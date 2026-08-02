@@ -1,3 +1,4 @@
+import "./setup-register-all.js";
 import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";

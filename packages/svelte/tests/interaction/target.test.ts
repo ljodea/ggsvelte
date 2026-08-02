@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Resolved-target ownership (#1080): one nearest path, one distance policy,
  * panel-scoped so faceted probes cannot seed a neighbouring facet (#787).

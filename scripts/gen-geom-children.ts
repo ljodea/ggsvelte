@@ -78,6 +78,7 @@ export function renderShell(spec: ShellSpec): string {
   }
   return [
     GENERATED_HEADER,
+    ...registrationBlock(spec),
     `<script lang="ts">`,
     typeImportBlock(spec),
     ``,
@@ -88,6 +89,26 @@ export function renderShell(spec: ShellSpec): string {
     `</script>`,
     ``,
   ].join("\n");
+}
+
+/**
+ * Self-registration <script module> block (#1420) for specialty shells:
+ * importing the component is what pulls its geom batch + default stat frame
+ * into the consumer bundle. Runs once per module evaluation; idempotent.
+ */
+function registrationBlock(spec: ShellSpec): string[] {
+  if (spec.registration === undefined) return [];
+  return [
+    `<script module lang="ts">`,
+    `  import { ${spec.registration} } from "@ggsvelte/core";`,
+    ``,
+    `  // Self-registration (#1420): this component's geom batch + default stat`,
+    `  // frame enter the bundle (and the core registries) only when the`,
+    `  // component itself is imported. Idempotent.`,
+    `  ${spec.registration}();`,
+    `</script>`,
+    ``,
+  ];
 }
 
 /**

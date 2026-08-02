@@ -1,3 +1,4 @@
+import "./setup-register-all.js";
 /**
  * M0c component tests (vitest 4 browser mode, chromium):
  *  - renders points from a spec

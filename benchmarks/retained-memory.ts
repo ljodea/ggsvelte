@@ -1,7 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { runPipeline } from "@ggsvelte/core";
+import { registerAll, runPipeline } from "@ggsvelte/core";
+
+// Headless full-grammar fixtures (#1420): explicit opt-in.
+registerAll();
 
 import { createInspectionCoordinator } from "../packages/svelte/src/lib/inspection/resolver";
 import { buildWorkloads } from "./workloads";
