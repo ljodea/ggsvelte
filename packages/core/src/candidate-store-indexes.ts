@@ -85,6 +85,29 @@ export type CandidateStoreIndexes = {
  * group() bucket permutations. Growable construction buffers are cleared at
  * the end of this function (retained-memory budget boundary).
  */
+/**
+ * Exclusive end of the (layer, series) run starting at `from` within
+ * `valid[0..end)` — extracted to keep the bucket walk under the nesting
+ * budget and to give the hot scan a tight local frame.
+ */
+function seriesRunEnd(
+  valid: number[],
+  from: number,
+  end: number,
+  layerPerCandidate: Uint32Array,
+  series: Uint32Array,
+  layerIndex: number,
+  seriesId: number,
+): number {
+  let cursor = from + 1;
+  while (cursor < end) {
+    const id = valid[cursor]!;
+    if (layerPerCandidate[id]! !== layerIndex || series[id] !== seriesId) break;
+    cursor++;
+  }
+  return cursor;
+}
+
 export function buildCandidateStoreIndexes(
   scene: Scene,
   options: CandidateStoreOptions = {},
@@ -489,13 +512,15 @@ export function buildCandidateStoreIndexes(
         const seriesFirst = valid[seriesStart]!;
         const layerIndex = layerPerCandidate[seriesFirst]!;
         const seriesId = series[seriesFirst]!;
-        let seriesEnd = seriesStart + 1;
-        while (seriesEnd < end) {
-          const continueId = valid[seriesEnd]!;
-          if (layerPerCandidate[continueId]! !== layerIndex || series[continueId] !== seriesId)
-            break;
-          seriesEnd++;
-        }
+        const seriesEnd = seriesRunEnd(
+          valid,
+          seriesStart,
+          end,
+          layerPerCandidate,
+          series,
+          layerIndex,
+          seriesId,
+        );
         seriesBoundaries.push({ start: seriesStart, end: seriesEnd, layerIndex, seriesId });
         seriesStart = seriesEnd;
       }

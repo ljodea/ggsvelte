@@ -62,7 +62,7 @@ describe("radixSortByWords", () => {
 describe("float32SortKey", () => {
   it("orders finite float32 values ascending", () => {
     const values = [-Infinity, -1e30, -1.5, -1, -0, 0, 1e-9, 0.5, 1, 42.25, 1e30, Infinity];
-    const keys = values.map(float32SortKey);
+    const keys = values.map((v) => float32SortKey(v));
     for (let i = 1; i < keys.length; i++) expect(keys[i]!).toBeGreaterThan(keys[i - 1]!);
   });
 

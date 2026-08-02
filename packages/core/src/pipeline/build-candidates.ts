@@ -81,8 +81,8 @@ function createRawCandidateDatumResolver(
       shape: styleRead(binding.shape),
       linetype: styleRead(binding.linetype),
       color:
-        table === null || binding.color.field == null ? null : table.column(binding.color.field),
-      fill: table === null || binding.fill.field == null ? null : table.column(binding.fill.field),
+        table === null || binding.color.field === null ? null : table.column(binding.color.field),
+      fill: table === null || binding.fill.field === null ? null : table.column(binding.fill.field),
     };
   };
   // One-slot memo: marks of a layer walk rows of one table in order, so the
@@ -140,13 +140,13 @@ function createRawCandidateDatumResolver(
     // Rank lookups preserve ordinalColorRank semantics exactly: non-ordinal
     // scales and unmapped fields give -1; an unlocatable row reads null.
     const colorRank =
-      colorOrdinal === null || binding.color.field == null
+      colorOrdinal === null || binding.color.field === null
         ? -1
         : (colorOrdinal.scale.indexOf(
             localRow < 0 || state.color === null ? null : state.color[localRow]!,
           ) ?? -1);
     const fillRank =
-      fillOrdinal === null || binding.fill.field == null
+      fillOrdinal === null || binding.fill.field === null
         ? -1
         : (fillOrdinal.scale.indexOf(
             localRow < 0 || state.fill === null ? null : state.fill[localRow]!,
