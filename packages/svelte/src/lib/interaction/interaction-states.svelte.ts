@@ -52,7 +52,7 @@ import { createPlotZoomState } from "../zoom/zoom-state.svelte.js";
 import type { InteractionContext } from "./interaction-context.svelte.js";
 
 /** The five interaction controllers, keyed by role. */
-export type InteractionStates = {
+type InteractionStates = {
   readonly zoom: PlotZoomState;
   readonly selection: SelectionState;
   readonly interval: IntervalState;
@@ -65,7 +65,7 @@ export type InteractionStates = {
  * ports (reducer, emitSelection, commitZoom, inspection/interval/zoom
  * getters) are wired internally — hosts never see them.
  */
-export type InteractionStatesOptions = {
+type InteractionStatesOptions = {
   readonly interval: Pick<IntervalStateOptions, "consumptionCandidates">;
   readonly surface: Pick<
     SurfaceStateOptions,
