@@ -74,7 +74,7 @@ export type CandidateStoreIndexes = {
   readonly coincidentStack: (Uint32Array | undefined)[];
   readonly coincidentAt: Uint32Array;
   readonly permutations: Record<"x" | "y", Uint32Array>;
-  readonly buckets: Record<"x" | "y", Map<string, BucketBoundary>>;
+  readonly buckets: Record<"x" | "y", Map<number, BucketBoundary>>;
   logicalValue(id: number, axis: "x" | "y"): CellValue;
   fact(id: number): CandidateFacts | null;
 };
@@ -379,10 +379,23 @@ export function buildCandidateStoreIndexes(
     x: new Uint32Array(0),
     y: new Uint32Array(0),
   };
-  const buckets: Record<"x" | "y", Map<string, BucketBoundary>> = {
-    x: new Map<string, BucketBoundary>(),
-    y: new Map<string, BucketBoundary>(),
+  const buckets: Record<"x" | "y", Map<number, BucketBoundary>> = {
+    x: new Map<number, BucketBoundary>(),
+    y: new Map<number, BucketBoundary>(),
   };
+  // Rank tokens once (m log m, m = unique tokens) so the permutation sort's
+  // hot comparator is arithmetic instead of compareTokens object dispatch.
+  // Ranks preserve compareTokens order exactly.
+  const tokenRank = new Int32Array(tokens.length);
+  {
+    const tokenOrder = Array.from({ length: tokens.length }, (_, id) => id);
+    tokenOrder.sort((a, b) => compareTokens(tokens[a]!, tokens[b]!));
+    for (let rank = 0; rank < tokenOrder.length; rank++) tokenRank[tokenOrder[rank]!] = rank;
+  }
+  // Bucket maps key on panel * tokenCount + tokenId (numeric, no per-bucket
+  // `${panel}|${key}` strings — dense plots have O(n) buckets).
+  const tokenCount = Math.max(tokens.length, 1);
+  const bucketKey = (panel: number, tokenId: number): number => panel * tokenCount + tokenId;
   for (const axis of ["x", "y"] as const) {
     const keys = axis === "x" ? xTokenIds : yTokenIds,
       orth = axis === "x" ? (flip ? xs : ys) : flip ? ys : xs;
@@ -390,7 +403,7 @@ export function buildCandidateStoreIndexes(
     valid.sort(
       (a, b) =>
         panelIds[a]! - panelIds[b]! ||
-        compareTokens(tokens[keys[a]!]!, tokens[keys[b]!]!) ||
+        tokenRank[keys[a]!]! - tokenRank[keys[b]!]! ||
         ranks[a]! - ranks[b]! ||
         scene.batches[batchIds[a]!]!.layerIndex - scene.batches[batchIds[b]!]!.layerIndex ||
         series[a]! - series[b]! ||
@@ -426,7 +439,7 @@ export function buildCandidateStoreIndexes(
       // point; treat as immutable by convention (same contract as the
       // coincident stacks) instead of paying one Object.freeze per bucket —
       // dense plots have O(n) buckets.
-      buckets[axis].set(`${panel}|${key}`, {
+      buckets[axis].set(bucketKey(panel, key), {
         start,
         end,
         series: seriesBoundaries,
