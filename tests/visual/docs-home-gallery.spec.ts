@@ -163,8 +163,10 @@ test("gallery exposes every generated preview exactly once", async ({ page }) =>
   // label/basic (#792), hex/basic (#800), bin2d/basic (#799),
   // polygon/regions (#807), boxplot/violin (#798), point/count (#795),
   // interval-family identity specimens (errorbar/caps, linerange/stems,
-  // pointrange/midpoints, crossbar/boxes), etc.
-  const exampleCount = 86;
+  // pointrange/midpoints, crossbar/boxes), sparse mark specimens
+  // (jitter/spread, spoke/rays, rug/ticks, step/stairs, qq/cloud,
+  // qq_line/match), etc.
+  const exampleCount = 92;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

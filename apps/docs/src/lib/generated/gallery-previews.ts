@@ -261,6 +261,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4",
   },
   {
+    id: "jitter/spread",
+    filename: "jitter-spread-light.png",
+    path: "/previews/jitter-spread-light.png",
+    sha256: "a086801456fb5fc9265185807d9b43954e940d83a1c77b43fb77906a5fc873ba",
+  },
+  {
     id: "label/basic",
     filename: "label-basic-light.png",
     path: "/previews/label-basic-light.png",
@@ -429,10 +435,22 @@ export const GALLERY_PREVIEWS = [
     sha256: "d9c6c49c1d227f0390d5b5e58ac4a064ce7d35eef4bc0b13c3155cd651412078",
   },
   {
+    id: "qq/cloud",
+    filename: "qq-cloud-light.png",
+    path: "/previews/qq-cloud-light.png",
+    sha256: "b2166556f1c2eb41b7c6b453c924bb0ca35fe99a5b44f365ca047d763ddd019c",
+  },
+  {
     id: "qq/normal",
     filename: "qq-normal-light.png",
     path: "/previews/qq-normal-light.png",
     sha256: "bd1f2447bc9fce75dc80bc72a8b2933ec5252750859ef17653b7ddc86e3ed9bb",
+  },
+  {
+    id: "qq_line/match",
+    filename: "qq_line-match-light.png",
+    path: "/previews/qq_line-match-light.png",
+    sha256: "9699a22469c2aa95be76ad22ba9d3618a3b073820dbdd4c560c93c4c9f9c4bfb",
   },
   {
     id: "raster/grid",
@@ -457,6 +475,12 @@ export const GALLERY_PREVIEWS = [
     filename: "ribbon-paint-light.png",
     path: "/previews/ribbon-paint-light.png",
     sha256: "f5039b1f13b2360d1dd0a404ded7c98ab47090e7059b1584b954860830e2f0fe",
+  },
+  {
+    id: "rug/ticks",
+    filename: "rug-ticks-light.png",
+    path: "/previews/rug-ticks-light.png",
+    sha256: "28d56176f22303e12db2f77ac49d0bf206ffed72100234db07552eb8b6c0ea96",
   },
   {
     id: "rule/annotation",
@@ -513,6 +537,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72",
   },
   {
+    id: "spoke/rays",
+    filename: "spoke-rays-light.png",
+    path: "/previews/spoke-rays-light.png",
+    sha256: "05d1b2fcbf20b9142942076cb506c7aeab5e7d85b28c8dd43ea804a6a6f9bc20",
+  },
+  {
     id: "spoke/vector-field",
     filename: "spoke-vector-field-light.png",
     path: "/previews/spoke-vector-field-light.png",
@@ -523,6 +553,12 @@ export const GALLERY_PREVIEWS = [
     filename: "step-ecdf-light.png",
     path: "/previews/step-ecdf-light.png",
     sha256: "e367484343e16a997395078070dd2efb461845f97883d3f0e9aa47d8d1543be2",
+  },
+  {
+    id: "step/stairs",
+    filename: "step-stairs-light.png",
+    path: "/previews/step-stairs-light.png",
+    sha256: "b028da7bd03baf5ea5b703be2193667d7660333a0a75802d06ecc37e1dd5021f",
   },
   {
     id: "text/labels",

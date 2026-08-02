@@ -1,0 +1,6 @@
+{
+  "title": "Sparse Q–Q cloud",
+  "description": "Twelve large sample quantiles vs theoretical normal — the scatter mark that reads at index thumbnail size.",
+  "tags": ["qq", "diagnostics", "distribution", "quantiles"],
+  "docsSection": "Distributions"
+}

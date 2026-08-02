@@ -1,0 +1,6 @@
+{
+  "title": "Jittered points by group",
+  "description": "Twelve large points in three columns with wide horizontal jitter — the alias mark that reads at index thumbnail size.",
+  "tags": ["jitter", "point", "overplotting", "categorical"],
+  "docsSection": "Points & scatter"
+}

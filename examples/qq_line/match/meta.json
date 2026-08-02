@@ -1,0 +1,6 @@
+{
+  "title": "Q–Q reference line",
+  "description": "Thick line through the sample/theoretical quartile match — the mark that reads at index thumbnail size.",
+  "tags": ["qq_line", "qq-line", "diagnostics", "distribution"],
+  "docsSection": "Distributions"
+}

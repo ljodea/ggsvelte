@@ -4669,6 +4669,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-qq_line:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#examples",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-stats-identity",
     kind: "page",
     title: "stat identity",
@@ -6287,6 +6297,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/stats/qq_line#compatible-geoms",
     keywords: ["stat qq_line", "documentation"],
     exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-qq_line:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat qq_line. stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line#examples",
+    keywords: ["stat qq_line", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-positions-identity",
@@ -21220,6 +21240,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Menu calories, spread so items do not stack"],
   },
   {
+    id: "example:jitter:spread",
+    kind: "example",
+    title: "Jittered points by group",
+    summary:
+      "Twelve large points in three columns with wide horizontal jitter — the alias mark that reads at index thumbnail size.",
+    href: "/examples/jitter/spread",
+    keywords: [
+      "Jittered points by group",
+      "Points & scatter",
+      "jitter",
+      "point",
+      "overplotting",
+      "categorical",
+    ],
+    exact: ["Jittered points by group"],
+  },
+  {
     id: "example:label:basic",
     kind: "example",
     title: "Boxed labels",
@@ -21706,6 +21743,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Which pump was nearest"],
   },
   {
+    id: "example:qq:cloud",
+    kind: "example",
+    title: "Sparse Q–Q cloud",
+    summary:
+      "Twelve large sample quantiles vs theoretical normal — the scatter mark that reads at index thumbnail size.",
+    href: "/examples/qq/cloud",
+    keywords: [
+      "Sparse Q–Q cloud",
+      "Distributions",
+      "qq",
+      "diagnostics",
+      "distribution",
+      "quantiles",
+    ],
+    exact: ["Sparse Q–Q cloud"],
+  },
+  {
     id: "example:qq:normal",
     kind: "example",
     title: "Sample quantiles against the normal",
@@ -21719,6 +21773,23 @@ export const DOCS_SEARCH_INDEX = [
       "distribution",
     ],
     exact: ["Sample quantiles against the normal"],
+  },
+  {
+    id: "example:qq_line:match",
+    kind: "example",
+    title: "Q–Q reference line",
+    summary:
+      "Thick line through the sample/theoretical quartile match — the mark that reads at index thumbnail size.",
+    href: "/examples/qq_line/match",
+    keywords: [
+      "Q–Q reference line",
+      "Distributions",
+      "qq_line",
+      "qq-line",
+      "diagnostics",
+      "distribution",
+    ],
+    exact: ["Q–Q reference line"],
   },
   {
     id: "example:raster:grid",
@@ -21779,6 +21850,16 @@ export const DOCS_SEARCH_INDEX = [
       "paint",
     ],
     exact: ["A ribbon with gradient fill, stroke and glow"],
+  },
+  {
+    id: "example:rug:ticks",
+    kind: "example",
+    title: "Bottom-edge rug ticks",
+    summary:
+      "Ten long thick ticks along the panel bottom — the marginal mark that reads at index thumbnail size.",
+    href: "/examples/rug/ticks",
+    keywords: ["Bottom-edge rug ticks", "Annotations & rules", "rug", "distribution", "marginal"],
+    exact: ["Bottom-edge rug ticks"],
   },
   {
     id: "example:rule:annotation",
@@ -21943,6 +22024,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Cocoa percent against bar rating"],
   },
   {
+    id: "example:spoke:rays",
+    kind: "example",
+    title: "Eight rays from one origin",
+    summary:
+      "Eight long thick spokes at equal angles — the mark shape that reads at index thumbnail size.",
+    href: "/examples/spoke/rays",
+    keywords: ["Eight rays from one origin", "Lines & rules", "spoke", "vector", "angle", "radius"],
+    exact: ["Eight rays from one origin"],
+  },
+  {
     id: "example:spoke:vector-field",
     kind: "example",
     title: "Direction and length from each point",
@@ -21968,6 +22059,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/examples/step/ecdf",
     keywords: ["Step ECDF of paired differences", "Lines & time", "step", "ecdf", "line", "geom"],
     exact: ["Step ECDF of paired differences"],
+  },
+  {
+    id: "example:step:stairs",
+    kind: "example",
+    title: "Thick staircase",
+    summary:
+      "Five vertices joined with hv steps — the stair mark that reads at index thumbnail size.",
+    href: "/examples/step/stairs",
+    keywords: ["Thick staircase", "Lines & time", "step", "line", "stairs"],
+    exact: ["Thick staircase"],
   },
   {
     id: "example:text:labels",
