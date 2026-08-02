@@ -83,6 +83,34 @@ export function bwNRD0(sorted: Float64Array): number {
 
 const INV_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI);
 
+/** Exact direct kernel sum over the ±8·bw window (small groups). */
+function directWindowDensities(
+  sorted: Float64Array,
+  sortedW: Float64Array | null,
+  bw: number,
+  from: number,
+  step: number,
+  gridN: number,
+  window: number,
+  densities: Float64Array,
+): void {
+  const nx = sorted.length;
+  let lo = 0;
+  for (let k = 0; k < gridN; k++) {
+    const x0 = from + k * step;
+    while (lo < nx && sorted[lo]! < x0 - window) lo++;
+    let d = 0;
+    for (let j = lo; j < nx; j++) {
+      const v = sorted[j]!;
+      if (v > x0 + window) break;
+      const z = (x0 - v) / bw;
+      const kern = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
+      d += (sortedW === null ? 1 / nx : sortedW[j]!) * kern;
+    }
+    densities[k] = d;
+  }
+}
+
 export function statDensity(input: DensityStatInput): DensityStatResult {
   const { x, groups, weights } = input;
   const params = input.params ?? {};
@@ -194,20 +222,7 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
         densities[k] = d;
       }
     } else {
-      let lo = 0;
-      for (let k = 0; k < gridN; k++) {
-        const x0 = from + k * step;
-        while (lo < nx && sorted[lo]! < x0 - window) lo++;
-        let d = 0;
-        for (let j = lo; j < nx; j++) {
-          const v = sorted[j]!;
-          if (v > x0 + window) break;
-          const z = (x0 - v) / bw;
-          const kern = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
-          d += (sortedW === null ? 1 / nx : sortedW[j]!) * kern;
-        }
-        densities[k] = d;
-      }
+      directWindowDensities(sorted, sortedW, bw, from, step, gridN, window, densities);
     }
 
     let maxDensity = 0;
