@@ -71,7 +71,7 @@ describe("source-backed columnar datum resolution", () => {
     const store = model.candidates;
     expect(store.size).toBe(ROW_COUNT);
     const facts = Array.from({ length: store.size }, (_, id) => store.candidate(id));
-    // Golden tuples: [xValue, yValue, sizeValue, alphaValue, seriesRank, seriesId]
+    // Golden tuples: [xValue, yValue, sizeValue, alphaValue, seriesRank]
     // pinned from actual store behavior (both resolver paths agree).
     const golden: (CellValue | undefined)[][] = facts.map((fact) => [
       fact?.xValue,
@@ -79,14 +79,21 @@ describe("source-backed columnar datum resolution", () => {
       fact?.sizeValue,
       fact?.alphaValue,
       fact?.seriesRank,
-      fact?.seriesId,
     ]);
     expect(golden.slice(0, 4)).toEqual([
-      [0, 0, 1, 0.2, 0, 1],
-      [1, 7, 2, 0.30000000000000004, 1, 1],
-      [2, 14, 3, 0.4, 2, 2],
-      [3, 21, 4, 0.5, 0, 3],
+      [0, 0, 1, 0.2, 0],
+      [1, 7, 2, 0.30000000000000004, 1],
+      [2, 14, 3, 0.4, 2],
+      [3, 21, 4, 0.5, 0],
     ]);
+    // seriesId flows from a process-global interner, so its absolute value is
+    // test-order-dependent; pin shape (non-negative int) plus the row count.
+    const seriesIds = facts.map((fact) => fact?.seriesId);
+    expect(seriesIds).toHaveLength(ROW_COUNT);
+    for (const id of seriesIds) {
+      expect(typeof id).toBe("number");
+      expect(id).toBeGreaterThanOrEqual(0);
+    }
     // Color field drives ordinal series ranks: c0/c1/c2 cycle → ranks 0/1/2.
     expect(facts.map((fact) => fact?.seriesRank)).toEqual(
       Array.from({ length: ROW_COUNT }, (_, i) => i % 3),
