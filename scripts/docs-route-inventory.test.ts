@@ -345,16 +345,19 @@ describe("docs route inventory", () => {
       "interaction/facet-intervals",
       "interaction/linked-views",
     ] as const) {
-      expect(createDocsRouteInventory().find((entry) => entry.path === `/examples/${id}`)).toEqual({
-        path: `/examples/${id}`,
-        title: expect.stringContaining("— ggsvelte gallery"),
-        description: expect.any(String),
-        canonicalPath: `/examples/${id}`,
-        kind: "page",
-        index: true,
-        sitemap: true,
-        shell: "site",
-      });
+      const exposition = createDocsRouteInventory().find(
+        (entry) => entry.path === `/examples/${id}`,
+      );
+      expect(exposition).toBeDefined();
+      if (exposition === undefined) continue;
+      expect(exposition.path).toBe(`/examples/${id}`);
+      expect(exposition.canonicalPath).toBe(`/examples/${id}`);
+      expect(exposition.kind).toBe("page");
+      expect(exposition.index).toBe(true);
+      expect(exposition.sitemap).toBe(true);
+      expect(exposition.shell).toBe("site");
+      expect(exposition.title.endsWith("— ggsvelte gallery")).toBe(true);
+      expect(exposition.description.trim().length).toBeGreaterThan(0);
     }
   });
 
