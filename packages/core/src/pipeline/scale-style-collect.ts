@@ -85,9 +85,16 @@ export function collectStyleValues(input: {
       anyField = true;
       anyIndexable = true;
       if (catalogTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
-      for (const value of catalogTable.column(mapped.field)) {
-        indexableKeys.add(encodeKey(value));
-        add(value);
+      // One encodeKey per row (not two — indexableKeys and the catalog
+      // dedupe keyed separately); this walk dominates mapped-style profiles.
+      const column = catalogTable.column(mapped.field);
+      for (let i = 0; i < column.length; i++) {
+        const key = encodeKey(column[i]!);
+        indexableKeys.add(key);
+        if (!seen.has(key)) {
+          seen.add(key);
+          catalog.push(column[i]!);
+        }
       }
     }
     if (mapped.scaledConstant !== null) {
