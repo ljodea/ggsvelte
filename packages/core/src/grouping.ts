@@ -133,14 +133,12 @@ function canonicalGroupsSingleColumn(
   let kind: "string" | "number" | "boolean" | "bigint" | "null" | null = null;
   for (let i = 0; i < n; i++) {
     const v = column[i]!;
+    const t = typeof v;
     const vKind =
       v === null
-        ? "null"
-        : typeof v === "string" ||
-            typeof v === "number" ||
-            typeof v === "boolean" ||
-            typeof v === "bigint"
-          ? typeof v
+        ? ("null" as const)
+        : t === "string" || t === "number" || t === "boolean" || t === "bigint"
+          ? t
           : null;
     if (vKind === null) return null; // Date (or any object): epoch-ms grouping
     if (kind === null) kind = vKind;
