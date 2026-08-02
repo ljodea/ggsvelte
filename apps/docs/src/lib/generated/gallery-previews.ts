@@ -123,6 +123,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "bcbaa70cba1fc891c1f1a3dc9d65261445b6c18bc8562550dccbd9712998e197",
   },
   {
+    id: "crossbar/boxes",
+    filename: "crossbar-boxes-light.png",
+    path: "/previews/crossbar-boxes-light.png",
+    sha256: "d7005d533050a62ab822d5663bd9b8060da25b2286ed1eca1507f732a94845d7",
+  },
+  {
     id: "curve/connectors",
     filename: "curve-connectors-light.png",
     path: "/previews/curve-connectors-light.png",
@@ -151,6 +157,12 @@ export const GALLERY_PREVIEWS = [
     filename: "dotplot-histodot-light.png",
     path: "/previews/dotplot-histodot-light.png",
     sha256: "636553aae59e2c7d06c43b7d5b078d620061732d8c71560ab6ff5ba957adee07",
+  },
+  {
+    id: "errorbar/caps",
+    filename: "errorbar-caps-light.png",
+    path: "/previews/errorbar-caps-light.png",
+    sha256: "f232ca152874d8b4306b1c6439bdfb5dc0328acf66310d21bff65b5a459e6019",
   },
   {
     id: "errorbar/mean-se",
@@ -279,6 +291,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "83398f628cf7ed1eb80857f0dcca157927e183172d67a2ce97486803e1f14049",
   },
   {
+    id: "linerange/stems",
+    filename: "linerange-stems-light.png",
+    path: "/previews/linerange-stems-light.png",
+    sha256: "0958c1a7195d001f16489ac74d888c375752fa115d1ddf283328c0f0dee2f432",
+  },
+  {
     id: "map/choropleth",
     filename: "map-choropleth-light.png",
     path: "/previews/map-choropleth-light.png",
@@ -397,6 +415,12 @@ export const GALLERY_PREVIEWS = [
     filename: "point-void-chrome-light.png",
     path: "/previews/point-void-chrome-light.png",
     sha256: "c2d830e1b567cf25f2022a258611454a85f024b8991f773d90b60d4c36273d79",
+  },
+  {
+    id: "pointrange/midpoints",
+    filename: "pointrange-midpoints-light.png",
+    path: "/previews/pointrange-midpoints-light.png",
+    sha256: "5c44493e2ba5b9da11cb83d536a95c567ea220ef9d106365af4e025474c2de91",
   },
   {
     id: "polygon/regions",

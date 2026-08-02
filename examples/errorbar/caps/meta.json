@@ -1,0 +1,6 @@
+{
+  "title": "Capped error bars",
+  "description": "Three tall identity intervals with end caps — the mark shape that reads at index thumbnail size.",
+  "tags": ["errorbar", "identity", "caps", "ymin", "ymax"],
+  "docsSection": "Statistical summaries"
+}

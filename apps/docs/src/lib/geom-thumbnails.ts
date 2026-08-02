@@ -32,11 +32,13 @@ export const GEOM_THUMBNAIL_EXAMPLE = {
   quantile: "point/quantile-lines",
   boxplot: "boxplot/by-category",
   density: "density/overlay",
-  errorbar: "errorbar/mean-se",
-  // Interval family shares the errorbar specimen until dedicated examples land.
-  linerange: "errorbar/mean-se",
-  pointrange: "errorbar/mean-se",
-  crossbar: "errorbar/mean-se",
+  // Dedicated sparse identity specimens so caps / bare stem / mid point /
+  // interval box each read at the 96×96 geoms-index crop (they used to share
+  // errorbar/mean-se and looked identical).
+  errorbar: "errorbar/caps",
+  linerange: "linerange/stems",
+  pointrange: "pointrange/midpoints",
+  crossbar: "crossbar/boxes",
   rect: "rect/regions",
   tile: "tile/heatmap",
   raster: "raster/grid",

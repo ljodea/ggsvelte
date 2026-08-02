@@ -1,0 +1,6 @@
+{
+  "title": "Interval boxes with mid line",
+  "description": "Three tall identity boxes with a mid horizontal line — crossbar's mark shape at index thumbnail size.",
+  "tags": ["crossbar", "identity", "box", "ymin", "ymax"],
+  "docsSection": "Statistical summaries"
+}

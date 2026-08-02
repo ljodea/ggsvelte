@@ -1508,6 +1508,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1551,6 +1556,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1592,6 +1602,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -12520,6 +12535,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/crossbar/boxes",
+    title: "Interval boxes with mid line — ggsvelte gallery",
+    description:
+      "Three tall identity boxes with a mid horizontal line — crossbar's mark shape at index thumbnail size.",
+    canonicalPath: "/examples/crossbar/boxes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/curve/connectors",
     title: "Paired points joined by a curve — ggsvelte gallery",
     description:
@@ -12568,6 +12594,17 @@ export const DOCS_ROUTES = [
     description:
       "Dotplots when the sample is small enough that every observation should stay visible.",
     canonicalPath: "/examples/dotplot/histodot",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/errorbar/caps",
+    title: "Capped error bars — ggsvelte gallery",
+    description:
+      "Three tall identity intervals with end caps — the mark shape that reads at index thumbnail size.",
+    canonicalPath: "/examples/errorbar/caps",
     kind: "page",
     index: true,
     sitemap: true,
@@ -12792,6 +12829,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/linerange/stems",
+    title: "Bare vertical stems — ggsvelte gallery",
+    description:
+      "Three tall identity stems without end caps — linerange's mark shape at index thumbnail size.",
+    canonicalPath: "/examples/linerange/stems",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/map/choropleth",
     title: "Snow's outbreak by nearest pump — ggsvelte gallery",
     description:
@@ -12998,6 +13046,17 @@ export const DOCS_ROUTES = [
     title: "A sparkline without axes or grid — ggsvelte gallery",
     description: "Void theme when the mark alone is the chart.",
     canonicalPath: "/examples/point/void-chrome",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/pointrange/midpoints",
+    title: "Stem plus mid point — ggsvelte gallery",
+    description:
+      "Three tall identity stems with a large mid point — pointrange's mark shape at index thumbnail size.",
+    canonicalPath: "/examples/pointrange/midpoints",
     kind: "page",
     index: true,
     sitemap: true,
