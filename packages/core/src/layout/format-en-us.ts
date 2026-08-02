@@ -28,8 +28,8 @@ function roundShortestDecimal(abs: number, decimals: number): string | null {
   }
   // Combined kept digits (integer part + kept fraction) as a mutable array.
   const kept = intStr + fracStr.slice(0, decimals);
-  const digits = Array.from(kept, (ch) => ch.codePointAt(0) - 48);
-  if (fracStr.codePointAt(decimals) >= 53) {
+  const digits = Array.from(kept, (ch) => ch.codePointAt(0)! - 48);
+  if (fracStr.codePointAt(decimals)! >= 53) {
     // '5' — round half-up, like ICU on the shortest decimal form.
     let i = digits.length - 1;
     while (i >= 0) {

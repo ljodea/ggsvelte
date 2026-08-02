@@ -124,12 +124,18 @@ function fieldDiscreteness(
  * primitive types, which cellKey would separate) falls back to the
  * canonical key path.
  */
-function canonicalGroupsSingleColumn(
+/**
+ * Raw-value interning for one column: per-row intern ids (first-seen
+ * order) plus the distinct count, or null when the column needs cellKey
+ * semantics (Date epoch-ms grouping, or mixed primitive types that the
+ * typeof-tagged key would separate).
+ */
+function internPrimitiveColumn(
   n: number,
   column: readonly CellValue[],
-): { groups: number[]; groupCount: number } | null {
-  const groups = Array.from<number>({ length: n });
-  const ids = new Map<CellValue, number>();
+): { ids: Uint32Array; count: number } | null {
+  const ids = new Uint32Array(n);
+  const interner = new Map<CellValue, number>();
   let kind: "string" | "number" | "boolean" | "bigint" | "null" | null = null;
   for (let i = 0; i < n; i++) {
     const v = column[i]!;
@@ -143,10 +149,57 @@ function canonicalGroupsSingleColumn(
     if (vKind === null) return null; // Date (or any object): epoch-ms grouping
     if (kind === null) kind = vKind;
     else if (kind !== vKind) return null; // mixed types: cellKey separates them
-    let id = ids.get(v);
+    let id = interner.get(v);
+    if (id === undefined) {
+      id = interner.size;
+      interner.set(v, id);
+    }
+    ids[i] = id;
+  }
+  return { ids, count: interner.size };
+}
+
+function canonicalGroupsSingleColumn(
+  n: number,
+  column: readonly CellValue[],
+): { groups: number[]; groupCount: number } | null {
+  const interned = internPrimitiveColumn(n, column);
+  if (interned === null) return null;
+  return { groups: Array.from(interned.ids), groupCount: interned.count };
+}
+
+/**
+ * Multi-column interaction without per-row key strings: intern each column
+ * raw, then fold the per-row intern ids into one numeric key (strides =
+ * per-column distinct counts). The fold preserves tuple identity exactly,
+ * so first-seen group numbering matches the canonical join path; any
+ * non-primitive column or an implausibly wide product falls back to the
+ * canonical key path.
+ */
+function canonicalGroupsMultiColumn(
+  n: number,
+  columns: readonly (readonly CellValue[])[],
+): { groups: number[]; groupCount: number } | null {
+  const interned: { ids: Uint32Array; count: number }[] = [];
+  let product = 1;
+  for (const column of columns) {
+    const one = internPrimitiveColumn(n, column);
+    if (one === null) return null;
+    product *= Math.max(1, one.count);
+    if (product > Number.MAX_SAFE_INTEGER / Math.max(1, n)) return null;
+    interned.push(one);
+  }
+  const groups = Array.from<number>({ length: n });
+  const ids = new Map<number, number>();
+  for (let i = 0; i < n; i++) {
+    let key = 0;
+    for (const { ids: columnIds, count } of interned) {
+      key = key * Math.max(1, count) + columnIds[i]!;
+    }
+    let id = ids.get(key);
     if (id === undefined) {
       id = ids.size;
-      ids.set(v, id);
+      ids.set(key, id);
     }
     groups[i] = id;
   }
@@ -249,12 +302,17 @@ export function deriveGroups(
   }
 
   const constantKey = constantParts.join(SEP);
-  const single =
-    discreteColumns.length === 1 && constantKey === ""
-      ? canonicalGroupsSingleColumn(n, discreteColumns[0]!.column)
+  const fast =
+    constantKey === ""
+      ? discreteColumns.length === 1
+        ? canonicalGroupsSingleColumn(n, discreteColumns[0]!.column)
+        : canonicalGroupsMultiColumn(
+            n,
+            discreteColumns.map(({ column }) => column),
+          )
       : null;
   const { groups, groupCount } =
-    single ??
+    fast ??
     canonicalGroups(n, (i) => {
       const parts = discreteColumns.map(({ column }) => cellKey(column[i]!));
       if (constantKey !== "") parts.push(constantKey);
