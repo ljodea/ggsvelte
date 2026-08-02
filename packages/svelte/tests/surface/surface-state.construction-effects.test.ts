@@ -5,6 +5,7 @@ import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import {
   continuousSpec,
   firstCandidate,
@@ -15,7 +16,7 @@ import {
   fromAny,
   panelCenterClient,
   pointerEvent,
-  type SurfaceStateDeps,
+  type SurfaceStateOptions,
   type InteractionTool,
 } from "./surface-state.harness.js";
 
@@ -44,7 +45,7 @@ describe("createSurfaceState construction", () => {
 
     // Minimal stubs so construction can close the cycle without real siblings.
     const stubInspection = fromAny<
-      SurfaceStateDeps["inspection"] extends () => infer R ? R : never
+      SurfaceStateOptions["inspection"] extends () => infer R ? R : never
     >({
       get inspection() {
         inspectionCalls++;
@@ -87,79 +88,85 @@ describe("createSurfaceState construction", () => {
       },
     });
 
-    const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
-      get committedInterval() {
-        intervalCalls++;
-        return null;
+    const stubInterval = fromAny<SurfaceStateOptions["interval"] extends () => infer R ? R : never>(
+      {
+        get committedInterval() {
+          intervalCalls++;
+          return null;
+        },
+        finishBrushSelect: () => {
+          intervalCalls++;
+        },
       },
-      finishBrushSelect: () => {
-        intervalCalls++;
-      },
-    });
+    );
 
-    const stubZoom = fromAny<SurfaceStateDeps["zoom"] extends () => infer R ? R : never>({
+    const stubZoom = fromAny<SurfaceStateOptions["zoom"] extends () => infer R ? R : never>({
       applyBrushZoom: () => {
         zoomCalls++;
       },
     });
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createSurfaceState({
-        model: () => model,
-        root: () => null,
-        toolProp: () => {
-          toolPropCalls++;
+      createSurfaceState(
+        testInteractionContext({
+          model: () => model,
+          root: () => null,
+          inspectConfig: () => config.inspect,
+          selectConfig: () => config.select,
+          ontoolchange: () => {
+            ontoolchangeCalls++;
+          },
+          candidateSemanticKeys: () => {
+            candidateSemanticKeysCalls++;
+            return [];
+          },
+          semanticKey: () => {
+            semanticKeyCalls++;
+            return null;
+          },
+          tooltipHovered: () => {
+            tooltipHoveredCalls++;
+            return false;
+          },
+          announce: () => {},
+        }),
+        {
+          toolProp: () => {
+            toolPropCalls++;
+          },
+          initialTool: () => config.initialTool,
+          availableTools: () => {
+            availableToolsCalls++;
+            return config.availableTools;
+          },
+          pointSelectEnabled: () => {
+            pointSelectEnabledCalls++;
+            return false;
+          },
+          surfaceInteractive: () => {
+            surfaceInteractiveCalls++;
+            return true;
+          },
+          inspection: () => {
+            inspectionCalls++;
+            return stubInspection;
+          },
+          interval: () => {
+            intervalCalls++;
+            return stubInterval;
+          },
+          zoom: () => {
+            zoomCalls++;
+            return stubZoom;
+          },
+          emitSelection: () => {
+            emitSelectionCalls++;
+          },
+          togglePointKeys: () => {
+            togglePointKeysCalls++;
+          },
         },
-        initialTool: () => config.initialTool,
-        availableTools: () => {
-          availableToolsCalls++;
-          return config.availableTools;
-        },
-        inspectConfig: () => config.inspect,
-        selectConfig: () => config.select,
-        pointSelectEnabled: () => {
-          pointSelectEnabledCalls++;
-          return false;
-        },
-        ontoolchange: () => {
-          ontoolchangeCalls++;
-        },
-        surfaceInteractive: () => {
-          surfaceInteractiveCalls++;
-          return true;
-        },
-        candidateSemanticKeys: () => {
-          candidateSemanticKeysCalls++;
-          return [];
-        },
-        inspection: () => {
-          inspectionCalls++;
-          return stubInspection;
-        },
-        interval: () => {
-          intervalCalls++;
-          return stubInterval;
-        },
-        zoom: () => {
-          zoomCalls++;
-          return stubZoom;
-        },
-        emitSelection: () => {
-          emitSelectionCalls++;
-        },
-        semanticKey: () => {
-          semanticKeyCalls++;
-          return null;
-        },
-        togglePointKeys: () => {
-          togglePointKeysCalls++;
-        },
-        tooltipHovered: () => {
-          tooltipHoveredCalls++;
-          return false;
-        },
-        announce: () => {},
-      }),
+      ),
     );
 
     // Public accessors only — brushing is private. Sibling controllers must
@@ -211,7 +218,7 @@ describe("createSurfaceState construction", () => {
     });
     let inspectConfigCalls = 0;
     const stubInspection = fromAny<
-      SurfaceStateDeps["inspection"] extends () => infer R ? R : never
+      SurfaceStateOptions["inspection"] extends () => infer R ? R : never
     >({
       get inspection() {
         return null;
@@ -230,45 +237,51 @@ describe("createSurfaceState construction", () => {
         return null;
       },
     });
-    const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
-      finishBrushSelect: () => {},
-      get committedInterval() {
-        return null;
+    const stubInterval = fromAny<SurfaceStateOptions["interval"] extends () => infer R ? R : never>(
+      {
+        finishBrushSelect: () => {},
+        get committedInterval() {
+          return null;
+        },
       },
-    });
-    const stubZoom = fromAny<SurfaceStateDeps["zoom"] extends () => infer R ? R : never>({
+    );
+    const stubZoom = fromAny<SurfaceStateOptions["zoom"] extends () => infer R ? R : never>({
       applyBrushZoom: () => {},
     });
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createSurfaceState({
-        model: () => model,
-        root: () => null,
-        toolProp: () => {
-          /* uncontrolled */
+      createSurfaceState(
+        testInteractionContext({
+          model: () => model,
+          root: () => null,
+          inspectConfig: () => {
+            inspectConfigCalls++;
+            return config.inspect;
+          },
+          selectConfig: () => config.select,
+          ontoolchange: () => {
+            /* no controlled callback */
+          },
+          candidateSemanticKeys: () => [],
+          semanticKey: () => null,
+          tooltipHovered: () => false,
+          announce: () => {},
+        }),
+        {
+          toolProp: () => {
+            /* uncontrolled */
+          },
+          initialTool: () => config.initialTool,
+          availableTools: () => config.availableTools,
+          pointSelectEnabled: () => false,
+          surfaceInteractive: () => true,
+          inspection: () => stubInspection,
+          interval: () => stubInterval,
+          zoom: () => stubZoom,
+          emitSelection: () => {},
+          togglePointKeys: () => {},
         },
-        initialTool: () => config.initialTool,
-        availableTools: () => config.availableTools,
-        inspectConfig: () => {
-          inspectConfigCalls++;
-          return config.inspect;
-        },
-        selectConfig: () => config.select,
-        pointSelectEnabled: () => false,
-        ontoolchange: () => {
-          /* no controlled callback */
-        },
-        surfaceInteractive: () => true,
-        candidateSemanticKeys: () => [],
-        inspection: () => stubInspection,
-        interval: () => stubInterval,
-        zoom: () => stubZoom,
-        emitSelection: () => {},
-        semanticKey: () => null,
-        togglePointKeys: () => {},
-        tooltipHovered: () => false,
-        announce: () => {},
-      }),
+      ),
     );
 
     flushSync();

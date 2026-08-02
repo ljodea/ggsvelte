@@ -126,7 +126,6 @@ describe("createPlotZoomState applyBrushZoom", () => {
     const flipped = reactiveBox(false);
     const { state, destroy } = mountZoomController({
       model: () => contModel.value,
-      coordFlipped: () => flipped.value,
       onzoom: () => (event) => {
         zoomEvents.push(event);
       },

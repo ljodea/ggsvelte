@@ -19,18 +19,17 @@
  *
  * Scene-reconcile + coordinator disposal effects register inside this factory.
  */
-import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
+import type { CandidateFacts, CellValue } from "@ggsvelte/core";
 
 import { panelBoundsFrom, type PanelBounds } from "../scene/geometry.js";
 
 import { createInspectionCoordinator } from "./coordinator.js";
+import type { InteractionContext } from "../interaction/interaction-context.svelte.js";
 import type { createInteractionReducer } from "../interaction/reducer.js";
 import type {
   InteractionSource,
   PlotInspection,
   PlotInspectionChange,
-  PlotInteractionEvent,
-  ResolvedInteractionConfig,
 } from "../interaction/interaction.js";
 import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
 import { plotTooltipDomId } from "../assembly/layout.js";
@@ -68,36 +67,23 @@ import {
 /** Component-held reducer shape — factory-only export from interaction/reducer. */
 type InteractionReducer = ReturnType<typeof createInteractionReducer>;
 
-export type InspectionStateDeps = {
-  model: () => RenderModel | null;
-  /**
-   * Shared interaction reducer. Prefer a concrete instance from the assembly
-   * (constructed before this factory) so inspection does not close over surface.
-   */
-  reducer: InteractionReducer | (() => InteractionReducer);
-  inspectConfig: () => ResolvedInteractionConfig["inspect"];
-  inspectEnabled: () => boolean;
-  dataIdentityEpoch: () => string;
-  /**
-   * Semantic key at row index — closes over the later semantic-key service.
-   * Handler-only (coordinator resolve paths); never invoked at construction.
-   */
-  keyAt: (index: number) => PropertyKey | null;
-  root: () => HTMLDivElement | null;
-  captureSurface: () => HTMLDivElement | null;
-  plotId: () => string;
-  tooltipHovered: () => boolean;
-  clearTooltipHovered: () => void;
-  oninspect: () => ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined;
-  oninteraction: () =>
-    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
-    | undefined;
-  /** Stable sinks over the announcer. */
-  announce: (message: string) => void;
-  clearAnnouncement: () => void;
+/**
+ * Inspection-specific ports beyond the shared InteractionContext. The reducer
+ * is hoisted by the assembly (constructed before this factory) so inspection
+ * does not close over surface.
+ */
+export type InspectionStateOptions = {
+  /** Shared interaction reducer (concrete instance from the assembly). */
+  readonly reducer: InteractionReducer | (() => InteractionReducer);
+  readonly inspectEnabled: () => boolean;
+  readonly dataIdentityEpoch: () => string;
+  readonly plotId: () => string;
+  readonly clearTooltipHovered: () => void;
+  /** Stable sink over the announcer. */
+  readonly clearAnnouncement: () => void;
 };
 
-function resolveReducer(reducer: InspectionStateDeps["reducer"]): InteractionReducer {
+function resolveReducer(reducer: InspectionStateOptions["reducer"]): InteractionReducer {
   return typeof reducer === "function" ? reducer() : reducer;
 }
 
@@ -164,8 +150,11 @@ export type InspectionState = {
  * Construction-order note: deps must not be invoked during construction —
  * construction-read discipline enforced by the armed-getter suite.
  */
-export function createInspectionState(deps: InspectionStateDeps): InspectionState {
-  const reducerOf = (): InteractionReducer => resolveReducer(deps.reducer);
+export function createInspectionState(
+  context: InteractionContext,
+  options: InspectionStateOptions,
+): InspectionState {
+  const reducerOf = (): InteractionReducer => resolveReducer(options.reducer);
   let inspection = $state<PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null>(
     null,
   );
@@ -189,7 +178,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   // construction (armed-getter suite). setInspection is a function
   // declaration (hoisted) so the apply-pending re-entry closes correctly.
   const pointerQueue = createPointerInspectQueue({
-    model: () => deps.model(),
+    model: () => context.model(),
     reducer: () => reducerOf(),
     inspectionState: () => (inspection === null ? "none" : inspection.state),
     setInspection: (candidate, source, state, concreteMode) => {
@@ -202,10 +191,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   // candidate), not a re-hit of focus.anchor geometry (#787). Bounds come
   // from the semantic viewport — no scene.panels.find round-trip.
   const inspectionPanel = $derived.by((): InspectionPanelBounds | null => {
-    if (inspection === null || deps.model() === null) return null;
+    if (inspection === null || context.model() === null) return null;
     const panelId = inspection.panelId;
     if (panelId === null) return null;
-    const viewportPanel = deps.model()!.viewport.panel(panelId);
+    const viewportPanel = context.model()!.viewport.panel(panelId);
     if (viewportPanel === null) return null;
     return { id: viewportPanel.id, ...panelBoundsFrom(viewportPanel.bounds) };
   });
@@ -216,7 +205,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
-    (index) => deps.keyAt(index),
+    (index) => context.keyAt(index),
   );
 
   let reconciledRun = -1;
@@ -227,9 +216,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     state: "transient" | "pinned" = "transient",
     concreteMode?: "exact" | "x" | "y" | "xy",
   ) {
-    const model = deps.model();
+    const model = context.model();
     if (model === null) throw new Error("Cannot resolve inspection without a render model");
-    const requested = deps.inspectConfig()?.mode ?? "auto";
+    const requested = context.inspectConfig()?.mode ?? "auto";
     const mode = resolveInspectionMode({
       concreteMode,
       requested,
@@ -241,13 +230,13 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       mode,
       state,
       source,
-      identityEpoch: deps.dataIdentityEpoch(),
+      identityEpoch: options.dataIdentityEpoch(),
       layoutEpoch: model.runId,
       completeness: resolveInspectionCompleteness({
         state,
-        hasCustomContent: deps.inspectConfig()?.content !== undefined,
-        hasInspectCallback: deps.oninspect() !== undefined,
-        hasInteractionCallback: deps.oninteraction() !== undefined,
+        hasCustomContent: context.inspectConfig()?.content !== undefined,
+        hasInspectCallback: context.oninspect() !== undefined,
+        hasInteractionCallback: context.oninteraction() !== undefined,
       }),
     });
   }
@@ -264,14 +253,14 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     });
     if (emit.type === "skip") return;
     if (emit.updateFingerprint !== null) lastInspectionFingerprint = emit.updateFingerprint;
-    deps.oninspect()?.(next);
-    deps.oninteraction()?.(next);
+    context.oninspect()?.(next);
+    context.oninteraction()?.(next);
   }
 
   function inspectionLiveText(
     value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
   ): string {
-    return inspectionLiveTextFor(deps.model(), value);
+    return inspectionLiveTextFor(context.model(), value);
   }
 
   function setInspection(
@@ -288,7 +277,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         source,
       })
     )
-      deps.clearAnnouncement();
+      options.clearAnnouncement();
     // Direct applies (keyboard/touch/programmatic) must cancel queued hover /
     // touch-move inspect frames so a pending rAF cannot override the apply
     // (e.g. touch tap after a sub-threshold touch move scheduled inspect).
@@ -300,7 +289,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       hasHit: candidate !== null,
       requestedState: state,
       currentState: inspection === null ? "none" : inspection.state,
-      tooltipHovered: deps.tooltipHovered(),
+      tooltipHovered: context.tooltipHovered(),
     });
     switch (action.type) {
       case "ignore":
@@ -324,7 +313,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           setInspection(null, source);
           return;
         }
-        const runId = deps.model()?.runId ?? 0;
+        const runId = context.model()?.runId ?? 0;
         // Same-candidate dismiss latch (Escape on transient).
         if (
           dismissedCandidateId === resolved.seed.id &&
@@ -375,19 +364,19 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         inspectionSeed = resolved.seed;
         if (nextState === "transient") inspectionCoordinator.release("pinned");
         if (shouldAnnounceUnpin({ state: nextState, source }))
-          deps.announce(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
+          context.announce(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
         if (resolved.semanticChanged)
           emitInspection(resolved.snapshot, resolved.semanticFingerprint);
         if (
           shouldFocusPinnedInteractiveTooltip({
             state: nextState,
-            contentMode: deps.inspectConfig()?.contentMode,
+            contentMode: context.inspectConfig()?.contentMode,
           })
         )
           queueMicrotask(() =>
-            deps
+            context
               .root()
-              ?.querySelector<HTMLElement>(`#${CSS.escape(plotTooltipDomId(deps.plotId()))}`)
+              ?.querySelector<HTMLElement>(`#${CSS.escape(plotTooltipDomId(options.plotId()))}`)
               ?.focus(),
           );
       }
@@ -420,7 +409,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     // Latch only when dismissing a *transient* inspection (Escape path).
     if (inspection?.state === "transient" && inspectionSeed !== null) {
       dismissedCandidateId = inspectionSeed.id;
-      dismissedRunId = deps.model()?.runId ?? null;
+      dismissedRunId = context.model()?.runId ?? null;
     } else if (inspection?.state === "pinned") {
       clearDismissedLatch();
     }
@@ -429,12 +418,12 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     if (plan.emitClear) emitInspection({ type: "inspect", phase: "clear", source });
     inspection = null;
     inspectionSeed = null;
-    if (plan.clearTooltipHovered) deps.clearTooltipHovered();
+    if (plan.clearTooltipHovered) options.clearTooltipHovered();
     if (plan.coordinator === "invalidate") inspectionCoordinator.invalidate();
     else inspectionCoordinator.release("pinned");
     // Cross-module clearBrush / returnToInspect: caller applies via
     // applyInspectionDismissSideEffects (surface / transition owner).
-    if (plan.restoreFocus) queueMicrotask(() => deps.captureSurface()?.focus());
+    if (plan.restoreFocus) queueMicrotask(() => context.captureSurface()?.focus());
     return plan;
   }
 
@@ -444,21 +433,21 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
 
   function applyCandidateId(id: number | null): void {
     if (id === null) return;
-    const candidate = deps.model()?.candidates.candidate(id);
+    const candidate = context.model()?.candidates.candidate(id);
     if (candidate === null || candidate === undefined) return;
     activeCandidateId = id;
     setInspection(candidate, "keyboard", "transient");
   }
 
   function navigate(delta: number): void {
-    const store = deps.model()?.candidates;
+    const store = context.model()?.candidates;
     if (store === undefined || store.size === 0) return;
     const direction = delta < 0 ? "previous" : "next";
     applyCandidateId(store.traverse(activeCandidateId, direction, Math.abs(delta)));
   }
 
   function navigateDirection(dx: number, dy: number): void {
-    const store = deps.model()?.candidates;
+    const store = context.model()?.candidates;
     if (store === undefined || store.size === 0) return;
     if (inspection === null || activeCandidateId === null) {
       applyCandidateId(store.traverse(activeCandidateId, "next"));
@@ -469,7 +458,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   }
 
   function cycleCoincident(delta: number): void {
-    const store = deps.model()?.candidates;
+    const store = context.model()?.candidates;
     if (store === undefined || store.size === 0) return;
     if (inspection === null || activeCandidateId === null) {
       applyCandidateId(store.traverse(activeCandidateId, "next"));
@@ -503,9 +492,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   });
 
   $effect(() => {
-    const currentModel = deps.model();
+    const currentModel = context.model();
     const plan = planSceneInspectReconcile({
-      inspectionEnabled: deps.inspectEnabled(),
+      inspectionEnabled: options.inspectEnabled(),
       // Thunk: do not read `inspection` on the same-run skip path so hover
       // updates are not effect dependencies of scene-run reconcile.
       getInspectionState: () => (inspection === null ? "none" : inspection.state),
@@ -516,7 +505,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     // same-run skip does not subscribe to hover inspection updates.
     applySceneInspectReconcile(plan, {
       model: currentModel,
-      dataIdentityEpoch: deps.dataIdentityEpoch,
+      dataIdentityEpoch: options.dataIdentityEpoch,
       clearInspection() {
         inspection = null;
         inspectionSeed = null;

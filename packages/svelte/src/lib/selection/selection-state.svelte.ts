@@ -8,16 +8,9 @@
  * `commitPointSelection` is PRIVATE (no external caller — toggle/clear only).
  * Public API speaks PropertyKey; PublicKey casts stay at the host boundary.
  */
-import type { CellValue } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "../interaction/controller.svelte.js";
-import type {
-  InteractionSource,
-  PlotInteractionEvent,
-  PlotInteractionScope,
-  PlotSelection,
-  ResolvedInteractionConfig,
-} from "../interaction/interaction.js";
+import type { InteractionContext } from "../interaction/interaction-context.svelte.js";
+import type { InteractionSource, PlotSelection } from "../interaction/interaction.js";
 import { createScopedStore } from "../interaction/scoped-store.svelte.js";
 import { selectionAnnouncement } from "../assembly/labels.js";
 import {
@@ -29,20 +22,6 @@ import {
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
-
-export type SelectionStateDeps = {
-  interaction: () => PlotInteractionController<PropertyKey> | undefined;
-  resolvedInteractionScope: () => PlotInteractionScope;
-  /** Narrow getter over `interactionConfig.select`. */
-  selectConfig: () => ResolvedInteractionConfig["select"];
-  /** Deferred callback getters (handler-only; never construction). */
-  onselect: () => ((event: PlotSelection) => void) | undefined;
-  oninteraction: () =>
-    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
-    | undefined;
-  /** Stable sink; announcer is declared later — handler-only. */
-  announce: (message: string) => void;
-};
 
 export type SelectionState = {
   readonly effectiveSelectedKeys: readonly PropertyKey[];
@@ -59,11 +38,11 @@ export type SelectionState = {
  * Create the point-selection controller. Construction registers only the
  * `effectiveSelectedKeys` derived over interaction and scope.
  */
-export function createSelectionState(deps: SelectionStateDeps): SelectionState {
+export function createSelectionState(context: InteractionContext): SelectionState {
   const selectedKeys = createScopedStore<readonly PropertyKey[]>({
     initial: [],
-    controller: deps.interaction,
-    scope: deps.resolvedInteractionScope,
+    controller: context.interaction,
+    scope: context.resolvedInteractionScope,
     read: (controller, scope) => controller.selected(scope),
     write: (controller, next, scope, source) => {
       const transition = controller.setSelection(next, { scope, source });
@@ -94,9 +73,9 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
 
   function emitSelection(event: PlotSelection): void {
     const message = selectionAnnouncement(event);
-    if (message !== null) deps.announce(message);
-    deps.onselect()?.(event);
-    deps.oninteraction()?.(event);
+    if (message !== null) context.announce(message);
+    context.onselect()?.(event);
+    context.oninteraction()?.(event);
   }
 
   function togglePointKeys(keys: readonly PropertyKey[], source: InteractionSource): void {
@@ -104,7 +83,7 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
     const next = nextPointSelectionKeys(
       selectedKeys.value,
       keys,
-      deps.selectConfig()?.multiple ?? false,
+      context.selectConfig()?.multiple ?? false,
     );
     commitPointSelection(next, source);
   }

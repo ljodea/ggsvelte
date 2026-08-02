@@ -15,11 +15,12 @@ import type {
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import {
   createIntervalState,
-  type IntervalStateDeps,
+  type IntervalStateOptions,
 } from "../../src/lib/interval/interval-state.svelte.js";
 import type { ContinuousZoomDomains } from "../../src/lib/scene/geometry.js";
 import { buildIntervalSelection } from "../../src/lib/interval/interval.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { identityCandidateKeys, testInteractionContext } from "../helpers/interaction-context.js";
 import { modelFor } from "../helpers/model.js";
 
 const continuousRows = [
@@ -90,11 +91,8 @@ export function facetSpec(): PortableSpec {
     .spec();
 }
 
-/** Identity semantic keys — enough for local consumption without a host service. */
-export function identityCandidateKeys(candidate: CandidateFacts): PropertyKey[] {
-  if (candidate.rowIndex === null) return [];
-  return [String(candidate.rowIndex)];
-}
+/** Identity semantic keys — re-exported from the shared context helper. */
+export { identityCandidateKeys } from "../helpers/interaction-context.js";
 
 export function brushEvent(
   model: RenderModel,
@@ -137,7 +135,7 @@ export type IntervalHarness = {
 
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
- * getter (mirroring IntervalStateDeps). Tests that need reactivity pass
+ * getter (context + options split). Tests that need reactivity pass
  * getters over their own reactive boxes; omitted options get static defaults.
  */
 export function mountIntervalController(
@@ -147,11 +145,10 @@ export function mountIntervalController(
     resolvedInteractionScope?: () => PlotInteractionScope;
     selectConfig?: () => SelectConfig;
     effectiveZoomDomains?: () => ContinuousZoomDomains | null;
-    commitZoom?: IntervalStateDeps["commitZoom"];
-    coordFlipped?: () => boolean;
+    commitZoom?: IntervalStateOptions["commitZoom"];
     captureSurface?: () => HTMLDivElement | null;
     candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
-    consumptionCandidates?: IntervalStateDeps["consumptionCandidates"];
+    consumptionCandidates?: IntervalStateOptions["consumptionCandidates"];
     inspectionPanel?: () => Readonly<{ id: string }> | null;
     emitSelection?: (event: PlotSelection) => void;
     announce?: (message: string) => void;
@@ -160,37 +157,40 @@ export function mountIntervalController(
   const defaultModel = modelFor(continuousSpec());
 
   const { value: state, destroy } = withFlushedEffectRoot(() =>
-    createIntervalState({
-      model: options.model ?? (() => defaultModel),
-      interaction: options.interaction ?? noController,
-      resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
-      selectConfig: options.selectConfig ?? persistentSelect,
-      effectiveZoomDomains: options.effectiveZoomDomains ?? (() => null),
-      commitZoom: options.commitZoom ?? (() => {}),
-      coordFlipped: options.coordFlipped ?? (() => false),
-      captureSurface: options.captureSurface ?? (() => null),
-      candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
-      consumptionCandidates:
-        options.consumptionCandidates ??
-        (() => {
-          const currentModel = options.model?.() ?? defaultModel;
-          const candidates = [];
-          for (let id = 0; id < currentModel.candidates.size; id++) {
-            const candidate = currentModel.candidates.candidate(id);
-            if (candidate === null) continue;
-            candidates.push({
-              panelId: candidate.panelId,
-              xValue: candidate.xValue,
-              yValue: candidate.yValue,
-              keys: identityCandidateKeys(candidate),
-            });
-          }
-          return candidates;
-        }),
-      inspectionPanel: options.inspectionPanel ?? (() => null),
-      emitSelection: options.emitSelection ?? (() => {}),
-      announce: options.announce ?? (() => {}),
-    }),
+    createIntervalState(
+      testInteractionContext({
+        model: options.model ?? (() => defaultModel),
+        interaction: options.interaction ?? noController,
+        resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
+        selectConfig: options.selectConfig ?? persistentSelect,
+        captureSurface: options.captureSurface ?? (() => null),
+        candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
+        announce: options.announce ?? (() => {}),
+      }),
+      {
+        effectiveZoomDomains: options.effectiveZoomDomains ?? (() => null),
+        commitZoom: options.commitZoom ?? (() => {}),
+        consumptionCandidates:
+          options.consumptionCandidates ??
+          (() => {
+            const currentModel = options.model?.() ?? defaultModel;
+            const candidates = [];
+            for (let id = 0; id < currentModel.candidates.size; id++) {
+              const candidate = currentModel.candidates.candidate(id);
+              if (candidate === null) continue;
+              candidates.push({
+                panelId: candidate.panelId,
+                xValue: candidate.xValue,
+                yValue: candidate.yValue,
+                keys: identityCandidateKeys(candidate),
+              });
+            }
+            return candidates;
+          }),
+        inspectionPanel: options.inspectionPanel ?? (() => null),
+        emitSelection: options.emitSelection ?? (() => {}),
+      },
+    ),
   );
 
   return { state, destroy };

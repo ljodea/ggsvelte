@@ -8,6 +8,7 @@ import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
   applyInspect,
@@ -40,49 +41,53 @@ describe("createInspectionState construction", () => {
     const reducer = createInteractionReducer();
 
     const { value: state, destroy } = withEffectRoot(() =>
-      createInspectionState({
-        model: () => constructionModel,
-        reducer: () => {
-          reducerCalls++;
-          return reducer;
+      createInspectionState(
+        testInteractionContext({
+          model: () => constructionModel,
+          inspectConfig: defaultInspect,
+          keyAt: (index) => {
+            keyAtCalls++;
+            return String(index);
+          },
+          root: () => null,
+          captureSurface: () => {
+            captureSurfaceCalls++;
+            return null;
+          },
+          tooltipHovered: () => {
+            tooltipHoveredCalls++;
+            return false;
+          },
+          oninspect: () => {
+            oninspectCalls++;
+            return noInspect();
+          },
+          oninteraction: () => {
+            oninteractionCalls++;
+            return noInteraction();
+          },
+          announce: () => {},
+        }),
+        {
+          reducer: () => {
+            reducerCalls++;
+            return reducer;
+          },
+          inspectEnabled: () => {
+            inspectEnabledCalls++;
+            return true;
+          },
+          dataIdentityEpoch: () => "epoch-1",
+          plotId: () => {
+            plotIdCalls++;
+            return "plot";
+          },
+          clearTooltipHovered: () => {
+            clearTooltipHoveredCalls++;
+          },
+          clearAnnouncement: () => {},
         },
-        inspectConfig: defaultInspect,
-        inspectEnabled: () => {
-          inspectEnabledCalls++;
-          return true;
-        },
-        dataIdentityEpoch: () => "epoch-1",
-        keyAt: (index) => {
-          keyAtCalls++;
-          return String(index);
-        },
-        root: () => null,
-        captureSurface: () => {
-          captureSurfaceCalls++;
-          return null;
-        },
-        plotId: () => {
-          plotIdCalls++;
-          return "plot";
-        },
-        tooltipHovered: () => {
-          tooltipHoveredCalls++;
-          return false;
-        },
-        clearTooltipHovered: () => {
-          clearTooltipHoveredCalls++;
-        },
-        oninspect: () => {
-          oninspectCalls++;
-          return noInspect();
-        },
-        oninteraction: () => {
-          oninteractionCalls++;
-          return noInteraction();
-        },
-        announce: () => {},
-        clearAnnouncement: () => {},
-      }),
+      ),
     );
 
     expect(reducerCalls).toBe(0);

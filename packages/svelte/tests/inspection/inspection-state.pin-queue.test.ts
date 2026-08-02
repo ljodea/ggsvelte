@@ -8,6 +8,7 @@ import type { CandidateFacts, CellValue } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { testInteractionContext } from "../helpers/interaction-context.js";
 import {
   candidateHit,
   continuousSpec,
@@ -463,25 +464,29 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
     const stateTag = (): string => (controllerRef?.inspection === null ? "null" : "non-null");
 
     const handle = withFlushedEffectRoot(() => {
-      const controller = createInspectionState({
-        model: () => model,
-        reducer: () => createInteractionReducer(),
-        inspectConfig: defaultInspect,
-        inspectEnabled: () => true,
-        dataIdentityEpoch: () => "epoch-1",
-        keyAt: keyAtForModel(model),
-        root: () => null,
-        captureSurface: () => null,
-        plotId: () => "plot",
-        tooltipHovered: () => false,
-        clearTooltipHovered: () => {},
-        oninspect: () => (event) => {
-          if (event.phase === "clear") log.push(`emit-clear-inspection-${stateTag()}`);
+      const controller = createInspectionState(
+        testInteractionContext({
+          model: () => model,
+          inspectConfig: defaultInspect,
+          keyAt: keyAtForModel(model),
+          root: () => null,
+          captureSurface: () => null,
+          tooltipHovered: () => false,
+          oninspect: () => (event) => {
+            if (event.phase === "clear") log.push(`emit-clear-inspection-${stateTag()}`);
+          },
+          oninteraction: noInteraction,
+          announce: () => {},
+        }),
+        {
+          reducer: () => createInteractionReducer(),
+          inspectEnabled: () => true,
+          dataIdentityEpoch: () => "epoch-1",
+          plotId: () => "plot",
+          clearTooltipHovered: () => {},
+          clearAnnouncement: () => {},
         },
-        oninteraction: noInteraction,
-        announce: () => {},
-        clearAnnouncement: () => {},
-      });
+      );
       controllerRef = controller;
       return controller;
     });
