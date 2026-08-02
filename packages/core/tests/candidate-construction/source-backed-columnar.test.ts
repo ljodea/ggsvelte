@@ -15,7 +15,7 @@ import { aes, gg } from "@ggsvelte/spec";
 
 import { LineageStore } from "../../src/identity.ts";
 import { runPipeline } from "../../src/pipeline.ts";
-import type { CellValue } from "../../src/cell-value.ts";
+import type { CellValue } from "../../src/table-types.ts";
 
 const ROW_COUNT = 24;
 
