@@ -92,21 +92,32 @@ export function buildCandidateStoreIndexes(
   const epoch = options.epoch ?? 0;
   const flip = options.flip ?? false;
   const hitTolerance = options.hitTolerance ?? 3;
-  const batchList: number[] = [];
-  const primitiveList: number[] = [];
-  const panelList: number[] = [];
-  const rowList: number[] = [];
-  const seriesList: number[] = [];
-  const rankList: number[] = [];
-  const sourceList: number[] = [];
-  const lineageList: number[] = [];
-  const autoModeList: number[] = [];
-  const xList: number[] = [];
-  const yList: number[] = [];
-  const xTokenList: number[] = [];
-  const yTokenList: number[] = [];
-  const xDateList: number[] = [];
-  const yDateList: number[] = [];
+  const uninspectable = options.uninspectableLayers;
+  // Capacity-first construction: growable number[] buffers paid a push
+  // (with capacity doubling) plus a full typed-array conversion copy per
+  // candidate column. Upper-bound the candidate count up front and write
+  // the final typed arrays directly; trim to the exact count at the end.
+  let capacity = 0;
+  for (const batch of scene.batches) {
+    if (scene.panels[batch.panelIndex] === undefined) continue;
+    if (uninspectable?.has(batch.layerIndex) === true) continue;
+    capacity += primitiveCount(batch);
+  }
+  const batchIdsBuf = new Uint32Array(capacity);
+  const primitiveIdsBuf = new Uint32Array(capacity);
+  const panelIdsBuf = new Uint32Array(capacity);
+  const rowsBuf = new Uint32Array(capacity);
+  const seriesBuf = new Uint32Array(capacity);
+  const ranksBuf = new Uint32Array(capacity);
+  const sourcesBuf = new Uint32Array(capacity);
+  const lineagesBuf = new Uint32Array(capacity);
+  const autoModesBuf = new Uint8Array(capacity);
+  const xsBuf = new Float32Array(capacity);
+  const ysBuf = new Float32Array(capacity);
+  const xTokenIdsBuf = new Int32Array(capacity);
+  const yTokenIdsBuf = new Int32Array(capacity);
+  const xDatesBuf = new Uint8Array(capacity);
+  const yDatesBuf = new Uint8Array(capacity);
   const invalidX = new Map<number, CellValue>();
   const invalidY = new Map<number, CellValue>();
   // NaN / ±Infinity plot-px anchors make the traversal comparator's
@@ -170,8 +181,7 @@ export function buildCandidateStoreIndexes(
     return -1;
   };
 
-  const uninspectable = options.uninspectableLayers;
-
+  let n = 0;
   for (let batchIndex = 0; batchIndex < scene.batches.length; batchIndex++) {
     const batch = scene.batches[batchIndex]!;
     const panel = scene.panels[batch.panelIndex];
@@ -180,7 +190,7 @@ export function buildCandidateStoreIndexes(
     if (uninspectable?.has(batch.layerIndex) === true) continue;
     for (let primitiveIndex = 0; primitiveIndex < primitiveCount(batch); primitiveIndex++) {
       if (!isCandidatePrimitive(batch, primitiveIndex)) continue;
-      const candidateIndex = batchList.length;
+      const candidateIndex = n;
       const raw = batch.rowIndex[primitiveIndex] ?? NO_ROW;
       const rowIndex = raw === NO_ROW ? null : raw;
       const [lx, ly] = localAnchor(batch, primitiveIndex);
@@ -206,48 +216,53 @@ export function buildCandidateStoreIndexes(
       alphaValues.push(datum.alphaValue ?? null);
       shapeValues.push(datum.shapeValue ?? null);
       linetypeValues.push(datum.linetypeValue ?? null);
-      batchList.push(batchIndex);
-      primitiveList.push(primitiveIndex);
-      panelList.push(batch.panelIndex);
-      rowList.push(rowIndex ?? NO_ROW);
+      batchIdsBuf[n] = batchIndex;
+      primitiveIdsBuf[n] = primitiveIndex;
+      panelIdsBuf[n] = batch.panelIndex;
+      rowsBuf[n] = rowIndex ?? NO_ROW;
       const ax = panel.x + lx;
       const ay = panel.y + ly;
-      xList.push(ax);
-      yList.push(ay);
+      xsBuf[n] = ax;
+      ysBuf[n] = ay;
       if (!Number.isFinite(ax) || !Number.isFinite(ay)) anyNonFiniteAnchor = true;
       const xToken = remember(xValue);
       const yToken = remember(yValue);
-      xTokenList.push(xToken);
-      yTokenList.push(yToken);
-      xDateList.push(xValue instanceof Date ? 1 : 0);
-      yDateList.push(yValue instanceof Date ? 1 : 0);
+      xTokenIdsBuf[n] = xToken;
+      yTokenIdsBuf[n] = yToken;
+      xDatesBuf[n] = xValue instanceof Date ? 1 : 0;
+      yDatesBuf[n] = yValue instanceof Date ? 1 : 0;
       if (xToken === -1 && xValue !== null) invalidX.set(candidateIndex, xValue);
       if (yToken === -1 && yValue !== null) invalidY.set(candidateIndex, yValue);
       const series = datum.seriesId ?? 0;
-      seriesList.push(series);
-      rankList.push(datum.seriesRank ?? series);
-      sourceList.push(datum.sourceOrder ?? rowIndex ?? primitiveIndex);
-      lineageList.push(datum.lineage ?? 0);
-      autoModeList.push(AUTO_MODE_CODE[datum.autoMode ?? defaultAutoMode(batch, primitiveIndex)]);
+      seriesBuf[n] = series;
+      ranksBuf[n] = datum.seriesRank ?? series;
+      sourcesBuf[n] = datum.sourceOrder ?? rowIndex ?? primitiveIndex;
+      lineagesBuf[n] = datum.lineage ?? 0;
+      autoModesBuf[n] = AUTO_MODE_CODE[datum.autoMode ?? defaultAutoMode(batch, primitiveIndex)]!;
+      n++;
     }
   }
 
-  const n = batchList.length;
-  const batchIds = Uint32Array.from(batchList);
-  const primitiveIds = Uint32Array.from(primitiveList);
-  const panelIds = Uint32Array.from(panelList);
-  const rows = Uint32Array.from(rowList);
-  const series = Uint32Array.from(seriesList);
-  const ranks = Uint32Array.from(rankList);
-  const sources = Uint32Array.from(sourceList);
-  const lineages = Uint32Array.from(lineageList);
-  const autoModes = Uint8Array.from(autoModeList);
-  const xs = Float32Array.from(xList);
-  const ys = Float32Array.from(yList);
-  const xTokenIds = Int32Array.from(xTokenList);
-  const yTokenIds = Int32Array.from(yTokenList);
-  const xDates = Uint8Array.from(xDateList);
-  const yDates = Uint8Array.from(yDateList);
+  // Exact-count trim: when eligibility skipped primitives the capacity was
+  // an upper bound, so slice the tails off (a view when exact — the common
+  // all-candidates case — a copy otherwise).
+  const trim = <T extends { slice(start: number, end: number): T; length: number }>(arr: T): T =>
+    n === arr.length ? arr : arr.slice(0, n);
+  const batchIds = trim(batchIdsBuf);
+  const primitiveIds = trim(primitiveIdsBuf);
+  const panelIds = trim(panelIdsBuf);
+  const rows = trim(rowsBuf);
+  const series = trim(seriesBuf);
+  const ranks = trim(ranksBuf);
+  const sources = trim(sourcesBuf);
+  const lineages = trim(lineagesBuf);
+  const autoModes = trim(autoModesBuf);
+  const xs = trim(xsBuf);
+  const ys = trim(ysBuf);
+  const xTokenIds = trim(xTokenIdsBuf);
+  const yTokenIds = trim(yTokenIdsBuf);
+  const xDates = trim(xDatesBuf);
+  const yDates = trim(yDatesBuf);
 
   const logicalValue = (id: number, axis: "x" | "y"): CellValue => {
     const ids = axis === "x" ? xTokenIds : yTokenIds;
@@ -497,28 +512,11 @@ export function buildCandidateStoreIndexes(
     }
   }
 
-  // Do not retain the growable construction buffers beside their compact
-  // typed-array replacements (the 100k-candidate retained-memory budget is
-  // measured after this boundary).
-  for (const buffer of [
-    batchList,
-    primitiveList,
-    panelList,
-    rowList,
-    seriesList,
-    rankList,
-    sourceList,
-    lineageList,
-    autoModeList,
-    xList,
-    yList,
-    xTokenList,
-    yTokenList,
-    xDateList,
-    yDateList,
-    order,
-  ])
-    buffer.length = 0;
+  // Do not retain construction scratch beside the store (the 100k-candidate
+  // retained-memory budget is measured after this boundary). The per-
+  // candidate columns were written into their final typed arrays directly,
+  // so only the permutation scratch order and the interning maps remain.
+  order.length = 0;
   numberTokenIndex.clear();
   stringTokenIndex.clear();
   booleanTokenIndex.clear();
