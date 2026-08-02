@@ -525,9 +525,12 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
   it("counts both columns when two layers map different y fields on the same rows", () => {
     // sales col + target line share rowIndex but read different y fields.
     // Total must be sales+target (25 at Jan), not only the first layer (10).
+    // Equal values (Mar: 12+12) must still count twice — identity is the
+    // mapped field, not the numeric coincidence.
     const data = [
       { id: "jan", x: "Jan", sales: 10, target: 15 },
       { id: "feb", x: "Feb", sales: 20, target: 18 },
+      { id: "mar", x: "Mar", sales: 12, target: 12 },
     ];
     const model = runPipeline(
       gg(data, aes({ x: "x" }))
@@ -536,13 +539,28 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
         .spec(),
       { width: 400, height: 300 },
     );
-    const seed = model.candidates.candidate(0)!;
-    expect(seed.xValue).toBe("Jan");
-    const inspection = axisInspection(model, seed);
-    expect(inspection.mode).toBe("x");
-    if (inspection.mode === "x" || inspection.mode === "y") {
-      expect(inspection.groupTotal).toBe(25);
-      expect(inspection.groupMemberCount).toBe(2);
+    const jan = model.candidates.candidate(0)!;
+    expect(jan.xValue).toBe("Jan");
+    const janInspection = axisInspection(model, jan);
+    expect(janInspection.mode).toBe("x");
+    if (janInspection.mode === "x" || janInspection.mode === "y") {
+      expect(janInspection.groupTotal).toBe(25);
+      expect(janInspection.groupMemberCount).toBe(2);
+    }
+
+    let marSeed = model.candidates.candidate(0)!;
+    for (let id = 0; id < model.candidates.size; id++) {
+      const c = model.candidates.candidate(id)!;
+      if (c.xValue === "Mar") {
+        marSeed = c;
+        break;
+      }
+    }
+    const marInspection = axisInspection(model, marSeed);
+    expect(marInspection.mode).toBe("x");
+    if (marInspection.mode === "x" || marInspection.mode === "y") {
+      expect(marInspection.groupTotal).toBe(24);
+      expect(marInspection.groupMemberCount).toBe(2);
     }
     model.dispose();
   });

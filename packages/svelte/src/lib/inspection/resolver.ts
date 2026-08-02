@@ -73,18 +73,36 @@ function candidateValueContribution(
 }
 
 /**
+ * Bound column for the value axis on a candidate's layer (y when grouping by
+ * x, x when grouping by y). Distinguishes multi-column overlays (sales vs
+ * target) while leaving line+point on the same field collapsible.
+ */
+function valueFieldName(model: RenderModel, member: CandidateFacts, groupAxis: "x" | "y"): string {
+  const channel = groupAxis === "x" ? "y" : "x";
+  for (const field of model.layerFields[member.layerIndex] ?? []) {
+    if (field.channel === channel) return field.field;
+  }
+  return "";
+}
+
+/**
  * Identity for one stack-total / overflow contribution (#1274 / #1389).
  *
- * Always pairs identity with the numeric contribution so:
- * - line+point / col+text (same row, same value) collapse to one contribution
- * - multi-column layers on the same row (sales col + target line) both count
- * - aggregates (null rowIndex) use layer-local seriesId + value so double-
- *   painted summaries collapse while distinct colliding seriesIds do not
+ * - Source-backed: row + mapped value field. Same field on the same row
+ *   (line+point, col+text) collapses; different fields (sales vs target)
+ *   stay distinct even when the numbers happen to match.
+ * - Aggregates (null rowIndex): seriesId + field + contribution so double-
+ *   painted summaries collapse while distinct values under a colliding
+ *   per-layer series index still count separately.
  */
-function contributionIdentity(member: CandidateFacts, contribution: number | null): string {
+function contributionIdentity(
+  member: CandidateFacts,
+  contribution: number | null,
+  valueField: string,
+): string {
+  if (member.rowIndex !== null) return `r:${member.rowIndex}:f:${valueField}`;
   const valueToken = contribution === null ? "" : String(contribution);
-  if (member.rowIndex !== null) return `r:${member.rowIndex}:v:${valueToken}`;
-  return `s:${member.seriesId}:v:${valueToken}`;
+  return `s:${member.seriesId}:f:${valueField}:v:${valueToken}`;
 }
 
 /**
@@ -96,6 +114,7 @@ function contributionIdentity(member: CandidateFacts, contribution: number | nul
  * (and col+text) double-counting of the same source series.
  */
 function groupMagnitudeTotal(
+  model: RenderModel,
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
 ): number | null {
@@ -103,7 +122,11 @@ function groupMagnitudeTotal(
   for (const member of members) {
     const contribution = candidateValueContribution(member, groupAxis);
     if (contribution === null) continue;
-    const key = contributionIdentity(member, contribution);
+    const key = contributionIdentity(
+      member,
+      contribution,
+      valueFieldName(model, member, groupAxis),
+    );
     if (byIdentity.has(key)) continue;
     byIdentity.set(key, contribution);
   }
@@ -118,13 +141,17 @@ function groupMagnitudeTotal(
  * Drives "+N more" after display collapse; must span layers so a thin
  * overlay focus does not hide truncation of a large stack beneath it.
  */
-function groupSeriesCount(members: readonly CandidateFacts[], groupAxis: "x" | "y"): number {
+function groupSeriesCount(
+  model: RenderModel,
+  members: readonly CandidateFacts[],
+  groupAxis: "x" | "y",
+): number {
   const seen = new Set<string>();
   for (const member of members) {
     const contribution = candidateValueContribution(member, groupAxis);
     // Count series even when the value is non-numeric so overflow still
     // reflects listed display rows (Total may be null separately).
-    seen.add(contributionIdentity(member, contribution));
+    seen.add(contributionIdentity(member, contribution, valueFieldName(model, member, groupAxis)));
   }
   return seen.size;
 }
@@ -369,8 +396,8 @@ export function materializeInspection<
     // Full-group series total + count (deduped across layers) — independent of
     // the hover cap so Total and "+N more" stay honest when members were
     // truncated or the focus layer is a thin overlay (#1274 / #1389).
-    groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis),
-    groupMemberCount: groupSeriesCount(completeCandidates, groupAxis),
+    groupTotal: groupMagnitudeTotal(model, completeCandidates, groupAxis),
+    groupMemberCount: groupSeriesCount(model, completeCandidates, groupAxis),
   });
 }
 
