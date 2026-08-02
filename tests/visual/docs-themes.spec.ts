@@ -27,15 +27,15 @@ test("palettes is a first-class route from site navigation and the homepage", as
     page.getByRole("navigation", { name: "Footer" }).getByRole("link", { name: "Palettes" }),
   ).toBeVisible();
 
-  // Palettes sits between Themes and Interactions in primary nav order.
+  // Palettes sits between Themes and Reference in primary nav order.
   const primary = page.getByRole("navigation", { name: "Primary" });
   const labels = await primary.getByRole("link").allTextContents();
   const themesIdx = labels.indexOf("Themes");
   const palettesIdx = labels.indexOf("Palettes");
-  const interactionsIdx = labels.indexOf("Interactions");
+  const referenceIdx = labels.indexOf("Reference");
   expect(themesIdx).toBeGreaterThanOrEqual(0);
   expect(palettesIdx).toBe(themesIdx + 1);
-  expect(interactionsIdx).toBe(palettesIdx + 1);
+  expect(referenceIdx).toBe(palettesIdx + 1);
 
   await page.goto("/?theme=light");
   await expect(
@@ -387,35 +387,4 @@ test("themes controls remain legible in forced colors with reduced motion", asyn
     "none",
   );
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-});
-
-test("interactions is a first-class route with a single live chart", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/interactions?theme=light");
-  await expect(
-    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Interactions" }),
-  ).toHaveAttribute("aria-current", "page");
-
-  const demo = page.getByRole("region", { name: "Interaction demo" });
-  await expect(demo.locator(".gg-plot-root")).toHaveCount(1);
-  await expect(demo.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
-  await expect(demo.locator(".copy-code code")).toContainText("createPlotInteraction");
-  await expect(demo.locator(".copy-code code")).toContainText(
-    'select={{ type: "interval", mode: "xy" }}',
-  );
-
-  await demo.getByRole("button", { name: "Series: Alpha (color legend)" }).click();
-  await expect(demo.getByText(/3 emphasized/)).toBeVisible();
-  // Legend also exposes a "Clear" control (aria-label "Clear legend focus");
-  // exact match targets the demo status clear only.
-  await demo.getByRole("button", { name: "Clear", exact: true }).click();
-  await expect(demo.getByText(/0 emphasized/)).toBeVisible();
-});
-
-test("interactions has no horizontal overflow at 1280px", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/interactions?theme=light");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
 });

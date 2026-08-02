@@ -237,7 +237,7 @@ describe("guide sections cover their catalogs", () => {
     expect(INTERACTIONS_MD).toContain("reconcileKeys");
     expect(INTERACTIONS_MD).toContain("without retraining scales");
     expect(INTERACTIONS_MD).toContain("/examples/interactions/inspection");
-    expect(INTERACTIONS_MD).toContain("/interactions/linked-views");
+    expect(INTERACTIONS_MD).toContain("/examples/interaction/linked-views");
     expect(INTERACTIONS_MD).not.toContain("/playground");
     expect(INTERACTIONS_MD).toContain('<Inspect mode="x" pin maxDistance={24} />');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
@@ -402,14 +402,7 @@ describe("llms surfaces", () => {
     expect(txt).not.toContain("(https://ggsvelte.sh/playground)");
     expect(txt).toContain("(https://ggsvelte.sh/reference/interactions)");
     for (const ex of EXAMPLES) {
-      const exposition =
-        ex.id === "interaction/brush-zoom" ||
-        ex.id === "interaction/facet-intervals" ||
-        ex.id === "interaction/linked-views";
-      const path = exposition
-        ? `/interactions/${ex.id.slice("interaction/".length)}`
-        : `/examples/${ex.id}`;
-      expect(txt).toContain(`(https://ggsvelte.sh${path})`);
+      expect(txt).toContain(`(https://ggsvelte.sh/examples/${ex.id})`);
     }
     expect(pages.map((page) => page.slug)).toContain("interactions");
     expect(pages.map((page) => page.slug)).toContain("interaction-reference");

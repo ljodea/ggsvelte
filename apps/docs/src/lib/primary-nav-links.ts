@@ -30,11 +30,6 @@ export function primaryNavLinks(path: string, owner?: PrimaryNavOwner): readonly
       active: path === "/palettes",
     },
     {
-      label: "Interactions",
-      href: "/interactions",
-      active: path === "/interactions" || path.startsWith("/interactions/"),
-    },
-    {
       label: "Reference",
       href: "/reference",
       active: owner === "reference",

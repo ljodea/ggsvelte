@@ -192,7 +192,7 @@ for (const chapter of [
     group: "interaction",
     path: "/guide/interactions",
     heading: "Interactions",
-    evidence: "/interactions/linked-views",
+    evidence: "/examples/interaction/linked-views",
   },
   {
     group: "production",

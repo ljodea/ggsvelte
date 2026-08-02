@@ -205,7 +205,7 @@ test("detail is specimen-first and always orders Svelte, builder, then JSON", as
 
 for (const [path, width, height] of [
   ["/examples/point/scatter-color", 640, 400],
-  ["/interactions/linked-views", 640, 1140],
+  ["/examples/interaction/linked-views", 640, 1140],
   ["/examples/interaction/legend-focus", 960, 320],
 ] as const) {
   test(`VR detail isolates ${path} at canonical geometry`, async ({ page }) => {

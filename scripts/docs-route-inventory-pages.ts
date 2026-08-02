@@ -63,17 +63,6 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     shell: "site",
   },
   {
-    path: "/interactions",
-    title: "Chart-local interaction — ggsvelte",
-    description:
-      "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
-    canonicalPath: "/interactions",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
     path: "/reference",
     title: "Reference — ggsvelte",
     description:

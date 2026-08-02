@@ -59,17 +59,6 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
-    path: "/interactions",
-    title: "Chart-local interaction — ggsvelte",
-    description:
-      "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
-    canonicalPath: "/interactions",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
     path: "/reference",
     title: "Reference — ggsvelte",
     description:
@@ -12666,6 +12655,28 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/interaction/brush-zoom",
+    title: "Interval selection and zoom — ggsvelte gallery",
+    description:
+      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
+    canonicalPath: "/examples/interaction/brush-zoom",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/interaction/facet-intervals",
+    title: "One interval, applied in every panel — ggsvelte gallery",
+    description:
+      "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
+    canonicalPath: "/examples/interaction/facet-intervals",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/interaction/legend-filter",
     title: "Filter series from the legend — ggsvelte gallery",
     description: "Legend filter when readers need to hide series without losing colour identity.",
@@ -12681,6 +12692,17 @@ export const DOCS_ROUTES = [
     description:
       "Three of Playfair's commodity series. Focusing a group dims the others rather than dropping them, so the scales never move under you.",
     canonicalPath: "/examples/interaction/legend-focus",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/interaction/linked-views",
+    title: "Link plots, controls, and a table — ggsvelte gallery",
+    description:
+      "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
+    canonicalPath: "/examples/interaction/linked-views",
     kind: "page",
     index: true,
     sitemap: true,
@@ -13181,72 +13203,6 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
-    path: "/interactions/brush-zoom",
-    title: "Interval selection and zoom — ggsvelte interactions",
-    description:
-      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
-    canonicalPath: "/interactions/brush-zoom",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/interactions/facet-intervals",
-    title: "One interval, applied in every panel — ggsvelte interactions",
-    description:
-      "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
-    canonicalPath: "/interactions/facet-intervals",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/interactions/linked-views",
-    title: "Link plots, controls, and a table — ggsvelte interactions",
-    description:
-      "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
-    canonicalPath: "/interactions/linked-views",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/interaction/brush-zoom",
-    title: "Interval selection and zoom — ggsvelte interactions",
-    description:
-      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
-    canonicalPath: "/interactions/brush-zoom",
-    kind: "alias",
-    index: false,
-    sitemap: false,
-    shell: "site",
-  },
-  {
-    path: "/examples/interaction/facet-intervals",
-    title: "One interval, applied in every panel — ggsvelte interactions",
-    description:
-      "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
-    canonicalPath: "/interactions/facet-intervals",
-    kind: "alias",
-    index: false,
-    sitemap: false,
-    shell: "site",
-  },
-  {
-    path: "/examples/interaction/linked-views",
-    title: "Link plots, controls, and a table — ggsvelte interactions",
-    description:
-      "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
-    canonicalPath: "/interactions/linked-views",
-    kind: "alias",
-    index: false,
-    sitemap: false,
-    shell: "site",
-  },
-  {
     path: "/examples/interactions/inspection",
     title: "Inspect and pin data — ggsvelte gallery",
     description:
@@ -13259,10 +13215,10 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/interactions/interval-selection",
-    title: "Interval selection and zoom — ggsvelte interactions",
+    title: "Interval selection and zoom — ggsvelte gallery",
     description:
       "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
-    canonicalPath: "/interactions/brush-zoom",
+    canonicalPath: "/examples/interaction/brush-zoom",
     kind: "alias",
     index: false,
     sitemap: false,

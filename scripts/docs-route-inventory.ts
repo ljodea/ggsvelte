@@ -1,10 +1,5 @@
 import { EXAMPLES } from "../examples/manifest.ts";
 import { EXAMPLE_ALIASES } from "../apps/docs/src/lib/example-aliases.ts";
-import {
-  INTERACTION_EXPOSITION_IDS,
-  interactionExpositionSlug,
-  isInteractionExposition,
-} from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
 import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
 import {
@@ -62,9 +57,9 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
         }),
   }));
 
-  const examples: DocsRouteRecord[] = EXAMPLES.filter(
-    (entry) => !isInteractionExposition(entry.id),
-  ).map((entry) => ({
+  // All corpus entries (including interaction expositions) are real pages at
+  // /examples/*; gallery listing still excludes expositions separately.
+  const examples: DocsRouteRecord[] = EXAMPLES.map((entry) => ({
     path: `/examples/${entry.id}`,
     title: `${entry.title} — ggsvelte gallery`,
     description: exampleSeoDescription(entry),
@@ -74,55 +69,15 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     sitemap: true,
     shell: "site",
   }));
-  const interactionExpositions: DocsRouteRecord[] = INTERACTION_EXPOSITION_IDS.map((id) => {
-    const entry = EXAMPLES.find((example) => example.id === id);
-    if (entry === undefined) {
-      throw new Error(`Missing interaction exposition in manifest: ${id}`);
-    }
-    const slug = interactionExpositionSlug(id)!;
-    return {
-      path: `/interactions/${slug}`,
-      title: `${entry.title} — ggsvelte interactions`,
-      description: exampleSeoDescription(entry),
-      canonicalPath: `/interactions/${slug}`,
-      kind: "page" as const,
-      index: true,
-      sitemap: true,
-      shell: "site" as const,
-    };
-  });
-  // Former gallery URLs for interaction expositions — full HTML aliases keep
-  // stable deep links (noindex, canonical → /interactions/*); gallery excludes them.
-  const expositionGalleryAliases: DocsRouteRecord[] = INTERACTION_EXPOSITION_IDS.map((id) => {
-    const entry = EXAMPLES.find((example) => example.id === id);
-    const slug = interactionExpositionSlug(id)!;
-    return {
-      path: `/examples/${id}`,
-      title: `${entry?.title ?? "Interaction demo"} — ggsvelte interactions`,
-      description: entry
-        ? exampleSeoDescription(entry)
-        : "A chart-local interaction demo relocated from the gallery to /interactions.",
-      canonicalPath: `/interactions/${slug}`,
-      kind: "alias" as const,
-      index: false,
-      sitemap: false,
-      shell: "site" as const,
-    };
-  });
   const aliases: DocsRouteRecord[] = Object.entries(EXAMPLE_ALIASES).map(([alias, canonical]) => {
     const target = EXAMPLES.find((entry) => entry.id === canonical);
-    const expositionSlug = interactionExpositionSlug(canonical);
-    const isExposition = typeof expositionSlug === "string";
-    const canonicalPath = isExposition
-      ? `/interactions/${expositionSlug}`
-      : `/examples/${canonical}`;
     return {
       path: `/examples/${alias}`,
-      title: `${target?.title ?? "Example"} — ggsvelte ${isExposition ? "interactions" : "gallery"}`,
+      title: `${target?.title ?? "Example"} — ggsvelte gallery`,
       description: target
         ? exampleSeoDescription(target)
         : "A legacy ggsvelte example route preserved for compatibility.",
-      canonicalPath,
+      canonicalPath: `/examples/${canonical}`,
       kind: "alias" as const,
       index: false,
       sitemap: false,
@@ -139,8 +94,6 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...guideDetailRoutes(),
     ...guides,
     ...examples,
-    ...interactionExpositions,
-    ...expositionGalleryAliases,
     ...aliases,
     ...ENDPOINT_ROUTES,
     ...PERFORMANCE_ROUTES,

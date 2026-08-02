@@ -15,7 +15,7 @@
       },
       {
         "label": "Selection and zoom",
-        "href": "/interactions/brush-zoom"
+        "href": "/examples/interaction/brush-zoom"
       }
     ],
     "svelteFirst": true,

@@ -11,3 +11,7 @@
 /guide/rendering-performance /guide/production 301
 /guide/server-rendering-export /guide/production 301
 /guide/compatibility /guide/production 301
+/interactions /guide/interactions 301
+/interactions/brush-zoom /examples/interaction/brush-zoom 301
+/interactions/facet-intervals /examples/interaction/facet-intervals 301
+/interactions/linked-views /examples/interaction/linked-views 301

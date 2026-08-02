@@ -10,7 +10,6 @@ describe("primaryNavLinks", () => {
       "Gallery",
       "Themes",
       "Palettes",
-      "Interactions",
       "Reference",
     ]);
     expect(links.find((link) => link.href === "/docs")?.active).toBe(true);
@@ -18,7 +17,7 @@ describe("primaryNavLinks", () => {
     expect(links.find((link) => link.href === "/reference")?.active).toBe(false);
   });
 
-  test("marks gallery children and exact themes/palettes/interactions", () => {
+  test("marks gallery children and exact themes/palettes", () => {
     expect(
       primaryNavLinks("/examples/point/scatter").find((link) => link.href === "/examples")?.active,
     ).toBe(true);
@@ -26,13 +25,6 @@ describe("primaryNavLinks", () => {
     expect(primaryNavLinks("/palettes").find((link) => link.href === "/palettes")?.active).toBe(
       true,
     );
-    expect(
-      primaryNavLinks("/interactions").find((link) => link.href === "/interactions")?.active,
-    ).toBe(true);
-    expect(
-      primaryNavLinks("/interactions/linked-views").find((link) => link.href === "/interactions")
-        ?.active,
-    ).toBe(true);
   });
 
   test("marks reference owner", () => {
