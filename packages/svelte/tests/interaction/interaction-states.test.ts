@@ -6,7 +6,7 @@ import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import type { PlotInteractionEvent, PlotSelection } from "../../src/lib/interaction/interaction.js";
-import { createInteractionStates } from "../../src/lib/interaction/interaction-states.svelte.js";
+import { createInteractionAssembly } from "../../src/lib/interaction/interaction-states.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { testInteractionContext } from "../helpers/interaction-context.js";
 import { modelFor } from "../helpers/model.js";
@@ -25,8 +25,8 @@ function mountAssembly(
 ) {
   const spec = continuousSpec();
   const model = modelFor(spec);
-  return withFlushedEffectRoot(() =>
-    createInteractionStates(
+  return withFlushedEffectRoot(() => {
+    const assembly = createInteractionAssembly(
       testInteractionContext({
         model: () => model,
         resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y", intervals: "plot" }),
@@ -40,38 +40,44 @@ function mountAssembly(
           zoomConfig: () => null,
           assembled: () => spec,
         },
-        interval: {
-          consumptionCandidates: () => [],
-        },
-        surface: {
-          toolProp: () => {
-            /* uncontrolled */
-          },
-          initialTool: () => "inspect",
-          availableTools: () => [],
-          pointSelectEnabled: () => false,
-          surfaceInteractive: () => false,
-        },
-        inspection: {
-          inspectEnabled: () => false,
-          dataIdentityEpoch: () => "epoch-1",
-          plotId: () => "plot-test",
-          clearTooltipHovered: () => {},
-          clearAnnouncement: () => {},
-        },
       },
-    ),
-  );
+    );
+    return assembly.complete({
+      interval: {
+        consumptionCandidates: () => [],
+      },
+      surface: {
+        toolProp: () => {
+          /* uncontrolled */
+        },
+        initialTool: () => "inspect",
+        availableTools: () => [],
+        pointSelectEnabled: () => false,
+        surfaceInteractive: () => false,
+      },
+      inspection: {
+        inspectEnabled: () => false,
+        dataIdentityEpoch: () => "epoch-1",
+        plotId: () => "plot-test",
+        clearTooltipHovered: () => {},
+        clearAnnouncement: () => {},
+      },
+    });
+  });
 }
 
-describe("createInteractionStates construction", () => {
+describe("createInteractionAssembly construction", () => {
   it("builds all five controllers without invoking announce/handler sinks", () => {
     const announcements: string[] = [];
     const interactions: PlotInteractionEvent[] = [];
 
     const { value: states, destroy } = mountAssembly({
-      announce: (message) => announcements.push(message),
-      oninteraction: (event) => interactions.push(event),
+      announce: (message) => {
+        announcements.push(message);
+      },
+      oninteraction: (event) => {
+        interactions.push(event);
+      },
     });
 
     expect(states.zoom).toBeDefined();
@@ -90,14 +96,18 @@ describe("createInteractionStates construction", () => {
   });
 });
 
-describe("createInteractionStates sibling ports", () => {
+describe("createInteractionAssembly sibling ports", () => {
   it("wires interval finish → selection emit through the real controllers", () => {
     const interactions: PlotInteractionEvent[] = [];
     const selections: PlotSelection[] = [];
 
     const { value: states, destroy } = mountAssembly({
-      oninteraction: (event) => interactions.push(event),
-      onselect: (event) => selections.push(event),
+      oninteraction: (event) => {
+        interactions.push(event);
+      },
+      onselect: (event) => {
+        selections.push(event);
+      },
     });
     const model = modelFor(continuousSpec());
 
@@ -119,8 +129,12 @@ describe("createInteractionStates sibling ports", () => {
     const selections: PlotSelection[] = [];
 
     const { value: states, destroy } = mountAssembly({
-      oninteraction: (event) => interactions.push(event),
-      onselect: (event) => selections.push(event),
+      oninteraction: (event) => {
+        interactions.push(event);
+      },
+      onselect: (event) => {
+        selections.push(event);
+      },
     });
 
     states.selection.togglePointKeys(["a"], "pointer");

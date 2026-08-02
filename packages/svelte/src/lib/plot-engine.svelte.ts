@@ -12,11 +12,14 @@
  * Construction / effect-order contract
  * ------------------------------------
  * The five interaction controllers (zoom / selection / interval / surface /
- * inspection) are constructed by the interaction assembly
- * (interaction/interaction-states.svelte.ts), which owns their topological
- * order and sibling ports internally. Shared deps flow through one
- * InteractionContext (interaction/interaction-context.svelte.ts) instead of
- * per-factory hand-wired bags. Leaf modules register their own effects at
+ * inspection) are constructed by the two-phase interaction assembly
+ * (interaction/interaction-states.svelte.ts): phase 1 builds zoom before the
+ * legend-filter / runtime chain; phase 2 (`complete`) builds the model-
+ * reading controllers after the runtime + semantic-key service, because SSR
+ * evaluates $derived eagerly at construction. The assembly owns sibling
+ * ports internally. Shared deps flow through one InteractionContext
+ * (interaction/interaction-context.svelte.ts) instead of per-factory
+ * hand-wired bags. Leaf modules register their own effects at
  * construction; the engine only wires host-held deriveds into catalog
  * reconcile where data is not available at leaf construction time.
  *
@@ -71,7 +74,7 @@ import {
   type ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
 import { resolveInteractionContext } from "./interaction/interaction-context.svelte.js";
-import { createInteractionStates } from "./interaction/interaction-states.svelte.js";
+import { createInteractionAssembly } from "./interaction/interaction-states.svelte.js";
 import {
   createCapabilityResolution,
   ssrSafeDerived,
@@ -522,37 +525,15 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     candidateSemanticKeys: (candidate) => semanticKeys.candidateSemanticKeys(candidate),
   });
 
-  // ------------------------------------------------- interaction assembly
-  // zoom → selection → interval → surface → inspection, with sibling ports
-  // wired inside the assembly. The projection is the one remaining late
-  // binding: interval consumption closes over it, and it needs the assembled
-  // states — handler-only reads (#165 pattern).
-  let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
-  const states = createInteractionStates(interactionContext, {
+  // ------------------------------------------------- interaction assembly (phase 1)
+  // Zoom is the only controller the legend-filter / runtime chain reads.
+  // SSR evaluates $derived eagerly at construction, so the model-reading
+  // controllers (selection / interval / surface / inspection) must wait for
+  // the runtime — phase 2 (`complete`) runs after semanticKeys below.
+  const interactionAssembly = createInteractionAssembly(interactionContext, {
     zoom: {
       zoomConfig: () => interactionConfig().zoom,
       assembled,
-    },
-    interval: {
-      consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
-    },
-    surface: {
-      toolProp: () => host.props.tool,
-      initialTool: () => interactionConfig().initialTool,
-      availableTools: () => surfaceAvailableTools,
-      pointSelectEnabled: () => surfacePointSelectEnabled,
-      surfaceInteractive: () => surfaceInteractive,
-    },
-    inspection: {
-      inspectEnabled: () => inspectEnabled,
-      dataIdentityEpoch: () => dataIdentityEpoch,
-      plotId: () => host.plotId,
-      clearTooltipHovered: () => {
-        tooltipHovered = false;
-      },
-      clearAnnouncement: () => {
-        announcer.clear();
-      },
     },
   });
 
@@ -583,7 +564,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // Construction-time deriveds read legendFilter/effectiveSpec only —
   // model is deferred (declared after the runtime).
   const legendFilterState = createLegendFilterState({
-    effectiveSpec: () => states.zoom.effectiveSpec,
+    effectiveSpec: () => interactionAssembly.zoom.effectiveSpec,
     // GuideLegend children (or deprecated plot prop) — not plot prop alone.
     legendFilterProp: () => legendFilterResolved().configInput,
     onlegendfilter: () => host.props.onlegendfilter,
@@ -602,12 +583,12 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     widthProp: () => host.props.width,
     heightProp: () => host.props.height,
     assembled,
-    effectiveSpec: () => states.zoom.effectiveSpec,
-    effectiveZoomDomains: () => states.zoom.effectiveZoomDomains,
+    effectiveSpec: () => interactionAssembly.zoom.effectiveSpec,
+    effectiveZoomDomains: () => interactionAssembly.zoom.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
     root: host.root,
     resetZoom: () => {
-      states.zoom.resetForScales();
+      interactionAssembly.zoom.resetForScales();
     },
     onrender: () => host.props.onrender,
   });
@@ -647,6 +628,36 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     ),
   );
   const surfacePointSelectEnabled = $derived(canPublishPointSelection(interactionConfig().select));
+
+  // ------------------------------------------------- interaction assembly (phase 2)
+  // selection → interval → surface → inspection, sibling ports wired inside
+  // the assembly. The projection is the one remaining late binding: interval
+  // consumption closes over it, and it needs the assembled states —
+  // handler-only reads (#165 pattern).
+  let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
+  const states = interactionAssembly.complete({
+    interval: {
+      consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
+    },
+    surface: {
+      toolProp: () => host.props.tool,
+      initialTool: () => interactionConfig().initialTool,
+      availableTools: () => surfaceAvailableTools,
+      pointSelectEnabled: () => surfacePointSelectEnabled,
+      surfaceInteractive: () => surfaceInteractive,
+    },
+    inspection: {
+      inspectEnabled: () => inspectEnabled,
+      dataIdentityEpoch: () => dataIdentityEpoch,
+      plotId: () => host.plotId,
+      clearTooltipHovered: () => {
+        tooltipHovered = false;
+      },
+      clearAnnouncement: () => {
+        announcer.clear();
+      },
+    },
+  });
 
   // ------------------------------------------------- legend focus
   // Host-held entry lists are $derived after this factory; effects that read
