@@ -5,7 +5,7 @@ import type { LayerFrame, ResolvedColorScale } from "../types.js";
  * O(1) assignment rank, or -1 when scale/field does not apply.
  * `readValue` is a thunk so sequential/null scales never force a cell read.
  */
-export function ordinalColorRank(
+function ordinalColorRank(
   resolved: ResolvedColorScale | null,
   field: string | null | undefined,
   readValue: () => CellValue,
