@@ -48,10 +48,16 @@ function buildValidatorSource(): string {
     const inline = `[${variables.map(String).join(", ")}]`;
     let body = code.replace("let External = []", `let External = ${inline}`);
     if (body === code) throw new Error("gen-plot-validator: externals marker not found");
+    // Every post-processing step is verified: a TypeBox emit-format shift
+    // must fail the generator loudly, never ship a half-processed artifact.
     body = body.replace(/export function SetExternal[^\n]*\n\n/, "");
+    if (body.includes("SetExternal"))
+      throw new Error("gen-plot-validator: SetExternal emit survived removal");
     for (const name of ["Hashing", "Format", "Guard"]) {
       if (!new RegExp(`\\b${name}\\.`).test(body)) {
         body = body.replace(new RegExp(`import \\{ ${name} \\} from "typebox/[a-z]+"\\n`), "");
+        if (new RegExp(`import \\{ ${name} \\}`).test(body))
+          throw new Error(`gen-plot-validator: unused ${name} import survived removal`);
       }
     }
     return `/* oxlint-disable -- generated validator emit */
