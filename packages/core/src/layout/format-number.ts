@@ -10,6 +10,8 @@
  *
  * Unknown format strings fall back to default formatting and report `ok: false`.
  */
+import { formatEnUS } from "./format-en-us.js";
+
 const NUMERIC_FORMAT_RE = /^(,)?(?:\.(\d+))?(~)?([dfs%])$/;
 
 const SI_PREFIXES: [number, string][] = [
@@ -61,12 +63,7 @@ export function numberFormatter(spec: string): NumberFormatter {
   const decimals = match[2] === undefined ? undefined : Number(match[2]);
   const tilde = match[3] === "~";
   const type = match[4]!;
-  const locale = (v: number, digits: number) =>
-    v.toLocaleString("en-US", {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-      useGrouping: grouped,
-    });
+  const locale = (v: number, digits: number) => formatEnUS(v, digits, grouped);
   switch (type) {
     case "d":
       return {

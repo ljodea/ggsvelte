@@ -5,6 +5,8 @@
  * steps are 1/2/5 x 10^k, chosen so the tick count is close to the request.
  */
 
+import { formatEnUS, formatEnUSMaxDecimals } from "./format-en-us.js";
+
 const e10 = Math.sqrt(50);
 const e5 = Math.sqrt(10);
 const e2 = Math.sqrt(2);
@@ -79,10 +81,7 @@ export function defaultLogTickFormat(v: number): string {
     return v.toExponential(0).replace("e+", "e");
   }
   const decimals = abs >= 1 ? 0 : Math.min(20, -Math.floor(Math.log10(abs)));
-  return v.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: decimals,
-  });
+  return formatEnUSMaxDecimals(v, decimals, true);
 }
 
 /**
@@ -101,10 +100,6 @@ export function defaultTickFormat(step: number): (v: number) => string {
   return (v: number) => {
     if (!Number.isFinite(v)) return String(v);
     if (Math.abs(v) >= 1e18) return v.toExponential(2);
-    return v.toLocaleString("en-US", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-      useGrouping,
-    });
+    return formatEnUS(v, decimals, useGrouping);
   };
 }
