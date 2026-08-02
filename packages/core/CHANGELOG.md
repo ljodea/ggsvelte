@@ -1,5 +1,22 @@
 # @ggsvelte/core
 
+## 0.26.0
+
+### Minor Changes
+
+- 56b856b: # Export planStrata from the lean render entry
+
+  Migration: none — additive. `@ggsvelte/core/render` now re-exports `planStrata` and
+  the `Stratum` type. Canvas-mark charts can compose
+  `runPipeline` + `planStrata` (lean) with `drawStratum`
+  (`@ggsvelte/core/dom`) without importing the full `@ggsvelte/core` barrel,
+  which installs the Temporal polyfill on import. Measured on the competitive
+  canvas scatter entry: 237.7 → 144.7 KB gzip (−39%).
+
+### Patch Changes
+
+- @ggsvelte/spec@0.26.0
+
 ## 0.25.0
 
 ### Minor Changes
