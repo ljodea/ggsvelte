@@ -17,14 +17,16 @@
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
  */
-import Compile from "typebox/compile";
 import { Settings } from "typebox/system";
 
 import type { SpecError } from "./errors.js";
+// Precompiled at build time (scripts/gen-plot-validator.ts) — compiling the
+// full plot union at runtime costs seconds; the generated module is pinned
+// against a runtime-compiled validator by plot-spec-validator-generated.test.
+import { Check as plotSpecSchemaCheck } from "./generated/plot-spec-validator.js";
 import type { SpecAdvisory } from "./lint.js";
 import { lintSpec } from "./lint.js";
 import type { Aes, PortableSpec } from "./schema.js";
-import { PlotSpecSchema } from "./schema.js";
 import { ensureTemporalPolyfill } from "./temporal-polyfill.js";
 import type { ValidateOptions } from "./validate-data.js";
 import {
@@ -40,16 +42,6 @@ import { facetStructuralErrors, layerStructuralErrors } from "./validate-structu
 export type ValidateResult =
   | { ok: true; spec: PortableSpec; advisories?: SpecAdvisory[] }
   | { ok: false; errors: SpecError[]; advisories?: SpecAdvisory[] };
-
-const PLOT_SPEC_VALIDATOR = (() => {
-  const previousExactOptional = Settings.Get().exactOptionalPropertyTypes;
-  Settings.Set({ exactOptionalPropertyTypes: true });
-  try {
-    return Compile(PlotSpecSchema);
-  } finally {
-    Settings.Set({ exactOptionalPropertyTypes: previousExactOptional });
-  }
-})();
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -97,7 +89,7 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     // TypeBox's interpreted Value.Check / Value.Errors walk the cyclic schema
     // graph for every inline row. Use the compiled plot validator for the
     // common valid path, and Value.Errors only when building invalid diagnostics.
-    const schemaValid: boolean = PLOT_SPEC_VALIDATOR.Check(input);
+    const schemaValid: boolean = (plotSpecSchemaCheck as (value: unknown) => boolean)(input);
 
     // Tier-2 structural gate: run layerStructuralErrors only on branch-valid
     // layers. When the compiled plot check passed, LayerSpec's geom-discriminated

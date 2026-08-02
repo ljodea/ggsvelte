@@ -84,7 +84,9 @@
     "bench:competitive:full": "cd benchmarks/competitive && bun run measure:bundles:full && bun run measure:browser:full",
     "evals": "bun tests/evals/run.ts",
     "render:fresh": "bun scripts/render-fresh.ts",
-    "render:theme-evidence": "bun scripts/render-theme-evidence.ts && Rscript scripts/render-theme-references.R"
+    "render:theme-evidence": "bun scripts/render-theme-evidence.ts && Rscript scripts/render-theme-references.R",
+    "validator:gen": "bun scripts/gen-plot-validator.ts",
+    "validator:check": "bun scripts/gen-plot-validator.ts --check"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
