@@ -162,22 +162,60 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
     const step = gridN === 1 ? 0 : (to - from) / (gridN - 1);
     const window = 8 * bw;
 
-    let maxDensity = 0;
-    const base = outX.length;
-    let lo = 0;
-    for (let k = 0; k < gridN; k++) {
-      const x0 = from + k * step;
-      while (lo < nx && sorted[lo]! < x0 - window) lo++;
-      let d = 0;
-      for (let j = lo; j < nx; j++) {
-        const v = sorted[j]!;
-        if (v > x0 + window) break;
-        const z = (x0 - v) / bw;
-        const kern = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
-        d += (sortedW === null ? 1 / nx : sortedW[j]!) * kern;
+    // Density per grid node. Large groups (well above the grid size) use
+    // linear binning onto the grid + an exact discrete gaussian
+    // convolution — O(nx + gridN × taps) instead of O(nx × gridN) pairwise
+    // kernel evaluations. Binning conserves mass; the taps are the same
+    // kernel values the direct window sum uses (gauss(m·step/bw)/bw,
+    // truncated at ±8·bw), so the paths agree to binning error (well under
+    // the 5e-4 R-parity tolerance — R itself approximates by binned FFT).
+    const densities = new Float64Array(gridN);
+    if (nx > 4 * gridN && step > 0) {
+      const binned = new Float64Array(gridN);
+      for (let j = 0; j < nx; j++) {
+        const t = (sorted[j]! - from) / step;
+        const i0 = Math.floor(t);
+        const frac = t - i0;
+        const wv = sortedW === null ? 1 / nx : sortedW[j]!;
+        if (i0 >= 0 && i0 < gridN) binned[i0] = binned[i0]! + wv * (1 - frac);
+        if (frac > 0 && i0 + 1 < gridN) binned[i0 + 1] = binned[i0 + 1]! + wv * frac;
       }
-      if (d > maxDensity) maxDensity = d;
-      outX.push(x0);
+      const support = Math.min(gridN - 1, Math.ceil(window / step));
+      const taps = new Float64Array(support + 1);
+      for (let m = 0; m <= support; m++) {
+        const z = (m * step) / bw;
+        taps[m] = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
+      }
+      for (let k = 0; k < gridN; k++) {
+        const mLo = Math.max(0, k - support);
+        const mHi = Math.min(gridN - 1, k + support);
+        let d = 0;
+        for (let j = mLo; j <= mHi; j++) d += binned[j]! * taps[Math.abs(k - j)]!;
+        densities[k] = d;
+      }
+    } else {
+      let lo = 0;
+      for (let k = 0; k < gridN; k++) {
+        const x0 = from + k * step;
+        while (lo < nx && sorted[lo]! < x0 - window) lo++;
+        let d = 0;
+        for (let j = lo; j < nx; j++) {
+          const v = sorted[j]!;
+          if (v > x0 + window) break;
+          const z = (x0 - v) / bw;
+          const kern = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
+          d += (sortedW === null ? 1 / nx : sortedW[j]!) * kern;
+        }
+        densities[k] = d;
+      }
+    }
+
+    let maxDensity = 0;
+    for (let k = 0; k < gridN; k++) if (densities[k]! > maxDensity) maxDensity = densities[k]!;
+    const base = outX.length;
+    for (let k = 0; k < gridN; k++) {
+      const d = densities[k]!;
+      outX.push(from + k * step);
       outDensity.push(d);
       outCount.push(d * nx);
       outGroups.push(g);
