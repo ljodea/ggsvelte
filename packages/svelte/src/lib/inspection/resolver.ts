@@ -72,20 +72,26 @@ export function candidateValueContribution(
   return null;
 }
 
-/** Sum of finite contributions across the full axis group (not the hover cap). */
+/**
+ * Sum of finite contributions across the full axis group (not the hover cap).
+ * One value per `seriesId` (first-seen) so multi-layer compositions that paint
+ * the same series twice (line+point, col+text) do not inflate the total (#1274).
+ */
 export function groupMagnitudeTotal(
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
 ): number | null {
-  let sum = 0;
-  let any = false;
+  const bySeries = new Map<number, number>();
   for (const member of members) {
+    if (bySeries.has(member.seriesId)) continue;
     const contribution = candidateValueContribution(member, groupAxis);
     if (contribution === null) continue;
-    sum += contribution;
-    any = true;
+    bySeries.set(member.seriesId, contribution);
   }
-  return any ? sum : null;
+  if (bySeries.size === 0) return null;
+  let sum = 0;
+  for (const value of bySeries.values()) sum += value;
+  return sum;
 }
 
 /**
@@ -259,6 +265,7 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       axisValue,
       axisLabel: axisLabel(model, mode, axisValue),
       groupTotal: candidateValueContribution(seed, mode),
+      groupMemberCount: 1,
     });
   }
   return materializeInspection(input, target, "complete", keyAt);
@@ -323,9 +330,10 @@ export function materializeInspection<
     members: Object.freeze(nonempty),
     axisValue: group.axisValue,
     axisLabel: axisLabel(model, mode, group.axisValue),
-    // Full-group total — independent of the hover cap so "+N more" does not
-    // under-report the stack (#1274).
+    // Full-group total + size — independent of the hover cap so Total and
+    // "+N more" stay honest when members were truncated (#1274).
     groupTotal: groupMagnitudeTotal(completeCandidates, groupAxis),
+    groupMemberCount: completeCandidates.length,
   });
 }
 

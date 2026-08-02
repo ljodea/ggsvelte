@@ -146,9 +146,16 @@
       : displayMembers,
   );
 
+  // Prefer the full axis-group size when present (transient snapshots are
+  // already capped upstream, so displayMembers.length alone is always ≤8).
   const overflowCount = $derived(
     inspection.state === "transient"
-      ? Math.max(0, displayMembers.length - shownMembers.length)
+      ? Math.max(
+          0,
+          (inspection.mode === "x" || inspection.mode === "y"
+            ? inspection.groupMemberCount
+            : displayMembers.length) - shownMembers.length,
+        )
       : 0,
   );
 

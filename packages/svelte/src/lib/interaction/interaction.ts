@@ -70,9 +70,15 @@ export type PlotInspectionChange<Row, Key> =
        * Sum of numeric contributions on the value axis across the full
        * axis-group (y when mode is x, x when mode is y). Used by the default
        * tooltip Total row; independent of the hover member cap (#1274).
-       * `null` when no member has a finite numeric contribution.
+       * One contribution per seriesId so line+point (or bar+label) pairs do
+       * not double-count. `null` when no member has a finite numeric contribution.
        */
       readonly groupTotal: number | null;
+      /**
+       * Size of the full axis-group before the transient hover cap. Drives the
+       * default tooltip "+N more" line when members were truncated (#1274).
+       */
+      readonly groupMemberCount: number;
     });
 
 export interface PlotInspectionClear {

@@ -394,6 +394,7 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
     expect(inspection.mode).toBe("x");
     if (inspection.mode === "x" || inspection.mode === "y") {
       expect(inspection.groupTotal).toBe(210);
+      expect(inspection.groupMemberCount).toBe(20);
     }
     model.dispose();
   });

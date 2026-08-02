@@ -1,5 +1,5 @@
 ---
-"@ggsvelte/svelte": patch
+"@ggsvelte/svelte": minor
 ---
 
 # Default tooltip content policy for high-n stacks

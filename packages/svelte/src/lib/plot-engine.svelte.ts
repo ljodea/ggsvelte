@@ -767,7 +767,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // High-cardinality discrete color/fill + inspect: default tooltip policy
   // advisory (#1274). Needs trained scales (runtime.model); once-per-channel.
   const inspectHighCardinality = $derived.by((): InteractionDiagnostic[] => {
-    if (interactionConfig().inspect === undefined) return [];
+    // Resolved inspect is null when off (never undefined) — see normalizeInteractionConfig.
+    if (interactionConfig().inspect === null) return [];
     const model = runtime.model;
     if (model === null) return [];
     return inspectHighCardinalityDiagnostics({
