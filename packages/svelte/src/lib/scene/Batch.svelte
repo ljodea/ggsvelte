@@ -13,7 +13,6 @@
     ThemeTokens,
   } from "@ggsvelte/core";
   import {
-    labelBoxOrigin,
     pathData,
     pointShapeGeometry,
     pointShapePathD,
@@ -24,6 +23,23 @@
     resolveSegmentMark,
     themeVar,
   } from "@ggsvelte/core";
+
+  /** Panel-local box origin for a glyph anchor + box size (geom_label).
+   *  Local twin of packages/core labelBoxOrigin — keep private; no new
+   *  public core export for a Svelte-scene paint parity fix. */
+  function labelBoxOrigin(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    anchor: "start" | "middle" | "end",
+    padding: number,
+  ): { x: number; y: number } {
+    let left = x - width / 2;
+    if (anchor === "start") left = x - padding;
+    else if (anchor === "end") left = x - width + padding;
+    return { x: left, y: y - height / 2 };
+  }
 
   /** Keyboard-focus cap: point marks become focusable tooltip targets only
    *  up to this many marks per batch (a11y pass; beyond it, the canvas-style

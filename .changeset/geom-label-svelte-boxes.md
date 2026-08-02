@@ -1,5 +1,4 @@
 ---
-"@ggsvelte/core": patch
 "@ggsvelte/svelte": patch
 ---
 

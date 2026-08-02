@@ -4854,10 +4854,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "labelBoxOrigin": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "layout": {
           "kind": "value",
           "lifecycle": "experimental"

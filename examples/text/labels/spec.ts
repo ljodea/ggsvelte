@@ -7,7 +7,10 @@ export default defineExample(
   gg(langrenLabels, aes({ x: "longitude", y: "rank" }))
     // Thumbnail contract: few short names, large, above points so bare ink
     // reads at the 96×96 geoms-index crop. No boxes — that is GeomLabel's job.
-    .scales(scaleXContinuous({ limits: [18, 30] }), scaleYContinuous({ limits: [0.2, 3.8] }))
+    .scales({
+      ...scaleXContinuous({ limits: [18, 30] }),
+      ...scaleYContinuous({ limits: [0.2, 3.8] }),
+    })
     .geomPoint({
       size: 4,
       alpha: 0.5,
