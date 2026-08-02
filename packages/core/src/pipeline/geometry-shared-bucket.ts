@@ -109,7 +109,7 @@ export function sortGroupRowsByX(
     }
     for (const rows of groupRows) {
       if (isNonDecreasing(rows, keys)) continue;
-      rows.sort((a, b) => keys[a]! - keys[b]!);
+      rows.sort((a, b) => compareSortKeys(keys[a]!, keys[b]!));
     }
     return;
   }
@@ -118,7 +118,7 @@ export function sortGroupRowsByX(
     // Multi-series long form is usually already x-sorted within each group
     // after bucketByGroup's ascending row walk — O(n) check beats O(n log n).
     if (isNonDecreasing(rows, x)) continue;
-    rows.sort((a, b) => x[a]! - x[b]!);
+    rows.sort((a, b) => compareSortKeys(x[a]!, x[b]!));
   }
 }
 
@@ -129,4 +129,14 @@ function isNonDecreasing(rows: readonly number[], keys: ArrayLike<number>): bool
     if (!(keys[rows[i]!]! >= keys[rows[i - 1]!]!)) return false;
   }
   return true;
+}
+
+/** Ascending compare; NaN sorts after every finite key (ribbon pre-filter). */
+function compareSortKeys(a: number, b: number): number {
+  const aNan = Number.isNaN(a);
+  const bNan = Number.isNaN(b);
+  if (aNan && bNan) return 0;
+  if (aNan) return 1;
+  if (bNan) return -1;
+  return a - b;
 }
