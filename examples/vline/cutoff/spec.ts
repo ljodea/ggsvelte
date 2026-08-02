@@ -5,16 +5,18 @@ import { earthDensity } from "./data.js";
 
 export default defineExample(
   // geom_vline is sugar for rule + xintercept annotation (#818).
+  // Thumbnail contract: one thick vertical mark only — no series line, so
+  // the geom reads as a cutoff bar at index thumbnail size.
   gg(earthDensity, aes({ x: "trial", y: "density" }))
-    .geomLine({ linewidth: 1.4 })
-    .geomPoint({ size: 2.5 })
+    .geomPoint({ size: 2.2, alpha: 0.55 })
     .geomVline({
       xintercept: 6.5,
+      linewidth: 2.6,
       aes: aes({ color: { value: "#d4615c" } }),
     })
-    .theme("tufte")
+    .theme("minimal")
     .labs({
-      title: "A vertical rule at a known index",
+      title: "One vertical cutoff",
       subtitle:
         "Determinations in reported order; the rule marks the trial after which the wire changed",
       x: "Determination",

@@ -12656,8 +12656,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/hline/threshold",
-    title: "A horizontal rule at a known value — ggsvelte gallery",
-    description: "Horizontal rules for thresholds, targets, or modern reference values.",
+    title: "One horizontal threshold — ggsvelte gallery",
+    description:
+      "Horizontal rules for thresholds, targets, or known reference values across a panel.",
     canonicalPath: "/examples/hline/threshold",
     kind: "page",
     index: true,
@@ -12709,8 +12710,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/label/basic",
-    title: "Named points with background boxes — ggsvelte gallery",
-    description: "Boxed labels when names sit on top of other marks and must stay legible.",
+    title: "Text with rounded background boxes — ggsvelte gallery",
+    description:
+      "Boxed labels when names need a rounded background so they stay legible over other marks.",
     canonicalPath: "/examples/label/basic",
     kind: "page",
     index: true,
@@ -13034,8 +13036,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/rule/annotation",
-    title: "Reference rules on a one-dimensional sample — ggsvelte gallery",
-    description: "Annotation rules for cutoffs and known constants on continuous data.",
+    title: "A crosshair of two fixed intercepts — ggsvelte gallery",
+    description:
+      "Annotation rules for cutoffs and known constants: one vertical and one horizontal intercept on continuous data.",
     canonicalPath: "/examples/rule/annotation",
     kind: "page",
     index: true,
@@ -13148,8 +13151,8 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/text/labels",
-    title: "Text as the data mark — ggsvelte gallery",
-    description: "Text geoms when the label is the primary mark, not a decoration.",
+    title: "Bare text labels on points — ggsvelte gallery",
+    description: "Text geoms when the label is the primary mark, with no background box.",
     canonicalPath: "/examples/text/labels",
     kind: "page",
     index: true,
@@ -13169,8 +13172,8 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/vline/cutoff",
-    title: "A vertical rule at a known index — ggsvelte gallery",
-    description: "Vertical rules for cutoffs along a sequence or continuous x.",
+    title: "One vertical cutoff — ggsvelte gallery",
+    description: "Vertical rules for cutoffs along a sequence or continuous x across a panel.",
     canonicalPath: "/examples/vline/cutoff",
     kind: "page",
     index: true,

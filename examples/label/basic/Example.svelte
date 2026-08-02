@@ -4,9 +4,7 @@
     GeomLabel,
     GGPlot,
     Labs,
-    ScaleColorManual,
-    ScaleFillManual,
-    ThemeClassic,
+    ThemeMinimal,
   } from "@ggsvelte/svelte";
 
   import { langren1644 } from "./data.js";
@@ -18,30 +16,25 @@
   width={640}
   height={400}
 >
-  <ThemeClassic />
-  <ScaleColorManual
-    domain={["Astronomy", "Map"]}
-    values={["#205ea6", "#a02f6f"]}
-  />
-  <ScaleFillManual
-    domain={["Astronomy", "Map"]}
-    values={["#e8f0fb", "#f8e8f0"]}
-  />
+  <ThemeMinimal />
   <Labs
-    title="Named points with background boxes"
-    subtitle="Each estimate labelled with who made it; the box keeps text readable over the rule"
+    title="Text with rounded background boxes"
+    subtitle="Same labels as GeomText, with a measured box behind each name"
     x="Estimated Toledo–Rome longitude (°)"
     y="Ordered by estimate"
-    color="Derived from"
-    fill=""
   />
-  <GeomPoint size={3.5} aes={{ color: "source" }} />
+  <GeomPoint size={2.2} alpha={0.4} aes={{ color: { value: "#4a5568" } }} />
   <GeomLabel
-    aes={{ label: "name", fill: "source" }}
+    aes={{
+      label: "name",
+      fill: { value: "#dbe4f0" },
+      color: { value: "#0f172a" },
+    }}
     anchor="start"
     dx={7}
-    size={10}
-    padding={3}
-    radius={3}
+    size={12}
+    padding={5}
+    radius={5}
+    linewidth={1.8}
   />
 </GGPlot>

@@ -21053,11 +21053,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:hline:threshold",
     kind: "example",
-    title: "A horizontal rule at a known value",
-    summary: "Horizontal rules for thresholds, targets, or modern reference values.",
+    title: "One horizontal threshold",
+    summary: "Horizontal rules for thresholds, targets, or known reference values across a panel.",
     href: "/examples/hline/threshold",
     keywords: [
-      "A horizontal rule at a known value",
+      "One horizontal threshold",
       "Annotations & rules",
       "hline",
       "rule",
@@ -21065,7 +21065,7 @@ export const DOCS_SEARCH_INDEX = [
       "line",
       "theme",
     ],
-    exact: ["A horizontal rule at a known value"],
+    exact: ["One horizontal threshold"],
   },
   {
     id: "example:interaction:legend-filter",
@@ -21145,11 +21145,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:label:basic",
     kind: "example",
-    title: "Named points with background boxes",
-    summary: "Boxed labels when names sit on top of other marks and must stay legible.",
+    title: "Text with rounded background boxes",
+    summary:
+      "Boxed labels when names need a rounded background so they stay legible over other marks.",
     href: "/examples/label/basic",
-    keywords: ["Named points with background boxes", "Labels & text", "label", "text", "point"],
-    exact: ["Named points with background boxes"],
+    keywords: ["Text with rounded background boxes", "Labels & text", "label", "text", "point"],
+    exact: ["Text with rounded background boxes"],
   },
   {
     id: "example:line:ecdf",
@@ -21669,18 +21670,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:rule:annotation",
     kind: "example",
-    title: "Reference rules on a one-dimensional sample",
-    summary: "Annotation rules for cutoffs and known constants on continuous data.",
+    title: "A crosshair of two fixed intercepts",
+    summary:
+      "Annotation rules for cutoffs and known constants: one vertical and one horizontal intercept on continuous data.",
     href: "/examples/rule/annotation",
     keywords: [
-      "Reference rules on a one-dimensional sample",
+      "A crosshair of two fixed intercepts",
       "Annotations & rules",
       "rule",
       "annotation",
       "line",
       "layers",
     ],
-    exact: ["Reference rules on a one-dimensional sample"],
+    exact: ["A crosshair of two fixed intercepts"],
   },
   {
     id: "example:rule:data-driven",
@@ -21857,11 +21859,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:text:labels",
     kind: "example",
-    title: "Text as the data mark",
-    summary: "Text geoms when the label is the primary mark, not a decoration.",
+    title: "Bare text labels on points",
+    summary: "Text geoms when the label is the primary mark, with no background box.",
     href: "/examples/text/labels",
-    keywords: ["Text as the data mark", "Labels & text", "text", "point", "labels"],
-    exact: ["Text as the data mark"],
+    keywords: ["Bare text labels on points", "Labels & text", "text", "point", "labels"],
+    exact: ["Bare text labels on points"],
   },
   {
     id: "example:tile:heatmap",
@@ -21883,11 +21885,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:vline:cutoff",
     kind: "example",
-    title: "A vertical rule at a known index",
-    summary: "Vertical rules for cutoffs along a sequence or continuous x.",
+    title: "One vertical cutoff",
+    summary: "Vertical rules for cutoffs along a sequence or continuous x across a panel.",
     href: "/examples/vline/cutoff",
     keywords: [
-      "A vertical rule at a known index",
+      "One vertical cutoff",
       "Annotations & rules",
       "vline",
       "rule",
@@ -21895,7 +21897,7 @@ export const DOCS_SEARCH_INDEX = [
       "line",
       "theme",
     ],
-    exact: ["A vertical rule at a known index"],
+    exact: ["One vertical cutoff"],
   },
   {
     id: "api:ggsvelte-spec:A11yMode",

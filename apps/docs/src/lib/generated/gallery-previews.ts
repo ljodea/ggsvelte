@@ -204,7 +204,7 @@ export const GALLERY_PREVIEWS = [
     id: "hline/threshold",
     filename: "hline-threshold-light.png",
     path: "/previews/hline-threshold-light.png",
-    sha256: "93c2ca46135112a06636758fce44221de0dd8539255d68b9e5f91fe40fb12f29",
+    sha256: "4153e4b5d9d1802cac5a34f1c5e8991d3f97f2d3657fc0c03533fad7e435cd21",
   },
   {
     id: "interaction/brush-zoom",
@@ -252,7 +252,7 @@ export const GALLERY_PREVIEWS = [
     id: "label/basic",
     filename: "label-basic-light.png",
     path: "/previews/label-basic-light.png",
-    sha256: "cb149d2a09796031535444684c8136dd3ee080348ce7aab5bbbf4c244ef6fb7d",
+    sha256: "1cb489788a14c0c2fbecfa66ac281e83b8d3909dc330542bbeb6793b4592431c",
   },
   {
     id: "line/ecdf",
@@ -438,7 +438,7 @@ export const GALLERY_PREVIEWS = [
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",
-    sha256: "d7ae03b1fd5b335593e1ab3a44836af09cedd88910c2d1688898b8e9a1814e7c",
+    sha256: "e453f7d4fcfa0d5ad058801724b2ab1b14b18c524c7d841c4233c0e1ecdfe877",
   },
   {
     id: "rule/data-driven",
@@ -504,7 +504,7 @@ export const GALLERY_PREVIEWS = [
     id: "text/labels",
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",
-    sha256: "4914572bee4f7335a8d0a7f73ab80069941f60546dc29a67cbb91cb5cc9f3a90",
+    sha256: "bde79ad1536251a9c462f6f788b1746b3d78a7f08362d09618e7b65c4f74f242",
   },
   {
     id: "tile/heatmap",
@@ -516,6 +516,6 @@ export const GALLERY_PREVIEWS = [
     id: "vline/cutoff",
     filename: "vline-cutoff-light.png",
     path: "/previews/vline-cutoff-light.png",
-    sha256: "79c5b2248c2b0486d6141c082acdbbad6b299fc65bff7fdf01d7e76fc004f397",
+    sha256: "2e4519fa5a70c7efe10e08e05df8265c4cc10abd6ea1f663d27413b554c1466a",
   },
 ] as const satisfies readonly GalleryPreview[];

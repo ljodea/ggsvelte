@@ -1,6 +1,6 @@
 {
-  "title": "Reference rules on a one-dimensional sample",
-  "description": "Annotation rules for cutoffs and known constants on continuous data.",
+  "title": "A crosshair of two fixed intercepts",
+  "description": "Annotation rules for cutoffs and known constants: one vertical and one horizontal intercept on continuous data.",
   "tags": ["rule", "annotation", "line", "layers"],
   "docsSection": "Annotations & rules"
 }

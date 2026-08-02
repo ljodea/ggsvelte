@@ -1,6 +1,6 @@
 {
-  "title": "A horizontal rule at a known value",
-  "description": "Horizontal rules for thresholds, targets, or modern reference values.",
+  "title": "One horizontal threshold",
+  "description": "Horizontal rules for thresholds, targets, or known reference values across a panel.",
   "tags": ["hline", "rule", "annotation", "line", "theme"],
   "docsSection": "Annotations & rules"
 }
