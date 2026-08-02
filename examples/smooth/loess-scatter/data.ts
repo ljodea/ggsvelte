@@ -1,7 +1,7 @@
 /**
  * Chocolate bar reviews for a loess demo: cocoa percent against expert rating.
  *
- * A 400-row deterministic subsample of chocolateBars keeps loess interactive
+ * A ~400-row deterministic subsample of chocolateBars keeps loess interactive
  * on the gallery page while still looking dense. The full 2,530-row table
  * stays on `@ggsvelte/svelte/data` for consumers who want every review.
  *
