@@ -59,6 +59,27 @@ describe("statDensity — large-group binned path", () => {
       expect(weighted.density[k]!).toBeCloseTo(unweighted.density[k]!, 12);
     }
   });
+
+  it("keeps the exact direct path when the grid is coarse relative to the bandwidth", () => {
+    // n: 48 over this range gives step/bw ≈ 0.7 — linear binning would
+    // widen the effective bandwidth by percent levels. The stat must fall
+    // back to the exact direct sum, so the result matches an independent
+    // direct evaluation to (near) machine precision, not binning tolerance.
+    const result = statDensity({ x, groups, params: { n: 48 } });
+    const bw = estimateBw(x);
+    const sorted = Float64Array.from(x).toSorted();
+    const from = sorted[0]! - 3 * bw;
+    const step = (sorted.at(-1)! + 3 * bw - from) / (result.x.length - 1);
+    for (let k = 0; k < result.x.length; k++) {
+      const x0 = from + k * step;
+      let direct = 0;
+      for (let i = 0; i < n; i++) {
+        const z = (x0 - x[i]!) / bw;
+        direct += ((1 / n) * (Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI))) / bw;
+      }
+      expect(Math.abs(result.density[k]! - direct)).toBeLessThan(1e-9 * Math.max(1, direct));
+    }
+  });
 });
 
 /** bw.nrd0 via the same exported helper the stat uses. */

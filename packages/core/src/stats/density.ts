@@ -197,8 +197,13 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
     // kernel values the direct window sum uses (gauss(m·step/bw)/bw,
     // truncated at ±8·bw), so the paths agree to binning error (well under
     // the 5e-4 R-parity tolerance — R itself approximates by binned FFT).
+    // The resolution guard matters as much as the size guard: binning is
+    // equivalent to widening the bandwidth by sqrt(bw² + step²/6), so a
+    // user-coarsened grid (step ≈ bw) would over-smooth by percent levels.
+    // step ≤ bw/4 bounds that widening to ~0.5%; coarse grids are cheap
+    // for the direct path anyway (gridN small).
     const densities = new Float64Array(gridN);
-    if (nx > 4 * gridN && step > 0) {
+    if (nx > 4 * gridN && step > 0 && step <= bw / 4) {
       const binned = new Float64Array(gridN);
       for (let j = 0; j < nx; j++) {
         const t = (sorted[j]! - from) / step;
