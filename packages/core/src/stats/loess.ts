@@ -142,12 +142,8 @@ export function loessFit(
 
   const q = Math.max(degree + 1, Math.min(n, Math.floor(span * n + 1e-9)));
 
-  /**
-   * Local weighted fit at x0: returns the l(x0) weight vector over the
-   * window [i0, i0 + q) such that fit = Σ l_j · ys[i0 + j].
-   */
-  const localWeights = (x0: number): { i0: number; l: Float64Array } | null => {
-    // Nearest-q window: binary search, then two-pointer expansion.
+  /** Cold nearest-q window: binary search, then two-pointer expansion. */
+  const windowFor = (x0: number): number => {
     let lo = 0;
     let hi = n;
     while (lo < hi) {
@@ -166,7 +162,14 @@ export function loessFit(
         right++;
       }
     }
-    const i0 = left + 1;
+    return left + 1;
+  };
+
+  /**
+   * Local weighted fit at x0 over the window [i0, i0 + q): returns the l(x0)
+   * weight vector such that fit = Σ l_j · ys[i0 + j].
+   */
+  const localWeightsAt = (x0: number, i0: number): { i0: number; l: Float64Array } | null => {
     const i1 = i0 + q - 1;
     const dmax = Math.max(x0 - xs[i0]!, xs[i1]! - x0);
 
@@ -182,25 +185,50 @@ export function loessFit(
     }
 
     // Weighted least squares on the centered basis (1, z, z²), z = x − x0,
-    // reducing the degree on singular systems (duplicate-x windows).
+    // reducing the degree on singular systems (duplicate-x windows). The
+    // normal-equation moments s_k = Σ wj·z^k are accumulated once (scalar
+    // locals, same j-order and the same iterative power chain as the
+    // previous per-point powers array — bit-identical); the (d+1)×(d+1)
+    // system for each attempted degree reads off them, so degree reduction
+    // no longer rebuilds the matrix.
+    let s0 = 0;
+    let s1 = 0;
+    let s2 = 0;
+    let s3 = 0;
+    let s4 = 0;
+    for (let j = 0; j < q; j++) {
+      const wj = w[j]!;
+      if (wj === 0) continue;
+      const z = xs[i0 + j]! - x0;
+      const z2 = z * z;
+      const z3 = z2 * z;
+      const z4 = z3 * z;
+      s0 += wj;
+      s1 += wj * z;
+      s2 += wj * z2;
+      s3 += wj * z3;
+      s4 += wj * z4;
+    }
     for (let d = degree; d >= 0; d--) {
       const size = d + 1;
       const m = new Float64Array(size * size);
-      for (let j = 0; j < q; j++) {
-        const z = xs[i0 + j]! - x0;
-        const wj = w[j]!;
-        if (wj === 0) continue;
-        let zp = 1;
-        const powers = new Float64Array(2 * d + 1);
-        for (let p = 0; p <= 2 * d; p++) {
-          powers[p] = zp;
-          zp *= z;
-        }
-        for (let r = 0; r < size; r++) {
-          for (let c = 0; c < size; c++) {
-            m[r * size + c] = m[r * size + c]! + wj * powers[r + c]!;
-          }
-        }
+      if (d === 2) {
+        m[0] = s0;
+        m[1] = s1;
+        m[2] = s2;
+        m[3] = s1;
+        m[4] = s2;
+        m[5] = s3;
+        m[6] = s2;
+        m[7] = s3;
+        m[8] = s4;
+      } else if (d === 1) {
+        m[0] = s0;
+        m[1] = s1;
+        m[2] = s1;
+        m[3] = s2;
+      } else {
+        m[0] = s0;
       }
       const a = solveFirstColumn(m, size);
       if (a === null) continue;
@@ -221,6 +249,9 @@ export function loessFit(
     }
     return null;
   };
+
+  const localWeights = (x0: number): { i0: number; l: Float64Array } | null =>
+    localWeightsAt(x0, windowFor(x0));
 
   const predictAt = (x0: number): { fit: number; norm: number } | null => {
     const lw = localWeights(x0);
@@ -247,8 +278,21 @@ export function loessFit(
     let trLtL = 0;
     let rss = 0;
     let ok = true;
+    // Warm-start window walk: evaluation points xs[i] are sorted ascending,
+    // so the nearest-q window only slides right — amortized O(n) total
+    // instead of O(n·q). The slide never moves on an exact tie (matches the
+    // cold two-pointer's left preference), and boundary tie-swaps exchange
+    // zero-weight endpoints at dmax, leaving fits, tr(L), tr(LᵀL), and the
+    // dense L bit-identical. The one window-dependent case is dmax = 0
+    // (more than q points share one x): fall back to the cold selection.
+    let i0w = windowFor(xs[0]!);
     for (let i = 0; i < n; i++) {
-      const lw = localWeights(xs[i]!);
+      const x0 = xs[i]!;
+      while (i0w + q < n && xs[i0w + q]! - x0 < x0 - xs[i0w]!) i0w++;
+      const windowFirst = xs[i0w]!;
+      const windowLast = xs[i0w + q - 1]!;
+      if (windowFirst === windowLast) i0w = windowFor(x0);
+      const lw = localWeightsAt(x0, i0w);
       if (lw === null) {
         ok = false;
         break;
