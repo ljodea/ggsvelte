@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { settleVisualState } from "./helpers/deterministic";
+
 function relativeLuminance(cssColor: string): number {
   const channels = cssColor
     .match(/[\d.]+/g)
@@ -27,8 +29,10 @@ function contrastRatio(foreground: string, background: string): number {
 
 for (const theme of ["light", "dark"] as const) {
   test(`interaction tool labels meet AA contrast in ${theme} mode`, async ({ page }) => {
+    // No ?vr: keep page chrome so body background is the real site surface.
+    // Example detail pages are intent-gated; settleVisualState loads the chart.
     await page.goto(`/examples/interaction/brush-zoom?theme=${theme}`);
-    await expect(page.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+    await settleVisualState(page);
 
     const pageBackground = await page
       .locator("body")
