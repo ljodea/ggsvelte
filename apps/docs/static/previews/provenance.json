@@ -13,7 +13,7 @@
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "69639e2508ec13b2bb23aec4329c3e0a62d58078fa01f4d6d3f51ea5ad29fbfd",
+      "sourceSha256": "7c32a65a6daad5ee69938b5e60cccd81365a8a0eea36319f6e939c6dab24b1f1",
       "pngSha256": "dc33edb3d1d9841ff5cfdaf5961bb77d0941e01e9f98b0e02219bbd527405ed0"
     },
     "bar/horizontal": {
@@ -198,7 +198,7 @@
     },
     "jitter/basic": {
       "filename": "jitter-basic-light.png",
-      "sourceSha256": "21ecbbf7ca0aa771ac5035bd62fbb8a93cea6a7a25987019a4e96ae79d5f0465",
+      "sourceSha256": "be9e9f4c8daca4c56aae3378f1ea261931ddd6e2514e3f57a72cd59327196e8c",
       "pngSha256": "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4"
     },
     "label/basic": {
@@ -278,7 +278,7 @@
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
-      "sourceSha256": "d9d8b2467a0f43b9bbaef3dbf21fa81079fa90d6dd2505548002021d5c77a7d8",
+      "sourceSha256": "c51ced8c0a716e89b68a2909d63ac21e25872229c1c68e0ed763e23751063a58",
       "pngSha256": "c7b3ca2dd472c53f53ab8903f31c5db2361e667932f62034516a236b9ad05992"
     },
     "point/layer-data-bands": {
@@ -293,7 +293,7 @@
     },
     "point/quantile-lines": {
       "filename": "point-quantile-lines-light.png",
-      "sourceSha256": "6eebf9c2ec3fc8796de2bd141c0f91f1552ad648b8a1fe0f5a9ca6987823f192",
+      "sourceSha256": "63542ffac3a3bc0f9728b851d1a5e171554fbf139e9770b0a7474eac8b1d03ea",
       "pngSha256": "db8e483720567e3d6bf182d1837cb3b5da4a8069c518a2e4ff2e969c4fddc03f"
     },
     "point/scatter-color": {
@@ -363,7 +363,7 @@
     },
     "rule/data-driven": {
       "filename": "rule-data-driven-light.png",
-      "sourceSha256": "0c6088c30f06fe690de18270f7fd3546a5b15ae97acdf38608231b39c03ee60c",
+      "sourceSha256": "f3f7f7ba140f23d5ed23d3942986941d84648e3ae0192b5c90cc1b588e21634d",
       "pngSha256": "d77dbfed1af5e92d8f0383e32c6b9805b3ceda58ca6bffe7a5a7d57c346b3297"
     },
     "segment/annotations": {
@@ -398,7 +398,7 @@
     },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
-      "sourceSha256": "d441d72bda507e5b8171128bb51743d9f222ac726173a55cdc2f6bacba3896d2",
+      "sourceSha256": "2fc995596ad146ad67324a9ffeaa358e6e1e8ad5c5f1f4ee897f7bbb2cefef4a",
       "pngSha256": "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72"
     },
     "spoke/vector-field": {
