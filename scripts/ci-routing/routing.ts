@@ -122,7 +122,7 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   spec: ["packages/spec/**"],
   core: ["packages/core/**"],
   cli: ["packages/cli/**"],
-  svelte: ["packages/svelte/**", "skills/ggsvelte/**"],
+  svelte: ["packages/svelte/**", "packages/skill/**"],
   docs: [
     "apps/docs/**",
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
@@ -199,6 +199,7 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "packages/core/README.md",
     "packages/svelte/README.md",
     "packages/cli/README.md",
+    "packages/skill/README.md",
   ],
   // Cloudflare workers (when present). Own bun tests + type-aware lint/knip.
   // Nothing under workers/** renders charts, so no browser/docs surface.

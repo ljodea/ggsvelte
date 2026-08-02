@@ -28,8 +28,7 @@
   },
   "files": [
     "dist",
-    "bin",
-    "skills"
+    "bin"
   ],
   "type": "module",
   "sideEffects": false,

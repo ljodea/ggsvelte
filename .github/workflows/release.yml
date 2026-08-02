@@ -5,7 +5,8 @@
 #   1. A GitHub remote for this repo — until the repo is pushed to GitHub,
 #      this workflow never runs.
 #   2. npm "trusted publishing" configured on npmjs.com for EACH published
-#      package — @ggsvelte/spec, @ggsvelte/core, @ggsvelte/svelte, and @ggsvelte/cli — each pointing
+#      package — @ggsvelte/spec, @ggsvelte/core, @ggsvelte/svelte, @ggsvelte/cli,
+#      and @ggsvelte/skill — each pointing
 #      at this repository + this workflow file (release.yml). This requires
 #      the npm org/packages to exist and is maintainer-side setup.
 #
@@ -86,7 +87,7 @@ jobs:
         run: bun run build
       # Publishing is gated behind the NPM_PUBLISH_ENABLED repo variable so
       # this workflow stays green until npm trusted publishing (OIDC) is
-      # configured for all four packages on npmjs.com. Flip the gate with:
+      # configured for all five packages on npmjs.com. Flip the gate with:
       #   gh variable set NPM_PUBLISH_ENABLED --body true
       #
       # MUST run before changesets/action: the action switches the workspace

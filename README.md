@@ -4,8 +4,7 @@
 
 ggplot2's layered grammar for Svelte 5. Author with components; agents emit the
 same chart as PortableSpec JSON — validate, apply the fix, render headless.
-`@ggsvelte/svelte` ships the agent skill at
-[`skills/ggsvelte`](skills/ggsvelte/SKILL.md).
+The agent skill ships as [`@ggsvelte/skill`](packages/skill/SKILL.md).
 
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started)
@@ -22,8 +21,9 @@ and Windows.
 
 ## Agents
 
-- Skill: [`skills/ggsvelte/SKILL.md`](skills/ggsvelte/SKILL.md) (also published
-  under `node_modules/@ggsvelte/svelte/skills/ggsvelte/`)
+- Skill: [`@ggsvelte/skill`](packages/skill/SKILL.md) — published to npm so a
+  bundled copy in your repo gets dependabot update signals (install, then copy
+  `node_modules/@ggsvelte/skill` into your agent's skills dir as `ggsvelte/`)
 - Schema: [`schema/v0.json`](https://ggsvelte.sh/schema/v0.json)
 - Corpus: [`llms.txt`](https://ggsvelte.sh/llms.txt) ·
   [`llms-full.txt`](https://ggsvelte.sh/llms-full.txt)
@@ -34,10 +34,11 @@ and Windows.
 
 | Package                               | Surface                                                             |
 | ------------------------------------- | ------------------------------------------------------------------- |
-| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, re-exports, agent skill                        |
+| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, re-exports                                     |
 | [`@ggsvelte/spec`](packages/spec)     | PortableSpec types, JSON Schema, validate/normalize, fluent builder |
 | [`@ggsvelte/core`](packages/core)     | Pipeline, headless SVG, canvas, hit testing                         |
 | [`@ggsvelte/cli`](packages/cli)       | `ggsvelte-render` CLI: validate + render specs in agent sandboxes   |
+| [`@ggsvelte/skill`](packages/skill)   | Agent skill (SKILL.md + references) teaching the grammar            |
 
 ## Reference
 

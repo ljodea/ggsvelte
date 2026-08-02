@@ -1,7 +1,8 @@
 /**
- * Content contract for the shipped agent skill (skills/ggsvelte/).
+ * Content contract for the published agent skill (packages/skill/, npm:
+ * @ggsvelte/skill)..
  *
- * The skill ships inside the ggsvelte npm package and teaches agents the
+ * The skill ships as the @ggsvelte/skill npm package and teaches agents the
  * grammar; a stale or broken claim there produces broken charts downstream.
  * Four guards:
  *
@@ -51,7 +52,7 @@ import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-at
 import { codeBlocks } from "./guide-code-contract.ts";
 
 const ROOT = join(import.meta.dir, "..");
-const SKILL_DIR = join(ROOT, "skills", "ggsvelte");
+const SKILL_DIR = join(ROOT, "packages", "skill");
 
 function markdownFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -61,14 +62,30 @@ function markdownFiles(dir: string): string[] {
   });
 }
 
-const FILES = markdownFiles(SKILL_DIR).map((path) => ({
-  name: relative(SKILL_DIR, path),
-  markdown: readFileSync(path, "utf8"),
-}));
+// Only the skill surface: SKILL.md + references/. The package root also
+// holds README.md (npm front door) and — after the first Version Packages
+// PR — a changesets-generated CHANGELOG.md; holding those to the fence
+// contract would let a routine release note turn main red.
+const FILES = [join(SKILL_DIR, "SKILL.md"), ...markdownFiles(join(SKILL_DIR, "references"))].map(
+  (path) => ({
+    name: relative(SKILL_DIR, path),
+    markdown: readFileSync(path, "utf8"),
+  }),
+);
 
 describe("skill fence contract", () => {
   it("finds skill markdown to check", () => {
     expect(FILES.length).toBeGreaterThan(0);
+  });
+
+  it("checks only the skill surface (SKILL.md + references/), not package-root docs", () => {
+    // A changesets-generated CHANGELOG.md or the npm README carrying an
+    // unflagged fence must never fail this suite (Devin P1 on #1425).
+    const names = FILES.map((f) => f.name);
+    expect(names).toContain("SKILL.md");
+    for (const name of names) {
+      expect(name === "SKILL.md" || name.startsWith("references/")).toBe(true);
+    }
   });
 
   for (const file of FILES) {

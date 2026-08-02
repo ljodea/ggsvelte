@@ -505,23 +505,23 @@ PR gets one opened rather than a silent skip. The three-way decision
 Add a `.changeset/*.md` **only** when the PR changes an npm-published package
 surface — the same paths `scripts/changeset-check.ts` treats as shipped
 (`package.json`, `README.md`, `LICENSE`, that package’s npm `files` entries
-under `packages/{cli,core,spec,svelte}`, and — for packages that publish
+under `packages/{cli,core,skill,spec,svelte}`, and — for packages that publish
 compiled `dist` without listing `src` — the package’s `src/` tree that builds
-into `dist`, e.g. `packages/svelte/src/**`). Spec, core, svelte, and cli
+into `dist`, e.g. `packages/svelte/src/**`). Spec, core, svelte, cli, and skill
 version in **fixed lockstep**, so one real (or spurious) changeset advances all
-four package versions.
+five package versions.
 
 **Do not** add a changeset for docs site, examples, scripts, tests, CI, or
 guide content alone (`apps/docs/**`, `examples/**`, `scripts/quickstart/**`,
 lesson SVGs, gallery previews, VR baselines, …). Those PRs must not bump
 packages. The Changeset check workflow fails with verdict `unwarranted` if they
-do. Packaged agent skills under `packages/svelte/skills/` _do_ ship and may
+do. The agent skill under `packages/skill/` _does_ ship and may
 warrant a patch. Missing changesets on package code stay advisory only.
 
 ### Bump level (SemVer)
 
 Pick the level from the **public surface change**, not from how small the
-diff looks. Spec, core, svelte, and cli share one version, so the highest
+diff looks. Spec, core, svelte, cli, and skill share one version, so the highest
 level among pending changesets wins.
 
 | Level     | Use for                                                                                                                                                                            |
@@ -664,8 +664,8 @@ the sources); `lintSpec()` spec-lint advisories (wired into
 the docs guide pages GENERATED from those catalogs (`scripts/gen-llms.ts` is
 the one source for guide markdown, `/llms.txt`, and `/llms-full.txt` — the
 docs pages and llms endpoints cannot drift from the code); `/schema/v0.json`
-served from the docs build; `skills/ggsvelte/SKILL.md` (copy shipped in the
-ggsvelte package, sync-tested); the held-out eval harness (`tests/evals/`,
+served from the docs build; the agent skill published as `@ggsvelte/skill`
+(`packages/skill/`, inventory completeness enforced by skill-content tests); the held-out eval harness (`tests/evals/`,
 44 cases, dry-run mock without a key); benchmark budgets
 (`benchmarks/budgets.json`, provisional) + `bench:json`/`bench:budgets`;
 the completed VR approval flow (`/approve-visuals` comment gate,

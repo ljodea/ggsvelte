@@ -17,8 +17,12 @@ const root = join(import.meta.dir, "..");
 const PACKAGES = [
   { dir: "packages/cli", name: "@ggsvelte/cli", shipped: ["dist", "bin", "src"] },
   { dir: "packages/core", name: "@ggsvelte/core", shipped: ["dist", "src"] },
+  // @ggsvelte/skill ships root-level files, not only directories: SKILL.md is
+  // a `files` entry that is not a path prefix (the isShippedPath file-entry
+  // regression guard below keys off this). Sorted by dir: skill < spec.
+  { dir: "packages/skill", name: "@ggsvelte/skill", shipped: ["SKILL.md", "references"] },
   { dir: "packages/spec", name: "@ggsvelte/spec", shipped: ["dist", "schema", "src"] },
-  { dir: "packages/svelte", name: "@ggsvelte/svelte", shipped: ["dist", "bin", "skills"] },
+  { dir: "packages/svelte", name: "@ggsvelte/svelte", shipped: ["dist", "bin"] },
 ];
 
 describe("decideChangesetComment", () => {
@@ -78,14 +82,29 @@ describe("decideChangesetComment", () => {
 
   it("treats packaged agent skills as shipped (changeset ok)", () => {
     const decision = decideChangesetComment(
-      [".changeset/skill-rewrite.md", "packages/svelte/skills/ggsvelte/SKILL.md"],
+      [".changeset/skill-rewrite.md", "packages/skill/references/geoms-and-stats.md"],
       PACKAGES,
     );
     expect(decision.verdict).toBe("changeset-present");
   });
 
+  it("treats root-level `files` entries as shipped (SKILL.md, not only dirs)", () => {
+    // Regression: isShippedPath used to prefix-match `files` entries as
+    // directories only, so packages/skill/SKILL.md was invisible — a skill
+    // rewrite + changeset read as `unwarranted` and blocked the PR.
+    const withChangeset = decideChangesetComment(
+      [".changeset/skill-rewrite.md", "packages/skill/SKILL.md"],
+      PACKAGES,
+    );
+    expect(withChangeset.verdict).toBe("changeset-present");
+
+    const without = decideChangesetComment(["packages/skill/SKILL.md"], PACKAGES);
+    expect(without.verdict).toBe("missing");
+    expect(without.touched).toEqual(["packages/skill/SKILL.md"]);
+  });
+
   // Regression: Devin review on #1132 — @ggsvelte/svelte publishes compiled
-  // dist/ (gitignored), so files is [dist, bin, skills] with no src. Without
+  // dist/ (gitignored), so files is [dist, bin] with no src. Without
   // mapping src → shipped surface, real svelte fixes + changesets got
   // unwarranted and the new gate blocked them.
   it("treats svelte src as shipped when package only lists dist (compiled)", () => {

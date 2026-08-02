@@ -31,7 +31,7 @@ export type PublishedPackage = {
   /** Repo-relative package dir, e.g. "packages/core". */
   dir: string;
   name: string;
-  /** npm `files` entries — the dirs that ship in the tarball. */
+  /** npm `files` entries — the dirs/files that ship in the tarball. */
   shipped: string[];
 };
 
@@ -45,8 +45,8 @@ export type Decision = {
 
 /**
  * Read the npm-published workspace packages from packages/*. Published means
- * no `"private": true`; `shipped` mirrors the npm `files` field (the dirs
- * that actually reach the tarball).
+ * no `"private": true`; `shipped` mirrors the npm `files` field (the entries
+ * that actually reach the tarball — directories and root-level files alike).
  */
 export function discoverPublishedPackages(root: string): PublishedPackage[] {
   const packages: PublishedPackage[] = [];
@@ -96,8 +96,8 @@ export function renderComment(decision: Decision): string {
       "",
       "Add a changeset only when the diff touches a published package's",
       "`files` entries (or its `package.json`) — same rule as",
-      "`scripts/changeset-check.ts`. Packaged agent skills under",
-      "`packages/svelte/skills/` *do* ship and may warrant a patch.",
+      "`scripts/changeset-check.ts`. The packaged agent skill under",
+      "`packages/skill/` *does* ship and may warrant a patch.",
       "",
       "This check **blocks** merging until the unwarranted changeset is removed.",
       "",
@@ -183,11 +183,20 @@ function isShippedPath(path: string, pkg: PublishedPackage): boolean {
   // Colocated test files live under src/ but are not part of the consumer
   // surface a changelog entry describes.
   if (/\.(test|spec)\.[jt]sx?$/.test(path)) return false;
-  if (pkg.shipped.some((dir) => path.startsWith(`${pkg.dir}/${dir}/`))) return true;
+  // `files` mixes directories (dist, references) and root-level files
+  // (@ggsvelte/skill: files=["SKILL.md","references"]). Match both: exact
+  // file entries, and directory entries as path prefixes.
+  if (
+    pkg.shipped.some(
+      (entry) => path === `${pkg.dir}/${entry}` || path.startsWith(`${pkg.dir}/${entry}/`),
+    )
+  ) {
+    return true;
+  }
   // Packages that publish compiled dist (not source) still change consumers
   // via src/. dist/ is usually gitignored, so git diffs never list it —
   // map src/ → shipped surface when files lists dist but not src.
-  // (@ggsvelte/svelte: files=["dist","bin","skills"]; build = svelte-package
+  // (@ggsvelte/svelte: files=["dist","bin"]; build = svelte-package
   // -i src/lib -o dist.)
   if (
     pkg.shipped.includes("dist") &&

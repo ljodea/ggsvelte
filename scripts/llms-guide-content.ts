@@ -1957,6 +1957,26 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.26 to 0.27
+
+### Skill moved to @ggsvelte/skill
+
+The agent skill (\`SKILL.md\` + \`references/\`) no longer ships inside
+\`@ggsvelte/svelte\`. It is its own package, \`@ggsvelte/skill\`, versioned in
+lock-step with the rest of ggsvelte — the package root IS the skill directory:
+
+\`\`\`sh fragment
+npm install --save-dev @ggsvelte/skill
+# then copy or symlink it into your agent's skills directory:
+cp -R node_modules/@ggsvelte/skill .claude/skills/ggsvelte
+\`\`\`
+
+Or point agents at the stable path
+\`node_modules/@ggsvelte/skill/SKILL.md\` directly. Re-copy on every version
+bump; dependabot (or npm-check-updates) surfaces those bumps now. Any checkout
+that previously read \`node_modules/@ggsvelte/svelte/skills/ggsvelte/\` must
+switch — that directory is gone.
+
 ## 0.22 to 0.23
 
 ### CLI moved to @ggsvelte/cli

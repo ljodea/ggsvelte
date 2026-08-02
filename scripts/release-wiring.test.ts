@@ -525,6 +525,7 @@ describe("R0 release wiring", () => {
     for (const directory of [
       '"/"',
       '"/packages/core"',
+      '"/packages/skill"',
       '"/packages/spec"',
       '"/packages/svelte"',
       '"/packages/cli"',
@@ -561,10 +562,10 @@ describe("R0 release wiring", () => {
       privatePackages?: boolean | { version?: boolean; tag?: boolean };
     };
     expect(config.privatePackages).toBe(false);
-    // fixed (not linked): any release bumps all four so package-identity
+    // fixed (not linked): any release bumps all five so package-identity
     // lockstep versions stay equal even when only one package has a changeset.
     expect(config.fixed).toEqual([
-      ["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte", "@ggsvelte/cli"],
+      ["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte", "@ggsvelte/cli", "@ggsvelte/skill"],
     ]);
     expect(config.linked ?? []).toEqual([]);
   });

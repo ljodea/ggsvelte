@@ -47,7 +47,6 @@ ignore:
   - "packages/svelte/bin/**"
   - "packages/cli/bin/**"
   - "packages/cli/tests/**"
-  - "packages/svelte/skills/**"
   - "packages/core/tests/**"
   - "packages/spec/tests/**"
   - "packages/spec/scripts/**"

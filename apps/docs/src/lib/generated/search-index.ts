@@ -20063,6 +20063,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-26-to-0-27",
+    kind: "heading",
+    title: "0.26 to 0.27",
+    summary:
+      "0.26 to 0.27 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-26-to-0-27",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.26 to 0.27"],
+  },
+  {
+    id: "heading:guide-upgrading:skill-moved-to-ggsvelte-skill",
+    kind: "heading",
+    title: "Skill moved to @ggsvelte/skill",
+    summary:
+      "Skill moved to @ggsvelte/skill in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#skill-moved-to-ggsvelte-skill",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Skill moved to @ggsvelte/skill"],
+  },
+  {
     id: "heading:guide-upgrading:0-22-to-0-23",
     kind: "heading",
     title: "0.22 to 0.23",
