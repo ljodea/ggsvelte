@@ -25,6 +25,7 @@ import type { SpecAdvisory } from "./lint.js";
 import { lintSpec } from "./lint.js";
 import type { Aes, PortableSpec } from "./schema.js";
 import { PlotSpecSchema } from "./schema.js";
+import { ensureTemporalPolyfill } from "./temporal-polyfill.js";
 import type { ValidateOptions } from "./validate-data.js";
 import {
   dataChecks,
@@ -64,6 +65,9 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  * On success, returns the input typed as PortableSpec (no copy is made).
  */
 export function validate(input: unknown, options?: ValidateOptions): ValidateResult {
+  // Agent validate path may inspect temporal columns / IANA zones — load the
+  // polyfill here so lean `@ggsvelte/core/render` graphs never need it.
+  ensureTemporalPolyfill();
   const limits = { ...DEFAULT_VALIDATE_LIMITS, ...options?.limits };
 
   // Depth guard first: pathological nesting must not reach the schema walker.

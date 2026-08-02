@@ -33,3 +33,4 @@ tests/evals/out/
 # competitive bench outputs (machine-local)
 benchmarks/competitive/results/
 benchmarks/competitive/node_modules/
+packages/core/tests/.tmp-lean-bundle/

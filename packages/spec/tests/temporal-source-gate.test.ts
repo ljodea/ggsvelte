@@ -23,4 +23,18 @@ describe("temporal source gate", () => {
       .filter((path) => readFileSync(path, "utf8").includes("Date.parse"));
     expect(offenders).toEqual([]);
   });
+
+  it("static-imports @js-temporal/polyfill only from temporal-polyfill.ts", () => {
+    const specSrc = join(import.meta.dir, "..", "src");
+    const offenders = sourceFiles(specSrc).filter((path) => {
+      if (path.endsWith("temporal-polyfill.ts")) return false;
+      const text = readFileSync(path, "utf8");
+      // Runtime import only — type-only `import("@js-temporal/polyfill")` is fine.
+      return (
+        /import\s+[^;]*from\s+["']@js-temporal\/polyfill["']/.test(text) ||
+        /require\s*\(\s*["']@js-temporal\/polyfill["']\s*\)/.test(text)
+      );
+    });
+    expect(offenders).toEqual([]);
+  });
 });

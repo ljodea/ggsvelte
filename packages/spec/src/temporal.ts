@@ -8,9 +8,18 @@
  *  - temporal-column.ts — inferTemporalColumn / parseTemporalColumn
  *  - this file — ymd/dmy/… helpers, epoch helpers, and re-exports so existing
  *    `./temporal.js` imports stay stable.
+ *
+ * Public parse helpers here register the Temporal polyfill so a bundler that
+ * tree-shakes `@ggsvelte/spec` for `parseTemporal` / column helpers still gets
+ * non-UTC zones. Lean render never imports this facade (only portable + core
+ * render, which stay free of the polyfill).
  */
 
+import { ensureTemporalPolyfill } from "./temporal-polyfill.js";
 import { parseTemporal, TemporalParseError, type TemporalParserSpec } from "./temporal-parse.js";
+
+// Side-effect for every public temporal facade import (parseTemporal, ymd, …).
+ensureTemporalPolyfill();
 
 export {
   TEMPORAL_PARSER_NAMES,
