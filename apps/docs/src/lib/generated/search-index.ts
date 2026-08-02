@@ -19914,14 +19914,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-321",
+    id: "heading:guide-lifecycle:experimental-324",
     kind: "heading",
-    title: "experimental (321)",
+    title: "experimental (324)",
     summary:
-      "experimental (321) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-321",
+      "experimental (324) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-324",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (321)"],
+    exact: ["experimental (324)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -30567,6 +30567,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["COLORBLIND_PALETTE"],
   },
   {
+    id: "api:ggsvelte-core:CandidateBatchFacts",
+    kind: "api",
+    title: "CandidateBatchFacts",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["CandidateBatchFacts"],
+  },
+  {
     id: "api:ggsvelte-core:CandidateBuildFacts",
     kind: "api",
     title: "CandidateBuildFacts",
@@ -30583,6 +30592,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["CandidateDatum"],
+  },
+  {
+    id: "api:ggsvelte-core:CandidateDatumColumns",
+    kind: "api",
+    title: "CandidateDatumColumns",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["CandidateDatumColumns"],
   },
   {
     id: "api:ggsvelte-core:CandidateFacts",
@@ -30646,6 +30664,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["CandidateStoreOptions"],
+  },
+  {
+    id: "api:ggsvelte-core:CandidateStyleColumn",
+    kind: "api",
+    title: "CandidateStyleColumn",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["CandidateStyleColumn"],
   },
   {
     id: "api:ggsvelte-core:CanonicalAxisToken",
