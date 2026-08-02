@@ -23,9 +23,9 @@ Slices:
 - Axis-token interning is kind-dispatched (number/string/boolean Maps keyed
   on the raw value) with peek-before-allocate, eliminating per-candidate
   `tokenKey()` strings and token objects on repeat hits.
-- Traversal and orderByX permutations use a stable 16-bit-digit LSD radix
-  sort over order-preserving float32 keys on the all-finite fast path
-  (non-finite scenes keep the historical comparator path verbatim).
+- Fast-path gating for non-finite anchors reads the NARROWED float32 column
+  values, so doubles that overflow float32 to ±Infinity take the same
+  historical ordering path as any other non-finite anchor.
 - Permutation-sort comparator reads precomputed token ranks and per-candidate
   layer ids — no `compareTokens` dispatch, no `scene.batches[…]` chases.
 - Single-batch all-points scenes reuse the main anchor quadtree instead of
