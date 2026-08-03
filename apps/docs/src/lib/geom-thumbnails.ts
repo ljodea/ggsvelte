@@ -81,6 +81,18 @@ export function thumbnailPathForGeom(geom: GeomName): string | undefined {
   return previewPathById.get(exampleId);
 }
 
+/**
+ * Full-frame illustration for a geom detail page: the same light-theme gallery
+ * PNG the index crops, plus the example id for a live-chart link.
+ */
+export function illustrationForGeom(
+  geom: GeomName,
+): { path: string; exampleId: string } | undefined {
+  const exampleId = GEOM_THUMBNAIL_EXAMPLE[geom];
+  const path = previewPathById.get(exampleId);
+  return path === undefined ? undefined : { path, exampleId };
+}
+
 /** Every KNOWN_GEOMS entry must have a resolvable gallery preview. */
 export function missingGeomThumbnails(): readonly string[] {
   const missing: string[] = [];

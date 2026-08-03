@@ -11,6 +11,7 @@
 
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
+  const illustration = $derived(data.illustration);
 
   const svelteSnippet = $derived(
     buildGeomSvelteSnippet(
@@ -28,6 +29,26 @@
 <article class="geom-detail prose" aria-labelledby="geom-heading">
   <h1 id="geom-heading"><code>{entry.component}</code></h1>
   <ReferenceLede text={entry.summary} />
+
+  {#if illustration}
+    <figure class="geom-illustration">
+      <div class="preview-paper">
+        <img
+          src={`${base}${illustration.path}`}
+          alt={`Light-theme example chart for ${entry.component}`}
+          width={illustration.width}
+          height={illustration.height}
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <figcaption>
+        <a href={`${base}/examples/${illustration.exampleId}`}
+          >{illustration.title}</a
+        >
+      </figcaption>
+    </figure>
+  {/if}
 
   <h2 id="defaults">Defaults</h2>
   <dl class="defaults">
@@ -141,6 +162,35 @@
 
   h1 {
     margin: 0 0 0.5rem;
+  }
+
+  .geom-illustration {
+    margin: 0 0 1.75rem;
+    max-width: 40rem;
+  }
+
+  .preview-paper {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
+
+  .preview-paper img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .geom-illustration figcaption {
+    margin-top: 0.55rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .geom-illustration figcaption a {
+    color: inherit;
+    text-underline-offset: 0.12em;
   }
 
   .defaults {
