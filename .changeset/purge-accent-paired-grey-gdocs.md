@@ -2,6 +2,8 @@
 "@ggsvelte/core": minor
 "@ggsvelte/spec": minor
 "@ggsvelte/svelte": minor
+"@ggsvelte/skill": minor
+"@ggsvelte/cli": minor
 ---
 
 # Drop Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes
@@ -19,3 +21,7 @@ Also remove chart theme `gdocs` and its Svelte shell `ThemeGdocs`.
 greyscale `range` (optional `start`/`end`). They no longer emit
 `scheme: "grey"`. Prefer `Dark2`, `tableau10`, `colorblind`, or `pander` for
 named categorical color; prefer `minimal`, `classic`, or `bw` for themes.
+
+Skill inventory (`SKILL.md`, `references/scales-and-palettes.md`,
+`references/themes.md`) drops the same schemes and theme so agents no longer
+list them.
