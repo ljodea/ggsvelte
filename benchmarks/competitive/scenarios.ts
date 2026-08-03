@@ -320,18 +320,18 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "svelteplot",
     label: "SveltePlot",
-    browser: false,
+    browser: true,
     bundle: true,
-    scenarios: ["scatter-color"],
-    note: "Svelte peer — bundle only until component fixture lands",
+    scenarios: ["scatter-color", "line-multiseries"],
+    note: "Svelte peer — <Plot><Dot>/<Line> + default axes via components/svelteplot",
   },
   {
     id: "layercake",
     label: "LayerCake",
-    browser: false,
+    browser: true,
     bundle: true,
-    scenarios: ["scatter-color"],
-    note: "Svelte peer — bundle only until component fixture lands",
+    scenarios: ["scatter-color", "line-multiseries"],
+    note: "Svelte peer — <LayerCake><Svg> + custom marks via components/layercake (no axes: framework ships none)",
   },
 ] as const;
 

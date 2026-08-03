@@ -15,6 +15,8 @@ import { mountD3 } from "../adapters/d3";
 import { mountEcharts } from "../adapters/echarts";
 import { mountGgsvelteCanvas } from "../adapters/ggsvelte-canvas";
 import { mountGgsvelteSvg } from "../adapters/ggsvelte-svg";
+import { mountLayerCake } from "../adapters/layercake";
+import { mountSveltePlot } from "../adapters/svelteplot";
 import { mountUplot } from "../adapters/uplot";
 import {
   CASES,
@@ -77,6 +79,14 @@ function mountSync(
     }
     case "echarts": {
       const r = mountEcharts(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "svelteplot": {
+      const r = mountSveltePlot(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "layercake": {
+      const r = mountLayerCake(scenario, data, root);
       return { markHint: r.markHint, handle: r.handle };
     }
     default:

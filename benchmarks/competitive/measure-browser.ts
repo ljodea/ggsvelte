@@ -70,8 +70,12 @@ const server = await createServer({
   plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
   resolve: {
     conditions: ["svelte", "browser", "import", "module", "default"],
+    dedupe: ["svelte"],
   },
   optimizeDeps: {
+    // Svelte component libs must share one svelte runtime with the fixture
+    // components (context + flushSync break across duplicated runtimes).
+    exclude: ["svelte", "svelteplot", "layercake"],
     include: [
       "@ggsvelte/core",
       "@ggsvelte/core/render",
@@ -96,6 +100,16 @@ await server.listen();
 const browser = await chromium.launch();
 let page = await browser.newPage();
 page.setDefaultTimeout(120_000);
+
+function wirePageDiagnostics(p: Page): void {
+  p.on("pageerror", (e) => process.stderr.write(`PAGEERROR: ${String(e).slice(0, 800)}\n`));
+  p.on("console", (m) => {
+    if (m.type() === "error") {
+      process.stderr.write(`CONSOLE-ERR: ${m.text().slice(0, 400)}\n`);
+    }
+  });
+}
+wirePageDiagnostics(page);
 
 const results: Record<string, unknown>[] = [];
 const matrix = pairs();
@@ -122,6 +136,7 @@ async function recoverPage(): Promise<void> {
     }
     page = await browser.newPage();
     page.setDefaultTimeout(120_000);
+    wirePageDiagnostics(page);
     await page.goto("http://127.0.0.1:5199/");
     await waitForBenchApi();
   }
