@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (49)
+### Categorical schemes (40)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -169,9 +169,6 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau10                 | Tableau 10 qualitative palette                                     |
 | colorblind                | ggthemes 8-color colorblind-safe palette                           |
 | stata                     | ggthemes Stata s2color scheme (15 colors, the default)             |
-| stata_s1color             | ggthemes Stata s1color scheme (15 colors)                          |
-| stata_s1rcolor            | ggthemes Stata s1rcolor dark-background scheme (15 colors)         |
-| stata_mono                | ggthemes Stata monochrome scheme (15 grays)                        |
 | economist                 | ggthemes Economist blues/greens (scale_colour/fill_economist)      |
 | solarized                 | ggthemes Solarized accents, blue first (scale_*_solarized)         |
 | few                       | ggthemes Few "Medium" — the default `scale_colour_few` palette     |
@@ -199,13 +196,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau_purple_pink_gray  | ggthemes Tableau Purple-Pink-Gray (12)                             |
 | tableau_hue_circle        | ggthemes Tableau Hue Circle (19)                                   |
 | gdocs                     | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
-| hc                        | ggthemes Highcharts default 10 colors                              |
-| hc_dark                   | ggthemes Highcharts darkunica 11 colors                            |
 | pander                    | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
-| calc                      | ggthemes LibreOffice Calc 12 chart colors                          |
-| excel                     | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
-| excel_fill                | ggthemes Excel 97 area palette (`scale_fill_excel`)                |
-| excel_new                 | ggthemes current-Office accents ("Office Theme" default)           |
 | Dark2                     | ColorBrewer qualitative, dark tones                                |
 | Paired                    | ColorBrewer qualitative, light/dark pairs                          |
 | Accent                    | ColorBrewer qualitative, accented mix                              |

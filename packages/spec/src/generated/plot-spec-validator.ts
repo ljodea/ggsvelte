@@ -6086,9 +6086,6 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau10") ||
     (typeof value.scheme === "string" && value.scheme === "colorblind") ||
     (typeof value.scheme === "string" && value.scheme === "stata") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_s1color") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_s1rcolor") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_mono") ||
     (typeof value.scheme === "string" && value.scheme === "economist") ||
     (typeof value.scheme === "string" && value.scheme === "solarized") ||
     (typeof value.scheme === "string" && value.scheme === "few") ||
@@ -6116,13 +6113,7 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau_purple_pink_gray") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_hue_circle") ||
     (typeof value.scheme === "string" && value.scheme === "gdocs") ||
-    (typeof value.scheme === "string" && value.scheme === "hc") ||
-    (typeof value.scheme === "string" && value.scheme === "hc_dark") ||
     (typeof value.scheme === "string" && value.scheme === "pander") ||
-    (typeof value.scheme === "string" && value.scheme === "calc") ||
-    (typeof value.scheme === "string" && value.scheme === "excel") ||
-    (typeof value.scheme === "string" && value.scheme === "excel_fill") ||
-    (typeof value.scheme === "string" && value.scheme === "excel_new") ||
     (typeof value.scheme === "string" && value.scheme === "Dark2") ||
     (typeof value.scheme === "string" && value.scheme === "Paired") ||
     (typeof value.scheme === "string" && value.scheme === "Accent") ||
@@ -7114,7 +7105,6 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "void") ||
   (typeof value === "string" && value === "stata") ||
   (typeof value === "string" && value === "stata_s1color") ||
-  (typeof value === "string" && value === "stata_mono") ||
   (typeof value === "string" && value === "solarized") ||
   (typeof value === "string" && value === "solarizeddark") ||
   (typeof value === "string" && value === "economist_white") ||
@@ -7125,9 +7115,6 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||
-  (typeof value === "string" && value === "calc") ||
-  (typeof value === "string" && value === "excel") ||
-  (typeof value === "string" && value === "excel_new") ||
   (typeof value === "string" && value === "base") ||
   (typeof value === "string" && value === "igray") ||
   (typeof value === "string" && value === "map") ||
@@ -7254,7 +7241,6 @@ const check_392 = (value) =>
   (typeof value === "string" && value === "void") ||
   (typeof value === "string" && value === "stata") ||
   (typeof value === "string" && value === "stata_s1color") ||
-  (typeof value === "string" && value === "stata_mono") ||
   (typeof value === "string" && value === "solarized") ||
   (typeof value === "string" && value === "solarizeddark") ||
   (typeof value === "string" && value === "economist_white") ||
@@ -7265,9 +7251,6 @@ const check_392 = (value) =>
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||
-  (typeof value === "string" && value === "calc") ||
-  (typeof value === "string" && value === "excel") ||
-  (typeof value === "string" && value === "excel_new") ||
   (typeof value === "string" && value === "base") ||
   (typeof value === "string" && value === "igray") ||
   (typeof value === "string" && value === "map") ||

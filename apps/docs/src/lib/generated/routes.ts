@@ -12072,8 +12072,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-368",
-        title: "experimental (368)",
+        id: "experimental-359",
+        title: "experimental (359)",
         level: 3,
       },
       {
@@ -12122,8 +12122,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-243",
-        title: "stable-intent (243)",
+        id: "stable-intent-239",
+        title: "stable-intent (239)",
         level: 3,
       },
       {
@@ -12157,6 +12157,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-27-to-0-28",
+        title: "0.27 to 0.28",
+        level: 2,
+      },
+      {
+        id: "removed-spreadsheet-highcharts-and-extra-stata-schemes-and-themes",
+        title: "Removed spreadsheet, Highcharts, and extra Stata schemes and themes",
+        level: 3,
       },
       {
         id: "0-26-to-0-27",

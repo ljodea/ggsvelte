@@ -97,63 +97,6 @@ export const STATA_PALETTE: readonly string[] = [
   "#d9e6eb",
 ];
 
-/** ggthemes stata_pal("s1color") — the Stata s1color scheme's 15 colors. */
-export const STATA_S1COLOR_PALETTE: readonly string[] = [
-  "#006000",
-  "#ff4500",
-  "#1a476f",
-  "#90353b",
-  "#6e8e84",
-  "#a0522d",
-  "#ff7f00",
-  "#ff00ff",
-  "#00ffff",
-  "#ff0000",
-  "#00ff00",
-  "#9c8847",
-  "#800080",
-  "#c0dcc0",
-  "#add8e6",
-];
-
-/** ggthemes stata_pal("s1rcolor") — the Stata s1rcolor (dark-background) scheme's 15 colors. */
-export const STATA_S1RCOLOR_PALETTE: readonly string[] = [
-  "#ffff00",
-  "#00ff00",
-  "#0080ff",
-  "#ff00ff",
-  "#ff7f00",
-  "#ff0000",
-  "#add8e6",
-  "#ffe474",
-  "#00ff80",
-  "#c0dcc0",
-  "#ff4500",
-  "#0000ff",
-  "#ff0080",
-  "#6e8e84",
-  "#a0522d",
-];
-
-/** ggthemes stata_pal("mono") — the Stata monochrome scheme's 15 grays. */
-export const STATA_MONO_PALETTE: readonly string[] = [
-  "#606060",
-  "#a0a0a0",
-  "#808080",
-  "#404040",
-  "#000000",
-  "#e0e0e0",
-  "#202020",
-  "#707070",
-  "#909090",
-  "#b0b0b0",
-  "#d0d0d0",
-  "#f0f0f0",
-  "#303030",
-  "#c0c0c0",
-  "#505050",
-];
-
 /**
  * ggthemes economist_pal(fill = TRUE) at full capacity (n = 9 selection):
  * blue-gray, dark blue, blue, light blue, dark green, light green, dark red,
@@ -523,35 +466,6 @@ export const GDOCS_PALETTE: readonly string[] = [
   "#edf8f9",
 ];
 
-/** ggthemes hc_pal("default") — Highcharts default 10 colors. */
-export const HC_PALETTE: readonly string[] = [
-  "#7cb5ec",
-  "#434348",
-  "#90ed7d",
-  "#f7a35c",
-  "#8085e9",
-  "#f15c80",
-  "#e4d354",
-  "#8085e8",
-  "#8d4653",
-  "#91e8e1",
-];
-
-/** ggthemes hc_pal("darkunica") — Highcharts dark-unica 11 colors (verbatim, with its trailing repeats). */
-export const HC_DARK_PALETTE: readonly string[] = [
-  "#2b908f",
-  "#90ee7e",
-  "#f45b5b",
-  "#7798BF",
-  "#aaeeee",
-  "#ff0066",
-  "#eeaaee",
-  "#55BF3B",
-  "#DF5353",
-  "#7798BF",
-  "#aaeeee",
-];
-
 /**
  * ggthemes palette_pander() — the pander package's colorblind- and
  * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
@@ -568,58 +482,6 @@ export const PANDER_PALETTE: readonly string[] = [
   "#E69F00",
 ];
 
-/** ggthemes calc_pal() — the 12 LibreOffice Calc chart colors, in source order. */
-export const CALC_PALETTE: readonly string[] = [
-  "#004586",
-  "#ff420e",
-  "#ffd320",
-  "#579d1c",
-  "#7e0021",
-  "#83caff",
-  "#314004",
-  "#aecf00",
-  "#4b1f6f",
-  "#ff950e",
-  "#c5000b",
-  "#0084d1",
-];
-
-/** ggthemes excel_pal(line = TRUE) — the Excel 97 line/point palette (scale_colour_excel). */
-export const EXCEL_PALETTE: readonly string[] = [
-  "#FF00FF",
-  "#FFFF00",
-  "#00FFFF",
-  "#800080",
-  "#800000",
-  "#008080",
-  "#0000FF",
-];
-
-/** ggthemes excel_pal(line = FALSE) — the Excel 97 area/fill palette (scale_fill_excel). */
-export const EXCEL_FILL_PALETTE: readonly string[] = [
-  "#993366",
-  "#FFFFCC",
-  "#CCFFFF",
-  "#660066",
-  "#FF8080",
-  "#0066CC",
-  "#CCCCFF",
-];
-
-/**
- * ggthemes excel_new_pal("Office Theme") — current Office's six accents.
- * ggthemes ships 50 named Office color themes; only the default is
- * registered (documented subset, as with canva).
- */
-export const EXCEL_NEW_PALETTE: readonly string[] = [
-  "#4472C4",
-  "#ED7D31",
-  "#A5A5A5",
-  "#FFC000",
-  "#5B9BD5",
-  "#70AD47",
-];
-
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -628,9 +490,6 @@ export const CATEGORICAL_SCHEMES = {
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
   stata: STATA_PALETTE,
-  stata_s1color: STATA_S1COLOR_PALETTE,
-  stata_s1rcolor: STATA_S1RCOLOR_PALETTE,
-  stata_mono: STATA_MONO_PALETTE,
   economist: ECONOMIST_PALETTE,
   solarized: SOLARIZED_PALETTE,
   few: FEW_PALETTE,
@@ -658,13 +517,7 @@ export const CATEGORICAL_SCHEMES = {
   tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
   gdocs: GDOCS_PALETTE,
-  hc: HC_PALETTE,
-  hc_dark: HC_DARK_PALETTE,
   pander: PANDER_PALETTE,
-  calc: CALC_PALETTE,
-  excel: EXCEL_PALETTE,
-  excel_fill: EXCEL_FILL_PALETTE,
-  excel_new: EXCEL_NEW_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,

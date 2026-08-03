@@ -3846,10 +3846,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "CALC_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "CANVAS_AUTO_THRESHOLD": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4054,18 +4050,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "EXCEL_FILL_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "EXCEL_NEW_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "EXCEL_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "EcdfStatInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4144,14 +4128,6 @@
         },
         "GuidePlan": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "HC_DARK_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "HC_PALETTE": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "IPSUM_PALETTE": {
@@ -4422,19 +4398,7 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "STATA_MONO_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "STATA_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "STATA_S1COLOR_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "STATA_S1RCOLOR_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -7186,10 +7150,6 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
-        "ThemeCalc": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
         "ThemeClassic": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -7211,14 +7171,6 @@
           "lifecycle": "stable-intent"
         },
         "ThemeEconomistwhite": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeExcel": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeExcelnew": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -7311,10 +7263,6 @@
           "lifecycle": "experimental"
         },
         "ThemeStata": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeStatamono": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
