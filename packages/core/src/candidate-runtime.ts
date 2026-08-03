@@ -17,7 +17,7 @@ import type { buildPipelineCandidates } from "./pipeline/build-candidates.js";
 
 /** Inputs finalize retains for the lazy candidate build (type-only import —
  * this module stays in the lean render graph, build-candidates does not). */
-export type CandidateBuildInput = Parameters<typeof buildPipelineCandidates>[0];
+type CandidateBuildInput = Parameters<typeof buildPipelineCandidates>[0];
 
 export interface CandidateBuildRuntime {
   readonly build: (input: CandidateBuildInput) => CandidateStore;
