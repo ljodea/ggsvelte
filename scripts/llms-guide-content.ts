@@ -1995,7 +1995,13 @@ registered in this build. Call registerAll() …\`.
 
 <!-- Before 0.27: any geom worked from the layers prop — the core barrel
      bundled and registered the full grammar for every app. -->
-<GGPlot data={rows} aes={{ x: "x", y: "y" }} layers={[{ geom: "smooth" }]} width={480} height={320} />
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y" }}
+  layers={[{ geom: "smooth" }]}
+  width={480}
+  height={320}
+/>
 \`\`\`
 
 \`\`\`svelte fragment
@@ -2015,7 +2021,13 @@ registered in this build. Call registerAll() …\`.
   ];
 </script>
 
-<GGPlot data={rows} aes={{ x: "x", y: "y" }} layers={[{ geom: "smooth" }]} width={480} height={320} />
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y" }}
+  layers={[{ geom: "smooth" }]}
+  width={480}
+  height={320}
+/>
 \`\`\`
 
 - Prefer one \`registerAll()\` at app startup for the pre-0.27 "full grammar"
