@@ -375,4 +375,18 @@ describe("theme registry", () => {
     );
     expect(resolveTheme({ name: "tufte", fontSize: 14 }).tooltipBorder).toBe("transparent");
   });
+
+  it("LEGACY light/dark/minimal re-derive tip roles (no stale tip leak from foundation spread)", () => {
+    // LEGACY variants must not inherit LEGACY_BASE tip colors as themed() overrides.
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipPaper).toBe(LEGACY_BUILTIN_THEMES.dark.paper);
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipInk).toBe(LEGACY_BUILTIN_THEMES.dark.ink);
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipBorder).toBe(LEGACY_BUILTIN_THEMES.dark.grid);
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipBorder).toBe("rgba(230,232,235,0.16)");
+
+    expect(LEGACY_BUILTIN_THEMES.light.tooltipPaper).toBe(LEGACY_BUILTIN_THEMES.light.paper);
+    expect(LEGACY_BUILTIN_THEMES.light.tooltipBorder).toBe(LEGACY_BUILTIN_THEMES.light.grid);
+
+    expect(LEGACY_BUILTIN_THEMES.minimal.tooltipBorder).toBe(LEGACY_BUILTIN_THEMES.minimal.grid);
+    expect(LEGACY_BUILTIN_THEMES.minimal.tooltipBorder).toBe("rgba(128,128,128,0.12)");
+  });
 });

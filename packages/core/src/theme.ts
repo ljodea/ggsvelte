@@ -33,11 +33,60 @@ export class UnknownThemeError extends Error {
 }
 
 /**
- * All foundation keys themed() accepts for object resolution (no tip*).
+ * Concrete foundation (+ letterbox) bag for themed() — all keys present so
+ * exactOptionalPropertyTypes does not see `T | undefined` on optional props.
  * Shared by pureFromBase and mergeFoundation so sticky-when-elevated detection
  * cannot false-sticky #1069 borders from an incomplete pure list.
  */
-function foundationFromTokens(t: ThemeTokens): Parameters<typeof themed>[0] {
+type FoundationBag = {
+  ink: string;
+  paper: string;
+  accent: string;
+  grid: string;
+  panel: string;
+  letterboxFill: string;
+  axisText: string;
+  axisLine: string;
+  tickColor: string;
+  panelBorder: string;
+  fontFamily: string;
+  fontSize: number;
+  axisTextSize: number;
+  fontWeight: number;
+  titleSize: number;
+  titleWeight: number;
+  subtitleSize: number;
+  subtitleWeight: number;
+  axisTitleSize: number;
+  axisTitleWeight: number;
+  guideTitleSize: number;
+  legendKeySize: number;
+  legendKeyGap: number;
+  legendRowGap: number;
+  guideBlockGap: number;
+  colorbarThickness: number;
+  colorbarLengthMin: number;
+  captionSize: number;
+  stripSize: number;
+  stripWeight: number;
+  axisLineWidth: number;
+  tickWidth: number;
+  tickLength: number;
+  gridWidth: number;
+  panelBorderWidth: number;
+  gridDasharray: string;
+  axisLineX: boolean;
+  axisLineY: boolean;
+  ticksX: boolean;
+  ticksY: boolean;
+  labelsX: boolean;
+  labelsY: boolean;
+  gridX: boolean;
+  gridY: boolean;
+  showPanelBorder: boolean;
+};
+
+function foundationFromTokens(t: ThemeTokens): FoundationBag {
   return {
     ink: t.ink,
     paper: t.paper,
@@ -88,7 +137,7 @@ function foundationFromTokens(t: ThemeTokens): Parameters<typeof themed>[0] {
 }
 
 /** Merge ThemeSpec role overrides over a named base's foundation keys. */
-function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): Parameters<typeof themed>[0] {
+function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
   const fromBase = foundationFromTokens(base);
   return {
     ink: theme.ink ?? fromBase.ink,
@@ -96,8 +145,8 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): Parameters<typeof
     accent: theme.accent ?? fromBase.accent,
     grid: theme.grid ?? fromBase.grid,
     panel: theme.panel ?? fromBase.panel,
-    // Only pass when the object sets it — themed() defaults letterboxFill to paper.
-    ...(theme.letterboxFill !== undefined && { letterboxFill: theme.letterboxFill }),
+    // Match prior object path: only override letterbox when the spec sets it.
+    letterboxFill: theme.letterboxFill ?? fromBase.letterboxFill,
     axisText: theme.axisText ?? fromBase.axisText,
     axisLine: theme.axisLine ?? fromBase.axisLine,
     tickColor: theme.tickColor ?? fromBase.tickColor,

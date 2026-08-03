@@ -931,7 +931,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
   }),
 });
 
-const LEGACY_BASE = themed({
+// Foundation-only (no interaction/tooltip roles). Spreading a full ThemeTokens
+// into themed() would pass stale tooltip* as intentional overrides once themed()
+// accepts tip overrides — keep variants on this plain object instead.
+const LEGACY_BASE_FOUNDATION = {
   ink: "currentColor",
   paper: "none",
   panel: "none",
@@ -963,14 +966,16 @@ const LEGACY_BASE = themed({
   axisLineY: true,
   ticksX: true,
   ticksY: true,
-});
+} as const satisfies Partial<FoundationThemeTokens>;
+
+const LEGACY_BASE = themed(LEGACY_BASE_FOUNDATION);
 
 /** Edition-1 color themes with their original typography and chrome. */
 export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.freeze({
   ...BUILTIN_THEMES,
   default: LEGACY_BASE,
   light: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     ink: "#1f2328",
     paper: "#ffffff",
     panel: "none",
@@ -980,7 +985,7 @@ export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = O
     grid: "rgba(31,35,40,0.14)",
   }),
   dark: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     ink: "#e6e8eb",
     paper: "#16181d",
     panel: "none",
@@ -991,7 +996,7 @@ export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = O
     grid: "rgba(230,232,235,0.16)",
   }),
   minimal: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     accent: "#9498a0",
     grid: "rgba(128,128,128,0.12)",
   }),
