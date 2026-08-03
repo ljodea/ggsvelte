@@ -23,6 +23,8 @@
   import type { ThemeName } from "@ggsvelte/spec";
 
   import TemperaturesSpecimen from "$lib/components/TemperaturesSpecimen.svelte";
+  import { docsAppearance } from "$lib/docs-appearance-state.svelte";
+  import { marksOnlyThemeRoles } from "$lib/marks-only-theme-contrast";
   import type {
     SchemeName,
     ThemeSpecimenKind,
@@ -55,6 +57,10 @@
   } = $props();
 
   const colorScale = $derived({ type: "ordinal" as const, scheme });
+  /** void/map/solid: light ink on the dark docs shell so marks stay readable. */
+  const themeRoles = $derived(
+    marksOnlyThemeRoles(name, docsAppearance.current),
+  );
 </script>
 
 {#if kind === "temps-line"}
@@ -76,7 +82,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale value={{ color: colorScale }} />
     <Labs
       title="Playfair wheat price & weekly wage"
@@ -98,7 +104,7 @@
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale value={{ fill: colorScale }} />
     <Labs
       title="Edgeworth county deaths, 1876–82"
@@ -119,7 +125,7 @@
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale
       value={{
         x: { nice: false },
@@ -145,7 +151,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
     <GeomLine linewidth={1.5} />
   </GGPlot>
@@ -160,7 +166,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale value={{ color: colorScale }} />
     <Labs
       title="Penguin flipper length and body mass"
@@ -181,7 +187,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale
       value={{
         ...scaleXLog10({ labels: "~s" }),
@@ -208,7 +214,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Labs
       title="Salk trial paralytic polio rates"
       x="Group"
@@ -228,7 +234,7 @@
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} />
+    <Theme {name} {...themeRoles} />
     <Scale value={{ x: { labels: ".1f" } }} />
     <Labs
       title="Van Langren longitude estimates, 1644"

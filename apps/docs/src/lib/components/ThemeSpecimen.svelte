@@ -4,6 +4,10 @@
   import type { ThemeName } from "@ggsvelte/spec";
 
   import { observeUserIntent } from "$lib/load-on-intent";
+  import {
+    isMarksOnlyTheme,
+    marksOnlyDarkSiteShellPath,
+  } from "$lib/marks-only-theme-contrast";
   import type {
     SchemeName,
     ThemeSpecimenKind,
@@ -29,6 +33,10 @@
   } = $props();
 
   const plotHeight = 380;
+  /** Transparent-paper themes need a dark-site static shell before hydrate. */
+  const darkSiteStaticSrc = $derived(
+    isMarksOnlyTheme(name) ? marksOnlyDarkSiteShellPath(name) : null,
+  );
 
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<typeof import("./ThemeSpecimenLive.svelte").default | null>(
@@ -62,6 +70,29 @@
   <div class="plot-panel" bind:this={host} style:min-height="{plotHeight}px">
     {#if Live !== null}
       <Live {name} {label} {kind} {scheme} {legendFocus} height={plotHeight} />
+    {:else if darkSiteStaticSrc !== null}
+      <!--
+        theme.js sets data-theme before paint. Dual shells so marks-only
+        themes stay high-contrast on the dark docs shell before hydrate.
+      -->
+      <img
+        class="static-shell static-shell--light-site"
+        src={`${base}${staticSrc}`}
+        alt=""
+        width="832"
+        height={plotHeight}
+        decoding="async"
+        loading="lazy"
+      />
+      <img
+        class="static-shell static-shell--dark-site"
+        src={`${base}${darkSiteStaticSrc}`}
+        alt=""
+        width="832"
+        height={plotHeight}
+        decoding="async"
+        loading="lazy"
+      />
     {:else}
       <img
         class="static-shell"
@@ -111,5 +142,17 @@
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  .static-shell--dark-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .static-shell--light-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .static-shell--dark-site {
+    display: block;
   }
 </style>
