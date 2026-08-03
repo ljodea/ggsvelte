@@ -42,10 +42,18 @@ describe("docs chart intent-gated load", () => {
     expect(specimen).not.toContain("eager");
   });
 
-  it("loads palette/sequential plots only after user intent", () => {
-    const palette = read("lib/components/PaletteSpecimen.svelte");
-    expect(palette).toContain("observeUserIntent");
-    expect(palette).not.toContain("observeNearViewport");
+  it("loads the single shared palette preview eagerly; sequential plots stay intent-gated", () => {
+    // One chart anchor per page: the 48-specimen gallery (whose intent gate
+    // existed because dozens of chart imports locked SPA nav) is gone, so
+    // PalettePreview deliberately imports its live chart from onMount.
+    const preview = read("lib/components/PalettePreview.svelte");
+    expect(preview).toContain('void import("./PaletteSpecimenLive.svelte")');
+    expect(preview).not.toContain("observeUserIntent");
+
+    // Index rows render without any chart-stack import.
+    const index = read("lib/components/PaletteIndex.svelte");
+    expect(index).not.toMatch(/import\s*\(/);
+    expect(index).not.toContain("PaletteSpecimenLive");
 
     const sequential = read("lib/components/SequentialDeferredPlot.svelte");
     expect(sequential).toContain("observeUserIntent");

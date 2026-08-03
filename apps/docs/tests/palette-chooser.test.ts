@@ -42,7 +42,9 @@ describe("sortPaletteSpecimens", () => {
   it("keeps the real registry label-alphabetical by default order", () => {
     const sorted = sortPaletteSpecimens(CATEGORICAL_PALETTES, "name");
     expect(sorted.map((s) => s.label)).toEqual(
-      CATEGORICAL_PALETTES.map((p) => p.label).toSorted((a, b) => a.localeCompare(b)),
+      CATEGORICAL_PALETTES.map((p) => p.label).toSorted((a: string, b: string) =>
+        a.localeCompare(b),
+      ),
     );
   });
 });

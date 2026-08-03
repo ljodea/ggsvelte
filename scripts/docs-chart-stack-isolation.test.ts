@@ -82,7 +82,8 @@ describe("docs chart stack isolation (PR1)", () => {
     // Type-only is fine; a value import of the main entry pulls ggsvelte-svelte.
     for (const rel of [
       "lib/components/ThemeSpecimen.svelte",
-      "lib/components/PaletteSpecimen.svelte",
+      "lib/components/PalettePreview.svelte",
+      "lib/components/PaletteIndex.svelte",
       "lib/components/GrammarDemo.svelte",
       "lib/components/ChartThemeLab.svelte",
       "lib/components/SequentialDeferredPlot.svelte",

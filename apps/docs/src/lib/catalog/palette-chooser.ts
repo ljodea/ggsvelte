@@ -50,7 +50,7 @@ export const sortPaletteSpecimens = <T extends SortableSpecimen>(
 export const resolveInitialScheme = <T extends { readonly name: string }>(
   requested: string | null,
   specimens: readonly T[],
-): T["name"] | null =>
-  requested !== null && specimens.some((s) => s.name === requested)
-    ? (requested as T["name"])
-    : null;
+): T["name"] | null => {
+  if (requested === null) return null;
+  return specimens.find((s) => s.name === requested)?.name ?? null;
+};

@@ -46,7 +46,7 @@
     );
     if (initial === null) return;
     pinned = initial;
-    const target = document.getElementById(`scheme-${initial}`);
+    const target = document.querySelector(`#scheme-${initial}`);
     if (target === null) return;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
