@@ -1,5 +1,132 @@
 # @ggsvelte/core
 
+## 0.28.0
+
+### Minor Changes
+
+- 15d7c79: # Faster continuous color and mapped style vectors at 100k (#1423)
+
+  Migration: none — additive. New public helpers `buildRampLut`, `sampleRampLut`,
+  and `RAMP_LUT_STEPS` are optional; `trainSequential` / `colorOf` behavior is
+  the default path apps already use.
+
+  - Sequential color scales train a dense ramp LUT (`RAMP_LUT_STEPS = 1024`);
+    per-point `colorOf` is one clamp + index lookup after `t` is known.
+  - Fixture mid/endpoints that land on table entries stay bit-identical to
+    continuous `rampColor` (e.g. `t = 0`, `0.5`, `1` and log10 decades on
+    black↔white). Other `t` values quantize to the nearest of 1025 samples —
+    at most one sRGB channel step vs continuous piecewise-linear output
+    (#1423 acceptance: LUT or documented tolerance).
+  - `mappedPaintVector` / numeric / indexed style vectors resolve the scale once
+    per unique source value, then fan out (bench columns cycle ~100–1000 levels).
+
+  Local medians on 100k canvas points (before → after): color-log10 **~101 → ~38 ms**,
+  mapped-style **~89 → ~66 ms**. Budgets in `benchmarks/budgets.json` tightened to match.
+
+- 70c8c82: # Interaction: lazy candidate store behind a runtime hook (#1421)
+
+  The interaction candidate store (hit-testing) no longer ships in the lean
+  `@ggsvelte/core/render` graph and no longer builds during `runPipeline`:
+
+  - Candidate construction runs through a runtime hook
+    (`candidate-runtime.ts`, mirroring `temporal-runtime.ts`). The full barrel
+    installs it via `install-candidates.ts`; the lean render entry omits it, so
+    headless/SSR bundles drop ~95 KB raw of candidate-store/hit/spatial code
+    (ggsvelte-svg 156.0 → 136.1 KB gzip, ggsvelte-canvas 148.6 → 128.6 KB gzip,
+    measured same-tree).
+  - `RenderModel.candidates` / `RenderModel.lineage` are now lazy getters that
+    build the store once on first access. Full-entry behavior is unchanged;
+    a `renderToSVGString` run never pays candidate-build cost at runtime.
+  - Accessing either on a lean-entry model throws an `Error` naming the full
+    entry. `semantic-viewport` resolves the store at interaction time.
+
+  CI bundle guard: `benchmarks/competitive/lean-candidates-graph.test.ts`
+  asserts the lean graphs exclude the candidate-store modules.
+
+  Migration: none — additive behavior for `@ggsvelte/core` consumers;
+  `@ggsvelte/core/render` consumers who read `model.candidates` or
+  `model.lineage` must switch to the full `@ggsvelte/core` entry.
+
+- 3217502: # Drop Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes>
+
+  Remove eight categorical schemes (and public `*_PALETTE` constants where they
+  existed): `Accent`, `Paired`, `grey`, `gray`, `gdocs`,
+  `tableau_green_orange_teal`, `tableau_red_blue_brown`,
+  `tableau_purple_pink_gray`.
+
+  Also remove chart theme `gdocs` and its Svelte shell `ThemeGdocs`.
+
+  `scaleColorGrey()` / `<ScaleColorGrey />` still work by baking an explicit
+  greyscale `range` (optional `start`/`end`). They no longer emit
+  `scheme: "grey"`. Prefer `Dark2`, `tableau10`, `colorblind`, or `pander` for
+  named categorical color; prefer `minimal`, `classic`, or `bw` for themes.
+
+  Skill inventory (`SKILL.md`, `references/scales-and-palettes.md`,
+  `references/themes.md`) drops the same schemes and theme so agents no longer
+  list them.
+
+- 5531a8d: # Drop spreadsheet/Stata-extra schemes and Excel/Calc/Stata Mono themes
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#removed-spreadsheet-highcharts-and-extra-stata-schemes-and-themes>
+
+  Remove nine categorical schemes and their public `*_PALETTE` constants:
+  `stata_s1color`, `stata_s1rcolor`, `stata_mono`, `hc`, `hc_dark`, `calc`,
+  `excel`, `excel_fill`, `excel_new`.
+
+  Also remove four chart themes (and their Svelte shells): `stata_mono`
+  (`ThemeStatamono`), `calc` (`ThemeCalc`), `excel` (`ThemeExcel`), `excel_new`
+  (`ThemeExcelnew`). Nothing with "Excel" remains in the product surface.
+
+  Skill inventory drops the same schemes and themes.
+
+  Switch removed schemes to `stata`, `tableau10`, `Dark2`, or `pander`.
+  Switch removed themes to `stata`, `stata_s1color`, `bw`, `classic`, or
+  `minimal`.
+
+- ef631d6: # Tree-shaken registration: GGPlot apps bundle only declared geoms/stats
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#explicit-registration-for-spec-driven-charts>
+
+  The `@ggsvelte/core` barrel no longer registers every stat frame builder and geom batch at module scope, and no longer installs Temporal on import. Registration is explicit:
+
+  - `registerAll()` — full grammar + Temporal + interaction candidates (one-call pre-0.27 behavior), re-exported from `@ggsvelte/svelte`.
+  - `registerBasic()` — identity-chart tier (what `@ggsvelte/core/render` still installs on import).
+  - Per-family `registerSmooth()` / `registerBoxplot()` / … — granular opt-in; each generated `<Geom*>` component calls its own in a `<script module>` block, so importing a component is what pulls its code into the bundle.
+
+  GGPlot registers basic geoms/stats + Temporal by default, so component-driven apps (including histograms, smooth, sf, … via `<Geom*>` children) need no change and now tree-shake every specialty geom/stat they do not declare. A Vite consumer rendering a point/line chart no longer bundles smooth/density_2d/sf/contour/violin/hex/boxplot code (CI-enforced via bundle attribution).
+
+  **Breaking (pre-1.0):** spec-driven charts (`layers` prop, `spec`, or headless `runPipeline` / `renderToSVGString`) using specialty geoms/stats must call `registerAll()` once (or a per-family register function). A `stat="…"` override on a component child needs that stat's family register call too — the component registers only its default stat. Missing registration fails loudly with a "not registered in this build" error naming the fix. `ggsvelte-render` (CLI) registers the full grammar itself — no change.
+
+### Patch Changes
+
+- 89efa48: # Faster large-n loess (interpolate surface)
+
+  Migration: none. Internal algorithm work; small-n outputs stay on the
+  existing direct/exact path (R fixtures 23–24 bit-identical).
+
+  For groups with more than 500 rows, loess switches to an interpolate
+  surface modeled on R's default `surface="interpolate"` /
+  `statistics="approximate"` path (1D kd-tree-style median partition, cubic
+  Hermite blend of vertex fits, approximate SE). The previous direct path
+  fitted a local model at every data point (O(n·q) with q ≈ span·n) and
+  allocated a fresh weights buffer per evaluation; large-n SE was hundreds
+  of milliseconds with large allocation churn.
+
+  Measured `pipeline loess 5k` (loess+se, forced method): hundreds of ms →
+  low double-digit ms; budget 710 → 45 ms. Scratch weights/`l` buffers are
+  reused on both surfaces. New fixture 25 pins the large-n path against R's
+  default loess.
+
+- 6295520: # Not-registered errors name the family register function
+
+  When a specialty stat/geom is missing from the build, the thrown error now names the precise fix — `registerSummary()`, `registerViolin()`, `registerHex()`, … (exported from both `@ggsvelte/core` and `@ggsvelte/svelte`) — instead of only the broad `registerAll()` / `registerBasic()` advice, and no longer suggests `registerBasic()` for specialty names it cannot cover. Non-obvious families map correctly (`bin_hex` → `registerHex()`, `ydensity` → `registerViolin()`, `bindot` → `registerDotplot()`). The hint maps are pure strings so the lean `@ggsvelte/core/render` graph stays free of the registration modules, with drift-guard tests keeping them in sync with the `register-*.ts` family modules.
+
+- Updated dependencies [3217502]
+- Updated dependencies [5531a8d]
+  - @ggsvelte/spec@0.28.0
+
 ## 0.27.0
 
 ### Minor Changes
