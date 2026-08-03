@@ -2,6 +2,8 @@
 "@ggsvelte/core": minor
 "@ggsvelte/spec": minor
 "@ggsvelte/svelte": minor
+"@ggsvelte/skill": minor
+"@ggsvelte/cli": minor
 ---
 
 # Drop spreadsheet/Stata-extra schemes and Excel/Calc/Stata Mono themes
@@ -16,6 +18,8 @@ Also remove four chart themes (and their Svelte shells): `stata_mono`
 (`ThemeStatamono`), `calc` (`ThemeCalc`), `excel` (`ThemeExcel`), `excel_new`
 (`ThemeExcelnew`). Nothing with "Excel" remains in the product surface.
 
-Switch removed schemes to `stata`, `tableau10`, `grey`, `gdocs`, or `pander`.
+Skill inventory drops the same schemes and themes.
+
+Switch removed schemes to `stata`, `tableau10`, `Dark2`, or `pander`.
 Switch removed themes to `stata`, `stata_s1color`, `bw`, `classic`, or
 `minimal`.
