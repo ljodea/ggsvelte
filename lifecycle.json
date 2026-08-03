@@ -4306,6 +4306,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RAMP_LUT_STEPS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "RampLegendInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4707,6 +4711,10 @@
           "lifecycle": "experimental"
         },
         "buildPrimitiveInteractionMasks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "buildRampLut": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5127,6 +5135,10 @@
           "lifecycle": "experimental"
         },
         "runPipeline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sampleRampLut": {
           "kind": "value",
           "lifecycle": "experimental"
         },

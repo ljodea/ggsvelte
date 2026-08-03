@@ -19974,14 +19974,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-355",
+    id: "heading:guide-lifecycle:experimental-358",
     kind: "heading",
-    title: "experimental (355)",
+    title: "experimental (358)",
     summary:
-      "experimental (355) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-355",
+      "experimental (358) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-358",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (355)"],
+    exact: ["experimental (358)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -31794,6 +31794,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["PositionTransformName"],
   },
   {
+    id: "api:ggsvelte-core:RAMP_LUT_STEPS",
+    kind: "api",
+    title: "RAMP_LUT_STEPS",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["RAMP_LUT_STEPS"],
+  },
+  {
     id: "api:ggsvelte-core:RampLegendInput",
     kind: "api",
     title: "RampLegendInput",
@@ -32701,6 +32710,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["buildPrimitiveInteractionMasks"],
+  },
+  {
+    id: "api:ggsvelte-core:buildRampLut",
+    kind: "api",
+    title: "buildRampLut",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["buildRampLut"],
   },
   {
     id: "api:ggsvelte-core:canonicalAxisToken",
@@ -33646,6 +33664,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["runPipeline"],
+  },
+  {
+    id: "api:ggsvelte-core:sampleRampLut",
+    kind: "api",
+    title: "sampleRampLut",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["sampleRampLut"],
   },
   {
     id: "api:ggsvelte-core:sampleSequentialPalette",

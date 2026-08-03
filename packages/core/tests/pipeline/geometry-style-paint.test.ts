@@ -96,6 +96,62 @@ describe("mappedPaintVector", () => {
       "#ff0000",
     ]);
   });
+
+  it("resolves the scale once per unique value when fanning out (#1423)", () => {
+    let colorOfCalls = 0;
+    const scale = fromPartial<ResolvedColorScale>({
+      kind: "ordinal",
+      scale: {
+        colorOf: (value: unknown) => {
+          colorOfCalls++;
+          return value === null || value === undefined
+            ? undefined
+            : PALETTE[`${value as string | number}`];
+        },
+        naValue: DEFAULT_MISSING_COLOR,
+        unknownValue: DEFAULT_MISSING_COLOR,
+      },
+    });
+    // 6 rows, 2 unique values → 2 colorOf calls (not 6).
+    const frame = makeFrame({ colorValues: ["a", "b", "a", "b", "a", "b"] });
+    expect(mappedPaintVector(frame, "color", scale, [0, 1, 2, 3, 4, 5])).toEqual([
+      "#ff0000",
+      "#00ff00",
+      "#ff0000",
+      "#00ff00",
+      "#ff0000",
+      "#00ff00",
+    ]);
+    expect(colorOfCalls).toBe(2);
+  });
+
+  it("skips unique memoization for all-distinct continuous columns (#1449 Devin)", () => {
+    let colorOfCalls = 0;
+    const scale = fromPartial<ResolvedColorScale>({
+      kind: "sequential",
+      scale: {
+        colorOf: (value: unknown) => {
+          colorOfCalls++;
+          // Distinct hex per value so output equality is observable.
+          const n = typeof value === "number" ? value : 0;
+          const ch = (n % 256).toString(16).padStart(2, "0");
+          return `#${ch}${ch}${ch}`;
+        },
+        naValue: DEFAULT_MISSING_COLOR,
+        unknownValue: DEFAULT_MISSING_COLOR,
+      },
+    });
+    // 600 distinct numbers (> probe length × high-cardinality ratio) →
+    // direct path: one colorOf per row, not Map growth to 600 entries.
+    const values = Array.from({ length: 600 }, (_, i) => i);
+    const frame = makeFrame({ colorValues: values });
+    const rows = Array.from({ length: 600 }, (_, i) => i);
+    const painted = mappedPaintVector(frame, "color", scale, rows);
+    expect(painted).toHaveLength(600);
+    expect(painted[0]).toBe("#000000");
+    expect(painted[255]).toBe("#ffffff");
+    expect(colorOfCalls).toBe(600);
+  });
 });
 
 describe("paintVector", () => {

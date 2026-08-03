@@ -182,7 +182,14 @@ export type {
   OrdinalColorConfig,
   PositionScale,
 } from "./scales/train.js";
-export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
+export {
+  buildRampLut,
+  rampColor,
+  RAMP_LUT_STEPS,
+  sampleRampLut,
+  trainSequential,
+  VIRIDIS_RAMP_10,
+} from "./scales/color.js";
 export { sequentialSchemeRamp } from "./scales/sequential-schemes.js";
 export { sampleSequentialPalette } from "./scales/train-color.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";

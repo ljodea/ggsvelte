@@ -1,5 +1,5 @@
 {
-  "$comment": "PROVISIONAL budgets (plan M3): measured on an Apple M1 Pro dev machine (darwin arm64, bun 1.3.6) on 2026-07-11 via `bun run bench:json`; budget = median * 1.5 headroom, rounded up to ~2 significant figures. Re-baseline on the CI runner when a remote exists (plan M3->M4). Canvas workloads measure JS command-generation cost against a stub 2d context (bun has no raster) \u2014 see workloads/. Keys must exactly match the workload ids emitted by bench-json.ts; check-budgets.ts asserts coverage in both directions. 2026-08-02: candidate workloads re-baselined on linux-x64 bun 1.3.14 after the columnar-datum + lazy-axis-groups rework (canvas cold 1161\u2192263ms measured; the pre-existing 130/31ms M1 budgets predate the 2026-07-24 candidate-store rework and no longer reflected this workload's shape).",
+  "$comment": "PROVISIONAL budgets (plan M3): measured on an Apple M1 Pro dev machine (darwin arm64, bun 1.3.6) on 2026-07-11 via `bun run bench:json`; budget = median * 1.5 headroom, rounded up to ~2 significant figures. Re-baseline on the CI runner when a remote exists (plan M3->M4). Canvas workloads measure JS command-generation cost against a stub 2d context (bun has no raster) \u2014 see workloads/. Keys must exactly match the workload ids emitted by bench-json.ts; check-budgets.ts asserts coverage in both directions. 2026-08-02: candidate workloads re-baselined on linux-x64 bun 1.3.14 after the columnar-datum + lazy-axis-groups rework (canvas cold 1161\u2192263ms measured; the pre-existing 130/31ms M1 budgets predate the 2026-07-24 candidate-store rework and no longer reflected this workload's shape). 2026-08-02 (#1423): color-log10 / color-binned / color-manual / mapped-style 100k tightened after sequential ramp LUT + unique-value style fan-out (local medians ~38/34/42/66 ms; budgets median*~1.5 with CI headroom).",
   "budgets": {
     "pipeline scatter 1k": {
       "budgetMs": 2.9
@@ -95,16 +95,16 @@
       "budgetMs": 50
     },
     "pipeline color-log10 100k": {
-      "budgetMs": 130
+      "budgetMs": 70
     },
     "pipeline color-binned 100k": {
-      "budgetMs": 180
+      "budgetMs": 70
     },
     "pipeline color-manual 100k": {
-      "budgetMs": 130
+      "budgetMs": 70
     },
     "pipeline mapped-style 100k": {
-      "budgetMs": 132
+      "budgetMs": 110
     },
     "pipeline responsive-guides resize 10k": {
       "budgetMs": 12
