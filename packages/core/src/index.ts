@@ -19,6 +19,8 @@ import "./pipeline/frame-stats-register-all.js";
 import "./pipeline/geometry-register-all.js";
 // Full temporal: Temporal polyfill parsing + guide planner.
 import "./install-temporal.js";
+// Interaction candidates: lazy candidate-store construction (#1421).
+import "./install-candidates.js";
 
 // Data binding
 export {

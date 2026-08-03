@@ -8,12 +8,14 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import { getCandidateRuntime } from "../candidate-runtime.js";
+import type { LazyInteraction } from "../candidate-runtime.js";
+import type { CandidateStore } from "../candidate-store.js";
 import { buildPanelCoordProjector } from "../coord-projector.js";
 import { LineageStore } from "../identity.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
-import { buildPipelineCandidates } from "./build-candidates.js";
 import { computeBaselineDomains, computeEffectiveDomains } from "./compute-domains.js";
 import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import { finalizeGeometryAndScene } from "./finalize-geometry-scene.js";
@@ -97,24 +99,46 @@ export function finalize(run: PipelineRunState): RenderModel {
     effectiveDomains,
   });
 
-  // --- lineage + interaction candidates ---
-  const lineage = new LineageStore<number>();
-  const candidates = buildPipelineCandidates({
-    scene,
-    runId,
-    flip,
-    bindings,
-    panelFrames: prepared.panelFrames,
-    facetPanels: prepared.facetPanels,
-    // Candidate sourceRow indexes and lineage rows are source-table based
-    // (runtime filters preserve identity), so value lookups must be too.
-    table: prepared.sourceTable,
-    sources: prepared.sourceRegistry,
-    layerFields,
-    color: trained.colorResolution.resolved,
-    fill: trained.fillResolution.resolved,
-    lineage,
-  });
+  // --- lineage + interaction candidates (lazy, #1421) ---
+  // The candidate store builds on first `model.candidates` / `model.lineage`
+  // access so headless/SSR renders never pay for it, and the lean render entry
+  // never carries the candidate-store graph (no runtime installed there). The
+  // build populates `lineage`, so every access must go through `ensure()` — a
+  // bare read of the eager-but-empty store would be silently stale.
+  const lineageStore = new LineageStore<number>();
+  let builtCandidates: CandidateStore | null = null;
+  const interaction: LazyInteraction = {
+    lineageStore,
+    ensure(): CandidateStore {
+      if (builtCandidates !== null) return builtCandidates;
+      const runtime = getCandidateRuntime();
+      if (runtime === null) {
+        throw new Error(
+          "Interaction candidates require @ggsvelte/core (full entry); the lean @ggsvelte/core/render graph does not carry the candidate store.",
+        );
+      }
+      builtCandidates = runtime.build({
+        scene,
+        runId,
+        flip,
+        bindings,
+        panelFrames: prepared.panelFrames,
+        facetPanels: prepared.facetPanels,
+        // Candidate sourceRow indexes and lineage rows are source-table based
+        // (runtime filters preserve identity), so value lookups must be too.
+        table: prepared.sourceTable,
+        sources: prepared.sourceRegistry,
+        layerFields,
+        color: trained.colorResolution.resolved,
+        fill: trained.fillResolution.resolved,
+        lineage: lineageStore,
+      });
+      return builtCandidates;
+    },
+    built(): CandidateStore | null {
+      return builtCandidates;
+    },
+  };
 
   // --- pack trained scales + contracts into the render model ---
   const { colorResolution, fillResolution, styleResolutions } = trained;
@@ -167,8 +191,7 @@ export function finalize(run: PipelineRunState): RenderModel {
     layerScaledConstants,
     baselineDomains,
     effectiveDomains,
-    lineage,
-    candidates,
+    interaction,
     formatX: panelLayout.formatX,
     formatY: panelLayout.formatY,
     // Retain the unfiltered source table + multi-table registry: model.row()

@@ -11,8 +11,7 @@ import type { ScaleState } from "../scales/state.js";
 import type { PositionScale } from "../scales/train.js";
 import type { Scene } from "../scene.js";
 import type { CellValue, ColumnTable } from "../table.js";
-import type { CandidateStore } from "../candidate-store.js";
-import type { LineageStore } from "../identity.js";
+import type { LazyInteraction } from "../candidate-runtime.js";
 import { createSemanticViewport } from "../semantic-viewport.js";
 import type { AdvisoryCode } from "../diagnostics.js";
 
@@ -65,8 +64,7 @@ export interface AssembleRenderModelInput {
   layerScaledConstants: ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>>;
   baselineDomains: ScaleDomainSnapshot;
   effectiveDomains: ScaleDomainSnapshot;
-  lineage: LineageStore<number>;
-  candidates: CandidateStore;
+  interaction: LazyInteraction;
   formatX: TickFormatter | undefined;
   formatY: TickFormatter | undefined;
   table: ColumnTable;
@@ -250,11 +248,11 @@ function guidePlanIdsByAesthetic(
 }
 
 export function assembleRenderModel(input: AssembleRenderModelInput): RenderModel {
-  const { scene, candidates } = input;
+  const { scene, interaction } = input;
   const scales = buildRenderModelScales(input);
   const lifecycle = createRenderModelLifecycle({
     scene,
-    candidates,
+    builtCandidates: interaction.built,
     table: input.table,
     ...(input.sourceRegistry !== undefined && { sourceRegistry: input.sourceRegistry }),
   });
@@ -284,7 +282,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
       scales,
       coordProjectors: input.coordProjectors,
       flipped: input.flipped,
-      candidates,
+      candidates: interaction.ensure,
       sceneSize: { width: scene.width, height: scene.height },
     }),
     runId: input.runId,
@@ -292,8 +290,16 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     layerFields: input.layerFields,
     layerScaledConstants: input.layerScaledConstants,
     domains: freezeRenderModelDomains(input.baselineDomains, input.effectiveDomains),
-    lineage: input.lineage,
-    candidates,
+    // Lazy getters (#1421): the candidate store builds on first access through
+    // the installed runtime hook, and the same build populates lineage — the
+    // lineage getter ensures first so it never hands out an empty stale store.
+    get lineage() {
+      interaction.ensure();
+      return interaction.lineageStore;
+    },
+    get candidates() {
+      return interaction.ensure();
+    },
     axisFormatters: buildRenderModelAxisFormatters(
       input.xScale,
       input.yScale,

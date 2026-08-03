@@ -287,7 +287,7 @@ function createPanel(
   scales: Readonly<{ x: PositionScale; y: PositionScale }>,
   coord: PanelCoordProjector | undefined,
   flipped: boolean,
-  candidates: CandidateStore,
+  candidates: () => CandidateStore,
   indexFor: (scale: PositionScale) => ReadonlyMap<string, BandKeyEntry>,
 ): SemanticViewportPanel {
   const xBandValuesByKey = indexFor(scales.x);
@@ -370,20 +370,21 @@ function createPanel(
               : { ...rect, x0: panel.x, x1: panel.x + panel.width }
             : rect;
       const matches: CandidateFacts[] = [];
-      for (const id of candidates.queryRect(
+      const store = candidates();
+      for (const id of store.queryRect(
         expanded.x0,
         expanded.y0,
         expanded.x1,
         expanded.y1,
         panel.id,
       )) {
-        const candidate = candidates.candidate(id);
+        const candidate = store.candidate(id);
         if (candidate !== null) matches.push(candidate);
       }
       return matches;
     },
     nearest(point, options) {
-      return candidates.nearest(point.x, point.y, {
+      return candidates().nearest(point.x, point.y, {
         mode: options.mode,
         maxDistance: options.maxDistance,
         panelId: panel.id,
@@ -397,7 +398,9 @@ export type CreateSemanticViewportInput = {
   readonly scales: ViewportScales;
   readonly coordProjectors: readonly PanelCoordProjector[];
   readonly flipped: boolean;
-  readonly candidates: CandidateStore;
+  /** Lazy candidate store (#1421): resolved at interaction time so headless
+   * renders never build it. */
+  readonly candidates: () => CandidateStore;
   /** Plot pixel size used by `locate` for client → scene scaling. */
   readonly sceneSize: Readonly<{ width: number; height: number }>;
 };

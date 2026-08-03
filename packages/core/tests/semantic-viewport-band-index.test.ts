@@ -52,7 +52,7 @@ function viewportOver(
     scales: { ...perPanel(0), panels: panels.map((_, i) => perPanel(i)) },
     coordProjectors: [],
     flipped: false,
-    candidates: model.candidates,
+    candidates: () => model.candidates,
     sceneSize: { width: 640, height: 400 },
   });
 }

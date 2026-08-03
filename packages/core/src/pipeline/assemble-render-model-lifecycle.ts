@@ -12,7 +12,8 @@ import { NO_ROW } from "./types.js";
 
 export function createRenderModelLifecycle(input: {
   scene: Scene;
-  candidates: CandidateStore;
+  /** Lazy candidates (#1421): dispose only when the store was ever built. */
+  builtCandidates: () => CandidateStore | null;
   table: ColumnTable;
   /** When present, model.row resolves multi-table global source ids. */
   sourceRegistry?: SourceRegistry | null;
@@ -23,7 +24,7 @@ export function createRenderModelLifecycle(input: {
   let disposed = false;
   let retainedTable: ColumnTable | null = input.table;
   let retainedRegistry: SourceRegistry | null = input.sourceRegistry ?? null;
-  const { scene, candidates } = input;
+  const { scene, builtCandidates } = input;
 
   return {
     row(index: number): Record<string, CellValue> | null {
@@ -38,7 +39,7 @@ export function createRenderModelLifecycle(input: {
     dispose(): void {
       if (disposed) return;
       disposed = true;
-      candidates.dispose();
+      builtCandidates()?.dispose();
       retainedTable = null;
       retainedRegistry = null;
       // Release geometry (typed arrays) and per-panel structures; the bound

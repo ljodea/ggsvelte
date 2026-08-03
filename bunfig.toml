@@ -10,6 +10,7 @@ preload = [
   # Spec-src graph: unit tests import packages/spec/src/*.ts directly.
   "./packages/spec/src/temporal-polyfill.ts",
   "./packages/core/src/install-temporal.ts",
+  "./packages/core/src/install-candidates.ts",
   "./packages/core/src/pipeline/frame-stats-register-all.ts",
   "./packages/core/src/pipeline/geometry-register-all.ts",
 ]
