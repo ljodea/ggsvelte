@@ -1964,6 +1964,35 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.27 to 0.28
+
+### Removed spreadsheet and extra Stata categorical schemes
+
+Nine categorical \`scheme\` names (and the matching public \`*_PALETTE\` constants
+from \`@ggsvelte/core\`) are gone:
+
+- \`stata_s1color\`, \`stata_s1rcolor\`, \`stata_mono\`
+- \`hc\`, \`hc_dark\`
+- \`calc\`, \`excel\`, \`excel_fill\`, \`excel_new\`
+
+A PortableSpec that still names one of those schemes fails validation. Switch
+to a remaining scheme — \`stata\`, \`tableau10\`, \`grey\`, \`gdocs\`, and \`pander\` are
+the usual replacements — or pass an explicit \`range\` of hex color stops.
+
+Chart **themes** that shared those names (\`theme: "excel"\`, \`<ThemeHc/>\`,
+\`<ThemeStatamono/>\`, …) are unchanged. Only the color/fill scheme registry
+shrank.
+
+\`\`\`json fragment
+// Before: scheme names that no longer validate
+{ "scales": { "color": { "type": "ordinal", "scheme": "excel_new" } } }
+\`\`\`
+
+\`\`\`json fragment
+// After: pick a remaining scheme (or an explicit range)
+{ "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } } }
+\`\`\`
+
 ## 0.26 to 0.27
 
 ### Explicit registration for spec-driven charts

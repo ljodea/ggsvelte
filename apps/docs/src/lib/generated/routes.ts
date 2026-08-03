@@ -12159,6 +12159,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-27-to-0-28",
+        title: "0.27 to 0.28",
+        level: 2,
+      },
+      {
+        id: "removed-spreadsheet-and-extra-stata-categorical-schemes",
+        title: "Removed spreadsheet and extra Stata categorical schemes",
+        level: 3,
+      },
+      {
         id: "0-26-to-0-27",
         title: "0.26 to 0.27",
         level: 2,

@@ -20123,6 +20123,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-27-to-0-28",
+    kind: "heading",
+    title: "0.27 to 0.28",
+    summary:
+      "0.27 to 0.28 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-27-to-0-28",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.27 to 0.28"],
+  },
+  {
+    id: "heading:guide-upgrading:removed-spreadsheet-and-extra-stata-categorical-schemes",
+    kind: "heading",
+    title: "Removed spreadsheet and extra Stata categorical schemes",
+    summary:
+      "Removed spreadsheet and extra Stata categorical schemes in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#removed-spreadsheet-and-extra-stata-categorical-schemes",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Removed spreadsheet and extra Stata categorical schemes"],
+  },
+  {
     id: "heading:guide-upgrading:0-26-to-0-27",
     kind: "heading",
     title: "0.26 to 0.27",
