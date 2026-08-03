@@ -5,7 +5,6 @@
 
   import PaletteIndex from "$lib/components/PaletteIndex.svelte";
   import PalettePreview from "$lib/components/PalettePreview.svelte";
-  import SequentialColorLab from "$lib/components/SequentialColorLab.svelte";
   import {
     sortPaletteSpecimens,
     type PaletteSort,
@@ -62,7 +61,8 @@
     <p>
       Categorical schemes color discrete series. Sequential ramps encode
       continuous fill. Chart themes style paper and chrome separately — see
-      <a href={`${base}/themes`}>Themes</a>.
+      <a href={`${base}/themes`}>Themes</a>. Sequential ramps live on
+      <a href={`${base}/palettes/ramps`}>Sequential color ramps</a>.
     </p>
     <p class="guide-link">
       Scheme names as scale inputs:
@@ -133,11 +133,13 @@
     </p>
   </section>
 
-  <SequentialColorLab examples={data.sequentialExamples} />
-
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>
     <ul>
+      <li>
+        <a href={`${base}/palettes/ramps`}>Sequential color ramps</a>
+        — every sequential scheme strip, plus scale behavior on a chart
+      </li>
       <li>
         <a href={`${base}/reference/palettes`}>Palettes reference</a>
         — scheme → ScaleColor* / ScaleFill* mapping

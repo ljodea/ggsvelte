@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
-  import { VIRIDIS_COLORS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
   import SequentialDeferredPlot from "$lib/components/SequentialDeferredPlot.svelte";
   import { SEQUENTIAL_RASTER_SNIPPET } from "$lib/theme-specimens/snippets";
@@ -20,17 +19,9 @@
 <section class="sequential-lab" aria-label="Sequential color scales">
   <header class="section-heading">
     <div>
-      <p class="eyebrow">Sequential</p>
-      <h2>Ramps</h2>
+      <p class="eyebrow">Behavior</p>
+      <h2>Read on the colorbar</h2>
     </div>
-    <ol class="viridis-ramp" aria-label="Viridis reference colors">
-      {#each VIRIDIS_COLORS as color, index (`${color}-${String(index)}`)}
-        <li
-          style={`--swatch:${color}`}
-          aria-label={`${String(index + 1)}: ${color}`}
-        ></li>
-      {/each}
-    </ol>
   </header>
 
   <p class="lede">
@@ -103,21 +94,6 @@
     color: var(--muted);
     font-size: 0.95rem;
     line-height: 1.45;
-  }
-
-  .viridis-ramp {
-    display: flex;
-    width: min(100%, 18rem);
-    height: 1.25rem;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    list-style: none;
-  }
-
-  .viridis-ramp li {
-    flex: 1;
-    background: var(--swatch);
   }
 
   .examples {

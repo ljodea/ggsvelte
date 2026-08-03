@@ -43,10 +43,20 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:palettes",
     kind: "page",
     title: "Color palettes",
-    summary: "Categorical palettes and sequential color scales for data encoding.",
+    summary: "Categorical palettes for discrete series: browse, compare, and preview every scheme.",
     href: "/palettes",
     keywords: [],
     exact: ["Color palettes"],
+  },
+  {
+    id: "page:palettes-ramps",
+    kind: "page",
+    title: "Sequential color ramps",
+    summary:
+      "Sequential color ramps for continuous fill, and how reverse, range, and domain read on a chart.",
+    href: "/palettes/ramps",
+    keywords: [],
+    exact: ["Sequential color ramps"],
   },
   {
     id: "page:reference",
