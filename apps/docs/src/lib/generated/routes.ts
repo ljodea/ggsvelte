@@ -12072,8 +12072,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-358",
-        title: "experimental (358)",
+        id: "experimental-352",
+        title: "experimental (352)",
         level: 3,
       },
       {
@@ -12171,6 +12171,11 @@ export const DOCS_ROUTES = [
       {
         id: "removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes",
         title: "Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes",
+        level: 3,
+      },
+      {
+        id: "removed-tableau-10-summer-winter-and-stone-schemes",
+        title: "Removed Tableau 10, Summer, Winter, and stone schemes",
         level: 3,
       },
       {

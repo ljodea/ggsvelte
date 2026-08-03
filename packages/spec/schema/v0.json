@@ -6027,10 +6027,6 @@
                 },
                 {
                   "type": "string",
-                  "const": "tableau10"
-                },
-                {
-                  "type": "string",
                   "const": "colorblind"
                 },
                 {
@@ -6103,27 +6099,7 @@
                 },
                 {
                   "type": "string",
-                  "const": "tableau_miller_stone"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_superfishel_stone"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_nuriel_stone"
-                },
-                {
-                  "type": "string",
                   "const": "tableau_jewel_bright"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_summer"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_winter"
                 },
                 {
                   "type": "string",
@@ -6342,7 +6318,7 @@
                   "const": "tableau_div_temperature"
                 }
               ],
-              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", and ColorBrewer qualitative (Dark2); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
+              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"colorblind\", \"hue\", and ColorBrewer qualitative (Dark2); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
             },
             "reverse": {
               "type": "boolean",

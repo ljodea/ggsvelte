@@ -157,7 +157,7 @@ export const PALETTE_HELPER_GROUPS = [
       "ScaleFillManual",
     ],
     summary:
-      'Pass scheme="tableau10" (or another categorical name) on discrete/ordinal shells. Brewer and hue set the scheme by construction; grey bakes an explicit range.',
+      'Pass scheme="observable10" (or another categorical name) on discrete/ordinal shells. Brewer and hue set the scheme by construction; grey bakes an explicit range.',
   },
   {
     id: "continuous",

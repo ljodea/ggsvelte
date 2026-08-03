@@ -26,7 +26,7 @@
   <ScaleLinewidthContinuous range={[1, 9]} />
   <ScaleShapeDiscrete range={["circle", "triangle"]} />
   <ScaleLinetypeDiscrete range={["solid", "dashed"]} />
-  <ScaleColorDiscrete scheme="tableau10" />
+  <ScaleColorDiscrete scheme="observable10" />
   <Labs
     title="Minard's march on five style channels"
     subtitle="Width, size and fade all carry strength; line type and shape carry direction"

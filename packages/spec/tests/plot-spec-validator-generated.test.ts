@@ -51,7 +51,7 @@ function corpus(): unknown[] {
       scales: {
         x: { type: "linear", domain: [0, 10], breaks: [0, 5, 10], labels: ",.2f" },
         y: { type: "log", transform: "log10" },
-        fill: { type: "categorical", scheme: "tableau10" },
+        fill: { type: "categorical", scheme: "observable10" },
       },
       coord: { type: "fixed", ratio: 1.5 },
       facet: { type: "wrap", facets: "g", ncol: 2 },

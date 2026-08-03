@@ -71,14 +71,16 @@ describe("palette precedence", () => {
       await import("../src/scales/categorical-palettes.ts");
     const edition = ["#111111", "#222222"] as const;
     expect(
-      resolveOrdinalPipelineRange({ range: ["#ff0000"], scheme: "tableau10" }, edition),
+      resolveOrdinalPipelineRange({ range: ["#ff0000"], scheme: "colorblind" }, edition),
     ).toEqual(["#ff0000"]);
     // Named schemes leave range undefined so trainColor owns scheme fingerprints.
-    expect(resolveOrdinalPipelineRange({ scheme: "tableau10" }, edition)).toBeUndefined();
+    expect(resolveOrdinalPipelineRange({ scheme: "colorblind" }, edition)).toBeUndefined();
     expect(resolveOrdinalPipelineRange({}, edition)).toBe(edition);
     // Built-in edition palette stays undefined for observable10 fingerprint stability.
     expect(resolveOrdinalPipelineRange({}, CATEGORICAL_PALETTE_10)).toBeUndefined();
-    expect(resolveOrdinalPaletteStops({ scheme: "tableau10" })).toBe(CATEGORICAL_SCHEMES.tableau10);
+    expect(resolveOrdinalPaletteStops({ scheme: "colorblind" })).toBe(
+      CATEGORICAL_SCHEMES.colorblind,
+    );
     expect(resolveOrdinalPaletteStops()).toBe(CATEGORICAL_PALETTE_10);
   });
 

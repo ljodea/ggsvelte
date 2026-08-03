@@ -21,7 +21,7 @@
   height={400}
 >
   <ThemeClassic />
-  <ScaleColorDiscrete scheme="tableau10" />
+  <ScaleColorDiscrete scheme="observable10" />
   <Labs
     title="Raw points with a manual mean per group"
     subtitle="Twenty faint measurements per run; the solid mark is that run's mean"

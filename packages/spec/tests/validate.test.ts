@@ -41,7 +41,7 @@ describe("validate — accepts", () => {
   });
 
   it("accepts the hrbrthemes and ggthemes categorical schemes", () => {
-    for (const scheme of ["ipsum", "flexoki", "tableau10", "colorblind"]) {
+    for (const scheme of ["ipsum", "flexoki", "observable10", "colorblind"]) {
       const result = validate({
         layers: [{ geom: "point" }],
         scales: { color: { type: "ordinal", scheme } },

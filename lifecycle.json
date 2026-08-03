@@ -4546,10 +4546,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "TABLEAU10_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TABLEAU20_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4566,27 +4562,7 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TABLEAU_MILLER_STONE_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_NURIEL_STONE_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TABLEAU_SEATTLE_GRAYS_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_SUMMER_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_SUPERFISHEL_STONE_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_WINTER_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -53,9 +53,9 @@ describe("palette reference catalog", () => {
   });
 
   it("maps categorical schemes to discrete scale helpers", () => {
-    const tableau = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "tableau10");
-    expect(tableau?.helpers).toContain("ScaleColorDiscrete");
-    expect(tableau?.helpers).toContain("ScaleFillDiscrete");
+    const colorblind = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "colorblind");
+    expect(colorblind?.helpers).toContain("ScaleColorDiscrete");
+    expect(colorblind?.helpers).toContain("ScaleFillDiscrete");
 
     const dark2 = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "Dark2");
     expect(dark2?.helpers).toContain("ScaleColorBrewer");

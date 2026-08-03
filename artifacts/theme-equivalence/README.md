@@ -29,7 +29,6 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 
 - hrbrthemes `ipsum`: `#d18975 #8fd175 #3f2d54 #75b8d1 #2d543d #c9d175 #d1ab75 #d175b8 #758bd1`
 - hrbrthemes Flexoki Light: `#D14D41 #DA702C #D0A215 #879A39 #3AA99F #4385BE #8B7EC8 #CE5D97`
-- ggthemes Tableau 10: `#4E79A7 #F28E2B #E15759 #76B7B2 #59A14F #EDC948 #B07AA1 #FF9DA7 #9C755F #BAB0AC`
 - ggthemes colorblind: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
 - ggthemes stata (s2color): `#1a476f #90353b #55752f #e37e00 #6e8e84 #c10534 #938dd2 #cac27e #a0522d #7b92a8 #2d6d66 #9c8847 #bfa19c #ffd200 #d9e6eb`
 - ggthemes stata_s1color: `#006000 #ff4500 #1a476f #90353b #6e8e84 #a0522d #ff7f00 #ff00ff #00ffff #ff0000 #00ff00 #9c8847 #800080 #c0dcc0 #add8e6`
@@ -39,12 +38,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes tableau20 (Tableau 20): `#4E79A7 #A0CBE8 #F28E2B #FFBE7D #59A14F #8CD17D #B6992D #F1CE63 #499894 #86BCB6 #E15759 #FF9D9A #79706E #BAB0AC #D37295 #FABFD2 #B07AA1 #D4A6C8 #9D7660 #D7B5A6`
 - ggthemes tableau_colorblind (Tableau Color Blind): `#1170aa #fc7d0b #a3acb9 #57606c #5fa2ce #c85200 #7b848f #a3cce9 #ffbc79 #c8d0d9`
 - ggthemes tableau_seattle_grays (Seattle Grays): `#767f8b #b3b7b8 #5c6068 #d3d3d3 #989ca3`
-- ggthemes tableau_miller_stone (Miller Stone): `#4f6980 #849db1 #a2ceaa #638b66 #bfbb60 #f47942 #fbb04e #b66353 #d7ce9f #b9aa97 #7e756d`
-- ggthemes tableau_superfishel_stone (Superfishel Stone): `#6388b4 #ffae34 #ef6f6a #8cc2ca #55ad89 #c3bc3f #bb7693 #baa094 #a9b5ae #767676`
-- ggthemes tableau_nuriel_stone (Nuriel Stone): `#8175aa #6fb899 #31a1b3 #ccb22b #a39fc9 #94d0c0 #959c9e #027b8e #9f8f12`
 - ggthemes tableau_jewel_bright (Jewel Bright): `#eb1e2c #fd6f30 #f9a729 #f9d23c #5fbb68 #64cdcc #91dcea #a4a4d5 #bbc9e5`
-- ggthemes tableau_summer (Summer): `#bfb202 #b9ca5d #cf3e53 #f1788d #00a2b3 #97cfd0 #f3a546 #f7c480`
-- ggthemes tableau_winter (Winter): `#90728f #b9a0b4 #9d983d #cecb76 #e15759 #ff9888 #6b6b6b #bab2ae #aa8780 #dab6af`
 - ggthemes tableau_green_orange_teal (Green-Orange-Teal): `#4e9f50 #87d180 #ef8a0c #fcc66d #3ca8bc #98d9e4 #94a323 #c3ce3d #a08400 #f7d42a #26897e #8dbfa8`
 - ggthemes tableau_red_blue_brown (Red-Blue-Brown): `#466f9d #91b3d7 #ed444a #feb5a2 #9d7660 #d7b5a6 #3896c4 #a0d4ee #ba7e45 #39b87f #c8133b #ea8783`
 - ggthemes tableau_purple_pink_gray (Purple-Pink-Gray): `#8074a8 #c6c1f0 #c46487 #ffbed1 #9c9290 #c5bfbe #9b93c9 #ddb5d5 #7c7270 #f498b6 #b173a0 #c799bc`

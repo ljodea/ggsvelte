@@ -117,7 +117,7 @@ Named categorical schemes are stable data encodings:
 
 - `observable10` is the general default.
 - `ipsum` and `flexoki` preserve audited hrbrthemes source order.
-- `tableau10` and `colorblind` preserve audited ggthemes source order.
+- `colorblind` and remaining Tableau variants preserve audited ggthemes source order.
 - `viridis` is the sequential default.
 
 Do not use color alone to distinguish selection from zoom, focus from selection, or an

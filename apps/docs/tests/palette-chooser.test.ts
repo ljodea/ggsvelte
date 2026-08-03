@@ -20,31 +20,31 @@ const fake = (
 describe("sortPaletteSpecimens", () => {
   it("sorts alphabetically by display label without mutating the input", () => {
     const input = [
-      { ...fake("tableau10", 10), label: "Tableau 10" },
+      { ...fake("colorblind", 8), label: "Colorblind" },
       { ...fake("observable10", 10), label: "Observable 10" },
       { ...fake("ipsum", 6), label: "Ipsum" },
     ];
     const sorted = sortPaletteSpecimens(input, "name");
-    expect(sorted.map((s) => s.label)).toEqual(["Ipsum", "Observable 10", "Tableau 10"]);
-    expect(input.map((s) => s.name)).toEqual(["tableau10", "observable10", "ipsum"]);
+    expect(sorted.map((s) => s.label)).toEqual(["Colorblind", "Ipsum", "Observable 10"]);
+    expect(input.map((s) => s.name)).toEqual(["colorblind", "observable10", "ipsum"]);
   });
 
   it("sorts by ascending capacity, breaking ties by label", () => {
     const input = [
-      { ...fake("tableau10", 10), label: "Tableau 10" },
+      { ...fake("colorblind", 8), label: "Colorblind" },
       { ...fake("ipsum", 6), label: "Ipsum" },
       { ...fake("observable10", 10), label: "Observable 10" },
     ];
     const sorted = sortPaletteSpecimens(input, "capacity");
-    expect(sorted.map((s) => s.label)).toEqual(["Ipsum", "Observable 10", "Tableau 10"]);
+    expect(sorted.map((s) => s.label)).toEqual(["Ipsum", "Colorblind", "Observable 10"]);
   });
 });
 
 describe("resolveInitialScheme", () => {
-  const specimens = [fake("observable10", 10), fake("tableau10", 10)];
+  const specimens = [fake("observable10", 10), fake("colorblind", 8)];
 
   it("returns the requested scheme when it exists", () => {
-    expect(resolveInitialScheme("tableau10", specimens)).toBe("tableau10");
+    expect(resolveInitialScheme("colorblind", specimens)).toBe("colorblind");
   });
 
   it("returns null for missing or unknown schemes", () => {

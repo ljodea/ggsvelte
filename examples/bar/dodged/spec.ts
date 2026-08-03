@@ -6,7 +6,7 @@ import { beerProduction } from "./data.js";
 export default defineExample(
   gg(beerProduction, aes({ x: "year", fill: "package", weight: "barrelsMillions" }))
     .geomBar({ position: "dodge" })
-    .scales({ fill: { type: "ordinal", scheme: "tableau10" } })
+    .scales({ fill: { type: "ordinal", scheme: "observable10" } })
     .theme("few")
     .labs({
       title: "US beer production by package type",

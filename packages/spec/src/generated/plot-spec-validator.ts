@@ -6083,7 +6083,6 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "observable10") ||
     (typeof value.scheme === "string" && value.scheme === "ipsum") ||
     (typeof value.scheme === "string" && value.scheme === "flexoki") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau10") ||
     (typeof value.scheme === "string" && value.scheme === "colorblind") ||
     (typeof value.scheme === "string" && value.scheme === "stata") ||
     (typeof value.scheme === "string" && value.scheme === "economist") ||
@@ -6102,12 +6101,7 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau20") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_colorblind") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_seattle_grays") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_miller_stone") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_superfishel_stone") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_nuriel_stone") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_jewel_bright") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_summer") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_winter") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_hue_circle") ||
     (typeof value.scheme === "string" && value.scheme === "pander") ||
     (typeof value.scheme === "string" && value.scheme === "Dark2") ||

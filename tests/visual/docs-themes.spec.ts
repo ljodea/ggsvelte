@@ -129,6 +129,12 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   expect(paletteLabels.filter((label) => label === "Google Docs")).toHaveLength(0);
   expect(paletteLabels.filter((label) => label === "Accent")).toHaveLength(0);
   expect(paletteLabels.filter((label) => label === "Paired")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Tableau 10")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Summer")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Winter")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Miller Stone")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Superfishel Stone")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Nuriel Stone")).toHaveLength(0);
   await expect(lab.getByRole("checkbox", { name: "Follow docs appearance" })).toHaveCount(0);
   await expect(lab.getByRole("status")).toHaveCount(0);
   await expect(lab.getByText(/theme="/)).toHaveCount(0);
@@ -137,8 +143,8 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   await chartTheme.selectOption("economist");
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
   // Palette is independent of theme.
-  await palette.selectOption("tableau10");
-  await expect(palette).toHaveValue("tableau10");
+  await palette.selectOption("colorblind");
+  await expect(palette).toHaveValue("colorblind");
   await expect(chartTheme).toHaveValue("economist");
 
   // Site appearance must not hijack the chart theme.
@@ -155,7 +161,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const rows = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Default order is label-alphabetical (sort control: Name/Color count).
-  await expect(rows).toHaveCount(32);
+  await expect(rows).toHaveCount(26);
   await expect(rows.locator(".name")).toHaveText([
     "Canva",
     "Colorblind",
@@ -170,20 +176,14 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Hue Circle",
     "Ipsum",
     "Jewel Bright",
-    "Miller Stone",
-    "Nuriel Stone",
     "Observable 10",
     "Pander",
     "Paul Tol",
     "Seattle Grays",
     "Solarized",
     "Stata",
-    "Summer",
-    "Superfishel Stone",
-    "Tableau 10",
     "Tableau 20",
     "Tableau Color Blind",
-    "Winter",
     "WSJ",
     "WSJ Black/Green",
     "WSJ Dem/Rep",
@@ -204,19 +204,13 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "19 colors",
     "9 colors",
     "9 colors",
-    "11 colors",
-    "9 colors",
     "10 colors",
     "8 colors",
     "12 colors",
     "5 colors",
     "8 colors",
     "15 colors",
-    "8 colors",
-    "10 colors",
-    "10 colors",
     "20 colors",
-    "10 colors",
     "10 colors",
     "6 colors",
     "4 colors",
@@ -252,18 +246,18 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(firstMark).toBeVisible();
 
   // Hover previews transiently; click pins the selection (aria-pressed).
-  const tableau = region.getByRole("button", {
-    name: "Tableau 10, 10 colors",
+  const colorblind = region.getByRole("button", {
+    name: "Colorblind, 8 colors",
     exact: true,
   });
-  await tableau.hover();
-  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
-  await tableau.click();
-  await expect(tableau).toHaveAttribute("aria-pressed", "true");
-  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
+  await colorblind.hover();
+  await expect(preview.getByRole("heading", { name: "Colorblind" })).toBeVisible();
+  await colorblind.click();
+  await expect(colorblind).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Colorblind" })).toBeVisible();
 
   // Screen-reader announcement tracks the previewed scheme.
-  await expect(page.getByRole("status")).toContainText("Previewing Tableau 10");
+  await expect(page.getByRole("status")).toContainText("Previewing Colorblind");
 
   // Exact inspect: tooltip on the bar, no full-panel crosshair guides.
   const capture = preview.locator(".gg-capture");
@@ -287,17 +281,17 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 });
 
 test("palette deep links pre-select and re-apply on same-route navigation", async ({ page }) => {
-  await page.goto("/palettes?scheme=tableau10&theme=light");
+  await page.goto("/palettes?scheme=colorblind&theme=light");
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const preview = page.getByRole("region", { name: "Palette preview" });
-  const tableau = region.getByRole("button", {
-    name: "Tableau 10, 10 colors",
+  const colorblind = region.getByRole("button", {
+    name: "Colorblind, 8 colors",
     exact: true,
   });
-  await expect(tableau).toHaveAttribute("aria-pressed", "true");
-  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
-  await expect(tableau).toBeInViewport();
+  await expect(colorblind).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Colorblind" })).toBeVisible();
+  await expect(colorblind).toBeInViewport();
 
   // Same-route query change WITHOUT remount (injected same-origin link — the
   // router intercepts it and keeps the page component alive): the new scheme

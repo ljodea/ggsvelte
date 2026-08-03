@@ -51,7 +51,7 @@ describe("sequentialSwatchFor", () => {
 
 describe("chooserSchemeFor", () => {
   it("deep-links picker schemes and skips display aliases", () => {
-    expect(chooserSchemeFor("tableau10")).toBe("tableau10");
+    expect(chooserSchemeFor("observable10")).toBe("observable10");
     expect(chooserSchemeFor("gray")).toBeNull();
   });
 });

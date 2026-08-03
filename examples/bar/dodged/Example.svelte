@@ -18,7 +18,7 @@
   height={400}
 >
   <ThemeFew />
-  <ScaleFillDiscrete scheme="tableau10" />
+  <ScaleFillDiscrete scheme="observable10" />
   <Labs
     title="US beer production by package type"
     subtitle="Millions of barrels each year as bottles and cans, kegs, or on-premises pours"

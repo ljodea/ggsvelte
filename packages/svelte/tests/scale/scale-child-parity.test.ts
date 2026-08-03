@@ -220,7 +220,7 @@ describe("live prop update (one per family, ADR-0001 getter)", () => {
       family: "color-fill",
       component: "ScaleColorDiscrete",
       initial: { scheme: "colorblind" },
-      next: { scheme: "tableau10" },
+      next: { scheme: "observable10" },
       read: (s) => s?.color?.scheme,
     },
     {
