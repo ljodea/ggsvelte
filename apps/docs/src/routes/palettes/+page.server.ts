@@ -1,5 +1,6 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
+import { isColorblindSafe, resolveInitialScheme } from "$lib/catalog/palette-chooser";
 import { CATEGORICAL_PALETTES } from "$lib/catalog/themes";
 import { THEME_STATIC_SHELL_BY_ID } from "$lib/generated/theme-static-shells";
 import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
@@ -45,17 +46,19 @@ function shellPath(id: string): string {
 }
 
 /** Paths only — SVG bodies under /theme-shells/ (see gen-theme-static-shells). */
-export function load() {
+export function load({ url }: { url: URL }) {
+  const paletteSpecimens = CATEGORICAL_PALETTES.map((palette) => ({
+    name: palette.name,
+    label: palette.label,
+    colors: palette.colors,
+    capacity: palette.capacity,
+    colorblindSafe: isColorblindSafe(palette.name),
+    staticSrc: shellPath(`palette-${palette.name}`),
+  }));
+
   return {
-    paletteSpecimens: CATEGORICAL_PALETTES.map((palette) => ({
-      name: palette.name,
-      label: palette.label,
-      colors: palette.colors,
-      capacity: palette.capacity,
-      reverse: false,
-      paperTheme: "light" as const,
-      staticSrc: shellPath(`palette-${palette.name}`),
-    })),
+    paletteSpecimens,
+    initialScheme: resolveInitialScheme(url.searchParams.get("scheme"), paletteSpecimens),
     sequentialExamples: SEQUENTIAL_EXAMPLES.map((example) => ({
       label: example.label,
       scale: example.scale,

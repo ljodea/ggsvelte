@@ -1,12 +1,58 @@
 <script lang="ts">
   import { base } from "$app/paths";
+  import { onMount, untrack } from "svelte";
+  import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
-  import PaletteGallery from "$lib/components/PaletteGallery.svelte";
+  import PaletteIndex from "$lib/components/PaletteIndex.svelte";
+  import PalettePreview from "$lib/components/PalettePreview.svelte";
   import SequentialColorLab from "$lib/components/SequentialColorLab.svelte";
+  import {
+    sortPaletteSpecimens,
+    type PaletteSort,
+  } from "$lib/catalog/palette-chooser";
 
   import type { PageProps } from "./$types";
 
+  type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
+
   const { data }: PageProps = $props();
+
+  let paperTheme = $state<ThemeName>("light");
+  let reversed = $state(false);
+  let sort = $state<PaletteSort>("name");
+
+  const sortedSpecimens = $derived(
+    sortPaletteSpecimens(data.paletteSpecimens, sort),
+  );
+
+  // Pinned once from the ?scheme= deep link (or the registry default);
+  // afterwards only row clicks change it.
+  let pinned = $state<CategoricalSchemeName>(
+    untrack(
+      () =>
+        data.initialScheme ?? data.paletteSpecimens[0]?.name ?? "observable10",
+    ),
+  );
+  let hovered = $state<CategoricalSchemeName | null>(null);
+
+  const previewName = $derived(hovered ?? pinned);
+  const previewSpecimen = $derived(
+    data.paletteSpecimens.find((s) => s.name === previewName) ??
+      data.paletteSpecimens[0],
+  );
+
+  onMount(() => {
+    if (data.initialScheme === null) return;
+    const target = document.getElementById(`scheme-${data.initialScheme}`);
+    if (target === null) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    target.scrollIntoView({
+      block: "center",
+      behavior: reduced ? "auto" : "smooth",
+    });
+  });
 </script>
 
 <main class="palettes-page">
@@ -33,7 +79,60 @@
     </p>
   </header>
 
-  <PaletteGallery specimens={data.paletteSpecimens} />
+  <section class="chooser" aria-label="Categorical palette chooser">
+    <div class="rail">
+      <fieldset class="picker">
+        <legend class="eyebrow">Preview settings</legend>
+        <label class="field">
+          Chart paper
+          <select bind:value={paperTheme}>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" bind:checked={reversed} />
+          Reverse
+        </label>
+        <label class="field">
+          Sort
+          <select bind:value={sort}>
+            <option value="name">Name</option>
+            <option value="capacity">Color count</option>
+          </select>
+        </label>
+      </fieldset>
+
+      {#if previewSpecimen !== undefined}
+        <PalettePreview
+          name={previewSpecimen.name}
+          label={previewSpecimen.label}
+          capacity={previewSpecimen.capacity}
+          reverse={reversed}
+          {paperTheme}
+          staticSrc={previewSpecimen.staticSrc}
+        />
+
+        <p class="visually-hidden" role="status">
+          Previewing {previewSpecimen.label}, {previewSpecimen.capacity} colors
+        </p>
+      {/if}
+    </div>
+
+    <PaletteIndex
+      specimens={sortedSpecimens}
+      selected={pinned}
+      reverse={reversed}
+      onpreview={(name) => (hovered = name)}
+      onselect={(name) => (pinned = name)}
+    />
+
+    <p class="footnote">
+      CB-safe marks schemes whose source palette declares colorblind-safe
+      colors. Unmarked palettes have not been audited yet.
+    </p>
+  </section>
+
   <SequentialColorLab examples={data.sequentialExamples} />
 
   <nav class="learning-path" aria-label="Next steps">
@@ -111,6 +210,97 @@
     font-weight: 650;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .chooser {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .rail {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    min-width: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .rail {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding-block: 0.75rem;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  .footnote {
+    margin: 0;
+    max-width: 52rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: flex-end;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .picker legend {
+    padding: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .field select {
+    font: inherit;
+    color: var(--fg);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    padding: 0.45rem 0.6rem;
+    min-height: 44px;
+  }
+
+  .check {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .check input {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--accent);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .learning-path {
