@@ -1,5 +1,42 @@
 # @ggsvelte/cli
 
+## 0.29.1
+
+### Patch Changes
+
+- 44124a6: # Elevate tooltip cards on dark, hcdark, 538, economist
+
+  Raise default tooltip surfaces so tips read as floating cards on `dark`,
+  `hcdark`, `fivethirtyeight`, and `economist`. Edition-2 dark elevates fill only;
+  LEGACY dark elevates `tooltipPaper` only (border stays rgba grid-derived).
+  hcdark also brightens tip ink. VR smoke golden `interaction-tooltip-dark.png`
+  updates with the dark tip change.
+
+- c851682: # Solarized tooltip surfaces for contrast
+
+  Elevate tooltip cards on `solarized`, `solarizeddark`, `solarized_2`, and
+  `solarized_2dark` using adjacent Schoonover base steps so tips no longer match
+  the chart panel. Tip ink steps stronger than axis ink (base01/base1) for short
+  reading chrome. Light solarized tip text is palette-native near-AA (4.39∶1).
+
+- 5105cdc: # Tooltip overrides in themed() and sticky-when-elevated resolveTheme tips
+
+  `themed()` accepts optional `tooltipPaper` / `tooltipInk` / `tooltipBorder` so
+  complete themes can elevate the tip package above pure foundation derivation.
+
+  `resolveTheme` object path uses sticky-when-elevated tip inheritance: named bases
+  that store non-derived tip roles keep them when authors only tweak
+  typography/accent/etc.; pure themes still re-derive tip from paper/panel/grid.
+  Explicit ThemeSpec tip roles still win.
+
+  No built-in problem-theme hex changes in this release slice — those follow in
+  separate token PRs.
+
+- Updated dependencies [44124a6]
+- Updated dependencies [c851682]
+- Updated dependencies [5105cdc]
+  - @ggsvelte/core@0.29.1
+
 ## 0.29.0
 
 ### Minor Changes
