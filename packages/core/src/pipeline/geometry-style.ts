@@ -14,10 +14,22 @@ function paintValues(frame: LayerFrame, channel: PaintChannel): LayerFrame["colo
   return channel === "color" ? frame.colorValues : frame.fillValues;
 }
 
+/** Probe length for unique-ratio estimation (see mapUniqueThenFanOut). */
+const UNIQUE_PROBE = 512;
+/**
+ * If uniques in the probe exceed this fraction of probe rows, the column is
+ * treated as high-cardinality and we skip the memo Map (Devin #1449).
+ */
+const HIGH_CARDINALITY_RATIO = 0.75;
+
 /**
  * Map unique source values once, then fan out onto kept rows (#1423).
  * SameValueZero Map keys (number/string/boolean/null/NaN); Dates fall back
  * to per-row evaluation because object identity is not value identity.
+ *
+ * High-cardinality columns (most continuous measurements: nearly all-distinct
+ * floats) fall back to a plain per-row loop after a short probe so we do not
+ * grow an unused Map to one entry per row.
  */
 function mapUniqueThenFanOut<T>(
   rows: ArrayLike<number>,
@@ -41,6 +53,29 @@ function mapUniqueThenFanOut<T>(
     for (let i = 0; i < n; i++) out[i] = mapped;
     return out;
   }
+
+  // Probe a prefix: if nearly every sample is unique, memoization is a pure
+  // loss (failed gets + Map growth). Fall back to the direct loop.
+  const probe = Math.min(n, UNIQUE_PROBE);
+  const probeSeen = new Set<unknown>();
+  let probeUniques = 0;
+  for (let i = 0; i < probe; i++) {
+    const value = valueAt(rows[i]!);
+    if (typeof value === "object" && value !== null) {
+      // Objects never memoize; count each as unique for the ratio.
+      probeUniques++;
+      continue;
+    }
+    if (!probeSeen.has(value)) {
+      probeSeen.add(value);
+      probeUniques++;
+    }
+  }
+  if (probeUniques >= probe * HIGH_CARDINALITY_RATIO) {
+    for (let i = 0; i < n; i++) out[i] = mapOne(valueAt(rows[i]!));
+    return out;
+  }
+
   const cache = new Map<unknown, T>();
   for (let i = 0; i < n; i++) {
     const value = valueAt(rows[i]!);

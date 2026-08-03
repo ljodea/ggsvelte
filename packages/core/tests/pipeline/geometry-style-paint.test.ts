@@ -124,6 +124,34 @@ describe("mappedPaintVector", () => {
     ]);
     expect(colorOfCalls).toBe(2);
   });
+
+  it("skips unique memoization for all-distinct continuous columns (#1449 Devin)", () => {
+    let colorOfCalls = 0;
+    const scale = fromPartial<ResolvedColorScale>({
+      kind: "sequential",
+      scale: {
+        colorOf: (value: unknown) => {
+          colorOfCalls++;
+          // Distinct hex per value so output equality is observable.
+          const n = typeof value === "number" ? value : 0;
+          const ch = (n % 256).toString(16).padStart(2, "0");
+          return `#${ch}${ch}${ch}`;
+        },
+        naValue: DEFAULT_MISSING_COLOR,
+        unknownValue: DEFAULT_MISSING_COLOR,
+      },
+    });
+    // 600 distinct numbers (> probe length × high-cardinality ratio) →
+    // direct path: one colorOf per row, not Map growth to 600 entries.
+    const values = Array.from({ length: 600 }, (_, i) => i);
+    const frame = makeFrame({ colorValues: values });
+    const rows = Array.from({ length: 600 }, (_, i) => i);
+    const painted = mappedPaintVector(frame, "color", scale, rows);
+    expect(painted).toHaveLength(600);
+    expect(painted[0]).toBe("#000000");
+    expect(painted[255]).toBe("#ffffff");
+    expect(colorOfCalls).toBe(600);
+  });
 });
 
 describe("paintVector", () => {
