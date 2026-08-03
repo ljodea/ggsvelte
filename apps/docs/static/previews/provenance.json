@@ -336,11 +336,6 @@
       "sourceSha256": "61524085932957371ac7533f0ba3a6fd746adaaca38fe919d8ad271d2437e771",
       "pngSha256": "16094b61079140080cc999bc8b0ba2b85bb3f836246a9153c98caa9e72aa0070"
     },
-    "point/style-scales": {
-      "filename": "point-style-scales-light.png",
-      "sourceSha256": "de4b86026588c581e12c5f9143a7002df8615f7b5f055d85128ecbc434675860",
-      "pngSha256": "de025b170eda0f3852db7a43d8e8350ba2008a4642de34d2da58c928ec017f83"
-    },
     "point/void-chrome": {
       "filename": "point-void-chrome-light.png",
       "sourceSha256": "0c88e1736cc3ac34bc18204b9411886140247b812f352c0705800a8f4045efcc",

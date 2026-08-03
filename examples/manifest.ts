@@ -788,16 +788,6 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
-    id: "point/style-scales",
-    category: "point",
-    name: "style-scales",
-    title: "Minard's march on five style channels",
-    description: "Line width, mark size and fade all carry the army's strength, the way Minard drew it; line type and shape carry the direction of march.",
-    tags: ["point", "line", "size", "alpha", "linewidth", "shape", "linetype", "scales"],
-    docsSection: "Scales & guides",
-    hasData: true,
-  },
-  {
     id: "point/void-chrome",
     category: "point",
     name: "void-chrome",
