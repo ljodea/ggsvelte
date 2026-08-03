@@ -24,7 +24,7 @@ export const GALLERY_PREVIEWS = [
     id: "bar/dodged",
     filename: "bar-dodged-light.png",
     path: "/previews/bar-dodged-light.png",
-    sha256: "dc33edb3d1d9841ff5cfdaf5961bb77d0941e01e9f98b0e02219bbd527405ed0",
+    sha256: "3a3a4284ab80901182bcc578d3778933272ae784bd05ed10078c333e2910f00d",
   },
   {
     id: "bar/horizontal",
@@ -318,7 +318,7 @@ export const GALLERY_PREVIEWS = [
     id: "path/ellipse-rings",
     filename: "path-ellipse-rings-light.png",
     path: "/previews/path-ellipse-rings-light.png",
-    sha256: "a72467b6cdf9177897840a548701a03fc431baa1de348742055641b1696907e9",
+    sha256: "2baaa74d40800122489d5ac012201a03e45da094a3778271128a16c7a7e984a7",
   },
   {
     id: "path/trajectory",
@@ -390,13 +390,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/scatter-color",
     filename: "point-scatter-color-light.png",
     path: "/previews/point-scatter-color-light.png",
-    sha256: "86bcfb3db5fb67d3c6c3a71e96a9387a36a0041a4f5fdfb3e6b6f06d32e5fb0e",
+    sha256: "668bb0efa136faddb762254da43cc9c465125b275a479415b6109c0ba3c85a49",
   },
   {
     id: "point/stat-manual-mean",
     filename: "point-stat-manual-mean-light.png",
     path: "/previews/point-stat-manual-mean-light.png",
-    sha256: "d08e50fad2dc86294e4e143ea1f5cc11f86682da44660076cf17d313e3f2fa99",
+    sha256: "e6819a2e8fc6b4bf60309a6c7f4a319a9a0e4d811723ec74577977a76954fec1",
   },
   {
     id: "point/stat-unique",
@@ -414,7 +414,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/style-scales",
     filename: "point-style-scales-light.png",
     path: "/previews/point-style-scales-light.png",
-    sha256: "eb208f47bc7a270d033e7ebf9295327eb1a75af6fc7853acebd61d6adc84b672",
+    sha256: "de025b170eda0f3852db7a43d8e8350ba2008a4642de34d2da58c928ec017f83",
   },
   {
     id: "point/void-chrome",

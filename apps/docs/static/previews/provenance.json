@@ -13,8 +13,8 @@
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "7c32a65a6daad5ee69938b5e60cccd81365a8a0eea36319f6e939c6dab24b1f1",
-      "pngSha256": "dc33edb3d1d9841ff5cfdaf5961bb77d0941e01e9f98b0e02219bbd527405ed0"
+      "sourceSha256": "728672042a83f51d65aaa4fb5e15c049f55da165ac988593db2394b4b8c8a9b4",
+      "pngSha256": "3a3a4284ab80901182bcc578d3778933272ae784bd05ed10078c333e2910f00d"
     },
     "bar/horizontal": {
       "filename": "bar-horizontal-light.png",
@@ -258,8 +258,8 @@
     },
     "path/ellipse-rings": {
       "filename": "path-ellipse-rings-light.png",
-      "sourceSha256": "c718c0c3efd6377e0aa316e4cd02bccb7486f742a5886756f862b02d73e52896",
-      "pngSha256": "a72467b6cdf9177897840a548701a03fc431baa1de348742055641b1696907e9"
+      "sourceSha256": "9627cf3cdc9952124e8a841744c7f77b21cf6b2d91baf8ae2eaeb4aba0360a41",
+      "pngSha256": "2baaa74d40800122489d5ac012201a03e45da094a3778271128a16c7a7e984a7"
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
@@ -318,13 +318,13 @@
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
-      "sourceSha256": "7671a80987ba5b3e5c16b639505b68afec4662cf4370b5a8e657c88ca7ec011d",
-      "pngSha256": "86bcfb3db5fb67d3c6c3a71e96a9387a36a0041a4f5fdfb3e6b6f06d32e5fb0e"
+      "sourceSha256": "ca73931143fb17f6a4781ac9cd528abca333470a7f75983e6c68a21c34190ae9",
+      "pngSha256": "668bb0efa136faddb762254da43cc9c465125b275a479415b6109c0ba3c85a49"
     },
     "point/stat-manual-mean": {
       "filename": "point-stat-manual-mean-light.png",
-      "sourceSha256": "6ee897ddded2fb3e13fc3540f2d162e46b1ce15dd63ede4267c013d6ad6365da",
-      "pngSha256": "d08e50fad2dc86294e4e143ea1f5cc11f86682da44660076cf17d313e3f2fa99"
+      "sourceSha256": "7a54095b64b31107899d9933559010e9caed75115618929c0851b28fd4624f61",
+      "pngSha256": "e6819a2e8fc6b4bf60309a6c7f4a319a9a0e4d811723ec74577977a76954fec1"
     },
     "point/stat-unique": {
       "filename": "point-stat-unique-light.png",
@@ -338,8 +338,8 @@
     },
     "point/style-scales": {
       "filename": "point-style-scales-light.png",
-      "sourceSha256": "0c6339c8216dcdde1ef7cd9879f4806f9ee2660d3b6e6d861fee36e0cd821488",
-      "pngSha256": "eb208f47bc7a270d033e7ebf9295327eb1a75af6fc7853acebd61d6adc84b672"
+      "sourceSha256": "de4b86026588c581e12c5f9143a7002df8615f7b5f055d85128ecbc434675860",
+      "pngSha256": "de025b170eda0f3852db7a43d8e8350ba2008a4642de34d2da58c928ec017f83"
     },
     "point/void-chrome": {
       "filename": "point-void-chrome-light.png",

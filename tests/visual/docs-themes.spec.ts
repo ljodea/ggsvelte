@@ -246,8 +246,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(firstMark).toBeVisible();
 
   // Hover previews transiently; click pins the selection (aria-pressed).
+  // colorblind is in COLORBLIND_SAFE_SCHEMES, so the row name ends in ", CB-safe".
   const colorblind = region.getByRole("button", {
-    name: "Colorblind, 8 colors",
+    name: "Colorblind, 8 colors, CB-safe",
     exact: true,
   });
   await colorblind.hover();
@@ -286,7 +287,7 @@ test("palette deep links pre-select and re-apply on same-route navigation", asyn
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const preview = page.getByRole("region", { name: "Palette preview" });
   const colorblind = region.getByRole("button", {
-    name: "Colorblind, 8 colors",
+    name: "Colorblind, 8 colors, CB-safe",
     exact: true,
   });
   await expect(colorblind).toHaveAttribute("aria-pressed", "true");
