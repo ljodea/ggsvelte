@@ -111,6 +111,17 @@
     <code>tooltipInk</code> and <code>interactionInk</code> contrasty so
     recovery controls like legend <strong>Clear</strong> stay readable on dark bases.
   </p>
+  <p>
+    Named bases that share paper and panel paint elevated tooltip chrome so tips
+    read as a card off the chart surface:
+    <code>solarized</code>, <code>solarized_2</code>,
+    <code>solarizeddark</code>, <code>solarized_2dark</code>,
+    <code>dark</code>, <code>hcdark</code>, <code>fivethirtyeight</code>, and
+    <code>economist</code>. A <code>ThemeSpec</code> object or named shell that
+    only overrides non-tip roles keeps that elevated package unless
+    <code>tooltipPaper</code>, <code>tooltipInk</code>, or
+    <code>tooltipBorder</code> is set.
+  </p>
   <div class="table-wrap">
     <table>
       <thead>
