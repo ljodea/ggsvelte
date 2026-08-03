@@ -40,11 +40,13 @@ describe("sortPaletteSpecimens", () => {
   });
 
   it("keeps the real registry label-alphabetical by default order", () => {
+    // Type the registry through an annotated alias: oxlint's type-aware
+    // program resolves the deep core imports in palette-tables.ts to an
+    // error type, and calling .map on that value trips no-unsafe-call.
+    const registry: readonly { label: string }[] = CATEGORICAL_PALETTES;
     const sorted = sortPaletteSpecimens(CATEGORICAL_PALETTES, "name");
     expect(sorted.map((s) => s.label)).toEqual(
-      CATEGORICAL_PALETTES.map((p) => p.label).toSorted((a: string, b: string) =>
-        a.localeCompare(b),
-      ),
+      registry.map((p) => p.label).toSorted((a, b) => a.localeCompare(b)),
     );
   });
 });
