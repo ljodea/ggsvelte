@@ -6,6 +6,7 @@
   import PaletteIndex from "$lib/components/PaletteIndex.svelte";
   import PalettePreview from "$lib/components/PalettePreview.svelte";
   import {
+    resolveInitialScheme,
     sortPaletteSpecimens,
     type PaletteSort,
   } from "$lib/catalog/palette-chooser";
@@ -24,13 +25,11 @@
     sortPaletteSpecimens(data.paletteSpecimens, sort),
   );
 
-  // Pinned once from the ?scheme= deep link (or the registry default);
-  // afterwards only row clicks change it.
+  // Pinned to the registry default on first paint; the ?scheme= deep link
+  // resolves client-side in onMount (the site is prerendered, so the query
+  // string is not available to the server load).
   let pinned = $state<CategoricalSchemeName>(
-    untrack(
-      () =>
-        data.initialScheme ?? data.paletteSpecimens[0]?.name ?? "observable10",
-    ),
+    untrack(() => data.paletteSpecimens[0]?.name ?? "observable10"),
   );
   let hovered = $state<CategoricalSchemeName | null>(null);
 
@@ -41,8 +40,13 @@
   );
 
   onMount(() => {
-    if (data.initialScheme === null) return;
-    const target = document.getElementById(`scheme-${data.initialScheme}`);
+    const initial = resolveInitialScheme(
+      new URLSearchParams(window.location.search).get("scheme"),
+      data.paletteSpecimens,
+    );
+    if (initial === null) return;
+    pinned = initial;
+    const target = document.getElementById(`scheme-${initial}`);
     if (target === null) return;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",

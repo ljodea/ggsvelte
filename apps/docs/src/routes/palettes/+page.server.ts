@@ -1,4 +1,4 @@
-import { isColorblindSafe, resolveInitialScheme } from "$lib/catalog/palette-chooser";
+import { isColorblindSafe } from "$lib/catalog/palette-chooser";
 import { CATEGORICAL_PALETTES } from "$lib/catalog/themes";
 import { THEME_STATIC_SHELL_BY_ID } from "$lib/generated/theme-static-shells";
 
@@ -9,7 +9,7 @@ function shellPath(id: string): string {
 }
 
 /** Paths only — SVG bodies under /theme-shells/ (see gen-theme-static-shells). */
-export function load({ url }: { url: URL }) {
+export function load() {
   const paletteSpecimens = CATEGORICAL_PALETTES.map((palette) => ({
     name: palette.name,
     label: palette.label,
@@ -19,8 +19,5 @@ export function load({ url }: { url: URL }) {
     staticSrc: shellPath(`palette-${palette.name}`),
   }));
 
-  return {
-    paletteSpecimens,
-    initialScheme: resolveInitialScheme(url.searchParams.get("scheme"), paletteSpecimens),
-  };
+  return { paletteSpecimens };
 }
