@@ -20123,6 +20123,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-28-to-0-29",
+    kind: "heading",
+    title: "0.28 to 0.29",
+    summary:
+      "0.28 to 0.29 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-28-to-0-29",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.28 to 0.29"],
+  },
+  {
+    id: "heading:guide-upgrading:removed-tableau-10-summer-winter-and-stone-schemes",
+    kind: "heading",
+    title: "Removed Tableau 10, Summer, Winter, and stone schemes",
+    summary:
+      "Removed Tableau 10, Summer, Winter, and stone schemes in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#removed-tableau-10-summer-winter-and-stone-schemes",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Removed Tableau 10, Summer, Winter, and stone schemes"],
+  },
+  {
     id: "heading:guide-upgrading:0-27-to-0-28",
     kind: "heading",
     title: "0.27 to 0.28",
@@ -20151,16 +20171,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes"],
-  },
-  {
-    id: "heading:guide-upgrading:removed-tableau-10-summer-winter-and-stone-schemes",
-    kind: "heading",
-    title: "Removed Tableau 10, Summer, Winter, and stone schemes",
-    summary:
-      "Removed Tableau 10, Summer, Winter, and stone schemes in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
-    href: "/guide/upgrading#removed-tableau-10-summer-winter-and-stone-schemes",
-    keywords: ["Upgrade guide", "Release"],
-    exact: ["Removed Tableau 10, Summer, Winter, and stone schemes"],
   },
   {
     id: "heading:guide-upgrading:0-26-to-0-27",

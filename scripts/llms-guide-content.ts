@@ -1965,6 +1965,36 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.28 to 0.29
+
+### Removed Tableau 10, Summer, Winter, and stone schemes
+
+Six categorical \`scheme\` names (and matching public \`*_PALETTE\` constants)
+are gone:
+
+- \`tableau10\`
+- \`tableau_summer\`, \`tableau_winter\`
+- \`tableau_miller_stone\`, \`tableau_superfishel_stone\`,
+  \`tableau_nuriel_stone\`
+
+Prefer \`observable10\`, \`colorblind\`, \`Dark2\`, \`pander\`, or another
+remaining Tableau scheme (\`tableau20\`, \`tableau_colorblind\`,
+\`tableau_jewel_bright\`, …), or pass an explicit \`range\`.
+
+\`\`\`json fragment
+// Before
+{
+  "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } }
+}
+\`\`\`
+
+\`\`\`json fragment
+// After
+{
+  "scales": { "color": { "type": "ordinal", "scheme": "observable10" } }
+}
+\`\`\`
+
 ## 0.27 to 0.28
 
 ### Removed spreadsheet, Highcharts, and extra Stata schemes and themes
@@ -2032,34 +2062,6 @@ greyscale \`range\` (optional \`start\`/\`end\`). They no longer emit
 {
   "theme": "minimal",
   "scales": { "color": { "type": "ordinal", "scheme": "Dark2" } }
-}
-\`\`\`
-
-### Removed Tableau 10, Summer, Winter, and stone schemes
-
-Six more categorical \`scheme\` names (and matching public \`*_PALETTE\`
-constants) are gone:
-
-- \`tableau10\`
-- \`tableau_summer\`, \`tableau_winter\`
-- \`tableau_miller_stone\`, \`tableau_superfishel_stone\`,
-  \`tableau_nuriel_stone\`
-
-Prefer \`observable10\`, \`colorblind\`, \`Dark2\`, \`pander\`, or another
-remaining Tableau scheme (\`tableau20\`, \`tableau_colorblind\`,
-\`tableau_jewel_bright\`, …), or pass an explicit \`range\`.
-
-\`\`\`json fragment
-// Before
-{
-  "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } }
-}
-\`\`\`
-
-\`\`\`json fragment
-// After
-{
-  "scales": { "color": { "type": "ordinal", "scheme": "observable10" } }
 }
 \`\`\`
 
