@@ -18,7 +18,7 @@
   height={400}
 >
   <ThemeFew />
-  <ScaleColorDiscrete scheme="tableau10" />
+  <ScaleColorDiscrete scheme="observable10" />
   <Labs
     title="Two measures coloured by region"
     subtitle="Literacy against crime rate; colour marks the region of each department"

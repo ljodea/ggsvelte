@@ -18,12 +18,12 @@ describe("themes catalog", () => {
     // grey/gray alias ggplot2 (#824) — one picker row (ggplot2), not three.
     expect(THEME_OPTIONS.map(({ name, scheme }) => ({ name, scheme }))).toEqual([
       { name: "default", scheme: "observable10" },
-      { name: "light", scheme: "tableau10" },
+      { name: "light", scheme: "observable10" },
       { name: "dark", scheme: "flexoki" },
       { name: "minimal", scheme: "colorblind" },
       { name: "ggplot2", scheme: "observable10" },
-      { name: "classic", scheme: "tableau10" },
-      { name: "bw", scheme: "tableau10" },
+      { name: "classic", scheme: "colorblind" },
+      { name: "bw", scheme: "colorblind" },
       { name: "hrbr", scheme: "ipsum" },
       { name: "few", scheme: "few" },
       { name: "clean", scheme: "flexoki" },
@@ -40,11 +40,11 @@ describe("themes catalog", () => {
       { name: "solarized_2", scheme: "solarized" },
       { name: "solarized_2dark", scheme: "solarized" },
       { name: "wsj", scheme: "wsj" },
-      { name: "hc", scheme: "tableau10" },
+      { name: "hc", scheme: "observable10" },
       { name: "hcdark", scheme: "flexoki" },
       { name: "pander", scheme: "pander" },
-      { name: "base", scheme: "tableau10" },
-      { name: "igray", scheme: "tableau10" },
+      { name: "base", scheme: "observable10" },
+      { name: "igray", scheme: "observable10" },
       { name: "map", scheme: "colorblind" },
       { name: "solid", scheme: "colorblind" },
       { name: "test", scheme: "colorblind" },
@@ -54,7 +54,7 @@ describe("themes catalog", () => {
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gdocs");
 
     const byName = new Map(CATEGORICAL_PALETTES.map((p) => [p.name, p]));
-    for (const name of ["observable10", "stata", "tableau10", "pander", "Dark2", "hue"] as const) {
+    for (const name of ["observable10", "stata", "pander", "Dark2", "hue"] as const) {
       expect(byName.get(name), name).toBeDefined();
     }
     // Removed schemes must not reappear.
@@ -77,12 +77,18 @@ describe("themes catalog", () => {
       "tableau_green_orange_teal",
       "tableau_red_blue_brown",
       "tableau_purple_pink_gray",
+      "tableau10",
+      "tableau_summer",
+      "tableau_winter",
+      "tableau_miller_stone",
+      "tableau_superfishel_stone",
+      "tableau_nuriel_stone",
     ]) {
       expect(paletteNames.has(name), name).toBe(false);
     }
     expect(byName.get("stata")!.capacity).toBe(15);
     // Registry size is owned by schema-names; keep a lower bound so shrinks fail.
-    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(28);
+    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(22);
     expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
 
     expect(VIRIDIS_COLORS).toEqual([

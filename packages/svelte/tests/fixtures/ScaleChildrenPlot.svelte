@@ -61,7 +61,7 @@
     spec={{
       data: { values: rows },
       layers: [{ geom: "point", aes: { x: "x", y: "y", color: "c" } }],
-      scales: { color: { type: "ordinal", scheme: "tableau10" } },
+      scales: { color: { type: "ordinal", scheme: "observable10" } },
     }}
     width={480}
     height={320}

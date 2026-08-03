@@ -10,7 +10,7 @@ export default defineExample(
   gg(penguins, aes({ x: "bill", y: "flipper", color: "species" }))
     .geomPoint({ alpha: 0.6, size: 2.4 })
     .geomPath({ stat: "ellipse", level: 0.95, segments: 51, linewidth: 1.5 })
-    .scales({ color: { type: "ordinal", scheme: "tableau10" } })
+    .scales({ color: { type: "ordinal", scheme: "observable10" } })
     .theme("classic")
     .labs({
       title: "Confidence ellipses around groups",

@@ -52,20 +52,6 @@ export const FLEXOKI_PALETTE: readonly string[] = [
   "#CE5D97",
 ];
 
-/** ggthemes' regular "Tableau 10" palette. */
-export const TABLEAU10_PALETTE: readonly string[] = [
-  "#4E79A7",
-  "#F28E2B",
-  "#E15759",
-  "#76B7B2",
-  "#59A14F",
-  "#EDC948",
-  "#B07AA1",
-  "#FF9DA7",
-  "#9C755F",
-  "#BAB0AC",
-];
-
 /** ggthemes' eight-color qualitative colorblind-safe palette. */
 export const COLORBLIND_PALETTE: readonly string[] = [
   "#000000",
@@ -254,48 +240,6 @@ export const TABLEAU_SEATTLE_GRAYS_PALETTE: readonly string[] = [
   "#989ca3",
 ];
 
-/** ggthemes tableau_color_pal("Miller Stone", "regular"). */
-export const TABLEAU_MILLER_STONE_PALETTE: readonly string[] = [
-  "#4f6980",
-  "#849db1",
-  "#a2ceaa",
-  "#638b66",
-  "#bfbb60",
-  "#f47942",
-  "#fbb04e",
-  "#b66353",
-  "#d7ce9f",
-  "#b9aa97",
-  "#7e756d",
-];
-
-/** ggthemes tableau_color_pal("Superfishel Stone", "regular"). */
-export const TABLEAU_SUPERFISHEL_STONE_PALETTE: readonly string[] = [
-  "#6388b4",
-  "#ffae34",
-  "#ef6f6a",
-  "#8cc2ca",
-  "#55ad89",
-  "#c3bc3f",
-  "#bb7693",
-  "#baa094",
-  "#a9b5ae",
-  "#767676",
-];
-
-/** ggthemes tableau_color_pal("Nuriel Stone", "regular"). */
-export const TABLEAU_NURIEL_STONE_PALETTE: readonly string[] = [
-  "#8175aa",
-  "#6fb899",
-  "#31a1b3",
-  "#ccb22b",
-  "#a39fc9",
-  "#94d0c0",
-  "#959c9e",
-  "#027b8e",
-  "#9f8f12",
-];
-
 /** ggthemes tableau_color_pal("Jewel Bright", "regular"). */
 export const TABLEAU_JEWEL_BRIGHT_PALETTE: readonly string[] = [
   "#eb1e2c",
@@ -307,32 +251,6 @@ export const TABLEAU_JEWEL_BRIGHT_PALETTE: readonly string[] = [
   "#91dcea",
   "#a4a4d5",
   "#bbc9e5",
-];
-
-/** ggthemes tableau_color_pal("Summer", "regular"). */
-export const TABLEAU_SUMMER_PALETTE: readonly string[] = [
-  "#bfb202",
-  "#b9ca5d",
-  "#cf3e53",
-  "#f1788d",
-  "#00a2b3",
-  "#97cfd0",
-  "#f3a546",
-  "#f7c480",
-];
-
-/** ggthemes tableau_color_pal("Winter", "regular"). */
-export const TABLEAU_WINTER_PALETTE: readonly string[] = [
-  "#90728f",
-  "#b9a0b4",
-  "#9d983d",
-  "#cecb76",
-  "#e15759",
-  "#ff9888",
-  "#6b6b6b",
-  "#bab2ae",
-  "#aa8780",
-  "#dab6af",
 ];
 
 /** ggthemes tableau_color_pal("Hue Circle", "regular") — 19 steps around the hue wheel. */
@@ -406,7 +324,6 @@ export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
   ipsum: IPSUM_PALETTE,
   flexoki: FLEXOKI_PALETTE,
-  tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
   stata: STATA_PALETTE,
   economist: ECONOMIST_PALETTE,
@@ -425,12 +342,7 @@ export const CATEGORICAL_SCHEMES = {
   tableau20: TABLEAU20_PALETTE,
   tableau_colorblind: TABLEAU_COLORBLIND_PALETTE,
   tableau_seattle_grays: TABLEAU_SEATTLE_GRAYS_PALETTE,
-  tableau_miller_stone: TABLEAU_MILLER_STONE_PALETTE,
-  tableau_superfishel_stone: TABLEAU_SUPERFISHEL_STONE_PALETTE,
-  tableau_nuriel_stone: TABLEAU_NURIEL_STONE_PALETTE,
   tableau_jewel_bright: TABLEAU_JEWEL_BRIGHT_PALETTE,
-  tableau_summer: TABLEAU_SUMMER_PALETTE,
-  tableau_winter: TABLEAU_WINTER_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
   pander: PANDER_PALETTE,
   ...COLORBREWER_QUALITATIVE,

@@ -71,7 +71,7 @@ describe("hue/grey/ordinal scale helpers (#829)", () => {
     for (const scales of [
       scaleColorHue(),
       scaleColorGrey(),
-      scaleColorOrdinal({ scheme: "tableau10" }),
+      scaleColorOrdinal({ scheme: "observable10" }),
     ]) {
       const result = validate({
         data: {

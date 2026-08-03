@@ -22,7 +22,7 @@
   height={400}
 >
   <ThemeClassic />
-  <ScaleColorDiscrete scheme="tableau10" />
+  <ScaleColorDiscrete scheme="observable10" />
   <Labs
     title="Confidence ellipses around groups"
     subtitle="95% bivariate normal rings for three species in bill and flipper length"

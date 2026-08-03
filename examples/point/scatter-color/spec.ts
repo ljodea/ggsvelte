@@ -6,7 +6,7 @@ import { guerry } from "./data.js";
 export default defineExample(
   gg(guerry, aes({ x: "literacy", y: "crimePersons", color: "region" }))
     .geomPoint({ size: 3 })
-    .scales({ color: { type: "ordinal", scheme: "tableau10" } })
+    .scales({ color: { type: "ordinal", scheme: "observable10" } })
     .theme("few")
     .labs({
       title: "Two measures coloured by region",

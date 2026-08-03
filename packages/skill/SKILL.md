@@ -103,7 +103,7 @@ only on the geoms in `STYLE_AESTHETIC_GEOMS`.
 
 <GGPlot data={cars} aes={{ x: "displ", y: "hwy", color: "class" }} height={400}>
   <ThemeMinimal />
-  <ScaleColorDiscrete scheme="tableau10" />
+  <ScaleColorDiscrete scheme="observable10" />
   <Labs
     title="Bigger engines, thirstier cars"
     x="Displacement (l)"
@@ -188,8 +188,8 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 82 named schemes — 32 categorical (`observable10`, `tableau10`,
-  `colorblind`, `Dark2`…) and 50 sequential/diverging (`viridis`, `magma`,
+  `identity`. 76 named schemes — 26 categorical (`observable10`, `colorblind`,
+  `Dark2`…) and 50 sequential/diverging (`viridis`, `magma`,
   `Blues`, `RdBu`, Tableau gradient ramps…). Size/linewidth/alpha and shape/linetype have their own
   scale families.
 - Three equivalent skins:

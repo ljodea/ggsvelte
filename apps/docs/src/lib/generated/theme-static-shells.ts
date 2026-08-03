@@ -18,7 +18,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-light",
     filename: "theme-light.svg",
     path: "/theme-shells/theme-light.svg",
-    sha256: "89f78593f4dc0fc0f8180c6268359a92aba8b559f394c799a9f37f0a9f089e42",
+    sha256: "a2e7c0d2786ddfa5835c9220fe0a6089bb355e0490dd1544f404b951af154d27",
   },
   {
     id: "theme-dark",
@@ -42,13 +42,13 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-classic",
     filename: "theme-classic.svg",
     path: "/theme-shells/theme-classic.svg",
-    sha256: "7bd0826f5a7954d45f6950ab9812e06ef203a0add086b040bb63d6b594c0c202",
+    sha256: "5ece0a1b88e522095cd76df07c85b62ad1fb2eb746822ddea71bc301ace9aec5",
   },
   {
     id: "theme-bw",
     filename: "theme-bw.svg",
     path: "/theme-shells/theme-bw.svg",
-    sha256: "3df18e7d94911efbb998a43e865db97ea938d8b5a21c776089313d2efd35cdb2",
+    sha256: "81d3164206c94a1c94b46d6b9e00b204951cdc588c59a823fc2980933292e979",
   },
   {
     id: "theme-hrbr",
@@ -150,7 +150,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-hc",
     filename: "theme-hc.svg",
     path: "/theme-shells/theme-hc.svg",
-    sha256: "b36158f78ac0e2b29d607e616882576aab79c26614b4d24ecaf6a1684fa97081",
+    sha256: "4325febf77af438b33779d96d9353ae5d99689b70686ff97a3598e5d8ead19e5",
   },
   {
     id: "theme-hcdark",
@@ -168,13 +168,13 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-base",
     filename: "theme-base.svg",
     path: "/theme-shells/theme-base.svg",
-    sha256: "e94b14ae8a61d92e36bbc10fbd759e474c349e3d864c50f10247b8d449b08832",
+    sha256: "4b5c2f53db06edfb3972df748c4eac853e08b7f20e8d581fcf88a2939fba7147",
   },
   {
     id: "theme-igray",
     filename: "theme-igray.svg",
     path: "/theme-shells/theme-igray.svg",
-    sha256: "57a84545004a89df9ba4b68c7e5b57da565e9ad16cc326627ca145d33b4c750a",
+    sha256: "83945d336704a658301723fc67c44d47f23de1cf7483d0d85efefe63df95861c",
   },
   {
     id: "theme-map",
@@ -217,12 +217,6 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-flexoki.svg",
     path: "/theme-shells/palette-flexoki.svg",
     sha256: "c9355650582cdeeb21053a15558da321fc00effc02647d8d9b267d7580067721",
-  },
-  {
-    id: "palette-tableau10",
-    filename: "palette-tableau10.svg",
-    path: "/theme-shells/palette-tableau10.svg",
-    sha256: "4061581b4a56b9020ee4f254b4cf5bf24e92e522bce1016806035753b314b153",
   },
   {
     id: "palette-colorblind",
@@ -333,40 +327,10 @@ export const THEME_STATIC_SHELLS = [
     sha256: "6aa0ad812a3a1a3f6dad7db6c699e8ff7fdb818e0853b14b54586208f4e14945",
   },
   {
-    id: "palette-tableau_miller_stone",
-    filename: "palette-tableau_miller_stone.svg",
-    path: "/theme-shells/palette-tableau_miller_stone.svg",
-    sha256: "a7f8d41d1ad52b404f58fb7995ce4cb08751d48c81869a09fd7415cf01adcc8a",
-  },
-  {
-    id: "palette-tableau_superfishel_stone",
-    filename: "palette-tableau_superfishel_stone.svg",
-    path: "/theme-shells/palette-tableau_superfishel_stone.svg",
-    sha256: "79f5e0f678d84c496729cd779931d00b7c274fadc0450b69bd55c0eaf5dfec07",
-  },
-  {
-    id: "palette-tableau_nuriel_stone",
-    filename: "palette-tableau_nuriel_stone.svg",
-    path: "/theme-shells/palette-tableau_nuriel_stone.svg",
-    sha256: "443d9ce8d6d17815a84025116ec9d43ea7827cfef02c057cc0616af5956b6b7e",
-  },
-  {
     id: "palette-tableau_jewel_bright",
     filename: "palette-tableau_jewel_bright.svg",
     path: "/theme-shells/palette-tableau_jewel_bright.svg",
     sha256: "68566ad47735e2d55352d7628de8b96a45d34a5a287ccc99960697c582539989",
-  },
-  {
-    id: "palette-tableau_summer",
-    filename: "palette-tableau_summer.svg",
-    path: "/theme-shells/palette-tableau_summer.svg",
-    sha256: "3d1bd48b44a5df30453ae59c8acc3e994c0df745cde2eaa518b7d16f0be3fbf0",
-  },
-  {
-    id: "palette-tableau_winter",
-    filename: "palette-tableau_winter.svg",
-    path: "/theme-shells/palette-tableau_winter.svg",
-    sha256: "83cfbcbc41abdea942d1c78b35d5854aba6254f0437e445576609c70096aeb5f",
   },
   {
     id: "palette-tableau_hue_circle",

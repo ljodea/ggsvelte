@@ -856,7 +856,7 @@ ggplot2-shaped discrete helpers (portable named schemes, not bake-only):
 
 \`\`\`svelte fragment
 <ScaleColorHue />
-<!-- or: <ScaleColorGrey />, <ScaleColorOrdinal scheme="tableau10" /> -->
+<!-- or: <ScaleColorGrey />, <ScaleColorOrdinal scheme="colorblind" /> -->
 \`\`\`
 
 \`\`\`ts fragment
@@ -864,7 +864,7 @@ import { scaleColorHue, scaleColorGrey, scaleColorOrdinal } from "@ggsvelte/spec
 
 scaleColorHue(); // { color: { type: "ordinal", scheme: "hue" } }
 scaleColorGrey(); // bakes a 10-stop greyscale range (US gray is a binding-identical alias)
-scaleColorOrdinal({ scheme: "tableau10" }); // alias of scaleColorDiscrete
+scaleColorOrdinal({ scheme: "colorblind" }); // alias of scaleColorDiscrete
 // Custom h/c/l (hue) or start/end (grey) bake a fixed 10-stop range instead.
 \`\`\`
 
@@ -1977,7 +1977,7 @@ from \`@ggsvelte/core\`) are gone:
 - \`calc\`, \`excel\`, \`excel_fill\`, \`excel_new\`
 
 A PortableSpec that still names one of those schemes fails validation. Switch
-to a remaining scheme — \`stata\`, \`tableau10\`, \`Dark2\`, and \`pander\` are
+to a remaining scheme — \`stata\`, \`observable10\`, \`Dark2\`, and \`pander\` are
 the usual replacements — or pass an explicit \`range\` of hex color stops.
 
 Four chart **themes** are also gone: \`stata_mono\`, \`calc\`, \`excel\`, and
@@ -1997,7 +1997,7 @@ Four chart **themes** are also gone: \`stata_mono\`, \`calc\`, \`excel\`, and
 // After: pick remaining theme + scheme (or an explicit color range)
 {
   "theme": "minimal",
-  "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } }
+  "scales": { "color": { "type": "ordinal", "scheme": "observable10" } }
 }
 \`\`\`
 
@@ -2032,6 +2032,34 @@ greyscale \`range\` (optional \`start\`/\`end\`). They no longer emit
 {
   "theme": "minimal",
   "scales": { "color": { "type": "ordinal", "scheme": "Dark2" } }
+}
+\`\`\`
+
+### Removed Tableau 10, Summer, Winter, and stone schemes
+
+Six more categorical \`scheme\` names (and matching public \`*_PALETTE\`
+constants) are gone:
+
+- \`tableau10\`
+- \`tableau_summer\`, \`tableau_winter\`
+- \`tableau_miller_stone\`, \`tableau_superfishel_stone\`,
+  \`tableau_nuriel_stone\`
+
+Prefer \`observable10\`, \`colorblind\`, \`Dark2\`, \`pander\`, or another
+remaining Tableau scheme (\`tableau20\`, \`tableau_colorblind\`,
+\`tableau_jewel_bright\`, …), or pass an explicit \`range\`.
+
+\`\`\`json fragment
+// Before
+{
+  "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } }
+}
+\`\`\`
+
+\`\`\`json fragment
+// After
+{
+  "scales": { "color": { "type": "ordinal", "scheme": "observable10" } }
 }
 \`\`\`
 

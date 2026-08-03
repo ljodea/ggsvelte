@@ -30,7 +30,7 @@ export default defineExample(
       ...scaleLinewidthContinuous({ range: [1, 9] }),
       ...scaleShapeDiscrete({ range: ["circle", "triangle"] }),
       ...scaleLinetypeDiscrete({ range: ["solid", "dashed"] }),
-      color: { type: "ordinal", scheme: "tableau10" },
+      color: { type: "ordinal", scheme: "observable10" },
     })
     .labs({
       title: "Minard's march on five style channels",

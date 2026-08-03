@@ -9,7 +9,6 @@ import {
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   niceLinearDomain,
-  TABLEAU10_PALETTE,
   trainBand,
   trainColor,
   trainLinear,
@@ -101,18 +100,6 @@ describe("trainColor (value-stable, decision 0002)", () => {
       "#4385BE",
       "#8B7EC8",
       "#CE5D97",
-    ]);
-    expect(TABLEAU10_PALETTE).toEqual([
-      "#4E79A7",
-      "#F28E2B",
-      "#E15759",
-      "#76B7B2",
-      "#59A14F",
-      "#EDC948",
-      "#B07AA1",
-      "#FF9DA7",
-      "#9C755F",
-      "#BAB0AC",
     ]);
     expect(COLORBLIND_PALETTE).toEqual([
       "#000000",

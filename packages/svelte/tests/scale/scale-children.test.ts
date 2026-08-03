@@ -88,7 +88,7 @@ describe("Scale children → assembled PortableSpec", () => {
       },
     });
     const spec = await waitAssembled(() => assembled);
-    expect(spec.scales?.color).toEqual({ type: "ordinal", scheme: "tableau10" });
+    expect(spec.scales?.color).toEqual({ type: "ordinal", scheme: "observable10" });
   });
 
   it("7: layers prop + scale child → layers wins for marks, scale child still applies", async () => {
@@ -130,7 +130,7 @@ describe("Scale children → assembled PortableSpec", () => {
     assembled = null;
     await view.rerender({
       useScaleColorDiscrete: true,
-      colorScheme: "tableau10",
+      colorScheme: "observable10",
       captureRegistry: (registry: LayerRegistry) => {
         host = registry;
       },
@@ -140,7 +140,7 @@ describe("Scale children → assembled PortableSpec", () => {
     });
     flushSync();
     await waitAssembled(() => assembled);
-    expect(assembled!.scales?.color?.scheme).toBe("tableau10");
+    expect(assembled!.scales?.color?.scheme).toBe("observable10");
     // ADR 0001: prop updates must not re-register.
     expect(host!.registrationCount).toBe(countAfterInit);
   });
@@ -262,7 +262,7 @@ describe("definedProps + composition diagnostics", () => {
       .poll(() => diagnostics.filter((d) => d.code === "DUPLICATE_SCALE_CHANNEL").length)
       .toBe(1);
 
-    for (const next of ["tableau10", "observable10", "ipsum", "flexoki"] as const) {
+    for (const next of ["observable10", "observable10", "ipsum", "flexoki"] as const) {
       await view.rerender({
         useScaleColorDiscrete: true,
         colorScheme: next,

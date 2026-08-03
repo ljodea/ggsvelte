@@ -10,7 +10,7 @@ export default defineExample(
   gg(michelsonRuns, aes({ x: "order", y: "velocity", color: "run" }))
     .geomPoint({ size: 2.4, alpha: 0.35 })
     .geomPoint({ stat: "manual", fun: "mean", size: 6, alpha: 0.95 })
-    .scales({ color: { type: "ordinal", scheme: "tableau10" } })
+    .scales({ color: { type: "ordinal", scheme: "observable10" } })
     .theme("classic")
     .labs({
       title: "Raw points with a manual mean per group",

@@ -24,7 +24,6 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "observable10",
   "ipsum",
   "flexoki",
-  "tableau10",
   "colorblind",
   // ggthemes ports (#1159): Stata s2color default
   "stata",
@@ -46,17 +45,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "wsj_red_green",
   "wsj_black_green",
   "wsj_dem_rep",
-  // ggthemes tableau_color_pal regular variants (#1159); Tableau 10 above is
-  // the default — these complete the set.
+  // ggthemes tableau_color_pal regular variants (#1159)
   "tableau20",
   "tableau_colorblind",
   "tableau_seattle_grays",
-  "tableau_miller_stone",
-  "tableau_superfishel_stone",
-  "tableau_nuriel_stone",
   "tableau_jewel_bright",
-  "tableau_summer",
-  "tableau_winter",
   "tableau_hue_circle",
   // ggthemes ports (#1159): pander
   "pander",
