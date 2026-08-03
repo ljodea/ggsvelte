@@ -1,5 +1,53 @@
 # @ggsvelte/skill
 
+## 0.28.0
+
+### Minor Changes
+
+- 3217502: # Drop Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes>
+
+  Remove eight categorical schemes (and public `*_PALETTE` constants where they
+  existed): `Accent`, `Paired`, `grey`, `gray`, `gdocs`,
+  `tableau_green_orange_teal`, `tableau_red_blue_brown`,
+  `tableau_purple_pink_gray`.
+
+  Also remove chart theme `gdocs` and its Svelte shell `ThemeGdocs`.
+
+  `scaleColorGrey()` / `<ScaleColorGrey />` still work by baking an explicit
+  greyscale `range` (optional `start`/`end`). They no longer emit
+  `scheme: "grey"`. Prefer `Dark2`, `tableau10`, `colorblind`, or `pander` for
+  named categorical color; prefer `minimal`, `classic`, or `bw` for themes.
+
+  Skill inventory (`SKILL.md`, `references/scales-and-palettes.md`,
+  `references/themes.md`) drops the same schemes and theme so agents no longer
+  list them.
+
+- 5531a8d: # Drop spreadsheet/Stata-extra schemes and Excel/Calc/Stata Mono themes
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#removed-spreadsheet-highcharts-and-extra-stata-schemes-and-themes>
+
+  Remove nine categorical schemes and their public `*_PALETTE` constants:
+  `stata_s1color`, `stata_s1rcolor`, `stata_mono`, `hc`, `hc_dark`, `calc`,
+  `excel`, `excel_fill`, `excel_new`.
+
+  Also remove four chart themes (and their Svelte shells): `stata_mono`
+  (`ThemeStatamono`), `calc` (`ThemeCalc`), `excel` (`ThemeExcel`), `excel_new`
+  (`ThemeExcelnew`). Nothing with "Excel" remains in the product surface.
+
+  Skill inventory drops the same schemes and themes.
+
+  Switch removed schemes to `stata`, `tableau10`, `Dark2`, or `pander`.
+  Switch removed themes to `stata`, `stata_s1color`, `bw`, `classic`, or
+  `minimal`.
+
+### Patch Changes
+
+- cd7a4c8: # Skill teaches the stat-override registration contract
+
+  docs(skill): teach the stat-override registration contract (#1420). `<Geom*>` children self-register only their DEFAULT stat; the stat usage patterns, the errorbar `stat="summary"` recipe, and the SKILL.md preamble now name the matching `register<Family>()` calls from `@ggsvelte/svelte` (and `registerAll()` for spec-driven surfaces). Agents following the skill previously produced apps that threw "not registered in this build" for `stat="…"` overrides.
+
 ## 0.27.0
 
 ### Minor Changes
