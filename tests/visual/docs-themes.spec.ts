@@ -79,7 +79,6 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Solarized 2",
     "Solarized 2 Dark",
     "WSJ",
-    "Google Docs",
     "Highcharts",
     "Highcharts Dark",
     "Pander",
@@ -119,14 +118,17 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
-  // No grey/gray theme alias rows (both map to ggplot2) and no gray palette
-  // twin (same ramp as grey). No follow-docs checkbox or theme=/scheme= status
-  // echo that only restates the selects.
+  // No grey/gray theme alias rows (both map to ggplot2). No grey/gray named
+  // palette rows either (scale_*_grey bakes a range). No follow-docs checkbox
+  // or theme=/scheme= status echo that only restates the selects.
   const themeLabels = await chartTheme.locator("option").allTextContents();
   expect(themeLabels.filter((label) => /^Gre[ya]y$/i.test(label))).toHaveLength(0);
   const paletteLabels = await palette.locator("option").allTextContents();
   expect(paletteLabels.filter((label) => label === "Gray")).toHaveLength(0);
-  expect(paletteLabels.filter((label) => label === "Grey")).toHaveLength(1);
+  expect(paletteLabels.filter((label) => label === "Grey")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Google Docs")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Accent")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Paired")).toHaveLength(0);
   await expect(lab.getByRole("checkbox", { name: "Follow docs appearance" })).toHaveCount(0);
   await expect(lab.getByRole("status")).toHaveCount(0);
   await expect(lab.getByText(/theme="/)).toHaveCount(0);
@@ -152,11 +154,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const rows = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  // Unique schemes only — "gray" is a US-spelling alias of "grey", not a twin
-  // row. Default order is label-alphabetical (sort control: Name/Color count).
-  await expect(rows).toHaveCount(39);
+  // Default order is label-alphabetical (sort control: Name/Color count).
+  await expect(rows).toHaveCount(32);
   await expect(rows.locator(".name")).toHaveText([
-    "Accent",
     "Canva",
     "Colorblind",
     "Dark2",
@@ -166,9 +166,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Few Light",
     "FiveThirtyEight",
     "Flexoki",
-    "Google Docs",
-    "Green/Orange/Teal",
-    "Grey",
     "Hue",
     "Hue Circle",
     "Ipsum",
@@ -176,11 +173,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Miller Stone",
     "Nuriel Stone",
     "Observable 10",
-    "Paired",
     "Pander",
     "Paul Tol",
-    "Purple/Pink/Gray",
-    "Red/Blue/Brown",
     "Seattle Grays",
     "Solarized",
     "Stata",
@@ -197,7 +191,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "WSJ Red/Green",
   ]);
   await expect(rows.locator(".capacity")).toHaveText([
-    "8 colors",
     "4 colors",
     "8 colors",
     "8 colors",
@@ -207,9 +200,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "3 colors",
     "8 colors",
-    "24 colors",
-    "12 colors",
-    "10 colors",
     "10 colors",
     "19 colors",
     "9 colors",
@@ -217,10 +207,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "11 colors",
     "9 colors",
     "10 colors",
-    "12 colors",
     "8 colors",
-    "12 colors",
-    "12 colors",
     "12 colors",
     "5 colors",
     "8 colors",

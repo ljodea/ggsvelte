@@ -57,22 +57,13 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "tableau_jewel_bright",
   "tableau_summer",
   "tableau_winter",
-  "tableau_green_orange_teal",
-  "tableau_red_blue_brown",
-  "tableau_purple_pink_gray",
   "tableau_hue_circle",
-  // ggthemes ports (#1159): Google Docs + pander
-  "gdocs",
+  // ggthemes ports (#1159): pander
   "pander",
   // ColorBrewer qualitative (#825)
   "Dark2",
-  "Paired",
-  "Accent",
   /** Even HSL hues — ggplot2-shaped scale_*_hue default discrete path (#829). */
   "hue",
-  /** Greyscale discrete — scale_*_grey / scale_*_gray (#829). */
-  "grey",
-  "gray",
 ] as const;
 
 /**
@@ -193,7 +184,6 @@ export const THEME_NAMES = [
   "solarized_2dark",
   /** ggthemes theme_wsj (Wall Street Journal). */
   "wsj",
-  "gdocs",
   "hc",
   "hcdark",
   "pander",

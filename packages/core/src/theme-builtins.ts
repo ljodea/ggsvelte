@@ -698,33 +698,6 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     gridX: false,
   }),
-  // ggthemes theme_gdocs: Google Docs chart defaults — white panel, #cccccc
-  // major grid both directions (minor blank), black x-only axis line, no
-  // ticks, #757575 text, plain 20px left-aligned title. Accent is Google
-  // blue, the first gdocs palette color.
-  gdocs: themed({
-    ink: "#757575",
-    paper: "#ffffff",
-    panel: "#ffffff",
-    accent: "#4285f4",
-    grid: "#cccccc",
-    axisText: "#757575",
-    axisLine: "#000000",
-    tickColor: "#000000",
-    fontSize: 12,
-    axisTextSize: 12,
-    fontWeight: 400,
-    titleSize: 20,
-    titleWeight: 400,
-    subtitleSize: 12,
-    subtitleWeight: 400,
-    axisTitleSize: 12,
-    axisLineWidth: 0.5,
-    gridWidth: 0.5,
-    axisLineX: true,
-    ticksX: false,
-    ticksY: false,
-  }),
   // ggthemes theme_hc(style = "default"): Highcharts defaults — #D8D8D8
   // y-only major grid, no panel border (panel background blank over white
   // rect), theme_grey-lineage ticks and axis text. Accent is the first

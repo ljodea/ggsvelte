@@ -7,6 +7,8 @@
  */
 import type { ScaleReferenceEntry } from "@ggsvelte/spec";
 
+import { GREY_PALETTE_10 } from "../../../../../packages/spec/src/hue-grey-palettes.js";
+
 import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "./palette-tables.js";
 
 // Mirror packages/spec/src/scale-color-stops.ts (not exported from that module).
@@ -146,9 +148,9 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
       };
     case "grey":
       return {
-        colors: CATEGORICAL_SCHEMES.grey,
+        colors: GREY_PALETTE_10,
         kind: "discrete",
-        caption: 'Default scheme "grey"',
+        caption: "Default greyscale range (scale_*_grey)",
       };
     case "brewer":
       return {

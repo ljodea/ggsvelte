@@ -5,7 +5,7 @@
 // Palettes live in @ggsvelte/spec (authoring + portable schemes). Core only
 // consumes the frozen 10-stop tables for CATEGORICAL_SCHEMES — do not re-export
 // builders here (knip: unused package exports).
-import { GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
+import { HUE_PALETTE_10 } from "@ggsvelte/spec";
 
 import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
 
@@ -335,54 +335,6 @@ export const TABLEAU_WINTER_PALETTE: readonly string[] = [
   "#dab6af",
 ];
 
-/** ggthemes tableau_color_pal("Green-Orange-Teal", "regular"). */
-export const TABLEAU_GREEN_ORANGE_TEAL_PALETTE: readonly string[] = [
-  "#4e9f50",
-  "#87d180",
-  "#ef8a0c",
-  "#fcc66d",
-  "#3ca8bc",
-  "#98d9e4",
-  "#94a323",
-  "#c3ce3d",
-  "#a08400",
-  "#f7d42a",
-  "#26897e",
-  "#8dbfa8",
-];
-
-/** ggthemes tableau_color_pal("Red-Blue-Brown", "regular"). */
-export const TABLEAU_RED_BLUE_BROWN_PALETTE: readonly string[] = [
-  "#466f9d",
-  "#91b3d7",
-  "#ed444a",
-  "#feb5a2",
-  "#9d7660",
-  "#d7b5a6",
-  "#3896c4",
-  "#a0d4ee",
-  "#ba7e45",
-  "#39b87f",
-  "#c8133b",
-  "#ea8783",
-];
-
-/** ggthemes tableau_color_pal("Purple-Pink-Gray", "regular"). */
-export const TABLEAU_PURPLE_PINK_GRAY_PALETTE: readonly string[] = [
-  "#8074a8",
-  "#c6c1f0",
-  "#c46487",
-  "#ffbed1",
-  "#9c9290",
-  "#c5bfbe",
-  "#9b93c9",
-  "#ddb5d5",
-  "#7c7270",
-  "#f498b6",
-  "#b173a0",
-  "#c799bc",
-];
-
 /** ggthemes tableau_color_pal("Hue Circle", "regular") — 19 steps around the hue wheel. */
 export const TABLEAU_HUE_CIRCLE_PALETTE: readonly string[] = [
   "#1ba3c6",
@@ -434,39 +386,6 @@ export const WSJ_BLACK_GREEN_PALETTE: readonly string[] = [
 export const WSJ_DEM_REP_PALETTE: readonly string[] = ["#006a8e", "#b1283a", "#a8a6a7"];
 
 /**
- * ggthemes gdocs_pal() — Google Docs chart colors: the six brand hues in
- * four decreasing strengths. Copied verbatim from the upstream YAML,
- * including its duplicated "teal 2" entry (#ff994d); the doc comment
- * upstream claims 20 colors but the table holds 24.
- */
-export const GDOCS_PALETTE: readonly string[] = [
-  "#4285f4",
-  "#ea4335",
-  "#fbbc04",
-  "#34a853",
-  "#ff6d01",
-  "#46bdc6",
-  "#7baaf7",
-  "#f07b72",
-  "#fcd04f",
-  "#71c287",
-  "#ff994d",
-  "#ff994d",
-  "#b3cefb",
-  "#f7b4ae",
-  "#fde49b",
-  "#aedcba",
-  "#ffc599",
-  "#c9e4e7",
-  "#ecf3fe",
-  "#fdeceb",
-  "#fff8e6",
-  "#ebf6ee",
-  "#fff0e6",
-  "#edf8f9",
-];
-
-/**
  * ggthemes palette_pander() — the pander package's colorblind- and
  * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
  * the Okabe-Ito hues in pander's order, with #999999 in place of black.
@@ -512,14 +431,8 @@ export const CATEGORICAL_SCHEMES = {
   tableau_jewel_bright: TABLEAU_JEWEL_BRIGHT_PALETTE,
   tableau_summer: TABLEAU_SUMMER_PALETTE,
   tableau_winter: TABLEAU_WINTER_PALETTE,
-  tableau_green_orange_teal: TABLEAU_GREEN_ORANGE_TEAL_PALETTE,
-  tableau_red_blue_brown: TABLEAU_RED_BLUE_BROWN_PALETTE,
-  tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
-  gdocs: GDOCS_PALETTE,
   pander: PANDER_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
-  grey: GREY_PALETTE_10,
-  gray: GREY_PALETTE_10,
 } as const satisfies Readonly<Record<string, readonly string[]>>;

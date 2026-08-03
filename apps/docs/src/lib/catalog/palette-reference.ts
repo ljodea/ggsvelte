@@ -32,7 +32,7 @@ const CONTINUOUS_HELPERS = [
   "ScaleFillBinned",
 ] as const;
 
-const COLORBREWER_QUALITATIVE = new Set(["Dark2", "Paired", "Accent"]);
+const COLORBREWER_QUALITATIVE = new Set(["Dark2"]);
 
 const VIRIDIS_FAMILY = new Set(["viridis", "magma", "plasma", "inferno", "cividis", "turbo"]);
 
@@ -57,9 +57,6 @@ function categoricalHelpers(name: string): readonly string[] {
   if (name === "hue") {
     return ["ScaleColorHue", "ScaleFillHue", ...DISCRETE_HELPERS];
   }
-  if (name === "grey" || name === "gray") {
-    return ["ScaleColorGrey", "ScaleFillGrey", ...DISCRETE_HELPERS];
-  }
   if (COLORBREWER_QUALITATIVE.has(name)) {
     return ["ScaleColorBrewer", "ScaleFillBrewer", ...DISCRETE_HELPERS];
   }
@@ -68,9 +65,6 @@ function categoricalHelpers(name: string): readonly string[] {
 
 function categoricalNotes(name: string): string | undefined {
   if (name === "hue") return 'Default discrete path; also scheme="hue" on ordinal scales.';
-  if (name === "grey" || name === "gray") {
-    return "Same greyscale ramp; US and UK spellings both accepted.";
-  }
   if (COLORBREWER_QUALITATIVE.has(name)) {
     return `ColorBrewer qualitative — prefer <ScaleColorBrewer palette="${name}" /> (maps to scheme).`;
   }
@@ -163,7 +157,7 @@ export const PALETTE_HELPER_GROUPS = [
       "ScaleFillManual",
     ],
     summary:
-      'Pass scheme="tableau10" (or another categorical name) on discrete/ordinal shells. Brewer, hue, and grey set the scheme by construction.',
+      'Pass scheme="tableau10" (or another categorical name) on discrete/ordinal shells. Brewer and hue set the scheme by construction; grey bakes an explicit range.',
   },
   {
     id: "continuous",

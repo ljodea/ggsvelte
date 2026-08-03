@@ -21,7 +21,6 @@ export const sequentialSwatchFor = (name: string): readonly string[] | null =>
 
 /**
  * The scheme name when /palettes?scheme=<name> can pre-select it, else null.
- * Display aliases (e.g. "gray") resolve on scales but are not picker entries.
  */
 export const chooserSchemeFor = (name: string): string | null =>
   PICKER_NAMES.has(name) ? name : null;

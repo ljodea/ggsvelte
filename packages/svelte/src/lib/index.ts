@@ -240,7 +240,6 @@ export { default as ThemeSolarized2dark } from "./theme/ThemeSolarized2dark.svel
 /** @lifecycle stable-intent */
 export { default as ThemeWsj } from "./theme/ThemeWsj.svelte";
 /** @lifecycle stable-intent */
-export { default as ThemeGdocs } from "./theme/ThemeGdocs.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeHc } from "./theme/ThemeHc.svelte";
 /** @lifecycle stable-intent */

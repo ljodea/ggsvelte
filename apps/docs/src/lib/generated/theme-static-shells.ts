@@ -147,12 +147,6 @@ export const THEME_STATIC_SHELLS = [
     sha256: "da764fda164a3b8b694b9a04f84ab89370fbd247b304871d73505f172311f316",
   },
   {
-    id: "theme-gdocs",
-    filename: "theme-gdocs.svg",
-    path: "/theme-shells/theme-gdocs.svg",
-    sha256: "792a37c3c296d1b893bd22613388e3ac39458221a4793433202aaeaaa72117a7",
-  },
-  {
     id: "theme-hc",
     filename: "theme-hc.svg",
     path: "/theme-shells/theme-hc.svg",
@@ -375,34 +369,10 @@ export const THEME_STATIC_SHELLS = [
     sha256: "83cfbcbc41abdea942d1c78b35d5854aba6254f0437e445576609c70096aeb5f",
   },
   {
-    id: "palette-tableau_green_orange_teal",
-    filename: "palette-tableau_green_orange_teal.svg",
-    path: "/theme-shells/palette-tableau_green_orange_teal.svg",
-    sha256: "f0d225a0e76178a55271bc04c3e76c76e803c15aaa7a062de9f9d42c254f977d",
-  },
-  {
-    id: "palette-tableau_red_blue_brown",
-    filename: "palette-tableau_red_blue_brown.svg",
-    path: "/theme-shells/palette-tableau_red_blue_brown.svg",
-    sha256: "89e8b12650a7cedeb857b7039e8c738d92b6445809c7da1b7de7418766b9fdca",
-  },
-  {
-    id: "palette-tableau_purple_pink_gray",
-    filename: "palette-tableau_purple_pink_gray.svg",
-    path: "/theme-shells/palette-tableau_purple_pink_gray.svg",
-    sha256: "2d5a3028066d9099b695b776b962d9e5e3e63be9b378805b5cf2fc082c22fa87",
-  },
-  {
     id: "palette-tableau_hue_circle",
     filename: "palette-tableau_hue_circle.svg",
     path: "/theme-shells/palette-tableau_hue_circle.svg",
     sha256: "1761ac62ef1ed645e843d483bc6869c9b37092696619940c0a35e55a2a7eee5f",
-  },
-  {
-    id: "palette-gdocs",
-    filename: "palette-gdocs.svg",
-    path: "/theme-shells/palette-gdocs.svg",
-    sha256: "f2fe48b18b4e471d25c1d7cf60095c73123443574634a12a7feb1d910935e337",
   },
   {
     id: "palette-pander",
@@ -417,28 +387,10 @@ export const THEME_STATIC_SHELLS = [
     sha256: "155d6569d444b2165d99800fffb6700e9ced547c0d206ac6435f822d0c4ec3db",
   },
   {
-    id: "palette-Paired",
-    filename: "palette-Paired.svg",
-    path: "/theme-shells/palette-Paired.svg",
-    sha256: "420f5e86cded3ec8b933d2ff0b2aea4aaf471aa9f0ad6c158a7bf6ce2d93ace2",
-  },
-  {
-    id: "palette-Accent",
-    filename: "palette-Accent.svg",
-    path: "/theme-shells/palette-Accent.svg",
-    sha256: "9a13ea2674a765a485576594feac642828ccf2ea0e98692b7946a531a856d3da",
-  },
-  {
     id: "palette-hue",
     filename: "palette-hue.svg",
     path: "/theme-shells/palette-hue.svg",
     sha256: "28a5142ff1839f14f2bb810e6463fbb2ba462fb877197d7ee3e5c469cbdc83ef",
-  },
-  {
-    id: "palette-grey",
-    filename: "palette-grey.svg",
-    path: "/theme-shells/palette-grey.svg",
-    sha256: "b72323956526945151ed89f0d3e4ff5ba25d1cf269f5b74cbf5b988576a6598c",
   },
   {
     id: "sequential-viridis",

@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (40)
+### Categorical schemes (32)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -191,22 +191,15 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau_jewel_bright      | ggthemes Tableau Jewel Bright (9)                                  |
 | tableau_summer            | ggthemes Tableau Summer (8)                                        |
 | tableau_winter            | ggthemes Tableau Winter (10)                                       |
-| tableau_green_orange_teal | ggthemes Tableau Green-Orange-Teal (12)                            |
-| tableau_red_blue_brown    | ggthemes Tableau Red-Blue-Brown (12)                               |
-| tableau_purple_pink_gray  | ggthemes Tableau Purple-Pink-Gray (12)                             |
 | tableau_hue_circle        | ggthemes Tableau Hue Circle (19)                                   |
-| gdocs                     | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
 | pander                    | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
 | Dark2                     | ColorBrewer qualitative, dark tones                                |
-| Paired                    | ColorBrewer qualitative, light/dark pairs                          |
-| Accent                    | ColorBrewer qualitative, accented mix                              |
 | hue                       | Evenly spaced HSL hues — the ggplot2-shaped `scale_*_hue` default  |
-| grey                      | Greyscale discrete ramp (`scale_*_grey`)                           |
-| gray (alias of grey)      | Same scheme, US spelling — identical colors                        |
 
-`grey` and `gray` are the same scheme; both spellings validate and produce
-identical output. Sequential scheme names are also legal on ordinal scales
-(discrete sampling along the ramp — what `scale_*_viridis_d` does).
+There is no registered `"grey"` / `"gray"` scheme name. Use
+`<ScaleColorGrey />` / `scaleColorGrey()` (or `start`/`end`) — those bake an
+explicit greyscale `range`. Sequential scheme names are also legal on ordinal
+scales (discrete sampling along the ramp — what `scale_*_viridis_d` does).
 
 **Palette exhaustion** (`onExhaust`, ordinal scales only): `cycle` (default)
 restarts the palette and emits the bounded `palette-exhausted` warning once;

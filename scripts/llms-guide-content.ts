@@ -863,13 +863,14 @@ ggplot2-shaped discrete helpers (portable named schemes, not bake-only):
 import { scaleColorHue, scaleColorGrey, scaleColorOrdinal } from "@ggsvelte/spec";
 
 scaleColorHue(); // { color: { type: "ordinal", scheme: "hue" } }
-scaleColorGrey(); // scheme "grey" (US gray is a binding-identical alias)
+scaleColorGrey(); // bakes a 10-stop greyscale range (US gray is a binding-identical alias)
 scaleColorOrdinal({ scheme: "tableau10" }); // alias of scaleColorDiscrete
 // Custom h/c/l (hue) or start/end (grey) bake a fixed 10-stop range instead.
 \`\`\`
 
 [Hue discrete colour](/examples/point/hue-discrete): even-hue groups via
-\`scale_color_hue\`. Registered schemes also include \`"grey"\` / \`"gray"\`.
+\`scale_color_hue\`. There is no registered \`"grey"\` / \`"gray"\` scheme —
+use \`scaleColorGrey()\` / \`<ScaleColorGrey />\` for greyscale discrete color.
 
 ## Continuous, binned, manual, and identity color
 
@@ -1976,7 +1977,7 @@ from \`@ggsvelte/core\`) are gone:
 - \`calc\`, \`excel\`, \`excel_fill\`, \`excel_new\`
 
 A PortableSpec that still names one of those schemes fails validation. Switch
-to a remaining scheme — \`stata\`, \`tableau10\`, \`grey\`, \`gdocs\`, and \`pander\` are
+to a remaining scheme — \`stata\`, \`tableau10\`, \`Dark2\`, and \`pander\` are
 the usual replacements — or pass an explicit \`range\` of hex color stops.
 
 Four chart **themes** are also gone: \`stata_mono\`, \`calc\`, \`excel\`, and
@@ -1997,6 +1998,40 @@ Four chart **themes** are also gone: \`stata_mono\`, \`calc\`, \`excel\`, and
 {
   "theme": "minimal",
   "scales": { "color": { "type": "ordinal", "scheme": "tableau10" } }
+}
+\`\`\`
+
+### Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes
+
+Eight more categorical \`scheme\` names (and matching public \`*_PALETTE\`
+constants where they existed) are gone:
+
+- \`Accent\`, \`Paired\`
+- \`grey\`, \`gray\`
+- \`gdocs\`
+- \`tableau_green_orange_teal\`, \`tableau_red_blue_brown\`,
+  \`tableau_purple_pink_gray\`
+
+Theme \`gdocs\` (and Svelte shell \`ThemeGdocs\`) is also gone. Prefer
+\`minimal\`, \`classic\`, or \`bw\`.
+
+\`scaleColorGrey()\` / \`<ScaleColorGrey />\` still work: they bake an explicit
+greyscale \`range\` (optional \`start\`/\`end\`). They no longer emit
+\`scheme: "grey"\`.
+
+\`\`\`json fragment
+// Before
+{
+  "theme": "gdocs",
+  "scales": { "color": { "type": "ordinal", "scheme": "Accent" } }
+}
+\`\`\`
+
+\`\`\`json fragment
+// After
+{
+  "theme": "minimal",
+  "scales": { "color": { "type": "ordinal", "scheme": "Dark2" } }
 }
 \`\`\`
 

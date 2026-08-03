@@ -6108,18 +6108,10 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau_jewel_bright") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_summer") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_winter") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_green_orange_teal") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_red_blue_brown") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_purple_pink_gray") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_hue_circle") ||
-    (typeof value.scheme === "string" && value.scheme === "gdocs") ||
     (typeof value.scheme === "string" && value.scheme === "pander") ||
     (typeof value.scheme === "string" && value.scheme === "Dark2") ||
-    (typeof value.scheme === "string" && value.scheme === "Paired") ||
-    (typeof value.scheme === "string" && value.scheme === "Accent") ||
     (typeof value.scheme === "string" && value.scheme === "hue") ||
-    (typeof value.scheme === "string" && value.scheme === "grey") ||
-    (typeof value.scheme === "string" && value.scheme === "gray") ||
     (typeof value.scheme === "string" && value.scheme === "viridis") ||
     (typeof value.scheme === "string" && value.scheme === "magma") ||
     (typeof value.scheme === "string" && value.scheme === "plasma") ||
@@ -7111,7 +7103,6 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "solarized_2") ||
   (typeof value === "string" && value === "solarized_2dark") ||
   (typeof value === "string" && value === "wsj") ||
-  (typeof value === "string" && value === "gdocs") ||
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||
@@ -7247,7 +7238,6 @@ const check_392 = (value) =>
   (typeof value === "string" && value === "solarized_2") ||
   (typeof value === "string" && value === "solarized_2dark") ||
   (typeof value === "string" && value === "wsj") ||
-  (typeof value === "string" && value === "gdocs") ||
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||

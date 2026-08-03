@@ -15,14 +15,8 @@ const THEME_NAME_ALIASES = {
 /** Canonical picker themes — grey/gray alias ggplot2 and stay out of the list. */
 type ThemeOptionName = Exclude<ThemeName, keyof typeof THEME_NAME_ALIASES>;
 
-/**
- * Display-only scheme aliases for the docs catalog. Both spellings stay valid
- * API scheme names (identical GREY_PALETTE_10); only the canonical row is listed.
- * US `gray` is the spelling twin of UK `grey` — not a second palette.
- */
-const CATEGORICAL_SCHEME_DISPLAY_ALIASES = {
-  gray: "grey",
-} as const satisfies Partial<
+/** No scheme-name display aliases remain after the grey/gray scheme purge. */
+const CATEGORICAL_SCHEME_DISPLAY_ALIASES = {} as const satisfies Partial<
   Record<keyof typeof CATEGORICAL_SCHEMES, keyof typeof CATEGORICAL_SCHEMES>
 >;
 
@@ -55,7 +49,6 @@ const THEME_LABELS = {
   solarized_2: "Solarized 2",
   solarized_2dark: "Solarized 2 Dark",
   wsj: "WSJ",
-  gdocs: "Google Docs",
   hc: "Highcharts",
   hcdark: "Highcharts Dark",
   pander: "Pander",
@@ -95,19 +88,11 @@ const PALETTE_LABELS = {
   tableau_jewel_bright: "Jewel Bright",
   tableau_summer: "Summer",
   tableau_winter: "Winter",
-  tableau_green_orange_teal: "Green/Orange/Teal",
-  tableau_red_blue_brown: "Red/Blue/Brown",
-  tableau_purple_pink_gray: "Purple/Pink/Gray",
   tableau_hue_circle: "Hue Circle",
-  gdocs: "Google Docs",
   pander: "Pander",
   hue: "Hue",
-  // Also scheme "gray" (US spelling) — same ramp; filtered via DISPLAY_ALIASES.
-  grey: "Grey",
   // ColorBrewer qualitative (#825) — keep the upstream palette names.
   Dark2: "Dark2",
-  Paired: "Paired",
-  Accent: "Accent",
 } as const satisfies Record<PaletteOptionName, string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */
@@ -137,7 +122,6 @@ const THEME_DEMO_SCHEMES = {
   solarized_2: "solarized",
   solarized_2dark: "solarized",
   wsj: "wsj",
-  gdocs: "gdocs",
   hc: "tableau10",
   hcdark: "flexoki",
   pander: "pander",
