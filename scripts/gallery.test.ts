@@ -22,7 +22,7 @@ describe("gallery editorial catalog", () => {
   test("curates exactly six unique real examples in the approved order", () => {
     expect(FEATURED_EXAMPLES.map((entry) => entry.id)).toEqual([
       "line/multi-series",
-      "smooth/loess-scatter",
+      "path/trajectory",
       "density/kde-2d-filled",
       "density/overlay",
       "path/ellipse-rings",

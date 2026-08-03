@@ -10,7 +10,7 @@ export interface GalleryEntry extends ExampleManifestEntry {
 /** Featured strip order on home and gallery. Identity only — titles come from the manifest. */
 export const FEATURED_EXAMPLES = [
   { id: "line/multi-series" },
-  { id: "smooth/loess-scatter" },
+  { id: "path/trajectory" },
   { id: "density/kde-2d-filled" },
   { id: "density/overlay" },
   { id: "path/ellipse-rings" },
