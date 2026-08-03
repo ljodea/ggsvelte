@@ -321,6 +321,38 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(preview.locator(".gg-paper")).toHaveAttribute("fill", "var(--gg-paper, #16181d)");
 });
 
+test("palette deep links pre-select and re-apply on same-route navigation", async ({ page }) => {
+  await page.goto("/palettes?scheme=tableau10&theme=light");
+
+  const region = page.getByRole("region", { name: "Categorical palettes" });
+  const preview = page.getByRole("region", { name: "Palette preview" });
+  const tableau = region.getByRole("button", {
+    name: "Tableau 10, 10 colors",
+    exact: true,
+  });
+  await expect(tableau).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
+  await expect(tableau).toBeInViewport();
+
+  // Same-route query change WITHOUT remount (injected same-origin link — the
+  // router intercepts it and keeps the page component alive): the new scheme
+  // must still pre-select.
+  await page.evaluate(() => {
+    const link = document.createElement("a");
+    link.href = "/palettes?scheme=pander";
+    link.id = "deep-link-probe";
+    link.textContent = "probe";
+    document.body.append(link);
+  });
+  await page.click("#deep-link-probe");
+  const pander = region.getByRole("button", {
+    name: "Pander, 8 colors, CB-safe",
+    exact: true,
+  });
+  await expect(pander).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Pander" })).toBeVisible();
+});
+
 test("sequential color compares direction, custom stops, and a pinned domain on raster", async ({
   page,
 }) => {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { onMount, untrack } from "svelte";
+  import { page } from "$app/state";
+  import { untrack } from "svelte";
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
   import PaletteIndex from "$lib/components/PaletteIndex.svelte";
@@ -26,8 +27,9 @@
   );
 
   // Pinned to the registry default on first paint; the ?scheme= deep link
-  // resolves client-side in onMount (the site is prerendered, so the query
-  // string is not available to the server load).
+  // resolves client-side (the site is prerendered, so the query string is
+  // not available to the server load). The effect re-runs on same-route
+  // query changes — back/forward between ?scheme= variants must re-apply.
   let pinned = $state<CategoricalSchemeName>(
     untrack(() => data.paletteSpecimens[0]?.name ?? "observable10"),
   );
@@ -39,11 +41,12 @@
       data.paletteSpecimens[0],
   );
 
-  onMount(() => {
-    const initial = resolveInitialScheme(
-      new URLSearchParams(window.location.search).get("scheme"),
-      data.paletteSpecimens,
-    );
+  let lastAppliedScheme = $state<string | null>(null);
+  $effect(() => {
+    const requested = page.url.searchParams.get("scheme");
+    if (requested === untrack(() => lastAppliedScheme)) return;
+    lastAppliedScheme = requested;
+    const initial = resolveInitialScheme(requested, data.paletteSpecimens);
     if (initial === null) return;
     pinned = initial;
     const target = document.querySelector(`#scheme-${initial}`);
