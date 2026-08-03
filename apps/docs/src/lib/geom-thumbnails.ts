@@ -90,8 +90,7 @@ export function illustrationForGeom(
 ): { path: string; exampleId: string } | undefined {
   const exampleId = GEOM_THUMBNAIL_EXAMPLE[geom];
   const path = previewPathById.get(exampleId);
-  if (path === undefined) return undefined;
-  return { path, exampleId };
+  return path === undefined ? undefined : { path, exampleId };
 }
 
 /** Every KNOWN_GEOMS entry must have a resolvable gallery preview. */

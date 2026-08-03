@@ -2,8 +2,6 @@
   import { base } from "$app/paths";
 
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
-  import { EXAMPLES } from "$lib/examples-manifest";
-  import { illustrationForGeom } from "$lib/geom-thumbnails";
   import {
     buildGeomJsonSnippet,
     buildGeomSvelteSnippet,
@@ -13,19 +11,7 @@
 
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
-
-  const illustration = $derived.by(() => {
-    const resolved = illustrationForGeom(entry.name);
-    if (resolved === undefined) return undefined;
-    const example = EXAMPLES.find((ex) => ex.id === resolved.exampleId);
-    return {
-      path: resolved.path,
-      exampleId: resolved.exampleId,
-      title: example?.title ?? entry.component,
-      width: example?.vrWidth ?? 640,
-      height: example?.vrHeight ?? 400,
-    };
-  });
+  const illustration = $derived(data.illustration);
 
   const svelteSnippet = $derived(
     buildGeomSvelteSnippet(
@@ -44,7 +30,7 @@
   <h1 id="geom-heading"><code>{entry.component}</code></h1>
   <ReferenceLede text={entry.summary} />
 
-  {#if illustration !== undefined}
+  {#if illustration}
     <figure class="geom-illustration">
       <div class="preview-paper">
         <img

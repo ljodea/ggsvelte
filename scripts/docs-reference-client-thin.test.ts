@@ -48,6 +48,16 @@ describe("docs reference detail client thin", () => {
     }
   });
 
+  it("keeps detail .svelte free of catalog barrels (EXAMPLES / thumbnails)", () => {
+    for (const dir of DETAIL_DIRS) {
+      const rel = `${dir}/+page.svelte`;
+      const source = read(rel);
+      expect(source, rel).not.toMatch(
+        /from\s*["']\$lib\/(?:examples-manifest|examples|geom-thumbnails|generated\/gallery-previews)["']/,
+      );
+    }
+  });
+
   it("keeps ReferenceLede on the thin known-names catalog", () => {
     const lede = read("lib/components/ReferenceLede.svelte");
     expect(lede).toContain("known-names");
