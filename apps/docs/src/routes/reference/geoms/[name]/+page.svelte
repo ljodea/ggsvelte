@@ -2,6 +2,8 @@
   import { base } from "$app/paths";
 
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
+  import { EXAMPLES } from "$lib/examples-manifest";
+  import { illustrationForGeom } from "$lib/geom-thumbnails";
   import {
     buildGeomJsonSnippet,
     buildGeomSvelteSnippet,
@@ -11,6 +13,19 @@
 
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
+
+  const illustration = $derived.by(() => {
+    const resolved = illustrationForGeom(entry.name);
+    if (resolved === undefined) return undefined;
+    const example = EXAMPLES.find((ex) => ex.id === resolved.exampleId);
+    return {
+      path: resolved.path,
+      exampleId: resolved.exampleId,
+      title: example?.title ?? entry.component,
+      width: example?.vrWidth ?? 640,
+      height: example?.vrHeight ?? 400,
+    };
+  });
 
   const svelteSnippet = $derived(
     buildGeomSvelteSnippet(
@@ -28,6 +43,26 @@
 <article class="geom-detail prose" aria-labelledby="geom-heading">
   <h1 id="geom-heading"><code>{entry.component}</code></h1>
   <ReferenceLede text={entry.summary} />
+
+  {#if illustration !== undefined}
+    <figure class="geom-illustration">
+      <div class="preview-paper">
+        <img
+          src={`${base}${illustration.path}`}
+          alt={`Light-theme example chart for ${entry.component}`}
+          width={illustration.width}
+          height={illustration.height}
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <figcaption>
+        <a href={`${base}/examples/${illustration.exampleId}`}
+          >{illustration.title}</a
+        >
+      </figcaption>
+    </figure>
+  {/if}
 
   <h2 id="defaults">Defaults</h2>
   <dl class="defaults">
@@ -141,6 +176,35 @@
 
   h1 {
     margin: 0 0 0.5rem;
+  }
+
+  .geom-illustration {
+    margin: 0 0 1.75rem;
+    max-width: 40rem;
+  }
+
+  .preview-paper {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
+
+  .preview-paper img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .geom-illustration figcaption {
+    margin-top: 0.55rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .geom-illustration figcaption a {
+    color: inherit;
+    text-underline-offset: 0.12em;
   }
 
   .defaults {
