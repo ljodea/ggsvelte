@@ -582,6 +582,11 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     ticksY: true,
     showPanelBorder: true,
+    // Tip package: base2 card; tip ink intentionally stronger than axis ink
+    // (base01 vs base1) for short-lived reading chrome.
+    tooltipPaper: "#eee8d5",
+    tooltipInk: "#586e75",
+    tooltipBorder: "#93a1a1",
   }),
   // ggthemes theme_solarized (light = FALSE): same geometry on the dark
   // rebase — base03 panel (#002b36), base02 grid, base01 chrome. Accents are
@@ -613,6 +618,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     ticksY: true,
     showPanelBorder: true,
+    // Tip package: base02 card; tip ink brightens from axis base01 to base1.
+    tooltipPaper: "#073642",
+    tooltipInk: "#93a1a1",
+    tooltipBorder: "#586e75",
   }),
   // ggthemes theme_economist_white (gray_bg = TRUE): the Graphic Detail blog
   // variant of theme_economist — white panel on a light-gray (#ebebeb) plot
@@ -658,6 +667,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridWidth: 0.5,
     ticksX: true,
     ticksY: true,
+    // Tip package: base3 card (lighter than base2 panel); tip ink base01.
+    tooltipPaper: "#fdf6e3",
+    tooltipInk: "#586e75",
+    tooltipBorder: "#93a1a1",
   }),
   // ggthemes theme_solarized_2 (light = FALSE): same geometry on the dark
   // rebase — base02 panel (#073642), base03 grid (#002b36), base01 chrome.
@@ -681,6 +694,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridWidth: 0.5,
     ticksX: true,
     ticksY: true,
+    // Tip package: base03 card (darker than base02 panel); tip ink base1.
+    tooltipPaper: "#002b36",
+    tooltipInk: "#93a1a1",
+    tooltipBorder: "#586e75",
   }),
   // ggthemes theme_wsj: Wall Street Journal chrome — "brown" paper (#f8f2e4),
   // dotted black y-grid only, x axis line and ticks, no y line/ticks, big bold
