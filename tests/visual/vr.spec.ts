@@ -120,9 +120,16 @@ const INTERACTION_HANDLERS: Record<
   },
 
   async "dark-tooltip"(page, scenario) {
+    // Hover-open a tip so elevated dark tooltipPaper is in the golden (not just
+    // the chart surface). Pin path is covered by tooltip-pinned under light.
     await page.goto("/examples/interaction/tooltip?vr&theme=dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await settleVisualState(page);
+    const mark = page.locator(".gg-points circle").first();
+    const box = await mark.boundingBox();
+    if (box === null) throw new Error("expected an inspectable point");
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(page.locator(".gg-tooltip")).toBeVisible();
     await expect(page.locator(".gg-example-frame")).toHaveScreenshot(scenario.basename);
   },
 

@@ -282,7 +282,7 @@ describe("theme registry", () => {
 
     expect(BUILTIN_THEMES.default.tooltipPaper).toBe(BUILTIN_THEMES.default.paper);
     expect(BUILTIN_THEMES.default.tooltipInk).toBe(BUILTIN_THEMES.default.ink);
-    expect(BUILTIN_THEMES.dark.tooltipPaper).toBe(BUILTIN_THEMES.dark.paper);
+    // dark elevates tip paper above chart surface (see elevated problem-theme tests).
     expect(BUILTIN_THEMES.dark.tooltipInk).toBe(BUILTIN_THEMES.dark.ink);
     expect(BUILTIN_THEMES.default.selectionFill).toContain("rgba(");
     expect(BUILTIN_THEMES.dark.selectionFill).toContain("rgba(");
@@ -376,9 +376,10 @@ describe("theme registry", () => {
     expect(resolveTheme({ name: "tufte", fontSize: 14 }).tooltipBorder).toBe("transparent");
   });
 
-  it("LEGACY light/dark/minimal re-derive tip roles (no stale tip leak from foundation spread)", () => {
-    // LEGACY variants must not inherit LEGACY_BASE tip colors as themed() overrides.
-    expect(LEGACY_BUILTIN_THEMES.dark.tooltipPaper).toBe(LEGACY_BUILTIN_THEMES.dark.paper);
+  it("LEGACY light/dark/minimal tip contracts (no stale tip leak from foundation spread)", () => {
+    // LEGACY dark elevates paper only; border tracks legacy rgba grid.
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipPaper).toBe("#22262d");
+    expect(LEGACY_BUILTIN_THEMES.dark.tooltipPaper).not.toBe(LEGACY_BUILTIN_THEMES.dark.paper);
     expect(LEGACY_BUILTIN_THEMES.dark.tooltipInk).toBe(LEGACY_BUILTIN_THEMES.dark.ink);
     expect(LEGACY_BUILTIN_THEMES.dark.tooltipBorder).toBe(LEGACY_BUILTIN_THEMES.dark.grid);
     expect(LEGACY_BUILTIN_THEMES.dark.tooltipBorder).toBe("rgba(230,232,235,0.16)");
@@ -439,5 +440,41 @@ describe("theme registry", () => {
     expect(BUILTIN_THEMES.solarized_2dark.tooltipPaper).toBe("#002b36"); // base03
     expect(BUILTIN_THEMES.solarized_2dark.tooltipInk).toBe("#93a1a1");
     expect(BUILTIN_THEMES.solarized_2dark.tooltipBorder).toBe("#586e75");
+  });
+
+  it("elevates tooltip cards on dark, hcdark, fivethirtyeight, and economist", () => {
+    // Edition-2 dark: paper only; ink/border stay derived.
+    expect(BUILTIN_THEMES.dark.tooltipPaper).toBe("#22262d");
+    expect(BUILTIN_THEMES.dark.tooltipPaper).not.toBe(BUILTIN_THEMES.dark.paper);
+    expect(BUILTIN_THEMES.dark.tooltipInk).toBe(BUILTIN_THEMES.dark.ink);
+    expect(BUILTIN_THEMES.dark.tooltipBorder).toBe(BUILTIN_THEMES.dark.grid);
+    expect(resolveTheme({ name: "dark", accent: "#ff0000" }).tooltipPaper).toBe("#22262d");
+
+    // hcdark: elevated fill + brighter tip ink; border tracks grid.
+    expect(BUILTIN_THEMES.hcdark.tooltipPaper).toBe("#353538");
+    expect(BUILTIN_THEMES.hcdark.tooltipInk).toBe("#E0E0E3");
+    expect(BUILTIN_THEMES.hcdark.tooltipBorder).toBe(BUILTIN_THEMES.hcdark.grid);
+    expect(resolveTheme({ name: "hcdark", titleSize: 20 }).tooltipPaper).toBe("#353538");
+
+    // fivethirtyeight: white tip + soft grey border.
+    expect(BUILTIN_THEMES.fivethirtyeight.tooltipPaper).toBe("#ffffff");
+    expect(BUILTIN_THEMES.fivethirtyeight.tooltipInk).toBe(BUILTIN_THEMES.fivethirtyeight.ink);
+    expect(BUILTIN_THEMES.fivethirtyeight.tooltipBorder).toBe("#d0d0d0");
+    expect(resolveTheme({ name: "fivethirtyeight", titleSize: 20 }).tooltipPaper).toBe("#ffffff");
+
+    // economist: same-hue lighter tip + tick-color border.
+    expect(BUILTIN_THEMES.economist.tooltipPaper).toBe("#eef5f8");
+    expect(BUILTIN_THEMES.economist.tooltipInk).toBe(BUILTIN_THEMES.economist.ink);
+    expect(BUILTIN_THEMES.economist.tooltipBorder).toBe("#6794a7");
+    expect(resolveTheme({ name: "economist", titleSize: 20 }).tooltipPaper).toBe("#eef5f8");
+
+    // LEGACY non-dark problem names equal edition-2 tips via spread.
+    for (const name of ["hcdark", "fivethirtyeight", "economist"] as const) {
+      expect(LEGACY_BUILTIN_THEMES[name].tooltipPaper).toBe(BUILTIN_THEMES[name].tooltipPaper);
+    }
+
+    // Pure controls still hold.
+    expect(BUILTIN_THEMES.default.tooltipPaper).toBe(BUILTIN_THEMES.default.paper);
+    expect(BUILTIN_THEMES.ggplot2.tooltipPaper).toBe(BUILTIN_THEMES.ggplot2.paper);
   });
 });

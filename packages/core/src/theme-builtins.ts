@@ -306,6 +306,8 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     axisText: "#c6c9ce",
     axisLine: "#6b717b",
     tickColor: "#6b717b",
+    // Elevated card fill only; ink/border stay derived from foundation.
+    tooltipPaper: "#22262d",
   }),
   ggplot2: GGPLOT2_GREY,
   // theme_grey / theme_gray name parity — same token map as ggplot2 (#824).
@@ -413,6 +415,9 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     grid: "#ffffff",
     axisText: "#3c3c3c",
     gridWidth: 0.5,
+    // White card over grey paper (theme highlight tone); soft hairline (fill is primary).
+    tooltipPaper: "#ffffff",
+    tooltipBorder: "#d0d0d0",
   }),
   economist: themed({
     ink: "#014d64",
@@ -426,6 +431,9 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     tickLength: 4,
     gridWidth: 0.5,
     ticksX: true,
+    // Same-hue lighter tip + tick-color border (not pure white wash).
+    tooltipPaper: "#eef5f8",
+    tooltipBorder: "#6794a7",
   }),
   tufte: themed({
     ink: "#111111",
@@ -783,6 +791,9 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     ticksY: true,
     gridX: false,
+    // Elevated neutral card; brighter tip ink; border stays grid-derived.
+    tooltipPaper: "#353538",
+    tooltipInk: "#E0E0E3",
   }),
   // ggthemes theme_pander() with its defaults (fc black, gc grey, gl dashed,
   // boxes FALSE): white panel (pc "transparent" over white), dashed #bebebe
@@ -1014,6 +1025,8 @@ export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = O
     axisLine: "#e6e8eb",
     tickColor: "#e6e8eb",
     grid: "rgba(230,232,235,0.16)",
+    // Elevate fill only — border stays derived from legacy rgba grid.
+    tooltipPaper: "#22262d",
   }),
   minimal: themed({
     ...LEGACY_BASE_FOUNDATION,
