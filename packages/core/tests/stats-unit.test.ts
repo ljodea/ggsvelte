@@ -6,7 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import { statBin } from "../src/stats/bin.ts";
 import { statDensity } from "../src/stats/density.ts";
-import { loessFit } from "../src/stats/loess.ts";
+import { loessFit, LOESS_INTERPOLATE_DIRECT_LIMIT } from "../src/stats/loess.ts";
 import { mean, mulberry32, quantile7, resolution, sampleSD } from "../src/stats/numeric.ts";
 import { statSummary } from "../src/stats/summary.ts";
 import { jitterOffsets, nudgeOffsets } from "../src/positions/jitter.ts";
@@ -191,6 +191,57 @@ describe("loessFit edges", () => {
     const model = loessFit(x, y, { span: 0.9, degree: 2, statistics: false });
     expect(model).not.toBeNull();
     expect(Number.isFinite(model!.predict(1))).toBe(true);
+  });
+
+  it("interpolate surface agrees with direct on fit for moderate n (#1422)", () => {
+    const n = LOESS_INTERPOLATE_DIRECT_LIMIT + 100;
+    const x = Float64Array.from({ length: n }, (_, i) => (i / n) * 10);
+    const y = Float64Array.from(
+      { length: n },
+      (_, i) => 3 + 1.5 * x[i]! - 0.12 * x[i]! * x[i]! + 0.3 * Math.sin(i * 0.1),
+    );
+    const direct = loessFit(x, y, {
+      span: 0.75,
+      degree: 2,
+      statistics: true,
+      surface: "direct",
+    })!;
+    const interp = loessFit(x, y, {
+      span: 0.75,
+      degree: 2,
+      statistics: true,
+      surface: "interpolate",
+    })!;
+    let scale = 0;
+    let maxAbs = 0;
+    for (let k = 0; k <= 40; k++) {
+      const x0 = (k / 40) * 10;
+      const fd = direct.predict(x0);
+      const fi = interp.predict(x0);
+      scale = Math.max(scale, Math.abs(fd));
+      maxAbs = Math.max(maxAbs, Math.abs(fd - fi));
+    }
+    expect(maxAbs / (scale || 1)).toBeLessThan(0.005);
+    expect(Number.isFinite(interp.sigma)).toBe(true);
+    expect(Number.isFinite(interp.df)).toBe(true);
+    expect(interp.seNorm(5)).toBeGreaterThan(0);
+  });
+
+  it("auto-selects interpolate above INTERPOLATE_DIRECT_LIMIT (#1422)", () => {
+    const n = LOESS_INTERPOLATE_DIRECT_LIMIT + 1;
+    const x = Float64Array.from({ length: n }, (_, i) => i);
+    const y = Float64Array.from({ length: n }, (_, i) => i + 0.01 * Math.sin(i));
+    // Default surface for large n is interpolate; forcing direct is slower
+    // and yields a different seNorm path. Both must produce finite fits.
+    const auto = loessFit(x, y, { span: 0.75, degree: 2, statistics: true })!;
+    const forced = loessFit(x, y, {
+      span: 0.75,
+      degree: 2,
+      statistics: true,
+      surface: "interpolate",
+    })!;
+    expect(auto.predict(n / 2)).toBeCloseTo(forced.predict(n / 2), 10);
+    expect(Number.isFinite(auto.sigma)).toBe(true);
   });
 });
 

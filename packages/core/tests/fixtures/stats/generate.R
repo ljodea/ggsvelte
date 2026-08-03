@@ -5,10 +5,11 @@
 # public layer_data() API, plus stats::density() reference curves, for fixed
 # synthetic datasets. One JSON fixture per case.
 #
-# Loess parity targets (decision 0010): case 22 pins ggplot2's DEFAULT loess
-# path (surface = "interpolate", statistics = "approximate"); case 23 pins
-# the exact/direct path (loess.control(surface = "direct", statistics =
-# "exact")) that ggsvelte's implementation reproduces analytically.
+# Loess parity targets (decision 0010 / #1422): case 22 pins ggplot2's DEFAULT
+# loess path (surface = "interpolate", statistics = "approximate") on small n;
+# case 23 pins the exact/direct path (loess.control(surface = "direct",
+# statistics = "exact")) that ggsvelte uses for n ≤ INTERPOLATE_DIRECT_LIMIT;
+# case 25 pins the large-n interpolate path (n=1200) vs R defaults.
 #
 # Run from anywhere:  Rscript packages/core/tests/fixtures/stats/generate.R
 
@@ -189,6 +190,20 @@ emit(24, "smooth-loess-degree1-span04",
      "loess degree = 1, span = 0.4 (direct/exact): pins the degree and span handling.",
      "geom_smooth(method = 'loess', n = 60, span = 0.4, method.args = list(degree = 1, control = ...))",
      df_json(df_smooth), smooth_expected(layer_data(p)))
+
+# Large-n loess: R defaults (interpolate/approximate). ggsvelte switches to its
+# interpolate surface above INTERPOLATE_DIRECT_LIMIT (500) — see issue #1422.
+set.seed(4213)
+n_large <- 1200
+xs_large <- round(sort(runif(n_large, 0, 10)), 6)
+ys_large <- round(3 + 1.5 * xs_large - 0.12 * xs_large^2 + rnorm(n_large, 0, 1.2), 6)
+df_smooth_large <- data.frame(x = xs_large, y = ys_large)
+p <- ggplot(df_smooth_large, aes(x, y)) + geom_smooth(method = "loess", n = 80, span = 0.75)
+emit(25, "smooth-loess-interpolate-large",
+     "Large-n loess (n=1200) with R DEFAULT surface=interpolate / statistics=approximate — pins the ggsvelte interpolate path (#1422).",
+     "ggplot(df, aes(x, y)) + geom_smooth(method = 'loess', n = 80, span = 0.75)  # n_data=1200",
+     df_json(df_smooth_large), smooth_expected(layer_data(p)),
+     list(nData = n_large, surface = "interpolate"))
 
 # --------------------------------------------------------- boxplot cases ---
 

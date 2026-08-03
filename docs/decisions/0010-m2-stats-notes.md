@@ -29,18 +29,21 @@ asserted bound:
 | density (3 cases: nrd0, explicit bw + n=256, second group)                                                       | stats::density (binned FFT)      | 2.6e-4 rel; bw + grid endpoints exact                               | 5e-4 rel       |
 | qt (28-point p×df grid)                                                                                          | R qt()                           | 5.4e-12 abs                                                         | 1e-9           |
 
-**Loess, honestly:** ggsvelte implements the textbook local-regression
-algorithm — the thing R computes with `surface = "direct",
-statistics = "exact"` — and matches THAT to float noise, including σ, δ1,
-δ2, and the t-based band (δ2 is computed exactly via dense n×n algebra for
-n ≤ 300, and approximated by δ1 above; at those sizes qt barely moves).
-ggplot2's default loess path instead _interpolates_ fits from a kd-tree of
-vertices and _approximates_ the delta statistics — that gap, not ours, is
-the sub-1% fit deviation documented above. Attribution for the algorithmic
-lineage (SveltePlot → d3-regression → science.js / vega-statistics) is in
-the repo NOTICE file; the R-parity rewrite shares structure (sorted window
-walk, tricube), not code. R's gaussian family runs NO robustness
-iterations, so the reference's robust reweighting was deliberately dropped.
+**Loess, honestly:** for n ≤ 500 (`INTERPOLATE_DIRECT_LIMIT`) ggsvelte
+implements the textbook local-regression algorithm — the thing R computes
+with `surface = "direct", statistics = "exact"` — and matches THAT to float
+noise, including σ, δ1, δ2, and the t-based band (δ2 is computed exactly via
+dense n×n algebra for n ≤ 300, and approximated by δ1 above; at those sizes
+qt barely moves). Above 500, ggsvelte switches to a 1D interpolate surface
+(kd-tree-style median partition, leaf capacity `floor(n·span·cell)` with
+cell=0.2, cubic Hermite blend of vertex value+derivative, approximate δ /
+blended ‖l‖ for the SE band — issue #1422). That path tracks R/ggplot2's
+default large-n loess (fixture 25: fit near float noise, SE within ~10%).
+Attribution for the algorithmic lineage (SveltePlot → d3-regression →
+science.js / vega-statistics) is in the repo NOTICE file; the R-parity
+rewrite shares structure (sorted window walk, tricube), not code. R's
+gaussian family runs NO robustness iterations, so the reference's robust
+reweighting was deliberately dropped.
 
 ## Seeded jitter (deliberate divergence from ggplot2)
 
@@ -123,10 +126,10 @@ domains stay data-determined and deterministic).
 ## Benchmarks (Apple Silicon dev machine, single-run pipeline cost)
 
 - bin 100k rows: ~51 ms
-- loess 5k rows + se band: ~380 ms (the exact-statistics pass is O(n·q),
-  q = span·n — quadratic; **~25 ms without se**). 5k is the practical
-  envelope for se bands; the method-inference cutoff (1000) keeps the
-  default path far below it.
+- loess 5k rows + se band: single-digit to low-double-digit ms after the
+  interpolate surface (#1422; was ~380 ms on the exact-statistics O(n·q)
+  path). The method-inference cutoff (1000 → lm) still keeps the default
+  path below forced-loess 5k.
 - density 100k rows: ~210 ms (after the 8σ window cut; 2.1 s naive).
 
 Workloads are in `benchmarks/pipeline.bench.ts` (`histogram 100k`,
@@ -139,9 +142,9 @@ Workloads are in `benchmarks/pipeline.bench.ts` (`histogram 100k`,
 2. Errorbar dodge (grouped errorbars beside dodged bars).
 3. Continuous-x boxplots (ggplot2 group-by-x behavior) once demanded.
 4. `{ stat }` channels beyond y for the new stats (e.g. fill by ncount).
-5. Loess se for n > 5000: chunk-yielding or worker offload (plan's
-   run-id/cancellation machinery is the intended host), or an interpolate
-   surface like R's default.
+5. ~~Loess se for n > 5000: interpolate surface~~ — landed as #1422
+   (`INTERPOLATE_DIRECT_LIMIT = 500`). Remaining: chunk-yielding / worker
+   offload if interactive cancellation of forced-direct large-n is needed.
 6. Panel clipping (decision 0008 follow-up 2) now also matters for jitter
    offsets near panel edges and se ribbons under pinned domains.
 7. VR corpus: the 6 new examples ship 12 shots (42 total, two-run

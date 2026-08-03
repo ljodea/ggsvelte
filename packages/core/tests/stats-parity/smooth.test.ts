@@ -40,11 +40,19 @@ describe("smooth stat — R parity (fixtures)", () => {
       { y: 1e-9, band: 1e-9, se: 1e-9 },
     ],
     // ggplot2's default loess path (interpolate/approximate): the honest,
-    // measured tolerance (decision 0010).
+    // measured tolerance (decision 0010). Small-n still runs direct/exact.
     [
       "22-smooth-loess-default.json",
       { method: "loess", n: 80, span: 0.75, degree: 2 },
       { y: 0.01, band: 0.015, se: 0.04 },
+    ],
+    // Large-n interpolate surface (n=1200 > INTERPOLATE_DIRECT_LIMIT): vs R's
+    // default loess. Fit is near float noise; SE uses approximate δ / blended
+    // ‖l‖ so the band is looser (#1422).
+    [
+      "25-smooth-loess-interpolate-large.json",
+      { method: "loess", n: 80, span: 0.75, degree: 2 },
+      { y: 0.001, band: 0.01, se: 0.12 },
     ],
   ];
 
