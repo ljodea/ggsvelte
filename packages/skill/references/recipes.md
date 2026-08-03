@@ -47,6 +47,10 @@ Raw observations per group; the summary stat computes mean ± se, no preaggregat
 </GGPlot>
 ```
 
+The `stat="summary"` override needs one call at app startup:
+`import { registerSummary } from "@ggsvelte/svelte"; registerSummary();`
+(or `registerAll()`; the JSON spec twin needs `registerAll()` regardless).
+
 ## Value labels on columns
 
 `dy`/`dx` are PIXEL offsets (negative dy = up); `position: "nudge"` + `positionParams` offsets in DATA units instead.
