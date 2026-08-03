@@ -161,24 +161,42 @@ function translucent(color: string, alpha: number): string {
   return `color-mix(in srgb, ${color} ${alpha * 100}%, transparent)`;
 }
 
+/** Optional tooltip-role overrides accepted by themed() (not foundation). */
+export type TooltipRoleOverrides = {
+  tooltipPaper?: string;
+  tooltipInk?: string;
+  tooltipBorder?: string;
+};
+
 /**
  * Interaction colors are relationships, not a second palette. Keeping the
  * derivation here means every built-in and edition-specific theme gets a
  * coherent interaction treatment when its foundational roles change.
+ *
+ * Complete themes may pass optional tooltip* overrides when pure derivation
+ * would leave the tip indistinguishable from the chart surface.
  */
 export function themed(
-  overrides: Partial<FoundationThemeTokens> & { letterboxFill?: string },
+  overrides: Partial<FoundationThemeTokens> & {
+    letterboxFill?: string;
+  } & TooltipRoleOverrides,
 ): ThemeTokens {
-  const { letterboxFill, ...foundationOverrides } = overrides;
+  const {
+    letterboxFill,
+    tooltipPaper: tooltipPaperOverride,
+    tooltipInk: tooltipInkOverride,
+    tooltipBorder: tooltipBorderOverride,
+    ...foundationOverrides
+  } = overrides;
   const foundation = { ...HRBR_BASE, ...foundationOverrides };
   const hasOpaqueSurface = foundation.paper !== "none" || foundation.panel !== "none";
-  const tooltipPaper =
+  const derivedTooltipPaper =
     foundation.paper === "none"
       ? foundation.panel === "none"
         ? "#ffffff"
         : foundation.panel
       : foundation.paper;
-  const tooltipInk = hasOpaqueSurface
+  const derivedTooltipInk = hasOpaqueSurface
     ? foundation.ink
     : foundation.ink === "currentColor"
       ? "#1f2328"
@@ -192,7 +210,7 @@ export function themed(
     !foundation.showPanelBorder &&
     !foundation.axisLineX &&
     !foundation.axisLineY;
-  const tooltipBorder = flatTooltipChrome
+  const derivedTooltipBorder = flatTooltipChrome
     ? "transparent"
     : foundation.grid === "none"
       ? foundation.panelBorder
@@ -206,9 +224,9 @@ export function themed(
     crosshair: foundation.axisText,
     selectionFill: translucent(foundation.accent, 0.18),
     selectionStroke: foundation.accent,
-    tooltipPaper,
-    tooltipInk,
-    tooltipBorder,
+    tooltipPaper: tooltipPaperOverride ?? derivedTooltipPaper,
+    tooltipInk: tooltipInkOverride ?? derivedTooltipInk,
+    tooltipBorder: tooltipBorderOverride ?? derivedTooltipBorder,
     toolActive: foundation.ink,
   });
 }

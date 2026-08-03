@@ -13,6 +13,7 @@ import {
   trainSequential,
   VIRIDIS_RAMP_10,
 } from "../../src/scales/color.ts";
+import { themed } from "../../src/theme-builtins.ts";
 import {
   BUILTIN_THEMES,
   LEGACY_BUILTIN_THEMES,
@@ -315,5 +316,63 @@ describe("theme registry", () => {
 
     // Object overrides still win over the derivation.
     expect(resolveTheme({ name: "tufte", tooltipBorder: "#aabbcc" }).tooltipBorder).toBe("#aabbcc");
+  });
+
+  it("themed() accepts tooltip role overrides", () => {
+    const tokens = themed({
+      paper: "#111111",
+      ink: "#eeeeee",
+      tooltipPaper: "#222222",
+      tooltipInk: "#ffffff",
+      tooltipBorder: "#444444",
+    });
+    expect(tokens.tooltipPaper).toBe("#222222");
+    expect(tokens.tooltipInk).toBe("#ffffff");
+    expect(tokens.tooltipBorder).toBe("#444444");
+  });
+
+  it("object path sticky-when-elevated: pure themes still re-derive tip from paper", () => {
+    const tokens = resolveTheme({ name: "default", paper: "#ffeeee" });
+    expect(tokens.tooltipPaper).toBe("#ffeeee");
+  });
+
+  it("object path sticky-when-elevated: elevated base tips stick without explicit tip*", () => {
+    // Synthetic complete theme: pure derivation would set tip = paper, but the
+    // frozen entry elevates the tip package above that derivation.
+    const elevated = themed({
+      paper: "#16181d",
+      panel: "#16181d",
+      ink: "#e6e8eb",
+      grid: "#3b3f46",
+      tooltipPaper: "#22262d",
+      tooltipInk: "#ffffff",
+      tooltipBorder: "#555555",
+    });
+    const builtins = { ...BUILTIN_THEMES, default: elevated };
+    const viaString = resolveTheme("default", builtins);
+    const viaObject = resolveTheme({ name: "default", titleSize: 20 }, builtins);
+    const viaAccentOnly = resolveTheme({ name: "default", accent: "#ff0000" }, builtins);
+
+    expect(viaString.tooltipPaper).toBe("#22262d");
+    expect(viaObject.tooltipPaper).toBe("#22262d");
+    expect(viaObject.tooltipInk).toBe("#ffffff");
+    expect(viaObject.tooltipBorder).toBe("#555555");
+    expect(viaAccentOnly.tooltipPaper).toBe("#22262d");
+    // Explicit tip still wins over sticky elevation.
+    expect(resolveTheme({ name: "default", tooltipPaper: "#111111" }, builtins).tooltipPaper).toBe(
+      "#111111",
+    );
+  });
+
+  it("object path sticky-when-elevated: few/classic keep panelBorder keyline (no false-sticky)", () => {
+    // Guards incomplete pureFromBase foundation lists that would re-derive
+    // transparent borders for framed gridless themes.
+    expect(resolveTheme({ name: "few", fontSize: 14 }).tooltipBorder).toBe(
+      BUILTIN_THEMES.few.panelBorder,
+    );
+    expect(resolveTheme({ name: "classic", fontSize: 14 }).tooltipBorder).toBe(
+      BUILTIN_THEMES.classic.panelBorder,
+    );
+    expect(resolveTheme({ name: "tufte", fontSize: 14 }).tooltipBorder).toBe("transparent");
   });
 });
