@@ -8,7 +8,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { getCandidateRuntime } from "../candidate-runtime.js";
+import { getCandidateRuntime, RELEASED_CANDIDATE_STORE } from "../candidate-runtime.js";
 import type { CandidateBuildInput, LazyInteraction } from "../candidate-runtime.js";
 import type { CandidateStore } from "../candidate-store.js";
 import { buildPanelCoordProjector } from "../coord-projector.js";
@@ -134,7 +134,10 @@ export function finalize(run: PipelineRunState): RenderModel {
       if (builtCandidates !== null) return builtCandidates;
       const input = retained;
       if (input === null) {
-        throw new Error("Interaction candidates are released with this model's dispose().");
+        // Disposed before any interaction: quiet-null inert store, matching
+        // the pre-#1421 built-then-disposed contract for late hit-tests.
+        builtCandidates = RELEASED_CANDIDATE_STORE;
+        return builtCandidates;
       }
       const runtime = getCandidateRuntime();
       if (runtime === null) {

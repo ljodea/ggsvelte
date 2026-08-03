@@ -98,16 +98,22 @@ describe("lazy interaction candidates", () => {
     }
   });
 
-  it("dispose releases the retained build inputs (no eager build, no leak)", () => {
+  it("dispose releases the retained build inputs; late interaction is quiet-null", () => {
     const counter = countBuilds();
     try {
       const model = runPipeline(spec, size);
       expect(counter.builds()).toBe(0);
       model.dispose();
-      // Never built: dispose dropped the retained inputs, so a late access is
-      // a caller bug with a clear message — the build cannot resurrect them.
+      // Never built: dispose dropped the retained inputs, and a late hit-test
+      // gets the inert released store (pre-#1421 quiet-null contract), not a
+      // crash and not a resurrected build.
       expect(counter.builds()).toBe(0);
-      expect(() => model.candidates).toThrowError(/dispose/);
+      const store = model.candidates;
+      expect(counter.builds()).toBe(0);
+      expect(store.size).toBe(0);
+      expect(store.nearest(10, 10, { mode: "exact", maxDistance: 20 })).toBeNull();
+      expect(store.candidate(0)).toBeNull();
+      expect(model.candidates).toBe(store);
     } finally {
       installCandidates();
     }

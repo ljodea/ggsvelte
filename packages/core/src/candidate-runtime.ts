@@ -51,6 +51,30 @@ export function getCandidateRuntime(): CandidateBuildRuntime | null {
   return runtime;
 }
 
+const EMPTY_F32 = new Float32Array(0);
+const EMPTY_U32 = new Uint32Array(0);
+
+/**
+ * Inert store returned when interaction is first accessed after the model's
+ * dispose released the build inputs. Preserves the pre-#1421 contract for
+ * late hit-tests on a released chart (quiet nulls, never a crash) without
+ * keeping the source table alive. Interface drift breaks tsc, not callers.
+ */
+export const RELEASED_CANDIDATE_STORE: CandidateStore = {
+  epoch: -1,
+  size: 0,
+  x: EMPTY_F32,
+  y: EMPTY_F32,
+  candidate: () => null,
+  hitTest: () => null,
+  nearest: () => null,
+  group: () => null,
+  traverse: () => null,
+  cycle: () => null,
+  queryRect: () => EMPTY_U32,
+  dispose: () => {},
+};
+
 /**
  * Test-only: clear the runtime so the lean render path is exercised.
  * Restore with `installCandidates()` (bunfig preload shares module state
