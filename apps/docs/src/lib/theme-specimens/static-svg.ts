@@ -62,12 +62,7 @@ export type ThemeStaticSvgInput = {
    * marks-only void/map/solid portraits).
    */
   readonly themeRoles?: Readonly<
-    Partial<
-      Pick<
-        ThemeSpec,
-        "ink" | "axisText" | "axisLine" | "tickColor" | "interactionInk" | "toolActive"
-      >
-    >
+    Partial<Pick<ThemeSpec, "ink" | "axisText" | "axisLine" | "tickColor">>
   >;
 };
 

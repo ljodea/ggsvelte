@@ -65,9 +65,17 @@ describe("marks-only theme contrast (docs dark shell)", () => {
     });
 
     // themeVar form: var(--gg-ink, <token>). Dark site must not fall back to HRBR ink.
-    expect(light).toContain(`var(--gg-ink, ${"#262626"})`);
+    expect(light).toContain("var(--gg-ink, #262626)");
     expect(dark).toContain(`var(--gg-ink, ${MARKS_ONLY_DARK_SITE_ROLES.ink})`);
-    expect(dark).not.toContain(`var(--gg-ink, ${"#262626"})`);
+    expect(dark).not.toContain("var(--gg-ink, #262626)");
     expect(dark).not.toEqual(light);
+  });
+
+  it("does not remap interactionInk (keeps white-halo crosshair labels legible)", () => {
+    const roles = marksOnlyThemeRoles("void", "dark");
+    expect(roles).not.toHaveProperty("interactionInk");
+    expect(roles).not.toHaveProperty("toolActive");
+    expect(roles).not.toHaveProperty("tooltipPaper");
+    expect(roles).toHaveProperty("ink", MARKS_ONLY_DARK_SITE_ROLES.ink);
   });
 });

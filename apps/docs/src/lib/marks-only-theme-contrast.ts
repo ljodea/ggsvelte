@@ -21,18 +21,22 @@ export type MarksOnlyThemeName = (typeof MARKS_ONLY_THEME_NAMES)[number];
 
 const MARKS_ONLY = new Set<string>(MARKS_ONLY_THEME_NAMES);
 
-/** High-contrast foreground roles when the docs shell is dark. */
+/**
+ * High-contrast chart roles when the docs shell is dark.
+ *
+ * Intentionally omits interactionInk / toolActive / tooltip*: transparent-paper
+ * themes keep a white tooltipPaper halo under dark interactionInk (see themed()
+ * in core). Remapping interactionInk to light ink without a matching dark
+ * tooltipPaper made hover/zoom axis labels white-on-white.
+ */
 export const MARKS_ONLY_DARK_SITE_ROLES = {
   ink: "#e9edf4",
   axisText: "#aab4c4",
   axisLine: "#e9edf4",
   tickColor: "#e9edf4",
-  interactionInk: "#e9edf4",
-  toolActive: "#e9edf4",
-} as const satisfies Pick<
-  ThemeSpec,
-  "ink" | "axisText" | "axisLine" | "tickColor" | "interactionInk" | "toolActive"
->;
+} as const satisfies Pick<ThemeSpec, "ink" | "axisText" | "axisLine" | "tickColor">;
+
+export type MarksOnlyDarkSiteRoles = typeof MARKS_ONLY_DARK_SITE_ROLES;
 
 export function isMarksOnlyTheme(name: string): name is MarksOnlyThemeName {
   return MARKS_ONLY.has(name);
@@ -45,9 +49,7 @@ export function isMarksOnlyTheme(name: string): name is MarksOnlyThemeName {
 export function marksOnlyThemeRoles(
   name: ThemeName,
   appearance: DocsAppearance,
-): Partial<
-  Pick<ThemeSpec, "ink" | "axisText" | "axisLine" | "tickColor" | "interactionInk" | "toolActive">
-> {
+): Partial<MarksOnlyDarkSiteRoles> {
   if (appearance !== "dark" || !isMarksOnlyTheme(name)) return {};
   return { ...MARKS_ONLY_DARK_SITE_ROLES };
 }
