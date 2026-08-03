@@ -83,7 +83,7 @@
     </p>
   </header>
 
-  <section class="chooser" aria-label="Categorical palette chooser">
+  <section class="chooser" aria-label="Categorical palettes">
     <div class="rail">
       <fieldset class="picker">
         <legend class="eyebrow">Preview settings</legend>

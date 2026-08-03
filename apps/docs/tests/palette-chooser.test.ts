@@ -8,29 +8,41 @@ import {
 } from "../src/lib/catalog/palette-chooser";
 import { CATEGORICAL_PALETTES } from "../src/lib/catalog/themes";
 
-const fake = (name: string, capacity: number): { name: string; capacity: number } => ({
+const fake = (
+  name: string,
+  capacity: number,
+): { name: string; label: string; capacity: number } => ({
   name,
+  label: name,
   capacity,
 });
 
 describe("sortPaletteSpecimens", () => {
-  it("sorts alphabetically by name without mutating the input", () => {
-    const input = [fake("tableau10", 10), fake("observable10", 10), fake("ipsum", 6)];
+  it("sorts alphabetically by display label without mutating the input", () => {
+    const input = [
+      { ...fake("tableau10", 10), label: "Tableau 10" },
+      { ...fake("observable10", 10), label: "Observable 10" },
+      { ...fake("ipsum", 6), label: "Ipsum" },
+    ];
     const sorted = sortPaletteSpecimens(input, "name");
-    expect(sorted.map((s) => s.name)).toEqual(["ipsum", "observable10", "tableau10"]);
+    expect(sorted.map((s) => s.label)).toEqual(["Ipsum", "Observable 10", "Tableau 10"]);
     expect(input.map((s) => s.name)).toEqual(["tableau10", "observable10", "ipsum"]);
   });
 
-  it("sorts by ascending capacity, breaking ties alphabetically", () => {
-    const input = [fake("tableau10", 10), fake("ipsum", 6), fake("observable10", 10)];
+  it("sorts by ascending capacity, breaking ties by label", () => {
+    const input = [
+      { ...fake("tableau10", 10), label: "Tableau 10" },
+      { ...fake("ipsum", 6), label: "Ipsum" },
+      { ...fake("observable10", 10), label: "Observable 10" },
+    ];
     const sorted = sortPaletteSpecimens(input, "capacity");
-    expect(sorted.map((s) => s.name)).toEqual(["ipsum", "observable10", "tableau10"]);
+    expect(sorted.map((s) => s.label)).toEqual(["Ipsum", "Observable 10", "Tableau 10"]);
   });
 
-  it("keeps the real registry alphabetical by default order", () => {
+  it("keeps the real registry label-alphabetical by default order", () => {
     const sorted = sortPaletteSpecimens(CATEGORICAL_PALETTES, "name");
-    expect(sorted.map((s) => s.name)).toEqual(
-      CATEGORICAL_PALETTES.map((p) => p.name).toSorted((a, b) => a.localeCompare(b)),
+    expect(sorted.map((s) => s.label)).toEqual(
+      CATEGORICAL_PALETTES.map((p) => p.label).toSorted((a, b) => a.localeCompare(b)),
     );
   });
 });

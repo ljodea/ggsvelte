@@ -6,9 +6,15 @@
   {#each SEQUENTIAL_RAMP_ROWS as row (row.name)}
     <li>
       <code class="name">{row.name}</code>
-      <span class="strip" role="img" aria-label={`${row.name} ramp colors`}>
+      <span class="strip" role="list" aria-label={`${row.name} ramp colors`}>
         {#each row.colors as color, index (`${color}-${String(index)}`)}
-          <span class="cell" style={`--swatch:${color}`} title={color}></span>
+          <span
+            class="cell"
+            role="listitem"
+            style={`--swatch:${color}`}
+            title={color}
+            aria-label={`${String(index + 1)}: ${color}`}
+          ></span>
         {/each}
       </span>
     </li>

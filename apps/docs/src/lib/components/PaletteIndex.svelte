@@ -41,6 +41,7 @@
 
 <ol
   class="index"
+  aria-label="Categorical palettes"
   onpointerleave={() => onpreview(null)}
   onfocusout={clearIfFocusLeaves}
 >
@@ -60,18 +61,25 @@
         <span class="meta">
           <span class="name">{specimen.label}</span>
           <span class="detail">
-            {specimen.capacity} colors{#if specimen.colorblindSafe}&nbsp;·&nbsp;<span
-                class="cb">CB-safe</span
+            <span class="capacity">{specimen.capacity} colors</span
+            >{#if specimen.colorblindSafe}&nbsp;·&nbsp;<span class="cb"
+                >CB-safe</span
               >{/if}
           </span>
         </span>
         <span
           class="strip"
-          role="img"
+          role="list"
           aria-label={`${specimen.label} ordered colors`}
         >
           {#each displayColors as color, index (`${color}-${String(index)}`)}
-            <span class="cell" style={`--swatch:${color}`} title={color}></span>
+            <span
+              class="cell"
+              role="listitem"
+              style={`--swatch:${color}`}
+              title={color}
+              aria-label={`${String(index + 1)}: ${color}`}
+            ></span>
           {/each}
         </span>
       </button>

@@ -25,10 +25,11 @@ export type PaletteSort = "name" | "capacity";
 
 interface SortableSpecimen {
   readonly name: string;
+  readonly label: string;
   readonly capacity: number;
 }
 
-/** Returns a new array; never mutates the input. */
+/** Returns a new array; never mutates the input. Sorts by what the user reads. */
 export const sortPaletteSpecimens = <T extends SortableSpecimen>(
   specimens: readonly T[],
   sort: PaletteSort,
@@ -36,8 +37,8 @@ export const sortPaletteSpecimens = <T extends SortableSpecimen>(
   const copy = [...specimens];
   copy.sort((a, b) =>
     sort === "capacity"
-      ? a.capacity - b.capacity || a.name.localeCompare(b.name)
-      : a.name.localeCompare(b.name),
+      ? a.capacity - b.capacity || a.label.localeCompare(b.label)
+      : a.label.localeCompare(b.label),
   );
   return copy;
 };

@@ -1,6 +1,6 @@
 import type { ThemeName } from "@ggsvelte/spec";
 
-import { CATEGORICAL_SCHEMES } from "./palette-tables.js";
+import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "./palette-tables.js";
 
 /**
  * Docs-local mirror of package aliases (grey/gray → ggplot2). Kept as a plain
@@ -187,3 +187,6 @@ export const CATEGORICAL_PALETTES = (
       colors,
     };
   });
+
+/** Viridis reference colors — consumed by scripts/themes-page.test.ts. */
+export const VIRIDIS_COLORS = VIRIDIS_RAMP_10;
