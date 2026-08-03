@@ -12936,9 +12936,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/path/trajectory",
-    title: "Napoleon's march, drawn in march order — ggsvelte gallery",
+    title: "Minard's march on Moscow, map and all — ggsvelte gallery",
     description:
-      "Minard's strength counts against longitude. The retreat covers the same ground as the advance, so only a path drawn in row order tells the two legs apart.",
+      "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
     canonicalPath: "/examples/path/trajectory",
     kind: "page",
     index: true,

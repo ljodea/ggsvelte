@@ -1,34 +1,106 @@
 <script lang="ts">
   import {
+    CoordFixed,
     GeomPath,
     GeomPoint,
+    GeomText,
     GGPlot,
     Labs,
     ScaleColorManual,
+    ScaleLinewidthContinuous,
+    ScaleXContinuous,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { napoleonsArmy } from "./data.js";
+  import {
+    campaignRivers,
+    minardCityLabels,
+    minardCold,
+    minardStrengthLabels,
+    minardTroops,
+  } from "./data.js";
 </script>
 
-<GGPlot
-  data={napoleonsArmy}
-  aes={{ x: "long", y: "survivors", group: "leg", color: "direction" }}
-  width={640}
-  height={400}
->
-  <ThemeClassic />
-  <ScaleColorManual
-    domain={["Advance", "Retreat"]}
-    values={["#b45309", "#1f2937"]}
-  />
-  <Labs
-    title="Napoleon's army marches east and dies coming back"
-    subtitle="Minard's 1812 strength counts, drawn in march order: out to Moscow, then home"
-    x="Longitude east"
-    y="Men still with the column"
-    color=""
-  />
-  <GeomPath linewidth={2} />
-  <GeomPoint size={2.2} alpha={0.7} />
-</GGPlot>
+<div class="minard">
+  <GGPlot width={960} height={520}>
+    <ThemeClassic />
+    <!-- lon/lat degrees are not the same length on the ground at 55°N -->
+    <CoordFixed ratio={1.6} />
+    <ScaleXContinuous limits={[23.5, 38.2]} />
+    <!-- legends below the panel so both plots keep the same full-width x axis -->
+    <ScaleColorManual
+      domain={["Advance", "Retreat"]}
+      values={["#d3a05e", "#25221e"]}
+      guide={{ type: "legend", position: "bottom" }}
+    />
+    <ScaleLinewidthContinuous
+      range={[1, 18]}
+      guide={{ type: "legend", position: "bottom" }}
+    />
+    <Labs
+      title="The Grande Armée's march to Moscow and back, 1812–13"
+      subtitle="Band width is the number of men still with the column — after Minard's 1869 figurative map"
+      x=""
+      y=""
+      color=""
+      linewidth="Survivors"
+    />
+    <GeomPath
+      data={campaignRivers}
+      aes={{ x: "long", y: "lat", group: "river", color: { value: "#8fa8c0" } }}
+      linewidth={0.8}
+      alpha={0.7}
+    />
+    <GeomPath
+      data={minardTroops}
+      aes={{
+        x: "long",
+        y: "lat",
+        group: "leg",
+        color: "direction",
+        linewidth: "survivors",
+      }}
+    />
+    <GeomText
+      data={minardCityLabels}
+      aes={{ x: "lx", y: "ly", label: "city", color: { value: "#4a4237" } }}
+      size={10}
+      dy={-9}
+    />
+    <GeomText
+      data={minardStrengthLabels}
+      aes={{ x: "long", y: "lat", label: "count", color: { value: "#6b5d4a" } }}
+      size={9}
+    />
+  </GGPlot>
+
+  <GGPlot width={960} height={190}>
+    <ThemeClassic />
+    <ScaleXContinuous limits={[23.5, 38.2]} />
+    <Labs title="The cold on the road back" x="Longitude east" y="°Réaumur" />
+    <GeomPath
+      data={minardCold}
+      aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
+      linewidth={1.5}
+    />
+    <GeomPoint
+      data={minardCold}
+      aes={{ x: "long", y: "temp", color: { value: "#374151" } }}
+      size={2.5}
+    />
+    <GeomText
+      data={minardCold}
+      aes={{ x: "long", y: "temp", label: "date", color: { value: "#374151" } }}
+      size={10}
+      dy={-11}
+    />
+  </GGPlot>
+</div>
+
+<style>
+  .minard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>
