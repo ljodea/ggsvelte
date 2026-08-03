@@ -106,9 +106,15 @@ describe("explicit registration API (Seam A)", () => {
     expect(typeof registerAll).toBe("function");
     expect(typeof registerBasic).toBe("function");
     // Preload already registered everything; re-calling must not throw.
-    expect(() => registerBasic()).not.toThrow();
-    expect(() => registerAll()).not.toThrow();
-    expect(() => registerAll()).not.toThrow();
+    expect(() => {
+      registerBasic();
+    }).not.toThrow();
+    expect(() => {
+      registerAll();
+    }).not.toThrow();
+    expect(() => {
+      registerAll();
+    }).not.toThrow();
   });
 
   it("registerAll() covers the complete pre-#1420 grammar", () => {
@@ -168,7 +174,7 @@ describe("fresh-process registration gating (Seam B)", () => {
       encoding: "utf8",
     });
     expect(proc.status).toBe(0);
-    const out = JSON.parse(proc.stdout.trim().split("\n").at(-1) ?? "{}");
+    const out = JSON.parse(proc.stdout.trim().split("\n").at(-1) ?? "{}") as Record<string, string>;
 
     // Fresh barrel import: nothing registered, and errors guide to the fix.
     expect(out.pointFresh).toContain("not registered");
