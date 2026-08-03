@@ -62,5 +62,7 @@ import "./pipeline/frame-stats-register-all.js";
 import "./pipeline/geometry-register-all.js";
 // Full temporal polyfill + guide planner (lean render entry skips this).
 import "./install-temporal.js";
+// Lazy interaction candidate construction (lean render entry skips this).
+import "./install-candidates.js";
 
 export { runPipeline } from "./pipeline/run-pipeline.js";

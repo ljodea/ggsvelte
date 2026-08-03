@@ -5,14 +5,16 @@
 import type { Scene } from "../scene.js";
 import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
-import type { CandidateStore } from "../candidate-store.js";
+import type { LazyInteraction } from "../candidate-runtime.js";
 
 import type { SourceRegistry } from "./source-registry.js";
 import { NO_ROW } from "./types.js";
 
 export function createRenderModelLifecycle(input: {
   scene: Scene;
-  candidates: CandidateStore;
+  /** Lazy candidates (#1421): dispose a built store; release drops the
+   *  retained build inputs so a disposed model frees the source table. */
+  interaction: LazyInteraction;
   table: ColumnTable;
   /** When present, model.row resolves multi-table global source ids. */
   sourceRegistry?: SourceRegistry | null;
@@ -23,7 +25,7 @@ export function createRenderModelLifecycle(input: {
   let disposed = false;
   let retainedTable: ColumnTable | null = input.table;
   let retainedRegistry: SourceRegistry | null = input.sourceRegistry ?? null;
-  const { scene, candidates } = input;
+  const { scene, interaction } = input;
 
   return {
     row(index: number): Record<string, CellValue> | null {
@@ -38,7 +40,8 @@ export function createRenderModelLifecycle(input: {
     dispose(): void {
       if (disposed) return;
       disposed = true;
-      candidates.dispose();
+      interaction.built()?.dispose();
+      interaction.release();
       retainedTable = null;
       retainedRegistry = null;
       // Release geometry (typed arrays) and per-panel structures; the bound

@@ -8,12 +8,14 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import { getCandidateRuntime, RELEASED_CANDIDATE_STORE } from "../candidate-runtime.js";
+import type { CandidateBuildInput, LazyInteraction } from "../candidate-runtime.js";
+import type { CandidateStore } from "../candidate-store.js";
 import { buildPanelCoordProjector } from "../coord-projector.js";
 import { LineageStore } from "../identity.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
-import { buildPipelineCandidates } from "./build-candidates.js";
 import { computeBaselineDomains, computeEffectiveDomains } from "./compute-domains.js";
 import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import { finalizeGeometryAndScene } from "./finalize-geometry-scene.js";
@@ -97,9 +99,20 @@ export function finalize(run: PipelineRunState): RenderModel {
     effectiveDomains,
   });
 
-  // --- lineage + interaction candidates ---
-  const lineage = new LineageStore<number>();
-  const candidates = buildPipelineCandidates({
+  // --- lineage + interaction candidates (lazy, #1421) ---
+  // The candidate store builds on first `model.candidates` access so
+  // headless/SSR renders never pay for it, and the lean render entry
+  // never carries the candidate-store graph (no runtime installed there).
+  // `lineageStore` is created eagerly and populated by the store's assembly
+  // (first candidate read) — the same deferred shape as the pre-#1421 eager
+  // build, so `model.lineage` needs no ensure of its own.
+  const lineageStore = new LineageStore<number>();
+  let builtCandidates: CandidateStore | null = null;
+  // Retained build inputs live in a null-able box: a successful build hands
+  // its own references to the store (which dispose() clears), and model
+  // dispose drops the box either way — a released model must not keep the
+  // source table / prepared panels alive through this closure.
+  let retained: CandidateBuildInput | null = {
     scene,
     runId,
     flip,
@@ -113,8 +126,36 @@ export function finalize(run: PipelineRunState): RenderModel {
     layerFields,
     color: trained.colorResolution.resolved,
     fill: trained.fillResolution.resolved,
-    lineage,
-  });
+    lineage: lineageStore,
+  };
+  const interaction: LazyInteraction = {
+    lineageStore,
+    ensure(): CandidateStore {
+      if (builtCandidates !== null) return builtCandidates;
+      const input = retained;
+      if (input === null) {
+        // Disposed before any interaction: quiet-null inert store, matching
+        // the pre-#1421 built-then-disposed contract for late hit-tests.
+        builtCandidates = RELEASED_CANDIDATE_STORE;
+        return builtCandidates;
+      }
+      const runtime = getCandidateRuntime();
+      if (runtime === null) {
+        throw new Error(
+          "Interaction candidates require @ggsvelte/core (full entry); the lean @ggsvelte/core/render graph does not carry the candidate store.",
+        );
+      }
+      builtCandidates = runtime.build(input);
+      retained = null;
+      return builtCandidates;
+    },
+    built(): CandidateStore | null {
+      return builtCandidates;
+    },
+    release(): void {
+      retained = null;
+    },
+  };
 
   // --- pack trained scales + contracts into the render model ---
   const { colorResolution, fillResolution, styleResolutions } = trained;
@@ -167,8 +208,7 @@ export function finalize(run: PipelineRunState): RenderModel {
     layerScaledConstants,
     baselineDomains,
     effectiveDomains,
-    lineage,
-    candidates,
+    interaction,
     formatX: panelLayout.formatX,
     formatY: panelLayout.formatY,
     // Retain the unfiltered source table + multi-table registry: model.row()

@@ -33,6 +33,7 @@
     "./dist/render-entry.js",
     "./dist/temporal-entry.js",
     "./dist/install-temporal.js",
+    "./dist/install-candidates.js",
     "./dist/pipeline/frame-stats-register-all.js",
     "./dist/pipeline/geometry-register-all.js",
     "./dist/pipeline/geometry-register-basic.js",

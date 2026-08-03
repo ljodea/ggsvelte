@@ -52,9 +52,14 @@ export interface RenderModel {
   layerScaledConstants: ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>>;
   /** Stable baseline plus the domains actually used for this render. */
   domains: Readonly<{ baseline: ScaleDomainSnapshot; effective: ScaleDomainSnapshot }>;
-  /** Interned source-row memberships. Public adapters resolve these through keys. */
+  /** Interned source-row memberships. Public adapters resolve these through keys.
+   *  Populated when the candidate store assembles (first candidate read /
+   *  hit-test); reading it before that yields an empty store — unchanged from
+   *  the pre-#1421 eager build, which assembled lazily too. */
   lineage: LineageStore<number>;
-  /** Shared epoch-scoped interaction candidate storage. */
+  /** Shared epoch-scoped interaction candidate storage. Built lazily on first
+   *  access (#1421): headless renders never pay for it, and the lean
+   *  `@ggsvelte/core/render` entry throws here (full entry required). */
   candidates: CandidateStore;
   /** Trained semantic formatters. Coord transforms never swap x and y here. */
   axisFormatters: Readonly<{ x: AxisValueFormatter; y: AxisValueFormatter }>;
