@@ -26,11 +26,8 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
-  // ggthemes ports (#1159): Stata schemes
+  // ggthemes ports (#1159): Stata s2color default
   "stata",
-  "stata_s1color",
-  "stata_s1rcolor",
-  "stata_mono",
   /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
   "economist",
   /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
@@ -64,16 +61,9 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "tableau_red_blue_brown",
   "tableau_purple_pink_gray",
   "tableau_hue_circle",
-  // ggthemes ports (#1159): Google Docs + Highcharts + pander
+  // ggthemes ports (#1159): Google Docs + pander
   "gdocs",
-  "hc",
-  "hc_dark",
   "pander",
-  // ggthemes ports (#1159): LibreOffice Calc + Excel 97 + current Office
-  "calc",
-  "excel",
-  "excel_fill",
-  "excel_new",
   // ColorBrewer qualitative (#825)
   "Dark2",
   "Paired",

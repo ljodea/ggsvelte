@@ -33,8 +33,8 @@ describe("themes catalog", () => {
       { name: "linedraw", scheme: "colorblind" },
       { name: "void", scheme: "colorblind" },
       { name: "stata", scheme: "stata" },
-      { name: "stata_s1color", scheme: "stata_s1color" },
-      { name: "stata_mono", scheme: "stata_mono" },
+      { name: "stata_s1color", scheme: "stata" },
+      { name: "stata_mono", scheme: "grey" },
       { name: "solarized", scheme: "solarized" },
       { name: "solarizeddark", scheme: "solarized" },
       { name: "economist_white", scheme: "economist" },
@@ -42,12 +42,12 @@ describe("themes catalog", () => {
       { name: "solarized_2dark", scheme: "solarized" },
       { name: "wsj", scheme: "wsj" },
       { name: "gdocs", scheme: "gdocs" },
-      { name: "hc", scheme: "hc" },
-      { name: "hcdark", scheme: "hc_dark" },
+      { name: "hc", scheme: "tableau10" },
+      { name: "hcdark", scheme: "flexoki" },
       { name: "pander", scheme: "pander" },
-      { name: "calc", scheme: "calc" },
-      { name: "excel", scheme: "excel" },
-      { name: "excel_new", scheme: "excel_new" },
+      { name: "calc", scheme: "tableau10" },
+      { name: "excel", scheme: "tableau10" },
+      { name: "excel_new", scheme: "tableau10" },
       { name: "base", scheme: "tableau10" },
       { name: "igray", scheme: "tableau10" },
       { name: "map", scheme: "colorblind" },
@@ -58,26 +58,28 @@ describe("themes catalog", () => {
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gray");
 
     const byName = new Map(CATEGORICAL_PALETTES.map((p) => [p.name, p]));
+    for (const name of ["observable10", "stata", "tableau10", "gdocs", "pander", "grey"] as const) {
+      expect(byName.get(name), name).toBeDefined();
+    }
+    // Removed spreadsheet/Highcharts/extra-Stata schemes must not reappear.
+    const paletteNames = new Set(CATEGORICAL_PALETTES.map((p) => p.name as string));
     for (const name of [
-      "observable10",
+      "stata_s1color",
+      "stata_s1rcolor",
+      "stata_mono",
+      "hc",
+      "hc_dark",
       "calc",
       "excel",
       "excel_fill",
       "excel_new",
-      "tableau10",
-      "gdocs",
-      "grey",
-    ] as const) {
-      expect(byName.get(name), name).toBeDefined();
+    ]) {
+      expect(paletteNames.has(name), name).toBe(false);
     }
-    expect(byName.get("calc")!.capacity).toBe(12);
-    expect(byName.get("excel")!.capacity).toBe(7);
-    expect(byName.get("excel_fill")!.capacity).toBe(7);
-    expect(byName.get("excel_new")!.capacity).toBe(6);
-    expect(byName.get("calc")!.colors[0]).toBe("#004586");
-    expect(byName.get("excel")!.colors[0]).toBe("#FF00FF");
+    expect(byName.get("stata")!.capacity).toBe(15);
+    expect(byName.get("gdocs")!.capacity).toBeGreaterThan(0);
     // Registry size is owned by schema-names; keep a lower bound so shrinks fail.
-    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(45);
+    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(35);
     expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
 
     expect(VIRIDIS_COLORS).toEqual([

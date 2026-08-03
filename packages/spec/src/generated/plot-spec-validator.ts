@@ -245,10 +245,10 @@ let External = [
 
 // @ts-ignore
 // @ts-ignore
-const check_0 = (value) => check_1(value);
+const check_2bc5822166bf4786 = (value) => check_2e887d21691806b7(value);
 
 // @ts-ignore
-const check_1 = (value) =>
+const check_2e887d21691806b7 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -259,25 +259,27 @@ const check_1 = (value) =>
     (Number.isInteger(value.edition) &&
       (!(Number.isFinite(value.edition) || typeof value.edition === "bigint") ||
         value.edition >= 1))) &&
-  (!("data" in value) || check_2(value.data)) &&
+  (!("data" in value) || check_2bc5422166bedac6(value.data)) &&
   (!("datasets" in value) ||
     (typeof value.datasets === "object" &&
       value.datasets !== null &&
       !Array.isArray(value.datasets) &&
       Object.entries(value.datasets).every(
-        ([var_6, var_7], _) => !External[3].test(var_6) || check_8(var_7),
+        ([var_6, var_7], _) => !External[3].test(var_6) || check_2c320221671b3fe6(var_7),
       ))) &&
-  (!("aes" in value) || check_11(value.aes)) &&
+  (!("aes" in value) || check_2c1e1e21670ac670(value.aes)) &&
   Array.isArray(value.layers) &&
-  value.layers.every((element, index) => check_16(element)) &&
+  value.layers.every((element, index) => check_2bfc222166ede6d6(element)) &&
   value.layers.length >= 1 &&
-  (!("facet" in value) || check_341(value.facet)) &&
-  (!("coord" in value) || check_346(value.coord)) &&
-  (!("scales" in value) || check_352(value.scales)) &&
-  (!("guides" in value) || check_386(value.guides)) &&
-  (!("legend" in value) || check_388(value.legend)) &&
-  (!("labs" in value) || check_389(value.labs)) &&
-  (!("theme" in value) || check_390(value.theme) || check_391(value.theme)) &&
+  (!("facet" in value) || check_cc25c02252c1628b(value.facet)) &&
+  (!("coord" in value) || check_eab0d01f8e7428bb(value.coord)) &&
+  (!("scales" in value) || check_2cc13e2167955e20(value.scales)) &&
+  (!("guides" in value) || check_3f9332220292677e(value.guides)) &&
+  (!("legend" in value) || check_559c9222a04be09e(value.legend)) &&
+  (!("labs" in value) || check_cc4b222252e1254e(value.labs)) &&
+  (!("theme" in value) ||
+    check_6ba572233e04803e(value.theme) ||
+    check_e2540222f099c4ee(value.theme)) &&
   (!("width" in value) || (Number.isFinite(value.width) && value.width > 0)) &&
   (!("height" in value) || (Number.isFinite(value.height) && value.height > 0)) &&
   (!("a11y" in value) ||
@@ -285,10 +287,11 @@ const check_1 = (value) =>
     (typeof value.a11y === "string" && value.a11y === "force-svg"));
 
 // @ts-ignore
-const check_2 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2bc5422166bedac6 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_3 = (value) =>
+const check_2be0722166d5f40e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -301,20 +304,20 @@ const check_3 = (value) =>
       element !== null &&
       !Array.isArray(element) &&
       Object.getOwnPropertyNames(element).every(
-        (var_2, var_3) => External[1].test(var_2) || check_4(element[var_2]),
+        (var_2, var_3) => External[1].test(var_2) || check_2b8f6221669181b6(element[var_2]),
       ) &&
       true,
   );
 
 // @ts-ignore
-const check_4 = (value) =>
+const check_2b8f6221669181b6 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_5 = (value) =>
+const check_2b814a2166851b92 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -326,18 +329,18 @@ const check_5 = (value) =>
   Object.entries(value.columns).every(
     ([var_4, var_5], _) =>
       !External[2].test(var_4) ||
-      (Array.isArray(var_5) && var_5.every((element, index) => check_6(element))),
+      (Array.isArray(var_5) && var_5.every((element, index) => check_2baa122166a7c17e(element))),
   );
 
 // @ts-ignore
-const check_6 = (value) =>
+const check_2baa122166a7c17e = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_7 = (value) =>
+const check_2b9c7a21669c34da = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -346,10 +349,11 @@ const check_7 = (value) =>
   typeof value.name === "string";
 
 // @ts-ignore
-const check_8 = (value) => check_9(value) || check_10(value);
+const check_2c320221671b3fe6 = (value) =>
+  check_2c2b362167157994(value) || check_2c246a21670fb342(value);
 
 // @ts-ignore
-const check_9 = (value) =>
+const check_2c2b362167157994 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -362,13 +366,13 @@ const check_9 = (value) =>
       element !== null &&
       !Array.isArray(element) &&
       Object.getOwnPropertyNames(element).every(
-        (var_8, var_9) => External[4].test(var_8) || check_4(element[var_8]),
+        (var_8, var_9) => External[4].test(var_8) || check_2b8f6221669181b6(element[var_8]),
       ) &&
       true,
   );
 
 // @ts-ignore
-const check_10 = (value) =>
+const check_2c246a21670fb342 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -380,46 +384,50 @@ const check_10 = (value) =>
   Object.entries(value.columns).every(
     ([var_10, var_11], _) =>
       !External[5].test(var_10) ||
-      (Array.isArray(var_11) && var_11.every((element, index) => check_6(element))),
+      (Array.isArray(var_11) && var_11.every((element, index) => check_2baa122166a7c17e(element))),
   );
 
 // @ts-ignore
-const check_11 = (value) =>
+const check_2c1e1e21670ac670 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_12, var_13) => External[6].test(var_12) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_12 = (value) => check_13(value) || check_14(value) || check_15(value) || value === null;
+const check_2c4d32216732592e = (value) =>
+  check_2c466621672c92dc(value) ||
+  check_2c401a216727a60a(value) ||
+  check_2c394e216721dfb8(value) ||
+  value === null;
 
 // @ts-ignore
-const check_13 = (value) =>
+const check_2c466621672c92dc = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -428,7 +436,7 @@ const check_13 = (value) =>
   typeof value.field === "string";
 
 // @ts-ignore
-const check_14 = (value) =>
+const check_2c401a216727a60a = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -440,7 +448,7 @@ const check_14 = (value) =>
   (!("scale" in value) || typeof value.scale === "boolean");
 
 // @ts-ignore
-const check_15 = (value) =>
+const check_2c394e216721dfb8 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -449,59 +457,59 @@ const check_15 = (value) =>
   typeof value.stat === "string";
 
 // @ts-ignore
-const check_16 = (value) =>
-  check_17(value) ||
-  check_24(value) ||
-  check_38(value) ||
-  check_45(value) ||
-  check_52(value) ||
-  check_61(value) ||
-  check_69(value) ||
-  check_75(value) ||
-  check_80(value) ||
-  check_88(value) ||
-  check_96(value) ||
-  check_105(value) ||
-  check_113(value) ||
-  check_121(value) ||
-  check_127(value) ||
-  check_134(value) ||
-  check_140(value) ||
-  check_147(value) ||
-  check_154(value) ||
-  check_159(value) ||
-  check_164(value) ||
-  check_169(value) ||
-  check_174(value) ||
-  check_181(value) ||
-  check_188(value) ||
-  check_193(value) ||
-  check_198(value) ||
-  check_203(value) ||
-  check_209(value) ||
-  check_215(value) ||
-  check_221(value) ||
-  check_227(value) ||
-  check_233(value) ||
-  check_241(value) ||
-  check_249(value) ||
-  check_256(value) ||
-  check_261(value) ||
-  check_266(value) ||
-  check_271(value) ||
-  check_279(value) ||
-  check_288(value) ||
-  check_295(value) ||
-  check_300(value) ||
-  check_307(value) ||
-  check_314(value) ||
-  check_319(value) ||
-  check_324(value) ||
-  check_329(value) ||
-  check_336(value);
+const check_2bfc222166ede6d6 = (value) =>
+  check_2bff082166eff07f(value) ||
+  check_2c1752216705001e(value) ||
+  check_2c9b5c216774c1dd(value) ||
+  check_d7ccde1ef366fc90(value) ||
+  check_2cb326216788f7fc(value) ||
+  check_d7e88e1ef37eef58(value) ||
+  check_551788229fda6bdf(value) ||
+  check_004fd6202bd26ce4(value) ||
+  check_2c5b4a21673ebf52(value) ||
+  check_2c53fe2167381f80(value) ||
+  check_2c8412216761653e(value) ||
+  check_552886229fe8dbac(value) ||
+  check_5521ba229fe3155a(value) ||
+  check_551b6e229fde2888(value) ||
+  check_0060d4202be0dcb1(value) ||
+  check_00f9c2202c62cae6(value) ||
+  check_d851e81ef3d8714f(value) ||
+  check_6bb9d6233e15d334(value) ||
+  check_55b45c22a06016bd(value) ||
+  check_16ff3c20ca18875d(value) ||
+  check_d840ea1ef3ca0182(value) ||
+  check_3fa4302202a0d74b(value) ||
+  check_00f010202c5afaeb(value) ||
+  check_eadcfe1f8e99b1d0(value) ||
+  check_d83d841ef3c71e59(value) ||
+  check_3fc9922202c09a0e(value) ||
+  check_0114f2202c79e42e(value) ||
+  check_6bdeb8233e34bc77(value) ||
+  check_3fc3462202bbad3c(value) ||
+  check_17170620ca2cbd7c(value) ||
+  check_eb08ac1f8ebe6165(value) ||
+  check_6bcdba233e264caa(value) ||
+  check_3fbf602202b7f093(value) ||
+  check_3fb52e2202af4718(value) ||
+  check_3fb8942202b22a41(value) ||
+  check_2cd5222167a5d796(value) ||
+  check_cc2ff22252ca0c06(value) ||
+  check_eabb021f8e7cd236(value) ||
+  check_8d7b52207c835626(value) ||
+  check_e23c3822f0858ecf(value) ||
+  check_2cce562167a01144(value) ||
+  check_e2320622f07ce554(value) ||
+  check_00bd16202c2fab84(value) ||
+  check_b623ac21b50e893d(value) ||
+  check_eab71c1f8e79158d(value) ||
+  check_8d776c207c7f997d(value) ||
+  check_55734a22a0286132(value) ||
+  check_4b531a1ea34deaa2(value) ||
+  check_2ccb7021679e079b(value);
 
 // @ts-ignore
-const check_17 = (value) =>
+const check_2bff082166eff07f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -519,15 +527,15 @@ const check_17 = (value) =>
     (typeof value.position === "string" && value.position === "identity") ||
     (typeof value.position === "string" && value.position === "jitter") ||
     (typeof value.position === "string" && value.position === "nudge")) &&
-  (!("positionParams" in value) || check_18(value.positionParams)) &&
-  (!("render" in value) || check_19(value.render)) &&
-  (!("aes" in value) || check_20(value.aes)) &&
-  (!("data" in value) || check_21(value.data)) &&
-  (!("params" in value) || check_22(value.params)) &&
+  (!("positionParams" in value) || check_2bf5562166e82084(value.positionParams)) &&
+  (!("render" in value) || check_2bf83c2166ea2a2d(value.render)) &&
+  (!("aes" in value) || check_2bee0a2166e180b2(value.aes)) &&
+  (!("data" in value) || check_2bf1702166e463db(value.data)) &&
+  (!("params" in value) || check_2be73e2166dbba60(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_18 = (value) =>
+const check_2bf5562166e82084 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -541,48 +549,49 @@ const check_18 = (value) =>
   (!("y" in value) || Number.isFinite(value.y));
 
 // @ts-ignore
-const check_19 = (value) =>
+const check_2bf83c2166ea2a2d = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_20 = (value) =>
+const check_2bee0a2166e180b2 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_20, var_21) => External[10].test(var_20) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_21 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2bf1702166e463db = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_22 = (value) =>
+const check_2be73e2166dbba60 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -613,11 +622,11 @@ const check_22 = (value) =>
     (typeof value.fun === "string" && value.fun === "min") ||
     (typeof value.fun === "string" && value.fun === "max") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_23(value.funMin)) &&
-  (!("funMax" in value) || check_23(value.funMax));
+  (!("funMin" in value) || check_2beb242166df7709(value.funMin)) &&
+  (!("funMax" in value) || check_2beb242166df7709(value.funMax));
 
 // @ts-ignore
-const check_23 = (value) =>
+const check_2beb242166df7709 = (value) =>
   (typeof value === "string" && value === "mean") ||
   (typeof value === "string" && value === "median") ||
   (typeof value === "string" && value === "sum") ||
@@ -625,7 +634,7 @@ const check_23 = (value) =>
   (typeof value === "string" && value === "max");
 
 // @ts-ignore
-const check_24 = (value) =>
+const check_2c1752216705001e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -644,55 +653,56 @@ const check_24 = (value) =>
     (typeof value.stat === "string" && value.stat === "ecdf")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_25(value.render)) &&
-  (!("aes" in value) || check_26(value.aes)) &&
-  (!("data" in value) || check_27(value.data)) &&
-  (!("params" in value) || check_28(value.params)) &&
+  (!("render" in value) || check_2c1a3821670709c7(value.render)) &&
+  (!("aes" in value) || check_2c10062166fe604c(value.aes)) &&
+  (!("data" in value) || check_2c136c2167014375(value.data)) &&
+  (!("params" in value) || check_2c093a2166f899fa(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_25 = (value) =>
+const check_2c1a3821670709c7 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_26 = (value) =>
+const check_2c10062166fe604c = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_26, var_27) => External[13].test(var_26) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_27 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c136c2167014375 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_28 = (value) =>
+const check_2c093a2166f899fa = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -730,13 +740,13 @@ const check_28 = (value) =>
     (typeof value.fun === "string" && value.fun === "min") ||
     (typeof value.fun === "string" && value.fun === "max") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_29(value.funMin)) &&
-  (!("funMax" in value) || check_29(value.funMax)) &&
-  (!("strokePaint" in value) || check_30(value.strokePaint)) &&
-  (!("glow" in value) || check_37(value.glow));
+  (!("funMin" in value) || check_2c0d202166fc56a3(value.funMin)) &&
+  (!("funMax" in value) || check_2c0d202166fc56a3(value.funMax)) &&
+  (!("strokePaint" in value) || check_2c026e2166f2d3a8(value.strokePaint)) &&
+  (!("glow" in value) || check_d7daf61ef37362b4(value.glow));
 
 // @ts-ignore
-const check_29 = (value) =>
+const check_2c0d202166fc56a3 = (value) =>
   (typeof value === "string" && value === "mean") ||
   (typeof value === "string" && value === "median") ||
   (typeof value === "string" && value === "sum") ||
@@ -744,10 +754,11 @@ const check_29 = (value) =>
   (typeof value === "string" && value === "max");
 
 // @ts-ignore
-const check_30 = (value) => check_31(value) || check_34(value);
+const check_2c026e2166f2d3a8 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_31 = (value) =>
+const check_2c06542166f69051 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -765,22 +776,22 @@ const check_31 = (value) =>
   Number.isFinite(value.y1) &&
   Number.isFinite(value.x2) &&
   Number.isFinite(value.y2) &&
-  (!("space" in value) || check_32(value.space)) &&
+  (!("space" in value) || check_2c9f422167787e86(value.space)) &&
   Array.isArray(value.stops) &&
-  value.stops.every((element, index) => check_33(element)) &&
+  value.stops.every((element, index) => check_d7e1c21ef3792906(element)) &&
   value.stops.length <= 16 &&
   value.stops.length >= 2 &&
   typeof value.fallback === "string" &&
   External[18].test(value.fallback);
 
 // @ts-ignore
-const check_32 = (value) =>
+const check_2c9f422167787e86 = (value) =>
   (typeof value === "string" && value === "mark") ||
   (typeof value === "string" && value === "panel") ||
   (typeof value === "string" && value === "plot");
 
 // @ts-ignore
-const check_33 = (value) =>
+const check_d7e1c21ef3792906 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -796,7 +807,7 @@ const check_33 = (value) =>
     (Number.isFinite(value.opacity) && value.opacity <= 1 && value.opacity >= 0));
 
 // @ts-ignore
-const check_34 = (value) =>
+const check_2ca22821677a882f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -813,22 +824,22 @@ const check_34 = (value) =>
   Number.isFinite(value.cy) &&
   Number.isFinite(value.r) &&
   value.r > 0 &&
-  (!("space" in value) || check_35(value.space)) &&
+  (!("space" in value) || check_d7e4a81ef37b32af(value.space)) &&
   Array.isArray(value.stops) &&
-  value.stops.every((element, index) => check_36(element)) &&
+  value.stops.every((element, index) => check_2c9876216772b834(element)) &&
   value.stops.length <= 16 &&
   value.stops.length >= 2 &&
   typeof value.fallback === "string" &&
   External[22].test(value.fallback);
 
 // @ts-ignore
-const check_35 = (value) =>
+const check_d7e4a81ef37b32af = (value) =>
   (typeof value === "string" && value === "mark") ||
   (typeof value === "string" && value === "panel") ||
   (typeof value === "string" && value === "plot");
 
 // @ts-ignore
-const check_36 = (value) =>
+const check_2c9876216772b834 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -844,7 +855,7 @@ const check_36 = (value) =>
     (Number.isFinite(value.opacity) && value.opacity <= 1 && value.opacity >= 0));
 
 // @ts-ignore
-const check_37 = (value) =>
+const check_d7daf61ef37362b4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -862,7 +873,7 @@ const check_37 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_38 = (value) =>
+const check_2c9b5c216774c1dd = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -878,55 +889,56 @@ const check_38 = (value) =>
     (typeof value.stat === "string" && value.stat === "ellipse")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_39(value.render)) &&
-  (!("aes" in value) || check_40(value.aes)) &&
-  (!("data" in value) || check_41(value.data)) &&
-  (!("params" in value) || check_42(value.params)) &&
+  (!("render" in value) || check_d7dddc1ef3756c5d(value.render)) &&
+  (!("aes" in value) || check_2c912a21676c1862(value.aes)) &&
+  (!("data" in value) || check_d7d3aa1ef36cc2e2(value.data)) &&
+  (!("params" in value) || check_2c951021676fd50b(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_39 = (value) =>
+const check_d7dddc1ef3756c5d = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_40 = (value) =>
+const check_2c912a21676c1862 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_40, var_41) => External[25].test(var_40) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_41 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d7d3aa1ef36cc2e2 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_42 = (value) =>
+const check_2c951021676fd50b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -955,14 +967,15 @@ const check_42 = (value) =>
     (Number.isInteger(value.segments) &&
       (!(Number.isFinite(value.segments) || typeof value.segments === "bigint") ||
         (value.segments <= 500 && value.segments >= 3)))) &&
-  (!("strokePaint" in value) || check_43(value.strokePaint)) &&
-  (!("glow" in value) || check_44(value.glow));
+  (!("strokePaint" in value) || check_d7d7901ef3707f8b(value.strokePaint)) &&
+  (!("glow" in value) || check_2c8a5e2167665210(value.glow));
 
 // @ts-ignore
-const check_43 = (value) => check_31(value) || check_34(value);
+const check_d7d7901ef3707f8b = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_44 = (value) =>
+const check_2c8a5e2167665210 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -980,7 +993,7 @@ const check_44 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_45 = (value) =>
+const check_d7ccde1ef366fc90 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -991,55 +1004,56 @@ const check_45 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_46(value.render)) &&
-  (!("aes" in value) || check_47(value.aes)) &&
-  (!("data" in value) || check_48(value.data)) &&
-  (!("params" in value) || check_49(value.params)) &&
+  (!("render" in value) || check_2c8e4421676a0eb9(value.render)) &&
+  (!("aes" in value) || check_d7d0c41ef36ab939(value.aes)) &&
+  (!("data" in value) || check_2cba7221678f97ce(value.data)) &&
+  (!("params" in value) || check_d7fcf21ef390424e(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_46 = (value) =>
+const check_2c8e4421676a0eb9 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_47 = (value) =>
+const check_d7d0c41ef36ab939 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_46, var_47) => External[29].test(var_46) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_48 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2cba7221678f97ce = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_49 = (value) =>
+const check_d7fcf21ef390424e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1050,14 +1064,15 @@ const check_49 = (value) =>
     (typeof value.direction === "string" && value.direction === "hv") ||
     (typeof value.direction === "string" && value.direction === "vh") ||
     (typeof value.direction === "string" && value.direction === "mid")) &&
-  (!("strokePaint" in value) || check_50(value.strokePaint)) &&
-  (!("glow" in value) || check_51(value.glow));
+  (!("strokePaint" in value) || check_2cbd58216791a177(value.strokePaint)) &&
+  (!("glow" in value) || check_d7ffd81ef3924bf7(value.glow));
 
 // @ts-ignore
-const check_50 = (value) => check_31(value) || check_34(value);
+const check_2cbd58216791a177 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_51 = (value) =>
+const check_d7ffd81ef3924bf7 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1075,7 +1090,7 @@ const check_51 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_52 = (value) =>
+const check_2cb326216788f7fc = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1083,83 +1098,85 @@ const check_52 = (value) =>
   Object.getOwnPropertyNames(value).every((var_50, var_51) => External[32].test(var_50) || false) &&
   typeof value.geom === "string" &&
   value.geom === "col" &&
-  (!("stat" in value) || check_53(value.stat)) &&
-  (!("position" in value) || check_54(value.position)) &&
-  (!("render" in value) || check_55(value.render)) &&
-  (!("aes" in value) || check_56(value.aes)) &&
-  (!("data" in value) || check_57(value.data)) &&
-  (!("params" in value) || check_58(value.params)) &&
+  (!("stat" in value) || check_d7f5a61ef389a27c(value.stat)) &&
+  (!("position" in value) || check_2cb70c21678cb4a5(value.position)) &&
+  (!("render" in value) || check_d7f98c1ef38d5f25(value.render)) &&
+  (!("aes" in value) || check_2cac5a21678331aa(value.aes)) &&
+  (!("data" in value) || check_d7eeda1ef383dc2a(value.data)) &&
+  (!("params" in value) || check_2cb040216786ee53(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_53 = (value) =>
+const check_d7f5a61ef389a27c = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_54 = (value) =>
+const check_2cb70c21678cb4a5 = (value) =>
   (typeof value === "string" && value === "stack") ||
   (typeof value === "string" && value === "fill") ||
   (typeof value === "string" && value === "dodge") ||
   (typeof value === "string" && value === "identity");
 
 // @ts-ignore
-const check_55 = (value) =>
+const check_d7f98c1ef38d5f25 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_56 = (value) =>
+const check_2cac5a21678331aa = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_52, var_53) => External[33].test(var_52) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_57 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d7eeda1ef383dc2a = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_58 = (value) =>
+const check_2cb040216786ee53 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_54, var_55) => External[34].test(var_54) || false) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("width" in value) || (Number.isFinite(value.width) && value.width > 0 && value.width <= 1)) &&
-  (!("fillPaint" in value) || check_59(value.fillPaint)) &&
-  (!("glow" in value) || check_60(value.glow));
+  (!("fillPaint" in value) || check_d7f2c01ef38798d3(value.fillPaint)) &&
+  (!("glow" in value) || check_2ca60e21677e44d8(value.glow));
 
 // @ts-ignore
-const check_59 = (value) => check_31(value) || check_34(value);
+const check_d7f2c01ef38798d3 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_60 = (value) =>
+const check_2ca60e21677e44d8 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1177,7 +1194,7 @@ const check_60 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_61 = (value) =>
+const check_d7e88e1ef37eef58 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1188,63 +1205,64 @@ const check_61 = (value) =>
   (!("stat" in value) ||
     (typeof value.stat === "string" && value.stat === "count") ||
     (typeof value.stat === "string" && value.stat === "bin")) &&
-  (!("position" in value) || check_62(value.position)) &&
-  (!("render" in value) || check_63(value.render)) &&
-  (!("aes" in value) || check_64(value.aes)) &&
-  (!("data" in value) || check_65(value.data)) &&
-  (!("params" in value) || check_66(value.params)) &&
+  (!("position" in value) || check_2ca9742167812801(value.position)) &&
+  (!("render" in value) || check_d7ebf41ef381d281(value.render)) &&
+  (!("aes" in value) || check_2c68622167497276(value.aes)) &&
+  (!("data" in value) || check_5514a2229fd86236(value.data)) &&
+  (!("params" in value) || check_d7aae21ef34a1cf6(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_62 = (value) =>
+const check_2ca9742167812801 = (value) =>
   (typeof value === "string" && value === "stack") ||
   (typeof value === "string" && value === "fill") ||
   (typeof value === "string" && value === "dodge") ||
   (typeof value === "string" && value === "identity");
 
 // @ts-ignore
-const check_63 = (value) =>
+const check_d7ebf41ef381d281 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_64 = (value) =>
+const check_2c68622167497276 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_58, var_59) => External[37].test(var_58) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_65 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_5514a2229fd86236 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_66 = (value) =>
+const check_d7aae21ef34a1cf6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1260,14 +1278,15 @@ const check_66 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
-  (!("fillPaint" in value) || check_67(value.fillPaint)) &&
-  (!("glow" in value) || check_68(value.glow));
+  (!("fillPaint" in value) || check_005722202bd90cb6(value.fillPaint)) &&
+  (!("glow" in value) || check_2c6c4821674d2f1f(value.glow));
 
 // @ts-ignore
-const check_67 = (value) => check_31(value) || check_34(value);
+const check_005722202bd90cb6 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_68 = (value) =>
+const check_2c6c4821674d2f1f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1285,7 +1304,7 @@ const check_68 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_69 = (value) =>
+const check_551788229fda6bdf = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1294,63 +1313,64 @@ const check_69 = (value) =>
   typeof value.geom === "string" &&
   value.geom === "histogram" &&
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "bin")) &&
-  (!("position" in value) || check_70(value.position)) &&
-  (!("render" in value) || check_71(value.render)) &&
-  (!("aes" in value) || check_72(value.aes)) &&
-  (!("data" in value) || check_73(value.data)) &&
-  (!("params" in value) || check_74(value.params)) &&
+  (!("position" in value) || check_d7aec81ef34dd99f(value.position)) &&
+  (!("render" in value) || check_005a08202bdb165f(value.render)) &&
+  (!("aes" in value) || check_2c621621674485a4(value.aes)) &&
+  (!("data" in value) || check_550d56229fd1c264(value.data)) &&
+  (!("params" in value) || check_d7a4961ef3453024(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_70 = (value) =>
+const check_d7aec81ef34dd99f = (value) =>
   (typeof value === "string" && value === "stack") ||
   (typeof value === "string" && value === "fill") ||
   (typeof value === "string" && value === "dodge") ||
   (typeof value === "string" && value === "identity");
 
 // @ts-ignore
-const check_71 = (value) =>
+const check_005a08202bdb165f = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_72 = (value) =>
+const check_2c621621674485a4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_64, var_65) => External[41].test(var_64) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_73 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_550d56229fd1c264 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_74 = (value) =>
+const check_d7a4961ef3453024 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1366,11 +1386,11 @@ const check_74 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
-  (!("fillPaint" in value) || check_67(value.fillPaint)) &&
-  (!("glow" in value) || check_68(value.glow));
+  (!("fillPaint" in value) || check_005722202bd90cb6(value.fillPaint)) &&
+  (!("glow" in value) || check_2c6c4821674d2f1f(value.glow));
 
 // @ts-ignore
-const check_75 = (value) =>
+const check_004fd6202bd26ce4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1381,55 +1401,56 @@ const check_75 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "bin")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_76(value.render)) &&
-  (!("aes" in value) || check_77(value.aes)) &&
-  (!("data" in value) || check_78(value.data)) &&
-  (!("params" in value) || check_79(value.params)) &&
+  (!("render" in value) || check_2c657c21674768cd(value.render)) &&
+  (!("aes" in value) || check_5510bc229fd4a58d(value.aes)) &&
+  (!("data" in value) || check_d7a7fc1ef348134d(value.data)) &&
+  (!("params" in value) || check_00533c202bd5500d(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_76 = (value) =>
+const check_2c657c21674768cd = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_77 = (value) =>
+const check_5510bc229fd4a58d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_70, var_71) => External[44].test(var_70) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_78 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d7a7fc1ef348134d = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_79 = (value) =>
+const check_00533c202bd5500d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1467,13 +1488,13 @@ const check_79 = (value) =>
     (typeof value.fun === "string" && value.fun === "min") ||
     (typeof value.fun === "string" && value.fun === "max") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_29(value.funMin)) &&
-  (!("funMax" in value) || check_29(value.funMax)) &&
-  (!("strokePaint" in value) || check_30(value.strokePaint)) &&
-  (!("glow" in value) || check_37(value.glow));
+  (!("funMin" in value) || check_2c0d202166fc56a3(value.funMin)) &&
+  (!("funMax" in value) || check_2c0d202166fc56a3(value.funMax)) &&
+  (!("strokePaint" in value) || check_2c026e2166f2d3a8(value.strokePaint)) &&
+  (!("glow" in value) || check_d7daf61ef37362b4(value.glow));
 
 // @ts-ignore
-const check_80 = (value) =>
+const check_2c5b4a21673ebf52 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1485,76 +1506,78 @@ const check_80 = (value) =>
     (typeof value.stat === "string" && value.stat === "identity") ||
     (typeof value.stat === "string" && value.stat === "unique") ||
     (typeof value.stat === "string" && value.stat === "align")) &&
-  (!("position" in value) || check_81(value.position)) &&
-  (!("render" in value) || check_82(value.render)) &&
-  (!("aes" in value) || check_83(value.aes)) &&
-  (!("data" in value) || check_84(value.data)) &&
-  (!("params" in value) || check_85(value.params)) &&
+  (!("position" in value) || check_55068a229fcbfc12(value.position)) &&
+  (!("render" in value) || check_d79dca1ef33f69d2(value.render)) &&
+  (!("aes" in value) || check_00490a202bcca692(value.aes)) &&
+  (!("data" in value) || check_2c5e30216740c8fb(value.data)) &&
+  (!("params" in value) || check_550a70229fcfb8bb(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_81 = (value) =>
+const check_55068a229fcbfc12 = (value) =>
   (typeof value === "string" && value === "stack") ||
   (typeof value === "string" && value === "fill") ||
   (typeof value === "string" && value === "dodge") ||
   (typeof value === "string" && value === "identity");
 
 // @ts-ignore
-const check_82 = (value) =>
+const check_d79dca1ef33f69d2 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_83 = (value) =>
+const check_00490a202bcca692 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_76, var_77) => External[47].test(var_76) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_84 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c5e30216740c8fb = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_85 = (value) =>
+const check_550a70229fcfb8bb = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_78, var_79) => External[48].test(var_78) || false) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("fillPaint" in value) || check_86(value.fillPaint)) &&
-  (!("glow" in value) || check_87(value.glow));
+  (!("fillPaint" in value) || check_d7a0b01ef341737b(value.fillPaint)) &&
+  (!("glow" in value) || check_004cf0202bd0633b(value.glow));
 
 // @ts-ignore
-const check_86 = (value) => check_31(value) || check_34(value);
+const check_d7a0b01ef341737b = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_87 = (value) =>
+const check_004cf0202bd0633b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1572,7 +1595,7 @@ const check_87 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_88 = (value) =>
+const check_2c53fe2167381f80 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1580,63 +1603,64 @@ const check_88 = (value) =>
   Object.getOwnPropertyNames(value).every((var_80, var_81) => External[50].test(var_80) || false) &&
   typeof value.geom === "string" &&
   value.geom === "ribbon" &&
-  (!("stat" in value) || check_89(value.stat)) &&
+  (!("stat" in value) || check_55003e229fc70f40(value.stat)) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_90(value.render)) &&
-  (!("aes" in value) || check_91(value.aes)) &&
-  (!("data" in value) || check_92(value.data)) &&
-  (!("params" in value) || check_93(value.params)) &&
+  (!("render" in value) || check_d7967e1ef338ca00(value.render)) &&
+  (!("aes" in value) || check_0042be202bc7b9c0(value.aes)) &&
+  (!("data" in value) || check_2c576421673b02a9(value.data)) &&
+  (!("params" in value) || check_5503a4229fc9f269(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_89 = (value) =>
+const check_55003e229fc70f40 = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_90 = (value) =>
+const check_d7967e1ef338ca00 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_91 = (value) =>
+const check_0042be202bc7b9c0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_82, var_83) => External[51].test(var_82) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_92 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c576421673b02a9 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_93 = (value) =>
+const check_5503a4229fc9f269 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1659,15 +1683,16 @@ const check_93 = (value) =>
     (typeof value.linejoin === "string" && value.linejoin === "miter") ||
     (typeof value.linejoin === "string" && value.linejoin === "round") ||
     (typeof value.linejoin === "string" && value.linejoin === "bevel")) &&
-  (!("fillPaint" in value) || check_94(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_94(value.strokePaint)) &&
-  (!("glow" in value) || check_95(value.glow));
+  (!("fillPaint" in value) || check_d799e41ef33bad29(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_d799e41ef33bad29(value.strokePaint)) &&
+  (!("glow" in value) || check_004624202bca9ce9(value.glow));
 
 // @ts-ignore
-const check_94 = (value) => check_31(value) || check_34(value);
+const check_d799e41ef33bad29 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_95 = (value) =>
+const check_004624202bca9ce9 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1685,7 +1710,7 @@ const check_95 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_96 = (value) =>
+const check_2c8412216761653e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1693,76 +1718,77 @@ const check_96 = (value) =>
   Object.getOwnPropertyNames(value).every((var_86, var_87) => External[54].test(var_86) || false) &&
   typeof value.geom === "string" &&
   value.geom === "rule" &&
-  (!("stat" in value) || check_97(value.stat)) &&
+  (!("stat" in value) || check_552f52229feea1fe(value.stat)) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_98(value.render)) &&
-  (!("aes" in value) || check_99(value.aes)) &&
-  (!("data" in value) || check_100(value.data)) &&
-  (!("params" in value) || check_101(value.params)) &&
+  (!("render" in value) || check_d7c6921ef3620fbe(value.render)) &&
+  (!("aes" in value) || check_0071d2202bef4c7e(value.aes)) &&
+  (!("data" in value) || check_2c87782167644867(value.data)) &&
+  (!("params" in value) || check_5532b8229ff18527(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_97 = (value) =>
+const check_552f52229feea1fe = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_98 = (value) =>
+const check_d7c6921ef3620fbe = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_99 = (value) =>
+const check_0071d2202bef4c7e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_88, var_89) => External[55].test(var_88) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_100 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c87782167644867 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_101 = (value) =>
+const check_5532b8229ff18527 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_90, var_91) => External[56].test(var_90) || false) &&
-  (!("xintercept" in value) || check_102(value.xintercept)) &&
-  (!("yintercept" in value) || check_102(value.yintercept)) &&
+  (!("xintercept" in value) || check_d7c9f81ef364f2e7(value.xintercept)) &&
+  (!("yintercept" in value) || check_d7c9f81ef364f2e7(value.yintercept)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("strokePaint" in value) || check_103(value.strokePaint)) &&
-  (!("glow" in value) || check_104(value.glow));
+  (!("strokePaint" in value) || check_007538202bf22fa7(value.strokePaint)) &&
+  (!("glow" in value) || check_2c7d4621675b9eec(value.glow));
 
 // @ts-ignore
-const check_102 = (value) =>
+const check_d7c9f81ef364f2e7 = (value) =>
   Number.isFinite(value) ||
   typeof value === "string" ||
   (Array.isArray(value) &&
@@ -1770,10 +1796,11 @@ const check_102 = (value) =>
     value.length >= 1);
 
 // @ts-ignore
-const check_103 = (value) => check_31(value) || check_34(value);
+const check_007538202bf22fa7 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_104 = (value) =>
+const check_2c7d4621675b9eec = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1791,7 +1818,7 @@ const check_104 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_105 = (value) =>
+const check_552886229fe8dbac = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1802,67 +1829,68 @@ const check_105 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_106(value.render)) &&
-  (!("aes" in value) || check_107(value.aes)) &&
-  (!("data" in value) || check_108(value.data)) &&
-  (!("params" in value) || check_109(value.params)) &&
+  (!("render" in value) || check_d7bfc61ef35c496c(value.render)) &&
+  (!("aes" in value) || check_006b06202be9862c(value.aes)) &&
+  (!("data" in value) || check_2c802c21675da895(value.data)) &&
+  (!("params" in value) || check_552c6c229fec9855(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_106 = (value) =>
+const check_d7bfc61ef35c496c = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_107 = (value) =>
+const check_006b06202be9862c = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_94, var_95) => External[59].test(var_94) || false) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_108 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c802c21675da895 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_109 = (value) =>
+const check_552c6c229fec9855 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every((var_96, var_97) => External[60].test(var_96) || false) &&
-  (!("yintercept" in value) || check_110(value.yintercept)) &&
+  (!("yintercept" in value) || check_d7c2ac1ef35e5315(value.yintercept)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("strokePaint" in value) || check_111(value.strokePaint)) &&
-  (!("glow" in value) || check_112(value.glow));
+  (!("strokePaint" in value) || check_006eec202bed42d5(value.strokePaint)) &&
+  (!("glow" in value) || check_2c767a216755d89a(value.glow));
 
 // @ts-ignore
-const check_110 = (value) =>
+const check_d7c2ac1ef35e5315 = (value) =>
   Number.isFinite(value) ||
   typeof value === "string" ||
   (Array.isArray(value) &&
@@ -1870,10 +1898,11 @@ const check_110 = (value) =>
     value.length >= 1);
 
 // @ts-ignore
-const check_111 = (value) => check_31(value) || check_34(value);
+const check_006eec202bed42d5 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_112 = (value) =>
+const check_2c767a216755d89a = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1891,7 +1920,7 @@ const check_112 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_113 = (value) =>
+const check_5521ba229fe3155a = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1902,71 +1931,72 @@ const check_113 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_114(value.render)) &&
-  (!("aes" in value) || check_115(value.aes)) &&
-  (!("data" in value) || check_116(value.data)) &&
-  (!("params" in value) || check_117(value.params)) &&
+  (!("render" in value) || check_d7b8fa1ef356831a(value.render)) &&
+  (!("aes" in value) || check_00643a202be3bfda(value.aes)) &&
+  (!("data" in value) || check_2c7960216757e243(value.data)) &&
+  (!("params" in value) || check_5525a0229fe6d203(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_114 = (value) =>
+const check_d7b8fa1ef356831a = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_115 = (value) =>
+const check_00643a202be3bfda = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_100, var_101) => External[63].test(var_100) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_116 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2c7960216757e243 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_117 = (value) =>
+const check_5525a0229fe6d203 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_102, var_103) => External[64].test(var_102) || false,
   ) &&
-  (!("xintercept" in value) || check_118(value.xintercept)) &&
+  (!("xintercept" in value) || check_d7bbe01ef3588cc3(value.xintercept)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("strokePaint" in value) || check_119(value.strokePaint)) &&
-  (!("glow" in value) || check_120(value.glow));
+  (!("strokePaint" in value) || check_006820202be77c83(value.strokePaint)) &&
+  (!("glow" in value) || check_2c6f2e21674f38c8(value.glow));
 
 // @ts-ignore
-const check_118 = (value) =>
+const check_d7bbe01ef3588cc3 = (value) =>
   Number.isFinite(value) ||
   typeof value === "string" ||
   (Array.isArray(value) &&
@@ -1974,10 +2004,11 @@ const check_118 = (value) =>
     value.length >= 1);
 
 // @ts-ignore
-const check_119 = (value) => check_31(value) || check_34(value);
+const check_006820202be77c83 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_120 = (value) =>
+const check_2c6f2e21674f38c8 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -1995,7 +2026,7 @@ const check_120 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_121 = (value) =>
+const check_551b6e229fde2888 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2007,15 +2038,15 @@ const check_121 = (value) =>
   value.geom === "jitter" &&
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) || (typeof value.position === "string" && value.position === "jitter")) &&
-  (!("positionParams" in value) || check_122(value.positionParams)) &&
-  (!("render" in value) || check_123(value.render)) &&
-  (!("aes" in value) || check_124(value.aes)) &&
-  (!("data" in value) || check_125(value.data)) &&
-  (!("params" in value) || check_126(value.params)) &&
+  (!("positionParams" in value) || check_d7b1ae1ef34fe348(value.positionParams)) &&
+  (!("render" in value) || check_005dee202bded308(value.render)) &&
+  (!("aes" in value) || check_2c7314216752f571(value.aes)) &&
+  (!("data" in value) || check_551e54229fe03231(value.data)) &&
+  (!("params" in value) || check_d7b5941ef3539ff1(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_122 = (value) =>
+const check_d7b1ae1ef34fe348 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2031,50 +2062,51 @@ const check_122 = (value) =>
   (!("y" in value) || Number.isFinite(value.y));
 
 // @ts-ignore
-const check_123 = (value) =>
+const check_005dee202bded308 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_124 = (value) =>
+const check_2c7314216752f571 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_108, var_109) => External[68].test(var_108) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_125 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_551e54229fe03231 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_126 = (value) =>
+const check_d7b5941ef3539ff1 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2107,11 +2139,11 @@ const check_126 = (value) =>
     (typeof value.fun === "string" && value.fun === "min") ||
     (typeof value.fun === "string" && value.fun === "max") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_23(value.funMin)) &&
-  (!("funMax" in value) || check_23(value.funMax));
+  (!("funMin" in value) || check_2beb242166df7709(value.funMin)) &&
+  (!("funMax" in value) || check_2beb242166df7709(value.funMax));
 
 // @ts-ignore
-const check_127 = (value) =>
+const check_0060d4202be0dcb1 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2121,24 +2153,24 @@ const check_127 = (value) =>
   ) &&
   typeof value.geom === "string" &&
   value.geom === "text" &&
-  (!("stat" in value) || check_128(value.stat)) &&
+  (!("stat" in value) || check_2d0c022167d4e3a6(value.stat)) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity") ||
     (typeof value.position === "string" && value.position === "nudge")) &&
-  (!("positionParams" in value) || check_129(value.positionParams)) &&
-  (!("render" in value) || check_130(value.render)) &&
-  (!("aes" in value) || check_131(value.aes)) &&
-  (!("data" in value) || check_132(value.data)) &&
-  (!("params" in value) || check_133(value.params)) &&
+  (!("positionParams" in value) || check_3fae622202a980c6(value.positionParams)) &&
+  (!("render" in value) || check_55b74222a0622066(value.render)) &&
+  (!("aes" in value) || check_6bc0a2233e1b9986(value.aes)) &&
+  (!("data" in value) || check_d84e821ef3d58e26(value.data)) &&
+  (!("params" in value) || check_eaf0e21f8eaa2b46(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_128 = (value) =>
+const check_2d0c022167d4e3a6 = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_129 = (value) =>
+const check_3fae622202a980c6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2154,50 +2186,51 @@ const check_129 = (value) =>
   (!("y" in value) || Number.isFinite(value.y));
 
 // @ts-ignore
-const check_130 = (value) =>
+const check_55b74222a0622066 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_131 = (value) =>
+const check_6bc0a2233e1b9986 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_116, var_117) => External[72].test(var_116) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_132 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d84e821ef3d58e26 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_133 = (value) =>
+const check_eaf0e21f8eaa2b46 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2214,7 +2247,7 @@ const check_133 = (value) =>
   (!("dy" in value) || Number.isFinite(value.dy));
 
 // @ts-ignore
-const check_134 = (value) =>
+const check_00f9c2202c62cae6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2228,15 +2261,15 @@ const check_134 = (value) =>
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity") ||
     (typeof value.position === "string" && value.position === "nudge")) &&
-  (!("positionParams" in value) || check_135(value.positionParams)) &&
-  (!("render" in value) || check_136(value.render)) &&
-  (!("aes" in value) || check_137(value.aes)) &&
-  (!("data" in value) || check_138(value.data)) &&
-  (!("params" in value) || check_139(value.params)) &&
+  (!("positionParams" in value) || check_17032220ca1c4406(value.positionParams)) &&
+  (!("render" in value) || check_2d0f682167d7c6cf(value.render)) &&
+  (!("aes" in value) || check_3fb2482202ad3d6f(value.aes)) &&
+  (!("data" in value) || check_55baa822a065038f(value.data)) &&
+  (!("params" in value) || check_6bc388233e1da32f(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_135 = (value) =>
+const check_17032220ca1c4406 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2252,50 +2285,51 @@ const check_135 = (value) =>
   (!("y" in value) || Number.isFinite(value.y));
 
 // @ts-ignore
-const check_136 = (value) =>
+const check_2d0f682167d7c6cf = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_137 = (value) =>
+const check_3fb2482202ad3d6f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_124, var_125) => External[76].test(var_124) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_138 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_55baa822a065038f = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_139 = (value) =>
+const check_6bc388233e1da32f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2315,7 +2349,7 @@ const check_139 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth >= 0));
 
 // @ts-ignore
-const check_140 = (value) =>
+const check_d851e81ef3d8714f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2328,57 +2362,58 @@ const check_140 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "smooth")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_141(value.render)) &&
-  (!("aes" in value) || check_142(value.aes)) &&
-  (!("data" in value) || check_143(value.data)) &&
-  (!("params" in value) || check_144(value.params)) &&
+  (!("render" in value) || check_eaf4c81f8eade7ef(value.render)) &&
+  (!("aes" in value) || check_00fd28202c65ae0f(value.aes)) &&
+  (!("data" in value) || check_17060820ca1e4daf(value.data)) &&
+  (!("params" in value) || check_2d05362167cf1d54(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_141 = (value) =>
+const check_eaf4c81f8eade7ef = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_142 = (value) =>
+const check_00fd28202c65ae0f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_130, var_131) => External[79].test(var_130) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_143 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_17060820ca1e4daf = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_144 = (value) =>
+const check_2d05362167cf1d54 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2400,14 +2435,15 @@ const check_144 = (value) =>
         (value.n <= 5000 && value.n >= 2)))) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("strokePaint" in value) || check_145(value.strokePaint)) &&
-  (!("glow" in value) || check_146(value.glow));
+  (!("strokePaint" in value) || check_3fa7962202a3ba74(value.strokePaint)) &&
+  (!("glow" in value) || check_55b07622a05c5a14(value.glow));
 
 // @ts-ignore
-const check_145 = (value) => check_31(value) || check_34(value);
+const check_3fa7962202a3ba74 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_146 = (value) =>
+const check_55b07622a05c5a14 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2425,7 +2461,7 @@ const check_146 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_147 = (value) =>
+const check_6bb9d6233e15d334 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2438,57 +2474,58 @@ const check_147 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "quantile")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_148(value.render)) &&
-  (!("aes" in value) || check_149(value.aes)) &&
-  (!("data" in value) || check_150(value.data)) &&
-  (!("params" in value) || check_151(value.params)) &&
+  (!("render" in value) || check_d847b61ef3cfc7d4(value.render)) &&
+  (!("aes" in value) || check_eaea161f8ea464f4(value.aes)) &&
+  (!("data" in value) || check_00f2f6202c5d0494(value.data)) &&
+  (!("params" in value) || check_16fc5620ca167db4(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_148 = (value) =>
+const check_d847b61ef3cfc7d4 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_149 = (value) =>
+const check_eaea161f8ea464f4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_136, var_137) => External[83].test(var_136) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_150 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_00f2f6202c5d0494 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_151 = (value) =>
+const check_16fc5620ca167db4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2507,14 +2544,15 @@ const check_151 = (value) =>
         (value.n <= 5000 && value.n >= 2)))) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("strokePaint" in value) || check_152(value.strokePaint)) &&
-  (!("glow" in value) || check_153(value.glow));
+  (!("strokePaint" in value) || check_2d081c2167d126fd(value.strokePaint)) &&
+  (!("glow" in value) || check_3fab7c2202a7771d(value.glow));
 
 // @ts-ignore
-const check_152 = (value) => check_31(value) || check_34(value);
+const check_2d081c2167d126fd = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_153 = (value) =>
+const check_3fab7c2202a7771d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2532,7 +2570,7 @@ const check_153 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_154 = (value) =>
+const check_55b45c22a06016bd = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2545,57 +2583,58 @@ const check_154 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "qq")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_155(value.render)) &&
-  (!("aes" in value) || check_156(value.aes)) &&
-  (!("data" in value) || check_157(value.data)) &&
-  (!("params" in value) || check_158(value.params)) &&
+  (!("render" in value) || check_6bbcbc233e17dcdd(value.render)) &&
+  (!("aes" in value) || check_d84a9c1ef3d1d17d(value.aes)) &&
+  (!("data" in value) || check_eaedfc1f8ea8219d(value.data)) &&
+  (!("params" in value) || check_00f6dc202c60c13d(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_155 = (value) =>
+const check_6bbcbc233e17dcdd = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_156 = (value) =>
+const check_d84a9c1ef3d1d17d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_142, var_143) => External[87].test(var_142) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_157 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_eaedfc1f8ea8219d = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_158 = (value) =>
+const check_00f6dc202c60c13d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2613,7 +2652,7 @@ const check_158 = (value) =>
     (typeof value.shape === "string" && value.shape === "cross"));
 
 // @ts-ignore
-const check_159 = (value) =>
+const check_16ff3c20ca18875d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2626,57 +2665,58 @@ const check_159 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "qq_line")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_160(value.render)) &&
-  (!("aes" in value) || check_161(value.aes)) &&
-  (!("data" in value) || check_162(value.data)) &&
-  (!("params" in value) || check_163(value.params)) &&
+  (!("render" in value) || check_2cfe6a2167c95702(value.render)) &&
+  (!("aes" in value) || check_3fa14a22029ecda2(value.aes)) &&
+  (!("data" in value) || check_55a9aa22a05693c2(value.data)) &&
+  (!("params" in value) || check_6bb28a233e0f3362(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_160 = (value) =>
+const check_2cfe6a2167c95702 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_161 = (value) =>
+const check_3fa14a22029ecda2 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_148, var_149) => External[90].test(var_148) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_162 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_55a9aa22a05693c2 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_163 = (value) =>
+const check_6bb28a233e0f3362 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2687,7 +2727,7 @@ const check_163 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0));
 
 // @ts-ignore
-const check_164 = (value) =>
+const check_d840ea1ef3ca0182 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2700,57 +2740,58 @@ const check_164 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "contour")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_165(value.render)) &&
-  (!("aes" in value) || check_166(value.aes)) &&
-  (!("data" in value) || check_167(value.data)) &&
-  (!("params" in value) || check_168(value.params)) &&
+  (!("render" in value) || check_eae3ca1f8e9f7822(value.render)) &&
+  (!("aes" in value) || check_00ec2a202c573e42(value.aes)) &&
+  (!("data" in value) || check_16f50a20ca0fdde2(value.data)) &&
+  (!("params" in value) || check_2d01502167cb60ab(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_165 = (value) =>
+const check_eae3ca1f8e9f7822 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_166 = (value) =>
+const check_00ec2a202c573e42 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_154, var_155) => External[93].test(var_154) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_167 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_16f50a20ca0fdde2 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_168 = (value) =>
+const check_2d01502167cb60ab = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2769,7 +2810,7 @@ const check_168 = (value) =>
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0));
 
 // @ts-ignore
-const check_169 = (value) =>
+const check_3fa4302202a0d74b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2783,57 +2824,58 @@ const check_169 = (value) =>
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "dodge") ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_170(value.render)) &&
-  (!("aes" in value) || check_171(value.aes)) &&
-  (!("data" in value) || check_172(value.data)) &&
-  (!("params" in value) || check_173(value.params)) &&
+  (!("render" in value) || check_55ad9022a05a506b(value.render)) &&
+  (!("aes" in value) || check_6bb670233e12f00b(value.aes)) &&
+  (!("data" in value) || check_d843d01ef3cc0b2b(value.data)) &&
+  (!("params" in value) || check_eae6b01f8ea181cb(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_170 = (value) =>
+const check_55ad9022a05a506b = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_171 = (value) =>
+const check_6bb670233e12f00b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_160, var_161) => External[96].test(var_160) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_172 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d843d01ef3cc0b2b = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_173 = (value) =>
+const check_eae6b01f8ea181cb = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2847,7 +2889,7 @@ const check_173 = (value) =>
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0));
 
 // @ts-ignore
-const check_174 = (value) =>
+const check_00f010202c5afaeb = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2861,57 +2903,58 @@ const check_174 = (value) =>
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "dodge") ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_175(value.render)) &&
-  (!("aes" in value) || check_176(value.aes)) &&
-  (!("data" in value) || check_177(value.data)) &&
-  (!("params" in value) || check_178(value.params)) &&
+  (!("render" in value) || check_16f8f020ca139a8b(value.render)) &&
+  (!("aes" in value) || check_2cf71e2167c2b730(value.aes)) &&
+  (!("data" in value) || check_3f9a7e2202990750(value.data)) &&
+  (!("params" in value) || check_55a35e22a051a6f0(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_175 = (value) =>
+const check_16f8f020ca139a8b = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_176 = (value) =>
+const check_2cf71e2167c2b730 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_166, var_167) => External[99].test(var_166) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_177 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_3f9a7e2202990750 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_178 = (value) =>
+const check_55a35e22a051a6f0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2932,15 +2975,16 @@ const check_178 = (value) =>
   (!("width" in value) || (Number.isFinite(value.width) && value.width > 0 && value.width <= 1)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("fillPaint" in value) || check_179(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_179(value.strokePaint)) &&
-  (!("glow" in value) || check_180(value.glow));
+  (!("fillPaint" in value) || check_6babbe233e096d10(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_6babbe233e096d10(value.strokePaint)) &&
+  (!("glow" in value) || check_d8399e1ef3c361b0(value.glow));
 
 // @ts-ignore
-const check_179 = (value) => check_31(value) || check_34(value);
+const check_6babbe233e096d10 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_180 = (value) =>
+const check_d8399e1ef3c361b0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2958,7 +3002,7 @@ const check_180 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_181 = (value) =>
+const check_eadcfe1f8e99b1d0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -2971,57 +3015,58 @@ const check_181 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "density")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_182(value.render)) &&
-  (!("aes" in value) || check_183(value.aes)) &&
-  (!("data" in value) || check_184(value.data)) &&
-  (!("params" in value) || check_185(value.params)) &&
+  (!("render" in value) || check_00e5de202c525170(value.render)) &&
+  (!("aes" in value) || check_16ee3e20ca0a1790(value.aes)) &&
+  (!("data" in value) || check_2cfb042167c673d9(value.data)) &&
+  (!("params" in value) || check_3f9d6422029b10f9(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_182 = (value) =>
+const check_00e5de202c525170 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_183 = (value) =>
+const check_16ee3e20ca0a1790 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_172, var_173) => External[103].test(var_172) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_184 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2cfb042167c673d9 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_185 = (value) =>
+const check_3f9d6422029b10f9 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3036,14 +3081,15 @@ const check_185 = (value) =>
         (value.n <= 4096 && value.n >= 2)))) &&
   (!("cut" in value) || (Number.isFinite(value.cut) && value.cut >= 0)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("fillPaint" in value) || check_186(value.fillPaint)) &&
-  (!("glow" in value) || check_187(value.glow));
+  (!("fillPaint" in value) || check_55a64422a053b099(value.fillPaint)) &&
+  (!("glow" in value) || check_6bafa4233e0d29b9(value.glow));
 
 // @ts-ignore
-const check_186 = (value) => check_31(value) || check_34(value);
+const check_55a64422a053b099 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_187 = (value) =>
+const check_6bafa4233e0d29b9 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3061,7 +3107,7 @@ const check_187 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_188 = (value) =>
+const check_d83d841ef3c71e59 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3074,57 +3120,58 @@ const check_188 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "density_2d")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_189(value.render)) &&
-  (!("aes" in value) || check_190(value.aes)) &&
-  (!("data" in value) || check_191(value.data)) &&
-  (!("params" in value) || check_192(value.params)) &&
+  (!("render" in value) || check_eadfe41f8e9bbb79(value.render)) &&
+  (!("aes" in value) || check_00e8c4202c545b19(value.aes)) &&
+  (!("data" in value) || check_16f22420ca0dd439(value.data)) &&
+  (!("params" in value) || check_2d27322167ebfcee(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_189 = (value) =>
+const check_eadfe41f8e9bbb79 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_190 = (value) =>
+const check_00e8c4202c545b19 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_178, var_179) => External[107].test(var_178) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_191 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_16f22420ca0dd439 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_192 = (value) =>
+const check_2d27322167ebfcee = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3154,7 +3201,7 @@ const check_192 = (value) =>
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0));
 
 // @ts-ignore
-const check_193 = (value) =>
+const check_3fc9922202c09a0e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3167,57 +3214,58 @@ const check_193 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "density_2d_filled")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_194(value.render)) &&
-  (!("aes" in value) || check_195(value.aes)) &&
-  (!("data" in value) || check_196(value.data)) &&
-  (!("params" in value) || check_197(value.params)) &&
+  (!("render" in value) || check_55d27222a07939ae(value.render)) &&
+  (!("aes" in value) || check_6bdbd2233e32b2ce(value.aes)) &&
+  (!("data" in value) || check_d869b21ef3eca76e(value.data)) &&
+  (!("params" in value) || check_eb0c121f8ec1448e(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_194 = (value) =>
+const check_55d27222a07939ae = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_195 = (value) =>
+const check_6bdbd2233e32b2ce = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_184, var_185) => External[110].test(var_184) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_196 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d869b21ef3eca76e = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_197 = (value) =>
+const check_eb0c121f8ec1448e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3247,7 +3295,7 @@ const check_197 = (value) =>
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0));
 
 // @ts-ignore
-const check_198 = (value) =>
+const check_0114f2202c79e42e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3260,57 +3308,58 @@ const check_198 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "bindot")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_199(value.render)) &&
-  (!("aes" in value) || check_200(value.aes)) &&
-  (!("data" in value) || check_201(value.data)) &&
-  (!("params" in value) || check_202(value.params)) &&
+  (!("render" in value) || check_171e5220ca335d4e(value.render)) &&
+  (!("aes" in value) || check_2d2a182167ee0697(value.aes)) &&
+  (!("data" in value) || check_3fcd782202c456b7(value.data)) &&
+  (!("params" in value) || check_55d65822a07cf657(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_199 = (value) =>
+const check_171e5220ca335d4e = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_200 = (value) =>
+const check_2d2a182167ee0697 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_190, var_191) => External[113].test(var_190) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_201 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_3fcd782202c456b7 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_202 = (value) =>
+const check_55d65822a07cf657 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3344,7 +3393,7 @@ const check_202 = (value) =>
     (typeof value.shape === "string" && value.shape === "cross"));
 
 // @ts-ignore
-const check_203 = (value) =>
+const check_6bdeb8233e34bc77 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3359,15 +3408,15 @@ const check_203 = (value) =>
     (typeof value.position === "string" && value.position === "identity") ||
     (typeof value.position === "string" && value.position === "jitter") ||
     (typeof value.position === "string" && value.position === "nudge")) &&
-  (!("positionParams" in value) || check_204(value.positionParams)) &&
-  (!("render" in value) || check_205(value.render)) &&
-  (!("aes" in value) || check_206(value.aes)) &&
-  (!("data" in value) || check_207(value.data)) &&
-  (!("params" in value) || check_208(value.params)) &&
+  (!("positionParams" in value) || check_d86c981ef3eeb117(value.positionParams)) &&
+  (!("render" in value) || check_eb0ff81f8ec50137(value.render)) &&
+  (!("aes" in value) || check_0118d8202c7da0d7(value.aes)) &&
+  (!("data" in value) || check_17213820ca3566f7(value.data)) &&
+  (!("params" in value) || check_2d20662167e6369c(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_204 = (value) =>
+const check_d86c981ef3eeb117 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3383,50 +3432,51 @@ const check_204 = (value) =>
   (!("y" in value) || Number.isFinite(value.y));
 
 // @ts-ignore
-const check_205 = (value) =>
+const check_eb0ff81f8ec50137 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_206 = (value) =>
+const check_0118d8202c7da0d7 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_198, var_199) => External[117].test(var_198) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_207 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_17213820ca3566f7 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_208 = (value) =>
+const check_2d20662167e6369c = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3459,11 +3509,11 @@ const check_208 = (value) =>
     (typeof value.fun === "string" && value.fun === "min") ||
     (typeof value.fun === "string" && value.fun === "max") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_23(value.funMin)) &&
-  (!("funMax" in value) || check_23(value.funMax));
+  (!("funMin" in value) || check_2beb242166df7709(value.funMin)) &&
+  (!("funMax" in value) || check_2beb242166df7709(value.funMax));
 
 // @ts-ignore
-const check_209 = (value) =>
+const check_3fc3462202bbad3c = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3480,57 +3530,58 @@ const check_209 = (value) =>
     (typeof value.stat === "string" && value.stat === "summary_bin")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_210(value.render)) &&
-  (!("aes" in value) || check_211(value.aes)) &&
-  (!("data" in value) || check_212(value.data)) &&
-  (!("params" in value) || check_213(value.params)) &&
+  (!("render" in value) || check_55cba622a073735c(value.render)) &&
+  (!("aes" in value) || check_6bd486233e2c12fc(value.aes)) &&
+  (!("data" in value) || check_d862e61ef3e6e11c(value.data)) &&
+  (!("params" in value) || check_eb05c61f8ebc57bc(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_210 = (value) =>
+const check_55cba622a073735c = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_211 = (value) =>
+const check_6bd486233e2c12fc = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_204, var_205) => External[120].test(var_204) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_212 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d862e61ef3e6e11c = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_213 = (value) =>
+const check_eb05c61f8ebc57bc = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3544,8 +3595,8 @@ const check_213 = (value) =>
     (typeof value.fun === "string" && value.fun === "mean") ||
     (typeof value.fun === "string" && value.fun === "median") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_214(value.funMin)) &&
-  (!("funMax" in value) || check_214(value.funMax)) &&
+  (!("funMin" in value) || check_010e26202c741ddc(value.funMin)) &&
+  (!("funMax" in value) || check_010e26202c741ddc(value.funMax)) &&
   (!("bins" in value) ||
     (Number.isInteger(value.bins) &&
       (!(Number.isFinite(value.bins) || typeof value.bins === "bigint") || value.bins >= 1))) &&
@@ -3557,7 +3608,7 @@ const check_213 = (value) =>
     (typeof value.closed === "string" && value.closed === "left"));
 
 // @ts-ignore
-const check_214 = (value) =>
+const check_010e26202c741ddc = (value) =>
   (typeof value === "string" && value === "mean") ||
   (typeof value === "string" && value === "median") ||
   (typeof value === "string" && value === "sum") ||
@@ -3565,7 +3616,7 @@ const check_214 = (value) =>
   (typeof value === "string" && value === "max");
 
 // @ts-ignore
-const check_215 = (value) =>
+const check_17170620ca2cbd7c = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3580,60 +3631,61 @@ const check_215 = (value) =>
     (typeof value.stat === "string" && value.stat === "summary")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_216(value.render)) &&
-  (!("aes" in value) || check_217(value.aes)) &&
-  (!("data" in value) || check_218(value.data)) &&
-  (!("params" in value) || check_219(value.params)) &&
+  (!("render" in value) || check_2d234c2167e84045(value.render)) &&
+  (!("aes" in value) || check_3fc62c2202bdb6e5(value.aes)) &&
+  (!("data" in value) || check_55cf8c22a0773005(value.data)) &&
+  (!("params" in value) || check_6bd86c233e2fcfa5(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_216 = (value) =>
+const check_2d234c2167e84045 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_217 = (value) =>
+const check_3fc62c2202bdb6e5 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_210, var_211) => External[123].test(var_210) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_218 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_55cf8c22a0773005 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_219 = (value) => check_220(value);
+const check_6bd86c233e2fcfa5 = (value) => check_d865cc1ef3e8eac5(value);
 
 // @ts-ignore
-const check_220 = (value) =>
+const check_d865cc1ef3e8eac5 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3647,8 +3699,8 @@ const check_220 = (value) =>
     (typeof value.fun === "string" && value.fun === "mean") ||
     (typeof value.fun === "string" && value.fun === "median") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_214(value.funMin)) &&
-  (!("funMax" in value) || check_214(value.funMax)) &&
+  (!("funMin" in value) || check_010e26202c741ddc(value.funMin)) &&
+  (!("funMax" in value) || check_010e26202c741ddc(value.funMax)) &&
   (!("bins" in value) ||
     (Number.isInteger(value.bins) &&
       (!(Number.isFinite(value.bins) || typeof value.bins === "bigint") || value.bins >= 1))) &&
@@ -3660,7 +3712,7 @@ const check_220 = (value) =>
     (typeof value.closed === "string" && value.closed === "left"));
 
 // @ts-ignore
-const check_221 = (value) =>
+const check_eb08ac1f8ebe6165 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3675,57 +3727,58 @@ const check_221 = (value) =>
     (typeof value.stat === "string" && value.stat === "summary")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_222(value.render)) &&
-  (!("aes" in value) || check_223(value.aes)) &&
-  (!("data" in value) || check_224(value.data)) &&
-  (!("params" in value) || check_225(value.params)) &&
+  (!("render" in value) || check_01120c202c77da85(value.render)) &&
+  (!("aes" in value) || check_171aec20ca307a25(value.aes)) &&
+  (!("data" in value) || check_2d191a2167df96ca(value.data)) &&
+  (!("params" in value) || check_3fbc7a2202b5e6ea(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_222 = (value) =>
+const check_01120c202c77da85 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_223 = (value) =>
+const check_171aec20ca307a25 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_216, var_217) => External[126].test(var_216) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_224 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_2d191a2167df96ca = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_225 = (value) =>
+const check_3fbc7a2202b5e6ea = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3746,11 +3799,11 @@ const check_225 = (value) =>
     (typeof value.fun === "string" && value.fun === "mean") ||
     (typeof value.fun === "string" && value.fun === "median") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_226(value.funMin)) &&
-  (!("funMax" in value) || check_226(value.funMax));
+  (!("funMin" in value) || check_55c55a22a06e868a(value.funMin)) &&
+  (!("funMax" in value) || check_55c55a22a06e868a(value.funMax));
 
 // @ts-ignore
-const check_226 = (value) =>
+const check_55c55a22a06e868a = (value) =>
   (typeof value === "string" && value === "mean") ||
   (typeof value === "string" && value === "median") ||
   (typeof value === "string" && value === "sum") ||
@@ -3758,7 +3811,7 @@ const check_226 = (value) =>
   (typeof value === "string" && value === "max");
 
 // @ts-ignore
-const check_227 = (value) =>
+const check_6bcdba233e264caa = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3773,57 +3826,58 @@ const check_227 = (value) =>
     (typeof value.stat === "string" && value.stat === "summary")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_228(value.render)) &&
-  (!("aes" in value) || check_229(value.aes)) &&
-  (!("data" in value) || check_230(value.data)) &&
-  (!("params" in value) || check_231(value.params)) &&
+  (!("render" in value) || check_d85b9a1ef3e0414a(value.render)) &&
+  (!("aes" in value) || check_eafefa1f8eb6916a(value.aes)) &&
+  (!("data" in value) || check_0107da202c6f310a(value.data)) &&
+  (!("params" in value) || check_17103a20ca26f72a(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_228 = (value) =>
+const check_d85b9a1ef3e0414a = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_229 = (value) =>
+const check_eafefa1f8eb6916a = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_222, var_223) => External[129].test(var_222) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_230 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_0107da202c6f310a = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_231 = (value) =>
+const check_17103a20ca26f72a = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3838,11 +3892,11 @@ const check_231 = (value) =>
     (typeof value.fun === "string" && value.fun === "mean") ||
     (typeof value.fun === "string" && value.fun === "median") ||
     (typeof value.fun === "string" && value.fun === "sum")) &&
-  (!("funMin" in value) || check_232(value.funMin)) &&
-  (!("funMax" in value) || check_232(value.funMax));
+  (!("funMin" in value) || check_2d1d002167e35373(value.funMin)) &&
+  (!("funMax" in value) || check_2d1d002167e35373(value.funMax));
 
 // @ts-ignore
-const check_232 = (value) =>
+const check_2d1d002167e35373 = (value) =>
   (typeof value === "string" && value === "mean") ||
   (typeof value === "string" && value === "median") ||
   (typeof value === "string" && value === "sum") ||
@@ -3850,7 +3904,7 @@ const check_232 = (value) =>
   (typeof value === "string" && value === "max");
 
 // @ts-ignore
-const check_233 = (value) =>
+const check_3fbf602202b7f093 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3864,57 +3918,58 @@ const check_233 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_234(value.render)) &&
-  (!("aes" in value) || check_235(value.aes)) &&
-  (!("data" in value) || check_236(value.data)) &&
-  check_237(value.params) &&
+  (!("render" in value) || check_55c84022a0709033(value.render)) &&
+  (!("aes" in value) || check_6bd1a0233e2a0953(value.aes)) &&
+  (!("data" in value) || check_d85f801ef3e3fdf3(value.data)) &&
+  check_eb01e01f8eb89b13(value.params) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_234 = (value) =>
+const check_55c84022a0709033 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_235 = (value) =>
+const check_6bd1a0233e2a0953 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_228, var_229) => External[132].test(var_228) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_236 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d85f801ef3e3fdf3 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_237 = (value) =>
+const check_eb01e01f8eb89b13 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3922,22 +3977,24 @@ const check_237 = (value) =>
   Object.getOwnPropertyNames(value).every(
     (var_230, var_231) => External[133].test(var_230) || false,
   ) &&
-  check_238(value.map) &&
+  check_010ac0202c713ab3(value.map) &&
   (!("mapId" in value) || (typeof value.mapId === "string" && Guard.IsMinLength(value.mapId, 1))) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("fillPaint" in value) || check_239(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_239(value.strokePaint)) &&
-  (!("glow" in value) || check_240(value.glow));
+  (!("fillPaint" in value) || check_17142020ca2ab3d3(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_17142020ca2ab3d3(value.strokePaint)) &&
+  (!("glow" in value) || check_2d124e2167d9d078(value.glow));
 
 // @ts-ignore
-const check_238 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_010ac0202c713ab3 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_239 = (value) => check_31(value) || check_34(value);
+const check_17142020ca2ab3d3 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_240 = (value) =>
+const check_2d124e2167d9d078 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3955,7 +4012,7 @@ const check_240 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_241 = (value) =>
+const check_3fb52e2202af4718 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -3965,65 +4022,66 @@ const check_241 = (value) =>
   ) &&
   typeof value.geom === "string" &&
   value.geom === "rect" &&
-  (!("stat" in value) || check_242(value.stat)) &&
+  (!("stat" in value) || check_55be8e22a068c038(value.stat)) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_243(value.render)) &&
-  (!("aes" in value) || check_244(value.aes)) &&
-  (!("data" in value) || check_245(value.data)) &&
-  (!("params" in value) || check_246(value.params)) &&
+  (!("render" in value) || check_6bc76e233e215fd8(value.render)) &&
+  (!("aes" in value) || check_d854ce1ef3da7af8(value.aes)) &&
+  (!("data" in value) || check_eaf7ae1f8eaff198(value.data)) &&
+  (!("params" in value) || check_01010e202c696ab8(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_242 = (value) =>
+const check_55be8e22a068c038 = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_243 = (value) =>
+const check_6bc76e233e215fd8 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_244 = (value) =>
+const check_d854ce1ef3da7af8 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_234, var_235) => External[136].test(var_234) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_245 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_eaf7ae1f8eaff198 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_246 = (value) =>
+const check_01010e202c696ab8 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4032,15 +4090,16 @@ const check_246 = (value) =>
   ) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("fillPaint" in value) || check_247(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_247(value.strokePaint)) &&
-  (!("glow" in value) || check_248(value.glow));
+  (!("fillPaint" in value) || check_1709ee20ca220a58(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_1709ee20ca220a58(value.strokePaint)) &&
+  (!("glow" in value) || check_2d16342167dd8d21(value.glow));
 
 // @ts-ignore
-const check_247 = (value) => check_31(value) || check_34(value);
+const check_1709ee20ca220a58 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_248 = (value) =>
+const check_2d16342167dd8d21 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4058,7 +4117,7 @@ const check_248 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_249 = (value) =>
+const check_3fb8942202b22a41 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4071,57 +4130,58 @@ const check_249 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_250(value.render)) &&
-  (!("aes" in value) || check_251(value.aes)) &&
-  (!("data" in value) || check_252(value.data)) &&
-  (!("params" in value) || check_253(value.params)) &&
+  (!("render" in value) || check_55c17422a06ac9e1(value.render)) &&
+  (!("aes" in value) || check_6bcad4233e244301(value.aes)) &&
+  (!("data" in value) || check_d858b41ef3de37a1(value.data)) &&
+  (!("params" in value) || check_eafb141f8eb2d4c1(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_250 = (value) =>
+const check_55c17422a06ac9e1 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_251 = (value) =>
+const check_6bcad4233e244301 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_240, var_241) => External[140].test(var_240) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_252 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d858b41ef3de37a1 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_253 = (value) =>
+const check_eafb141f8eb2d4c1 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4132,15 +4192,16 @@ const check_253 = (value) =>
   (!("height" in value) || (Number.isFinite(value.height) && value.height > 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
-  (!("fillPaint" in value) || check_254(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_254(value.strokePaint)) &&
-  (!("glow" in value) || check_255(value.glow));
+  (!("fillPaint" in value) || check_0103f4202c6b7461(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_0103f4202c6b7461(value.strokePaint)) &&
+  (!("glow" in value) || check_170d5420ca24ed81(value.glow));
 
 // @ts-ignore
-const check_254 = (value) => check_31(value) || check_34(value);
+const check_0103f4202c6b7461 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_255 = (value) =>
+const check_170d5420ca24ed81 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4158,7 +4219,7 @@ const check_255 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_256 = (value) =>
+const check_2cd5222167a5d796 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4171,57 +4232,58 @@ const check_256 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "bin_2d")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_257(value.render)) &&
-  (!("aes" in value) || check_258(value.aes)) &&
-  (!("data" in value) || check_259(value.data)) &&
-  (!("params" in value) || check_260(value.params)) &&
+  (!("render" in value) || check_a01db2211757f346(value.render)) &&
+  (!("aes" in value) || check_3f788222027c27b6(value.aes)) &&
+  (!("data" in value) || check_b6269221b51092e6(value.data)) &&
+  (!("params" in value) || check_55816222a034c756(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_257 = (value) =>
+const check_a01db2211757f346 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_258 = (value) =>
+const check_3f788222027c27b6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_246, var_247) => External[144].test(var_246) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_259 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_b6269221b51092e6 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_260 = (value) =>
+const check_55816222a034c756 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4235,7 +4297,7 @@ const check_260 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0));
 
 // @ts-ignore
-const check_261 = (value) =>
+const check_cc2ff22252ca0c06 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4248,57 +4310,58 @@ const check_261 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_262(value.render)) &&
-  (!("aes" in value) || check_263(value.aes)) &&
-  (!("data" in value) || check_264(value.data)) &&
-  (!("params" in value) || check_265(value.params)) &&
+  (!("render" in value) || check_6b89c2233dec8d76(value.render)) &&
+  (!("aes" in value) || check_e238d222f082aba6(value.aes)) &&
+  (!("data" in value) || check_d817a21ef3a68216(value.data)) &&
+  (!("params" in value) || check_4b60321ea3589dc6(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_262 = (value) =>
+const check_6b89c2233dec8d76 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_263 = (value) =>
+const check_e238d222f082aba6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_252, var_253) => External[147].test(var_252) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_264 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_d817a21ef3a68216 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_265 = (value) =>
+const check_4b60321ea3589dc6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4312,7 +4375,7 @@ const check_265 = (value) =>
     (typeof value.interpolate === "boolean" && value.interpolate === false));
 
 // @ts-ignore
-const check_266 = (value) =>
+const check_eabb021f8e7cd236 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4325,57 +4388,58 @@ const check_266 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "bin_hex")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_267(value.render)) &&
-  (!("aes" in value) || check_268(value.aes)) &&
-  (!("data" in value) || check_269(value.data)) &&
-  (!("params" in value) || check_270(value.params)) &&
+  (!("render" in value) || check_6169121f41113d66(value.render)) &&
+  (!("aes" in value) || check_00c3e2202c3571d6(value.aes)) &&
+  (!("data" in value) || check_7772721fdecab686(value.data)) &&
+  (!("params" in value) || check_16cc4220c9ed37f6(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_267 = (value) =>
+const check_6169121f41113d66 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_268 = (value) =>
+const check_00c3e2202c3571d6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_258, var_259) => External[150].test(var_258) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_269 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_7772721fdecab686 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_270 = (value) =>
+const check_16cc4220c9ed37f6 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4388,7 +4452,7 @@ const check_270 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth >= 0));
 
 // @ts-ignore
-const check_271 = (value) =>
+const check_8d7b52207c835626 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4398,65 +4462,66 @@ const check_271 = (value) =>
   ) &&
   typeof value.geom === "string" &&
   value.geom === "segment" &&
-  (!("stat" in value) || check_272(value.stat)) &&
+  (!("stat" in value) || check_2cd9082167a9943f(value.stat)) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_273(value.render)) &&
-  (!("aes" in value) || check_274(value.aes)) &&
-  (!("data" in value) || check_275(value.data)) &&
-  (!("params" in value) || check_276(value.params)) &&
+  (!("render" in value) || check_a0219821175bafef(value.render)) &&
+  (!("aes" in value) || check_3f7b6822027e315f(value.aes)) &&
+  (!("data" in value) || check_b629f821b513760f(value.data)) &&
+  (!("params" in value) || check_55844822a036d0ff(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_272 = (value) =>
+const check_2cd9082167a9943f = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "unique");
 
 // @ts-ignore
-const check_273 = (value) =>
+const check_a0219821175bafef = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_274 = (value) =>
+const check_3f7b6822027e315f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_264, var_265) => External[153].test(var_264) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_275 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_b629f821b513760f = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_276 = (value) =>
+const check_55844822a036d0ff = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4469,14 +4534,15 @@ const check_276 = (value) =>
     (typeof value.lineend === "string" && value.lineend === "butt") ||
     (typeof value.lineend === "string" && value.lineend === "round") ||
     (typeof value.lineend === "string" && value.lineend === "square")) &&
-  (!("strokePaint" in value) || check_277(value.strokePaint)) &&
-  (!("glow" in value) || check_278(value.glow));
+  (!("strokePaint" in value) || check_cc32d82252cc15af(value.strokePaint)) &&
+  (!("glow" in value) || check_6b8da8233df04a1f(value.glow));
 
 // @ts-ignore
-const check_277 = (value) => check_31(value) || check_34(value);
+const check_cc32d82252cc15af = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_278 = (value) =>
+const check_6b8da8233df04a1f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4494,7 +4560,7 @@ const check_278 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_279 = (value) =>
+const check_e23c3822f0858ecf = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4508,57 +4574,58 @@ const check_279 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "function")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_280(value.render)) &&
-  (!("aes" in value) || check_281(value.aes)) &&
-  (!("data" in value) || check_282(value.data)) &&
-  check_283(value.params) &&
+  (!("render" in value) || check_d81b881ef3aa3ebf(value.render)) &&
+  (!("aes" in value) || check_4b64181ea35c5a6f(value.aes)) &&
+  (!("data" in value) || check_eabde81f8e7edbdf(value.data)) &&
+  check_616c781f4114208f(value.params) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_280 = (value) =>
+const check_d81b881ef3aa3ebf = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_281 = (value) =>
+const check_4b64181ea35c5a6f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_270, var_271) => External[157].test(var_270) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_282 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_eabde81f8e7edbdf = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_283 = (value) =>
+const check_616c781f4114208f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4566,7 +4633,7 @@ const check_283 = (value) =>
   Object.getOwnPropertyNames(value).every(
     (var_272, var_273) => External[158].test(var_272) || false,
   ) &&
-  check_284(value.fun) &&
+  check_00c6c8202c377b7f(value.fun) &&
   (!("n" in value) ||
     (Number.isInteger(value.n) &&
       (!(Number.isFinite(value.n) || typeof value.n === "bigint") ||
@@ -4576,21 +4643,21 @@ const check_283 = (value) =>
       value.xlim.every((element, index) => Number.isFinite(element)) &&
       value.xlim.length <= 2 &&
       value.xlim.length >= 2)) &&
-  (!("args" in value) || check_285(value.args)) &&
+  (!("args" in value) || check_7775581fdeccc02f(value.args)) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("strokePaint" in value) || check_286(value.strokePaint)) &&
-  (!("glow" in value) || check_287(value.glow));
+  (!("strokePaint" in value) || check_16d02820c9f0f49f(value.strokePaint)) &&
+  (!("glow" in value) || check_8d7eb8207c86394f(value.glow));
 
 // @ts-ignore
-const check_284 = (value) =>
+const check_00c6c8202c377b7f = (value) =>
   (typeof value === "string" && value === "identity") ||
   (typeof value === "string" && value === "dnorm") ||
   (typeof value === "string" && value === "pnorm") ||
   (typeof value === "string" && value === "linear");
 
 // @ts-ignore
-const check_285 = (value) =>
+const check_7775581fdeccc02f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4603,10 +4670,11 @@ const check_285 = (value) =>
   (!("b" in value) || Number.isFinite(value.b));
 
 // @ts-ignore
-const check_286 = (value) => check_31(value) || check_34(value);
+const check_16d02820c9f0f49f = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_287 = (value) =>
+const check_8d7eb8207c86394f = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4624,7 +4692,7 @@ const check_287 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_288 = (value) =>
+const check_2cce562167a01144 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4637,57 +4705,58 @@ const check_288 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_289(value.render)) &&
-  (!("aes" in value) || check_290(value.aes)) &&
-  (!("data" in value) || check_291(value.data)) &&
-  (!("params" in value) || check_292(value.params)) &&
+  (!("render" in value) || check_a016e62117522cf4(value.render)) &&
+  (!("aes" in value) || check_3f713622027587e4(value.aes)) &&
+  (!("data" in value) || check_b61fc621b50acc94(value.data)) &&
+  (!("params" in value) || check_557a9622a02f0104(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_289 = (value) =>
+const check_a016e62117522cf4 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_290 = (value) =>
+const check_3f713622027587e4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_278, var_279) => External[162].test(var_278) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_291 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_b61fc621b50acc94 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_292 = (value) =>
+const check_557a9622a02f0104 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4696,15 +4765,16 @@ const check_292 = (value) =>
   ) &&
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
-  (!("fillPaint" in value) || check_293(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_293(value.strokePaint)) &&
-  (!("glow" in value) || check_294(value.glow));
+  (!("fillPaint" in value) || check_cc29262252c445b4(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_cc29262252c445b4(value.strokePaint)) &&
+  (!("glow" in value) || check_6b8376233de7a0a4(value.glow));
 
 // @ts-ignore
-const check_293 = (value) => check_31(value) || check_34(value);
+const check_cc29262252c445b4 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_294 = (value) =>
+const check_6b8376233de7a0a4 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4722,7 +4792,7 @@ const check_294 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_295 = (value) =>
+const check_e2320622f07ce554 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4735,57 +4805,58 @@ const check_295 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_296(value.render)) &&
-  (!("aes" in value) || check_297(value.aes)) &&
-  (!("data" in value) || check_298(value.data)) &&
-  (!("params" in value) || check_299(value.params)) &&
+  (!("render" in value) || check_d810d61ef3a0bbc4(value.render)) &&
+  (!("aes" in value) || check_4b59661ea352d774(value.aes)) &&
+  (!("data" in value) || check_eab3b61f8e763264(value.data)) &&
+  (!("params" in value) || check_6162461f410b7714(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_296 = (value) =>
+const check_d810d61ef3a0bbc4 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_297 = (value) =>
+const check_4b59661ea352d774 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_284, var_285) => External[166].test(var_284) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_298 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_eab3b61f8e763264 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_299 = (value) =>
+const check_6162461f410b7714 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4798,7 +4869,7 @@ const check_299 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0));
 
 // @ts-ignore
-const check_300 = (value) =>
+const check_00bd16202c2fab84 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4811,57 +4882,58 @@ const check_300 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_301(value.render)) &&
-  (!("aes" in value) || check_302(value.aes)) &&
-  (!("data" in value) || check_303(value.data)) &&
-  (!("params" in value) || check_304(value.params)) &&
+  (!("render" in value) || check_776ba61fdec4f034(value.render)) &&
+  (!("aes" in value) || check_16c5f620c9e84b24(value.aes)) &&
+  (!("data" in value) || check_8d7486207c7d8fd4(value.data)) &&
+  (!("params" in value) || check_2cd23c2167a3cded(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_301 = (value) =>
+const check_776ba61fdec4f034 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_302 = (value) =>
+const check_16c5f620c9e84b24 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_290, var_291) => External[169].test(var_290) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_303 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_8d7486207c7d8fd4 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_304 = (value) =>
+const check_2cd23c2167a3cded = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4880,14 +4952,15 @@ const check_304 = (value) =>
     (typeof value.lineend === "string" && value.lineend === "butt") ||
     (typeof value.lineend === "string" && value.lineend === "round") ||
     (typeof value.lineend === "string" && value.lineend === "square")) &&
-  (!("strokePaint" in value) || check_305(value.strokePaint)) &&
-  (!("glow" in value) || check_306(value.glow));
+  (!("strokePaint" in value) || check_a01acc211755e99d(value.strokePaint)) &&
+  (!("glow" in value) || check_3f749c2202786b0d(value.glow));
 
 // @ts-ignore
-const check_305 = (value) => check_31(value) || check_34(value);
+const check_a01acc211755e99d = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_306 = (value) =>
+const check_3f749c2202786b0d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4905,7 +4978,7 @@ const check_306 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_307 = (value) =>
+const check_b623ac21b50e893d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4918,57 +4991,58 @@ const check_307 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "sf")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_308(value.render)) &&
-  (!("aes" in value) || check_309(value.aes)) &&
-  (!("data" in value) || check_310(value.data)) &&
-  (!("params" in value) || check_311(value.params)) &&
+  (!("render" in value) || check_557d7c22a0310aad(value.render)) &&
+  (!("aes" in value) || check_cc2c0c2252c64f5d(value.aes)) &&
+  (!("data" in value) || check_6b86dc233dea83cd(value.data)) &&
+  (!("params" in value) || check_e234ec22f07eeefd(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_308 = (value) =>
+const check_557d7c22a0310aad = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_309 = (value) =>
+const check_cc2c0c2252c64f5d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_296, var_297) => External[173].test(var_296) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_310 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_6b86dc233dea83cd = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_311 = (value) =>
+const check_e234ec22f07eeefd = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -4980,15 +5054,16 @@ const check_311 = (value) =>
   (!("alpha" in value) || (Number.isFinite(value.alpha) && value.alpha <= 1 && value.alpha >= 0)) &&
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0)) &&
   (!("size" in value) || (Number.isFinite(value.size) && value.size > 0)) &&
-  (!("fillPaint" in value) || check_312(value.fillPaint)) &&
-  (!("strokePaint" in value) || check_312(value.strokePaint)) &&
-  (!("glow" in value) || check_313(value.glow));
+  (!("fillPaint" in value) || check_d814bc1ef3a4786d(value.fillPaint)) &&
+  (!("strokePaint" in value) || check_d814bc1ef3a4786d(value.strokePaint)) &&
+  (!("glow" in value) || check_4b5d4c1ea356941d(value.glow));
 
 // @ts-ignore
-const check_312 = (value) => check_31(value) || check_34(value);
+const check_d814bc1ef3a4786d = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_313 = (value) =>
+const check_4b5d4c1ea356941d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5006,7 +5081,7 @@ const check_313 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_314 = (value) =>
+const check_eab71c1f8e79158d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5019,57 +5094,58 @@ const check_314 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "sf_coordinates")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_315(value.render)) &&
-  (!("aes" in value) || check_316(value.aes)) &&
-  (!("data" in value) || check_317(value.data)) &&
-  (!("params" in value) || check_318(value.params)) &&
+  (!("render" in value) || check_61662c1f410f33bd(value.render)) &&
+  (!("aes" in value) || check_00bffc202c31b52d(value.aes)) &&
+  (!("data" in value) || check_776e8c1fdec6f9dd(value.data)) &&
+  (!("params" in value) || check_16c95c20c9eb2e4d(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_315 = (value) =>
+const check_61662c1f410f33bd = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_316 = (value) =>
+const check_00bffc202c31b52d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_302, var_303) => External[177].test(var_302) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_317 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_776e8c1fdec6f9dd = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_318 = (value) =>
+const check_16c95c20c9eb2e4d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5088,7 +5164,7 @@ const check_318 = (value) =>
   (!("dy" in value) || Number.isFinite(value.dy));
 
 // @ts-ignore
-const check_319 = (value) =>
+const check_8d776c207c7f997d = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5101,57 +5177,58 @@ const check_319 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "sf_coordinates")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_320(value.render)) &&
-  (!("aes" in value) || check_321(value.aes)) &&
-  (!("data" in value) || check_322(value.data)) &&
-  (!("params" in value) || check_323(value.params)) &&
+  (!("render" in value) || check_2cc80a21679b2472(value.render)) &&
+  (!("aes" in value) || check_a0109a21174d4022(value.aes)) &&
+  (!("data" in value) || check_3f6a6a22026fc192(value.data)) &&
+  (!("params" in value) || check_b618fa21b5050642(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_320 = (value) =>
+const check_2cc80a21679b2472 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_321 = (value) =>
+const check_a0109a21174d4022 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_308, var_309) => External[180].test(var_308) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_322 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_3f6a6a22026fc192 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_323 = (value) =>
+const check_b618fa21b5050642 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5173,7 +5250,7 @@ const check_323 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0));
 
 // @ts-ignore
-const check_324 = (value) =>
+const check_55734a22a0286132 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5186,57 +5263,58 @@ const check_324 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_325(value.render)) &&
-  (!("aes" in value) || check_326(value.aes)) &&
-  (!("data" in value) || check_327(value.data)) &&
-  (!("params" in value) || check_328(value.params)) &&
+  (!("render" in value) || check_cc21da2252bda5e2(value.render)) &&
+  (!("aes" in value) || check_6b7caa233de1da52(value.aes)) &&
+  (!("data" in value) || check_e22b3a22f0771f02(value.data)) &&
+  (!("params" in value) || check_d80a8a1ef39bcef2(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_325 = (value) =>
+const check_cc21da2252bda5e2 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_326 = (value) =>
+const check_6b7caa233de1da52 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_314, var_315) => External[183].test(var_314) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_327 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_e22b3a22f0771f02 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_328 = (value) =>
+const check_d80a8a1ef39bcef2 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5246,7 +5324,7 @@ const check_328 = (value) =>
   true;
 
 // @ts-ignore
-const check_329 = (value) =>
+const check_4b531a1ea34deaa2 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5259,57 +5337,58 @@ const check_329 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_330(value.render)) &&
-  (!("aes" in value) || check_331(value.aes)) &&
-  (!("data" in value) || check_332(value.data)) &&
-  (!("params" in value) || check_333(value.params)) &&
+  (!("render" in value) || check_eaacea1f8e706c12(value.render)) &&
+  (!("aes" in value) || check_615b7a1f4105b0c2(value.aes)) &&
+  (!("data" in value) || check_00b5ca202c290bb2(value.data)) &&
+  (!("params" in value) || check_77645a1fdebe5062(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_330 = (value) =>
+const check_eaacea1f8e706c12 = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_331 = (value) =>
+const check_615b7a1f4105b0c2 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_320, var_321) => External[186].test(var_320) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_332 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_00b5ca202c290bb2 = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_333 = (value) =>
+const check_77645a1fdebe5062 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5324,14 +5403,15 @@ const check_333 = (value) =>
     (typeof value.lineend === "string" && value.lineend === "butt") ||
     (typeof value.lineend === "string" && value.lineend === "round") ||
     (typeof value.lineend === "string" && value.lineend === "square")) &&
-  (!("strokePaint" in value) || check_334(value.strokePaint)) &&
-  (!("glow" in value) || check_335(value.glow));
+  (!("strokePaint" in value) || check_16bf2a20c9e284d2(value.strokePaint)) &&
+  (!("glow" in value) || check_8d6dba207c77c982(value.glow));
 
 // @ts-ignore
-const check_334 = (value) => check_31(value) || check_34(value);
+const check_16bf2a20c9e284d2 = (value) =>
+  check_2c06542166f69051(value) || check_2ca22821677a882f(value);
 
 // @ts-ignore
-const check_335 = (value) =>
+const check_8d6dba207c77c982 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5349,7 +5429,7 @@ const check_335 = (value) =>
   value.opacity >= 0;
 
 // @ts-ignore
-const check_336 = (value) =>
+const check_2ccb7021679e079b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5362,57 +5442,58 @@ const check_336 = (value) =>
   (!("stat" in value) || (typeof value.stat === "string" && value.stat === "identity")) &&
   (!("position" in value) ||
     (typeof value.position === "string" && value.position === "identity")) &&
-  (!("render" in value) || check_337(value.render)) &&
-  (!("aes" in value) || check_338(value.aes)) &&
-  (!("data" in value) || check_339(value.data)) &&
-  (!("params" in value) || check_340(value.params)) &&
+  (!("render" in value) || check_a0138021174f49cb(value.render)) &&
+  (!("aes" in value) || check_3f6e502202737e3b(value.aes)) &&
+  (!("data" in value) || check_b61ce021b508c2eb(value.data)) &&
+  (!("params" in value) || check_5576b022a02b445b(value.params)) &&
   (!("inspect" in value) || (typeof value.inspect === "boolean" && value.inspect === false));
 
 // @ts-ignore
-const check_337 = (value) =>
+const check_a0138021174f49cb = (value) =>
   (typeof value === "string" && value === "svg") ||
   (typeof value === "string" && value === "canvas") ||
   (typeof value === "string" && value === "auto");
 
 // @ts-ignore
-const check_338 = (value) =>
+const check_3f6e502202737e3b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_326, var_327) => External[190].test(var_326) || false,
   ) &&
-  (!("x" in value) || check_12(value.x)) &&
-  (!("y" in value) || check_12(value.y)) &&
-  (!("color" in value) || check_12(value.color)) &&
-  (!("fill" in value) || check_12(value.fill)) &&
-  (!("size" in value) || check_12(value.size)) &&
-  (!("linewidth" in value) || check_12(value.linewidth)) &&
-  (!("alpha" in value) || check_12(value.alpha)) &&
-  (!("shape" in value) || check_12(value.shape)) &&
-  (!("linetype" in value) || check_12(value.linetype)) &&
-  (!("group" in value) || check_12(value.group)) &&
-  (!("label" in value) || check_12(value.label)) &&
-  (!("weight" in value) || check_12(value.weight)) &&
-  (!("sample" in value) || check_12(value.sample)) &&
-  (!("ymin" in value) || check_12(value.ymin)) &&
-  (!("ymax" in value) || check_12(value.ymax)) &&
-  (!("xmin" in value) || check_12(value.xmin)) &&
-  (!("xmax" in value) || check_12(value.xmax)) &&
-  (!("xend" in value) || check_12(value.xend)) &&
-  (!("yend" in value) || check_12(value.yend)) &&
-  (!("width" in value) || check_12(value.width)) &&
-  (!("height" in value) || check_12(value.height)) &&
-  (!("z" in value) || check_12(value.z)) &&
-  (!("map_id" in value) || check_12(value.map_id)) &&
-  (!("angle" in value) || check_12(value.angle)) &&
-  (!("radius" in value) || check_12(value.radius));
+  (!("x" in value) || check_2c4d32216732592e(value.x)) &&
+  (!("y" in value) || check_2c4d32216732592e(value.y)) &&
+  (!("color" in value) || check_2c4d32216732592e(value.color)) &&
+  (!("fill" in value) || check_2c4d32216732592e(value.fill)) &&
+  (!("size" in value) || check_2c4d32216732592e(value.size)) &&
+  (!("linewidth" in value) || check_2c4d32216732592e(value.linewidth)) &&
+  (!("alpha" in value) || check_2c4d32216732592e(value.alpha)) &&
+  (!("shape" in value) || check_2c4d32216732592e(value.shape)) &&
+  (!("linetype" in value) || check_2c4d32216732592e(value.linetype)) &&
+  (!("group" in value) || check_2c4d32216732592e(value.group)) &&
+  (!("label" in value) || check_2c4d32216732592e(value.label)) &&
+  (!("weight" in value) || check_2c4d32216732592e(value.weight)) &&
+  (!("sample" in value) || check_2c4d32216732592e(value.sample)) &&
+  (!("ymin" in value) || check_2c4d32216732592e(value.ymin)) &&
+  (!("ymax" in value) || check_2c4d32216732592e(value.ymax)) &&
+  (!("xmin" in value) || check_2c4d32216732592e(value.xmin)) &&
+  (!("xmax" in value) || check_2c4d32216732592e(value.xmax)) &&
+  (!("xend" in value) || check_2c4d32216732592e(value.xend)) &&
+  (!("yend" in value) || check_2c4d32216732592e(value.yend)) &&
+  (!("width" in value) || check_2c4d32216732592e(value.width)) &&
+  (!("height" in value) || check_2c4d32216732592e(value.height)) &&
+  (!("z" in value) || check_2c4d32216732592e(value.z)) &&
+  (!("map_id" in value) || check_2c4d32216732592e(value.map_id)) &&
+  (!("angle" in value) || check_2c4d32216732592e(value.angle)) &&
+  (!("radius" in value) || check_2c4d32216732592e(value.radius));
 
 // @ts-ignore
-const check_339 = (value) => check_3(value) || check_5(value) || check_7(value);
+const check_b61ce021b508c2eb = (value) =>
+  check_2be0722166d5f40e(value) || check_2b814a2166851b92(value) || check_2b9c7a21669c34da(value);
 
 // @ts-ignore
-const check_340 = (value) =>
+const check_5576b022a02b445b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5429,24 +5510,24 @@ const check_340 = (value) =>
   (!("linewidth" in value) || (Number.isFinite(value.linewidth) && value.linewidth > 0));
 
 // @ts-ignore
-const check_341 = (value) =>
+const check_cc25c02252c1628b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_330, var_331) => External[193].test(var_330) || false,
   ) &&
-  (!("wrap" in value) || check_342(value.wrap)) &&
-  (!("rows" in value) || check_342(value.rows)) &&
-  (!("cols" in value) || check_342(value.cols)) &&
+  (!("wrap" in value) || check_6b7f90233de3e3fb(value.wrap)) &&
+  (!("rows" in value) || check_6b7f90233de3e3fb(value.rows)) &&
+  (!("cols" in value) || check_6b7f90233de3e3fb(value.cols)) &&
   (!("ncol" in value) ||
     (Number.isInteger(value.ncol) &&
       (!(Number.isFinite(value.ncol) || typeof value.ncol === "bigint") || value.ncol >= 1))) &&
-  (!("scales" in value) || check_344(value.scales)) &&
-  (!("strip" in value) || check_345(value.strip));
+  (!("scales" in value) || check_d80df01ef39eb21b(value.scales)) &&
+  (!("strip" in value) || check_4b56001ea34ff44b(value.strip));
 
 // @ts-ignore
-const check_342 = (value) =>
+const check_6b7f90233de3e3fb = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5457,7 +5538,7 @@ const check_342 = (value) =>
   typeof value.field === "string" &&
   (!("levels" in value) ||
     (Array.isArray(value.levels) &&
-      value.levels.every((element, index) => check_343(element)) &&
+      value.levels.every((element, index) => check_e22e2022f07928ab(element)) &&
       value.levels.length >= 1)) &&
   (!("labels" in value) ||
     (typeof value.labels === "object" &&
@@ -5468,21 +5549,21 @@ const check_342 = (value) =>
       )));
 
 // @ts-ignore
-const check_343 = (value) =>
+const check_e22e2022f07928ab = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_344 = (value) =>
+const check_d80df01ef39eb21b = (value) =>
   (typeof value === "string" && value === "fixed") ||
   (typeof value === "string" && value === "free") ||
   (typeof value === "string" && value === "free_x") ||
   (typeof value === "string" && value === "free_y");
 
 // @ts-ignore
-const check_345 = (value) =>
+const check_4b56001ea34ff44b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5497,11 +5578,14 @@ const check_345 = (value) =>
   (!("show" in value) || typeof value.show === "boolean");
 
 // @ts-ignore
-const check_346 = (value) =>
-  check_347(value) || check_348(value) || check_350(value) || check_351(value);
+const check_eab0d01f8e7428bb = (value) =>
+  check_615f601f41096d6b(value) ||
+  check_00b930202c2beedb(value) ||
+  check_16c21020c9e48e7b(value) ||
+  check_8d70a0207c79d32b(value);
 
 // @ts-ignore
-const check_347 = (value) =>
+const check_615f601f41096d6b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5511,7 +5595,7 @@ const check_347 = (value) =>
     (typeof value.type === "string" && value.type === "flip"));
 
 // @ts-ignore
-const check_348 = (value) =>
+const check_00b930202c2beedb = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5521,12 +5605,12 @@ const check_348 = (value) =>
   ) &&
   typeof value.type === "string" &&
   value.type === "transform" &&
-  (!("x" in value) || check_349(value.x)) &&
-  (!("y" in value) || check_349(value.y)) &&
+  (!("x" in value) || check_7768401fdec20d0b(value.x)) &&
+  (!("y" in value) || check_7768401fdec20d0b(value.y)) &&
   (!("clip" in value) || typeof value.clip === "boolean");
 
 // @ts-ignore
-const check_349 = (value) =>
+const check_7768401fdec20d0b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5546,7 +5630,7 @@ const check_349 = (value) =>
   (!("expand" in value) || typeof value.expand === "boolean");
 
 // @ts-ignore
-const check_350 = (value) =>
+const check_16c21020c9e48e7b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5559,7 +5643,7 @@ const check_350 = (value) =>
   (!("ratio" in value) || (Number.isFinite(value.ratio) && value.ratio > 0));
 
 // @ts-ignore
-const check_351 = (value) =>
+const check_8d70a0207c79d32b = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5572,25 +5656,25 @@ const check_351 = (value) =>
   (!("ratio" in value) || (Number.isFinite(value.ratio) && value.ratio > 0));
 
 // @ts-ignore
-const check_352 = (value) =>
+const check_2cc13e2167955e20 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_346, var_347) => External[201].test(var_346) || false,
   ) &&
-  (!("x" in value) || check_353(value.x)) &&
-  (!("y" in value) || check_353(value.y)) &&
-  (!("color" in value) || check_368(value.color)) &&
-  (!("fill" in value) || check_368(value.fill)) &&
-  (!("size" in value) || check_372(value.size)) &&
-  (!("linewidth" in value) || check_372(value.linewidth)) &&
-  (!("alpha" in value) || check_376(value.alpha)) &&
-  (!("shape" in value) || check_380(value.shape)) &&
-  (!("linetype" in value) || check_383(value.linetype));
+  (!("x" in value) || check_a009ce21174779d0(value.x)) &&
+  (!("y" in value) || check_a009ce21174779d0(value.y)) &&
+  (!("color" in value) || check_2cc42421679767c9(value.color)) &&
+  (!("fill" in value) || check_2cc42421679767c9(value.fill)) &&
+  (!("size" in value) || check_55706422a0265789(value.size)) &&
+  (!("linewidth" in value) || check_55706422a0265789(value.linewidth)) &&
+  (!("alpha" in value) || check_d806a41ef3981249(value.alpha)) &&
+  (!("shape" in value) || check_00b2e4202c270209(value.shape)) &&
+  (!("linetype" in value) || check_8d6a54207c74e659(value.linetype));
 
 // @ts-ignore
-const check_353 = (value) =>
+const check_a009ce21174779d0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5612,7 +5696,7 @@ const check_353 = (value) =>
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "time") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "monthDay")) &&
-  (!("parse" in value) || check_354(value.parse)) &&
+  (!("parse" in value) || check_3f641e22026ad4c0(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -5654,7 +5738,7 @@ const check_353 = (value) =>
     (typeof value.weekStart === "string" && value.weekStart === "sunday")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_355(element)) &&
+      value.domain.every((element, index) => check_b612ae21b5001970(element)) &&
       value.domain.length >= 1)) &&
   (!("nice" in value) || typeof value.nice === "boolean") &&
   (!("zero" in value) || typeof value.zero === "boolean") &&
@@ -5666,7 +5750,7 @@ const check_353 = (value) =>
       ) &&
       value.breaks.length >= 1)) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("expand" in value) || check_356(value.expand)) &&
+  (!("expand" in value) || check_556c7e22a0229ae0(value.expand)) &&
   (!("oob" in value) ||
     (typeof value.oob === "string" && value.oob === "censor") ||
     (typeof value.oob === "string" && value.oob === "squish")) &&
@@ -5675,7 +5759,9 @@ const check_353 = (value) =>
     (Array.isArray(value.minorBreaks) &&
       value.minorBreaks.every((element, index) => Number.isFinite(element)) &&
       value.minorBreaks.length >= 1)) &&
-  (!("guide" in value) || check_357(value.guide) || check_367(value.guide)) &&
+  (!("guide" in value) ||
+    check_cc1b0e2252b7df90(value.guide) ||
+    check_8d666e207c7129b0(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -5698,7 +5784,7 @@ const check_353 = (value) =>
         (typeof value.type === "string" && value.type === "band"))));
 
 // @ts-ignore
-const check_354 = (value) =>
+const check_3f641e22026ad4c0 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -5740,14 +5826,14 @@ const check_354 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_355 = (value) =>
+const check_b612ae21b5001970 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_356 = (value) =>
+const check_556c7e22a0229ae0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5768,11 +5854,15 @@ const check_356 = (value) =>
       value.add.length >= 2));
 
 // @ts-ignore
-const check_357 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_cc1b0e2252b7df90 = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_358 = (value) =>
+const check_6b755e233ddb3a80 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5790,10 +5880,10 @@ const check_358 = (value) =>
     (typeof value.collision === "string" && value.collision === "auto") ||
     (typeof value.collision === "string" && value.collision === "preserve") ||
     (typeof value.collision === "string" && value.collision === "ellipsis")) &&
-  (!("theme" in value) || check_359(value.theme));
+  (!("theme" in value) || check_e223ee22f0707f30(value.theme));
 
 // @ts-ignore
-const check_359 = (value) =>
+const check_e223ee22f0707f30 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5820,7 +5910,7 @@ const check_359 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_360 = (value) =>
+const check_d803be1ef39608a0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5851,10 +5941,10 @@ const check_360 = (value) =>
     (typeof value.collision === "string" && value.collision === "wrap") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_361(value.theme));
+  (!("theme" in value) || check_4b4c4e1ea3482450(value.theme));
 
 // @ts-ignore
-const check_361 = (value) =>
+const check_4b4c4e1ea3482450 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5881,7 +5971,7 @@ const check_361 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_362 = (value) =>
+const check_eaa69e1f8e6b7f40 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5911,10 +6001,10 @@ const check_362 = (value) =>
     (typeof value.collision === "string" && value.collision === "ellipsis") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_363(value.theme));
+  (!("theme" in value) || check_61552e1f4100c3f0(value.theme));
 
 // @ts-ignore
-const check_363 = (value) =>
+const check_61552e1f4100c3f0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5941,7 +6031,7 @@ const check_363 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_364 = (value) =>
+const check_00aefe202c234560 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -5970,10 +6060,10 @@ const check_364 = (value) =>
     (typeof value.collision === "string" && value.collision === "ellipsis") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_365(value.theme));
+  (!("theme" in value) || check_775d8e1fdeb88a10(value.theme));
 
 // @ts-ignore
-const check_365 = (value) =>
+const check_775d8e1fdeb88a10 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6000,7 +6090,7 @@ const check_365 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_366 = (value) =>
+const check_16b7de20c9dbe500 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6010,7 +6100,7 @@ const check_366 = (value) =>
   value.type === "none";
 
 // @ts-ignore
-const check_367 = (value) =>
+const check_8d666e207c7129b0 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6027,7 +6117,7 @@ const check_367 = (value) =>
   (!("wrap" in value) || (Number.isFinite(value.wrap) && value.wrap <= 8 && value.wrap >= 1));
 
 // @ts-ignore
-const check_368 = (value) =>
+const check_2cc42421679767c9 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6047,7 +6137,7 @@ const check_368 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_369(value.parse)) &&
+  (!("parse" in value) || check_a00cb42117498379(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6062,7 +6152,7 @@ const check_368 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_370(element)) &&
+      value.domain.every((element, index) => check_3f678422026db7e9(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6086,9 +6176,6 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau10") ||
     (typeof value.scheme === "string" && value.scheme === "colorblind") ||
     (typeof value.scheme === "string" && value.scheme === "stata") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_s1color") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_s1rcolor") ||
-    (typeof value.scheme === "string" && value.scheme === "stata_mono") ||
     (typeof value.scheme === "string" && value.scheme === "economist") ||
     (typeof value.scheme === "string" && value.scheme === "solarized") ||
     (typeof value.scheme === "string" && value.scheme === "few") ||
@@ -6116,13 +6203,7 @@ const check_368 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau_purple_pink_gray") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_hue_circle") ||
     (typeof value.scheme === "string" && value.scheme === "gdocs") ||
-    (typeof value.scheme === "string" && value.scheme === "hc") ||
-    (typeof value.scheme === "string" && value.scheme === "hc_dark") ||
     (typeof value.scheme === "string" && value.scheme === "pander") ||
-    (typeof value.scheme === "string" && value.scheme === "calc") ||
-    (typeof value.scheme === "string" && value.scheme === "excel") ||
-    (typeof value.scheme === "string" && value.scheme === "excel_fill") ||
-    (typeof value.scheme === "string" && value.scheme === "excel_new") ||
     (typeof value.scheme === "string" && value.scheme === "Dark2") ||
     (typeof value.scheme === "string" && value.scheme === "Paired") ||
     (typeof value.scheme === "string" && value.scheme === "Accent") ||
@@ -6191,7 +6272,7 @@ const check_368 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_371(value.guide)) &&
+  (!("guide" in value) || check_b6159421b5022319(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6282,7 +6363,7 @@ const check_368 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_369 = (value) =>
+const check_a00cb42117498379 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6324,18 +6405,22 @@ const check_369 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_370 = (value) =>
+const check_3f678422026db7e9 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_371 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_b6159421b5022319 = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_372 = (value) =>
+const check_55706422a0265789 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6351,7 +6436,7 @@ const check_372 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_373(value.parse)) &&
+  (!("parse" in value) || check_cc1ef42252bb9c39(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6366,7 +6451,7 @@ const check_372 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_374(element)) &&
+      value.domain.every((element, index) => check_6b78c4233dde1da9(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6392,7 +6477,7 @@ const check_372 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_375(value.guide)) &&
+  (!("guide" in value) || check_e227d422f0743bd9(value.guide)) &&
   (!("sizeUnit" in value) ||
     (typeof value.sizeUnit === "string" && value.sizeUnit === "area") ||
     (typeof value.sizeUnit === "string" && value.sizeUnit === "radius") ||
@@ -6405,7 +6490,7 @@ const check_372 = (value) =>
     value.type === "binned" &&
     (!("domain" in value) ||
       (Array.isArray(value.domain) &&
-        value.domain.every((element, index) => check_374(element)) &&
+        value.domain.every((element, index) => check_6b78c4233dde1da9(element)) &&
         value.domain.length <= 2 &&
         value.domain.length >= 2)) &&
     (!("breaks" in value) ||
@@ -6483,7 +6568,7 @@ const check_372 = (value) =>
       value.type === "sequential" &&
       (!("domain" in value) ||
         (Array.isArray(value.domain) &&
-          value.domain.every((element, index) => check_374(element)) &&
+          value.domain.every((element, index) => check_6b78c4233dde1da9(element)) &&
           value.domain.length <= 2 &&
           value.domain.length >= 2)) &&
       (!("range" in value) ||
@@ -6498,7 +6583,7 @@ const check_372 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_373 = (value) =>
+const check_cc1ef42252bb9c39 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6540,18 +6625,22 @@ const check_373 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_374 = (value) =>
+const check_6b78c4233dde1da9 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_375 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_e227d422f0743bd9 = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_376 = (value) =>
+const check_d806a41ef3981249 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6567,7 +6656,7 @@ const check_376 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_377(value.parse)) &&
+  (!("parse" in value) || check_4b4f341ea34a2df9(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6582,7 +6671,7 @@ const check_376 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_378(element)) &&
+      value.domain.every((element, index) => check_eaaa041f8e6e6269(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6611,7 +6700,7 @@ const check_376 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_379(value.guide)) &&
+  (!("guide" in value) || check_6158141f4102cd99(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6620,7 +6709,7 @@ const check_376 = (value) =>
     value.type === "binned" &&
     (!("domain" in value) ||
       (Array.isArray(value.domain) &&
-        value.domain.every((element, index) => check_378(element)) &&
+        value.domain.every((element, index) => check_eaaa041f8e6e6269(element)) &&
         value.domain.length <= 2 &&
         value.domain.length >= 2)) &&
     (!("breaks" in value) ||
@@ -6702,7 +6791,7 @@ const check_376 = (value) =>
       value.type === "sequential" &&
       (!("domain" in value) ||
         (Array.isArray(value.domain) &&
-          value.domain.every((element, index) => check_378(element)) &&
+          value.domain.every((element, index) => check_eaaa041f8e6e6269(element)) &&
           value.domain.length <= 2 &&
           value.domain.length >= 2)) &&
       (!("range" in value) ||
@@ -6719,7 +6808,7 @@ const check_376 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_377 = (value) =>
+const check_4b4f341ea34a2df9 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6761,18 +6850,22 @@ const check_377 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_378 = (value) =>
+const check_eaaa041f8e6e6269 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_379 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_6158141f4102cd99 = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_380 = (value) =>
+const check_00b2e4202c270209 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6786,7 +6879,7 @@ const check_380 = (value) =>
     (typeof value.type === "string" && value.type === "identity")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_381(element)) &&
+      value.domain.every((element, index) => check_7761741fdebc46b9(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6826,7 +6919,7 @@ const check_380 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_382(value.guide)) &&
+  (!("guide" in value) || check_16bb4420c9dec829(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6895,18 +6988,22 @@ const check_380 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_381 = (value) =>
+const check_7761741fdebc46b9 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_382 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_16bb4420c9dec829 = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_383 = (value) =>
+const check_8d6a54207c74e659 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6920,7 +7017,7 @@ const check_383 = (value) =>
     (typeof value.type === "string" && value.type === "identity")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_384(element)) &&
+      value.domain.every((element, index) => check_2cf0522167bcf0de(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6960,7 +7057,7 @@ const check_383 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_385(value.guide)) &&
+  (!("guide" in value) || check_a038e221176f0c8e(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -7029,40 +7126,48 @@ const check_383 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_384 = (value) =>
+const check_2cf0522167bcf0de = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_385 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_a038e221176f0c8e = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_386 = (value) =>
+const check_3f9332220292677e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_380, var_381) => External[225].test(var_380) || false,
   ) &&
-  (!("x" in value) || check_387(value.x)) &&
-  (!("y" in value) || check_387(value.y)) &&
-  (!("color" in value) || check_387(value.color)) &&
-  (!("fill" in value) || check_387(value.fill)) &&
-  (!("size" in value) || check_387(value.size)) &&
-  (!("linewidth" in value) || check_387(value.linewidth)) &&
-  (!("alpha" in value) || check_387(value.alpha)) &&
-  (!("shape" in value) || check_387(value.shape)) &&
-  (!("linetype" in value) || check_387(value.linetype));
+  (!("x" in value) || check_b641c221b527ac2e(value.x)) &&
+  (!("y" in value) || check_b641c221b527ac2e(value.y)) &&
+  (!("color" in value) || check_b641c221b527ac2e(value.color)) &&
+  (!("fill" in value) || check_b641c221b527ac2e(value.fill)) &&
+  (!("size" in value) || check_b641c221b527ac2e(value.size)) &&
+  (!("linewidth" in value) || check_b641c221b527ac2e(value.linewidth)) &&
+  (!("alpha" in value) || check_b641c221b527ac2e(value.alpha)) &&
+  (!("shape" in value) || check_b641c221b527ac2e(value.shape)) &&
+  (!("linetype" in value) || check_b641c221b527ac2e(value.linetype));
 
 // @ts-ignore
-const check_387 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_b641c221b527ac2e = (value) =>
+  check_6b755e233ddb3a80(value) ||
+  check_d803be1ef39608a0(value) ||
+  check_eaa69e1f8e6b7f40(value) ||
+  check_00aefe202c234560(value) ||
+  check_16b7de20c9dbe500(value);
 
 // @ts-ignore
-const check_388 = (value) =>
+const check_559c9222a04be09e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -7075,7 +7180,7 @@ const check_388 = (value) =>
     (typeof value.order === "string" && value.order === "sorted"));
 
 // @ts-ignore
-const check_389 = (value) =>
+const check_cc4b222252e1254e = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -7096,7 +7201,7 @@ const check_389 = (value) =>
   (!("linetype" in value) || typeof value.linetype === "string");
 
 // @ts-ignore
-const check_390 = (value) =>
+const check_6ba572233e04803e = (value) =>
   (typeof value === "string" && value === "default") ||
   (typeof value === "string" && value === "light") ||
   (typeof value === "string" && value === "dark") ||
@@ -7137,14 +7242,14 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "test");
 
 // @ts-ignore
-const check_391 = (value) =>
+const check_e2540222f099c4ee = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_386, var_387) => External[228].test(var_386) || false,
   ) &&
-  (!("name" in value) || check_392(value.name)) &&
+  (!("name" in value) || check_d832d21ef3bd9b5e(value.name)) &&
   (!("ink" in value) || typeof value.ink === "string") &&
   (!("paper" in value) || typeof value.paper === "string") &&
   (!("accent" in value) || typeof value.accent === "string") &&
@@ -7236,7 +7341,7 @@ const check_391 = (value) =>
   (!("showPanelBorder" in value) || typeof value.showPanelBorder === "boolean");
 
 // @ts-ignore
-const check_392 = (value) =>
+const check_d832d21ef3bd9b5e = (value) =>
   (typeof value === "string" && value === "default") ||
   (typeof value === "string" && value === "light") ||
   (typeof value === "string" && value === "dark") ||
@@ -7278,5 +7383,5 @@ const check_392 = (value) =>
 
 // @ts-ignore
 export function Check(value) {
-  return check_0(value);
+  return check_2bc5822166bf4786(value);
 }

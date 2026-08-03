@@ -6039,18 +6039,6 @@
                 },
                 {
                   "type": "string",
-                  "const": "stata_s1color"
-                },
-                {
-                  "type": "string",
-                  "const": "stata_s1rcolor"
-                },
-                {
-                  "type": "string",
-                  "const": "stata_mono"
-                },
-                {
-                  "type": "string",
                   "const": "economist"
                 },
                 {
@@ -6159,31 +6147,7 @@
                 },
                 {
                   "type": "string",
-                  "const": "hc"
-                },
-                {
-                  "type": "string",
-                  "const": "hc_dark"
-                },
-                {
-                  "type": "string",
                   "const": "pander"
-                },
-                {
-                  "type": "string",
-                  "const": "calc"
-                },
-                {
-                  "type": "string",
-                  "const": "excel"
-                },
-                {
-                  "type": "string",
-                  "const": "excel_fill"
-                },
-                {
-                  "type": "string",
-                  "const": "excel_new"
                 },
                 {
                   "type": "string",

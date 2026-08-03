@@ -158,17 +158,13 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const rows = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Unique schemes only — "gray" is a US-spelling alias of "grey", not a twin
   // row. Default order is label-alphabetical (sort control: Name/Color count).
-  await expect(rows).toHaveCount(48);
+  await expect(rows).toHaveCount(39);
   await expect(rows.locator(".name")).toHaveText([
     "Accent",
-    "Calc",
     "Canva",
     "Colorblind",
     "Dark2",
     "Economist",
-    "Excel",
-    "Excel Fill",
-    "Excel New",
     "Few",
     "Few Dark",
     "Few Light",
@@ -177,8 +173,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Google Docs",
     "Green/Orange/Teal",
     "Grey",
-    "Highcharts",
-    "Highcharts Dark",
     "Hue",
     "Hue Circle",
     "Ipsum",
@@ -194,9 +188,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Seattle Grays",
     "Solarized",
     "Stata",
-    "Stata Mono",
-    "Stata S1 Color",
-    "Stata S1R Color",
     "Summer",
     "Superfishel Stone",
     "Tableau 10",
@@ -211,14 +202,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   ]);
   await expect(rows.locator(".capacity")).toHaveText([
     "8 colors",
-    "12 colors",
     "4 colors",
     "8 colors",
     "8 colors",
     "9 colors",
-    "7 colors",
-    "7 colors",
-    "6 colors",
     "8 colors",
     "8 colors",
     "8 colors",
@@ -227,8 +214,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "24 colors",
     "12 colors",
     "10 colors",
-    "10 colors",
-    "11 colors",
     "10 colors",
     "19 colors",
     "9 colors",
@@ -243,9 +228,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "12 colors",
     "5 colors",
     "8 colors",
-    "15 colors",
-    "15 colors",
-    "15 colors",
     "15 colors",
     "8 colors",
     "10 colors",
