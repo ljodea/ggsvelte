@@ -12072,8 +12072,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-359",
-        title: "experimental (359)",
+        id: "experimental-355",
+        title: "experimental (355)",
         level: 3,
       },
       {
@@ -12122,8 +12122,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-239",
-        title: "stable-intent (239)",
+        id: "stable-intent-238",
+        title: "stable-intent (238)",
         level: 3,
       },
       {
@@ -12166,6 +12166,11 @@ export const DOCS_ROUTES = [
       {
         id: "removed-spreadsheet-highcharts-and-extra-stata-schemes-and-themes",
         title: "Removed spreadsheet, Highcharts, and extra Stata schemes and themes",
+        level: 3,
+      },
+      {
+        id: "removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes",
+        title: "Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes",
         level: 3,
       },
       {

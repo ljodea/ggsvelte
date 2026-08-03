@@ -4110,10 +4110,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "GDOCS_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4558,10 +4554,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TABLEAU_GREEN_ORANGE_TEAL_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TABLEAU_HUE_CIRCLE_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4575,14 +4567,6 @@
           "lifecycle": "experimental"
         },
         "TABLEAU_NURIEL_STONE_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_PURPLE_PINK_GRAY_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "TABLEAU_RED_BLUE_BROWN_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -7179,10 +7163,6 @@
           "lifecycle": "stable-intent"
         },
         "ThemeFivethirtyeight": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeGdocs": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

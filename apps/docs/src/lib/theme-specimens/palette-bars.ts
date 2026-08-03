@@ -93,7 +93,7 @@ const CHEST: readonly PaletteBarRow[] = [
 
 /**
  * London cholera 1848–49 death rate per 10,000 by district, highest first.
- * Enough rows for the largest categorical scheme (gdocs = 24).
+ * Enough rows for the largest remaining categorical scheme (tableau_hue_circle = 19).
  */
 const CHOLERA: readonly PaletteBarRow[] = [
   { category: "Rotherhithe", value: 205 },

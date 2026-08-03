@@ -17,6 +17,23 @@ const GRADIENT2_MID = "#F7F7F7";
 const GRADIENT2_HIGH = "#2166AC";
 
 /**
+ * Default 10-stop greyscale (packages/spec GREY_PALETTE_10 / start 0.2 → end
+ * 0.8). Local copy so /reference/scales never pulls the spec mega-chunk.
+ */
+const GREY_SWATCH_10: readonly string[] = [
+  "#333333",
+  "#444444",
+  "#555555",
+  "#666666",
+  "#777777",
+  "#888888",
+  "#999999",
+  "#aaaaaa",
+  "#bbbbbb",
+  "#cccccc",
+];
+
+/**
  * ColorBrewer tables mirrored from packages/core colorbrewer-palettes.
  * Local copies: CATEGORICAL_SCHEMES drops Set1/Set2/Set3 from its public type
  * surface under docs svelte-check, and sequential Blues is not categorical.
@@ -146,9 +163,9 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
       };
     case "grey":
       return {
-        colors: CATEGORICAL_SCHEMES.grey,
+        colors: GREY_SWATCH_10,
         kind: "discrete",
-        caption: 'Default scheme "grey"',
+        caption: "Default greyscale range (scale_*_grey)",
       };
     case "brewer":
       return {

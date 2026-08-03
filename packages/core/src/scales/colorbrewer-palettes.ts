@@ -15,31 +15,6 @@ const CB_DARK2 = [
   "#a6761d",
   "#666666",
 ] as const;
-const CB_PAIRED = [
-  "#a6cee3",
-  "#1f78b4",
-  "#b2df8a",
-  "#33a02c",
-  "#fb9a99",
-  "#e31a1c",
-  "#fdbf6f",
-  "#ff7f00",
-  "#cab2d6",
-  "#6a3d9a",
-  "#ffff99",
-  "#b15928",
-] as const;
-const CB_ACCENT = [
-  "#7fc97f",
-  "#beaed4",
-  "#fdc086",
-  "#ffff99",
-  "#386cb0",
-  "#f0027f",
-  "#bf5b17",
-  "#666666",
-] as const;
-
 /** Sequential 9-class */
 const CB_BLUES = [
   "#f7fbff",
@@ -211,8 +186,6 @@ const CB_PUOR = [
 /** Qualitative schemes for ordinal/brewer. */
 export const COLORBREWER_QUALITATIVE = {
   Dark2: CB_DARK2,
-  Paired: CB_PAIRED,
-  Accent: CB_ACCENT,
 } as const satisfies Readonly<Record<string, readonly string[]>>;
 
 /** Sequential + diverging ramps for distiller/fermenter (and ordinal if chosen). */

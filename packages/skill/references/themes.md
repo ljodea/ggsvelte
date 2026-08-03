@@ -9,7 +9,7 @@ optional `"name"` base plus role overrides, e.g.
 (last child wins) — merge rules live in
 [composition-surfaces.md](composition-surfaces.md).
 
-## Product themes (33)
+## Product themes (32)
 
 | Name                    | Look                                                                       |
 | ----------------------- | -------------------------------------------------------------------------- |
@@ -36,7 +36,6 @@ optional `"name"` base plus role overrides, e.g.
 | solarized_2             | Solarized grey-style variant: base2 panel, base3 grid, no frame            |
 | solarized_2dark         | solarized_2 on dark base tones                                             |
 | wsj                     | Wall Street Journal: brown paper, dotted black y-grid, x line + ticks      |
-| gdocs                   | Google Docs: black x line, no ticks, light-gray grid, plain 20px title     |
 | hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
 | hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
 | pander                  | pander: dashed grey grid and ticks, bold title on white                    |
@@ -58,9 +57,9 @@ One named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`,
 `ThemeStatas1color`, `ThemeSolarized`, `ThemeSolarizeddark`,
 `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`, `ThemeWsj`,
-`ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeBase`,
-`ThemeIgray`, `ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape
-hatch `<Theme name={dynamicName} />` for reactive names.
+`ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeBase`, `ThemeIgray`,
+`ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape hatch
+`<Theme name={dynamicName} />` for reactive names.
 
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,

@@ -47,13 +47,12 @@ function hueConfig(options: HueScaleOptions): DiscreteColorScaleOptions {
 
 function greyConfig(options: GreyScaleOptions): DiscreteColorScaleOptions {
   const { start, end, ...rest } = options;
-  if (start !== undefined || end !== undefined) {
-    return {
-      ...rest,
-      range: buildGreyPalette(GREY_STOPS, start ?? 0.2, end ?? 0.8),
-    };
-  }
-  return { ...rest, scheme: "grey" };
+  // Always bake a range — there is no registered "grey"/"gray" scheme name.
+  // scale_*_grey stays portable via explicit stops (start/end still honored).
+  return {
+    ...rest,
+    range: buildGreyPalette(GREY_STOPS, start ?? 0.2, end ?? 0.8),
+  };
 }
 
 export function scaleColorHue(options: HueScaleOptions = {}): Scales {

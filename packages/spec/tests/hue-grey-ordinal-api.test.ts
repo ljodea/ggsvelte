@@ -47,9 +47,9 @@ describe("hue/grey/ordinal scale helpers (#829)", () => {
     expect(scales.color?.range?.[0]).toMatch(/^#[0-9a-f]{6}$/);
   });
 
-  it("grey defaults to named scheme grey", () => {
+  it("grey defaults to a baked greyscale range (no named scheme)", () => {
     expect(scaleColorGrey()).toEqual({
-      color: { type: "ordinal", scheme: "grey" },
+      color: { type: "ordinal", range: [...GREY_PALETTE_10] },
     });
   });
 
@@ -60,7 +60,7 @@ describe("hue/grey/ordinal scale helpers (#829)", () => {
     expect(scales.color?.range?.at(-1)).toBe("#ffffff");
   });
 
-  it("default hue/grey scheme tables match exported palettes", () => {
+  it("default hue/grey tables match exported palettes", () => {
     expect(HUE_PALETTE_10).toHaveLength(10);
     expect(GREY_PALETTE_10).toHaveLength(10);
     expect(GREY_PALETTE_10[0]).toBe("#333333");

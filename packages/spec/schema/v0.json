@@ -6127,23 +6127,7 @@
                 },
                 {
                   "type": "string",
-                  "const": "tableau_green_orange_teal"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_red_blue_brown"
-                },
-                {
-                  "type": "string",
-                  "const": "tableau_purple_pink_gray"
-                },
-                {
-                  "type": "string",
                   "const": "tableau_hue_circle"
-                },
-                {
-                  "type": "string",
-                  "const": "gdocs"
                 },
                 {
                   "type": "string",
@@ -6155,23 +6139,7 @@
                 },
                 {
                   "type": "string",
-                  "const": "Paired"
-                },
-                {
-                  "type": "string",
-                  "const": "Accent"
-                },
-                {
-                  "type": "string",
                   "const": "hue"
-                },
-                {
-                  "type": "string",
-                  "const": "grey"
-                },
-                {
-                  "type": "string",
-                  "const": "gray"
                 },
                 {
                   "type": "string",
@@ -6374,7 +6342,7 @@
                   "const": "tableau_div_temperature"
                 }
               ],
-              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", \"grey\", \"gray\", and ColorBrewer qualitative (Dark2/Paired/Accent); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
+              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", and ColorBrewer qualitative (Dark2); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
             },
             "reverse": {
               "type": "boolean",
@@ -8707,10 +8675,6 @@
         },
         {
           "type": "string",
-          "const": "gdocs"
-        },
-        {
-          "type": "string",
           "const": "hc"
         },
         {
@@ -8750,7 +8714,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"stata\", \"stata_s1color\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"wsj\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"stata\", \"stata_s1color\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"wsj\", \"hc\", \"hcdark\", \"pander\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

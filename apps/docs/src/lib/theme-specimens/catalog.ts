@@ -224,14 +224,6 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: false,
   },
   {
-    name: "gdocs",
-    label: BY_NAME.gdocs.label,
-    caption: "Google Docs: black x line, no ticks, light-gray grid, 20px plain title.",
-    kind: "attendees-dodge",
-    scheme: BY_NAME.gdocs.scheme,
-    legendFocus: true,
-  },
-  {
     name: "hc",
     label: BY_NAME.hc.label,
     caption: "Highcharts default: y-only #D8D8D8 grid on white, no border.",

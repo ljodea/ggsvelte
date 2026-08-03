@@ -40,7 +40,6 @@ describe("themes catalog", () => {
       { name: "solarized_2", scheme: "solarized" },
       { name: "solarized_2dark", scheme: "solarized" },
       { name: "wsj", scheme: "wsj" },
-      { name: "gdocs", scheme: "gdocs" },
       { name: "hc", scheme: "tableau10" },
       { name: "hcdark", scheme: "flexoki" },
       { name: "pander", scheme: "pander" },
@@ -52,12 +51,13 @@ describe("themes catalog", () => {
     ]);
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gray");
+    expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gdocs");
 
     const byName = new Map(CATEGORICAL_PALETTES.map((p) => [p.name, p]));
-    for (const name of ["observable10", "stata", "tableau10", "gdocs", "pander", "grey"] as const) {
+    for (const name of ["observable10", "stata", "tableau10", "pander", "Dark2", "hue"] as const) {
       expect(byName.get(name), name).toBeDefined();
     }
-    // Removed spreadsheet/Highcharts/extra-Stata schemes must not reappear.
+    // Removed schemes must not reappear.
     const paletteNames = new Set(CATEGORICAL_PALETTES.map((p) => p.name as string));
     for (const name of [
       "stata_s1color",
@@ -69,13 +69,20 @@ describe("themes catalog", () => {
       "excel",
       "excel_fill",
       "excel_new",
+      "gdocs",
+      "Accent",
+      "Paired",
+      "grey",
+      "gray",
+      "tableau_green_orange_teal",
+      "tableau_red_blue_brown",
+      "tableau_purple_pink_gray",
     ]) {
       expect(paletteNames.has(name), name).toBe(false);
     }
     expect(byName.get("stata")!.capacity).toBe(15);
-    expect(byName.get("gdocs")!.capacity).toBeGreaterThan(0);
     // Registry size is owned by schema-names; keep a lower bound so shrinks fail.
-    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(35);
+    expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(28);
     expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
 
     expect(VIRIDIS_COLORS).toEqual([

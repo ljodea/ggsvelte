@@ -52,7 +52,6 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   solarized_2: "ThemeSolarized2",
   solarized_2dark: "ThemeSolarized2dark",
   wsj: "ThemeWsj",
-  gdocs: "ThemeGdocs",
   hc: "ThemeHc",
   hcdark: "ThemeHcdark",
   pander: "ThemePander",
