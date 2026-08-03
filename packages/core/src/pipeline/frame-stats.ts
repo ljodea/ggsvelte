@@ -9,6 +9,7 @@
 import type { ColumnTable } from "../table.js";
 
 import { getStatFrameBuilder } from "./frame-stats-registry.js";
+import { statRegisterHint } from "./register-hints.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
 
@@ -27,10 +28,15 @@ export function buildNonIdentityFrame(
   const build = getStatFrameBuilder(stat);
   if (build === undefined) {
     const path = `/layers/${String(binding.index)}/stat`;
+    const family = statRegisterHint(stat);
+    const fix =
+      family === undefined
+        ? `Call registerAll() (full grammar) or registerBasic() (identity charts) from @ggsvelte/core, render the stat's default <Geom*> component (it self-registers), or call registerStatFrame("${stat}", …).`
+        : `Call ${family}() once at startup (exported from @ggsvelte/svelte and @ggsvelte/core) or registerAll() (full grammar). A <Geom*> component self-registers only its default stat, so a stat override needs the family call. Low-level: registerStatFrame("${stat}", …).`;
     throw new PipelineError(
       "unsupported-param",
       path,
-      `Stat "${stat}" is not registered in this build. Call registerAll() (full grammar) or registerBasic() (identity charts) from @ggsvelte/core, render the stat's default <Geom*> component (it self-registers), or call registerStatFrame("${stat}", …).`,
+      `Stat "${stat}" is not registered in this build. ${fix}`,
     );
   }
   return build(binding, table, groups, warnings, advisories, binRange, functionDomain);
