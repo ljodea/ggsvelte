@@ -67,7 +67,7 @@ const GRAMMAR_ORDER = [
 ] as const;
 
 /** Layers that only make sense when the chart is wide enough to place text. */
-export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
+export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts", "baselineLab"] as const;
 
 export interface FoldSakuraOptions {
   /**

@@ -44,7 +44,7 @@ const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
     stat: "summary_bin",
     fun: "median",
     binwidth: ${SAKURA_BINWIDTH},
-    curve: "step-hv",
+    curve: "linear",
   })
   .spec();`;
 

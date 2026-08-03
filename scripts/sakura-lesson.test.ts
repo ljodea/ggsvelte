@@ -97,13 +97,13 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
   });
 
-  it("adds exactly one visible element per step", () => {
+  it("grows the layer set at every step", () => {
     const layerCounts = Array.from({ length: SAKURA_STEPS.length + 1 }, (_, count) => {
       const spec = foldSakura(count, rows).spec as { layers: unknown[] };
       return spec.layers.length;
     });
-    // base → theme+trend+y-ticks → epochs → annotate → finish
-    expect(layerCounts).toEqual([1, 2, 4, 7, 7]);
+    // base → theme+trend+chartlines+y-ticks → epochs → annotate → finish
+    expect(layerCounts).toEqual([1, 4, 6, 10, 10]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -120,8 +120,8 @@ describe("the sakura lesson folds to renderable specs", () => {
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
-    expect((full.spec.layers as unknown[]).length).toBe(7);
-    expect((narrow.spec.layers as unknown[]).length).toBe(5);
+    expect((full.spec.layers as unknown[]).length).toBe(10);
+    expect((narrow.spec.layers as unknown[]).length).toBe(7);
     const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(kinds).not.toContain("segment");
     // The epoch names stay: they are spread one per band rather than clustered
@@ -168,7 +168,18 @@ describe("the sakura lesson folds to renderable specs", () => {
     const geoms = (finished.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(geoms).toContain("segment");
     expect(SAKURA_FINISHED_SVELTE).toContain("<GeomSegment");
-    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+    expect(geoms).toEqual([
+      "rect",
+      "text",
+      "rule",
+      "rule",
+      "point",
+      "rule",
+      "text",
+      "line",
+      "segment",
+      "text",
+    ]);
   });
 
   it("publishes agent JSON that is the finished fold with named plot data only", () => {
@@ -189,7 +200,18 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(namedWithoutData).toEqual(finishedWithoutData);
     // Agent JSON must carry every finished layer geom — not a point+line fiction.
     const geoms = (named.layers as { geom: string }[]).map((layer) => layer.geom);
-    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+    expect(geoms).toEqual([
+      "rect",
+      "text",
+      "rule",
+      "rule",
+      "point",
+      "rule",
+      "text",
+      "line",
+      "segment",
+      "text",
+    ]);
     expect(named.theme).toBe("tufte");
     expect(named.scales?.y).toMatchObject({
       temporalKind: "monthDay",
@@ -206,8 +228,10 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, 'stat="summary_bin"', '"stat":"summary_bin"'],
       [0, 'fun="median"', '"fun":"median"'],
       [0, `binwidth={${SAKURA_BINWIDTH}}`, `"binwidth":${SAKURA_BINWIDTH}`],
-      [0, 'curve="step-hv"', '"curve":"step-hv"'],
-      [0, "alpha={0.5}", '"alpha":0.5'],
+      [0, 'curve="linear"', '"curve":"linear"'],
+      [0, "alpha={0.55}", '"alpha":0.55'],
+      [0, `yintercept="${SAKURA_Y_BREAKS[0]}"`, `"yintercept":"${SAKURA_Y_BREAKS[0]}"`],
+      [0, '"dotted"', '"value":"dotted"'],
       [0, "<ThemeTufte />", '"theme":"tufte"'],
       [0, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
       [0, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
@@ -217,6 +241,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [1, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [1, "ScaleFillManual", '"type":"manual"'],
       [2, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
+      [2, "data={baselineLabel}", '"pre-industrial median"'],
       [2, '"#b3452f"', '"value":"#b3452f"'],
       [3, 'key="year"', ""],
     ];
@@ -242,6 +267,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       "size",
       "anchor",
       "dx",
+      "dy",
       "linewidth",
       "stat",
       "fun",
@@ -412,10 +438,9 @@ describe("gate G8 — annotations that do not fight the chart", () => {
       labs?: { caption?: string; title?: string; subtitle?: string };
     };
     const rule = spec.layers.find(
-      (layer) => layer.geom === "rule" && "yintercept" in (layer.params ?? {}),
+      (layer) => layer.geom === "rule" && layer.params?.["yintercept"] === SAKURA_BASELINE,
     );
-    expect(rule?.params?.["yintercept"]).toBe(SAKURA_BASELINE);
-    expect(rule?.params?.["alpha"]).toBeUndefined();
+    expect(rule).toBeDefined();
     expect(rule?.params?.["linewidth"]).toBeGreaterThanOrEqual(1);
     // Caption/title/subtitle would squash the data panel; citation lives on
     // the page footnote instead (GettingStartedGuide).
@@ -425,17 +450,17 @@ describe("gate G8 — annotations that do not fight the chart", () => {
   });
 });
 
-describe("gate G4 — the binned-median step trend", () => {
-  it("draws a step path of bin medians, not a loess or the raw points", () => {
-    // foldSakura(1): theme + trend + y-tick polish (finished reading order for signal).
+describe("gate G4 — the binned-median trend", () => {
+  it("draws a polyline of bin medians, not a loess or the raw points", () => {
+    // foldSakura(1): theme + trend + chartlines + y-tick polish (finished reading order for signal).
     const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
-    expect(trend!.curve).toBe("step-hv");
+    expect(trend!.curve).toBe("linear");
     const vertices = trend!.positions.length / 2;
-    // ~1200 years / 25-year bins ≈ 50 non-empty bins — far fewer than 838 points.
-    expect(vertices).toBeGreaterThan(30);
-    expect(vertices).toBeLessThan(80);
+    // ~1200 years / 15-year bins ≈ 80 non-empty bins — far fewer than 838 points.
+    expect(vertices).toBeGreaterThan(40);
+    expect(vertices).toBeLessThan(120);
     expect(vertices).toBeLessThan(rows.length / 5);
   });
 

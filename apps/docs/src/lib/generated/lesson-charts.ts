@@ -16,9 +16,9 @@ export interface SakuraSizeRow {
 /** Target width:height of the data panel (not the outer SVG). */
 export const SAKURA_PANEL_ASPECT = 2.5;
 
-export const LESSON_CHART_WIDTH = 660;
+export const LESSON_CHART_WIDTH = 768;
 /** Outer height so the finished fold's panel is ~SAKURA_PANEL_ASPECT:1 after chrome. */
-export const LESSON_CHART_HEIGHT = 282;
+export const LESSON_CHART_HEIGHT = 325;
 
 /**
  * Measured outer heights for the finished sakura fold at common container
@@ -30,6 +30,7 @@ export const SAKURA_FINISHED_SIZE_TABLE: readonly SakuraSizeRow[] = [
   { width: 480, height: 210, panelWidth: 404, panelHeight: 162 },
   { width: 560, height: 242, panelWidth: 484, panelHeight: 194 },
   { width: 660, height: 282, panelWidth: 584, panelHeight: 234 },
+  { width: 768, height: 325, panelWidth: 692, panelHeight: 277 },
   { width: 800, height: 338, panelWidth: 724, panelHeight: 290 },
   { width: 1000, height: 418, panelWidth: 924, panelHeight: 370 },
 ];
