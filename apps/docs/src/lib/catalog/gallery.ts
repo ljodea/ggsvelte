@@ -11,10 +11,10 @@ export interface GalleryEntry extends ExampleManifestEntry {
 export const FEATURED_EXAMPLES = [
   { id: "line/multi-series" },
   { id: "smooth/loess-scatter" },
-  { id: "point/scatter-color" },
-  { id: "facet/wrap" },
-  { id: "color/continuous" },
-  { id: "point/canvas-scatter" },
+  { id: "density/kde-2d-filled" },
+  { id: "density/overlay" },
+  { id: "path/ellipse-rings" },
+  { id: "color/binned" },
 ] as const;
 
 const featuredIds = new Set<string>(FEATURED_EXAMPLES.map((entry) => entry.id));
