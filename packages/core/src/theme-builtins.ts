@@ -934,12 +934,15 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
 // Foundation-only (no interaction/tooltip roles). Spreading a full ThemeTokens
 // into themed() would pass stale tooltip* as intentional overrides once themed()
 // accepts tip overrides — keep variants on this plain object instead.
+// letterboxFill stays "none" so light/dark paper overrides do not paint opaque
+// fixed-aspect gutters (prior LEGACY_BASE spread carried letterboxFill: "none").
 const LEGACY_BASE_FOUNDATION = {
   ink: "currentColor",
   paper: "none",
   panel: "none",
   accent: "#4269d0",
   grid: "rgba(128,128,128,0.25)",
+  letterboxFill: "none",
   axisText: "currentColor",
   axisLine: "currentColor",
   tickColor: "currentColor",
@@ -966,7 +969,7 @@ const LEGACY_BASE_FOUNDATION = {
   axisLineY: true,
   ticksX: true,
   ticksY: true,
-} as const satisfies Partial<FoundationThemeTokens>;
+} as const satisfies Partial<FoundationThemeTokens> & { letterboxFill: string };
 
 const LEGACY_BASE = themed(LEGACY_BASE_FOUNDATION);
 

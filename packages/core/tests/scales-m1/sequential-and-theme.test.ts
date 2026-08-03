@@ -389,4 +389,14 @@ describe("theme registry", () => {
     expect(LEGACY_BUILTIN_THEMES.minimal.tooltipBorder).toBe(LEGACY_BUILTIN_THEMES.minimal.grid);
     expect(LEGACY_BUILTIN_THEMES.minimal.tooltipBorder).toBe("rgba(128,128,128,0.12)");
   });
+
+  it("LEGACY light/dark keep transparent letterbox gutters (edition-1 paper overrides)", () => {
+    // paper is opaque, but letterboxFill stays "none" so fixed-aspect margins
+    // remain see-through over the host page (prior LEGACY_BASE behavior).
+    expect(LEGACY_BUILTIN_THEMES.light.paper).toBe("#ffffff");
+    expect(LEGACY_BUILTIN_THEMES.light.letterboxFill).toBe("none");
+    expect(LEGACY_BUILTIN_THEMES.dark.paper).toBe("#16181d");
+    expect(LEGACY_BUILTIN_THEMES.dark.letterboxFill).toBe("none");
+    expect(LEGACY_BUILTIN_THEMES.minimal.letterboxFill).toBe("none");
+  });
 });
