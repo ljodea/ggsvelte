@@ -73,6 +73,7 @@ function uniqueStyleOutputs<T>(
 ): T[] {
   const binding = frame.binding[aesthetic];
   if (binding.constant !== null) {
+    // Binding constants are CellValue; style aesthetics store StyleOutput.
     const projected = project(binding.constant as StyleOutput);
     return Array.from({ length: rows.length }, () => projected);
   }
@@ -112,7 +113,7 @@ export function mappedPaintVector(
   const binding = frame.binding[channel];
   const values = paintValues(frame, channel);
   if (values === null) {
-    const color = colorOf(scale, binding.scaledConstant as CellValue);
+    const color = colorOf(scale, binding.scaledConstant);
     return Array.from({ length: rows.length }, () => color);
   }
   return mapUniqueThenFanOut(
