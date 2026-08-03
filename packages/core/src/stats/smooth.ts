@@ -17,9 +17,12 @@
  *      "lm"    — exact closed-form least squares. Band: ŷ ± qt((1+level)/2,
  *                n−2) · s·sqrt(1/n + (x0−x̄)²/Sxx) — matches R exactly
  *                (fixtures at 1e-8).
- *      "loess" — see stats/loess.ts (R parity target: surface="direct",
- *                statistics="exact"; tolerances vs ggplot2's default loess
- *                path documented in decision 0010).
+ *      "loess" — see stats/loess.ts. Small groups use R surface="direct" /
+ *                statistics="exact" (fixtures 23–24, float-noise parity).
+ *                Groups above INTERPOLATE_DIRECT_LIMIT (500) use an
+ *                interpolate/approximate surface (1D Hermite blend of vertex
+ *                fits; #1422) matching ggplot2's default large-n path in
+ *                spirit. Tolerances: decision 0010 + fixture 25.
  *    method omitted -> inferred: "loess" when the largest group has fewer
  *    than 1000 rows, else "lm" (advisory `smooth-method-inferred`;
  *    DIVERGENCE: ggplot2 escalates to mgcv::gam, which ggsvelte does not

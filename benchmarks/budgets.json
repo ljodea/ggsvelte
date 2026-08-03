@@ -116,7 +116,7 @@
       "budgetMs": 30
     },
     "pipeline loess 5k": {
-      "budgetMs": 710
+      "budgetMs": 45
     },
     "pipeline density 100k": {
       "budgetMs": 150

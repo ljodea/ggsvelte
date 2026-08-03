@@ -344,8 +344,8 @@ export function histogramSpec(n: number): PortableSpec {
 }
 
 /** M2 workload: loess smooth (+ se band) over n scatter rows.
- *  Documented cost: O(n·q) local fits for the exact statistics, q = span·n —
- *  quadratic in n; the 5k workload is the practical envelope (decision 0010). */
+ *  For n > INTERPOLATE_DIRECT_LIMIT (500) the interpolate surface is O(nv·q)
+ *  with nv ≪ n (#1422); below that, direct/exact is O(n·q). */
 export function loessSpec(n: number): PortableSpec {
   const rnd = mulberry32(0x10e55 ^ n);
   const x = Array.from<number>({ length: n });
