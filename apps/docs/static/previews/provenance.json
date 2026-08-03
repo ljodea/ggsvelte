@@ -263,8 +263,8 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "eda22d245e728fd087a8005932645ca08b74d89a55b465489be4c84bab80c43a",
-      "pngSha256": "4e747838f07d67cf6bd852cf86adf0b72a210a867f5d3d4384c46b807deac6ab"
+      "sourceSha256": "b538e521ffb5a32563ff817f4af8c6c4af3be81c7021d3db3abed19995fe21c9",
+      "pngSha256": "2949dc19048c52de04fced10fa7a563726b70d02b5f091f35f84c7d8a7b7f157"
     },
     "point/abline-identity": {
       "filename": "point-abline-identity-light.png",

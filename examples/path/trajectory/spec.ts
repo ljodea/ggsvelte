@@ -1,26 +1,62 @@
-import { aes, gg } from "@ggsvelte/spec";
+import {
+  aes,
+  gg,
+  scaleColorManual,
+  scaleLinewidthContinuous,
+  scaleXContinuous,
+} from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { napoleonsArmy } from "./data.js";
+import { campaignRivers, minardCities, minardTroops } from "./data.js";
 
 export default defineExample(
-  // geom_path connects in data (row) order within each group. The retreat
-  // walks back over the longitudes of the advance, so sorting by x - which is
-  // what geom_line does - would splice the two legs into nonsense.
-  gg(napoleonsArmy, aes({ x: "long", y: "survivors", group: "leg", color: "direction" }))
-    .geomPath({ linewidth: 2 })
-    .geomPoint({ size: 2.2, alpha: 0.7 })
-    .scaleColorManual({
-      domain: ["Advance", "Retreat"],
-      values: ["#b45309", "#1f2937"],
+  // Minard's flow map: band width carries surviving strength, so linewidth is
+  // a mapped aesthetic here, and geom_path keeps row order within each leg -
+  // the retreat walks back over the longitudes of the advance. The svelte
+  // example stacks the temperature strip from Minard's original beneath this
+  // map; a single PortableSpec describes the map panel.
+  gg(minardTroops, aes({ x: "long", y: "lat" }))
+    .geomPath({
+      data: campaignRivers,
+      aes: aes({ group: "river", color: { value: "#8fa8c0" } }),
+      linewidth: 0.8,
+      alpha: 0.7,
     })
+    .geomPath({
+      aes: aes({
+        group: "leg",
+        color: "direction",
+        linewidth: "survivors",
+      }),
+    })
+    .geomText({
+      data: minardCities,
+      aes: aes({ label: "city", color: { value: "#4a4237" } }),
+      size: 10,
+      dy: -9,
+    })
+    .scales({
+      ...scaleXContinuous({ limits: [23.5, 38.2] }),
+      ...scaleColorManual({
+        domain: ["Advance", "Retreat"],
+        values: ["#d3a05e", "#25221e"],
+        guide: { type: "legend", position: "bottom" },
+      }),
+      ...scaleLinewidthContinuous({
+        range: [1, 18],
+        guide: { type: "legend", position: "bottom" },
+      }),
+    })
+    .coordFixed({ ratio: 1.6 })
     .theme("classic")
     .labs({
-      title: "Napoleon's army marches east and dies coming back",
-      subtitle: "Minard's 1812 strength counts, drawn in march order: out to Moscow, then home",
-      x: "Longitude east",
-      y: "Men still with the column",
+      title: "The Grande Armée's march to Moscow and back, 1812–13",
+      subtitle:
+        "Band width is the number of men still with the column — after Minard's 1869 figurative map",
+      x: "",
+      y: "",
       color: "",
+      linewidth: "Survivors",
     })
     .spec(),
 );
