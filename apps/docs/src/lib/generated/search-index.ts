@@ -12846,16 +12846,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Guide interaction"],
   },
   {
-    id: "heading:reference-scales-linetype_discrete:examples",
-    kind: "heading",
-    title: "Examples",
-    summary:
-      "Examples in ScaleLinetypeDiscrete. ScaleLinetypeDiscrete: Discrete linetype scale for categories (named symbols).",
-    href: "/reference/scales/linetype_discrete#examples",
-    keywords: ["ScaleLinetypeDiscrete", "documentation"],
-    exact: ["Examples"],
-  },
-  {
     id: "page:reference-scales-linetype_identity",
     kind: "page",
     title: "ScaleLinetypeIdentity",
@@ -13778,16 +13768,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Guide interaction"],
   },
   {
-    id: "heading:reference-scales-shape_discrete:examples",
-    kind: "heading",
-    title: "Examples",
-    summary:
-      "Examples in ScaleShapeDiscrete. ScaleShapeDiscrete: Discrete shape scale for categories (named symbols).",
-    href: "/reference/scales/shape_discrete#examples",
-    keywords: ["ScaleShapeDiscrete", "documentation"],
-    exact: ["Examples"],
-  },
-  {
     id: "page:reference-scales-shape_identity",
     kind: "page",
     title: "ScaleShapeIdentity",
@@ -13994,16 +13974,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/scales/shape_ordinal#guide",
     keywords: ["ScaleShapeOrdinal", "documentation"],
     exact: ["Guide interaction"],
-  },
-  {
-    id: "heading:reference-scales-shape_ordinal:examples",
-    kind: "heading",
-    title: "Examples",
-    summary:
-      "Examples in ScaleShapeOrdinal. ScaleShapeOrdinal: Discrete shape scale for categories (named symbols). ggplot2 *Ordinal alias — same binding as ScaleShapeDiscrete.",
-    href: "/reference/scales/shape_ordinal#examples",
-    keywords: ["ScaleShapeOrdinal", "documentation"],
-    exact: ["Examples"],
   },
   {
     id: "page:reference-scales-size_area",
@@ -21741,27 +21711,6 @@ export const DOCS_SEARCH_INDEX = [
       "scale",
     ],
     exact: ["Cholera against height above the Thames"],
-  },
-  {
-    id: "example:point:style-scales",
-    kind: "example",
-    title: "Minard's march on five style channels",
-    summary:
-      "Line width, mark size and fade all carry the army's strength, the way Minard drew it; line type and shape carry the direction of march.",
-    href: "/examples/point/style-scales",
-    keywords: [
-      "Minard's march on five style channels",
-      "Scales & guides",
-      "point",
-      "line",
-      "size",
-      "alpha",
-      "linewidth",
-      "shape",
-      "linetype",
-      "scales",
-    ],
-    exact: ["Minard's march on five style channels"],
   },
   {
     id: "example:point:void-chrome",

@@ -7959,11 +7959,6 @@ export const DOCS_ROUTES = [
         title: "Guide interaction",
         level: 2,
       },
-      {
-        id: "examples",
-        title: "Examples",
-        level: 2,
-      },
     ],
   },
   {
@@ -8526,11 +8521,6 @@ export const DOCS_ROUTES = [
         title: "Guide interaction",
         level: 2,
       },
-      {
-        id: "examples",
-        title: "Examples",
-        level: 2,
-      },
     ],
   },
   {
@@ -8656,11 +8646,6 @@ export const DOCS_ROUTES = [
       {
         id: "guide",
         title: "Guide interaction",
-        level: 2,
-      },
-      {
-        id: "examples",
-        title: "Examples",
         level: 2,
       },
     ],
@@ -13088,17 +13073,6 @@ export const DOCS_ROUTES = [
     description:
       "Farr's 38 London districts of 1849, coloured in bands by their poor rate. A stepped ramp reads as brackets, which is how a rate like this gets argued about.",
     canonicalPath: "/examples/point/steps-binned",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/point/style-scales",
-    title: "Minard's march on five style channels — ggsvelte gallery",
-    description:
-      "Line width, mark size and fade all carry the army's strength, the way Minard drew it; line type and shape carry the direction of march.",
-    canonicalPath: "/examples/point/style-scales",
     kind: "page",
     index: true,
     sitemap: true,

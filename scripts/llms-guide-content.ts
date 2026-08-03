@@ -994,8 +994,12 @@ Missing and invalid values use distinct \`naValue\` and \`unknownValue\` outputs
 Date/datetime helpers reuse the strict parser and timezone semantics used by
 position and color scales.
 
-Open [complete style scales](/examples/point/style-scales) for the runnable
-five-channel contract.
+The five style channels each have their own scale families in the
+[scales reference](/reference/scales): [size](/reference/scales/size_continuous),
+[alpha](/reference/scales/alpha_continuous),
+[shape](/reference/scales/shape_ordinal),
+[linetype](/reference/scales/linetype_discrete), and
+[linewidth](/reference/scales/linewidth_continuous).
 
 ## Responsive guide presentation
 
