@@ -330,6 +330,30 @@ describe("guide sections cover their catalogs", () => {
     expect(UPGRADING_MD).toContain("Before 0.7, an explicit continuous color domain");
   });
 
+  it("keeps palette-purge migration guidance on the release that owns it", () => {
+    // 0.29 dropped Tableau 10 / season / stone; 0.28 dropped spreadsheet +
+    // Accent/Paired/gdocs multi-hue. H3 anchors stay stable for changesets;
+    // version ownership must not slide the wrong transition.
+    const tableauPurge = UPGRADING_MD.indexOf(
+      "### Removed Tableau 10, Summer, Winter, and stone schemes",
+    );
+    const accentPurge = UPGRADING_MD.indexOf(
+      "### Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes",
+    );
+    const spreadsheetPurge = UPGRADING_MD.indexOf(
+      "### Removed spreadsheet, Highcharts, and extra Stata schemes and themes",
+    );
+    expect(UPGRADING_MD).toContain("## 0.28 to 0.29");
+    expect(UPGRADING_MD).toContain("## 0.27 to 0.28");
+    expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-28-to-0-29"');
+    expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-27-to-0-28"');
+    expect(tableauPurge).toBeGreaterThan(UPGRADING_MD.indexOf("## 0.28 to 0.29"));
+    expect(tableauPurge).toBeLessThan(UPGRADING_MD.indexOf("## 0.27 to 0.28"));
+    expect(spreadsheetPurge).toBeGreaterThan(UPGRADING_MD.indexOf("## 0.27 to 0.28"));
+    expect(accentPurge).toBeGreaterThan(spreadsheetPurge);
+    expect(accentPurge).toBeLessThan(UPGRADING_MD.indexOf("## 0.26 to 0.27"));
+  });
+
   it("states the 0.1→0.2 upgrade contract: additive, controller optional", () => {
     expect(UPGRADING_MD).toContain("No source changes are required");
     // Controller adoption is optional — both APIs remain supported.

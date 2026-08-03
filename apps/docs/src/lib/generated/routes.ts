@@ -12159,6 +12159,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-28-to-0-29",
+        title: "0.28 to 0.29",
+        level: 2,
+      },
+      {
+        id: "removed-tableau-10-summer-winter-and-stone-schemes",
+        title: "Removed Tableau 10, Summer, Winter, and stone schemes",
+        level: 3,
+      },
+      {
         id: "0-27-to-0-28",
         title: "0.27 to 0.28",
         level: 2,
@@ -12171,11 +12181,6 @@ export const DOCS_ROUTES = [
       {
         id: "removed-accent-paired-grey-google-docs-and-tableau-multi-hue-schemes",
         title: "Removed Accent, Paired, Grey, Google Docs, and Tableau multi-hue schemes",
-        level: 3,
-      },
-      {
-        id: "removed-tableau-10-summer-winter-and-stone-schemes",
-        title: "Removed Tableau 10, Summer, Winter, and stone schemes",
         level: 3,
       },
       {
