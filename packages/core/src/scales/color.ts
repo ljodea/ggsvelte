@@ -5,6 +5,10 @@
  * viridis colormap — decision 0008: a lookup table with piecewise-linear sRGB
  * interpolation, no d3-scale-chromatic dependency; perceptual uniformity is
  * inherited from the sampled stops, not re-derived).
+ *
+ * Per-point sampling uses a dense trained LUT (#1423): 1024 steps so t=0.5
+ * lands on an exact table entry (same `rampColor` rounding as continuous
+ * midpoints). Per-point cost is one clamp + index lookup after t is known.
  */
 import { normalizeColor } from "./normalize-color.js";
 import { padDegenerateDomain, resolveMissingColors } from "./engine.js";
@@ -16,6 +20,13 @@ export { normalizeColor } from "./normalize-color.js";
 
 /** 10 stops sampled evenly from the viridis colormap (dark -> bright). */
 export { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
+
+/**
+ * Number of intervals in the trained sequential LUT (entries = steps + 1).
+ * Power-of-two steps keep t=0.5 on an exact sample so fixture midpoints
+ * match continuous `rampColor` (e.g. black↔white → #808080).
+ */
+export const RAMP_LUT_STEPS = 1024;
 
 function hexChannel(hex: string, i: number): number {
   return Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
@@ -41,6 +52,34 @@ export function rampColor(stops: readonly string[], t: number): string {
     out += to2(hexChannel(a, c) + (hexChannel(b, c) - hexChannel(a, c)) * f);
   }
   return out;
+}
+
+/**
+ * Dense ramp LUT: entry i stores `rampColor(stops, i / steps)`.
+ * Lookup quantizes t via `Math.round(t * steps)`.
+ */
+export function buildRampLut(
+  stops: readonly string[],
+  steps: number = RAMP_LUT_STEPS,
+): readonly string[] {
+  if (steps < 1) throw new RangeError(`Ramp LUT steps must be ≥ 1 (got ${String(steps)}).`);
+  if (stops.length === 0) throw new RangeError("Ramp LUT needs at least one color stop.");
+  if (stops.length === 1) {
+    return Object.freeze(Array.from({ length: steps + 1 }, () => stops[0]!));
+  }
+  const lut = Array.from<string>({ length: steps + 1 });
+  for (let i = 0; i <= steps; i++) {
+    lut[i] = rampColor(stops, i / steps);
+  }
+  return Object.freeze(lut);
+}
+
+/** Quantized LUT sample for t ∈ [0, 1] (clamped). */
+export function sampleRampLut(lut: readonly string[], t: number): string {
+  const steps = lut.length - 1;
+  if (steps <= 0) return lut[0]!;
+  const clamped = Math.min(1, Math.max(0, t));
+  return lut[Math.round(clamped * steps)]!;
 }
 
 export interface SequentialColorScale {
@@ -102,7 +141,9 @@ export function trainSequential(
   const base = (config.range ?? VIRIDIS_RAMP_10).map((stop) => normalizeColor(stop));
   const stops = config.reverse === true ? base.toReversed() : [...base];
   const span = transformedMax - transformedMin;
-  const at = (t: number) => rampColor(stops, t);
+  // Trained dense LUT: per-point color is one index lookup after t (#1423).
+  const lut = buildRampLut(stops, RAMP_LUT_STEPS);
+  const at = (t: number) => sampleRampLut(lut, t);
   const { naValue, unknownValue } = resolveMissingColors(config);
   return {
     type: "sequential",

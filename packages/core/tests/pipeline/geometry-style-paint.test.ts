@@ -96,6 +96,34 @@ describe("mappedPaintVector", () => {
       "#ff0000",
     ]);
   });
+
+  it("resolves the scale once per unique value when fanning out (#1423)", () => {
+    let colorOfCalls = 0;
+    const scale = fromPartial<ResolvedColorScale>({
+      kind: "ordinal",
+      scale: {
+        colorOf: (value: unknown) => {
+          colorOfCalls++;
+          return value === null || value === undefined
+            ? undefined
+            : PALETTE[`${value as string | number}`];
+        },
+        naValue: DEFAULT_MISSING_COLOR,
+        unknownValue: DEFAULT_MISSING_COLOR,
+      },
+    });
+    // 6 rows, 2 unique values → 2 colorOf calls (not 6).
+    const frame = makeFrame({ colorValues: ["a", "b", "a", "b", "a", "b"] });
+    expect(mappedPaintVector(frame, "color", scale, [0, 1, 2, 3, 4, 5])).toEqual([
+      "#ff0000",
+      "#00ff00",
+      "#ff0000",
+      "#00ff00",
+      "#ff0000",
+      "#00ff00",
+    ]);
+    expect(colorOfCalls).toBe(2);
+  });
 });
 
 describe("paintVector", () => {

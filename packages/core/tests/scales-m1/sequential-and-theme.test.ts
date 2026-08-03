@@ -5,7 +5,14 @@ import { THEME_NAMES } from "@ggsvelte/spec";
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
-import { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "../../src/scales/color.ts";
+import {
+  buildRampLut,
+  rampColor,
+  RAMP_LUT_STEPS,
+  sampleRampLut,
+  trainSequential,
+  VIRIDIS_RAMP_10,
+} from "../../src/scales/color.ts";
 import {
   BUILTIN_THEMES,
   LEGACY_BUILTIN_THEMES,
@@ -53,6 +60,31 @@ describe("sequential color", () => {
     expect(scale.colorOf(0)).toBe("#ffffff");
     expect(scale.colorOf(100)).toBe("#000000");
     expect(scale.colorOf(50)).toBe("#808080");
+  });
+
+  it("trains a dense ramp LUT whose mid/endpoints match continuous rampColor", () => {
+    const stops = ["#000000", "#ffffff"] as const;
+    const lut = buildRampLut(stops, RAMP_LUT_STEPS);
+    expect(lut).toHaveLength(RAMP_LUT_STEPS + 1);
+    expect(sampleRampLut(lut, 0)).toBe(rampColor(stops, 0));
+    expect(sampleRampLut(lut, 1)).toBe(rampColor(stops, 1));
+    // 1024 steps → t=0.5 lands on an exact entry (same #808080 as continuous).
+    expect(sampleRampLut(lut, 0.5)).toBe(rampColor(stops, 0.5));
+    expect(sampleRampLut(lut, 0.5)).toBe("#808080");
+  });
+
+  it("uses the trained LUT for sequential colorOf at fixture midpoints", () => {
+    const scale = trainSequential([0, 1], { range: ["#f00", "#00F"] });
+    expect(scale.colorOf(0.5)).toBe("#800080");
+    // Log-spaced endpoints and interior match the continuous log10 fixtures.
+    const logScale = trainSequential([1, 1000], {
+      transform: "log10",
+      range: ["#000000", "#ffffff"],
+    });
+    expect(logScale.colorOf(1)).toBe("#000000");
+    expect(logScale.colorOf(10)).toBe("#555555");
+    expect(logScale.colorOf(100)).toBe("#aaaaaa");
+    expect(logScale.colorOf(1000)).toBe("#ffffff");
   });
 });
 

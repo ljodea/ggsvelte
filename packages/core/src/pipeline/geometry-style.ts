@@ -2,6 +2,7 @@
 import type { StyleAesthetic } from "@ggsvelte/spec";
 
 import type { ResolvedStyleScale, StyleOutput } from "../scales/style.js";
+import type { CellValue } from "../table.js";
 import type { LayerBinding, LayerFrame, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 
@@ -14,9 +15,93 @@ function paintValues(frame: LayerFrame, channel: PaintChannel): LayerFrame["colo
 }
 
 /**
+ * Map unique source values once, then fan out onto kept rows (#1423).
+ * SameValueZero Map keys (number/string/boolean/null/NaN); Dates fall back
+ * to per-row evaluation because object identity is not value identity.
+ */
+function mapUniqueThenFanOut<T>(
+  rows: ArrayLike<number>,
+  valueAt: (row: number) => unknown,
+  mapOne: (value: unknown) => T,
+): T[] {
+  const n = rows.length;
+  const out = Array.from<T>({ length: n });
+  if (n === 0) return out;
+  // Fast constant path: every kept row reads the same value.
+  const first = valueAt(rows[0]!);
+  let allSame = true;
+  for (let i = 1; i < n; i++) {
+    if (!Object.is(valueAt(rows[i]!), first)) {
+      allSame = false;
+      break;
+    }
+  }
+  if (allSame) {
+    const mapped = mapOne(first);
+    for (let i = 0; i < n; i++) out[i] = mapped;
+    return out;
+  }
+  const cache = new Map<unknown, T>();
+  for (let i = 0; i < n; i++) {
+    const value = valueAt(rows[i]!);
+    // Date / object keys are reference-identity only — evaluate per row.
+    if (typeof value === "object" && value !== null) {
+      out[i] = mapOne(value);
+      continue;
+    }
+    let mapped = cache.get(value);
+    if (mapped === undefined && !cache.has(value)) {
+      mapped = mapOne(value);
+      cache.set(value, mapped);
+    }
+    out[i] = mapped as T;
+  }
+  return out;
+}
+
+/**
+ * Resolve a style aesthetic once per unique source value, then fan out.
+ * Uses the first kept row that carries each value so `mappedStyleOutput`
+ * (constant / scaledConstant / null) stays behavior-identical.
+ */
+function uniqueStyleOutputs<T>(
+  frame: LayerFrame,
+  aesthetic: StyleAesthetic,
+  rows: ArrayLike<number>,
+  scales: ResolvedStyleScales,
+  project: (output: StyleOutput | undefined) => T,
+): T[] {
+  const binding = frame.binding[aesthetic];
+  if (binding.constant !== null) {
+    const projected = project(binding.constant as StyleOutput);
+    return Array.from({ length: rows.length }, () => projected);
+  }
+  const values = styleFrameValues(frame, aesthetic);
+  const resolved = scales[aesthetic];
+  if (resolved === null) {
+    return Array.from({ length: rows.length }, () => project(undefined));
+  }
+  return mapUniqueThenFanOut(
+    rows,
+    (row) => (values === null ? binding.scaledConstant : values[row]),
+    (value) => {
+      const output =
+        value === null || value === undefined
+          ? binding.scaledConstant === null && values === null
+            ? undefined
+            : resolved.scale.valueOf(null)
+          : resolved.scale.valueOf(value);
+      return project(output);
+    },
+  );
+}
+
+/**
  * Per-row paint when the caller has already proven the channel is mapped
  * (scale non-null and values|scaledConstant present). Feeds Points/Rects/
  * Segments `string[]` fields without null casts.
+ *
+ * Resolves the scale once per unique source value, then fans out (#1423).
  */
 export function mappedPaintVector(
   frame: LayerFrame,
@@ -26,13 +111,15 @@ export function mappedPaintVector(
 ): string[] {
   const binding = frame.binding[channel];
   const values = paintValues(frame, channel);
-  const out = Array.from<string>({ length: rows.length });
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i]!;
-    const value = values === null ? binding.scaledConstant! : values[row]!;
-    out[i] = colorOf(scale, value);
+  if (values === null) {
+    const color = colorOf(scale, binding.scaledConstant as CellValue);
+    return Array.from({ length: rows.length }, () => color);
   }
-  return out;
+  return mapUniqueThenFanOut(
+    rows,
+    (row) => values[row]!,
+    (value) => colorOf(scale, value as CellValue),
+  );
 }
 
 /**
@@ -127,10 +214,12 @@ export function numericStyleVector(
   ) {
     return undefined;
   }
-  return Float32Array.from(
-    rows,
-    (row) => mappedStyleOutput(frame, aesthetic, row, scales) as number,
-  );
+  // Unique-value map then fan-out (#1423): size/alpha columns often cycle a
+  // small domain (bench: 100 magnitudes / 100 confidences over 100k rows).
+  const mapped = uniqueStyleOutputs(frame, aesthetic, rows, scales, (output) => output as number);
+  const out = new Float32Array(mapped.length);
+  for (let i = 0; i < mapped.length; i++) out[i] = mapped[i]!;
+  return out;
 }
 
 export function indexedStyleVector(
@@ -147,7 +236,10 @@ export function indexedStyleVector(
   ) {
     return undefined;
   }
-  return Uint8Array.from(rows, (row) =>
-    indexOf(String(mappedStyleOutput(frame, aesthetic, row, scales))),
+  const mapped = uniqueStyleOutputs(frame, aesthetic, rows, scales, (output) =>
+    indexOf(String(output)),
   );
+  const out = new Uint8Array(mapped.length);
+  for (let i = 0; i < mapped.length; i++) out[i] = mapped[i]!;
+  return out;
 }
