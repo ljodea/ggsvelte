@@ -27,7 +27,7 @@ export function primaryNavLinks(path: string, owner?: PrimaryNavOwner): readonly
     {
       label: "Palettes",
       href: "/palettes",
-      active: path === "/palettes",
+      active: path === "/palettes" || path.startsWith("/palettes/"),
     },
     {
       label: "Reference",

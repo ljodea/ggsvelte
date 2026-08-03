@@ -49,10 +49,12 @@
     {@const displayColors = reverse
       ? specimen.colors.toReversed()
       : specimen.colors}
+    {@const buttonLabel = `${specimen.label}, ${String(specimen.capacity)} colors${specimen.colorblindSafe ? ", CB-safe" : ""}`}
     <li>
       <button
         type="button"
         id={`scheme-${specimen.name}`}
+        aria-label={buttonLabel}
         aria-pressed={specimen.name === selected}
         onpointerenter={() => onpreview(specimen.name)}
         onfocus={() => onpreview(specimen.name)}
@@ -67,19 +69,13 @@
               >{/if}
           </span>
         </span>
-        <span
-          class="strip"
-          role="list"
-          aria-label={`${specimen.label} ordered colors`}
-        >
+        <!-- Decorative inside a named control: without an explicit button
+             aria-label, every swatch label folds into the spoken name (and
+             ARIA's presentational-children rule strips list roles inside a
+             button anyway). Hex stays discoverable via title tooltips. -->
+        <span class="strip" aria-hidden="true">
           {#each displayColors as color, index (`${color}-${String(index)}`)}
-            <span
-              class="cell"
-              role="listitem"
-              style={`--swatch:${color}`}
-              title={color}
-              aria-label={`${String(index + 1)}: ${color}`}
-            ></span>
+            <span class="cell" style={`--swatch:${color}`} title={color}></span>
           {/each}
         </span>
       </button>

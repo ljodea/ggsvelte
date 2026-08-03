@@ -27,6 +27,15 @@ describe("primaryNavLinks", () => {
     );
   });
 
+  test("marks palettes children without swallowing unrelated paths", () => {
+    expect(
+      primaryNavLinks("/palettes/ramps").find((link) => link.href === "/palettes")?.active,
+    ).toBe(true);
+    expect(primaryNavLinks("/palettesque").find((link) => link.href === "/palettes")?.active).toBe(
+      false,
+    );
+  });
+
   test("marks reference owner", () => {
     expect(
       primaryNavLinks("/reference/cli", "reference").find((link) => link.href === "/reference")

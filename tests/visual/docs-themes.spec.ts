@@ -265,14 +265,17 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await region.getByRole("combobox", { name: "Sort" }).selectOption("capacity");
   await expect(rows.locator(".name").first()).toHaveText("WSJ Red/Green");
 
-  const observable = region.getByRole("button", { name: /Observable 10/ });
-  const swatches = observable
-    .getByRole("list", { name: "Observable 10 ordered colors" })
-    .getByRole("listitem");
+  // Row buttons carry a concise explicit name — swatch hex must NOT fold
+  // into it (presentational-children strips list roles inside buttons).
+  const observable = region.getByRole("button", {
+    name: "Observable 10, 10 colors",
+    exact: true,
+  });
+  const swatches = observable.locator(".strip .cell");
   await expect(swatches).toHaveCount(10);
-  // Hex lives in accessible names only — not as visible code under every chip.
-  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #4269d0");
-  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
+  // Hex lives in title tooltips only — not as visible code under every chip.
+  await expect(swatches.first()).toHaveAttribute("title", "#4269d0");
+  await expect(swatches.last()).toHaveAttribute("title", "#9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
   // One shared preview chart hydrates eagerly; pinned default is Observable 10.
@@ -284,7 +287,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(firstMark).toBeVisible();
 
   // Hover previews transiently; click pins the selection (aria-pressed).
-  const tableau = region.getByRole("button", { name: /Tableau 10 / });
+  const tableau = region.getByRole("button", {
+    name: "Tableau 10, 10 colors",
+    exact: true,
+  });
   await tableau.hover();
   await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
   await tableau.click();
@@ -303,8 +309,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(preview.locator(".gg-crosshair")).toHaveCount(0);
 
   await region.getByRole("checkbox", { name: "Reverse" }).check();
-  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #9498a0");
-  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #4269d0");
+  await expect(swatches.first()).toHaveAttribute("title", "#9498a0");
+  await expect(swatches.last()).toHaveAttribute("title", "#4269d0");
   await region.getByRole("button", { name: /Observable 10/ }).click();
   await expect(preview.locator(".gg-plot-root [fill='#9498a0']").first()).toBeVisible();
 
