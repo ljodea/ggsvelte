@@ -14,47 +14,11 @@
 
   import {
     campaignRivers,
-    minardCities,
+    minardCityLabels,
     minardCold,
+    minardStrengthLabels,
     minardTroops,
   } from "./data.js";
-
-  // Label nudges in degrees, so names clear the bands the way Minard placed
-  // them: Kowno left of the crossing, the Vilna-loop names off the band.
-  const NUDGES: Record<string, readonly [number, number]> = {
-    Kowno: [-0.3, 0.05],
-    Wilna: [0, -0.24],
-    Smorgoni: [-0.1, -0.22],
-    Molodezno: [0.1, 0.14],
-    Studienska: [0, -0.34],
-    Bobr: [0.2, 0.1],
-    Polotzk: [0, 0.12],
-    "Malo-Jarosewii": [0, -0.2],
-    Moscou: [0.12, 0.06],
-  };
-  const cityLabels = minardCities.map((c) => {
-    const [dx, dy] = NUDGES[c.city] ?? [0, 0];
-    return { ...c, lx: c.long + dx, ly: c.lat + dy };
-  });
-
-  // The strength counts Minard lettered along the bands, placed just clear of
-  // the ink (his are rotated along the march; geom_text stays horizontal).
-  const strengthLabels: { long: number; lat: number; count: string }[] = [
-    { long: 25.5, lat: 55.3, count: "340,000" },
-    { long: 24.2, lat: 55.5, count: "60,000" },
-    { long: 24.2, lat: 55.62, count: "22,000" },
-    { long: 26.4, lat: 55.92, count: "40,000" },
-    { long: 30.3, lat: 55.66, count: "175,000" },
-    { long: 32.9, lat: 55.36, count: "140,000" },
-    { long: 37.2, lat: 56.12, count: "100,000" },
-    { long: 36.5, lat: 54.72, count: "97,000" },
-    { long: 34.3, lat: 54.88, count: "55,000" },
-    { long: 33.3, lat: 54.48, count: "37,000" },
-    { long: 31.6, lat: 54.3, count: "24,000" },
-    { long: 28.9, lat: 53.78, count: "20,000" },
-    { long: 25.0, lat: 54.14, count: "8,000" },
-    { long: 24.1, lat: 54.12, count: "4,000" },
-  ];
 </script>
 
 <div class="minard">
@@ -98,13 +62,13 @@
       }}
     />
     <GeomText
-      data={cityLabels}
+      data={minardCityLabels}
       aes={{ x: "lx", y: "ly", label: "city", color: { value: "#4a4237" } }}
       size={10}
       dy={-9}
     />
     <GeomText
-      data={strengthLabels}
+      data={minardStrengthLabels}
       aes={{ x: "long", y: "lat", label: "count", color: { value: "#6b5d4a" } }}
       size={9}
     />

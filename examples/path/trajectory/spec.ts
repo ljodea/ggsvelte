@@ -7,7 +7,7 @@ import {
 } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { campaignRivers, minardCities, minardTroops } from "./data.js";
+import { campaignRivers, minardCityLabels, minardStrengthLabels, minardTroops } from "./data.js";
 
 export default defineExample(
   // Minard's flow map: band width carries surviving strength, so linewidth is
@@ -30,10 +30,15 @@ export default defineExample(
       }),
     })
     .geomText({
-      data: minardCities,
-      aes: aes({ label: "city", color: { value: "#4a4237" } }),
+      data: minardCityLabels,
+      aes: aes({ x: "lx", y: "ly", label: "city", color: { value: "#4a4237" } }),
       size: 10,
       dy: -9,
+    })
+    .geomText({
+      data: minardStrengthLabels,
+      aes: aes({ label: "count", color: { value: "#6b5d4a" } }),
+      size: 9,
     })
     .scales({
       ...scaleXContinuous({ limits: [23.5, 38.2] }),
