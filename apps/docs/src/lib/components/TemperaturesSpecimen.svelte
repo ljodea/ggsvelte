@@ -12,6 +12,8 @@
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
+  import { docsAppearance } from "$lib/docs-appearance-state.svelte";
+  import { marksOnlyThemeRoles } from "$lib/marks-only-theme-contrast";
   import type { SchemeName } from "$lib/theme-specimens/catalog";
   import { temperaturesKeyed } from "$lib/theme-specimens/data";
   import { TEMPERATURES_CHART } from "$lib/theme-specimens/temperatures-chart";
@@ -31,6 +33,9 @@
   } = $props();
 
   const chart = TEMPERATURES_CHART;
+  const themeRoles = $derived(
+    marksOnlyThemeRoles(theme, docsAppearance.current),
+  );
 </script>
 
 <GGPlot data={temperaturesKeyed} aes={chart.aes} {height} {ariaLabel}>
@@ -38,7 +43,7 @@
   {#if legendFocus}
     <GuideLegend channel="color" focus />
   {/if}
-  <Theme name={theme} />
+  <Theme name={theme} {...themeRoles} />
   <ScaleXContinuous breaks={[...chart.monthBreaks]} />
   <ScaleColorDiscrete {scheme} />
   <Labs

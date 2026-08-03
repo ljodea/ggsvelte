@@ -9,7 +9,14 @@ import { registerAll, renderToSVGString } from "@ggsvelte/core";
 
 // Headless full-grammar rendering (#1420): explicit opt-in.
 registerAll();
-import { aes, gg, scaleXLog10, type AuthoringRows, type ThemeName } from "@ggsvelte/spec";
+import {
+  aes,
+  gg,
+  scaleXLog10,
+  type AuthoringRows,
+  type ThemeName,
+  type ThemeSpec,
+} from "@ggsvelte/spec";
 
 import { MONTH_BREAKS, type SchemeName, type ThemeSpecimenKind } from "./catalog.js";
 import {
@@ -50,15 +57,35 @@ export type ThemeStaticSvgInput = {
   readonly scheme: SchemeName;
   readonly width?: number;
   readonly height?: number;
+  /**
+   * Role overrides merged onto the named theme (e.g. dark-site ink for
+   * marks-only void/map/solid portraits).
+   */
+  readonly themeRoles?: Readonly<
+    Partial<
+      Pick<
+        ThemeSpec,
+        "ink" | "axisText" | "axisLine" | "tickColor" | "interactionInk" | "toolActive"
+      >
+    >
+  >;
 };
 
 function colorScale(scheme: SchemeName) {
   return { type: "ordinal" as const, scheme };
 }
 
+/** Named theme, or ThemeSpec object when role overrides are present. */
+function themeArg(input: ThemeStaticSvgInput): ThemeName | ThemeSpec {
+  const roles = input.themeRoles;
+  if (roles === undefined || Object.keys(roles).length === 0) return input.name;
+  return { name: input.name, ...roles };
+}
+
 function buildThemeSpec(input: ThemeStaticSvgInput) {
-  const { name, kind, scheme } = input;
+  const { kind, scheme } = input;
   const color = colorScale(scheme);
+  const theme = themeArg(input);
 
   switch (kind) {
     case "temps-line": {
@@ -70,7 +97,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
           x: { breaks: [...chart.monthBreaks] },
           color,
         })
-        .theme(name)
+        .theme(theme)
         .labs({ ...chart.labs })
         .spec();
     }
@@ -79,7 +106,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
         .geomLine({ linewidth: 2 })
         .geomPoint({ size: 2.8 })
         .scales({ color })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Playfair wheat price & weekly wage",
           x: "Year",
@@ -91,7 +118,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
       return gg(attendees, aes({ x: "track", fill: "level", weight: "deaths" }))
         .geomBar({ position: "dodge" })
         .scales({ fill: color })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Edgeworth county deaths, 1876–82",
           x: "Year",
@@ -103,7 +130,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
       return gg(generation, aes({ x: "year", y: "twh", fill: "source" }))
         .geomArea({ alpha: 0.9 })
         .scales({ x: { nice: false }, fill: color })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Crimean deaths by cause, 1854–56",
           x: "Year",
@@ -114,7 +141,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
     case "long-run-line":
       return gg(longRunSeries, aes({ x: "year", y: "value" }))
         .geomLine({ linewidth: 1.5 })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "British exports, 1855–1899",
           x: "Year",
@@ -125,7 +152,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
       return gg(penguins, aes({ x: "flipper", y: "mass", color: "species" }))
         .geomPoint({ size: 3.5, alpha: 0.9 })
         .scales({ color })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Penguin flipper length and body mass",
           x: "Flipper length (mm)",
@@ -138,7 +165,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
         .geomPoint({ size: 3.5 })
         .geomSmooth({ method: "lm", se: false })
         .scales({ ...scaleXLog10({ labels: "~s" }), color })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Cholera death rate vs density, 1849",
           x: "People per acre (log scale)",
@@ -150,7 +177,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
       return gg(revenue, aes({ x: "quarter", y: "amount" }))
         .geomCol({ width: 0.7 })
         .geomText({ aes: { label: "label" }, dy: -8, size: 11 })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Salk trial paralytic polio rates",
           x: "Group",
@@ -162,7 +189,7 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
         .geomPoint({ size: 3 })
         .geomText({ aes: { label: "city" }, dy: -9, size: 10 })
         .scales({ x: { labels: ".1f" } })
-        .theme(name)
+        .theme(theme)
         .labs({
           title: "Van Langren longitude estimates, 1644",
           x: "Toledo–Rome longitude (°)",
@@ -179,7 +206,8 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
 export function themeSpecimenStaticSvg(input: ThemeStaticSvgInput): string {
   const width = input.width ?? DOCS_STATIC_PLOT_WIDTH_PX;
   const height = input.height ?? 380;
-  const key = `${input.name}:${input.kind}:${input.scheme}:${String(width)}x${String(height)}`;
+  const rolesKey = input.themeRoles === undefined ? "" : `:${JSON.stringify(input.themeRoles)}`;
+  const key = `${input.name}:${input.kind}:${input.scheme}:${String(width)}x${String(height)}${rolesKey}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
   const svg = namespaceSvgIds(renderToSVGString(buildThemeSpec(input), { width, height }), key);

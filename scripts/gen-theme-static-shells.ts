@@ -16,6 +16,10 @@ import { join, resolve } from "node:path";
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import { CATEGORICAL_PALETTES } from "../apps/docs/src/lib/catalog/themes.js";
+import {
+  isMarksOnlyTheme,
+  MARKS_ONLY_DARK_SITE_ROLES,
+} from "../apps/docs/src/lib/marks-only-theme-contrast.js";
 import { RASTER_Z_DOMAIN, THEME_SPECIMENS } from "../apps/docs/src/lib/theme-specimens/catalog.js";
 import {
   paletteSpecimenStaticSvg,
@@ -81,6 +85,20 @@ function buildShells(): ShellFile[] {
         height: 380,
       }),
     });
+    // Transparent-paper themes need a second portrait for the dark docs shell
+    // (dark ink on transparent paper vanishes into the page background).
+    if (isMarksOnlyTheme(specimen.name)) {
+      files.push({
+        filename: `theme-${specimen.name}-dark-site.svg`,
+        body: themeSpecimenStaticSvg({
+          name: specimen.name,
+          kind: specimen.kind,
+          scheme: specimen.scheme,
+          height: 380,
+          themeRoles: MARKS_ONLY_DARK_SITE_ROLES,
+        }),
+      });
+    }
   }
   files.push({
     filename: "theme-lab-default.svg",
