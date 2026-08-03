@@ -44,7 +44,8 @@ type FoundationBag = {
   accent: string;
   grid: string;
   panel: string;
-  letterboxFill: string;
+  /** Optional — omit so themed() defaults letterboxFill to paper. */
+  letterboxFill?: string;
   axisText: string;
   axisLine: string;
   tickColor: string;
@@ -145,8 +146,9 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
     accent: theme.accent ?? fromBase.accent,
     grid: theme.grid ?? fromBase.grid,
     panel: theme.panel ?? fromBase.panel,
-    // Match prior object path: only override letterbox when the spec sets it.
-    letterboxFill: theme.letterboxFill ?? fromBase.letterboxFill,
+    // Only pass when the object sets it — themed() defaults letterboxFill to paper
+    // (so paper-only object overrides re-derive the gutter fill).
+    ...(theme.letterboxFill !== undefined && { letterboxFill: theme.letterboxFill }),
     axisText: theme.axisText ?? fromBase.axisText,
     axisLine: theme.axisLine ?? fromBase.axisLine,
     tickColor: theme.tickColor ?? fromBase.tickColor,
