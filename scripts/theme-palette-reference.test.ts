@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "bun:test";
 
 import {
@@ -16,6 +19,11 @@ import {
   SEQUENTIAL_SCHEME_NAMES,
   THEME_NAMES,
 } from "../packages/spec/src/schema-names.ts";
+
+const THEMES_PAGE = readFileSync(
+  join(import.meta.dir, "../apps/docs/src/routes/reference/themes/+page.svelte"),
+  "utf8",
+);
 
 describe("theme reference catalog", () => {
   it("lists a shell for every registered theme name", () => {
@@ -43,6 +51,27 @@ describe("theme reference catalog", () => {
       expect(names.has(role), role).toBe(true);
     }
     expect(ALL_THEME_ROLES.length).toBeGreaterThan(THEME_COLOR_ROLES.length);
+  });
+
+  it("documents elevated tooltip chrome on low-contrast built-ins", () => {
+    // Author-facing contract from tooltip-contrast-defaults PR 4: these named
+    // bases ship tip roles off the chart surface; object ThemeSpecs keep that
+    // package unless tip roles are set.
+    const elevated = [
+      "solarized",
+      "solarized_2",
+      "solarizeddark",
+      "solarized_2dark",
+      "dark",
+      "hcdark",
+      "fivethirtyeight",
+      "economist",
+    ] as const;
+    for (const name of elevated) {
+      expect(THEMES_PAGE.includes(name), name).toBe(true);
+    }
+    expect(THEMES_PAGE).toMatch(/elevated tooltip/i);
+    expect(THEMES_PAGE).toMatch(/elevated package unless[\s\S]*tooltipPaper/i);
   });
 });
 
