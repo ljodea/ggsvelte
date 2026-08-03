@@ -161,24 +161,42 @@ function translucent(color: string, alpha: number): string {
   return `color-mix(in srgb, ${color} ${alpha * 100}%, transparent)`;
 }
 
+/** Optional tooltip-role overrides accepted by themed() (not foundation). */
+export type TooltipRoleOverrides = {
+  tooltipPaper?: string;
+  tooltipInk?: string;
+  tooltipBorder?: string;
+};
+
 /**
  * Interaction colors are relationships, not a second palette. Keeping the
  * derivation here means every built-in and edition-specific theme gets a
  * coherent interaction treatment when its foundational roles change.
+ *
+ * Complete themes may pass optional tooltip* overrides when pure derivation
+ * would leave the tip indistinguishable from the chart surface.
  */
 export function themed(
-  overrides: Partial<FoundationThemeTokens> & { letterboxFill?: string },
+  overrides: Partial<FoundationThemeTokens> & {
+    letterboxFill?: string;
+  } & TooltipRoleOverrides,
 ): ThemeTokens {
-  const { letterboxFill, ...foundationOverrides } = overrides;
+  const {
+    letterboxFill,
+    tooltipPaper: tooltipPaperOverride,
+    tooltipInk: tooltipInkOverride,
+    tooltipBorder: tooltipBorderOverride,
+    ...foundationOverrides
+  } = overrides;
   const foundation = { ...HRBR_BASE, ...foundationOverrides };
   const hasOpaqueSurface = foundation.paper !== "none" || foundation.panel !== "none";
-  const tooltipPaper =
+  const derivedTooltipPaper =
     foundation.paper === "none"
       ? foundation.panel === "none"
         ? "#ffffff"
         : foundation.panel
       : foundation.paper;
-  const tooltipInk = hasOpaqueSurface
+  const derivedTooltipInk = hasOpaqueSurface
     ? foundation.ink
     : foundation.ink === "currentColor"
       ? "#1f2328"
@@ -192,7 +210,7 @@ export function themed(
     !foundation.showPanelBorder &&
     !foundation.axisLineX &&
     !foundation.axisLineY;
-  const tooltipBorder = flatTooltipChrome
+  const derivedTooltipBorder = flatTooltipChrome
     ? "transparent"
     : foundation.grid === "none"
       ? foundation.panelBorder
@@ -206,9 +224,9 @@ export function themed(
     crosshair: foundation.axisText,
     selectionFill: translucent(foundation.accent, 0.18),
     selectionStroke: foundation.accent,
-    tooltipPaper,
-    tooltipInk,
-    tooltipBorder,
+    tooltipPaper: tooltipPaperOverride ?? derivedTooltipPaper,
+    tooltipInk: tooltipInkOverride ?? derivedTooltipInk,
+    tooltipBorder: tooltipBorderOverride ?? derivedTooltipBorder,
     toolActive: foundation.ink,
   });
 }
@@ -913,12 +931,18 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
   }),
 });
 
-const LEGACY_BASE = themed({
+// Foundation-only (no interaction/tooltip roles). Spreading a full ThemeTokens
+// into themed() would pass stale tooltip* as intentional overrides once themed()
+// accepts tip overrides — keep variants on this plain object instead.
+// letterboxFill stays "none" so light/dark paper overrides do not paint opaque
+// fixed-aspect gutters (prior LEGACY_BASE spread carried letterboxFill: "none").
+const LEGACY_BASE_FOUNDATION = {
   ink: "currentColor",
   paper: "none",
   panel: "none",
   accent: "#4269d0",
   grid: "rgba(128,128,128,0.25)",
+  letterboxFill: "none",
   axisText: "currentColor",
   axisLine: "currentColor",
   tickColor: "currentColor",
@@ -945,14 +969,16 @@ const LEGACY_BASE = themed({
   axisLineY: true,
   ticksX: true,
   ticksY: true,
-});
+} as const satisfies Partial<FoundationThemeTokens> & { letterboxFill: string };
+
+const LEGACY_BASE = themed(LEGACY_BASE_FOUNDATION);
 
 /** Edition-1 color themes with their original typography and chrome. */
 export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.freeze({
   ...BUILTIN_THEMES,
   default: LEGACY_BASE,
   light: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     ink: "#1f2328",
     paper: "#ffffff",
     panel: "none",
@@ -962,7 +988,7 @@ export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = O
     grid: "rgba(31,35,40,0.14)",
   }),
   dark: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     ink: "#e6e8eb",
     paper: "#16181d",
     panel: "none",
@@ -973,7 +999,7 @@ export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = O
     grid: "rgba(230,232,235,0.16)",
   }),
   minimal: themed({
-    ...LEGACY_BASE,
+    ...LEGACY_BASE_FOUNDATION,
     accent: "#9498a0",
     grid: "rgba(128,128,128,0.12)",
   }),
