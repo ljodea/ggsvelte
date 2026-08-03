@@ -14,9 +14,12 @@
  * NOTE: deliberately NOT registerAll() — installTemporal() evaluates the
  * Temporal polyfill per iframe. Temporal arrives per-file via GGPlot's
  * runtime (component tests), helpers/model.ts, or an explicit registerAll()
- * in the test file (temporal spec-driven suites).
+ * in the test file (temporal spec-driven suites). installCandidates() IS
+ * called here: it is a cheap runtime thunk (no polyfill) and direct
+ * runPipeline tests may touch model.candidates (#1421).
  */
-import { registerAllGeomBatches, registerAllStatFrames } from "@ggsvelte/core";
+import { installCandidates, registerAllGeomBatches, registerAllStatFrames } from "@ggsvelte/core";
 
 registerAllStatFrames();
 registerAllGeomBatches();
+installCandidates();

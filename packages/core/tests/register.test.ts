@@ -15,6 +15,7 @@ import { describe, expect, it } from "bun:test";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
+import { getCandidateRuntime } from "../src/candidate-runtime.ts";
 import { getStatFrameBuilder } from "../src/pipeline/frame-stats-registry.ts";
 import { getGeomBatchBuilder } from "../src/pipeline/geometry-registry.ts";
 import { registerAll, registerBasic } from "../src/index.ts";
@@ -125,6 +126,9 @@ describe("explicit registration API (Seam A)", () => {
     for (const stat of ALL_STATS) {
       expect(getStatFrameBuilder(stat), `stat ${stat}`).toBeDefined();
     }
+    // #1421 parity: registerAll restores the full old-barrel runtime, which
+    // includes the interaction-candidate builder.
+    expect(getCandidateRuntime()).not.toBeNull();
   });
 });
 
@@ -132,7 +136,7 @@ describe("fresh-process registration gating (Seam B)", () => {
   it("bare import registers nothing; registerBasic/registerAll gate the grammar", () => {
     const coreRoot = path.resolve(import.meta.dir, "..");
     const script = `
-      import { registerAll, registerBasic, renderToSVGString } from ${JSON.stringify(
+      import { registerAll, registerBasic, renderToSVGString, runPipeline } from ${JSON.stringify(
         path.join(coreRoot, "src", "index.ts"),
       )};
       import { aes, gg } from "@ggsvelte/spec";
@@ -165,8 +169,16 @@ describe("fresh-process registration gating (Seam B)", () => {
       registerBasic();
       out.pointAfterBasic = attempt(point);
       out.smoothAfterBasic = attempt(smooth);
+      const candidates = () => {
+        const model = runPipeline(gg(rows, aes({ x: "x", y: "y" })).geomPoint().spec(), {
+          width: 400, height: 300,
+        });
+        return model.candidates.size;
+      };
+      out.candidatesFresh = attempt(candidates);
       registerAll();
       out.smoothAfterAll = attempt(smooth);
+      out.candidatesAfterAll = attempt(candidates);
       console.log(JSON.stringify(out));
     `;
     const proc = spawnSync(process.execPath, ["-e", script], {
@@ -185,7 +197,10 @@ describe("fresh-process registration gating (Seam B)", () => {
     expect(out.pointAfterBasic).toBe("rendered");
     expect(out.smoothAfterBasic).toContain("not registered");
 
-    // registerAll(): full grammar.
+    // registerAll(): full grammar + interaction candidates (#1421).
     expect(out.smoothAfterAll).toBe("rendered");
+    expect(out.candidatesFresh).toContain("require @ggsvelte/core");
+    expect(out.candidatesAfterAll).not.toContain("not registered");
+    expect(out.candidatesAfterAll).not.toContain("require @ggsvelte/core");
   }, 60_000);
 });

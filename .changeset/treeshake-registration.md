@@ -9,7 +9,7 @@ Migration: <https://ggsvelte.sh/guide/upgrading#explicit-registration-for-spec-d
 
 The `@ggsvelte/core` barrel no longer registers every stat frame builder and geom batch at module scope, and no longer installs Temporal on import. Registration is explicit:
 
-- `registerAll()` — full grammar + Temporal (one-call pre-0.27 behavior), re-exported from `@ggsvelte/svelte`.
+- `registerAll()` — full grammar + Temporal + interaction candidates (one-call pre-0.27 behavior), re-exported from `@ggsvelte/svelte`.
 - `registerBasic()` — identity-chart tier (what `@ggsvelte/core/render` still installs on import).
 - Per-family `registerSmooth()` / `registerBoxplot()` / … — granular opt-in; each generated `<Geom*>` component calls its own in a `<script module>` block, so importing a component is what pulls its code into the bundle.
 

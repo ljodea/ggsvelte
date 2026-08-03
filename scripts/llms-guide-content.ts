@@ -2031,7 +2031,8 @@ registered in this build. Call registerAll() …\`.
 \`\`\`
 
 - Prefer one \`registerAll()\` at app startup for the pre-0.27 "full grammar"
-  behavior (also re-exported from \`@ggsvelte/svelte\`).
+  behavior — grammar + Temporal + interaction candidates (also re-exported
+  from \`@ggsvelte/svelte\`).
 - Prefer a per-family call (\`registerSmooth()\`, \`registerBoxplot()\`, …, from
   \`@ggsvelte/core\`) for granular opt-in without the full grammar.
 - Overriding \`stat\` to a specialty stat (e.g.

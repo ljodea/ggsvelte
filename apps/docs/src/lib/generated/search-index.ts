@@ -19964,14 +19964,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-367",
+    id: "heading:guide-lifecycle:experimental-368",
     kind: "heading",
-    title: "experimental (367)",
+    title: "experimental (368)",
     summary:
-      "experimental (367) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-367",
+      "experimental (368) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-368",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (367)"],
+    exact: ["experimental (368)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -33003,6 +33003,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["inferFieldType"],
+  },
+  {
+    id: "api:ggsvelte-core:installCandidates",
+    kind: "api",
+    title: "installCandidates",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["installCandidates"],
   },
   {
     id: "api:ggsvelte-core:installTemporal",

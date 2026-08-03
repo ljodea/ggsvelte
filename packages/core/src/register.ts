@@ -7,8 +7,9 @@
  *   - `registerBasic()` — identity-chart geoms/stats (scatter, line, bar,
  *     area, …). Same tier `@ggsvelte/core/render` installs on import.
  *   - `registerAll()` — the full grammar (every stat frame + geom batch) plus
- *     the Temporal polyfill parse path. One-call migration path for apps that
- *     relied on the pre-#1420 auto-registering barrel.
+ *     the Temporal polyfill parse path and the interaction-candidate runtime
+ *     (#1421). One-call migration path for apps that relied on the pre-#1420
+ *     auto-registering barrel.
  *   - Per-family `register<Family>()` functions (see pipeline/register-*.ts)
  *     for granular opt-in.
  *
@@ -16,6 +17,7 @@
  *
  * @lifecycle experimental
  */
+import { installCandidates } from "./install-candidates.js";
 import { installTemporal } from "./install-temporal.js";
 import { registerBasicStatFrames } from "./pipeline/frame-stats-register-basic.js";
 import { registerAllStatFrames } from "./pipeline/frame-stats-register-all.js";
@@ -28,9 +30,10 @@ export function registerBasic(): void {
   registerBasicGeomBatches();
 }
 
-/** Register every stat frame + geom batch, and install the Temporal runtime. */
+/** Register every stat frame + geom batch; install Temporal + candidates. */
 export function registerAll(): void {
   registerAllStatFrames();
   registerAllGeomBatches();
   installTemporal();
+  installCandidates();
 }

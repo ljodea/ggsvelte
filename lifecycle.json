@@ -4862,6 +4862,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "installCandidates": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "installTemporal": {
           "kind": "value",
           "lifecycle": "experimental"
