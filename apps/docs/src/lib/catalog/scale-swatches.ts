@@ -7,8 +7,6 @@
  */
 import type { ScaleReferenceEntry } from "@ggsvelte/spec";
 
-import { GREY_PALETTE_10 } from "../../../../../packages/spec/src/hue-grey-palettes.js";
-
 import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "./palette-tables.js";
 
 // Mirror packages/spec/src/scale-color-stops.ts (not exported from that module).
@@ -17,6 +15,23 @@ const GRADIENT_HIGH = "#56B1F7";
 const GRADIENT2_LOW = "#B2182B";
 const GRADIENT2_MID = "#F7F7F7";
 const GRADIENT2_HIGH = "#2166AC";
+
+/**
+ * Default 10-stop greyscale (packages/spec GREY_PALETTE_10 / start 0.2 → end
+ * 0.8). Local copy so /reference/scales never pulls the spec mega-chunk.
+ */
+const GREY_SWATCH_10: readonly string[] = [
+  "#333333",
+  "#444444",
+  "#555555",
+  "#666666",
+  "#777777",
+  "#888888",
+  "#999999",
+  "#aaaaaa",
+  "#bbbbbb",
+  "#cccccc",
+];
 
 /**
  * ColorBrewer tables mirrored from packages/core colorbrewer-palettes.
@@ -148,7 +163,7 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
       };
     case "grey":
       return {
-        colors: GREY_PALETTE_10,
+        colors: GREY_SWATCH_10,
         kind: "discrete",
         caption: "Default greyscale range (scale_*_grey)",
       };
