@@ -6,7 +6,10 @@ import { pathToFileURL } from "node:url";
 
 import { chromium } from "@playwright/test";
 
-import { renderToSVGString } from "../packages/core/src/index.js";
+import { registerAll, renderToSVGString } from "../packages/core/src/index.js";
+
+// Headless rendering of the full example grammar: register everything (#1420).
+registerAll();
 import area from "../examples/area/stacked/spec.js";
 import dodged from "../examples/bar/dodged/spec.js";
 import horiz from "../examples/bar/horizontal/spec.js";

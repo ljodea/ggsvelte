@@ -12072,8 +12072,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-324",
-        title: "experimental (324)",
+        id: "experimental-368",
+        title: "experimental (368)",
         level: 3,
       },
       {
@@ -12117,8 +12117,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-474",
-        title: "experimental (474)",
+        id: "experimental-514",
+        title: "experimental (514)",
         level: 3,
       },
       {
@@ -12162,6 +12162,11 @@ export const DOCS_ROUTES = [
         id: "0-26-to-0-27",
         title: "0.26 to 0.27",
         level: 2,
+      },
+      {
+        id: "explicit-registration-for-spec-driven-charts",
+        title: "Explicit registration for spec-driven charts",
+        level: 3,
       },
       {
         id: "skill-moved-to-ggsvelte-skill",

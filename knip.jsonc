@@ -77,6 +77,10 @@
       // measure-*.ts are scripts; entries/fixtures are dynamic Vite entry points.
       "entry": ["measure-*.ts", "entries/**/*.ts", "fixtures/**/*.ts"],
       "project": ["**/*.ts"],
+      // fixtures/ggplot-*/App.svelte imports @ggsvelte/svelte — knip excludes
+      // compiled .svelte from the project graph (hint above), so the import
+      // is invisible here.
+      "ignoreDependencies": ["@ggsvelte/svelte"],
     },
     "examples": {
       // The corpus: spec.ts/data.ts are consumed by the docs app via the

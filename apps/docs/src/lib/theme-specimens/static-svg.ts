@@ -5,7 +5,10 @@
  * SSR + first client paint use these strings so the page is readable and
  * full-width immediately; user intent (hover/focus) upgrades to interactive.
  */
-import { renderToSVGString } from "@ggsvelte/core";
+import { registerAll, renderToSVGString } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 import { aes, gg, scaleXLog10, type AuthoringRows, type ThemeName } from "@ggsvelte/spec";
 
 import { MONTH_BREAKS, type SchemeName, type ThemeSpecimenKind } from "./catalog.js";

@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Labs,
+    registerUnique,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerUnique();
 
   import { deadlyQuarrels } from "./data.js";
 </script>

@@ -1179,7 +1179,10 @@ public callbacks. Measure with repo fixtures before forcing canvas globally.
 Three paths, one PortableSpec: Svelte SSR, pure \`renderToSVGString\`, CLI.
 
 \`\`\`ts fragment
-import { renderToSVGString } from "@ggsvelte/core";
+import { registerAll, renderToSVGString } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 
 const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
@@ -1962,6 +1965,82 @@ The accepted lifecycle and deprecation policy remains in
 rather than creating a second policy.
 
 ## 0.26 to 0.27
+
+### Explicit registration for spec-driven charts
+
+Apps that declare layers with components (\`<GeomPoint>\`, \`<GeomSmooth>\`, …)
+need **no change**: each component now registers its own geom batch and
+default stat on import, and GGPlot bundles only the geoms and stats a chart
+declares. Identity charts (point, line, path, col, bar, area, rule, hline,
+vline, text, label, rect, ribbon, segment, count, blank, jitter, step) work
+out of the box as before.
+
+Apps that drive GGPlot with a \`layers\` prop or a \`spec\`, or call
+\`runPipeline\` / \`renderToSVGString\` directly, must register specialty
+geoms/stats (smooth, boxplot, violin, hex, contour, density_2d, sf, qq, …)
+explicitly. A missing registration fails loudly: \`Geom "smooth" is not
+registered in this build. Call registerAll() …\`.
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 10 },
+    { x: 2, y: 20 },
+    { x: 3, y: 15 },
+    { x: 4, y: 25 },
+  ];
+</script>
+
+<!-- Before 0.27: any geom worked from the layers prop — the core barrel
+     bundled and registered the full grammar for every app. -->
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y" }}
+  layers={[{ geom: "smooth" }]}
+  width={480}
+  height={320}
+/>
+\`\`\`
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, registerAll } from "@ggsvelte/svelte";
+
+  // After 0.27: spec-driven charts (layers prop / spec, no <Geom*> components
+  // to self-register) opt into the full grammar once at app startup. Component
+  // children need no call — they self-register on import.
+  registerAll();
+
+  const rows = [
+    { x: 1, y: 10 },
+    { x: 2, y: 20 },
+    { x: 3, y: 15 },
+    { x: 4, y: 25 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y" }}
+  layers={[{ geom: "smooth" }]}
+  width={480}
+  height={320}
+/>
+\`\`\`
+
+- Prefer one \`registerAll()\` at app startup for the pre-0.27 "full grammar"
+  behavior — grammar + Temporal + interaction candidates (also re-exported
+  from \`@ggsvelte/svelte\`).
+- Prefer a per-family call (\`registerSmooth()\`, \`registerBoxplot()\`, …, from
+  \`@ggsvelte/core\`) for granular opt-in without the full grammar.
+- Overriding \`stat\` to a specialty stat (e.g.
+  \`<GeomPoint stat="density_2d" />\`) needs that stat's register call too —
+  the component registers only its default stat.
+- Direct \`@ggsvelte/core\` barrel importers: the barrel is side-effect-free
+  now — \`registerAll()\` restores pre-0.27 import-time registration. The lean
+  \`@ggsvelte/core/render\` entry is unchanged (basic registration on import).
 
 ### Skill moved to @ggsvelte/skill
 

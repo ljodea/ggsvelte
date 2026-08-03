@@ -43,5 +43,3 @@ export function installTemporal(): void {
       compileTemporalLabelFormat(pattern, options as TemporalLabelFormatOptions),
   });
 }
-
-installTemporal();

@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 import { describe, expect, it } from "vitest";
 
 import ColorBinnedExample from "../../../../examples/color/binned/Example.svelte";

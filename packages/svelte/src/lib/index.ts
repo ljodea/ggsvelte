@@ -1006,6 +1006,46 @@ export type {
 export {
   PipelineError,
   planStrata,
+  registerAbline, // @lifecycle experimental
+  registerAlign, // @lifecycle experimental
+  registerAll, // @lifecycle experimental
+  registerBasic, // @lifecycle experimental
+  registerBin, // @lifecycle experimental
+  registerBin2d, // @lifecycle experimental
+  registerBoxplot, // @lifecycle experimental
+  registerConnect, // @lifecycle experimental
+  registerContour, // @lifecycle experimental
+  registerCrossbar, // @lifecycle experimental
+  registerCurve, // @lifecycle experimental
+  registerDensity, // @lifecycle experimental
+  registerDensity2d, // @lifecycle experimental
+  registerDensity2dFilled, // @lifecycle experimental
+  registerDotplot, // @lifecycle experimental
+  registerEcdf, // @lifecycle experimental
+  registerEllipse, // @lifecycle experimental
+  registerErrorbar, // @lifecycle experimental
+  registerFunction, // @lifecycle experimental
+  registerHex, // @lifecycle experimental
+  registerLinerange, // @lifecycle experimental
+  registerManual, // @lifecycle experimental
+  registerMap, // @lifecycle experimental
+  registerPointrange, // @lifecycle experimental
+  registerPolygon, // @lifecycle experimental
+  registerQq, // @lifecycle experimental
+  registerQqLine, // @lifecycle experimental
+  registerQuantile, // @lifecycle experimental
+  registerRaster, // @lifecycle experimental
+  registerRug, // @lifecycle experimental
+  registerSf, // @lifecycle experimental
+  registerSfLabel, // @lifecycle experimental
+  registerSfText, // @lifecycle experimental
+  registerSmooth, // @lifecycle experimental
+  registerSpoke, // @lifecycle experimental
+  registerSummary, // @lifecycle experimental
+  registerSummaryBin, // @lifecycle experimental
+  registerTile, // @lifecycle experimental
+  registerUnique, // @lifecycle experimental
+  registerViolin, // @lifecycle experimental
   renderToSVGString, // @lifecycle stable-intent
   runPipeline,
 } from "@ggsvelte/core";

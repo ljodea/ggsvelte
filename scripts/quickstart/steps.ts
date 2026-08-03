@@ -118,6 +118,12 @@ export interface SakuraSpecDelta {
 export interface SakuraSourceDelta {
   /** Components added to the `@ggsvelte/svelte` import. */
   readonly components?: readonly string[];
+  /**
+   * Register functions added to the `@ggsvelte/svelte` import and called in
+   * the script body. A `stat="…"` override on a basic shell needs its family
+   * registered — the shell registers only its default stat (#1420).
+   */
+  readonly registers?: readonly string[];
   /** Whole `const` blocks added to the module script. */
   readonly consts?: readonly string[];
   /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
@@ -244,6 +250,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     },
     source: {
       components: ["GeomLine", "ThemeTufte"],
+      // stat="summary_bin" on the basic GeomLine shell: opt into the family.
+      registers: ["registerSummaryBin"],
       grammar: {
         theme: `  <ThemeTufte />`,
         scaleY: `  <ScaleYMonthDay

@@ -30,7 +30,7 @@ export function buildNonIdentityFrame(
     throw new PipelineError(
       "unsupported-param",
       path,
-      `Stat "${stat}" is not registered in this build. Import @ggsvelte/core (full package) rather than @ggsvelte/core/render, or call registerStatFrame("${stat}", …).`,
+      `Stat "${stat}" is not registered in this build. Call registerAll() (full grammar) or registerBasic() (identity charts) from @ggsvelte/core, render the stat's default <Geom*> component (it self-registers), or call registerStatFrame("${stat}", …).`,
     );
   }
   return build(binding, table, groups, warnings, advisories, binRange, functionDomain);

@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Default-tooltip display collapse for identical field payloads (#385).
  * Pure helper — does not mutate the public inspection snapshot.

@@ -232,7 +232,10 @@ console.log("prerendered Quickstart verified");
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
 import { coord_equal, coord_fixed, coord_transform, coordEqual, coordFixed, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
-import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { registerAll, renderToSVGString, runPipeline } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 import {
   KYOTO_SAKURA_CITATION,
   MPG_CITATION,

@@ -1,4 +1,4 @@
-import { CANVAS_AUTO_THRESHOLD, runPipeline } from "@ggsvelte/core";
+import { CANVAS_AUTO_THRESHOLD, runPipeline } from "@ggsvelte/core/render";
 import { describe, expect, test } from "bun:test";
 
 import { CANVAS_SCATTER_MARKS, cloud } from "../../../examples/point/canvas-scatter/data.ts";

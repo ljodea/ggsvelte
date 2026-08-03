@@ -27,6 +27,13 @@ export interface ShellSpec {
   layerInput: string;
   /** Special shell template (jitter merges flat width/height/seed). */
   kind: ShellKind;
+  /**
+   * Self-registration function from @ggsvelte/core (#1420), emitted in a
+   * <script module> block — importing the component pulls its geom batch +
+   * default stat frame into the bundle and registers them. undefined for
+   * basic-tier geoms (covered by @ggsvelte/core/render, which GGPlot loads).
+   */
+  registration?: string;
 }
 
 /** snake_case geom → PascalCase stem (LayerInput prefix without LayerInput). */
@@ -98,6 +105,78 @@ const PARAMS_TYPE: Record<GeomName, string> = {
   qq_line: "QqLineParams",
 };
 
+// ---------------------------------------------------------------------------
+// Self-registration map (#1420)
+// ---------------------------------------------------------------------------
+
+/**
+ * Basic-tier shells: geom batch AND default stat both registered by
+ * `@ggsvelte/core/render` (which GGPlot always loads), so these components
+ * emit no self-registration. `count` is basic (stat sum); alias shells
+ * hline/vline/jitter normalize to rule/rule/point with identity stats.
+ */
+export const BASIC_SHELL_GEOMS: readonly GeomName[] = [
+  "point",
+  "line",
+  "path",
+  "col",
+  "bar",
+  "area",
+  "rule",
+  "hline",
+  "vline",
+  "text",
+  "label",
+  "rect",
+  "ribbon",
+  "segment",
+  "count",
+  "blank",
+  "jitter",
+  "step",
+];
+
+/**
+ * Specialty shell → core register function, keyed by the shell's DEFAULT
+ * STAT + geom batch (not the component name): histogram/freqpoly normalize
+ * to bar/line (basic geom batches) but need the bin stat; density's geom
+ * batch is basic but its stat is not. Every function named here is exported
+ * from @ggsvelte/core (packages/core/src/index.ts).
+ */
+export const SHELL_REGISTRATION: Partial<Record<GeomName, string>> = {
+  histogram: "registerBin",
+  freqpoly: "registerBin",
+  density: "registerDensity",
+  smooth: "registerSmooth",
+  quantile: "registerQuantile",
+  boxplot: "registerBoxplot",
+  violin: "registerViolin",
+  errorbar: "registerErrorbar",
+  linerange: "registerLinerange",
+  pointrange: "registerPointrange",
+  crossbar: "registerCrossbar",
+  tile: "registerTile",
+  raster: "registerRaster",
+  function: "registerFunction",
+  polygon: "registerPolygon",
+  hex: "registerHex",
+  bin_2d: "registerBin2d",
+  abline: "registerAbline",
+  curve: "registerCurve",
+  contour: "registerContour",
+  density_2d: "registerDensity2d",
+  density_2d_filled: "registerDensity2dFilled",
+  dotplot: "registerDotplot",
+  map: "registerMap",
+  sf: "registerSf",
+  sf_text: "registerSfText",
+  sf_label: "registerSfLabel",
+  spoke: "registerSpoke",
+  rug: "registerRug",
+  qq: "registerQq",
+  qq_line: "registerQqLine",
+};
+
 /**
  * Export order matches the pre-#1039 index (lifecycle.json is order-sensitive).
  * Every KNOWN_GEOMS entry appears exactly once.
@@ -161,6 +240,7 @@ function shell(geom: GeomName): ShellSpec {
     paramsType: PARAMS_TYPE[geom],
     layerInput: `${pascalGeom(geom)}LayerInput`,
     kind: geom === "jitter" ? "jitter" : "default",
+    ...(SHELL_REGISTRATION[geom] !== undefined && { registration: SHELL_REGISTRATION[geom] }),
   };
 }
 

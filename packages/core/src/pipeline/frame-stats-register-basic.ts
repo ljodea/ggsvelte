@@ -8,7 +8,8 @@ import { registerStatFrame } from "./frame-stats-registry.js";
 
 let registered = false;
 
-function registerBasicStatFrames(): void {
+/** Idempotent: safe to call from registerBasic()/registerAll() more than once. */
+export function registerBasicStatFrames(): void {
   if (registered) return;
   registered = true;
   registerStatFrame("count", (binding, table, groups, warnings) =>
@@ -18,5 +19,3 @@ function registerBasicStatFrames(): void {
     buildSumFrame(binding, table, groups, warnings),
   );
 }
-
-registerBasicStatFrames();

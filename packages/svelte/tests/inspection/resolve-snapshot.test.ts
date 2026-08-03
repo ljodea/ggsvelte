@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { runPipeline } from "@ggsvelte/core";
+import { registerAll, runPipeline } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
+
+// Temporal spec-driven suite (#1420): no components to self-register, and
+// the lane setup skips Temporal deliberately — install the full grammar here.
+registerAll();
 
 import { formatTooltipCell } from "../../src/lib/inspection/display-members.js";
 // Barrel path characterization: production + tests historically import via resolver.js

@@ -36,33 +36,16 @@
  * values with a warning and REFUSE non-positive explicit domains.
  */
 
-// Re-export the public pipeline contract (import path stability).
-export type {
-  Advisory,
-  AxisValueFormatter,
-  LayerBackend,
-  MappedField,
-  NamedData,
-  PipelineWarning,
-  RenderModel,
-  ResolvedColorScale,
-  RunOptions,
-  ScaleDecision,
-  ScaleDiagnostic,
-  ScaleDiagnosticFix,
-  ScaleDomainSnapshot,
-  TrainedScales,
-} from "./pipeline/public-api.js";
-export { CANVAS_AUTO_THRESHOLD, PipelineError, batchMarkCount } from "./pipeline/public-api.js";
+// Re-export the pipeline contract pieces this barrel's remaining consumers
+// (unit tests, cli.ts, strata.ts) import. The package barrel re-exports the
+// full surface from public-api.js / run-pipeline.js directly (#1420).
+export type { LayerBackend, NamedData } from "./pipeline/public-api.js";
+export { PipelineError, batchMarkCount } from "./pipeline/public-api.js";
 
-// Full grammar registration for the default pipeline barrel (tests + main
-// package). Lean charts import `@ggsvelte/core/render` which loads basic geoms
-// only and never evaluates this file.
-import "./pipeline/frame-stats-register-all.js";
-import "./pipeline/geometry-register-all.js";
-// Full temporal polyfill + guide planner (lean render entry skips this).
-import "./install-temporal.js";
-// Lazy interaction candidate construction (lean render entry skips this).
-import "./install-candidates.js";
+// Registration is explicit (#1420): this barrel has no module-scope side
+// effects. Call registerBasic()/registerAll() (from "./register.js" or the
+// package barrel), or import `@ggsvelte/core/render` for basic auto-
+// registration. bunfig.toml preload keeps unit tests on the full grammar.
+// Interaction candidates install via installCandidates() (#1421).
 
 export { runPipeline } from "./pipeline/run-pipeline.js";

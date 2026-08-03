@@ -234,6 +234,7 @@ export type LibId =
   | "echarts"
   | "svelteplot"
   | "layercake"
+  | "ggsvelte-ggplot"
   | "ggsvelte-full";
 
 export type LibMeta = {
@@ -274,7 +275,15 @@ export const LIBS: readonly LibMeta[] = [
     browser: false,
     bundle: true,
     scenarios: ["scatter-color"],
-    note: "Identity scatter via @ggsvelte/core + @ggsvelte/spec (size ceiling)",
+    note: "Identity scatter via @ggsvelte/core + registerAll() + @ggsvelte/spec (size ceiling)",
+  },
+  {
+    id: "ggsvelte-ggplot",
+    label: "ggsvelte GGPlot (Svelte)",
+    browser: false,
+    bundle: true,
+    scenarios: ["scatter-color"],
+    note: "<GGPlot> + <GeomPoint>/<GeomLine> via @ggsvelte/svelte — the #1420 tree-shaken app graph",
   },
   {
     id: "d3",

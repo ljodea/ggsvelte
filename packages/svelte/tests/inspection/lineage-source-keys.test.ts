@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Lineage source keys resolve by row index, not by materializing every source
  * row. `model.row` copies every column on each call, and the production key

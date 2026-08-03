@@ -1,3 +1,4 @@
+import "../setup-register-all.js";
 /**
  * Spec for the legend entry-key-index service (S16).
  *

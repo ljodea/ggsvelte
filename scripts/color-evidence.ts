@@ -1,4 +1,7 @@
-import { PipelineError, runPipeline } from "@ggsvelte/core";
+import { PipelineError, registerAll, runPipeline } from "@ggsvelte/core";
+
+// Headless full-grammar rendering (#1420): explicit opt-in.
+registerAll();
 import { validate, type PortableSpec } from "@ggsvelte/spec";
 
 export interface ColorBehaviorEvidence {

@@ -13,6 +13,7 @@
   "dependencies": {
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
+    "@ggsvelte/svelte": "workspace:*",
     "chart.js": "^4.5.1",
     "d3-array": "^3.2.4",
     "d3-axis": "^3.0.0",

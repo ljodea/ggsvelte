@@ -7,10 +7,11 @@
  * (headless SSR renders never hit-test).
  *
  * Candidate construction therefore runs through a runtime hook
- * (`candidate-runtime.ts`, mirroring `temporal-runtime.ts`): the full barrel
- * installs it via `install-candidates.ts`; the lean entry leaves it unset and
- * candidate access throws a plain Error naming the full entry. `model.lineage`
- * is populated by the store's assembly, exactly as before #1421.
+ * (`candidate-runtime.ts`, mirroring `temporal-runtime.ts`): GGPlot's runtime
+ * and the test preload install it via `install-candidates.ts` (explicit since
+ * #1420); the lean entry leaves it unset and candidate access throws a plain
+ * Error naming the full entry. `model.lineage` is populated by the store's
+ * assembly, exactly as before #1421.
  */
 import { afterAll, describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";

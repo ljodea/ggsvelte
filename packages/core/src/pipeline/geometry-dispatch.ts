@@ -24,7 +24,7 @@ export function dispatchGeometryBatch(
     throw new PipelineError(
       "unsupported-param",
       `/layers/${String(frame.binding.index)}/geom`,
-      `Geom "${geom}" is not registered in this build. Import @ggsvelte/core (full package) rather than @ggsvelte/core/render, or call registerGeomBatch("${geom}", …).`,
+      `Geom "${geom}" is not registered in this build. Call registerAll() (full grammar) or registerBasic() (identity charts) from @ggsvelte/core, render the geom's <Geom*> component (it self-registers), or call registerGeomBatch("${geom}", …).`,
     );
   }
   return build(frame, fx, color, fill, styles, warnings);
