@@ -9,7 +9,8 @@
  * Candidate construction therefore runs through a runtime hook
  * (`candidate-runtime.ts`, mirroring `temporal-runtime.ts`): the full barrel
  * installs it via `install-candidates.ts`; the lean entry leaves it unset and
- * candidate access throws a plain Error naming the full entry.
+ * candidate access throws a plain Error naming the full entry. `model.lineage`
+ * is populated by the store's assembly, exactly as before #1421.
  */
 import { afterAll, describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
@@ -59,23 +60,23 @@ describe("lazy interaction candidates", () => {
       expect(counter.builds()).toBe(1);
       expect(first.size).toBeGreaterThan(0);
 
-      // Memoized: repeat candidate + lineage access shares the one build.
+      // Memoized: repeat access returns the same store without rebuilding.
       expect(model.candidates).toBe(first);
-      void model.lineage;
       expect(counter.builds()).toBe(1);
     } finally {
       installCandidates();
     }
   });
 
-  it(".lineage access alone triggers the shared build (no stale empty store)", () => {
+  it(".lineage alone builds nothing; candidate assembly populates it (pre-change semantics)", () => {
     const counter = countBuilds();
     try {
       const model = runPipeline(spec, size);
-      expect(counter.builds()).toBe(0);
+      // A lineage-only reader pays nothing — same as the pre-#1421 eager
+      // build, which also assembled (and populated lineage) lazily.
       const lineage = model.lineage;
-      expect(counter.builds()).toBe(1);
-      // The build populated the store: every candidate lineage id resolves.
+      expect(counter.builds()).toBe(0);
+
       const candidate = model.candidates.candidate(0);
       expect(candidate).not.toBeNull();
       expect(lineage.keys(candidate!.lineage).length).toBeGreaterThan(0);
@@ -92,7 +93,6 @@ describe("lazy interaction candidates", () => {
 
       const model = runPipeline(spec, size);
       expect(() => model.candidates).toThrowError(/@ggsvelte\/core/);
-      expect(() => model.lineage).toThrowError(/@ggsvelte\/core/);
     } finally {
       installCandidates();
     }
@@ -124,5 +124,12 @@ describe("lazy interaction candidates", () => {
     } finally {
       installCandidates();
     }
+  });
+
+  it("installCandidates() restores the real runtime after a test-only swap", () => {
+    const real = getCandidateRuntime();
+    installCandidateRuntime({ build: (input) => real!.build(input) });
+    installCandidates();
+    expect(getCandidateRuntime()).toBe(real);
   });
 });

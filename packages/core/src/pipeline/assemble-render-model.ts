@@ -290,11 +290,11 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     layerFields: input.layerFields,
     layerScaledConstants: input.layerScaledConstants,
     domains: freezeRenderModelDomains(input.baselineDomains, input.effectiveDomains),
-    // Lazy getters (#1421): the candidate store builds on first access through
-    // the installed runtime hook, and the same build populates lineage — the
-    // lineage getter ensures first so it never hands out an empty stale store.
+    // Lazy getters (#1421): `candidates` builds the store on first access
+    // through the installed runtime hook. `lineage` does NOT ensure: the
+    // store populates it when it assembles (first candidate read), exactly
+    // like the pre-#1421 eager build — a lineage-only reader pays nothing.
     get lineage() {
-      interaction.ensure();
       return interaction.lineageStore;
     },
     get candidates() {

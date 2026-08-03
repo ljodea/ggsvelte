@@ -100,11 +100,12 @@ export function finalize(run: PipelineRunState): RenderModel {
   });
 
   // --- lineage + interaction candidates (lazy, #1421) ---
-  // The candidate store builds on first `model.candidates` / `model.lineage`
-  // access so headless/SSR renders never pay for it, and the lean render entry
-  // never carries the candidate-store graph (no runtime installed there). The
-  // build populates `lineage`, so every access must go through `ensure()` — a
-  // bare read of the eager-but-empty store would be silently stale.
+  // The candidate store builds on first `model.candidates` access so
+  // headless/SSR renders never pay for it, and the lean render entry
+  // never carries the candidate-store graph (no runtime installed there).
+  // `lineageStore` is created eagerly and populated by the store's assembly
+  // (first candidate read) — the same deferred shape as the pre-#1421 eager
+  // build, so `model.lineage` needs no ensure of its own.
   const lineageStore = new LineageStore<number>();
   let builtCandidates: CandidateStore | null = null;
   // Retained build inputs live in a null-able box: a successful build hands

@@ -25,12 +25,13 @@ export interface CandidateBuildRuntime {
 
 /**
  * Finalize's lazy interaction bundle: the lineage store is created eagerly
- * (cheap, empty) but populated only by `ensure()`, so every accessor must go
- * through `ensure()` first — a bare read of the store would be silently stale.
+ * (cheap, empty) and populated by the store's assembly once `ensure()` has
+ * produced it — `ensure()` is the only guarded accessor.
  */
 export interface LazyInteraction {
   readonly lineageStore: LineageStore<number>;
-  /** Build (once) and return the candidate store; populates `lineageStore`. */
+  /** Build (once) and return the candidate store; its assembly populates
+   *  `lineageStore`. */
   readonly ensure: () => CandidateStore;
   /** The built store, or null when interaction was never accessed. */
   readonly built: () => CandidateStore | null;

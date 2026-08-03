@@ -5,15 +5,21 @@
  * omits it and never carries the candidate-store graph (#1421).
  */
 import { installCandidateRuntime, getCandidateRuntime } from "./candidate-runtime.js";
+import type { CandidateBuildRuntime } from "./candidate-runtime.js";
 import { buildPipelineCandidates } from "./pipeline/build-candidates.js";
 
-let installed = false;
+const REAL_RUNTIME: CandidateBuildRuntime = {
+  build: (input) => buildPipelineCandidates(input),
+};
 
+/**
+ * Install the real candidate-build runtime. Idempotent, and restores the real
+ * runtime after a test-only clear OR replacement (a counting wrapper that
+ * delegates must not survive its test's restore).
+ */
 export function installCandidates(): void {
-  // Re-install after test-only runtime clears; skip when already wired.
-  if (installed && getCandidateRuntime() !== null) return;
-  installed = true;
-  installCandidateRuntime({ build: (input) => buildPipelineCandidates(input) });
+  if (getCandidateRuntime() === REAL_RUNTIME) return;
+  installCandidateRuntime(REAL_RUNTIME);
 }
 
 installCandidates();

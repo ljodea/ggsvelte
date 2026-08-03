@@ -53,8 +53,9 @@ export interface RenderModel {
   /** Stable baseline plus the domains actually used for this render. */
   domains: Readonly<{ baseline: ScaleDomainSnapshot; effective: ScaleDomainSnapshot }>;
   /** Interned source-row memberships. Public adapters resolve these through keys.
-   *  Lazily populated by the same build as `candidates` (#1421) — the getter
-   *  triggers that build, so the store is never observed empty. */
+   *  Populated when the candidate store assembles (first candidate read /
+   *  hit-test); reading it before that yields an empty store — unchanged from
+   *  the pre-#1421 eager build, which assembled lazily too. */
   lineage: LineageStore<number>;
   /** Shared epoch-scoped interaction candidate storage. Built lazily on first
    *  access (#1421): headless renders never pay for it, and the lean
