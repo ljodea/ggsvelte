@@ -396,13 +396,13 @@ export const THEME_STATIC_SHELLS = [
     id: "sequential-viridis",
     filename: "sequential-viridis.svg",
     path: "/theme-shells/sequential-viridis.svg",
-    sha256: "030e45241629b1386babcf34d07303c8da38cf0376c0091427eb16826f334658",
+    sha256: "a4506ac982617d61420905907531b86ca3bfaf167e5a00d7c99da221d97f3990",
   },
   {
     id: "sequential-viridis-reversed",
     filename: "sequential-viridis-reversed.svg",
     path: "/theme-shells/sequential-viridis-reversed.svg",
-    sha256: "dbf978724603b3dff9c4a96055ee77d2dff2987a69bd85296aba7944a59600f8",
+    sha256: "d166d785e1a975da761ddbf39799df6c9003cabd42b4f4863601740bfd724b48",
   },
   {
     id: "sequential-custom-range",

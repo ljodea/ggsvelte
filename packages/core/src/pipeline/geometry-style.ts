@@ -69,7 +69,7 @@ function uniqueStyleOutputs<T>(
   aesthetic: StyleAesthetic,
   rows: ArrayLike<number>,
   scales: ResolvedStyleScales,
-  project: (output: StyleOutput | undefined) => T,
+  project: (output?: StyleOutput) => T,
 ): T[] {
   const binding = frame.binding[aesthetic];
   if (binding.constant !== null) {
@@ -80,19 +80,20 @@ function uniqueStyleOutputs<T>(
   const values = styleFrameValues(frame, aesthetic);
   const resolved = scales[aesthetic];
   if (resolved === null) {
-    return Array.from({ length: rows.length }, () => project(undefined));
+    // No scale → same as mappedStyleOutput returning undefined.
+    const projected = project();
+    return Array.from({ length: rows.length }, () => projected);
   }
   return mapUniqueThenFanOut(
     rows,
     (row) => (values === null ? binding.scaledConstant : values[row]),
     (value) => {
-      const output =
-        value === null || value === undefined
-          ? binding.scaledConstant === null && values === null
-            ? undefined
-            : resolved.scale.valueOf(null)
-          : resolved.scale.valueOf(value);
-      return project(output);
+      if (value === null || value === undefined) {
+        return binding.scaledConstant === null && values === null
+          ? project()
+          : project(resolved.scale.valueOf(null));
+      }
+      return project(resolved.scale.valueOf(value));
     },
   );
 }
