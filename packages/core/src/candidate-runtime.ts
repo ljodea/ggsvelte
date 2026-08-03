@@ -17,7 +17,7 @@ import type { buildPipelineCandidates } from "./pipeline/build-candidates.js";
 
 /** Inputs finalize retains for the lazy candidate build (type-only import —
  * this module stays in the lean render graph, build-candidates does not). */
-type CandidateBuildInput = Parameters<typeof buildPipelineCandidates>[0];
+export type CandidateBuildInput = Parameters<typeof buildPipelineCandidates>[0];
 
 export interface CandidateBuildRuntime {
   readonly build: (input: CandidateBuildInput) => CandidateStore;
@@ -34,6 +34,9 @@ export interface LazyInteraction {
   readonly ensure: () => CandidateStore;
   /** The built store, or null when interaction was never accessed. */
   readonly built: () => CandidateStore | null;
+  /** Drop the retained build inputs (model dispose) so a released model does
+   *  not keep the source table / prepared panels alive through the thunk. */
+  readonly release: () => void;
 }
 
 let runtime: CandidateBuildRuntime | null = null;

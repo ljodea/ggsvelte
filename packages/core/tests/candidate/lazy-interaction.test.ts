@@ -97,4 +97,32 @@ describe("lazy interaction candidates", () => {
       installCandidates();
     }
   });
+
+  it("dispose releases the retained build inputs (no eager build, no leak)", () => {
+    const counter = countBuilds();
+    try {
+      const model = runPipeline(spec, size);
+      expect(counter.builds()).toBe(0);
+      model.dispose();
+      // Never built: dispose dropped the retained inputs, so a late access is
+      // a caller bug with a clear message — the build cannot resurrect them.
+      expect(counter.builds()).toBe(0);
+      expect(() => model.candidates).toThrowError(/dispose/);
+    } finally {
+      installCandidates();
+    }
+  });
+
+  it("dispose after a build still returns the built store (pre-change semantics)", () => {
+    const counter = countBuilds();
+    try {
+      const model = runPipeline(spec, size);
+      const store = model.candidates;
+      expect(counter.builds()).toBe(1);
+      model.dispose();
+      expect(model.candidates).toBe(store);
+    } finally {
+      installCandidates();
+    }
+  });
 });

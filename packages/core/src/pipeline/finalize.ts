@@ -9,7 +9,7 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import { getCandidateRuntime } from "../candidate-runtime.js";
-import type { LazyInteraction } from "../candidate-runtime.js";
+import type { CandidateBuildInput, LazyInteraction } from "../candidate-runtime.js";
 import type { CandidateStore } from "../candidate-store.js";
 import { buildPanelCoordProjector } from "../coord-projector.js";
 import { LineageStore } from "../identity.js";
@@ -107,36 +107,49 @@ export function finalize(run: PipelineRunState): RenderModel {
   // bare read of the eager-but-empty store would be silently stale.
   const lineageStore = new LineageStore<number>();
   let builtCandidates: CandidateStore | null = null;
+  // Retained build inputs live in a null-able box: a successful build hands
+  // its own references to the store (which dispose() clears), and model
+  // dispose drops the box either way — a released model must not keep the
+  // source table / prepared panels alive through this closure.
+  let retained: CandidateBuildInput | null = {
+    scene,
+    runId,
+    flip,
+    bindings,
+    panelFrames: prepared.panelFrames,
+    facetPanels: prepared.facetPanels,
+    // Candidate sourceRow indexes and lineage rows are source-table based
+    // (runtime filters preserve identity), so value lookups must be too.
+    table: prepared.sourceTable,
+    sources: prepared.sourceRegistry,
+    layerFields,
+    color: trained.colorResolution.resolved,
+    fill: trained.fillResolution.resolved,
+    lineage: lineageStore,
+  };
   const interaction: LazyInteraction = {
     lineageStore,
     ensure(): CandidateStore {
       if (builtCandidates !== null) return builtCandidates;
+      const input = retained;
+      if (input === null) {
+        throw new Error("Interaction candidates are released with this model's dispose().");
+      }
       const runtime = getCandidateRuntime();
       if (runtime === null) {
         throw new Error(
           "Interaction candidates require @ggsvelte/core (full entry); the lean @ggsvelte/core/render graph does not carry the candidate store.",
         );
       }
-      builtCandidates = runtime.build({
-        scene,
-        runId,
-        flip,
-        bindings,
-        panelFrames: prepared.panelFrames,
-        facetPanels: prepared.facetPanels,
-        // Candidate sourceRow indexes and lineage rows are source-table based
-        // (runtime filters preserve identity), so value lookups must be too.
-        table: prepared.sourceTable,
-        sources: prepared.sourceRegistry,
-        layerFields,
-        color: trained.colorResolution.resolved,
-        fill: trained.fillResolution.resolved,
-        lineage: lineageStore,
-      });
+      builtCandidates = runtime.build(input);
+      retained = null;
       return builtCandidates;
     },
     built(): CandidateStore | null {
       return builtCandidates;
+    },
+    release(): void {
+      retained = null;
     },
   };
 

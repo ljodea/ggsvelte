@@ -252,7 +252,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
   const scales = buildRenderModelScales(input);
   const lifecycle = createRenderModelLifecycle({
     scene,
-    builtCandidates: interaction.built,
+    interaction,
     table: input.table,
     ...(input.sourceRegistry !== undefined && { sourceRegistry: input.sourceRegistry }),
   });
