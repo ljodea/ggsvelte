@@ -23,10 +23,10 @@ describe("gallery editorial catalog", () => {
     expect(FEATURED_EXAMPLES.map((entry) => entry.id)).toEqual([
       "line/multi-series",
       "smooth/loess-scatter",
-      "point/scatter-color",
-      "facet/wrap",
-      "color/continuous",
-      "point/canvas-scatter",
+      "density/kde-2d-filled",
+      "density/overlay",
+      "path/ellipse-rings",
+      "color/binned",
     ]);
     expect(new Set(FEATURED_EXAMPLES.map((entry) => entry.id)).size).toBe(6);
     const ids = new Set(EXAMPLES.map((entry) => entry.id));
