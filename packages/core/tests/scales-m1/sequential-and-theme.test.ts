@@ -399,4 +399,45 @@ describe("theme registry", () => {
     expect(LEGACY_BUILTIN_THEMES.dark.letterboxFill).toBe("none");
     expect(LEGACY_BUILTIN_THEMES.minimal.letterboxFill).toBe("none");
   });
+
+  it("Solarized family elevates tooltip cards above the reading surface", () => {
+    const PROBLEM_SOLARIZED = [
+      "solarized",
+      "solarizeddark",
+      "solarized_2",
+      "solarized_2dark",
+    ] as const;
+
+    for (const name of PROBLEM_SOLARIZED) {
+      const tokens = BUILTIN_THEMES[name];
+      const readingSurface = tokens.paper === "none" ? tokens.panel : tokens.paper;
+      const viaString = resolveTheme(name);
+      const viaObject = resolveTheme({ name, titleSize: 20 });
+
+      expect(viaString.tooltipPaper, name).toBe(tokens.tooltipPaper);
+      expect(viaObject.tooltipPaper, name).toBe(tokens.tooltipPaper);
+      expect(tokens.tooltipPaper, name).not.toBe(readingSurface);
+      // LEGACY spreads edition-2 Solarized tips.
+      expect(LEGACY_BUILTIN_THEMES[name].tooltipPaper, name).toBe(tokens.tooltipPaper);
+    }
+
+    // Exact Schoonover anchors (tip ink stronger than axis ink on low-contrast bases).
+    expect(BUILTIN_THEMES.solarized.tooltipPaper).toBe("#eee8d5"); // base2
+    expect(BUILTIN_THEMES.solarized.tooltipInk).toBe("#586e75"); // base01
+    expect(BUILTIN_THEMES.solarized.tooltipBorder).toBe("#93a1a1"); // base1
+    expect(BUILTIN_THEMES.solarized.tooltipInk).not.toBe(BUILTIN_THEMES.solarized.ink);
+
+    expect(BUILTIN_THEMES.solarized_2.tooltipPaper).toBe("#fdf6e3"); // base3
+    expect(BUILTIN_THEMES.solarized_2.tooltipInk).toBe("#586e75");
+    expect(BUILTIN_THEMES.solarized_2.tooltipBorder).toBe("#93a1a1");
+
+    expect(BUILTIN_THEMES.solarizeddark.tooltipPaper).toBe("#073642"); // base02
+    expect(BUILTIN_THEMES.solarizeddark.tooltipInk).toBe("#93a1a1"); // base1
+    expect(BUILTIN_THEMES.solarizeddark.tooltipBorder).toBe("#586e75"); // base01
+    expect(BUILTIN_THEMES.solarizeddark.tooltipInk).not.toBe(BUILTIN_THEMES.solarizeddark.ink);
+
+    expect(BUILTIN_THEMES.solarized_2dark.tooltipPaper).toBe("#002b36"); // base03
+    expect(BUILTIN_THEMES.solarized_2dark.tooltipInk).toBe("#93a1a1");
+    expect(BUILTIN_THEMES.solarized_2dark.tooltipBorder).toBe("#586e75");
+  });
 });
