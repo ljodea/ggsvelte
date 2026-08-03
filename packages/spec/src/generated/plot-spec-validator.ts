@@ -7105,7 +7105,6 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "void") ||
   (typeof value === "string" && value === "stata") ||
   (typeof value === "string" && value === "stata_s1color") ||
-  (typeof value === "string" && value === "stata_mono") ||
   (typeof value === "string" && value === "solarized") ||
   (typeof value === "string" && value === "solarizeddark") ||
   (typeof value === "string" && value === "economist_white") ||
@@ -7116,9 +7115,6 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||
-  (typeof value === "string" && value === "calc") ||
-  (typeof value === "string" && value === "excel") ||
-  (typeof value === "string" && value === "excel_new") ||
   (typeof value === "string" && value === "base") ||
   (typeof value === "string" && value === "igray") ||
   (typeof value === "string" && value === "map") ||
@@ -7245,7 +7241,6 @@ const check_392 = (value) =>
   (typeof value === "string" && value === "void") ||
   (typeof value === "string" && value === "stata") ||
   (typeof value === "string" && value === "stata_s1color") ||
-  (typeof value === "string" && value === "stata_mono") ||
   (typeof value === "string" && value === "solarized") ||
   (typeof value === "string" && value === "solarizeddark") ||
   (typeof value === "string" && value === "economist_white") ||
@@ -7256,9 +7251,6 @@ const check_392 = (value) =>
   (typeof value === "string" && value === "hc") ||
   (typeof value === "string" && value === "hcdark") ||
   (typeof value === "string" && value === "pander") ||
-  (typeof value === "string" && value === "calc") ||
-  (typeof value === "string" && value === "excel") ||
-  (typeof value === "string" && value === "excel_new") ||
   (typeof value === "string" && value === "base") ||
   (typeof value === "string" && value === "igray") ||
   (typeof value === "string" && value === "map") ||

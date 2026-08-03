@@ -184,7 +184,6 @@ export const THEME_NAMES = [
   // ggthemes theme ports (#1158): Stata family
   "stata",
   "stata_s1color",
-  "stata_mono",
   // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
   "solarized",
   "solarizeddark",
@@ -198,9 +197,6 @@ export const THEME_NAMES = [
   "hc",
   "hcdark",
   "pander",
-  "calc",
-  "excel",
-  "excel_new",
   // ggthemes minimalist family (#1158): theme_base / igray / map / solid
   "base",
   "igray",

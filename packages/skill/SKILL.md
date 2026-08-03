@@ -199,14 +199,13 @@ Two rules worth keeping in working memory:
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
   identifiers; never preprocess dates into indexes.
-- Themes: 37 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
+- Themes: 33 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
   `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
-  `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `stata_mono`,
-  `solarized`, `solarizeddark`, `economist_white`, `solarized_2`,
-  `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, `calc`,
-  `excel`, `excel_new`, `base`, `igray`, `map`, `solid`, plus `grey`/`gray`
-  aliasing `ggplot2`) as `<ThemeTufte/>`-style children or `"theme": "tufte"`
-  in JSON. Looks, shells, and role overrides:
+  `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `solarized`,
+  `solarizeddark`, `economist_white`, `solarized_2`, `solarized_2dark`,
+  `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, `base`, `igray`, `map`,
+  `solid`, plus `grey`/`gray` aliasing `ggplot2`) as `<ThemeTufte/>`-style
+  children or `"theme": "tufte"` in JSON. Looks, shells, and role overrides:
   [references/themes.md](references/themes.md).
 
 Full option surfaces — every scale option, the `Scale*` component matrix, all

@@ -7150,10 +7150,6 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
-        "ThemeCalc": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
         "ThemeClassic": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -7175,14 +7171,6 @@
           "lifecycle": "stable-intent"
         },
         "ThemeEconomistwhite": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeExcel": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeExcelnew": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -7275,10 +7263,6 @@
           "lifecycle": "experimental"
         },
         "ThemeStata": {
-          "kind": "value",
-          "lifecycle": "stable-intent"
-        },
-        "ThemeStatamono": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

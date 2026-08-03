@@ -22,7 +22,7 @@ describe("theme reference catalog", () => {
     expect(THEME_SHELLS.map((s) => s.name)).toEqual([...THEME_NAMES]);
     expect(themeComponentName("economist_white")).toBe("ThemeEconomistwhite");
     expect(themeComponentName("solarized_2dark")).toBe("ThemeSolarized2dark");
-    expect(themeComponentName("excel_new")).toBe("ThemeExcelnew");
+    expect(themeComponentName("stata_s1color")).toBe("ThemeStatas1color");
     expect(THEME_SHELLS.find((s) => s.name === "grey")?.aliasOf).toBe("ggplot2");
     expect(THEME_SHELLS.find((s) => s.name === "gray")?.aliasOf).toBe("ggplot2");
   });

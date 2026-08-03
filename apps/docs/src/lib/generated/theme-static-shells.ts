@@ -111,12 +111,6 @@ export const THEME_STATIC_SHELLS = [
     sha256: "772e24ea4802d368df2cf429f7611b2f5326837d4bf90ff46c20392edee35a88",
   },
   {
-    id: "theme-stata_mono",
-    filename: "theme-stata_mono.svg",
-    path: "/theme-shells/theme-stata_mono.svg",
-    sha256: "a6e2bf901af109456e61889504f35d7deba3908af55ae4dacc1a2ad79b8cf258",
-  },
-  {
     id: "theme-solarized",
     filename: "theme-solarized.svg",
     path: "/theme-shells/theme-solarized.svg",
@@ -175,24 +169,6 @@ export const THEME_STATIC_SHELLS = [
     filename: "theme-pander.svg",
     path: "/theme-shells/theme-pander.svg",
     sha256: "960d53b7005a2e932653231359f2e9de4d7f4f2ca5534406cd914e70dfa1769d",
-  },
-  {
-    id: "theme-calc",
-    filename: "theme-calc.svg",
-    path: "/theme-shells/theme-calc.svg",
-    sha256: "99623db2f873c7a520f6107be1276a3aef8ac0100d7ae429b5b9a96e3397df72",
-  },
-  {
-    id: "theme-excel",
-    filename: "theme-excel.svg",
-    path: "/theme-shells/theme-excel.svg",
-    sha256: "bb99186c592659a9a61d946542e847a612a972d7e88db2ce6aae1239353ed56e",
-  },
-  {
-    id: "theme-excel_new",
-    filename: "theme-excel_new.svg",
-    path: "/theme-shells/theme-excel_new.svg",
-    sha256: "18517863b4ee3526ba6c3fdc6c0f018dc1b0857cf92510c2e31d0be421100dde",
   },
   {
     id: "theme-base",

@@ -1,16 +1,21 @@
 ---
 "@ggsvelte/core": minor
 "@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
-# Drop Stata extras, Highcharts, Excel, and Calc schemes
+# Drop spreadsheet/Stata-extra schemes and Excel/Calc/Stata Mono themes
 
-Migration: <https://ggsvelte.sh/guide/upgrading#removed-spreadsheet-and-extra-stata-categorical-schemes>
+Migration: <https://ggsvelte.sh/guide/upgrading#removed-spreadsheet-highcharts-and-extra-stata-schemes-and-themes>
 
-Remove nine categorical schemes that pad the palette catalog without adding
-distinctive value: `stata_s1color`, `stata_s1rcolor`, `stata_mono`, `hc`,
-`hc_dark`, `calc`, `excel`, `excel_fill`, `excel_new`.
+Remove nine categorical schemes and their public `*_PALETTE` constants:
+`stata_s1color`, `stata_s1rcolor`, `stata_mono`, `hc`, `hc_dark`, `calc`,
+`excel`, `excel_fill`, `excel_new`.
 
-Switch `scheme` (and any import of the removed `*_PALETTE` constants) to a
-remaining scheme such as `stata`, `tableau10`, `grey`, `gdocs`, or `pander`.
-Chart themes that shared those names remain.
+Also remove four chart themes (and their Svelte shells): `stata_mono`
+(`ThemeStatamono`), `calc` (`ThemeCalc`), `excel` (`ThemeExcel`), `excel_new`
+(`ThemeExcelnew`). Nothing with "Excel" remains in the product surface.
+
+Switch removed schemes to `stata`, `tableau10`, `grey`, `gdocs`, or `pander`.
+Switch removed themes to `stata`, `stata_s1color`, `bw`, `classic`, or
+`minimal`.

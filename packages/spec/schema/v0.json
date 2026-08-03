@@ -8683,10 +8683,6 @@
         },
         {
           "type": "string",
-          "const": "stata_mono"
-        },
-        {
-          "type": "string",
           "const": "solarized"
         },
         {
@@ -8727,18 +8723,6 @@
         },
         {
           "type": "string",
-          "const": "calc"
-        },
-        {
-          "type": "string",
-          "const": "excel"
-        },
-        {
-          "type": "string",
-          "const": "excel_new"
-        },
-        {
-          "type": "string",
           "const": "base"
         },
         {
@@ -8766,7 +8750,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"stata\", \"stata_s1color\", \"stata_mono\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"wsj\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"calc\", \"excel\", \"excel_new\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"stata\", \"stata_s1color\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"wsj\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

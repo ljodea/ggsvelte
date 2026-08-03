@@ -9,7 +9,7 @@ optional `"name"` base plus role overrides, e.g.
 (last child wins) — merge rules live in
 [composition-surfaces.md](composition-surfaces.md).
 
-## Product themes (37)
+## Product themes (33)
 
 | Name                    | Look                                                                       |
 | ----------------------- | -------------------------------------------------------------------------- |
@@ -30,7 +30,6 @@ optional `"name"` base plus role overrides, e.g.
 | void                    | no axes, grid, or panel chrome; marks and legends remain                   |
 | stata                   | Stata s2color: bluish-gray plot region, white panel, y-grid                |
 | stata_s1color           | Stata s1color: white panel with black border, light y-grid                 |
-| stata_mono              | Stata s2mono: gray plot region, monochrome y-grid                          |
 | solarized               | Solarized light: cream panel, muted base1 chrome, blue accent              |
 | solarizeddark           | Solarized dark: deep teal panel, muted base01 chrome, blue accent          |
 | economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
@@ -41,9 +40,6 @@ optional `"name"` base plus role overrides, e.g.
 | hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
 | hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
 | pander                  | pander: dashed grey grid and ticks, bold title on white                    |
-| calc                    | LibreOffice Calc: white panel, gray70 border + y-grid, no axis lines       |
-| excel                   | Excel 97 classic: gray panel, black y-grid + border (horizontal=TRUE)      |
-| excel_new               | modern Excel: dark-gray ink, hairline #bfbfbf y-grid, no ticks or border   |
 | base                    | base R: black frame and ticks, no grid, bold title                         |
 | igray                   | inverse gray: white panel, gray90 surround and grid                        |
 | map                     | every axis/panel/grid element blank — marks only, for maps                 |
@@ -60,10 +56,9 @@ One named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
 `ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`,
-`ThemeStatas1color`, `ThemeStatamono`, `ThemeSolarized`,
-`ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`,
-`ThemeSolarized2dark`, `ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`,
-`ThemePander`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeBase`,
+`ThemeStatas1color`, `ThemeSolarized`, `ThemeSolarizeddark`,
+`ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`, `ThemeWsj`,
+`ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeBase`,
 `ThemeIgray`, `ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape
 hatch `<Theme name={dynamicName} />` for reactive names.
 
