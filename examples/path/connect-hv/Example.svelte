@@ -4,9 +4,13 @@
     GeomPoint,
     GGPlot,
     Labs,
+    registerConnect,
     ScaleXContinuous,
     ThemeClassic,
   } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerConnect();
 
   import { retreatCold } from "./data.js";
 </script>

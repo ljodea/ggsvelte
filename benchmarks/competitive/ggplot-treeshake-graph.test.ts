@@ -52,6 +52,15 @@ async function buildFixture(fixtureName: string): Promise<{
       },
       resolve: {
         conditions: ["svelte", "browser", "import", "module", "default"],
+        // Hermetic: resolve the adapter from source so the unit CI lane (which
+        // builds only spec/core/cli dist) can run this test. Core/spec still
+        // resolve to dist, matching what measure-bundles.ts records.
+        alias: [
+          {
+            find: /^@ggsvelte\/svelte$/,
+            replacement: path.join(root, "../../packages/svelte/src/lib/index.ts"),
+          },
+        ],
       },
     });
   } finally {
@@ -96,8 +105,9 @@ describe("GGPlot point/line bundle (#1420)", () => {
     for (const pattern of SPECIALTY_MODULE_PATTERNS) {
       expect(included(moduleIds, pattern)).toEqual([]);
     }
-    // Post-fix production raw is ~1237KB (pre-fix: ~1542KB with the full
-    // grammar force-bundled). Ceiling leaves ~5% headroom.
+    // Post-fix production raw is ~1209KB source-aliased (~1237KB against
+    // dist; pre-fix: ~1542KB with the full grammar force-bundled). Ceiling
+    // leaves ~5% headroom.
     expect(rawBytes).toBeLessThan(GGPLOT_SCATTER_MAX_RAW_BYTES);
   }, 120_000);
 });

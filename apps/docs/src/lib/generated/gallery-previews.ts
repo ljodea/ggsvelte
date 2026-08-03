@@ -168,13 +168,13 @@ export const GALLERY_PREVIEWS = [
     id: "errorbar/mean-se",
     filename: "errorbar-mean-se-light.png",
     path: "/previews/errorbar-mean-se-light.png",
-    sha256: "30706502d9de99c9899db0de8f7eea94f39067247fa3e4c6d2af902550a02470",
+    sha256: "dc0de79b6f2f3269ebf5632b580708609faf09b470fad83a7c089aec00ac2a42",
   },
   {
     id: "errorbar/summary-bin",
     filename: "errorbar-summary-bin-light.png",
     path: "/previews/errorbar-summary-bin-light.png",
-    sha256: "62531bab1611ae60058804fe1cd07a71ecdcc39471b16e985dcd4a9634c9da00",
+    sha256: "d7976f316ae4950012d6d3cdc93806c00f7145a168f617597123b1b61792adfe",
   },
   {
     id: "facet/ordered-side-strips",
@@ -276,7 +276,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/ecdf",
     filename: "line-ecdf-light.png",
     path: "/previews/line-ecdf-light.png",
-    sha256: "7fc9065baa47409ba7884e922b2c401eed9dd015682cd3dbce69289d5b9dab00",
+    sha256: "a20e75744859444d4b4e780328cec23a49fd4604fbf25451281ee3e373493eb8",
   },
   {
     id: "line/function",
@@ -312,13 +312,13 @@ export const GALLERY_PREVIEWS = [
     id: "path/connect-hv",
     filename: "path-connect-hv-light.png",
     path: "/previews/path-connect-hv-light.png",
-    sha256: "5a55581f60f706c8a2fd75a801cbbaa1ebb5d076b45f88e5374a13dbce151a7d",
+    sha256: "8757eb6a618b3e77d452ad3a43efaea17fe2d8682485e79866f8c38e604751c4",
   },
   {
     id: "path/ellipse-rings",
     filename: "path-ellipse-rings-light.png",
     path: "/previews/path-ellipse-rings-light.png",
-    sha256: "fb7db8dfed513692e0a08899dad8b19c010eae967427a43caf02718adb4b0c43",
+    sha256: "a72467b6cdf9177897840a548701a03fc431baa1de348742055641b1696907e9",
   },
   {
     id: "path/trajectory",
@@ -396,13 +396,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/stat-manual-mean",
     filename: "point-stat-manual-mean-light.png",
     path: "/previews/point-stat-manual-mean-light.png",
-    sha256: "4e1d1294b8ae63105ff3afb889233e70808ae85766b967d773d56a512ef37a96",
+    sha256: "d08e50fad2dc86294e4e143ea1f5cc11f86682da44660076cf17d313e3f2fa99",
   },
   {
     id: "point/stat-unique",
     filename: "point-stat-unique-light.png",
     path: "/previews/point-stat-unique-light.png",
-    sha256: "ee57cbc04209805714dbb323aef735a1a4648b4e7c4e7927512234ef726db409",
+    sha256: "b0fffa9382df269b881d6793c15ac30175b1cb7ea91c419e895ba7300d813914",
   },
   {
     id: "point/steps-binned",

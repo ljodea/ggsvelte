@@ -6,7 +6,10 @@ import { pathToFileURL } from "node:url";
 
 import { chromium } from "@playwright/test";
 
-import { BUILTIN_THEMES, renderToSVGString } from "../packages/core/src/index.js";
+import { BUILTIN_THEMES, registerAll, renderToSVGString } from "../packages/core/src/index.js";
+
+// Headless rendering via the barrel: explicit registration is required (#1420).
+registerAll();
 import {
   THEME_NAME_ALIASES,
   THEME_NAMES,

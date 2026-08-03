@@ -5,8 +5,12 @@
     GeomPoint,
     GGPlot,
     Labs,
+    registerSummaryBin,
     ThemeClassic,
   } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerSummaryBin();
 
   import { galtonHeights } from "./data.js";
 </script>

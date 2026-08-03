@@ -133,6 +133,9 @@
     loadStarted = true;
     void import("@ggsvelte/svelte").then((mod) => {
       if (!cancelled) {
+        // Spec-driven chart (the fold emits stat "summary_bin"): opt into the
+        // full grammar inside the lazy chunk, not the docs main bundle (#1420).
+        mod.registerAll();
         LivePlot = mod.GGPlot;
         LiveInspect = mod.Inspect;
       }

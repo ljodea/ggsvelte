@@ -4,9 +4,13 @@
     GeomPoint,
     GGPlot,
     Labs,
+    registerEllipse,
     ScaleColorDiscrete,
     ThemeClassic,
   } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerEllipse();
 
   import { penguins } from "./data.js";
 </script>

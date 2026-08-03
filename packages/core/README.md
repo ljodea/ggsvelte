@@ -18,8 +18,12 @@ For server, CLI, and agent rendering. Svelte apps use
 Author with the builder from `@ggsvelte/spec`, render here:
 
 ```ts
-import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { registerAll, renderToSVGString, runPipeline } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
+
+// The barrel is side-effect-free: register the grammar explicitly (or import
+// "@ggsvelte/core/render" for identity charts only).
+registerAll();
 
 const spec = gg(
   [

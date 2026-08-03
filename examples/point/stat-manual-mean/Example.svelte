@@ -3,9 +3,13 @@
     GeomPoint,
     GGPlot,
     Labs,
+    registerManual,
     ScaleColorDiscrete,
     ThemeClassic,
   } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerManual();
 
   import { michelsonRuns } from "./data.js";
 </script>

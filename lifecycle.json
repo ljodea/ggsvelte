@@ -7598,6 +7598,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerAbline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerAlign": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerAll": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -7606,11 +7614,155 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerBin": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBin2d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBoxplot": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerConnect": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerContour": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerCrossbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerCurve": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDensity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDensity2d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDensity2dFilled": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDotplot": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerEcdf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerEllipse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerErrorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerFunction": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerHex": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerLayer": {
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerLinerange": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerMap": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerPlotLayer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerPointrange": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerPolygon": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerQq": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerQqLine": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerQuantile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerRaster": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerRug": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSfLabel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSfText": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSmooth": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSpoke": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSummary": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSummaryBin": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerUnique": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerViolin": {
           "kind": "value",
           "lifecycle": "experimental"
         },

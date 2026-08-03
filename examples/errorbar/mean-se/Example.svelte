@@ -4,9 +4,13 @@
     GeomPoint,
     GGPlot,
     Labs,
+    registerSummary,
     ScaleXDiscrete,
     ThemeHrbr,
   } from "@ggsvelte/svelte";
+
+  // stat= override: the shell registers only its default stat (#1420).
+  registerSummary();
 
   import { soporifics } from "./data.js";
 </script>
