@@ -16,6 +16,9 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "bun:test";
 
+import { foldSakura } from "./quickstart/fold";
+import { SAKURA_STEPS } from "./quickstart/steps";
+
 const ROOT = join(import.meta.dir, "..");
 const EXAMPLES = join(ROOT, "examples");
 const REGISTER_DIR = join(ROOT, "packages/core/src/pipeline");
@@ -106,5 +109,27 @@ describe("example stat overrides register their family (#1420)", () => {
     // Spot-check the families examples rely on; a renamed export breaks the lint.
     expect(registers.get("ecdf")).toBe("registerEcdf");
     expect(registers.get("summary_bin")).toBe("registerSummaryBin");
+  });
+
+  it("the sakura quickstart fold registers every non-basic stat it emits", () => {
+    // The folded +page.svelte is what learners copy from the getting-started
+    // guide and the llms text surfaces — it must be runnable as-is (#1420).
+    const registers = statRegisterMap();
+    const basic = basicStats();
+    const violations: string[] = [];
+    for (let count = 1; count <= SAKURA_STEPS.length; count += 1) {
+      const { source } = foldSakura(count);
+      for (const match of source.matchAll(/stat="([a-z0-9_]+)"/g)) {
+        const statName = match[1];
+        if (statName === undefined || basic.has(statName)) continue;
+        const fn = registers.get(statName);
+        if (fn === undefined || !source.includes(`${fn}()`)) {
+          violations.push(
+            `fold(${count}): stat="${statName}" needs ${fn ?? "a register module"}()`,
+          );
+        }
+      }
+    }
+    expect(violations).toEqual([]);
   });
 });

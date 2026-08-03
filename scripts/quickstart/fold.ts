@@ -98,6 +98,7 @@ export function foldSakura(
   let theme: ThemeName | undefined;
 
   const components = new Set<string>(BASE_COMPONENTS);
+  const registers = new Set<string>();
   const consts: string[] = [];
   const attrs = new Map<string, string>([
     ["data", "  data={kyotoSakura}"],
@@ -116,6 +117,7 @@ export function foldSakura(
     if (step.spec.theme !== undefined) theme = step.spec.theme;
 
     for (const component of step.source.components ?? []) components.add(component);
+    for (const register of step.source.registers ?? []) registers.add(register);
     consts.push(...(step.source.consts ?? []));
     for (const [name, text] of Object.entries(step.source.attrs ?? {})) attrs.set(name, text);
     Object.assign(grammar, step.source.grammar ?? {});
@@ -141,7 +143,7 @@ export function foldSakura(
   // No ariaLabel in the lesson sources: the basic plot is for learning the
   // grammar, and an accessible name is a production polish step — not the
   // first thing a new reader should copy. Hosts still get a generated label.
-  const imported = [...components].toSorted((a, b) => a.localeCompare(b));
+  const imported = [...components, ...registers].toSorted((a, b) => a.localeCompare(b));
   // Wrap the component import once it stops fitting on one readable line.
   const imports =
     imported.join(", ").length > 60
@@ -150,6 +152,14 @@ export function foldSakura(
   const script = [
     `  import ${imports} from "@ggsvelte/svelte";`,
     `  import { kyotoSakura } from "@ggsvelte/svelte/data";`,
+    // stat= overrides: shells register only their default stat (#1420).
+    ...(registers.size > 0
+      ? [
+          "",
+          `  // A stat= override opts into its family explicitly (#1420).`,
+          ...[...registers].map((fn) => `  ${fn}();`),
+        ]
+      : []),
     ...(consts.length > 0 ? ["", ...consts] : []),
   ].join("\n");
 
