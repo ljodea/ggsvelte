@@ -55,8 +55,20 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/palettes",
     title: "Color palettes — ggsvelte",
-    description: "Categorical palettes and sequential color scales for data encoding.",
+    description:
+      "Categorical palettes for discrete series: browse, compare, and preview every scheme.",
     canonicalPath: "/palettes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/palettes/ramps",
+    title: "Sequential color ramps — ggsvelte",
+    description:
+      "Sequential color ramps for continuous fill, and how reverse, range, and domain read on a chart.",
+    canonicalPath: "/palettes/ramps",
     kind: "page",
     index: true,
     sitemap: true,

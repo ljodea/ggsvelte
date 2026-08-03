@@ -75,14 +75,17 @@ describe("docs chart stack isolation (PR1)", () => {
     expect(vite).toMatch(/name:\s*["']ggsvelte-palette-tables["'][\s\S]*?priority:\s*40/);
     // Data/palette carve-outs must match the thin modules, not the whole package.
     expect(vite).toMatch(/data[\\/]|[\\/]data[\\/]|svelte[\\/]data/);
-    expect(vite).toMatch(/categorical-palettes|colorbrewer-palettes|viridis-ramp/);
+    expect(vite).toMatch(
+      /categorical-palettes\|colorbrewer-palettes\|viridis-ramp\|sequential-schemes\|tableau-ramps/,
+    );
   });
 
   it("keeps intent-shell components free of static @ggsvelte/svelte main imports", () => {
     // Type-only is fine; a value import of the main entry pulls ggsvelte-svelte.
     for (const rel of [
       "lib/components/ThemeSpecimen.svelte",
-      "lib/components/PaletteSpecimen.svelte",
+      "lib/components/PalettePreview.svelte",
+      "lib/components/PaletteIndex.svelte",
       "lib/components/GrammarDemo.svelte",
       "lib/components/ChartThemeLab.svelte",
       "lib/components/SequentialDeferredPlot.svelte",
@@ -111,6 +114,18 @@ describe("docs chart stack isolation (PR1)", () => {
     expect(catalog).not.toMatch(/from\s*["']@ggsvelte\/core["']/);
     expect(catalog).not.toMatch(/import\s+(?!type\b)[^;]*\s+from\s*["']@ggsvelte\/spec["']/);
     expect(catalog).toMatch(/palette-tables|CATEGORICAL_SCHEMES|VIRIDIS_RAMP/);
+  });
+
+  it("keeps sequential-ramps on thin data imports (bundle isolation)", () => {
+    // Statically imported by RampsIndex (/palettes/ramps) and
+    // palette-ref-swatches (/reference/palettes). A value import of
+    // SEQUENTIAL_SCHEME_NAMES from the spec barrel would drag the TypeBox
+    // schema mega-chunk onto both pages; the name list is mirrored locally
+    // and checked against the registry by apps/docs/tests/sequential-ramps.test.ts.
+    const source = read("lib/catalog/sequential-ramps.ts");
+    expect(source).not.toMatch(
+      /import\s+(?!type\b)[^;]*\s+from\s*["']@ggsvelte\/(?:spec|core|svelte)["']/,
+    );
   });
 
   it("keeps root layout free of static @ggsvelte chart imports", () => {

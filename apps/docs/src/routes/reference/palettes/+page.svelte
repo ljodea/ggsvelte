@@ -6,7 +6,13 @@
     PALETTE_HELPER_GROUPS,
     SEQUENTIAL_SCHEME_REFS,
   } from "$lib/catalog/palette-reference";
+  import {
+    categoricalSwatchFor,
+    chooserSchemeFor,
+    sequentialSwatchFor,
+  } from "$lib/catalog/palette-ref-swatches";
   import CopyCode from "$lib/components/CopyCode.svelte";
+  import SchemeStrip from "$lib/components/SchemeStrip.svelte";
 
   // Join so the example's closing script tag does not terminate this module.
   const discreteExample = [
@@ -45,8 +51,10 @@
     <a href={`${base}/reference/themes`}>themes</a>.
   </p>
   <p>
-    Swatches and ramps for every scheme live on the
-    <a href={`${base}/palettes`}>Palettes showcase</a>.
+    Every scheme shows its swatch inline below. Select a categorical swatch to
+    preview it on a chart on the
+    <a href={`${base}/palettes`}>Palettes showcase</a>; sequential ramps live on
+    <a href={`${base}/palettes/ramps`}>Sequential color ramps</a>.
   </p>
 
   <h2 id="using-schemes">Using schemes</h2>
@@ -94,14 +102,30 @@
       <thead>
         <tr>
           <th scope="col">scheme</th>
+          <th scope="col">swatch</th>
           <th scope="col">Primary helpers</th>
           <th scope="col">Notes</th>
         </tr>
       </thead>
       <tbody>
         {#each CATEGORICAL_SCHEME_REFS as entry (entry.name)}
+          {@const swatch = categoricalSwatchFor(entry.name)}
+          {@const chooserScheme = chooserSchemeFor(entry.name)}
           <tr>
             <td><code>{entry.name}</code></td>
+            <td class="swatch-cell">
+              {#if swatch !== null}
+                <SchemeStrip
+                  colors={swatch}
+                  href={chooserScheme !== null
+                    ? `${base}/palettes?scheme=${chooserScheme}`
+                    : null}
+                  label={entry.name}
+                />
+              {:else}
+                —
+              {/if}
+            </td>
             <td>
               {#each entry.helpers.slice(0, 4) as helper, i (helper)}
                 {#if i > 0},
@@ -130,14 +154,27 @@
       <thead>
         <tr>
           <th scope="col">scheme</th>
+          <th scope="col">swatch</th>
           <th scope="col">Primary helpers</th>
           <th scope="col">Notes</th>
         </tr>
       </thead>
       <tbody>
         {#each SEQUENTIAL_SCHEME_REFS as entry (entry.name)}
+          {@const swatch = sequentialSwatchFor(entry.name)}
           <tr>
             <td><code>{entry.name}</code></td>
+            <td class="swatch-cell">
+              {#if swatch !== null}
+                <SchemeStrip
+                  colors={swatch}
+                  href={`${base}/palettes/ramps`}
+                  label={entry.name}
+                />
+              {:else}
+                —
+              {/if}
+            </td>
             <td>
               {#each entry.helpers.slice(0, 4) as helper, i (helper)}
                 {#if i > 0},
@@ -157,8 +194,12 @@
   <h2 id="see-also">See also</h2>
   <ul>
     <li>
-      <a href={`${base}/palettes`}>Palettes showcase</a> — swatches and sequential
-      lab
+      <a href={`${base}/palettes`}>Palettes showcase</a> — preview any categorical
+      scheme on a chart
+    </li>
+    <li>
+      <a href={`${base}/palettes/ramps`}>Sequential color ramps</a> — every sequential
+      ramp, plus scale behavior on a chart
     </li>
     <li>
       <a href={`${base}/reference/themes`}>Themes reference</a> — paper, ink, and
@@ -228,6 +269,12 @@
 
   td code {
     white-space: nowrap;
+  }
+
+  .swatch-cell {
+    width: 7rem;
+    min-width: 6rem;
+    vertical-align: middle;
   }
 
   .more {

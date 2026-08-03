@@ -155,154 +155,212 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await page.goto("/palettes?theme=light");
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
-  const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
-  // tableau_traffic removed (red/yellow/green KPI triples were a poor showcase ramp).
-  await expect(cards).toHaveCount(48);
-  await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
-    "Observable 10",
-    "Ipsum",
-    "Flexoki",
-    "Tableau 10",
-    "Colorblind",
-    "Stata",
-    "Stata S1 Color",
-    "Stata S1R Color",
-    "Stata Mono",
-    "Economist",
-    "Solarized",
-    "Few",
-    "Few Light",
-    "Few Dark",
-    "FiveThirtyEight",
-    "Paul Tol",
-    "Canva",
-    "WSJ",
-    "WSJ R/G/B/Y",
-    "WSJ Red/Green",
-    "WSJ Black/Green",
-    "WSJ Dem/Rep",
-    "Tableau 20",
-    "Tableau Color Blind",
-    "Seattle Grays",
-    "Miller Stone",
-    "Superfishel Stone",
-    "Nuriel Stone",
-    "Jewel Bright",
-    "Summer",
-    "Winter",
-    "Green/Orange/Teal",
-    "Red/Blue/Brown",
-    "Purple/Pink/Gray",
-    "Hue Circle",
-    "Google Docs",
-    "Highcharts",
-    "Highcharts Dark",
-    "Pander",
+  const rows = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
+  // Unique schemes only — "gray" is a US-spelling alias of "grey", not a twin
+  // row. Default order is label-alphabetical (sort control: Name/Color count).
+  await expect(rows).toHaveCount(48);
+  await expect(rows.locator(".name")).toHaveText([
+    "Accent",
     "Calc",
+    "Canva",
+    "Colorblind",
+    "Dark2",
+    "Economist",
     "Excel",
     "Excel Fill",
     "Excel New",
-    "Dark2",
-    "Paired",
-    "Accent",
-    "Hue",
+    "Few",
+    "Few Dark",
+    "Few Light",
+    "FiveThirtyEight",
+    "Flexoki",
+    "Google Docs",
+    "Green/Orange/Teal",
     "Grey",
+    "Highcharts",
+    "Highcharts Dark",
+    "Hue",
+    "Hue Circle",
+    "Ipsum",
+    "Jewel Bright",
+    "Miller Stone",
+    "Nuriel Stone",
+    "Observable 10",
+    "Paired",
+    "Pander",
+    "Paul Tol",
+    "Purple/Pink/Gray",
+    "Red/Blue/Brown",
+    "Seattle Grays",
+    "Solarized",
+    "Stata",
+    "Stata Mono",
+    "Stata S1 Color",
+    "Stata S1R Color",
+    "Summer",
+    "Superfishel Stone",
+    "Tableau 10",
+    "Tableau 20",
+    "Tableau Color Blind",
+    "Winter",
+    "WSJ",
+    "WSJ Black/Green",
+    "WSJ Dem/Rep",
+    "WSJ R/G/B/Y",
+    "WSJ Red/Green",
   ]);
-  await expect(cards.locator(".capacity")).toHaveText([
-    "10 colors",
-    "9 colors",
+  await expect(rows.locator(".capacity")).toHaveText([
     "8 colors",
-    "10 colors",
-    "8 colors",
-    "15 colors",
-    "15 colors",
-    "15 colors",
-    "15 colors",
-    "9 colors",
-    "8 colors",
-    "8 colors",
-    "8 colors",
-    "8 colors",
-    "3 colors",
     "12 colors",
     "4 colors",
+    "8 colors",
+    "8 colors",
+    "9 colors",
+    "7 colors",
+    "7 colors",
     "6 colors",
-    "4 colors",
-    "2 colors",
-    "4 colors",
+    "8 colors",
+    "8 colors",
+    "8 colors",
     "3 colors",
+    "8 colors",
+    "24 colors",
+    "12 colors",
+    "10 colors",
+    "10 colors",
+    "11 colors",
+    "10 colors",
+    "19 colors",
+    "9 colors",
+    "9 colors",
+    "11 colors",
+    "9 colors",
+    "10 colors",
+    "12 colors",
+    "8 colors",
+    "12 colors",
+    "12 colors",
+    "12 colors",
+    "5 colors",
+    "8 colors",
+    "15 colors",
+    "15 colors",
+    "15 colors",
+    "15 colors",
+    "8 colors",
+    "10 colors",
+    "10 colors",
     "20 colors",
     "10 colors",
-    "5 colors",
-    "11 colors",
     "10 colors",
-    "9 colors",
-    "9 colors",
-    "8 colors",
-    "10 colors",
-    "12 colors",
-    "12 colors",
-    "12 colors",
-    "19 colors",
-    "24 colors",
-    "10 colors",
-    "11 colors",
-    "8 colors",
-    "12 colors",
-    "7 colors",
-    "7 colors",
     "6 colors",
-    "8 colors",
-    "12 colors",
-    "8 colors",
-    "10 colors",
-    "10 colors",
+    "4 colors",
+    "3 colors",
+    "4 colors",
+    "2 colors",
   ]);
 
-  const observable = cards.first();
-  const swatches = observable
-    .getByRole("list", { name: "Observable 10 ordered colors" })
-    .getByRole("listitem");
+  // Sort control re-orders by capacity, ties broken by label: the single
+  // 2-color scheme leads.
+  await region.getByRole("combobox", { name: "Sort" }).selectOption("capacity");
+  await expect(rows.locator(".name").first()).toHaveText("WSJ Red/Green");
+
+  // Row buttons carry a concise explicit name — swatch hex must NOT fold
+  // into it (presentational-children strips list roles inside buttons).
+  const observable = region.getByRole("button", {
+    name: "Observable 10, 10 colors",
+    exact: true,
+  });
+  const swatches = observable.locator(".strip .cell");
   await expect(swatches).toHaveCount(10);
-  // Hex lives in accessible names only — not as visible code under every chip.
-  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #4269d0");
-  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
+  // Hex lives in title tooltips only — not as visible code under every chip.
+  await expect(swatches.first()).toHaveAttribute("title", "#4269d0");
+  await expect(swatches.last()).toHaveAttribute("title", "#9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
-  // Col chart uses fill (not the old 5-point scatter). Live plot mounts on intent.
-  await observable.scrollIntoViewIfNeeded();
-  await observable.locator(".plot-panel").hover();
-  await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+  // One shared preview chart hydrates eagerly; pinned default is Observable 10.
+  const preview = page.getByRole("region", { name: "Palette preview" });
+  await expect(preview.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 30_000,
   });
-  const firstMark = observable.locator(".gg-plot-root [fill='#4269d0']").first();
+  const firstMark = preview.locator(".gg-plot-root [fill='#4269d0']").first();
   await expect(firstMark).toBeVisible();
 
+  // Hover previews transiently; click pins the selection (aria-pressed).
+  const tableau = region.getByRole("button", {
+    name: "Tableau 10, 10 colors",
+    exact: true,
+  });
+  await tableau.hover();
+  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
+  await tableau.click();
+  await expect(tableau).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
+
+  // Screen-reader announcement tracks the previewed scheme.
+  await expect(page.getByRole("status")).toContainText("Previewing Tableau 10");
+
   // Exact inspect: tooltip on the bar, no full-panel crosshair guides.
-  const capture = observable.locator(".gg-capture");
+  const capture = preview.locator(".gg-capture");
   await capture.focus();
   await capture.press("ArrowRight");
-  const tooltip = observable.locator(".gg-tooltip");
+  const tooltip = preview.locator(".gg-tooltip");
   await expect(tooltip).toBeVisible();
-  await expect(observable.locator(".gg-crosshair")).toHaveCount(0);
+  await expect(preview.locator(".gg-crosshair")).toHaveCount(0);
 
   await region.getByRole("checkbox", { name: "Reverse" }).check();
-  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #9498a0");
-  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #4269d0");
-  await expect(observable.locator(".gg-plot-root [fill='#9498a0']").first()).toBeVisible();
+  await expect(swatches.first()).toHaveAttribute("title", "#9498a0");
+  await expect(swatches.last()).toHaveAttribute("title", "#4269d0");
+  await region.getByRole("button", { name: /Observable 10/ }).click();
+  await expect(preview.locator(".gg-plot-root [fill='#9498a0']").first()).toBeVisible();
 
   // No per-palette CopyCode.
-  await expect(observable.getByRole("button", { name: /^Copy / })).toHaveCount(0);
+  await expect(region.getByRole("button", { name: /^Copy / })).toHaveCount(0);
 
-  await region.getByLabel("Chart paper", { exact: true }).selectOption("dark");
-  await expect(observable.locator(".gg-paper")).toHaveAttribute("fill", "var(--gg-paper, #16181d)");
+  await region.getByRole("combobox", { name: "Chart paper" }).selectOption("dark");
+  await expect(preview.locator(".gg-paper")).toHaveAttribute("fill", "var(--gg-paper, #16181d)");
+});
+
+test("palette deep links pre-select and re-apply on same-route navigation", async ({ page }) => {
+  await page.goto("/palettes?scheme=tableau10&theme=light");
+
+  const region = page.getByRole("region", { name: "Categorical palettes" });
+  const preview = page.getByRole("region", { name: "Palette preview" });
+  const tableau = region.getByRole("button", {
+    name: "Tableau 10, 10 colors",
+    exact: true,
+  });
+  await expect(tableau).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Tableau 10" })).toBeVisible();
+  await expect(tableau).toBeInViewport();
+
+  // Same-route query change WITHOUT remount (injected same-origin link — the
+  // router intercepts it and keeps the page component alive): the new scheme
+  // must still pre-select.
+  await page.evaluate(() => {
+    const link = document.createElement("a");
+    link.href = "/palettes?scheme=pander";
+    link.id = "deep-link-probe";
+    link.textContent = "probe";
+    document.body.append(link);
+  });
+  await page.click("#deep-link-probe");
+  const pander = region.getByRole("button", {
+    name: "Pander, 8 colors, CB-safe",
+    exact: true,
+  });
+  await expect(pander).toHaveAttribute("aria-pressed", "true");
+  await expect(preview.getByRole("heading", { name: "Pander" })).toBeVisible();
 });
 
 test("sequential color compares direction, custom stops, and a pinned domain on raster", async ({
   page,
 }) => {
-  await page.goto("/palettes?theme=light");
+  await page.goto("/palettes/ramps?theme=light");
+
+  // Every registered sequential scheme gets a strip on the index.
+  const index = page.getByRole("list", { name: "Sequential color schemes" });
+  await expect(index.locator(":scope > li")).toHaveCount(50);
 
   const region = page.getByRole("region", { name: "Sequential color scales" });
   const cards = region

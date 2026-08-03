@@ -188,4 +188,5 @@ export const CATEGORICAL_PALETTES = (
     };
   });
 
+/** Viridis reference colors — consumed by scripts/themes-page.test.ts. */
 export const VIRIDIS_COLORS = VIRIDIS_RAMP_10;
