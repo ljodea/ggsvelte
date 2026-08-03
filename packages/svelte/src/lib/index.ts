@@ -1034,6 +1034,7 @@ export {
   registerSpoke, // @lifecycle experimental
   registerSummary, // @lifecycle experimental
   registerSummaryBin, // @lifecycle experimental
+  registerSummaryRolling, // @lifecycle experimental
   registerTile, // @lifecycle experimental
   registerUnique, // @lifecycle experimental
   registerViolin, // @lifecycle experimental

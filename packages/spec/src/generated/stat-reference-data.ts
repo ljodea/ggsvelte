@@ -237,6 +237,15 @@ export const STAT_REFERENCE_DATA = {
     compatibleGeoms: ["point", "line", "errorbar"],
     defaultForGeoms: [],
   },
+  summary_rolling: {
+    name: "summary_rolling",
+    slug: "summary_rolling",
+    summary:
+      "Centered rolling window over continuous x (params.window, in x units): summarize y per (group, unique x). Partial windows at the ends are kept. Publishes y.",
+    generatedColumns: ["y"],
+    compatibleGeoms: ["point", "line"],
+    defaultForGeoms: [],
+  },
   contour: {
     name: "contour",
     slug: "contour",

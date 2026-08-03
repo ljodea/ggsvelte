@@ -627,7 +627,7 @@ export const SpecDeclarations = {
       shape: Type.Optional(
         Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
           description:
-            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
         }),
       ),
       bins: Type.Optional(
@@ -662,6 +662,13 @@ export const SpecDeclarations = {
             'STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
         }),
       ),
+      window: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        }),
+      ),
       fun: Type.Optional(
         Type.Union(
           [
@@ -675,7 +682,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+              'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
           },
         ),
       ),
@@ -693,7 +700,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the point geom, plus summary_bin and/or manual controls.",
+        "Styling parameters for the point geom, plus summary_bin, summary_rolling, and/or manual controls.",
     },
   ),
 
@@ -793,6 +800,13 @@ export const SpecDeclarations = {
             'STAT BIN / SUMMARY_BIN: which edge of each bin is inclusive: "right" (default) or "left".',
         }),
       ),
+      window: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        }),
+      ),
       fun: Type.Optional(
         Type.Union(
           [
@@ -806,7 +820,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+              'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
           },
         ),
       ),
@@ -835,7 +849,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin, manual, or ecdf pad/n controls.",
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin, summary_rolling, manual, or ecdf pad/n controls.",
     },
   ),
 
@@ -1227,7 +1241,7 @@ export const SpecDeclarations = {
       shape: Type.Optional(
         Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
           description:
-            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
         }),
       ),
     },
@@ -1594,7 +1608,7 @@ export const SpecDeclarations = {
       shape: Type.Optional(
         Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
           description:
-            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
         }),
       ),
     },
@@ -2964,17 +2978,22 @@ export const SpecDeclarations = {
             Type.Literal("summary_bin", {
               description: "Bin continuous x and summarize y per (group × bin); default mean ± se.",
             }),
+            Type.Literal("summary_rolling", {
+              description:
+                "Centered rolling window over continuous x (params.window required, in x units); summarize y per (group, unique x). Partial windows at the ends are kept.",
+            }),
             Type.Literal("manual", {
               description:
                 "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;).",
             }),
             Type.Literal("sum", {
-              description: 'Aggregate coincident (x, y); size defaults to {stat:"n"} (geom_count).',
+              description:
+                'Aggregate coincident (x, y); size defaults to {stat: "n"} (geom_count).',
             }),
           ],
           {
             description:
-              'Point stat: "identity" (default), "unique", "summary_bin", "manual", or "sum".',
+              'Point stat: "identity" (default), "unique", "summary_bin", "summary_rolling", "manual", or "sum".',
           },
         ),
       ),
@@ -3039,6 +3058,10 @@ export const SpecDeclarations = {
               description:
                 "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order.",
             }),
+            Type.Literal("summary_rolling", {
+              description:
+                "Centered rolling window over continuous x (params.window required, in x units); summarize y per (group, unique x) and connect in x order. Partial windows at the ends are kept — a running line reaches both ends of the data.",
+            }),
             Type.Literal("manual", {
               description:
                 "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;).",
@@ -3050,7 +3073,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin", "manual", or "ecdf".',
+              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin", "summary_rolling", "manual", or "ecdf".',
           },
         ),
       ),

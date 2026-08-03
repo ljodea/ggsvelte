@@ -1015,3 +1015,26 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
   },
 }
 `;
+
+exports[`ERROR_CATALOG coverage [summary-rolling-window-required] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.window to the rolling-window width in x data units (greater than 0).",
+    "summary": "A layer uses stat summary_rolling without params.window.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "summary-rolling-window-required",
+    "fix": {
+      "description": "Set params.window to the window width in x units (e.g. 30 for a 30-year running summary).",
+      "example": {
+        "params": {
+          "window": 30,
+        },
+      },
+    },
+    "message": "The summary_rolling stat requires params.window (rolling-window width in x data units, greater than 0). There is no silent default width.",
+    "path": "/layers/0/params/window",
+  },
+}
+`;

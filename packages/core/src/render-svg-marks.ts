@@ -78,6 +78,9 @@ export function pointShape(
     case "lines":
       return `<path class="${className}" d="${pointShapePathD(geometry, px)}" fill="none" stroke="${fill}" stroke-width="${px(geometry.strokeWidth)}"/>`;
     case "circle":
+      if (geometry.mode === "stroke") {
+        return `<circle class="${className}" cx="${px(geometry.cx)}" cy="${px(geometry.cy)}" r="${px(geometry.r)}" fill="none" stroke="${fill}" stroke-width="${px(geometry.strokeWidth)}"/>`;
+      }
       return `<circle class="${className}" cx="${px(geometry.cx)}" cy="${px(geometry.cy)}" r="${px(geometry.r)}" fill="${fill}"/>`;
     default: {
       const exhaustive: never = geometry;
