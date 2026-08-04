@@ -11,6 +11,7 @@
     Labs,
     registerSummaryRolling,
     ScaleFillManual,
+    ScaleXContinuous,
     ScaleYMonthDay,
     ThemeTufte,
   } from "@ggsvelte/svelte";
@@ -38,8 +39,8 @@
       year: 1323,
       bloomDate: "05-04",
       label: "1323 · May 4, latest on record",
-      labelYear: 1250,
-      labelDate: "05-08",
+      labelYear: 1305,
+      labelDate: "05-07",
     },
     {
       year: 1409,
@@ -74,6 +75,7 @@
   height={420}
 >
   <ThemeTufte />
+  <ScaleXContinuous labels="d" domain={[800, 2030]} />
   <ScaleYMonthDay
     reverse
     breaks={["04-05", "04-15", "04-25"]}
