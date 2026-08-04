@@ -165,6 +165,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // #784: build/check run gen-lesson-charts --check; build runs docs-csp after vite.
     "scripts/gen-lesson-charts.ts",
     "scripts/gen-lesson-charts.test.ts",
+    // Homepage benchmark charts (build/check run gen-benchmark-charts --check).
+    "scripts/gen-benchmark-charts.ts",
     // Themes/palettes shell externalization (HTML shrink).
     "scripts/gen-theme-static-shells.ts",
     "scripts/docs-html-shell-external.test.ts",

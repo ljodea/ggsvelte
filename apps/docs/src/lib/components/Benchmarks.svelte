@@ -147,8 +147,7 @@
           <img
             class="bench-chart-img bench-chart--dark"
             src={`${base}${card.darkPath}`}
-            alt=""
-            aria-hidden="true"
+            alt={card.alt}
             width={card.width}
             height={card.height}
             loading="lazy"

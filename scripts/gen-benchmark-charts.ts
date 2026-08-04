@@ -56,7 +56,7 @@ interface BundleResults {
   }[];
 }
 
-function readJson<T>(name: string): T {
+function readJson(name: string): unknown {
   const path = join(COMPETITIVE, "results", name);
   if (!existsSync(path)) {
     throw new Error(
@@ -64,7 +64,7 @@ function readJson<T>(name: string): T {
         "  cd benchmarks/competitive && bun run measure:browser && bun run measure:bundles",
     );
   }
-  return JSON.parse(readFileSync(path, "utf8")) as T;
+  return JSON.parse(readFileSync(path, "utf8"));
 }
 
 /** True when the source benchmark results exist (local after measure:*, never in CI). */
@@ -256,8 +256,8 @@ export const BENCHMARK_BUNDLE_KB = ${JSON.stringify(bundles)} as const;
 }
 
 function build() {
-  const browser = readJson<BrowserResults>("browser.json");
-  const bundles = readJson<BundleResults>("bundles.json");
+  const browser = readJson("browser.json") as BrowserResults;
+  const bundles = readJson("bundles.json") as BundleResults;
   const cards = buildCards(browser);
   const files: ShellFile[] = cards.flatMap((card) => {
     const light = benchmarkChartSvg(card.chart, { width: CHART_WIDTH, height: CHART_HEIGHT });
@@ -353,12 +353,20 @@ function checkConsistent(): void {
         );
       }
     }
-    const onDiskSha = createHash("sha256")
-      .update(readFileSync(join(OUTPUT_DIR, lightName), "utf8"))
-      .digest("hex");
+    const lightBody = readFileSync(join(OUTPUT_DIR, lightName), "utf8");
+    const onDiskSha = createHash("sha256").update(lightBody).digest("hex");
     if (onDiskSha !== wantSha) {
       throw new Error(
         `benchmark charts INCONSISTENT (${lightName} sha mismatch vs projection). Run: bun scripts/gen-benchmark-charts.ts`,
+      );
+    }
+    // The dark-site SVG is a deterministic transform of the light one — recompute
+    // it and compare byte-for-byte so a stale/hand-edited dark image can't pass.
+    const wantDark = benchmarkChartDarkSiteSvg(lightBody);
+    const onDiskDark = readFileSync(join(OUTPUT_DIR, darkName), "utf8");
+    if (onDiskDark !== wantDark) {
+      throw new Error(
+        `benchmark charts INCONSISTENT (${darkName} does not match the dark-site transform of ${lightName}). Run: bun scripts/gen-benchmark-charts.ts`,
       );
     }
   }
