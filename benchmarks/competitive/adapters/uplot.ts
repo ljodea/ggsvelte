@@ -13,7 +13,7 @@ import {
   type SeriesColumns,
 } from "../scenarios";
 
-export type UpdateColumns = ScatterColumns | SeriesColumns;
+type UpdateColumns = ScatterColumns | SeriesColumns;
 
 export type UPlotHandle = {
   destroy: () => void;

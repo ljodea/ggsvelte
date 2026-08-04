@@ -27,7 +27,7 @@ import {
   type SeriesColumns,
 } from "../scenarios";
 
-export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
 
 export type LayerCakeHandle = {
   destroy: () => void;

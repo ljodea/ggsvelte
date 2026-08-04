@@ -24,9 +24,9 @@ import {
 
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
 
-export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
 
-export type D3Handle = {
+type D3Handle = {
   destroy: () => void;
   update: (data: UpdateColumns) => void;
 };

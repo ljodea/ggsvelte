@@ -26,7 +26,7 @@ echarts.use([
   CanvasRenderer,
 ]);
 
-export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
 
 export type EChartsHandle = {
   destroy: () => void;

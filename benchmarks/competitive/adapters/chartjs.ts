@@ -42,7 +42,7 @@ Chart.register(
   Legend,
 );
 
-export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
 
 export type ChartJsHandle = {
   destroy: () => void;
