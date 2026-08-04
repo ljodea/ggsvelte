@@ -1,6 +1,6 @@
 import { aes, gg, guideNone } from "@ggsvelte/spec";
 
-import { kyotoSakura } from "../../../packages/svelte/src/lib/data/index.ts";
+import { kyotoSakura } from "../../../packages/svelte/src/lib/data/index.js";
 import { defineExample } from "../../define.js";
 
 /**
