@@ -125,7 +125,6 @@ interface ChartCard {
   readonly id: string;
   readonly title: string;
   readonly subtitle: string;
-  readonly footnote: string;
   readonly chart: BenchmarkChartInput;
 }
 
@@ -134,15 +133,11 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     gg: mountMs(browser, "ggsvelte-svg", "scatter-color-10k"),
     lc: mountMs(browser, "layercake", "scatter-color-10k"),
     sp: mountMs(browser, "svelteplot", "scatter-color-10k"),
-    ggCanvas: mountMs(browser, "ggsvelte-canvas", "scatter-color-10k"),
-    lcCanvas: mountMs(browser, "layercake-canvas", "scatter-color-10k"),
   };
   const line = {
     gg: mountMs(browser, "ggsvelte-svg", "line-3x10k"),
     lc: mountMs(browser, "layercake", "line-3x10k"),
     sp: mountMs(browser, "svelteplot", "line-3x10k"),
-    ggCanvas: mountMs(browser, "ggsvelte-canvas", "line-3x10k"),
-    lcCanvas: mountMs(browser, "layercake-canvas", "line-3x10k"),
   };
 
   // Claim discipline: refuse to publish a chart ggsvelte does not win.
@@ -156,7 +151,7 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     }
   }
 
-  const subtitle = "Cold-mount milliseconds · median of 11 · Chromium, Linux x64";
+  const subtitle = "Cold-mount milliseconds · lower is better";
   const bars = (cell: { gg: number; lc: number; sp: number }) =>
     [
       { lib: "ggsvelte", value: cell.gg, kind: "ggsvelte", label: msLabel(cell.gg) },
@@ -171,9 +166,8 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
   return [
     {
       id: "scatter-mount",
-      title: "Mount a 10,000-point colored scatter",
+      title: "10,000-point colored scatter",
       subtitle,
-      footnote: `Canvas render target: ggsvelte ${msLabel(scatter.ggCanvas)}, LayerCake ${msLabel(scatter.lcCanvas)}.`,
       chart: {
         id: "scatter-mount",
         bars: bars(scatter),
@@ -182,9 +176,8 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     },
     {
       id: "line-mount",
-      title: "Mount a 3 × 10,000-point line chart",
+      title: "3 × 10,000-point line chart",
       subtitle,
-      footnote: `Canvas render target: ggsvelte ${msLabel(line.ggCanvas)}, LayerCake ${msLabel(line.lcCanvas)}.`,
       chart: {
         id: "line-mount",
         bars: bars(line),
@@ -215,7 +208,6 @@ function projectionSource(
     id: ${JSON.stringify(card.id)},
     title: ${JSON.stringify(card.title)},
     subtitle: ${JSON.stringify(card.subtitle)},
-    footnote: ${JSON.stringify(card.footnote)},
     path: ${JSON.stringify(`/benchmarks/${light.filename}`)},
     darkPath: ${JSON.stringify(`/benchmarks/${dark.filename}`)},
     sha256: ${JSON.stringify(sha256(light.body))},
@@ -232,7 +224,6 @@ export interface BenchmarkChartCard {
   readonly id: string;
   readonly title: string;
   readonly subtitle: string;
-  readonly footnote: string;
   readonly path: string;
   /** Dark-site portrait (transparent paper, light ink) — shown under data-theme="dark". */
   readonly darkPath: string;

@@ -5,7 +5,6 @@ export interface BenchmarkChartCard {
   readonly id: string;
   readonly title: string;
   readonly subtitle: string;
-  readonly footnote: string;
   readonly path: string;
   /** Dark-site portrait (transparent paper, light ink) — shown under data-theme="dark". */
   readonly darkPath: string;
@@ -18,9 +17,8 @@ export interface BenchmarkChartCard {
 export const BENCHMARK_CHART_CARDS = [
   {
     id: "scatter-mount",
-    title: "Mount a 10,000-point colored scatter",
-    subtitle: "Cold-mount milliseconds · median of 11 · Chromium, Linux x64",
-    footnote: "Canvas render target: ggsvelte 33.1 ms, LayerCake 36.7 ms.",
+    title: "10,000-point colored scatter",
+    subtitle: "Cold-mount milliseconds · lower is better",
     path: "/benchmarks/bench-scatter-mount.svg",
     darkPath: "/benchmarks/bench-scatter-mount-dark-site.svg",
     sha256: "40774c92ec1541f91ddae3b56b351231db469f4779932f0fb516fa8473e4df9b",
@@ -30,9 +28,8 @@ export const BENCHMARK_CHART_CARDS = [
   },
   {
     id: "line-mount",
-    title: "Mount a 3 × 10,000-point line chart",
-    subtitle: "Cold-mount milliseconds · median of 11 · Chromium, Linux x64",
-    footnote: "Canvas render target: ggsvelte 61.3 ms, LayerCake 50.2 ms.",
+    title: "3 × 10,000-point line chart",
+    subtitle: "Cold-mount milliseconds · lower is better",
     path: "/benchmarks/bench-line-mount.svg",
     darkPath: "/benchmarks/bench-line-mount-dark-site.svg",
     sha256: "d14b3b1596bcfaf131487527b0875ae4ad9faacabd48a53ea621e8ff8ca72d63",

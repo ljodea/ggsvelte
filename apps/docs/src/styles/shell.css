@@ -554,45 +554,45 @@
 .benchmarks {
   min-width: 0;
   overflow-x: clip;
-  padding-block: clamp(4rem, 8vw, 7rem);
+  padding-block: clamp(2.5rem, 5vw, 4rem);
   border-top: 1px solid var(--line);
 }
 
 .bench-intro h2 {
-  max-width: 14ch;
   margin: 0;
-  font-size: clamp(2.5rem, 5vw, 4.75rem);
-  line-height: 0.94;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  line-height: 1.1;
 }
 
 .bench-intro > p {
-  max-width: 56ch;
+  margin: 0.4rem 0 0;
   color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .bench-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-  margin-block: 2rem;
+  gap: 2rem;
+  margin-block: 1.5rem;
 }
 
 .bench-card {
   min-width: 0;
   margin: 0;
-  padding: 1.25rem 1.25rem 1rem;
-  border: 1px solid var(--line);
+  padding: 0;
 }
 
 .bench-card figcaption h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .bench-card figcaption p {
-  margin: 0.25rem 0 1rem;
+  margin: 0.2rem 0 0.75rem;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .bench-chart-img {
@@ -616,12 +616,6 @@
   display: block;
 }
 
-.bench-foot {
-  margin: 0.75rem 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
 .bench-table-wrap {
   display: block;
   max-width: 100%;
@@ -630,31 +624,49 @@
 
 .benchmarks table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.benchmarks .bench-col-feature {
+  width: auto;
+}
+
+.benchmarks .bench-col-lib {
+  width: 18%;
 }
 
 .benchmarks th,
 .benchmarks td {
-  padding: 0.75rem 1rem 0.75rem 0;
+  padding: 0.55rem 0.75rem;
   border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .benchmarks thead th {
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.benchmarks thead th:not(:first-child),
+.benchmarks tbody td {
+  text-align: center;
 }
 
 .benchmarks tbody th {
+  padding-left: 0;
   font-weight: 600;
+  text-align: left;
 }
 
 .benchmarks tbody th small {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
   color: var(--muted);
+  font-size: 0.75rem;
   font-weight: 400;
 }
 
@@ -665,7 +677,7 @@
 .benchmarks td small {
   display: block;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   white-space: normal;
 }
 
@@ -685,17 +697,15 @@
   color: #c64747;
 }
 
-.bench-method {
-  margin-top: 1rem;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
 @media (max-width: 42rem) {
   .bench-grid {
     /* minmax(0,…) so the wide capability table can't force the track (and the
      * page) wider than a mobile viewport — .bench-table-wrap scrolls instead. */
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .benchmarks .bench-col-lib {
+    width: 22%;
   }
 }
 
