@@ -16,18 +16,13 @@
    * Live homepage grammar plot. Dynamically imported so the section chrome +
    * static SVG shell can SSR without pulling @ggsvelte into the home node.
    *
-   * Default step (Interaction): xy inspect (numeric crosshair) + GuideLegend focus.
+   * Full interactive state (same as the old accordion step 4 / Interaction):
+   * xy inspect (numeric crosshair) + GuideLegend focus + loess smooth.
    * Full palmerPenguins (333 complete cases).
    *
    * Labs titles must match `homeGrammarStaticSvgFromData` so the shell→live
    * upgrade does not flash raw field names onto the axes.
    */
-  let {
-    active,
-  }: {
-    active: number;
-  } = $props();
-
   const chartTheme = $derived(contrastChartTheme());
 </script>
 
@@ -43,20 +38,14 @@
   aes={{
     x: "flipperLengthMm",
     y: "bodyMassG",
-    ...(active >= 1 && { color: "species" }),
+    color: "species",
   }}
   ariaLabel="Penguin body mass increases with flipper length, grouped by species"
 >
-  {#if active >= 3}
-    <Inspect mode="xy" pin maxDistance={24} />
-  {/if}
+  <Inspect mode="xy" pin maxDistance={24} />
   <Theme name={chartTheme} />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
-  {#if active >= 1}
-    <GuideLegend channel="color" focus />
-  {/if}
+  <GuideLegend channel="color" focus />
   <GeomJitter alpha={0.88} />
-  {#if active >= 2}
-    <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
-  {/if}
+  <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
 </GGPlot>

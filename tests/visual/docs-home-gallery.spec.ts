@@ -44,32 +44,34 @@ test("homepage title sits above the featured gallery without hero chrome", async
   expect(metrics.gap).toBeLessThan(160);
 });
 
-test("homepage grammar section SSRs chrome and a static chart shell", async ({ request }) => {
+test("homepage code-path section SSRs heading and a static chart shell", async ({ request }) => {
   const response = await request.get("/");
   const html = await response.text();
   // Section chrome is not gated on the dynamic plot import.
-  expect(html).toContain("Declare a layer interactive");
-  expect(html).toContain('id="grammar-heading"');
-  // Static shell ships before live GGPlot hydrates (same pattern as hero).
+  expect(html).toContain("Svelte for builders, JSON for embedded agents.");
+  expect(html).toContain('id="code-path-heading"');
+  // Static shell ships before live GGPlot hydrates.
   expect(html).toContain("grammar-static");
   expect(html).toContain("Flipper length mm");
 });
 
-test("homepage grammar steps change real chart structure in place", async ({ page }) => {
-  // Full palmerPenguins (333) + loess on step toggles is heavier than the old
-  // 30-row specimen; cold CI hydrate already sits near the 60s project budget.
+test("homepage grammar chart upgrades to full interactive layers on intent", async ({ page }) => {
+  // Full palmerPenguins (333) + loess is heavier than a small specimen; cold CI
+  // hydrate already sits near the 60s project budget.
   test.setTimeout(120_000);
   await page.goto("/");
-  // Chrome is SSR'd immediately — not blocked on the dynamic plot chunk.
-  await expect(page.getByRole("heading", { name: "Declare a layer interactive" })).toBeVisible();
+  // Code-path chrome is SSR'd immediately — not blocked on the plot chunk.
+  await expect(
+    page.getByRole("heading", { name: "Svelte for builders, JSON for embedded agents." }),
+  ).toBeVisible();
   const output = page.locator(".grammar-output");
   const plot = output.locator(".gg-plot-root");
-  // Live plot upgrades only after user intent (step click / hover).
-  await page.getByRole("button", { name: /Interaction/ }).click();
+  // Live plot upgrades only after user intent (hover / focus into the chart).
+  await output.hover();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
-  // The demo opens on the last step: layers, legend, and inspection all live.
+  // Full chart: points, legend, smooth paths, and inspect capture.
   await expect(output.locator(".gg-points")).toHaveCount(1);
   await expect(output.locator(".gg-legend")).toHaveCount(1);
   await expect(output.locator(".gg-paths")).toHaveCount(1);
@@ -78,31 +80,17 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-axis-title", { hasText: "Flipper length mm" })).toBeVisible();
   await expect(output.locator(".gg-axis-title", { hasText: "Body mass g" })).toBeVisible();
   await expect(output.getByText("flipperLengthMm")).toHaveCount(0);
-
-  await page.getByRole("button", { name: /Data/ }).click();
-  await expect(output.locator(".gg-legend")).toHaveCount(0);
-  await expect(output.locator(".gg-paths")).toHaveCount(0);
-
-  await page.getByRole("button", { name: /Mappings/ }).click();
-  await expect(output.locator(".gg-legend")).toHaveCount(1);
-  await expect(output.locator(".gg-paths")).toHaveCount(0);
-
-  await page.getByRole("button", { name: /Layers/ }).click();
-  // Remounting GeomSmooth re-runs loess per species; wait for ready then paths.
-  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 60_000 });
-  await expect(output.locator(".gg-paths")).toHaveCount(1, { timeout: 30_000 });
 });
 
 test("homepage grammar inspect draws xy crosshair and supports legend focus", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=dark");
   const output = page.locator(".grammar-output");
-  // Intent-gated: click the open Interaction step to pull the chart stack.
-  await page.getByRole("button", { name: /Interaction/ }).click();
+  // Intent-gated: hover the chart host to pull the chart stack.
+  await output.hover();
   await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
-  // Step 4 (Interaction) is the default open step.
   await expect(output.locator(".gg-capture")).toBeVisible();
 
   const capture = output.locator(".gg-capture");
