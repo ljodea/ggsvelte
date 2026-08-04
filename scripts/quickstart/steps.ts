@@ -207,11 +207,13 @@ ${SAKURA_RECORDS.map(
   ];`;
 
 /**
- * The baseline's in-panel tag: the reference's single word "median", above
- * the rule at the left edge. Measured against the rendered scene (gate G8):
- * the only placement on the baseline row that overprints no bloom — the row
- * is dense everywhere else, and the full phrase lives in the page footnote,
- * like the reference's caption.
+ * The baseline's in-panel tag: the reference's single word "median", below
+ * the rule at the left edge (the reference tags below the rule too, in the
+ * margin our panels clip). Measured against the rendered scene (gate G8):
+ * the box touches no trend vertex and exactly one faint bloom — the 891
+ * observation — at any wide width; every other candidate pocket sits on
+ * more data. The full phrase lives in the page footnote, like the
+ * reference's caption.
  */
 const SAKURA_BASELINE_LABEL = [{ year: 812, bloomDate: SAKURA_BASELINE, label: "median" }];
 
@@ -474,7 +476,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ color: { value: "#6b7075" } }} inspect={false} />
 <GeomText data={baselineLabel}
   aes={{ x: "year", y: "bloomDate", label: "label",
-         color: { value: "#6b7075" } }} size={9} anchor="start" dy={-10}
+         color: { value: "#6b7075" } }} size={9} anchor="start" dy={22}
   inspect={false} />
 <GeomPoint data={ringLatest} shape="circle-open" size={3.5}
   aes={{ x: "year", y: "bloomDate", color: { value: "#2c5282" } }} />
@@ -509,7 +511,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             label: { field: "label" },
             color: { value: "#6b7075" },
           },
-          params: { size: 9, anchor: "start", dy: -10 },
+          params: { size: 9, anchor: "start", dy: 22 },
           // Names the rule, like the epoch names name the bands (#1068).
           inspect: false,
         },
@@ -606,7 +608,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     }}
     size={9}
     anchor="start"
-    dy={-10}
+    dy={22}
     inspect={false}
   />`,
         ringLatest: `  <GeomPoint
