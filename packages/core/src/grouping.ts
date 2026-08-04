@@ -251,7 +251,7 @@ export function deriveGroups(
     if ("value" in groupChannel) {
       // Constant group (e.g. ggplot2's aes(group = 1)): a single group.
       return {
-        groups: n === 0 ? [] : Array.from<number>({ length: n }).fill(0),
+        groups: Array.from({ length: n }, () => 0),
         groupCount: n === 0 ? 0 : 1,
         source: "explicit",
         groupedBy: [],
