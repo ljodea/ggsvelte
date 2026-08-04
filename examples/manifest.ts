@@ -978,6 +978,18 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "showcase/kyoto-sakura",
+    category: "showcase",
+    name: "kyoto-sakura",
+    title: "Kyoto cherry blossoms, 812–2026",
+    description: "Tufte's full-bloom chart at full fidelity: 30-year rolling median, epoch bands, labeled baseline, and circled records.",
+    tags: ["line", "point", "time", "annotations", "theme", "case study"],
+    docsSection: "Showcase",
+    vrHeight: 420,
+    vrWidth: 768,
+    hasData: false,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

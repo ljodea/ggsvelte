@@ -431,6 +431,11 @@
       "sourceSha256": "328138448f0bb81c44a398c4a45fa1c446e84c3f0b372de48168292abf644397",
       "pngSha256": "30085a3515dedbbd919242f46c8e156fb7406b9b0df38ec2379f01672ac6b355"
     },
+    "showcase/kyoto-sakura": {
+      "filename": "showcase-kyoto-sakura-light.png",
+      "sourceSha256": "e67e3affe83b19df86829b0d0a7e0016dd34325818fdcd6c0b1d8a65efdf89b4",
+      "pngSha256": "6544f9bfaaa7d158916614140bf8f4442e64f613abe1c04959fb33a39c04c486"
+    },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
       "sourceSha256": "2fc995596ad146ad67324a9ffeaa358e6e1e8ad5c5f1f4ee897f7bbb2cefef4a",
