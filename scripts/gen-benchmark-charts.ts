@@ -341,11 +341,14 @@ function checkConsistent(): void {
   const cardRe =
     /path: "(\/benchmarks\/([^"]+))",\s*darkPath: "(\/benchmarks\/([^"]+))",\s*sha256: "([0-9a-f]{64})"/g;
   let matched = 0;
+  const wantNames = new Set<string>();
   for (const m of proj.matchAll(cardRe)) {
     matched += 1;
     const lightName = m[2]!;
     const darkName = m[4]!;
     const wantSha = m[5]!;
+    wantNames.add(lightName);
+    wantNames.add(darkName);
     for (const name of [lightName, darkName]) {
       if (!existsSync(join(OUTPUT_DIR, name))) {
         throw new Error(
@@ -372,6 +375,17 @@ function checkConsistent(): void {
   }
   if (matched === 0) {
     throw new Error("benchmark-charts projection has no parseable cards; cannot verify.");
+  }
+  // Parity with the full check path: orphan SVGs left after a rename/drop fail
+  // CI even when results are absent (the usual CI case).
+  if (existsSync(OUTPUT_DIR)) {
+    for (const name of readdirSync(OUTPUT_DIR).filter((n) => n.endsWith(".svg"))) {
+      if (!wantNames.has(name)) {
+        throw new Error(
+          `benchmark charts INCONSISTENT (orphan ${name}). Run: bun scripts/gen-benchmark-charts.ts`,
+        );
+      }
+    }
   }
 }
 

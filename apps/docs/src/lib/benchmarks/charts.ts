@@ -45,7 +45,7 @@ const DARK_SITE_FALLBACKS: Record<string, string> = {
   "var(--gg-axisText, #4d4d4d)": "var(--gg-axisText, #aab4c4)",
   "var(--gg-tickColor, #b3b3b3)": "var(--gg-tickColor, #e9edf4)",
   // Subject bar accent: dark-shell blue.
-  "#4269d0": "#7ea1f0",
+  [BENCH_GGSVELTE_FILL]: BENCH_GGSVELTE_FILL_DARK,
 };
 
 /**
