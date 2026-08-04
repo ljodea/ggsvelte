@@ -109,8 +109,7 @@
 
 <section class="benchmarks" aria-labelledby="benchmarks-heading">
   <header class="bench-intro">
-    <h2 id="benchmarks-heading">Mounts first</h2>
-    <p>10,000-point charts. Cold start.</p>
+    <h2 id="benchmarks-heading">ggsvelte is Fast</h2>
   </header>
 
   <div class="bench-grid">
