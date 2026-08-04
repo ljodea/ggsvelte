@@ -1,5 +1,104 @@
 # @ggsvelte/spec
 
+## 0.30.0
+
+### Minor Changes
+
+- 70971d9: <!-- markdownlint-disable MD041 -->
+
+  feat: accept `inspect` on builder layers and geom sugar
+
+  The schema and `normalize` have always admitted `inspect: false` (#1068)
+  and the runtime honors it, but the builder's `LayerInput` types and
+  `layerFrom` had no key for it — so builder-form specs (gallery examples,
+  agent-generated charts) could not opt decorative layers out of inspection
+  without dropping to raw spec objects. `geomRule({ inspect: false })`,
+  `.layer({ geom, inspect: false, … })`, and every other geom sugar now
+  carry it into the spec.
+
+  Migration: none — additive
+
+- 796cb50: <!-- markdownlint-disable MD041 -->
+
+  feat: circle-open point shape (unfilled ring)
+
+  Add `"circle-open"` to the point shape registry (ggplot2 shape 1): an
+  unfilled ring stroked in the mark's color channel, stroke width
+  max(1, size/3). Available as a scalar `params.shape`, as a shape-scale
+  range value, and through the shared `pointShapeGeometry` table, so SVG,
+  canvas, and both legend renderers draw it consistently. Interaction hit-
+  testing treats it as a circle of the same size.
+
+  Appended to `POINT_SHAPE_NAMES` (not inserted), so default discrete shape
+  assignments for domains of ≤ 6 levels are unchanged; a 7th level now assigns
+  circle-open instead of throwing/cycling one level earlier.
+
+  Migration: none — additive
+
+- 796cb50: <!-- markdownlint-disable MD041 -->
+
+  feat: stat_summary_rolling centered rolling-window summaries
+
+  Add `stat: "summary_rolling"` on line and point layers: one output row per
+  (group, unique x), summarizing y over the centered window
+  |x − center| ≤ params.window/2. `params.window` (x data units, > 0) is
+  required — the spec validator raises `summary-rolling-window-required` with a
+  named fix and the core stat throws as the pipeline backstop. `params.fun`
+  defaults to mean; pass "median" for a running median line. Partial windows
+  at the series ends are kept (divergence from zoo's default NA padding), so a
+  running line reaches both ends of the data. Windows never cross groups.
+
+  Component-form registration follows the #1420 contract: a `GeomLine` /
+  `GeomPoint` shell self-registers only its default stat, so a
+  `stat="summary_rolling"` override needs one `registerSummaryRolling()` call
+  at app startup (exported from `@ggsvelte/svelte` / `@ggsvelte/core`); spec-
+  driven surfaces call `registerAll()` as before. Missing registration fails
+  loudly with the register hint.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 5249477: # Speed lean column parse, grouping, and canvas mark paint
+
+  Migration: none — same scene geometry, group ids, and portable cell values for non-Date columns (still snapshot-isolated from caller mutation).
+
+  Cut per-mount cost on competitive multi-series / scatter paths: lean `parsed()` no longer double-coerces nominal columns; pure number and pure non-ISO string columns take monomorphic fast paths; `isoEpochMs` rejects short labels before the regex; group id materialization avoids `Array.from` on 30k typed arrays; explicit `aes.group` skips unused discreteness probes; builder column snapshots use `slice` and share non-Date portable arrays; canvas points bucket interleaved categorical colors; solid path strokes skip unused `subpathBounds` scans.
+
+- 70971d9: <!-- markdownlint-disable MD041 -->
+
+  fix: tier-2 validation accepts bare month-day values on monthDay scales
+
+  The runtime parses an unset `parse` on a `temporalKind: "monthDay"` scale
+  with the `md` parser (temporal-position.ts), but the validator fell back to
+  plain `auto` — so annotation fields holding exactly the values the scale is
+  for ("03-18", "05-08") failed `scale-type-mismatch` while rendering fine.
+  Any spec with month-day annotation rows on a monthDay axis (the sakura
+  lesson chart's epoch bands, record callouts, ring layers) now validates
+  clean; the error message names the effective parser.
+
+  Migration: none — validation-only false positive removed
+
+- 796cb50: <!-- markdownlint-disable MD041 -->
+
+  fix: close three summary_rolling contract gaps found in review
+
+  - `params.fun` "first"/"last" on summary stats silently plotted the window
+    **maximum** (the point/line params union admits manual's keep transforms;
+    `applySummaryFun`'s default branch aliased max). Tier-2 validation now
+    rejects them with a named `summary-fun-unsupported` error, and the core
+    summary registry throws on any out-of-registry fun as a backstop.
+  - Tooltips on rolling-summary charts advertised only x; `summary_rolling`
+    now publishes its summarized y to inspection like `summary_bin`.
+  - Spec validation accepted `{ stat: "y" }` channels the renderer rejects:
+    the style after-stat map now publishes `summary_rolling: ["y"]` (mirroring
+    `summary_bin`), and the validator checks the y channel against the
+    y-mappable column table (also closing the identical pre-existing
+    `summary_bin` y-channel gap).
+
+  Migration: none — invalid specs now fail validation instead of rendering
+  wrong (or crashing); valid specs are unaffected
+
 ## 0.29.1
 
 ### Patch Changes
