@@ -60,9 +60,19 @@ export function layerFrom(
     positionParams?: PositionParams;
     stat?: string;
     data?: DataInput;
+    inspect?: boolean;
   },
 ): LayerInput {
-  const { aes: layerAes, render, position, positionParams, stat, data, ...params } = options;
+  const {
+    aes: layerAes,
+    render,
+    position,
+    positionParams,
+    stat,
+    data,
+    inspect,
+    ...params
+  } = options;
   // Do not snapshot here: every geom sugar path is `this.layer(layerFrom(...))`,
   // and `layer()` is the single defensive-copy point (#1280). Snapshotting in
   // both places deep-copied every row twice on `geom*({ data })`.
@@ -73,6 +83,7 @@ export function layerFrom(
     ...(position !== undefined && { position }),
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
+    ...(inspect !== undefined && { inspect }),
     ...(layerAes !== undefined && { aes: layerAes }),
     ...withData,
     ...(Object.keys(params).length > 0 && { params }),

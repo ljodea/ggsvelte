@@ -107,6 +107,12 @@ interface LayerInputBase {
   data?: DataRef;
   /** Rendering backend hint ("auto" is the default and canonicalizes away). */
   render?: RenderBackend;
+  /**
+   * Set false to exclude this layer from inspection (#1068): its marks never
+   * become tooltip, hover, or keyboard-traversal candidates. For decorative
+   * layers whose marks would otherwise capture the pointer.
+   */
+  inspect?: boolean;
 }
 
 /** Facet field accepted at the TS/builder level (bare-string field shorthand). */

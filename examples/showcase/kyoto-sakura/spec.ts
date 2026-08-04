@@ -52,7 +52,7 @@ const records = [
     labelDate: "03-20",
   },
 ];
-const baselineLabel = [{ year: 2026, bloomDate: "04-15", label: "pre-industrial median" }];
+const baselineLabel = [{ year: 812, bloomDate: "04-15", label: "median" }];
 
 // Ring treatment from the reference: an open blue ring on the latest bloom,
 // an open red ring on the earliest, a filled red dot on the modern record.
@@ -84,20 +84,28 @@ export default defineExample(
       yintercept: "04-05",
       linewidth: 0.75,
       aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
+      inspect: false,
     })
     .geomRule({
       yintercept: "04-25",
       linewidth: 0.75,
       aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
+      inspect: false,
     })
     .geomPoint({ alpha: 0.55, size: 1.4, aes: { color: { value: "#4a5568" } } })
-    .geomRule({ yintercept: "04-15", linewidth: 1, aes: { color: { value: "#6b7075" } } })
+    .geomRule({
+      yintercept: "04-15",
+      linewidth: 1,
+      aes: { color: { value: "#6b7075" } },
+      inspect: false,
+    })
     .geomText({
       data: baselineLabel,
       aes: { x: "year", y: "bloomDate", label: "label", color: { value: "#6b7075" } },
       size: 9,
-      anchor: "end",
-      dy: 12,
+      anchor: "start",
+      dy: -10,
+      inspect: false,
     })
     .geomLine({
       stat: "summary_rolling",

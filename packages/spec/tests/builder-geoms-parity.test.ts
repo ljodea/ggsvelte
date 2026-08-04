@@ -48,6 +48,19 @@ describe("GGBuilder geom mixin ↔ KNOWN_GEOMS", () => {
     }
   });
 
+  it("carries inspect: false through sugar and .layer into the spec", () => {
+    // Decorative layers opt out of inspection (#1068); the builder must not
+    // gate what the schema and normalize already admit.
+    const sugared = gg(rows, aes({ x: "x", y: "y" }))
+      .geomRule({ yintercept: 2, inspect: false })
+      .spec();
+    expect(sugared.layers[0]).toMatchObject({ geom: "rule", inspect: false });
+    const plain = gg(rows, aes({ x: "x", y: "y" }))
+      .layer({ geom: "rule", inspect: false, params: { yintercept: 2 } })
+      .spec();
+    expect(plain.layers[0]).toMatchObject({ geom: "rule", inspect: false });
+  });
+
   it("geomFunction is sugar for .layer with required fun param", () => {
     const opts = { fun: "identity" as const };
     const viaMixin = gg(rows, aes({ x: "x", y: "y" }))

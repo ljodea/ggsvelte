@@ -528,7 +528,7 @@ export const GALLERY_PREVIEWS = [
     id: "showcase/kyoto-sakura",
     filename: "showcase-kyoto-sakura-light.png",
     path: "/previews/showcase-kyoto-sakura-light.png",
-    sha256: "b11a934b77ff6a0aaf53b4504a6ebd837af009cd6c98326afc0cc797aea2e2ce",
+    sha256: "5ec19c78fca03da15ae3d1a2b15ae3c8462454ec2a2e78f11fef83f2aa01a96c",
   },
   {
     id: "smooth/loess-scatter",
