@@ -544,3 +544,170 @@
     border-left-color: Highlight;
   }
 }
+
+/*
+ * Homepage benchmark section (Benchmarks.svelte). Lives in the global sheet,
+ * not a component <style>, so SvelteKit serves it as an external <link>
+ * covered by CSP style-src 'self' — component <style> gets inlined below the
+ * threshold and csp.mode:"hash" only hashes scripts, not styles.
+ */
+.benchmarks {
+  min-width: 0;
+  overflow-x: clip;
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--line);
+}
+
+.bench-intro h2 {
+  max-width: 14ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4.75rem);
+  line-height: 0.94;
+}
+
+.bench-intro > p {
+  max-width: 56ch;
+  color: var(--muted);
+}
+
+.bench-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-block: 2rem;
+}
+
+.bench-card {
+  min-width: 0;
+  margin: 0;
+  padding: 1.25rem 1.25rem 1rem;
+  border: 1px solid var(--line);
+}
+
+.bench-card figcaption h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.bench-card figcaption p {
+  margin: 0.25rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.bench-chart-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Dark shell swaps to the dark-site portrait (data-theme, not OS scheme —
+ * the docs toggle is independent of prefers-color-scheme). Mirrors
+ * GrammarDemo's grammar-static--light/dark-site. */
+.bench-chart--dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .bench-chart--light {
+  display: none;
+}
+
+:root[data-theme="dark"] .bench-chart--dark {
+  display: block;
+}
+
+.bench-foot {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.bench-table-wrap {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.benchmarks table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--line);
+}
+
+.benchmarks th,
+.benchmarks td {
+  padding: 0.75rem 1rem 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.benchmarks thead th {
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.benchmarks tbody th {
+  font-weight: 600;
+}
+
+.benchmarks tbody th small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.benchmarks td {
+  white-space: nowrap;
+}
+
+.benchmarks td small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: normal;
+}
+
+.benchmarks .mark {
+  font-weight: 700;
+}
+
+.benchmarks .mark--yes {
+  color: #2e9e5b;
+}
+
+.benchmarks .mark--partial {
+  color: #c98a1b;
+}
+
+.benchmarks .mark--no {
+  color: #c64747;
+}
+
+.bench-method {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 42rem) {
+  .bench-grid {
+    /* minmax(0,…) so the wide capability table can't force the track (and the
+     * page) wider than a mobile viewport — .bench-table-wrap scrolls instead. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Visually-hidden but screen-reader-accessible label (benchmark charts). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

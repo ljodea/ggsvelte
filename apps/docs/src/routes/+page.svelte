@@ -3,6 +3,7 @@
 
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
+  import Benchmarks from "$lib/components/Benchmarks.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import { EXAMPLES } from "$lib/examples-manifest";
   import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
@@ -68,6 +69,8 @@
     <CodeTabs {tabs} />
   </div>
 </section>
+
+<Benchmarks />
 
 <section class="evidence" aria-labelledby="evidence-heading">
   <header>

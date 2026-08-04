@@ -4,14 +4,6 @@
     {
       "ggsvelte": "ggsvelte-canvas",
       "peer": "layercake-canvas",
-      "caseId": "scatter-color-10k",
-      "kind": "mount",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
-      "note": "~32–34ms vs ~27–30ms after ordinal color collect + named-data adapter + paint path (#1468 follow-up). Gate thr = peer×1.02+2ms; self-destructs when the gap closes."
-    },
-    {
-      "ggsvelte": "ggsvelte-canvas",
-      "peer": "layercake-canvas",
       "caseId": "line-3x10k",
       "kind": "mount",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
@@ -24,14 +16,6 @@
       "kind": "update",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
       "note": "~90ms vs ~62ms. Our update path is a documented full re-render; layercake updates reactively through $state. Attack: incremental update planning."
-    },
-    {
-      "ggsvelte": "ggsvelte-svg",
-      "peer": "layercake",
-      "caseId": "line-3x10k",
-      "kind": "update",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "~57ms vs ~31ms. Full re-render vs reactive update at 30k points."
     },
     {
       "ggsvelte": "ggsvelte-canvas",
