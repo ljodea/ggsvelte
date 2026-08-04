@@ -1,5 +1,60 @@
 # @ggsvelte/svelte
 
+## 0.30.0
+
+### Minor Changes
+
+- 796cb50: <!-- markdownlint-disable MD041 -->
+
+  feat: circle-open point shape (unfilled ring)
+
+  Add `"circle-open"` to the point shape registry (ggplot2 shape 1): an
+  unfilled ring stroked in the mark's color channel, stroke width
+  max(1, size/3). Available as a scalar `params.shape`, as a shape-scale
+  range value, and through the shared `pointShapeGeometry` table, so SVG,
+  canvas, and both legend renderers draw it consistently. Interaction hit-
+  testing treats it as a circle of the same size.
+
+  Appended to `POINT_SHAPE_NAMES` (not inserted), so default discrete shape
+  assignments for domains of ≤ 6 levels are unchanged; a 7th level now assigns
+  circle-open instead of throwing/cycling one level earlier.
+
+  Migration: none — additive
+
+- 796cb50: <!-- markdownlint-disable MD041 -->
+
+  feat: stat_summary_rolling centered rolling-window summaries
+
+  Add `stat: "summary_rolling"` on line and point layers: one output row per
+  (group, unique x), summarizing y over the centered window
+  |x − center| ≤ params.window/2. `params.window` (x data units, > 0) is
+  required — the spec validator raises `summary-rolling-window-required` with a
+  named fix and the core stat throws as the pipeline backstop. `params.fun`
+  defaults to mean; pass "median" for a running median line. Partial windows
+  at the series ends are kept (divergence from zoo's default NA padding), so a
+  running line reaches both ends of the data. Windows never cross groups.
+
+  Component-form registration follows the #1420 contract: a `GeomLine` /
+  `GeomPoint` shell self-registers only its default stat, so a
+  `stat="summary_rolling"` override needs one `registerSummaryRolling()` call
+  at app startup (exported from `@ggsvelte/svelte` / `@ggsvelte/core`); spec-
+  driven surfaces call `registerAll()` as before. Missing registration fails
+  loudly with the register hint.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- Updated dependencies [70971d9]
+- Updated dependencies [5249477]
+- Updated dependencies [796cb50]
+- Updated dependencies [d3250a9]
+- Updated dependencies [70971d9]
+- Updated dependencies [796cb50]
+- Updated dependencies [796cb50]
+  - @ggsvelte/spec@0.30.0
+  - @ggsvelte/core@0.30.0
+
 ## 0.29.1
 
 ### Patch Changes
