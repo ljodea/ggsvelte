@@ -30,6 +30,53 @@ describe("tier 2 — temporal position scale data checks", () => {
       expect(result.ok).toBe(true);
     });
 
+    it("accepts bare month-day values in annotation layer fields", () => {
+      // The runtime parses with `md` when a monthDay scale leaves parse unset
+      // (temporal-position.ts); the validator used plain auto and rejected the
+      // very values the runtime accepts — layers like the sakura chart's epoch
+      // bands ("03-18") and record callouts ("05-08") failed tier 2 while
+      // rendering fine.
+      const result = validate(
+        {
+          data: {
+            columns: {
+              year: [812, 1409],
+              bloom: ["0812-04-01", "1409-03-27"],
+            },
+          },
+          layers: [
+            { geom: "point", aes: { x: { field: "year" }, y: { field: "bloom" } } },
+            {
+              geom: "text",
+              data: { values: [{ labelYear: 1310, labelDate: "03-24", label: "x" }] },
+              aes: {
+                x: { field: "labelYear" },
+                y: { field: "labelDate" },
+                label: { field: "label" },
+              },
+            },
+          ],
+          scales: { y: { type: "time", temporalKind: "monthDay" } },
+        },
+        {},
+      );
+      expect(result.ok).toBe(true);
+    });
+
+    it("still rejects genuinely nominal values on a monthDay axis", () => {
+      const result = validate(
+        {
+          data: { values: [{ year: 1409, when: "springtime" }] },
+          layers: [{ geom: "point", aes: { x: { field: "year" }, y: { field: "when" } } }],
+          scales: { y: { type: "time", temporalKind: "monthDay" } },
+        },
+        {},
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.errors.some((e) => e.code === "scale-type-mismatch")).toBe(true);
+    });
+
     it("accepts bare month-day values and a year-free domain", () => {
       expect(
         validate(

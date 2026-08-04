@@ -148,11 +148,16 @@ export function checkPositionScaleDataCompatibility(input: {
       const type = info?.type ?? null;
       if (type === null) continue;
       if (declared === "time") {
+        // Mirror the runtime's effective parser (temporal-position.ts): an
+        // unset parse on a monthDay scale means `md`, not `auto` — bare
+        // month-day values ("03-18") are exactly what the scale is for.
+        const effectiveParser =
+          config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
           info,
-          config?.parse ?? "auto",
+          effectiveParser,
           {
             ...(config?.timezone !== undefined && { timezone: config.timezone }),
             ...(config?.disambiguation !== undefined && {
@@ -183,7 +188,7 @@ export function checkPositionScaleDataCompatibility(input: {
               : decision?.status === "invalid"
                 ? ` Automatic temporal inference failed whole-column validation for ${decision.failedCount} value(s).`
                 : ""
-            : ` Parser ${JSON.stringify(config?.parse ?? "auto")} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
+            : ` Parser ${JSON.stringify(effectiveParser)} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
         errors.push({
           code: "scale-type-mismatch",
           path: use.path,
