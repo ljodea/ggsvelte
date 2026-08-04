@@ -60,7 +60,7 @@ export function layerFrom(
     positionParams?: PositionParams;
     stat?: string;
     data?: DataInput;
-    inspect?: boolean;
+    inspect?: false;
   },
 ): LayerInput {
   const {

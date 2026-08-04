@@ -74,11 +74,13 @@ export default defineExample(
         fill: "epoch",
       },
       alpha: 0.55,
+      inspect: false,
     })
     .geomText({
       data: epochNames,
       aes: { x: "midYear", y: "nameDate", label: "epoch", color: { value: "#6b7075" } },
       size: 11,
+      inspect: false,
     })
     .geomRule({
       yintercept: "04-05",

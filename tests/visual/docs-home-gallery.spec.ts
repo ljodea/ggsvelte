@@ -158,7 +158,7 @@ test("gallery exposes every generated preview exactly once", async ({ page }) =>
   // (jitter/spread, spoke/rays, rug/ticks, step/stairs, qq/cloud,
   // qq_line/match), etc. Drops to 91 when point/style-scales was retired
   // (its Minard content is subsumed by path/trajectory, #1460).
-  const exampleCount = 91;
+  const exampleCount = 92;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

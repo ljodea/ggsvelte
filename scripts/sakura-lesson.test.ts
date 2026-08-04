@@ -38,6 +38,26 @@ import {
 const rows = kyotoSakura.map((row) => ({ ...row }));
 const finished = foldSakura(SAKURA_STEPS.length, rows);
 
+/** Count point and path vertices that fall inside a text-glyph bounding box. */
+function countHitsInBox(
+  batches: ReturnType<typeof runPipeline>["scene"]["batches"],
+  box: { x0: number; x1: number; y0: number; y1: number },
+): { points: number; trend: number } {
+  let points = 0;
+  let trend = 0;
+  for (const batch of batches) {
+    if (batch.kind !== "points" && batch.kind !== "paths") continue;
+    for (let p = 0; p < batch.positions.length / 2; p += 1) {
+      const px = batch.positions[p * 2]!;
+      const py = batch.positions[p * 2 + 1]!;
+      if (px < box.x0 || px > box.x1 || py < box.y0 || py > box.y1) continue;
+      if (batch.kind === "points") points += 1;
+      else trend += 1;
+    }
+  }
+  return { points, trend };
+}
+
 /** Tick labels of one axis, top-to-bottom in screen order. */
 function yTicks(spec: unknown): { label: string; pos: number }[] {
   const model = runPipeline(spec as never, { width: 900, height: 480 });
@@ -408,19 +428,7 @@ describe("gate G8 — annotations that do not fight the chart", () => {
       // anchor start; the SVG renderer draws text with dy 0.32em, so the ink
       // spans roughly [gy − 0.75·bh, gy + 0.25·bh].
       const box = { x0: gx - 1, x1: gx + bw + 1, y0: gy - bh * 0.75 - 1, y1: gy + bh * 0.25 + 1 };
-      let points = 0;
-      let trend = 0;
-      for (const batch of model.scene.batches) {
-        if (batch.kind !== "points" && batch.kind !== "paths") continue;
-        for (let p = 0; p < batch.positions.length / 2; p += 1) {
-          const px = batch.positions[p * 2]!;
-          const py = batch.positions[p * 2 + 1]!;
-          // Early continue keeps this under eslint max-depth (4).
-          if (px < box.x0 || px > box.x1 || py < box.y0 || py > box.y1) continue;
-          if (batch.kind === "points") points += 1;
-          else trend += 1;
-        }
-      }
+      const { points, trend } = countHitsInBox(model.scene.batches, box);
       expect(trend, `baseline tag crosses the trend at ${width}px`).toBe(0);
       expect(points, `baseline tag overprints ${points} blooms at ${width}px`).toBeLessThanOrEqual(
         1,

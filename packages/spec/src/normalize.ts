@@ -276,9 +276,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): Normalized
     ...(render !== undefined && { render }),
     ...(aes !== undefined && { aes }),
     ...(layer.data !== undefined && { data: layer.data }),
-    // Only `false` is expressible, so `true` has nothing to canonicalize to
-    // but the default — omitted (#1065).
-    ...("inspect" in layer && layer.inspect === false && { inspect: false as const }),
+    // Only `false` is expressible (LayerInputBase.inspect?: false); presence
+    // alone means opt-out — the default is omitted (#1065).
+    ...(layer.inspect !== undefined && { inspect: false as const }),
     ...(params !== undefined && { params }),
   };
   return out as NormalizedLayerSpec;

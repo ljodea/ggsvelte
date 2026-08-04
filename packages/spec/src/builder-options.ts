@@ -59,7 +59,7 @@ interface GeomDataOption {
   /** Optional layer-local data; inherits plot data when omitted. */
   data?: DataInput;
   /** Set false to opt a decorative layer out of inspection (#1068). */
-  inspect?: boolean;
+  inspect?: false;
 }
 
 /** Point-layer sugar options: params plus aes and position (jitter/nudge). */
