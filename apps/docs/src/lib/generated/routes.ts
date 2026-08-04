@@ -12921,7 +12921,7 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/path/trajectory",
-    title: "Minard's march on Moscow, map and all — ggsvelte gallery",
+    title: "Minard's march on Moscow — ggsvelte gallery",
     description:
       "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
     canonicalPath: "/examples/path/trajectory",

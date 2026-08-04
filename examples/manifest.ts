@@ -639,7 +639,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     id: "path/trajectory",
     category: "path",
     name: "trajectory",
-    title: "Minard's march on Moscow, map and all",
+    title: "Minard's march on Moscow",
     description: "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
     tags: ["path", "map", "linewidth", "annotation", "text", "data-order"],
     docsSection: "Maps & polygons",
