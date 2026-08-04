@@ -5,9 +5,12 @@
 
   /**
    * Homepage grammar chart: static SVG shell until the user engages
-   * (hover/focus). Auto-import on mount pulled the full chart stack and locked
-   * the homepage for seconds. Copy and step accordion live in the parent
-   * code-path section — this component is the chart only.
+   * (hover/focus or the explicit load button). Auto-import on mount pulled the
+   * full chart stack and locked the homepage for seconds. Parent code-path
+   * section owns the title and code tabs — this component is the chart only.
+   *
+   * The static SVG has no focusable nodes, so a "Load interactive chart"
+   * button keeps a keyboard path after the old step accordion was removed.
    */
   let {
     staticSvgLightSite,
@@ -21,7 +24,7 @@
   let Plot = $state<
     typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
   >(null);
-  let loadStarted = false;
+  let loadStarted = $state(false);
 
   function ensureLive(): void {
     if (loadStarted || Plot !== null) return;
@@ -52,11 +55,22 @@
     <div class="grammar-static grammar-static--dark-site">
       {@html staticSvgDarkSite}
     </div>
+    <!-- Stay mounted and focusable while the import resolves (no disabled blur). -->
+    <button
+      type="button"
+      class="load-interactive"
+      onclick={ensureLive}
+      aria-disabled={loadStarted}
+      aria-busy={loadStarted}
+    >
+      {loadStarted ? "Loading…" : "Load interactive chart"}
+    </button>
   {/if}
 </div>
 
 <style>
   .grammar-output {
+    position: relative;
     min-width: 0;
   }
 
@@ -76,5 +90,26 @@
 
   :global(:root[data-theme="dark"]) .grammar-static--dark-site {
     display: block;
+  }
+
+  .load-interactive {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 2;
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--line, #ccc);
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--paper, #fff) 92%, transparent);
+    color: var(--ink, #111);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .load-interactive:focus-visible {
+    outline: 2px solid var(--ink, #111);
+    outline-offset: 2px;
   }
 </style>

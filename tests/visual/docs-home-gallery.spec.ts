@@ -66,8 +66,9 @@ test("homepage grammar chart upgrades to full interactive layers on intent", asy
   ).toBeVisible();
   const output = page.locator(".grammar-output");
   const plot = output.locator(".gg-plot-root");
-  // Live plot upgrades only after user intent (hover / focus into the chart).
-  await output.hover();
+  // Keyboard path: static SVG has no tab stops; the load button is the focus
+  // affordance (hover still works via observeUserIntent).
+  await page.getByRole("button", { name: "Load interactive chart" }).click();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
@@ -86,8 +87,8 @@ test("homepage grammar inspect draws xy crosshair and supports legend focus", as
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=dark");
   const output = page.locator(".grammar-output");
-  // Intent-gated: hover the chart host to pull the chart stack.
-  await output.hover();
+  // Intent-gated: load button pulls the chart stack for keyboard users.
+  await page.getByRole("button", { name: "Load interactive chart" }).click();
   await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
