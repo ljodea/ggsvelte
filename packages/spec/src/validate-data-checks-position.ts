@@ -85,7 +85,11 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
       continue;
     }
     if (config?.type === "band" || !scaleRequestsTime(scales, axis)) continue;
-    let configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
+    // Mirror the runtime effective parser (temporal-position.ts): unset parse
+    // on monthDay means `md`, not `auto`. Same expression as
+    // checkPositionScaleDataCompatibility below.
+    const effectiveParser = config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
+    let configurationError = temporalParserConfigurationError(effectiveParser, {
       ...(config?.timezone !== undefined && { timezone: config.timezone }),
       ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
     });
@@ -148,9 +152,7 @@ export function checkPositionScaleDataCompatibility(input: {
       const type = info?.type ?? null;
       if (type === null) continue;
       if (declared === "time") {
-        // Mirror the runtime's effective parser (temporal-position.ts): an
-        // unset parse on a monthDay scale means `md`, not `auto` — bare
-        // month-day values ("03-18") are exactly what the scale is for.
+        // Same effective parser as validateTemporalAxisConfiguration above.
         const effectiveParser =
           config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
         const decision = temporalDecisionForField(

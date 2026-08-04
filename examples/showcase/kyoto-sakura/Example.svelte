@@ -69,7 +69,7 @@
 <GGPlot
   data={kyotoSakura}
   aes={{ x: "year", y: "bloomDate" }}
-  width="container"
+  width={768}
   height={420}
 >
   <ThemeTufte />
