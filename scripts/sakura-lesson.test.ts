@@ -97,13 +97,13 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
   });
 
-  it("adds exactly one visible element per step", () => {
+  it("grows the layer set at every step", () => {
     const layerCounts = Array.from({ length: SAKURA_STEPS.length + 1 }, (_, count) => {
       const spec = foldSakura(count, rows).spec as { layers: unknown[] };
       return spec.layers.length;
     });
-    // base → theme+trend+y-ticks → epochs → annotate → finish
-    expect(layerCounts).toEqual([1, 2, 4, 7, 7]);
+    // base → theme+trend+chartlines+y-ticks → epochs → annotate → finish
+    expect(layerCounts).toEqual([1, 4, 6, 10, 10]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -120,8 +120,8 @@ describe("the sakura lesson folds to renderable specs", () => {
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
-    expect((full.spec.layers as unknown[]).length).toBe(7);
-    expect((narrow.spec.layers as unknown[]).length).toBe(5);
+    expect((full.spec.layers as unknown[]).length).toBe(10);
+    expect((narrow.spec.layers as unknown[]).length).toBe(7);
     const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(kinds).not.toContain("segment");
     // The epoch names stay: they are spread one per band rather than clustered
@@ -168,7 +168,18 @@ describe("the sakura lesson folds to renderable specs", () => {
     const geoms = (finished.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(geoms).toContain("segment");
     expect(SAKURA_FINISHED_SVELTE).toContain("<GeomSegment");
-    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+    expect(geoms).toEqual([
+      "rect",
+      "text",
+      "rule",
+      "rule",
+      "point",
+      "rule",
+      "text",
+      "line",
+      "segment",
+      "text",
+    ]);
   });
 
   it("publishes agent JSON that is the finished fold with named plot data only", () => {
@@ -189,13 +200,35 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(namedWithoutData).toEqual(finishedWithoutData);
     // Agent JSON must carry every finished layer geom — not a point+line fiction.
     const geoms = (named.layers as { geom: string }[]).map((layer) => layer.geom);
-    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+    expect(geoms).toEqual([
+      "rect",
+      "text",
+      "rule",
+      "rule",
+      "point",
+      "rule",
+      "text",
+      "line",
+      "segment",
+      "text",
+    ]);
     expect(named.theme).toBe("tufte");
     expect(named.scales?.y).toMatchObject({
       temporalKind: "monthDay",
       reverse: true,
       dateLabels: "%b %e",
     });
+  });
+
+  it("draws the finished file's chartlines as thick as the chart beside it", () => {
+    // Review on #1469 caught the copyable file drifting to 0.5 while the
+    // fragment and rendered spec used 0.75 — pin the third surface too.
+    for (const y of [SAKURA_Y_BREAKS[0], SAKURA_Y_BREAKS[2]]) {
+      expect(
+        SAKURA_FINISHED_SVELTE,
+        `finished file chartline at ${y} drifts from the chart`,
+      ).toContain(`yintercept="${y}"\n    linewidth={0.75}`);
+    }
   });
 
   it("prints fragments that carry the values the chart is rendered with", () => {
@@ -206,8 +239,10 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, 'stat="summary_bin"', '"stat":"summary_bin"'],
       [0, 'fun="median"', '"fun":"median"'],
       [0, `binwidth={${SAKURA_BINWIDTH}}`, `"binwidth":${SAKURA_BINWIDTH}`],
-      [0, 'curve="step-hv"', '"curve":"step-hv"'],
-      [0, "alpha={0.5}", '"alpha":0.5'],
+      [0, 'curve="linear"', '"curve":"linear"'],
+      [0, "alpha={0.55}", '"alpha":0.55'],
+      [0, `yintercept="${SAKURA_Y_BREAKS[0]}"`, `"yintercept":"${SAKURA_Y_BREAKS[0]}"`],
+      [0, '"dotted"', '"value":"dotted"'],
       [0, "<ThemeTufte />", '"theme":"tufte"'],
       [0, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
       [0, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
@@ -217,6 +252,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [1, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [1, "ScaleFillManual", '"type":"manual"'],
       [2, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
+      [2, "data={baselineLabel}", '"label":"median"'],
       [2, '"#b3452f"', '"value":"#b3452f"'],
       [3, 'key="year"', ""],
     ];
@@ -242,6 +278,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       "size",
       "anchor",
       "dx",
+      "dy",
       "linewidth",
       "stat",
       "fun",
@@ -299,6 +336,65 @@ describe("gate G1 — the reversed temporal y-axis", () => {
 
 describe("gate G8 — annotations that do not fight the chart", () => {
   const finishedSpec = () => foldSakura(SAKURA_STEPS.length, rows).spec;
+
+  it("labels the baseline where the least data sits", () => {
+    // The reference tags the rule with the single word "median", below it.
+    // Measured placement search over the rendered scene: below the rule at
+    // the left edge is the one pocket whose box touches no trend vertex and
+    // exactly one faint bloom (the 891 observation) at any wide width — every
+    // other candidate sits on more data. Pin that measurement so the tag
+    // cannot drift back onto the scatter (it overprinted ~20 blooms when
+    // placed at the right edge).
+    for (const width of [768, 900]) {
+      const model = runPipeline(finishedSpec(), { width, height: 330 });
+      const glyphs = model.scene.batches.find(
+        (batch) => batch.kind === "glyphs" && batch.texts.includes("median"),
+      );
+      expect(glyphs, `baseline tag missing at ${width}`).toBeDefined();
+      if (glyphs === undefined || glyphs.kind !== "glyphs") continue;
+      const i = glyphs.texts.indexOf("median");
+      const gx = glyphs.positions[i * 2]!;
+      const gy = glyphs.positions[i * 2 + 1]!;
+      const bw = glyphs.boxWidths![i]!;
+      const bh = glyphs.boxHeights![i]!;
+      // anchor start; the SVG renderer draws text with dy 0.32em, so the ink
+      // spans roughly [gy − 0.75·bh, gy + 0.25·bh].
+      const box = { x0: gx - 1, x1: gx + bw + 1, y0: gy - bh * 0.75 - 1, y1: gy + bh * 0.25 + 1 };
+      let points = 0;
+      let trend = 0;
+      for (const batch of model.scene.batches) {
+        if (batch.kind !== "points" && batch.kind !== "paths") continue;
+        for (let p = 0; p < batch.positions.length / 2; p += 1) {
+          const px = batch.positions[p * 2]!;
+          const py = batch.positions[p * 2 + 1]!;
+          // Early continue keeps this under eslint max-depth (4).
+          if (px < box.x0 || px > box.x1 || py < box.y0 || py > box.y1) continue;
+          if (batch.kind === "points") points += 1;
+          else trend += 1;
+        }
+      }
+      expect(trend, `baseline tag crosses the trend at ${width}px`).toBe(0);
+      expect(points, `baseline tag overprints ${points} blooms at ${width}px`).toBeLessThanOrEqual(
+        1,
+      );
+    }
+  });
+
+  it("keeps no-answer decoration out of inspection", () => {
+    // A yintercept rule synthesizes an empty row; when it wins the
+    // nearest-candidate race the tooltip renders nothing — the same #1068
+    // capture the bands and names already opt out of.
+    const spec = finishedSpec() as {
+      layers: { geom: string; inspect?: boolean }[];
+    };
+    const rules = spec.layers.filter((layer) => layer.geom === "rule");
+    expect(rules.length).toBe(3);
+    for (const rule of rules) expect(rule.inspect, "rule layer stays inspectable").toBe(false);
+    // …and the copyable file mirrors the opt-out on every GeomRule.
+    const ruleTags = SAKURA_FINISHED_SVELTE.match(/<GeomRule[\s\S]*?\/>/g) ?? [];
+    expect(ruleTags.length).toBe(3);
+    for (const tag of ruleTags) expect(tag).toContain("inspect={false}");
+  });
 
   it("names the bands where the reader is looking, with no legend", () => {
     const spec = finishedSpec() as {
@@ -412,10 +508,9 @@ describe("gate G8 — annotations that do not fight the chart", () => {
       labs?: { caption?: string; title?: string; subtitle?: string };
     };
     const rule = spec.layers.find(
-      (layer) => layer.geom === "rule" && "yintercept" in (layer.params ?? {}),
+      (layer) => layer.geom === "rule" && layer.params?.["yintercept"] === SAKURA_BASELINE,
     );
-    expect(rule?.params?.["yintercept"]).toBe(SAKURA_BASELINE);
-    expect(rule?.params?.["alpha"]).toBeUndefined();
+    expect(rule).toBeDefined();
     expect(rule?.params?.["linewidth"]).toBeGreaterThanOrEqual(1);
     // Caption/title/subtitle would squash the data panel; citation lives on
     // the page footnote instead (GettingStartedGuide).
@@ -425,17 +520,17 @@ describe("gate G8 — annotations that do not fight the chart", () => {
   });
 });
 
-describe("gate G4 — the binned-median step trend", () => {
-  it("draws a step path of bin medians, not a loess or the raw points", () => {
-    // foldSakura(1): theme + trend + y-tick polish (finished reading order for signal).
+describe("gate G4 — the binned-median trend", () => {
+  it("draws a polyline of bin medians, not a loess or the raw points", () => {
+    // foldSakura(1): theme + trend + chartlines + y-tick polish (finished reading order for signal).
     const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
-    expect(trend!.curve).toBe("step-hv");
+    expect(trend!.curve).toBe("linear");
     const vertices = trend!.positions.length / 2;
-    // ~1200 years / 25-year bins ≈ 50 non-empty bins — far fewer than 838 points.
-    expect(vertices).toBeGreaterThan(30);
-    expect(vertices).toBeLessThan(80);
+    // ~1200 years / 15-year bins ≈ 80 non-empty bins — far fewer than 838 points.
+    expect(vertices).toBeGreaterThan(40);
+    expect(vertices).toBeLessThan(120);
     expect(vertices).toBeLessThan(rows.length / 5);
   });
 

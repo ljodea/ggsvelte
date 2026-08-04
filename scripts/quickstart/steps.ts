@@ -10,8 +10,8 @@ import type { GuidesSpec, Labs, LayerSpec, Scales, ThemeName } from "@ggsvelte/s
 
 export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 
-/** Bin width (years) for the running-median step line. */
-export const SAKURA_BINWIDTH = 25;
+/** Bin width (years) for the binned-median trend line. */
+export const SAKURA_BINWIDTH = 15;
 
 /** Median bloom day 1600–1850, drawn as the pre-industrial baseline. */
 export const SAKURA_BASELINE = "04-15";
@@ -20,7 +20,7 @@ export const SAKURA_BASELINE = "04-15";
 export const SAKURA_Y_BREAKS = ["04-05", "04-15", "04-25"] as const;
 
 /** Y-axis title: the quantity (a date). Reverse scale puts earlier blooms higher. */
-export const SAKURA_Y_LAB = "Bloom date";
+export const SAKURA_Y_LAB = "Bloom date (earlier ↑)";
 
 /**
  * Plot domain top (earlier / higher on the reversed date axis). Leaves a
@@ -72,33 +72,35 @@ const SAKURA_EPOCH_NAMES = SAKURA_EPOCHS.map((band) => ({
  * the value the annotation exists to deliver. Middle dot, not em dash — the
  * label is two facts side by side, not an aside.
  *
- * `labelYear`/`labelDate` are hand-placed, and each sits on the opposite side
- * of its point from the leader's travel, so no leader crosses its own text.
- * They have to be hand-placed because there is no text repel (#727 gap B), so
- * these are positions computed against a layout nobody can see. Moving the
- * domain or the panel size can invalidate them.
+ * `labelYear`/`labelDate` are hand-placed adjacent to each point (short
+ * leaders; the reference chart never runs a leader across the data), and each
+ * sits on the opposite side of its point from the leader's travel, so no
+ * leader crosses its own text. They have to be hand-placed because there is
+ * no text repel (#727 gap B), so these are positions computed against a
+ * layout nobody can see. Moving the domain or the panel size can invalidate
+ * them.
  */
 export const SAKURA_RECORDS = [
   {
     year: 1323,
     bloomDate: "05-04",
     label: "1323 · May 4, latest on record",
-    labelYear: 1250,
-    labelDate: "05-08",
+    labelYear: 1305,
+    labelDate: "05-07",
   },
   {
     year: 1409,
     bloomDate: "03-27",
     label: "1409 · March 27, earliest for six centuries",
-    labelYear: 1310,
-    labelDate: "03-24",
+    labelYear: 1400,
+    labelDate: "03-22",
   },
   {
     year: 2023,
     bloomDate: "03-25",
     label: "2023 · March 25, earliest in 1,200 years",
-    labelYear: 2010,
-    labelDate: "03-24",
+    labelYear: 2014,
+    labelDate: "03-20",
   },
 ];
 
@@ -185,6 +187,21 @@ ${SAKURA_RECORDS.map(
 ).join("\n")}
   ];`;
 
+/**
+ * The baseline's in-panel tag: the reference's single word "median", below
+ * the rule at the left edge (the reference tags below the rule too, in the
+ * margin our panels clip). Measured against the rendered scene (gate G8):
+ * the box touches no trend vertex and exactly one faint bloom — the 891
+ * observation — at any wide width; every other candidate pocket sits on
+ * more data. The full phrase lives in the page footnote, like the
+ * reference's caption.
+ */
+const SAKURA_BASELINE_LABEL = [{ year: 812, bloomDate: SAKURA_BASELINE, label: "median" }];
+
+const BASELINE_LABEL_CONST = `  const baselineLabel = [
+    { year: 812, bloomDate: "${SAKURA_BASELINE}", label: "median" },
+  ];`;
+
 const EPOCH_NAMES_CONST = `  const epochNames = [
 ${SAKURA_EPOCH_NAMES.map(
   (n) => `    { epoch: "${n.epoch}", midYear: ${n.midYear}, nameDate: "${n.nameDate}" },`,
@@ -203,6 +220,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     // Theme + trend + y-tick polish in one step. Reverse already ships on the
     // first render (base fold); this only sets readable Apr day breaks, date
     // labels, and a domain strip for later epoch names — not a second reverse.
+    // Dotted chartlines hang off the two outer breaks so each labeled date has
+    // a line a reader can use, matching the reference chart.
     fragment: `<ThemeTufte />
 <ScaleYMonthDay
   reverse
@@ -210,10 +229,16 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   dateLabels="%b %e"
   domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
 />
-<GeomPoint alpha={0.5} size={1.6}
-  aes={{ color: { value: "#777777" } }} />
+<GeomRule yintercept="${SAKURA_Y_BREAKS[0]}" linewidth={0.75}
+  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+  inspect={false} />
+<GeomRule yintercept="${SAKURA_Y_BREAKS[2]}" linewidth={0.75}
+  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+  inspect={false} />
+<GeomPoint alpha={0.55} size={1.4}
+  aes={{ color: { value: "#4a5568" } }} />
 <GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
-  curve="step-hv" linewidth={1.8}
+  curve="linear" linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
     spec: {
       theme: "tufte",
@@ -229,10 +254,23 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       },
       labs: { x: "Year", y: SAKURA_Y_LAB },
       layers: {
+        chartlineEarly: {
+          geom: "rule",
+          aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
+          params: { yintercept: SAKURA_Y_BREAKS[0], linewidth: 0.75 },
+          // Chrome duplicating an axis break; answers no tooltip (#1068).
+          inspect: false,
+        },
+        chartlineLate: {
+          geom: "rule",
+          aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
+          params: { yintercept: SAKURA_Y_BREAKS[2], linewidth: 0.75 },
+          inspect: false,
+        },
         points: {
           geom: "point",
-          aes: { color: { value: "#777777" } },
-          params: { alpha: 0.5, size: 1.6 },
+          aes: { color: { value: "#4a5568" } },
+          params: { alpha: 0.55, size: 1.4 },
         },
         trend: {
           geom: "line",
@@ -241,15 +279,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: {
             fun: "median",
             binwidth: SAKURA_BINWIDTH,
-            curve: "step-hv",
+            curve: "linear",
             linewidth: 1.8,
           },
         },
       },
-      order: ["points", "trend"],
+      order: ["chartlineEarly", "chartlineLate", "points", "trend"],
     },
     source: {
-      components: ["GeomLine", "ThemeTufte"],
+      components: ["GeomLine", "GeomRule", "ThemeTufte"],
       // stat="summary_bin" on the basic GeomLine shell: opt into the family.
       registers: ["registerSummaryBin"],
       grammar: {
@@ -263,21 +301,33 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
       },
       children: {
+        chartlineEarly: `  <GeomRule
+    yintercept="${SAKURA_Y_BREAKS[0]}"
+    linewidth={0.75}
+    aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+    inspect={false}
+  />`,
+        chartlineLate: `  <GeomRule
+    yintercept="${SAKURA_Y_BREAKS[2]}"
+    linewidth={0.75}
+    aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+    inspect={false}
+  />`,
         points: `  <GeomPoint
-    alpha={0.5}
-    size={1.6}
-    aes={{ color: { value: "#777777" } }}
+    alpha={0.55}
+    size={1.4}
+    aes={{ color: { value: "#4a5568" } }}
   />`,
         trend: `  <GeomLine
     stat="summary_bin"
     fun="median"
     binwidth={${SAKURA_BINWIDTH}}
-    curve="step-hv"
+    curve="linear"
     linewidth={1.8}
     aes={{ color: { value: "#262626" } }}
   />`,
       },
-      childOrder: ["points", "trend"],
+      childOrder: ["chartlineEarly", "chartlineLate", "points", "trend"],
     },
   },
   {
@@ -339,7 +389,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           inspect: false,
         },
       },
-      order: ["epochs", "epochNames", "points", "trend"],
+      order: ["epochs", "epochNames", "chartlineEarly", "chartlineLate", "points", "trend"],
       scales: {
         fill: {
           type: "manual",
@@ -389,7 +439,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     inspect={false}
   />`,
       },
-      childOrder: ["epochs", "epochNames", "points", "trend"],
+      childOrder: ["epochs", "epochNames", "chartlineEarly", "chartlineLate", "points", "trend"],
     },
   },
   {
@@ -398,7 +448,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "",
     explanation: "",
     fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={1}
-  aes={{ color: { value: "#6b7075" }, linetype: { value: "dashed" } }} />
+  aes={{ color: { value: "#6b7075" } }} inspect={false} />
+<GeomText data={baselineLabel}
+  aes={{ x: "year", y: "bloomDate", label: "label",
+         color: { value: "#6b7075" } }} size={9} anchor="start" dy={22}
+  inspect={false} />
 <GeomSegment data={records}
   aes={{ x: "labelYear", y: "labelDate", xend: "year",
          yend: "bloomDate", color: { value: "#b3452f" } }} linewidth={0.7} />
@@ -409,11 +463,26 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       layers: {
         baseline: {
           geom: "rule",
-          // A reference line nobody can see refers to nothing. Darker and
-          // full strength; the caption says what it marks, because there is no
-          // room inside the panel to say it there (#727).
-          aes: { color: { value: "#6b7075" }, linetype: { value: "dashed" } },
+          // Solid and full strength: it marks the pre-industrial median, and
+          // the short in-panel tag at the left edge says so (#727).
+          aes: { color: { value: "#6b7075" } },
           params: { yintercept: SAKURA_BASELINE, linewidth: 1 },
+          // Synthesizes an empty row — hovering it must not blank the blooms'
+          // tooltips (#1068, same as the chartlines).
+          inspect: false,
+        },
+        baselineLab: {
+          geom: "text",
+          data: { values: SAKURA_BASELINE_LABEL },
+          aes: {
+            x: { field: "year" },
+            y: { field: "bloomDate" },
+            label: { field: "label" },
+            color: { value: "#6b7075" },
+          },
+          params: { size: 9, anchor: "start", dy: 22 },
+          // Names the rule, like the epoch names name the bands (#1068).
+          inspect: false,
         },
         leaders: {
           geom: "segment",
@@ -442,16 +511,41 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { size: 11, anchor: "end", dx: -4 },
         },
       },
-      order: ["epochs", "epochNames", "points", "baseline", "trend", "leaders", "callouts"],
+      order: [
+        "epochs",
+        "epochNames",
+        "chartlineEarly",
+        "chartlineLate",
+        "points",
+        "baseline",
+        "baselineLab",
+        "trend",
+        "leaders",
+        "callouts",
+      ],
     },
     source: {
       components: ["GeomRule", "GeomSegment", "GeomText"],
-      consts: [RECORDS_CONST],
+      consts: [RECORDS_CONST, BASELINE_LABEL_CONST],
       children: {
         baseline: `  <GeomRule
     yintercept="${SAKURA_BASELINE}"
     linewidth={1}
-    aes={{ color: { value: "#6b7075" }, linetype: { value: "dashed" } }}
+    aes={{ color: { value: "#6b7075" } }}
+    inspect={false}
+  />`,
+        baselineLab: `  <GeomText
+    data={baselineLabel}
+    aes={{
+      x: "year",
+      y: "bloomDate",
+      label: "label",
+      color: { value: "#6b7075" },
+    }}
+    size={9}
+    anchor="start"
+    dy={22}
+    inspect={false}
   />`,
         leaders: `  <GeomSegment
     data={records}
@@ -478,7 +572,18 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     dx={-4}
   />`,
       },
-      childOrder: ["epochs", "epochNames", "points", "baseline", "trend", "leaders", "callouts"],
+      childOrder: [
+        "epochs",
+        "epochNames",
+        "chartlineEarly",
+        "chartlineLate",
+        "points",
+        "baseline",
+        "baselineLab",
+        "trend",
+        "leaders",
+        "callouts",
+      ],
     },
   },
   {

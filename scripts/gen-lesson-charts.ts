@@ -54,13 +54,13 @@ export const LIVE_STEP_INDEXES: readonly number[] = [];
 export const SAKURA_PANEL_ASPECT = 2.5;
 
 /** Nominal plot width for static lesson SVGs; the SVG scales via viewBox. */
-export const LESSON_CHART_WIDTH = 660;
+export const LESSON_CHART_WIDTH = 768;
 
 /** Probe heights tall enough that chrome still fits while we measure panels. */
 const CHROME_PROBE_HEIGHT = 600;
 
 /** Container widths used to build the live-height lookup (includes legend-wrap). */
-export const SAKURA_HEIGHT_PROBE_WIDTHS = [360, 480, 560, 660, 800, 1000] as const;
+export const SAKURA_HEIGHT_PROBE_WIDTHS = [360, 480, 560, 660, 768, 800, 1000] as const;
 
 export interface LessonChartEntry {
   /** -1 is the first render, before any step. */
