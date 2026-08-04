@@ -252,7 +252,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [1, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [1, "ScaleFillManual", '"type":"manual"'],
       [2, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
-      [2, "data={baselineLabel}", '"pre-industrial median"'],
+      [2, "data={baselineLabel}", '"label":"median"'],
       [2, '"#b3452f"', '"value":"#b3452f"'],
       [3, 'key="year"', ""],
     ];
@@ -336,6 +336,53 @@ describe("gate G1 — the reversed temporal y-axis", () => {
 
 describe("gate G8 — annotations that do not fight the chart", () => {
   const finishedSpec = () => foldSakura(SAKURA_STEPS.length, rows).spec;
+
+  it("labels the baseline where no bloom sits", () => {
+    // The reference tags the rule with the single word "median". Measured
+    // against the rendered scene: the glyph box must not overprint any point —
+    // the page teaches not to let labels fight the data (#1469 review).
+    for (const width of [768, 900]) {
+      const model = runPipeline(finishedSpec(), { width, height: 330 });
+      const glyphs = model.scene.batches.find(
+        (batch) => batch.kind === "glyphs" && batch.texts.includes("median"),
+      );
+      expect(glyphs, `baseline tag missing at ${width}`).toBeDefined();
+      if (glyphs === undefined || glyphs.kind !== "glyphs") continue;
+      const i = glyphs.texts.indexOf("median");
+      const gx = glyphs.positions[i * 2]!;
+      const gy = glyphs.positions[i * 2 + 1]!;
+      const bw = glyphs.boxWidths![i]!;
+      const bh = glyphs.boxHeights![i]!;
+      // anchor start; the SVG renderer draws text with dy 0.32em, so the ink
+      // spans roughly [gy − 0.75·bh, gy + 0.25·bh].
+      const box = { x0: gx - 1, x1: gx + bw + 1, y0: gy - bh * 0.75 - 1, y1: gy + bh * 0.25 + 1 };
+      const points = model.scene.batches.find((batch) => batch.kind === "points");
+      expect(points).toBeDefined();
+      let inside = 0;
+      for (let p = 0; p < points!.positions.length / 2; p += 1) {
+        const px = points!.positions[p * 2]!;
+        const py = points!.positions[p * 2 + 1]!;
+        if (px >= box.x0 && px <= box.x1 && py >= box.y0 && py <= box.y1) inside += 1;
+      }
+      expect(inside, `baseline tag overprints ${inside} blooms at ${width}px`).toBe(0);
+    }
+  });
+
+  it("keeps no-answer decoration out of inspection", () => {
+    // A yintercept rule synthesizes an empty row; when it wins the
+    // nearest-candidate race the tooltip renders nothing — the same #1068
+    // capture the bands and names already opt out of.
+    const spec = finishedSpec() as {
+      layers: { geom: string; inspect?: boolean }[];
+    };
+    const rules = spec.layers.filter((layer) => layer.geom === "rule");
+    expect(rules.length).toBe(3);
+    for (const rule of rules) expect(rule.inspect, "rule layer stays inspectable").toBe(false);
+    // …and the copyable file mirrors the opt-out on every GeomRule.
+    const ruleTags = SAKURA_FINISHED_SVELTE.match(/<GeomRule[\s\S]*?\/>/g) ?? [];
+    expect(ruleTags.length).toBe(3);
+    for (const tag of ruleTags) expect(tag).toContain("inspect={false}");
+  });
 
   it("names the bands where the reader is looking, with no legend", () => {
     const spec = finishedSpec() as {
