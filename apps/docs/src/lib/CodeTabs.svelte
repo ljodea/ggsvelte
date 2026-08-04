@@ -180,6 +180,16 @@
     color: var(--code-ink);
   }
 
+  /*
+   * The card clips overflow for the rounded corners, so pull the global
+   * 3px/3px-offset focus indicator inside the bar padding (same
+   * compensation as .scroll-region below).
+   */
+  .bar button[role="tab"]:focus-visible,
+  .bar .copy:focus-visible {
+    outline-offset: -1px;
+  }
+
   .bar button[role="tab"].active {
     background: color-mix(in srgb, var(--code-ink) 10%, transparent);
     color: var(--code-ink);
