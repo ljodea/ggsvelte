@@ -4,9 +4,15 @@
   import { observeUserIntent } from "$lib/load-on-intent";
 
   /**
-   * Homepage grammar section: chrome always SSR'd; plot stays on the static
-   * SVG shell until the user engages (hover/focus/step click). Auto-import on
-   * mount pulled the full chart stack and locked the homepage for seconds.
+   * Homepage grammar chart: static SVG shell until the user engages
+   * (hover/focus or the explicit load button). Auto-import on mount pulled the
+   * full chart stack and locked the homepage for seconds. Parent code-path
+   * section owns the title and code tabs — this component is the chart only.
+   *
+   * The static SVG has no focusable nodes, so a "Load interactive chart"
+   * button keeps a keyboard path after the old step accordion was removed.
+   * After upgrade, focus is restored into .gg-capture so Tab does not jump to
+   * document.body when the load button unmounts (#1362).
    */
   let {
     staticSvgLightSite,
@@ -16,18 +22,13 @@
     staticSvgDarkSite: string;
   } = $props();
 
-  const steps = [
-    { label: "Data", note: "Rows as plain objects." },
-    { label: "Mappings", note: "aes for x, y, and color." },
-    { label: "Layers", note: "GeomSmooth over GeomJitter." },
-    { label: "Interaction", note: "just one more layer" },
-  ] as const;
-  let active = $state(steps.length - 1);
   let host = $state<HTMLElement | null>(null);
   let Plot = $state<
     typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
   >(null);
-  let loadStarted = false;
+  let loadStarted = $state(false);
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
 
   function ensureLive(): void {
     if (loadStarted || Plot !== null) return;
@@ -37,9 +38,41 @@
     });
   }
 
-  function selectStep(index: number): void {
-    active = index;
-    ensureLive();
+  function onShellFocusIn(): void {
+    if (Plot === null) restoreKeyboardFocus = true;
+  }
+
+  function onShellFocusOut(event: FocusEvent): void {
+    // relatedTarget === null means blur from unmount (keep restore pending).
+    const next = event.relatedTarget;
+    if (next === null) return;
+    if (next instanceof Node && host !== null && host.contains(next)) return;
+    restoreKeyboardFocus = false;
+  }
+
+  function focusAfterUpgrade(root: HTMLElement): boolean {
+    const capture = root.querySelector<HTMLElement>(".gg-capture");
+    const target =
+      capture ??
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]') ??
+      root.querySelector<HTMLElement>(".gg-plot-root");
+    if (target === null) return false;
+    const active = document.activeElement;
+    if (
+      active !== null &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      !root.contains(active)
+    ) {
+      return true; // user moved on — clear without focusing
+    }
+    if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+      target.tabIndex = -1;
+    }
+    queueMicrotask(() => {
+      target.focus({ preventScroll: true });
+    });
+    return true;
   }
 
   onMount(() => {
@@ -47,74 +80,68 @@
     if (el === null) return;
     return observeUserIntent(el, ensureLive);
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (Plot === null || host === null || !restoreKeyboardFocus) return;
+    const root = host;
+    const tryFocus = (): boolean => {
+      if (!focusAfterUpgrade(root)) return false;
+      restoreKeyboardFocus = false;
+      return true;
+    };
+    if (tryFocus()) return;
+    const mo = new MutationObserver(() => {
+      if (tryFocus()) mo.disconnect();
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      restoreKeyboardFocus = false;
+    }, 30_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
+  });
 </script>
 
-<section
-  class="grammar-demo"
-  aria-labelledby="grammar-heading"
+<div
+  class="grammar-output"
   bind:this={host}
+  onfocusin={onShellFocusIn}
+  onfocusout={onShellFocusOut}
 >
-  <div class="grammar-copy">
-    <h2 id="grammar-heading">Declare a layer interactive</h2>
-    <p>
-      Zero D3.js. Headless SVG rendering for CLI, SSR environments, &amp; agent
-      validation loops.
-    </p>
-    <ol>
-      {#each steps as step, index (step.label)}
-        <li class:active={active === index}>
-          <button
-            type="button"
-            aria-pressed={active === index}
-            onclick={() => selectStep(index)}
-          >
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{step.label}</strong>
-            <small>{step.note}</small>
-          </button>
-        </li>
-      {/each}
-    </ol>
-  </div>
-  <div class="grammar-output">
-    {#if Plot !== null}
-      <Plot {active} />
-    {:else}
-      <!--
-        theme.js sets data-theme before paint. Mirror contrastChartTheme():
-        fivethirtyeight on the light site, light chart on dark — no theme flash.
-      -->
-      <div class="grammar-static grammar-static--light-site">
-        {@html staticSvgLightSite}
-      </div>
-      <div class="grammar-static grammar-static--dark-site">
-        {@html staticSvgDarkSite}
-      </div>
-    {/if}
-  </div>
-</section>
+  {#if Plot !== null}
+    <Plot />
+  {:else}
+    <!--
+      theme.js sets data-theme before paint. Mirror contrastChartTheme():
+      fivethirtyeight on the light site, light chart on dark — no theme flash.
+    -->
+    <div class="grammar-static grammar-static--light-site">
+      {@html staticSvgLightSite}
+    </div>
+    <div class="grammar-static grammar-static--dark-site">
+      {@html staticSvgDarkSite}
+    </div>
+    <!-- Stay mounted and focusable while the import resolves (no disabled blur). -->
+    <button
+      type="button"
+      class="load-interactive"
+      onclick={ensureLive}
+      aria-disabled={loadStarted}
+      aria-busy={loadStarted}
+    >
+      {loadStarted ? "Loading…" : "Load interactive chart"}
+    </button>
+  {/if}
+</div>
 
 <style>
-  /*
-   * Chart owns the wide column on the left; title + step accordion stay narrow
-   * on the right. Source order keeps copy first for mobile stack / a11y.
-   */
-  .grammar-demo {
-    display: grid;
-    grid-template-areas: "output copy";
-    grid-template-columns: minmax(0, 1.55fr) minmax(12rem, 0.5fr);
-    gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: center;
-    padding-block: clamp(4rem, 9vw, 8rem);
-    border-block: 1px solid var(--line);
-  }
-
-  .grammar-copy {
-    grid-area: copy;
-  }
-
   .grammar-output {
-    grid-area: output;
+    position: relative;
     min-width: 0;
   }
 
@@ -136,91 +163,24 @@
     display: block;
   }
 
-  h2 {
-    max-width: 11ch;
-    margin: 0.25rem 0 1rem;
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    line-height: 0.95;
-  }
-
-  .grammar-copy > p {
-    max-width: 28rem;
-    color: var(--muted);
-  }
-
-  ol {
-    margin: 2rem 0 0;
-    padding: 0;
-    border-top: 1px solid var(--line);
-    list-style: none;
-  }
-
-  li {
-    border-bottom: 1px solid var(--line);
-  }
-
-  button {
-    display: grid;
-    grid-template-columns: 2rem 1fr;
-    width: 100%;
-    min-height: 64px;
-    padding: 0.75rem 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--muted);
-    text-align: left;
+  .load-interactive {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 2;
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--line, #ccc);
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--paper, #fff) 92%, transparent);
+    color: var(--ink, #111);
+    font: inherit;
+    font-size: 0.85rem;
     cursor: pointer;
   }
 
-  button:disabled {
-    cursor: default;
-  }
-
-  button > span {
-    grid-row: 1 / 3;
-    font: 600 0.75rem/1.4 var(--code-font);
-  }
-
-  button strong {
-    color: var(--ink);
-    font-family: var(--display-font);
-    font-size: 1.2rem;
-  }
-
-  button:hover:not(:disabled) strong {
-    text-decoration: underline;
-  }
-
-  button small {
-    opacity: 0;
-    transition: opacity 120ms ease;
-  }
-
-  li.active button {
-    color: var(--ink);
-    box-shadow: inset 2px 0 0 var(--accent);
-  }
-
-  li.active button {
-    padding-left: 0.75rem;
-  }
-
-  li.active button small {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    button small {
-      transition: none;
-    }
-  }
-
-  @media (max-width: 50rem) {
-    .grammar-demo {
-      grid-template-areas: "copy" "output";
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
+  .load-interactive:focus-visible {
+    outline: 2px solid var(--ink, #111);
+    outline-offset: 2px;
   }
 </style>

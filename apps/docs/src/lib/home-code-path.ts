@@ -4,15 +4,15 @@
  *
  * Hand-authored (not loadExample) so the JSON tab can use data: { name } and
  * never dump every row into a mile-tall panel. Matches the interactive
- * grammar demo on the homepage.
+ * grammar chart above the code tabs on the homepage.
  *
  * Data: bundled `palmerPenguins` from `@ggsvelte/svelte/data` (333 complete
  * cases). Field names match the published dataset, not the short theme-specimen
  * aliases.
  *
- * Interaction: GrammarDemo step 4 uses xy inspect (numeric crosshair on both
- * axes) plus GuideLegend focus. Prefer `<Inspect>` for the host capability;
- * legend focus is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
+ * Interaction: the live chart uses xy inspect (numeric crosshair on both axes)
+ * plus GuideLegend focus. Prefer `<Inspect>` for the host capability; legend
+ * focus is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
  * - Svelte: `<Inspect>` child; `focus` on <GuideLegend>
  * - Builder + spec: same host children; inspect via `<Inspect>`
  * - Row identity defaults to the `id` column on palmerPenguins (no `key` prop)

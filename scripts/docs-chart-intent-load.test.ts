@@ -26,6 +26,12 @@ describe("docs chart intent-gated load", () => {
     const demo = read("lib/components/GrammarDemo.svelte");
     expect(demo).toContain("observeUserIntent");
     expect(demo).toContain("ensureLive");
+    // Static SVG has no tab stops — button is the keyboard wake path.
+    expect(demo).toContain("Load interactive chart");
+    // Restore focus into the plot after the load button unmounts (#1362).
+    expect(demo).toContain("restoreKeyboardFocus");
+    expect(demo).toContain("focusAfterUpgrade");
+    expect(demo).toContain(".gg-capture");
     expect(demo).not.toMatch(/onMount\(\s*\(\)\s*=>\s*\{\s*void import/);
   });
 
