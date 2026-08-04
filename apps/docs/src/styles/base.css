@@ -207,6 +207,20 @@ pre {
   font-style: italic;
 }
 
+/*
+ * atom-one-dark's #e06c75 group (section/name/selector-tag/deletion/subst)
+ * sits at 4.4:1 on the softened --code-paper (#282c34). Lift to ~5:1 so axe
+ * color-contrast stays clean.
+ */
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst,
+.hljs-tag {
+  color: #ec767f !important;
+}
+
 /* Wide fences scroll locally; never expand the document width. */
 .copy-code,
 .guide-code-copy,
