@@ -3642,6 +3642,39 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/stats/summary_rolling",
+    title: "stat summary_rolling — ggsvelte",
+    description:
+      'stat "summary_rolling": Centered rolling window over continuous x (params.window, in x units): summarize y per (group, unique x). Partial windows at the ends are kept. Publishes y.',
+    canonicalPath: "/reference/stats/summary_rolling",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/stats/contour",
     title: "stat contour — ggsvelte",
     description:
@@ -11018,6 +11051,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "summary-rolling-window-required",
+        title: "summary-rolling-window-required",
+        level: 3,
+      },
+      {
         id: "invalid-data-profile",
         title: "invalid-data-profile",
         level: 3,
@@ -12057,8 +12095,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-352",
-        title: "experimental (352)",
+        id: "experimental-356",
+        title: "experimental (356)",
         level: 3,
       },
       {
@@ -12102,8 +12140,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-514",
-        title: "experimental (514)",
+        id: "experimental-515",
+        title: "experimental (515)",
         level: 3,
       },
       {

@@ -128,7 +128,7 @@ describe("docs route inventory", () => {
       navigation: { section: "Reference", label: "Stats", order: 52 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/stats/"));
-    expect(details.length).toBe(28);
+    expect(details.length).toBe(29);
     expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
     expect(inventory.find((entry) => entry.path === "/reference/stats/count")?.title).toBe(
       "stat count — ggsvelte",

@@ -64,6 +64,7 @@ export { registerSmooth } from "./pipeline/register-smooth.js";
 export { registerSpoke } from "./pipeline/register-spoke.js";
 export { registerSummary } from "./pipeline/register-summary.js";
 export { registerSummaryBin } from "./pipeline/register-summary-bin.js";
+export { registerSummaryRolling } from "./pipeline/register-summary-rolling.js";
 export { registerTile } from "./pipeline/register-tile.js";
 export { registerUnique } from "./pipeline/register-unique.js";
 export { registerViolin } from "./pipeline/register-violin.js";
@@ -107,6 +108,8 @@ export { statSum } from "./stats/sum.js";
 export type { SumStatInput, SumStatResult } from "./stats/sum.js";
 export { statEcdf } from "./stats/ecdf.js";
 export type { EcdfStatInput, EcdfStatResult } from "./stats/ecdf.js";
+export { statSummaryRolling } from "./stats/summary-rolling.js";
+export type { SummaryRollingStatInput, SummaryRollingStatResult } from "./stats/summary-rolling.js";
 export { positionDodge, positionStack } from "./positions/positions.js";
 export type { DodgeInput, DodgeResult, StackInput, StackResult } from "./positions/positions.js";
 

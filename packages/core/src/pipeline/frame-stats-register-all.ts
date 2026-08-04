@@ -29,6 +29,7 @@ import { registerSfText } from "./register-sf-text.js";
 import { registerSmooth } from "./register-smooth.js";
 import { registerSummary } from "./register-summary.js";
 import { registerSummaryBin } from "./register-summary-bin.js";
+import { registerSummaryRolling } from "./register-summary-rolling.js";
 import { registerUnique } from "./register-unique.js";
 import { registerViolin } from "./register-violin.js";
 
@@ -70,6 +71,7 @@ export function registerAllStatFrames(): void {
   registerSmooth();
   registerSummary();
   registerSummaryBin();
+  registerSummaryRolling();
   registerUnique();
   registerViolin();
 }

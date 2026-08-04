@@ -65,10 +65,11 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /**
-   * identity | unique | summary_bin (#817) | manual (#814) |
+   * identity | unique | summary_bin (#817) | summary_rolling (centered
+   * rolling window over x) | manual (#814) |
    * sum (geom_count overplotting; #795).
    */
-  stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
+  stat?: "identity" | "unique" | "summary_bin" | "summary_rolling" | "manual" | "sum";
   position?: PointPosition;
   positionParams?: PositionParams;
 }
@@ -89,10 +90,20 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
    * identity (default) | unique (#813) | bin (freqpoly / #796) |
    * align (shared continuous-x grid for stack/fill; #815) |
    * connect (expand successive points; #816) |
-   * summary_bin (#817) | manual (#814) |
+   * summary_bin (#817) | summary_rolling (centered rolling window over x) |
+   * manual (#814) |
    * ecdf (empirical CDF of x; do not map y — #811).
    */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
+  stat?:
+    | "identity"
+    | "unique"
+    | "bin"
+    | "align"
+    | "connect"
+    | "summary_bin"
+    | "summary_rolling"
+    | "manual"
+    | "ecdf";
 }
 
 /** Path-layer sugar options (data-order polylines; style + optional connect). */

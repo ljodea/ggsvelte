@@ -77,7 +77,7 @@ describe("GEOM_REFERENCE", () => {
     expect(point.component).toBe("GeomPoint");
     expect(point.summary.toLowerCase()).toMatch(/point|scatter/);
     expect([...point.allowedStats].toSorted()).toEqual(
-      ["identity", "manual", "sum", "summary_bin", "unique"].toSorted(),
+      ["identity", "manual", "sum", "summary_bin", "summary_rolling", "unique"].toSorted(),
     );
     expect([...point.allowedPositions].toSorted()).toEqual(
       ["identity", "jitter", "nudge"].toSorted(),

@@ -13,7 +13,7 @@ export const GEOM_REFERENCE_DATA = {
       "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     defaultStat: "identity",
     defaultPosition: "identity",
-    allowedStats: ["identity", "unique", "summary_bin", "manual", "sum"],
+    allowedStats: ["identity", "unique", "summary_bin", "summary_rolling", "manual", "sum"],
     allowedPositions: ["identity", "jitter", "nudge"],
     paramsType: "PointParams",
     params: [
@@ -32,8 +32,9 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description:
-          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -72,9 +73,16 @@ export const GEOM_REFERENCE_DATA = {
         required: false,
       },
       {
+        name: "window",
+        description:
+          'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        typeSummary: "number",
+        required: false,
+      },
+      {
         name: "fun",
         description:
-          'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+          'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
         typeSummary: '"first" | "last" | "mean" | "median" | "min" | "max" | "sum"',
         required: false,
       },
@@ -107,6 +115,7 @@ export const GEOM_REFERENCE_DATA = {
       "align",
       "connect",
       "summary_bin",
+      "summary_rolling",
       "manual",
       "ecdf",
     ],
@@ -189,9 +198,16 @@ export const GEOM_REFERENCE_DATA = {
         required: false,
       },
       {
+        name: "window",
+        description:
+          'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        typeSummary: "number",
+        required: false,
+      },
+      {
         name: "fun",
         description:
-          'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+          'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
         typeSummary: '"first" | "last" | "mean" | "median" | "min" | "max" | "sum"',
         required: false,
       },
@@ -582,9 +598,16 @@ export const GEOM_REFERENCE_DATA = {
         required: false,
       },
       {
+        name: "window",
+        description:
+          'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        typeSummary: "number",
+        required: false,
+      },
+      {
         name: "fun",
         description:
-          'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+          'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
         typeSummary: '"first" | "last" | "mean" | "median" | "min" | "max" | "sum"',
         required: false,
       },
@@ -1353,7 +1376,8 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description: 'Mid-point shape. Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -1729,8 +1753,9 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description:
-          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -1769,9 +1794,16 @@ export const GEOM_REFERENCE_DATA = {
         required: false,
       },
       {
+        name: "window",
+        description:
+          'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        typeSummary: "number",
+        required: false,
+      },
+      {
         name: "fun",
         description:
-          'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+          'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
         typeSummary: '"first" | "last" | "mean" | "median" | "min" | "max" | "sum"',
         required: false,
       },
@@ -2430,8 +2462,9 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description:
-          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
     ],
@@ -2715,8 +2748,9 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description:
-          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -2755,9 +2789,16 @@ export const GEOM_REFERENCE_DATA = {
         required: false,
       },
       {
+        name: "window",
+        description:
+          'STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is "summary_rolling".',
+        typeSummary: "number",
+        required: false,
+      },
+      {
         name: "fun",
         description:
-          'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
+          'SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
         typeSummary: '"first" | "last" | "mean" | "median" | "min" | "max" | "sum"',
         required: false,
       },
@@ -2947,8 +2988,9 @@ export const GEOM_REFERENCE_DATA = {
       {
         name: "shape",
         description:
-          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+          'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross", "circle-open". Default "circle".',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
     ],

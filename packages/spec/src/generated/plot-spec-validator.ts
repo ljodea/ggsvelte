@@ -23,10 +23,10 @@ let External = [
   /(^geom$|^stat$|^position$|^positionParams$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^width$|^height$|^seed$|^x$|^y$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
-  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fun$|^funMin$|^funMax$)/,
+  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^window$|^fun$|^funMin$|^funMax$)/,
   /(^geom$|^stat$|^position$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
-  /(^alpha$|^linewidth$|^curve$|^pad$|^n$|^connection$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fun$|^funMin$|^funMax$|^strokePaint$|^glow$)/,
+  /(^alpha$|^linewidth$|^curve$|^pad$|^n$|^connection$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^window$|^fun$|^funMin$|^funMax$|^strokePaint$|^glow$)/,
   /(^type$|^x1$|^y1$|^x2$|^y2$|^space$|^stops$|^fallback$)/,
   /(^offset$|^color$|^opacity$)/,
   /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/u,
@@ -57,7 +57,7 @@ let External = [
   /(^alpha$|^width$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fillPaint$|^glow$)/,
   /(^geom$|^stat$|^position$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
-  /(^alpha$|^linewidth$|^curve$|^pad$|^n$|^connection$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fun$|^funMin$|^funMax$|^strokePaint$|^glow$)/,
+  /(^alpha$|^linewidth$|^curve$|^pad$|^n$|^connection$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^window$|^fun$|^funMin$|^funMax$|^strokePaint$|^glow$)/,
   /(^geom$|^stat$|^position$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
   /(^alpha$|^fillPaint$|^glow$)/,
@@ -81,7 +81,7 @@ let External = [
   /(^geom$|^stat$|^position$|^positionParams$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^width$|^height$|^seed$|^x$|^y$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
-  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fun$|^funMin$|^funMax$)/,
+  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^window$|^fun$|^funMin$|^funMax$)/,
   /(^geom$|^stat$|^position$|^positionParams$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^width$|^height$|^seed$|^x$|^y$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
@@ -130,7 +130,7 @@ let External = [
   /(^geom$|^stat$|^position$|^positionParams$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^width$|^height$|^seed$|^x$|^y$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
-  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^fun$|^funMin$|^funMax$)/,
+  /(^alpha$|^size$|^shape$|^bins$|^binwidth$|^boundary$|^center$|^closed$|^window$|^fun$|^funMin$|^funMax$)/,
   /(^geom$|^stat$|^position$|^render$|^aes$|^data$|^params$|^inspect$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$|^group$|^label$|^weight$|^sample$|^ymin$|^ymax$|^xmin$|^xmax$|^xend$|^yend$|^width$|^height$|^z$|^map_id$|^angle$|^radius$)/,
   /(^width$|^linewidth$|^alpha$|^fun$|^funMin$|^funMax$|^bins$|^binwidth$|^boundary$|^center$|^closed$)/,
@@ -513,6 +513,7 @@ const check_17 = (value) =>
     (typeof value.stat === "string" && value.stat === "identity") ||
     (typeof value.stat === "string" && value.stat === "unique") ||
     (typeof value.stat === "string" && value.stat === "summary_bin") ||
+    (typeof value.stat === "string" && value.stat === "summary_rolling") ||
     (typeof value.stat === "string" && value.stat === "manual") ||
     (typeof value.stat === "string" && value.stat === "sum")) &&
   (!("position" in value) ||
@@ -595,7 +596,8 @@ const check_22 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross")) &&
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open")) &&
   (!("bins" in value) ||
     (Number.isInteger(value.bins) &&
       (!(Number.isFinite(value.bins) || typeof value.bins === "bigint") || value.bins >= 1))) &&
@@ -605,6 +607,7 @@ const check_22 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
+  (!("window" in value) || (Number.isFinite(value.window) && value.window > 0)) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "first") ||
     (typeof value.fun === "string" && value.fun === "last") ||
@@ -640,6 +643,7 @@ const check_24 = (value) =>
     (typeof value.stat === "string" && value.stat === "align") ||
     (typeof value.stat === "string" && value.stat === "connect") ||
     (typeof value.stat === "string" && value.stat === "summary_bin") ||
+    (typeof value.stat === "string" && value.stat === "summary_rolling") ||
     (typeof value.stat === "string" && value.stat === "manual") ||
     (typeof value.stat === "string" && value.stat === "ecdf")) &&
   (!("position" in value) ||
@@ -722,6 +726,7 @@ const check_28 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
+  (!("window" in value) || (Number.isFinite(value.window) && value.window > 0)) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "first") ||
     (typeof value.fun === "string" && value.fun === "last") ||
@@ -1459,6 +1464,7 @@ const check_79 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
+  (!("window" in value) || (Number.isFinite(value.window) && value.window > 0)) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "first") ||
     (typeof value.fun === "string" && value.fun === "last") ||
@@ -2089,7 +2095,8 @@ const check_126 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross")) &&
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open")) &&
   (!("bins" in value) ||
     (Number.isInteger(value.bins) &&
       (!(Number.isFinite(value.bins) || typeof value.bins === "bigint") || value.bins >= 1))) &&
@@ -2099,6 +2106,7 @@ const check_126 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
+  (!("window" in value) || (Number.isFinite(value.window) && value.window > 0)) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "first") ||
     (typeof value.fun === "string" && value.fun === "last") ||
@@ -2610,7 +2618,8 @@ const check_158 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross"));
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open"));
 
 // @ts-ignore
 const check_159 = (value) =>
@@ -3341,7 +3350,8 @@ const check_202 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross"));
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open"));
 
 // @ts-ignore
 const check_203 = (value) =>
@@ -3441,7 +3451,8 @@ const check_208 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross")) &&
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open")) &&
   (!("bins" in value) ||
     (Number.isInteger(value.bins) &&
       (!(Number.isFinite(value.bins) || typeof value.bins === "bigint") || value.bins >= 1))) &&
@@ -3451,6 +3462,7 @@ const check_208 = (value) =>
   (!("closed" in value) ||
     (typeof value.closed === "string" && value.closed === "right") ||
     (typeof value.closed === "string" && value.closed === "left")) &&
+  (!("window" in value) || (Number.isFinite(value.window) && value.window > 0)) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "first") ||
     (typeof value.fun === "string" && value.fun === "last") ||
@@ -3741,7 +3753,8 @@ const check_225 = (value) =>
     (typeof value.shape === "string" && value.shape === "square") ||
     (typeof value.shape === "string" && value.shape === "diamond") ||
     (typeof value.shape === "string" && value.shape === "plus") ||
-    (typeof value.shape === "string" && value.shape === "cross")) &&
+    (typeof value.shape === "string" && value.shape === "cross") ||
+    (typeof value.shape === "string" && value.shape === "circle-open")) &&
   (!("fun" in value) ||
     (typeof value.fun === "string" && value.fun === "mean") ||
     (typeof value.fun === "string" && value.fun === "median") ||
@@ -6781,7 +6794,8 @@ const check_380 = (value) =>
           (typeof element === "string" && element === "square") ||
           (typeof element === "string" && element === "diamond") ||
           (typeof element === "string" && element === "plus") ||
-          (typeof element === "string" && element === "cross"),
+          (typeof element === "string" && element === "cross") ||
+          (typeof element === "string" && element === "circle-open"),
       ) &&
       value.range.length >= 1)) &&
   (!("reverse" in value) || typeof value.reverse === "boolean") &&
@@ -6791,14 +6805,16 @@ const check_380 = (value) =>
     (typeof value.naValue === "string" && value.naValue === "square") ||
     (typeof value.naValue === "string" && value.naValue === "diamond") ||
     (typeof value.naValue === "string" && value.naValue === "plus") ||
-    (typeof value.naValue === "string" && value.naValue === "cross")) &&
+    (typeof value.naValue === "string" && value.naValue === "cross") ||
+    (typeof value.naValue === "string" && value.naValue === "circle-open")) &&
   (!("unknownValue" in value) ||
     (typeof value.unknownValue === "string" && value.unknownValue === "circle") ||
     (typeof value.unknownValue === "string" && value.unknownValue === "triangle") ||
     (typeof value.unknownValue === "string" && value.unknownValue === "square") ||
     (typeof value.unknownValue === "string" && value.unknownValue === "diamond") ||
     (typeof value.unknownValue === "string" && value.unknownValue === "plus") ||
-    (typeof value.unknownValue === "string" && value.unknownValue === "cross")) &&
+    (typeof value.unknownValue === "string" && value.unknownValue === "cross") ||
+    (typeof value.unknownValue === "string" && value.unknownValue === "circle-open")) &&
   (!("onExhaust" in value) ||
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
@@ -6837,7 +6853,8 @@ const check_380 = (value) =>
           (typeof element === "string" && element === "square") ||
           (typeof element === "string" && element === "diamond") ||
           (typeof element === "string" && element === "plus") ||
-          (typeof element === "string" && element === "cross"),
+          (typeof element === "string" && element === "cross") ||
+          (typeof element === "string" && element === "circle-open"),
       ) &&
       value.range.length >= 1 &&
       (!("domainMode" in value) || !true) &&

@@ -142,7 +142,7 @@ export function pointHitDistance(
     batch.shapeIndexes === undefined
       ? batch.shape
       : POINT_SHAPE_NAMES[batch.shapeIndexes[primitive]!]!;
-  if (shape === "circle") {
+  if (shape === "circle" || shape === "circle-open") {
     const distance = Math.hypot(dx, dy);
     return distance <= size + hitTolerance ? distance : null;
   }

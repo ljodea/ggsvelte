@@ -101,6 +101,21 @@
           fill={keyColor}
           opacity={entry.alpha}
         />
+      {:else if entry.shape === "circle-open"}
+        {@const r = Math.min(
+          legend.swatchSize / 2,
+          entry.size ?? legend.swatchSize / 2,
+        )}
+        <circle
+          class="gg-legend-key gg-shape-circle-open"
+          cx={keyX}
+          cy={keyCenterY}
+          {r}
+          fill="none"
+          stroke={keyColor}
+          stroke-width={Math.max(1, r / 3)}
+          opacity={entry.alpha}
+        />
       {:else if entry.shape === "plus" || entry.shape === "cross"}
         {@const r = Math.min(
           legend.swatchSize / 2,

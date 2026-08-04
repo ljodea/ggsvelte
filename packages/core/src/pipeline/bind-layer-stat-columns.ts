@@ -30,6 +30,8 @@ export const STAT_Y_COLUMNS: Record<StatName, readonly string[]> = {
   ecdf: ["ecdf"],
   // y/ymin/ymax are field-mapped measure outputs (not {stat} y columns).
   summary_bin: [],
+  // y is the rolling summary (a measure output, not a {stat} y column).
+  summary_rolling: [],
   // Contour writes x/y as frame coordinates; after_stat level is not a y column.
   contour: [],
   // The rest write y straight into the frame, so nothing is y-mappable.

@@ -111,6 +111,18 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     },
     options: {},
   },
+  "summary-rolling-window-required": {
+    spec: {
+      layers: [
+        {
+          geom: "line",
+          stat: "summary_rolling",
+          aes: { x: { field: "x" }, y: { field: "y" } },
+        },
+      ],
+    },
+    options: {},
+  },
   "facet-form-ambiguous": {
     spec: {
       layers: [point],

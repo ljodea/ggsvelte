@@ -201,7 +201,15 @@ describe("mapped style capability contract", () => {
   it("accepts every registered point shape as a scalar geom param", () => {
     // The scalar params.shape schema must reuse the same shape registry as the
     // shape scale, so the newly added diamond/plus/cross draw as literal shapes.
-    for (const shape of ["circle", "triangle", "square", "diamond", "plus", "cross"] as const) {
+    for (const shape of [
+      "circle",
+      "triangle",
+      "square",
+      "diamond",
+      "plus",
+      "cross",
+      "circle-open",
+    ] as const) {
       const result = spec.validate({
         data: { values: [{ x: 1, y: 2 }] },
         aes: { x: { field: "x" }, y: { field: "y" } },

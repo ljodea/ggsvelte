@@ -57,7 +57,7 @@ describe("style scale policy and validation", () => {
       runPipeline(
         fromAny({
           data: {
-            values: Array.from({ length: 7 }, (_, index) => ({
+            values: Array.from({ length: 8 }, (_, index) => ({
               x: index,
               y: index,
               group: `g${index}`,
@@ -247,7 +247,7 @@ describe("style scale policy and validation", () => {
     const model = runPipeline(
       fromAny({
         data: {
-          values: Array.from({ length: 7 }, (_, index) => ({
+          values: Array.from({ length: 8 }, (_, index) => ({
             x: index,
             y: index,
             group: `g${index}`,
@@ -261,8 +261,8 @@ describe("style scale policy and validation", () => {
     );
     const points = model.scene.batches.find((batch) => batch.kind === "points");
     if (points?.kind !== "points") throw new Error("expected points");
-    // Six named symbols; the seventh group wraps to the first instead of throwing.
-    expect([...points.shapeIndexes!]).toEqual([0, 1, 2, 3, 4, 5, 0]);
+    // Seven named symbols; the eighth group wraps to the first instead of throwing.
+    expect([...points.shapeIndexes!]).toEqual([0, 1, 2, 3, 4, 5, 6, 0]);
   });
 
   it("rejects a binned domain that disagrees with its boundaries", () => {

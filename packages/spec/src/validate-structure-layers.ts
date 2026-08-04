@@ -182,6 +182,25 @@ export function layerStructuralErrors(
     errors.push(...ribbonStructuralErrors(layer, layerPath, mapped));
   }
 
+  if (stat === "summary_rolling") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const window = params["window"];
+    // Non-number / non-positive windows are rejected by the schema type.
+    if (window === undefined || window === null || window === "") {
+      errors.push({
+        code: "summary-rolling-window-required",
+        path: `${layerPath}/params/window`,
+        message:
+          "The summary_rolling stat requires params.window (rolling-window width in x data units, greater than 0). There is no silent default width.",
+        fix: {
+          description:
+            "Set params.window to the window width in x units (e.g. 30 for a 30-year running summary).",
+          example: { params: { window: 30 } },
+        },
+      });
+    }
+  }
+
   if (stat === "manual") {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
     const fun = params["fun"];

@@ -256,7 +256,7 @@ restarts the palette and emits the bounded `palette-exhausted` warning once;
 
 ### Finite symbol sets (default assignment order)
 
-| Point shapes (6) | Linetypes (6) |
+| Point shapes (7) | Linetypes (6) |
 | ---------------- | ------------- |
 | circle           | solid         |
 | triangle         | dashed        |
@@ -264,6 +264,7 @@ restarts the palette and emits the bounded `palette-exhausted` warning once;
 | diamond          | dotdash       |
 | plus             | longdash      |
 | cross            | twodash       |
+| circle-open      |               |
 
 ## Temporal scales
 

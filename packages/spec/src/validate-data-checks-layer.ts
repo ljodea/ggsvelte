@@ -33,6 +33,8 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   /** ggplot2 after_stat(ecdf); y channel defaults to this column. */
   ecdf: ["ecdf"],
   summary_bin: ["y", "ymin", "ymax"],
+  /** Centered rolling-window summary; one row per (group, unique x). */
+  summary_rolling: ["y"],
   contour: ["level"],
   quantile: ["y"],
   density_2d: ["level", "density"],

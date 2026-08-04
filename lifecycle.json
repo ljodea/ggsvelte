@@ -4546,6 +4546,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SummaryRollingStatInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SummaryRollingStatResult": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "TABLEAU20_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5062,6 +5070,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerSummaryRolling": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerTile": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5155,6 +5167,10 @@
           "lifecycle": "experimental"
         },
         "statSum": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "statSummaryRolling": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -7671,6 +7687,10 @@
           "lifecycle": "experimental"
         },
         "registerSummaryBin": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSummaryRolling": {
           "kind": "value",
           "lifecycle": "experimental"
         },
