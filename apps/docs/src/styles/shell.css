@@ -536,6 +536,8 @@
  * threshold and csp.mode:"hash" only hashes scripts, not styles.
  */
 .benchmarks {
+  min-width: 0;
+  overflow-x: clip;
   padding-block: clamp(4rem, 8vw, 7rem);
   border-top: 1px solid var(--line);
 }
@@ -611,8 +613,7 @@
 }
 
 .benchmarks table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   border-collapse: collapse;
   border-top: 1px solid var(--line);
 }
