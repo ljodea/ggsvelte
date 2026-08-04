@@ -113,7 +113,7 @@
   >
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (scrollable code must be keyboard reachable) -->
     <div
-      class="scroll-region code-surface"
+      class="scroll-region"
       role="region"
       aria-label="Code example"
       tabindex="0"
@@ -129,8 +129,11 @@
   .code-tabs {
     min-width: 0;
     margin: 1.5rem 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--code-ink) 10%, transparent);
+    border-radius: var(--code-radius);
+    background: var(--code-paper);
+    color: var(--code-ink);
   }
 
   .bar {
@@ -138,9 +141,9 @@
     min-width: 0;
     align-items: center;
     gap: 0.25rem;
-    padding: 0 0.35rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
+    padding: 0.15rem 0.5rem 0.15rem 0.75rem;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--code-ink) 10%, transparent);
   }
 
   .tabs {
@@ -151,41 +154,51 @@
   }
 
   .bar button[role="tab"] {
-    min-height: 44px;
+    min-height: 2.25rem;
     flex: 0 0 auto;
-    padding: 0.35rem 0.65rem;
+    padding: 0.3rem 0.65rem;
     border: 0;
-    border-bottom: 2px solid transparent;
-    border-radius: 0;
+    border-radius: 7px;
     background: none;
-    color: var(--muted);
+    color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     cursor: pointer;
     font: 600 0.82rem/1 var(--body-font);
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .bar button[role="tab"]:hover {
+    color: var(--code-ink);
   }
 
   .bar button[role="tab"].active {
-    border-bottom-color: var(--accent);
-    color: var(--fg);
+    background: color-mix(in srgb, var(--code-ink) 10%, transparent);
+    color: var(--code-ink);
   }
 
   .bar .copy {
     display: grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
     margin-left: auto;
     padding: 0;
     border: 0;
-    border-radius: 2px;
+    border-radius: 7px;
     background: none;
-    color: var(--accent);
+    color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
   }
 
   .bar .copy:hover {
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    background: color-mix(in srgb, var(--code-ink) 12%, transparent);
+    color: var(--code-ink);
   }
 
   /*
@@ -196,6 +209,7 @@
   .scroll-region {
     max-width: 100%;
     padding: 0;
+    outline-offset: -2px;
   }
 
   .scroll-region :global(pre.hljs),
@@ -205,7 +219,9 @@
     padding: 1rem;
     background: transparent !important;
     color: inherit;
-    font: inherit;
+    font-family: var(--code-font);
+    font-size: 0.85rem;
+    line-height: 1.6;
   }
 
   .scroll-region :global(code.hljs),

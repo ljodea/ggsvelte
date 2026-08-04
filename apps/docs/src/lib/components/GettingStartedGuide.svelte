@@ -50,25 +50,20 @@
 
   <h2 id="start-with-a-basic-plot">Start with a basic plot</h2>
   <div class="lesson-block">
-    <section class="lesson-code">
-      <div class="lesson-label">Svelte</div>
-      <CopyCode
-        class="lesson-source lesson-source--file"
-        language="svelte"
-        accessibleLabel="Copy complete file"
-        code={QUICKSTART_PAGE_SVELTE}
-      />
-    </section>
-    <section class="lesson-output">
-      <div class="lesson-label">Output</div>
-      <img
-        class="lesson-chart"
-        src={chartSrc(-1)}
-        width={LESSON_CHART_WIDTH}
-        height={LESSON_CHART_HEIGHT}
-        alt="Peak cherry-blossom dates in Kyoto, 812 to 2026, as a scatter"
-      />
-    </section>
+    <CopyCode
+      class="lesson-source lesson-source--file"
+      language="svelte"
+      title="Example.svelte"
+      accessibleLabel="Copy complete file"
+      code={QUICKSTART_PAGE_SVELTE}
+    />
+    <img
+      class="lesson-chart"
+      src={chartSrc(-1)}
+      width={LESSON_CHART_WIDTH}
+      height={LESSON_CHART_HEIGHT}
+      alt="Peak cherry-blossom dates in Kyoto, 812 to 2026, as a scatter"
+    />
   </div>
 
   <h2 id="add-layers">Add layers</h2>
@@ -95,15 +90,13 @@
         {#if isFinish}
           <LessonFinishedChart placeholderSrc={chartSrc(index)} />
         {:else}
-          <div class="lesson-output">
-            <img
-              class="lesson-chart"
-              src={chartSrc(index)}
-              width={LESSON_CHART_WIDTH}
-              height={LESSON_CHART_HEIGHT}
-              alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
-            />
-          </div>
+          <img
+            class="lesson-chart"
+            src={chartSrc(index)}
+            width={LESSON_CHART_WIDTH}
+            height={LESSON_CHART_HEIGHT}
+            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
+          />
         {/if}
       </section>
     {/each}
@@ -113,6 +106,7 @@
   <CopyCode
     class="lesson-source lesson-source--file"
     language="svelte"
+    title="Sakura.svelte"
     accessibleLabel="Copy finished file"
     code={SAKURA_FINISHED_SVELTE}
   />
@@ -121,6 +115,7 @@
   <CopyCode
     class="lesson-source"
     language="json"
+    title="spec.json"
     accessibleLabel="Copy Spec (JSON) fragment"
     code={QUICKSTART_PORTABLE_SPEC_FRAGMENT}
   />
@@ -143,55 +138,31 @@
 <style>
   /*
    * Code on top, chart below — never side-by-side. Side-by-side crushes the
-   * plot on every viewport and is banned on this docs site.
+   * plot on every viewport and is banned on this docs site. Code blocks stand
+   * on their own (bun-like dark cards); no shaded casing panels around them.
    */
   .lesson-block,
   .progressive-step {
     display: grid;
+    gap: 1.25rem;
     margin: 1.5rem 0 3rem;
-    border-block: 1px solid var(--line);
   }
 
   /*
-   * Static step panels are plain divs in this component. The finished chart is
-   * a child component whose root carries .finished-chart — style it with
-   * :global so scoped CSS still pads and separates that slot.
+   * The finished chart is a child component whose root carries
+   * .finished-chart — style it with :global so scoped CSS still reaches that
+   * slot.
    */
-  .lesson-block > section,
-  .progressive-step > div,
+  .lesson-block > *,
+  .progressive-step > *,
   .progressive-step > :global(.finished-chart) {
     min-width: 0;
-    padding: 1rem;
-  }
-
-  .lesson-block > section + section,
-  .progressive-step > div + div,
-  .progressive-step > div + :global(.finished-chart) {
-    border-top: 1px solid var(--line);
   }
 
   .lesson-chart {
     display: block;
     width: 100%;
     height: auto;
-  }
-
-  .lesson-output {
-    min-width: 0;
-    overflow: hidden;
-    background: #fff;
-    color: #172033;
-  }
-
-  .lesson-label {
-    margin-bottom: 0.75rem;
-    color: var(--muted);
-    font-size: 0.72rem;
-  }
-
-  .lesson-code,
-  .step-copy {
-    background: var(--wash);
   }
 
   .step-copy h3 {
@@ -218,16 +189,5 @@
 
   .lesson-footnote p {
     margin: 0;
-  }
-
-  /*
-   * Translucent band fills do not survive forced-colors mode. Epoch names
-   * remain available via the bottom legend (and the aria-label on the live
-   * chart). The live finished chart carries the same rule in its own file.
-   */
-  @media (forced-colors: active) {
-    .lesson-output :global(.gg-marks rect) {
-      fill: none;
-    }
   }
 </style>
