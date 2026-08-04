@@ -560,6 +560,7 @@
 }
 
 .bench-card {
+  min-width: 0;
   margin: 0;
   padding: 1.25rem 1.25rem 1rem;
   border: 1px solid var(--line);
@@ -604,12 +605,14 @@
 }
 
 .bench-table-wrap {
+  display: block;
+  max-width: 100%;
   overflow-x: auto;
 }
 
 .benchmarks table {
-  width: 100%;
-  min-width: 34rem;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   border-top: 1px solid var(--line);
 }
@@ -673,7 +676,9 @@
 
 @media (max-width: 42rem) {
   .bench-grid {
-    grid-template-columns: 1fr;
+    /* minmax(0,…) so the wide capability table can't force the track (and the
+     * page) wider than a mobile viewport — .bench-table-wrap scrolls instead. */
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
