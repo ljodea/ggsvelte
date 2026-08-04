@@ -167,19 +167,21 @@ pre {
 
 /*
  * Shared host code surface (#696): one radius/type/padding for docs pre
- * blocks. Call sites: .prose pre, CodeTabs,
- * CodeTabs. Layout-only extras (max-height, margin, white-space) stay local.
+ * blocks (CopyCode and CodeTabs draw their own card chrome on top of the
+ * same tokens). Layout-only extras (max-height, margin, white-space) stay
+ * local.
  */
 .code-surface,
 .prose pre {
   overflow-x: auto;
   padding: 1rem;
-  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--code-ink) 10%, transparent);
+  border-radius: var(--code-radius);
   background: var(--code-paper);
   color: var(--code-ink);
   font-family: var(--code-font);
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 
 .prose pre {
@@ -203,6 +205,20 @@ pre {
 .hljs-quote {
   color: #a8b0bd !important;
   font-style: italic;
+}
+
+/*
+ * atom-one-dark's #e06c75 group (section/name/selector-tag/deletion/subst)
+ * sits at 4.4:1 on the softened --code-paper (#282c34). Lift to ~5:1 so axe
+ * color-contrast stays clean.
+ */
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst,
+.hljs-tag {
+  color: #ec767f !important;
 }
 
 /* Wide fences scroll locally; never expand the document width. */
@@ -236,7 +252,7 @@ pre {
 
 .guide-code-copy pre {
   margin: 0;
-  padding: 1rem 3.25rem 1rem 1rem;
+  padding: 1rem 2.75rem 1rem 1rem;
 }
 
 .guide-code-copy button {
@@ -246,21 +262,31 @@ pre {
   right: 0.5rem;
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  min-width: 2.5rem;
-  min-height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--code-ink) 28%, transparent);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--code-paper) 88%, transparent);
-  color: var(--code-ink);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: color-mix(in srgb, var(--code-ink) 55%, transparent);
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .guide-code-copy button:hover {
-  border-color: color-mix(in srgb, var(--code-ink) 55%, transparent);
-  background: color-mix(in srgb, var(--code-paper) 70%, var(--code-ink) 8%);
+  background: color-mix(in srgb, var(--code-ink) 12%, transparent);
+  color: var(--code-ink);
+}
+
+/* 32px visual, 44px hit region (DESIGN.md hit-region floor). */
+.guide-code-copy button::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .guide-code-copy button svg {

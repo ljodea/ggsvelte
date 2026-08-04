@@ -162,7 +162,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   );
   // Every chart is a build-time SVG without JS: first render + four steps
   // (Make it interactive keeps its static fallback until hydrate near-viewport, #972).
-  await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
+  await expect(page.locator(".lesson-block img.lesson-chart")).toBeVisible();
   await expect(page.locator("img.lesson-chart")).toHaveCount(5);
   await expect(
     page.getByRole("heading", {
@@ -320,12 +320,16 @@ test("mobile lesson stacks code above chart and remains contained", async ({ pag
 
   // Side-by-side is banned: code always above the chart, on every viewport.
   const order = await page
-    .locator(".lesson-block > section")
-    .evaluateAll((sections) => sections.map((section) => section.getAttribute("class")));
-  expect(order[0]).toContain("lesson-code");
-  expect(order[1]).toContain("lesson-output");
+    .locator(".lesson-block > *")
+    .evaluateAll((children) =>
+      children.map(
+        (child) => `${child.tagName.toLowerCase()}.${child.getAttribute("class") ?? ""}`,
+      ),
+    );
+  expect(order[0]).toContain("copy-code");
+  expect(order[1]).toContain("img.lesson-chart");
   await expect(page.getByRole("tablist", { name: "First chart surfaces" })).toHaveCount(0);
-  await expect(page.locator(".lesson-block .lesson-code")).toBeVisible();
-  await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
+  await expect(page.locator(".lesson-block .copy-code")).toBeVisible();
+  await expect(page.locator(".lesson-block img.lesson-chart")).toBeVisible();
   await expectNoDocumentOverflow(page);
 });

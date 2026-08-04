@@ -42,7 +42,7 @@
   --warning: #8a5a00;
   --error: #b42318;
   --visited: #665980;
-  --code-paper: #172033;
+  --code-paper: #282c34;
   --code-ink: #f4f6fa;
   --display-font: "Roboto Condensed", "Arial Narrow", Arial, sans-serif;
   --body-font: "Noto Sans Display", Arial, sans-serif;
@@ -52,6 +52,8 @@
   --sidebar-width: 15.5rem;
   --contents-width: 14rem;
   --radius: 4px;
+  /* Docs-site code surfaces borrow the softer, rounded bun.com block look. */
+  --code-radius: 10px;
   --bg: var(--paper);
   --fg: var(--ink);
   --muted: var(--muted-ink);
@@ -71,7 +73,7 @@
   --warning: #efc46d;
   --error: #ff8a80;
   --visited: #c2afe8;
-  --code-paper: #0b0e14;
+  --code-paper: #1a1f29;
   --code-ink: #f0f3f8;
   color-scheme: dark;
 }
