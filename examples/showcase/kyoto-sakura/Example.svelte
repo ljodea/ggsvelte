@@ -140,7 +140,7 @@
     }}
     size={9}
     anchor="start"
-    dy={-10}
+    dy={22}
     inspect={false}
   />
   <GeomLine

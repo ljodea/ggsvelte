@@ -104,7 +104,7 @@ export default defineExample(
       aes: { x: "year", y: "bloomDate", label: "label", color: { value: "#6b7075" } },
       size: 9,
       anchor: "start",
-      dy: -10,
+      dy: 22,
       inspect: false,
     })
     .geomLine({
