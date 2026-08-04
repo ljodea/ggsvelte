@@ -159,7 +159,9 @@ function liteParseColumn(
       decision: {
         status: "nominal",
         parser: null,
-        parserKey: "lite:auto",
+        // Distinct key so fieldType can classify without re-scanning (and
+        // without a first-cell probe that mis-types Date / mixed columns).
+        parserKey: "lite:numbers",
         kind: null,
         precision: null,
         evidence: [],
@@ -200,7 +202,9 @@ function liteParseColumn(
       decision: {
         status: "nominal",
         parser: null,
-        parserKey: "lite:auto",
+        // lite:labels = pure non-ISO strings; lite:auto = mixed / numeric-text
+        // (fieldType must fall back to nonTemporalFieldType for the latter).
+        parserKey: pureNonIsoLabelStrings ? "lite:labels" : "lite:auto",
         kind: null,
         precision: null,
         evidence: [],
@@ -289,6 +293,24 @@ function stringLooksNumeric(value: string): boolean {
   if (c0 === undefined) return false;
   // digit, '+', '-', '.'
   return (c0 >= 48 && c0 <= 57) || c0 === 43 || c0 === 45 || c0 === 46;
+}
+
+/**
+ * Map monomorphic lean parse keys to field types without re-scanning.
+ * Returns null for `lite:auto` (mixed / numeric-text / Dates) so the caller
+ * runs {@link nonTemporalFieldType} — a first-cell probe would mis-type pure
+ * Date columns as nominal and mixed number/text as quantitative (#1477 review).
+ */
+function fieldTypeFromLiteDecision(decision: ParsedColumnView["decision"]): FieldType | null {
+  switch (decision.parserKey) {
+    case "lite:numbers":
+    case "lite:numeric-only":
+      return "quantitative";
+    case "lite:labels":
+      return "nominal";
+    default:
+      return null;
+  }
 }
 
 function fallbackNumeric(
@@ -592,7 +614,10 @@ export class ColumnTable {
           : "nominal"
         : view.decision.status === "temporal"
           ? "temporal"
-          : nonTemporalFieldType(this.column(name));
+          : // Monomorphic lean keys (lite:numbers / lite:labels) skip the
+            // second O(n) typeof walk; mixed/Date fall through to
+            // nonTemporalFieldType so lean and full agree (#1477 review).
+            (fieldTypeFromLiteDecision(view.decision) ?? nonTemporalFieldType(this.column(name)));
     this.#typeCache.set(cacheKey, type);
     return type;
   }

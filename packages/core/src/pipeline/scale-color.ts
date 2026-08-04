@@ -7,7 +7,12 @@ import type { ScaleState } from "../scales/state.js";
 import type { ColumnTable } from "../table.js";
 import type { EditionDefaults } from "../editions.js";
 
-import { collectColorCatalogValues, collectColorChannelValues } from "./scale-color-collect.js";
+import {
+  collectColorCatalogValues,
+  collectColorChannelFlags,
+  collectColorChannelValues,
+  countNullColorChannelValues,
+} from "./scale-color-collect.js";
 import { resolveBinnedColorScale } from "./scale-color-binned.js";
 import { resolveIdentityColorScale } from "./scale-color-identity.js";
 import { resolveManualColorScale } from "./scale-color-manual.js";
@@ -31,21 +36,47 @@ export function resolveColorScale(
   advisories: Advisory[],
   editionDefaults: EditionDefaults,
 ): ColorResolution {
-  const collected = collectColorChannelValues(name, frames, table);
+  // Catalog first: ordinal multi-series only needs distinct source values
+  // (often 3 labels), not a 30k-element values array. Flags avoid the full
+  // push when type resolves to ordinal (#1468).
   const catalog = collectColorCatalogValues(name, bindings, catalogTable);
-  const values = collected.values;
-  const missingCount = values.filter((value) => value === null).length;
+  const flags = collectColorChannelFlags(name, frames, table);
+  const anyDiscreteField = flags.anyDiscreteField || catalog.anyDiscreteField;
+  const anyField = flags.anyField || catalog.anyField;
+  if (!anyField) return { resolved: null, legendInput: null, guidePlan: null, state: null };
+
+  const type = configuredColorScaleType(config) ?? (anyDiscreteField ? "ordinal" : "sequential");
+
+  // NA-color warning: count nulls without allocating a full values array.
+  const missingCount = countNullColorChannelValues(name, frames);
   if (missingCount > 0) {
     warnings.push({
       code: "color-na-values",
       message: `${String(missingCount)} ${name} value(s) use the NA color.`,
     });
   }
-  const anyDiscreteField = collected.anyDiscreteField || catalog.anyDiscreteField;
-  const anyField = collected.anyField || catalog.anyField;
-  if (!anyField) return { resolved: null, legendInput: null, guidePlan: null, state: null };
 
-  const type = configuredColorScaleType(config) ?? (anyDiscreteField ? "ordinal" : "sequential");
+  // Ordinal: train on the unfiltered source catalog when available.
+  if (type === "ordinal") {
+    let domainValues = catalog.catalogValues;
+    if (domainValues.length === 0) {
+      // No source field (stat-only color): fall back to frame values.
+      domainValues = collectColorChannelValues(name, frames, table).values;
+    }
+    return resolveOrdinalColorScale({
+      name,
+      values: domainValues.filter((value) => value !== null),
+      config,
+      prevState,
+      legendTitle,
+      warnings,
+      advisories,
+      editionDefaults,
+    });
+  }
+
+  // Sequential / binned / manual / identity still need the per-row values.
+  const values = collectColorChannelValues(name, frames, table).values;
 
   if (type === "sequential") {
     return resolveSequentialColorScale({
@@ -80,28 +111,12 @@ export function resolveColorScale(
       warnings,
     });
   }
-  if (type === "identity") {
-    return resolveIdentityColorScale({
-      name,
-      values,
-      config: config ?? { type: "identity" },
-      legendTitle,
-      warnings,
-    });
-  }
-
-  // Ordinal scales train on the unfiltered source catalog when available, so
-  // categorical assignments stay stable while runtime filters change the rows.
-  return resolveOrdinalColorScale({
+  // identity
+  return resolveIdentityColorScale({
     name,
-    values: (catalog.catalogValues.length > 0 ? catalog.catalogValues : values).filter(
-      (value) => value !== null,
-    ),
-    config,
-    prevState,
+    values,
+    config: config ?? { type: "identity" },
     legendTitle,
     warnings,
-    advisories,
-    editionDefaults,
   });
 }

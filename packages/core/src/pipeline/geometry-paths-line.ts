@@ -19,8 +19,98 @@ import {
   sortGroupRowsByX,
   warnSingleObservationGroups,
 } from "./geometry-shared.js";
-import { writeLineSubpaths } from "./geometry-paths-line-write.js";
+import { writeContinuousLineOnePass, writeLineSubpaths } from "./geometry-paths-line-write.js";
 import { splitStyleSubpaths } from "./geometry-paths-style-subpaths.js";
+
+/** True when linewidth/alpha/linetype are not per-vertex mapped (style split free). */
+function hasMappedStrokeStyle(frame: LayerFrame): boolean {
+  return (["linewidth", "alpha", "linetype"] as const).some((aesthetic) => {
+    const style = frame.binding[aesthetic];
+    return style.field !== null || style.statColumn !== null || style.scaledConstant !== null;
+  });
+}
+
+/** True when any group has x keys out of non-decreasing order. */
+function groupsNeedXSort(
+  groupRows: readonly (readonly number[])[],
+  xNumeric: Float64Array,
+): boolean {
+  for (const rows of groupRows) {
+    for (let i = 1; i < rows.length; i++) {
+      if (xNumeric[rows[i]!]! < xNumeric[rows[i - 1]!]!) return true;
+    }
+  }
+  return false;
+}
+
+type LineBuffers = {
+  positions: Float32Array;
+  rowIndex: Uint32Array;
+  frameRowIndex?: Uint32Array;
+  pathOffsets: Uint32Array;
+  strokes: (string | null)[];
+  subpaths: readonly (readonly number[])[];
+};
+
+/**
+ * Continuous multi-series: one normalize+pixel pass that also buckets by group.
+ * Falls back to bucket → sort → write when stroke style is mapped, scales are
+ * band, or x within a group needs sorting.
+ */
+function buildLineBuffers(
+  frame: LayerFrame,
+  fx: Frame,
+  color: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
+  warnings: PipelineWarning[],
+  wantSortByX: boolean,
+): LineBuffers | null {
+  const canOnePass =
+    !hasMappedStrokeStyle(frame) &&
+    fx.xScale.type !== "band" &&
+    fx.yScale.type !== "band" &&
+    frame.xNumeric !== null &&
+    frame.yNumeric !== null;
+  const onePass = canOnePass ? writeContinuousLineOnePass({ frame, fx, color, warnings }) : null;
+
+  if (onePass === null) {
+    const groupedRows = bucketByGroup(frame, fx, null, warnings);
+    if (groupedRows.length === 0) return null;
+    warnSingleObservationGroups(groupedRows, frame, warnings);
+    // geom_line sorts by x; geom_path keeps data/row order (#788).
+    if (wantSortByX) sortGroupRowsByX(groupedRows, frame, fx);
+    const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
+    const styleSplit = subpaths.length > groupedRows.length;
+    const written = writeLineSubpaths({
+      frame,
+      fx,
+      color,
+      subpaths,
+      includeFrameRows: styleSplit,
+    });
+    return { ...written, subpaths };
+  }
+
+  // If x within any group is out of order, fall back so sortGroupRowsByX +
+  // write stay correct (one-pass pixels would desync after a row reorder).
+  const needsSort = wantSortByX && groupsNeedXSort(onePass.groupRows, frame.xNumeric!);
+  if (needsSort) {
+    const groupedRows = onePass.groupRows.map((rows) => rows.slice());
+    sortGroupRowsByX(groupedRows, frame, fx);
+    warnSingleObservationGroups(groupedRows, frame, warnings);
+    const written = writeLineSubpaths({ frame, fx, color, subpaths: groupedRows });
+    return { ...written, subpaths: groupedRows };
+  }
+
+  warnSingleObservationGroups(onePass.groupRows, frame, warnings);
+  return {
+    positions: onePass.positions,
+    rowIndex: onePass.rowIndex,
+    pathOffsets: onePass.pathOffsets,
+    strokes: onePass.strokes,
+    subpaths: onePass.groupRows,
+  };
+}
 
 export function lineBatch(
   frame: LayerFrame,
@@ -31,15 +121,6 @@ export function lineBatch(
   options: { sortByX?: boolean } = {},
 ): PathsBatch | null {
   const { binding } = frame;
-  const groupedRows = bucketByGroup(frame, fx, null, warnings);
-  if (groupedRows.length === 0) return null;
-  warnSingleObservationGroups(groupedRows, frame, warnings);
-  // geom_line sorts by x; geom_path keeps data/row order (#788).
-  if (options.sortByX !== false && binding.layer.geom !== "path") {
-    sortGroupRowsByX(groupedRows, frame, fx);
-  }
-  const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
-  const styleSplit = subpaths.length > groupedRows.length;
 
   const paint = layerPaintFromParams(binding.layer.params);
   const strokePaintResolved =
@@ -48,13 +129,10 @@ export function lineBatch(
       : resolveGradientPaint(paint.strokePaint, binding.index, "stroke");
   const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
 
-  const { positions, rowIndex, frameRowIndex, pathOffsets, strokes } = writeLineSubpaths({
-    frame,
-    fx,
-    color,
-    subpaths,
-    includeFrameRows: styleSplit,
-  });
+  const wantSortByX = options.sortByX !== false && binding.layer.geom !== "path";
+  const buffers = buildLineBuffers(frame, fx, color, styles, warnings, wantSortByX);
+  if (buffers === null || buffers.subpaths.length === 0) return null;
+  const { positions, rowIndex, frameRowIndex, pathOffsets, strokes, subpaths } = buffers;
 
   // Apply strokePaint solid fallback when a stroke is still null/theme-default.
   if (strokePaintResolved !== undefined) {

@@ -17,6 +17,8 @@ export function bucketByGroup(
   // filter (no band / column normalize branch). Still call normalizeTransformed
   // so projected panel scales (coord log/sqrt/etc.) that map out-of-range
   // fractions to NaN are dropped with removed-missing — same as positionOf.
+  // Do not short-circuit on type/transform alone: projectors wrap linear
+  // identity scales and override normalizeTransformed.
   if (
     fx.xScale.type !== "band" &&
     fx.yScale.type !== "band" &&

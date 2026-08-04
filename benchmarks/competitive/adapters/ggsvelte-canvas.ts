@@ -2,6 +2,10 @@
  * Canvas-mark ggsvelte mounts (pipeline + planStrata + drawStratum).
  * All imports stay on the lean graph (@ggsvelte/core/render + /dom) so canvas
  * charts never install the Temporal polyfill.
+ *
+ * Spec uses a named data ref (`{ name: "main" }`) so mount/update feed columns
+ * via RunOptions.data without snapshotting 30k cells through toPortable each
+ * draw (same data path product code uses for live updates).
  */
 import { cssColorResolver, drawStratum, sizeCanvasForDpr } from "@ggsvelte/core/dom";
 import { planStrata, runPipeline } from "@ggsvelte/core/render";
@@ -24,23 +28,49 @@ export type MountHandle = {
 
 export type MountResult = { markHint: number; handle: MountHandle };
 
-function scatterSpec(data: ScatterColumns) {
-  return gg(data, aes({ x: "x", y: "y", color: "cls" }))
+const DATA_NAME = "main";
+
+/** Named-data portable specs — built once per scenario, data swapped at run.
+ * theme_void + color/fill guide none: no legend layout (peer canvas fixtures
+ * draw marks only). Keep axis guides on so the panel size stays near the
+ * LayerCake padding box — disabling axes expands the canvas and slowed paint.
+ * Guide form must be `{ type: "none" }` (string `"none"` is not normalized). */
+function scatterPortable() {
+  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", color: "cls" }))
     .geomPoint({ size: 1.5, alpha: 0.7, render: "canvas" })
+    .theme("void")
+    .guides({ color: { type: "none" } })
     .toPortable();
 }
 
-function lineSpec(data: SeriesColumns) {
-  return gg(data, aes({ x: "x", y: "y", color: "series", group: "series" }))
+function linePortable() {
+  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", color: "series", group: "series" }))
     .geomLine({ render: "canvas" })
+    .theme("void")
+    .guides({ color: { type: "none" } })
     .toPortable();
 }
 
-function areaSpec(data: SeriesColumns) {
+function areaPortable() {
   // Identity (not stack): competitors overlay series; default geomArea is stack.
-  return gg(data, aes({ x: "x", y: "y", fill: "series", group: "series" }))
+  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", fill: "series", group: "series" }))
     .geomArea({ position: "identity", render: "canvas" })
+    .theme("void")
+    .guides({ fill: { type: "none" } })
     .toPortable();
+}
+
+function portableFor(scenario: ScenarioId) {
+  switch (scenario) {
+    case "scatter-color":
+      return scatterPortable();
+    case "line-multiseries":
+      return linePortable();
+    case "area-multiseries":
+      return areaPortable();
+    default:
+      throw new Error(`unsupported canvas scenario ${scenario}`);
+  }
 }
 
 export function mountGgsvelteCanvas(
@@ -51,21 +81,12 @@ export function mountGgsvelteCanvas(
   if (scenario === "bars-stacked") {
     throw new Error("ggsvelte-canvas competitive path skips bars-stacked");
   }
-  const specFor = (d: UpdateColumns) => {
-    switch (scenario) {
-      case "scatter-color":
-        return scatterSpec(d as ScatterColumns);
-      case "line-multiseries":
-        return lineSpec(d as SeriesColumns);
-      case "area-multiseries":
-        return areaSpec(d as SeriesColumns);
-      default:
-        throw new Error(`unsupported canvas scenario ${scenario}`);
-    }
-  };
+  // Build the portable once: only columns change on update.
+  const portable = portableFor(scenario);
   root.replaceChildren();
   // Axes/text stay un-drawn in this harness (canvas marks only) so paint cost
-  // isolates mark drawing — documented in README fairness notes.
+  // isolates mark drawing — documented in README fairness notes. theme_void
+  // matches that posture (no axis chrome reserve).
   const canvas = document.createElement("canvas");
   canvas.style.width = `${PLOT_WIDTH}px`;
   canvas.style.height = `${PLOT_HEIGHT}px`;
@@ -76,7 +97,11 @@ export function mountGgsvelteCanvas(
   const resolve = cssColorResolver(canvas);
   let sized = false;
   const draw = (d: UpdateColumns): number => {
-    const model = runPipeline(specFor(d), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+    const model = runPipeline(portable, {
+      width: PLOT_WIDTH,
+      height: PLOT_HEIGHT,
+      data: { [DATA_NAME]: d },
+    });
     const strata = planStrata(model.scene, model.layerBackends);
     if (!sized) {
       sizeCanvasForDpr(canvas, ctx, model.scene.width, model.scene.height, dpr);
@@ -111,13 +136,25 @@ export function mountGgsvelteCanvas(
 }
 
 export function bundleScatterCanvas(data: ScatterColumns): unknown {
-  return runPipeline(scatterSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return runPipeline(scatterPortable(), {
+    width: PLOT_WIDTH,
+    height: PLOT_HEIGHT,
+    data: { [DATA_NAME]: data },
+  });
 }
 
 export function bundleLineCanvas(data: SeriesColumns): unknown {
-  return runPipeline(lineSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return runPipeline(linePortable(), {
+    width: PLOT_WIDTH,
+    height: PLOT_HEIGHT,
+    data: { [DATA_NAME]: data },
+  });
 }
 
 export function bundleAreaCanvas(data: SeriesColumns): unknown {
-  return runPipeline(areaSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return runPipeline(areaPortable(), {
+    width: PLOT_WIDTH,
+    height: PLOT_HEIGHT,
+    data: { [DATA_NAME]: data },
+  });
 }
