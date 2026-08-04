@@ -1,7 +1,7 @@
 <script>
-  import { LayerCake, Svg } from "layercake";
+  import { LayerCake, Canvas } from "layercake";
   import { scaleOrdinal } from "d3-scale";
-  import ScatterSvg from "./ScatterSvg.svelte";
+  import ScatterCanvas from "./ScatterCanvas.svelte";
 
   const COLORS = [
     "#4e79a7",
@@ -33,8 +33,8 @@
     zRange={COLORS}
     padding={{ top: 20, right: 20, bottom: 40, left: 50 }}
   >
-    <Svg>
-      <ScatterSvg />
-    </Svg>
+    <Canvas>
+      <ScatterCanvas />
+    </Canvas>
   </LayerCake>
 </div>

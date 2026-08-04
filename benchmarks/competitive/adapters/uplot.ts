@@ -13,7 +13,13 @@ import {
   type SeriesColumns,
 } from "../scenarios";
 
-export type UPlotHandle = { destroy: () => void };
+export type UpdateColumns = ScatterColumns | SeriesColumns;
+
+export type UPlotHandle = {
+  destroy: () => void;
+  /** uPlot's actual in-place update API: setData with same-shape aligned data. */
+  update: (data: UpdateColumns) => void;
+};
 
 function seriesFromLong(data: SeriesColumns): {
   xs: number[];
@@ -42,15 +48,16 @@ export function mountUplot(
 ): { markHint: number; handle: UPlotHandle } {
   root.replaceChildren();
   if (scenario === "scatter-color") {
-    const scatter = data as ScatterColumns;
     // uPlot requires data[0] (x) sorted ascending; it takes x-domain from first/last
     // samples. Sort outside the timed region would need harness changes — sort here
     // so paint cost still covers all N markers (not an off-canvas empty chart).
-    const order = Array.from({ length: scatter.x.length }, (_, i) => i).toSorted(
-      (a, b) => scatter.x[a]! - scatter.x[b]!,
-    );
-    const xs = order.map((i) => scatter.x[i]!);
-    const ys = order.map((i) => scatter.y[i]!);
+    const aligned = (d: ScatterColumns): uPlot.AlignedData => {
+      const order = Array.from({ length: d.x.length }, (_, i) => i).toSorted(
+        (a, b) => d.x[a]! - d.x[b]!,
+      );
+      return [order.map((i) => d.x[i]!), order.map((i) => d.y[i]!)];
+    };
+    const scatter = data as ScatterColumns;
     // uPlot is not a scatter specialist; plot as points with one series of x/y.
     // Fairness: still a cold canvas chart with N markers.
     const opts: uPlot.Options = {
@@ -69,8 +76,16 @@ export function mountUplot(
       axes: [{}, {}],
       legend: { show: false },
     };
-    const u = new uPlot(opts, [xs, ys], root);
-    return { markHint: scatter.x.length, handle: { destroy: () => u.destroy() } };
+    const u = new uPlot(opts, aligned(scatter), root);
+    return {
+      markHint: scatter.x.length,
+      handle: {
+        destroy: () => u.destroy(),
+        update: (d) => {
+          u.setData(aligned(d as ScatterColumns));
+        },
+      },
+    };
   }
 
   const seriesData = data as SeriesColumns;
@@ -109,5 +124,14 @@ export function mountUplot(
   };
   const aligned: uPlot.AlignedData = [xs, ...ys];
   const u = new uPlot(opts, aligned, root);
-  return { markHint: names.length * xs.length, handle: { destroy: () => u.destroy() } };
+  return {
+    markHint: names.length * xs.length,
+    handle: {
+      destroy: () => u.destroy(),
+      update: (d) => {
+        const next = seriesFromLong(d as SeriesColumns);
+        u.setData([next.xs, ...next.ys]);
+      },
+    },
+  };
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Plot, Line, GridX, GridY } from "svelteplot";
+  import { Plot, BarY, GridX, GridY } from "svelteplot";
 
-  type Row = { x: number; y: number; series: string };
+  type Row = { category: string; value: number; stack: string };
   let {
     rows: initialRows,
     width,
@@ -19,5 +19,9 @@
 <Plot {width} {height}>
   <GridX />
   <GridY />
-  <Line data={rows} x="x" y="y" stroke="series" strokeWidth={1.5} />
+  <!-- Genuinely stacked: BarY applies stackY by default (dist/marks/BarY.svelte),
+       grouping layers by the fill channel. x gets a band scale automatically
+       (BarY declares requiredScales x: ['band']). Colors come from svelteplot's
+       default categorical range — same posture as the scatter/line fixtures. -->
+  <BarY data={rows} x="category" y="value" fill="stack" />
 </Plot>

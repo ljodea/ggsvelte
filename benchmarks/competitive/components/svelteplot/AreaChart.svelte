@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plot, Line, GridX, GridY } from "svelteplot";
+  import { Plot, AreaY, GridX, GridY } from "svelteplot";
 
   type Row = { x: number; y: number; series: string };
   let {
@@ -19,5 +19,10 @@
 <Plot {width} {height}>
   <GridX />
   <GridY />
-  <Line data={rows} x="x" y="y" stroke="series" strokeWidth={1.5} />
+  <!-- IDENTITY position: AreaY implicitly applies stackY only when the y1/y2
+       channels are absent (dist/transforms/stack.js stackXY early-returns when
+       y1 or y2 is set). Passing an explicit baseline y1=0 + topline y2="y"
+       therefore yields overlaid, non-stacked areas — fair vs competitors
+       (#1357). -->
+  <AreaY data={rows} x="x" y1={0} y2="y" fill="series" fillOpacity={0.4} />
 </Plot>

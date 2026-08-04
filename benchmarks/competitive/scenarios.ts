@@ -234,6 +234,7 @@ export type LibId =
   | "echarts"
   | "svelteplot"
   | "layercake"
+  | "layercake-canvas"
   | "ggsvelte-ggplot"
   | "ggsvelte-full";
 
@@ -242,6 +243,9 @@ export type LibMeta = {
   readonly label: string;
   /** Browser paint harness implements this lib. */
   readonly browser: boolean;
+  /** Render form factor — the CI relative gate pairs peers with the
+   * same-form ggsvelte adapter (svg vs svg, canvas vs canvas). */
+  readonly form: "svg" | "canvas";
   /** Bundle matrix includes this lib. */
   readonly bundle: boolean;
   readonly scenarios: readonly ScenarioId[];
@@ -256,6 +260,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "ggsvelte-svg",
     label: "ggsvelte SVG (lean)",
+    form: "svg",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
@@ -264,6 +269,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "ggsvelte-canvas",
     label: "ggsvelte canvas (lean pipeline)",
+    form: "canvas",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries"],
@@ -272,6 +278,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "ggsvelte-full",
     label: "ggsvelte full barrel",
+    form: "svg",
     browser: false,
     bundle: true,
     scenarios: ["scatter-color"],
@@ -280,6 +287,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "ggsvelte-ggplot",
     label: "ggsvelte GGPlot (Svelte)",
+    form: "svg",
     browser: false,
     bundle: true,
     scenarios: ["scatter-color"],
@@ -288,6 +296,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "d3",
     label: "raw D3",
+    form: "svg",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
@@ -296,6 +305,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "uplot",
     label: "uPlot",
+    form: "canvas",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries"],
@@ -304,6 +314,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "chartjs",
     label: "Chart.js",
+    form: "canvas",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
@@ -312,6 +323,7 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "echarts",
     label: "Apache ECharts",
+    form: "canvas",
     browser: true,
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
@@ -320,18 +332,29 @@ export const LIBS: readonly LibMeta[] = [
   {
     id: "svelteplot",
     label: "SveltePlot",
+    form: "svg",
     browser: true,
     bundle: true,
-    scenarios: ["scatter-color", "line-multiseries"],
-    note: "Svelte peer — <Plot><Dot>/<Line> + default axes via components/svelteplot",
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Svelte peer — <Plot><Dot>/<Line>/<AreaY>/<BarY> + default axes via components/svelteplot",
   },
   {
     id: "layercake",
     label: "LayerCake",
+    form: "svg",
     browser: true,
     bundle: true,
-    scenarios: ["scatter-color", "line-multiseries"],
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
     note: "Svelte peer — <LayerCake><Svg> + custom marks via components/layercake (no axes: framework ships none)",
+  },
+  {
+    id: "layercake-canvas",
+    label: "LayerCake (Canvas)",
+    form: "canvas",
+    browser: true,
+    bundle: false,
+    scenarios: ["scatter-color", "line-multiseries"],
+    note: "LayerCake Canvas-layout fast path — one 2D-context draw pass, no per-mark DOM (rebuttal-proofing vs 'SVG-only peer' critique)",
   },
 ] as const;
 

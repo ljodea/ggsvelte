@@ -8,6 +8,7 @@
     "measure:browser:full": "COMPETITIVE_FULL=1 bun run measure-browser.ts",
     "measure:bundles:full": "COMPETITIVE_FULL=1 bun run measure-bundles.ts",
     "measure": "bun run measure:bundles && bun run measure:browser",
+    "check:budgets": "bun run check-budgets.ts",
     "test": "bun test scenarios.test.ts"
   },
   "dependencies": {
