@@ -645,6 +645,11 @@
   vertical-align: middle;
 }
 
+.benchmarks tbody tr:last-child th,
+.benchmarks tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .benchmarks thead th {
   font-size: 0.8rem;
   font-weight: 600;
