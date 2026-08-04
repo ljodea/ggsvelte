@@ -119,6 +119,7 @@
   }
 
   .copy-trigger {
+    position: relative; /* anchors the extended hit region */
     display: grid;
     place-items: center;
     width: 2rem;
@@ -134,6 +135,17 @@
     transition:
       background-color 120ms ease,
       color 120ms ease;
+  }
+
+  /*
+   * DESIGN.md: free-standing controls keep a 44px hit region even when the
+   * visual footprint is smaller (bun-style ghost icon). The pseudo-element
+   * extends the target without growing the hover wash.
+   */
+  .copy-trigger::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
   }
 
   .copy-trigger:hover {

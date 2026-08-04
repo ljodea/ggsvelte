@@ -154,6 +154,7 @@
   }
 
   .bar button[role="tab"] {
+    position: relative; /* anchors the extended hit region */
     min-height: 2.25rem;
     flex: 0 0 auto;
     padding: 0.3rem 0.65rem;
@@ -168,6 +169,13 @@
       color 120ms ease;
   }
 
+  /* 36px visual height, 44px hit height (DESIGN.md hit-region floor). */
+  .bar button[role="tab"]::after {
+    content: "";
+    position: absolute;
+    inset: -4px 0;
+  }
+
   .bar button[role="tab"]:hover {
     color: var(--code-ink);
   }
@@ -178,6 +186,7 @@
   }
 
   .bar .copy {
+    position: relative; /* anchors the extended hit region */
     display: grid;
     place-items: center;
     width: 2rem;
@@ -194,6 +203,13 @@
     transition:
       background-color 120ms ease,
       color 120ms ease;
+  }
+
+  /* 32px visual, 44px hit region (DESIGN.md hit-region floor). */
+  .bar .copy::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
   }
 
   .bar .copy:hover {

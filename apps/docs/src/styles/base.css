@@ -282,6 +282,13 @@ pre {
   color: var(--code-ink);
 }
 
+/* 32px visual, 44px hit region (DESIGN.md hit-region floor). */
+.guide-code-copy button::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
 .guide-code-copy button svg {
   display: block;
   pointer-events: none;
