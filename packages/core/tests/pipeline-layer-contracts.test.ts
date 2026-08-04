@@ -115,6 +115,26 @@ describe("resolveLayerFields", () => {
     expect(y?.source).toBe("stat");
   });
 
+  it("advertises the rolling summary value for tooltips", () => {
+    // Review on #1470: summary_rolling fell through the synthesized-stat
+    // branch list, so tooltips on a running-median chart showed only x.
+    const binding = bindLayer(
+      {
+        geom: "line",
+        stat: "summary_rolling",
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        params: { window: 30, fun: "median" },
+      },
+      0,
+      table,
+      [],
+    );
+    const fields = resolveLayerFields(1, [binding])[0]!;
+    const y = fields.find((f) => f.channel === "y");
+    expect(y?.field).toBe("y");
+    expect(y?.source).toBe("stat");
+  });
+
   it("pads empty bindings to declared layer count (empty-data contract)", () => {
     const fields = resolveLayerFields(2, []);
     expect(fields).toHaveLength(2);

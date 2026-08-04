@@ -48,14 +48,15 @@ export function drawPoints(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   const n = batch.rowIndex.length;
-  // plus/cross are open stroke paths — even a literal shape constant cannot use
-  // the fill-only fast path (it would paint nothing).
+  // plus/cross/circle-open are open stroke paths — even a literal shape
+  // constant cannot use the fill-only fast path (it would paint nothing).
   const needsPerPointPaint =
     batch.sizes !== undefined ||
     batch.alphas !== undefined ||
     batch.shapeIndexes !== undefined ||
     batch.shape === "plus" ||
-    batch.shape === "cross";
+    batch.shape === "cross" ||
+    batch.shape === "circle-open";
   if (needsPerPointPaint) {
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {
@@ -144,7 +145,8 @@ export function drawPointsSubset(
     batch.alphas !== undefined ||
     batch.shapeIndexes !== undefined ||
     batch.shape === "plus" ||
-    batch.shape === "cross";
+    batch.shape === "cross" ||
+    batch.shape === "circle-open";
   if (needsPerPointPaint) {
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {

@@ -78,6 +78,8 @@ const STAT_SUMMARIES: Readonly<Record<StatName, string>> = Object.freeze({
   ecdf: "Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.",
   summary_bin:
     "Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.",
+  summary_rolling:
+    "Centered rolling window over continuous x (params.window, in x units): summarize y per (group, unique x). Partial windows at the ends are kept. Publishes y.",
   contour:
     "Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.",
   align:

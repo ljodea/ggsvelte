@@ -79,12 +79,16 @@ export function applySummaryFun(
       for (let i = 1; i < values.length; i++) if (values[i]! < m) m = values[i]!;
       return m;
     }
-    default: {
-      // max
+    case "max": {
       let m = values[0]!;
       for (let i = 1; i < values.length; i++) if (values[i]! > m) m = values[i]!;
       return m;
     }
+    default:
+      // Exhaustive over SummaryFunName; an out-of-registry name (the manual
+      // keep transforms first/last, or a bad cast) must fail loudly, never
+      // silently alias one of the registry funs.
+      throw new Error(`applySummaryFun: unknown summary fun "${String(fun)}"`);
   }
 }
 

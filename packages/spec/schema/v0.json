@@ -507,9 +507,13 @@
             {
               "type": "string",
               "const": "cross"
+            },
+            {
+              "type": "string",
+              "const": "circle-open"
             }
           ],
-          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\", \"circle-open\". Default \"circle\"."
         },
         "bins": {
           "type": "integer",
@@ -542,6 +546,11 @@
           ],
           "description": "STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
         },
+        "window": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is \"summary_rolling\"."
+        },
         "fun": {
           "anyOf": [
             {
@@ -573,7 +582,7 @@
               "const": "sum"
             }
           ],
-          "description": "SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is \"manual\"."
+          "description": "SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is \"manual\"."
         },
         "funMin": {
           "$ref": "#/$defs/SummaryFun",
@@ -585,7 +594,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the point geom, plus summary_bin and/or manual controls."
+      "description": "Styling parameters for the point geom, plus summary_bin, summary_rolling, and/or manual controls."
     },
     "LineParams": {
       "type": "object",
@@ -687,6 +696,11 @@
           ],
           "description": "STAT BIN / SUMMARY_BIN: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
         },
+        "window": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "STAT SUMMARY_ROLLING ONLY: centered rolling-window width in x data units (must be greater than 0). Required when stat is \"summary_rolling\"."
+        },
         "fun": {
           "anyOf": [
             {
@@ -718,7 +732,7 @@
               "const": "sum"
             }
           ],
-          "description": "SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is \"manual\"."
+          "description": "SUMMARY_BIN / SUMMARY_ROLLING center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is \"manual\"."
         },
         "funMin": {
           "$ref": "#/$defs/SummaryFun",
@@ -738,7 +752,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin, manual, or ecdf pad/n controls."
+      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin, summary_rolling, manual, or ecdf pad/n controls."
     },
     "StepParams": {
       "type": "object",
@@ -1138,9 +1152,13 @@
             {
               "type": "string",
               "const": "cross"
+            },
+            {
+              "type": "string",
+              "const": "circle-open"
             }
           ],
-          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\", \"circle-open\". Default \"circle\"."
         }
       },
       "additionalProperties": false,
@@ -1505,9 +1523,13 @@
             {
               "type": "string",
               "const": "cross"
+            },
+            {
+              "type": "string",
+              "const": "circle-open"
             }
           ],
-          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\", \"circle-open\". Default \"circle\"."
         }
       },
       "additionalProperties": false,
@@ -1772,6 +1794,10 @@
             {
               "type": "string",
               "const": "cross"
+            },
+            {
+              "type": "string",
+              "const": "circle-open"
             }
           ],
           "description": "Mid-point shape. Default \"circle\"."
@@ -2833,16 +2859,21 @@
             },
             {
               "type": "string",
+              "const": "summary_rolling",
+              "description": "Centered rolling window over continuous x (params.window required, in x units); summarize y per (group, unique x). Partial windows at the ends are kept."
+            },
+            {
+              "type": "string",
               "const": "manual",
               "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;)."
             },
             {
               "type": "string",
               "const": "sum",
-              "description": "Aggregate coincident (x, y); size defaults to {stat:\"n\"} (geom_count)."
+              "description": "Aggregate coincident (x, y); size defaults to {stat: \"n\"} (geom_count)."
             }
           ],
-          "description": "Point stat: \"identity\" (default), \"unique\", \"summary_bin\", \"manual\", or \"sum\"."
+          "description": "Point stat: \"identity\" (default), \"unique\", \"summary_bin\", \"summary_rolling\", \"manual\", or \"sum\"."
         },
         "position": {
           "anyOf": [
@@ -2931,6 +2962,11 @@
             },
             {
               "type": "string",
+              "const": "summary_rolling",
+              "description": "Centered rolling window over continuous x (params.window required, in x units); summarize y per (group, unique x) and connect in x order. Partial windows at the ends are kept — a running line reaches both ends of the data."
+            },
+            {
+              "type": "string",
               "const": "manual",
               "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;)."
             },
@@ -2940,7 +2976,7 @@
               "description": "Empirical CDF of x; y defaults to {\"stat\": \"ecdf\"} — do NOT map aes.y to a field. Prefer params.curve \"step-hv\" for ECDF stairs."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\", \"manual\", or \"ecdf\"."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\", \"summary_rolling\", \"manual\", or \"ecdf\"."
         },
         "position": {
           "type": "string",
@@ -7503,6 +7539,10 @@
                   {
                     "type": "string",
                     "const": "cross"
+                  },
+                  {
+                    "type": "string",
+                    "const": "circle-open"
                   }
                 ]
               },
@@ -7536,6 +7576,10 @@
                 {
                   "type": "string",
                   "const": "cross"
+                },
+                {
+                  "type": "string",
+                  "const": "circle-open"
                 }
               ]
             },
@@ -7564,6 +7608,10 @@
                 {
                   "type": "string",
                   "const": "cross"
+                },
+                {
+                  "type": "string",
+                  "const": "circle-open"
                 }
               ]
             },
@@ -7663,6 +7711,10 @@
                       {
                         "type": "string",
                         "const": "cross"
+                      },
+                      {
+                        "type": "string",
+                        "const": "circle-open"
                       }
                     ]
                   },

@@ -12,6 +12,7 @@ import { LINETYPE_DASHES, type Linetype, type PointShape } from "./scales/style.
 /** Renderer-neutral point-shape geometry (one proportion table). */
 export type PointShapeGeometry =
   | { kind: "circle"; mode: "fill"; cx: number; cy: number; r: number }
+  | { kind: "circle"; mode: "stroke"; strokeWidth: number; cx: number; cy: number; r: number }
   | { kind: "rect"; mode: "fill"; x: number; y: number; width: number; height: number }
   | { kind: "polygon"; mode: "fill"; points: readonly (readonly [number, number])[] }
   | {
@@ -93,6 +94,17 @@ export function pointShapeGeometry(
         ],
       };
     }
+    case "circle-open":
+      // Unfilled ring (ggplot2 shape 1): stroke in the mark's color channel,
+      // width proportional to size so small rings stay visible.
+      return {
+        kind: "circle",
+        mode: "stroke",
+        strokeWidth: Math.max(1, size / 3),
+        cx: x,
+        cy: y,
+        r: size,
+      };
     default:
       return { kind: "circle", mode: "fill", cx: x, cy: y, r: size };
   }

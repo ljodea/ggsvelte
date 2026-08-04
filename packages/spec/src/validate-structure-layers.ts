@@ -182,6 +182,45 @@ export function layerStructuralErrors(
     errors.push(...ribbonStructuralErrors(layer, layerPath, mapped));
   }
 
+  if (stat === "summary" || stat === "summary_bin" || stat === "summary_rolling") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const fun = params["fun"];
+    // first|last are stat manual's row-keep transforms. The point/line params
+    // union admits them for every stat, and core's summary registry does not
+    // implement them — they must fail here, not silently summarize as max.
+    if (fun === "first" || fun === "last") {
+      errors.push({
+        code: "summary-fun-unsupported",
+        path: `${layerPath}/params/fun`,
+        message: `The ${stat} stat summarizes with the registry funs mean|median|sum|min|max; params.fun "${fun}" is a manual-stat keep transform and has no meaning here.`,
+        fix: {
+          description:
+            "Use mean, median, or sum for the center summary (min/max via funMin/funMax where supported).",
+          example: { params: { fun: "median" } },
+        },
+      });
+    }
+  }
+
+  if (stat === "summary_rolling") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const window = params["window"];
+    // Non-number / non-positive windows are rejected by the schema type.
+    if (window === undefined || window === null || window === "") {
+      errors.push({
+        code: "summary-rolling-window-required",
+        path: `${layerPath}/params/window`,
+        message:
+          "The summary_rolling stat requires params.window (rolling-window width in x data units, greater than 0). There is no silent default width.",
+        fix: {
+          description:
+            "Set params.window to the window width in x units (e.g. 30 for a 30-year running summary).",
+          example: { params: { window: 30 } },
+        },
+      });
+    }
+  }
+
   if (stat === "manual") {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
     const fun = params["fun"];

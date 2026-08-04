@@ -7468,7 +7468,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "range",
         description: "Explicit output range for the mapped aesthetic.",
-        typeSummary: 'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross">',
+        typeSummary:
+          'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open">',
         required: false,
       },
       {
@@ -7480,13 +7481,15 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "naValue",
         description: "Replacement for missing/null source values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
         name: "unknownValue",
         description: "Replacement for invalid, out-of-domain, or unmapped values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -7532,7 +7535,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "range",
         description: "Explicit output range for the mapped aesthetic.",
-        typeSummary: 'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross">',
+        typeSummary:
+          'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open">',
         required: false,
       },
       {
@@ -7544,13 +7548,15 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "naValue",
         description: "Replacement for missing/null source values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
         name: "unknownValue",
         description: "Replacement for invalid, out-of-domain, or unmapped values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -7583,13 +7589,15 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "naValue",
         description: "Replacement for missing/null source values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
         name: "unknownValue",
         description: "Replacement for invalid, out-of-domain, or unmapped values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -7622,13 +7630,15 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "naValue",
         description: "Replacement for missing/null source values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
         name: "unknownValue",
         description: "Replacement for invalid, out-of-domain, or unmapped values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
@@ -7675,7 +7685,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "range",
         description: "Explicit output range for the mapped aesthetic.",
-        typeSummary: 'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross">',
+        typeSummary:
+          'Array<"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open">',
         required: false,
       },
       {
@@ -7687,13 +7698,15 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "naValue",
         description: "Replacement for missing/null source values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {
         name: "unknownValue",
         description: "Replacement for invalid, out-of-domain, or unmapped values.",
-        typeSummary: '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross"',
+        typeSummary:
+          '"circle" | "triangle" | "square" | "diamond" | "plus" | "cross" | "circle-open"',
         required: false,
       },
       {

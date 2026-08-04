@@ -66,6 +66,8 @@ export function styleBinding(
       smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],
       summary_bin: ["y", "ymin", "ymax"],
+      // One measure output per (group, x): the rolling summary itself.
+      summary_rolling: ["y"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
       sum: ["n", "prop"],
       ecdf: ["ecdf"],

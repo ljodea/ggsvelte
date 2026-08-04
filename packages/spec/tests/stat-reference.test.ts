@@ -15,7 +15,7 @@ import {
 describe("STAT_REFERENCE", () => {
   it("covers every KNOWN_STATS entry exactly once", () => {
     expect(Object.keys(STAT_REFERENCE).toSorted()).toEqual([...KNOWN_STATS].toSorted());
-    expect(KNOWN_STATS).toHaveLength(28);
+    expect(KNOWN_STATS).toHaveLength(29);
   });
 
   it("every entry has a non-empty summary and matching slug", () => {

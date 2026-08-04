@@ -136,7 +136,7 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
+  stat?: "identity" | "unique" | "summary_bin" | "summary_rolling" | "manual" | "sum";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -153,7 +153,16 @@ export interface CountLayerInput extends LayerInputBase {
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
   /** identity | unique | bin | align | connect | summary_bin | manual | ecdf */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
+  stat?:
+    | "identity"
+    | "unique"
+    | "bin"
+    | "align"
+    | "connect"
+    | "summary_bin"
+    | "summary_rolling"
+    | "manual"
+    | "ecdf";
   position?: "identity";
   params?: LineParams;
 }

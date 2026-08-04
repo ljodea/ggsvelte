@@ -134,6 +134,7 @@ export const POINT_SHAPE_NAMES = [
   "diamond",
   "plus",
   "cross",
+  "circle-open",
 ] as const;
 export type PointShapeName = (typeof POINT_SHAPE_NAMES)[number];
 

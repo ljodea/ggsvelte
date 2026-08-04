@@ -37,6 +37,7 @@ export const STAT_REGISTER_HINTS: Readonly<Record<string, string>> = {
   smooth: "registerSmooth",
   summary: "registerSummary",
   summary_bin: "registerSummaryBin",
+  summary_rolling: "registerSummaryRolling",
   unique: "registerUnique",
   ydensity: "registerViolin",
 };

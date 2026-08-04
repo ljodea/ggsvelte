@@ -974,6 +974,52 @@ exports[`ERROR_CATALOG coverage [manual-fun-required] is reproducible; message +
 }
 `;
 
+exports[`ERROR_CATALOG coverage [summary-rolling-window-required] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.window to the rolling-window width in x data units (greater than 0).",
+    "summary": "A layer uses stat summary_rolling without params.window.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "summary-rolling-window-required",
+    "fix": {
+      "description": "Set params.window to the window width in x units (e.g. 30 for a 30-year running summary).",
+      "example": {
+        "params": {
+          "window": 30,
+        },
+      },
+    },
+    "message": "The summary_rolling stat requires params.window (rolling-window width in x data units, greater than 0). There is no silent default width.",
+    "path": "/layers/0/params/window",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [summary-fun-unsupported] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use mean, median, or sum (min/max via funMin/funMax where supported); first|last belong to stat manual.",
+    "summary": "A summary stat uses params.fun first|last, which only stat manual implements.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "summary-fun-unsupported",
+    "fix": {
+      "description": "Use mean, median, or sum for the center summary (min/max via funMin/funMax where supported).",
+      "example": {
+        "params": {
+          "fun": "median",
+        },
+      },
+    },
+    "message": "The summary_rolling stat summarizes with the registry funs mean|median|sum|min|max; params.fun "first" is a manual-stat keep transform and has no meaning here.",
+    "path": "/layers/0/params/fun",
+  },
+}
+`;
+
 exports[`ERROR_CATALOG coverage [invalid-data-profile] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {

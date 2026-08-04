@@ -33,12 +33,54 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   /** ggplot2 after_stat(ecdf); y channel defaults to this column. */
   ecdf: ["ecdf"],
   summary_bin: ["y", "ymin", "ymax"],
+  /** Centered rolling-window summary; one row per (group, unique x). */
+  summary_rolling: ["y"],
   contour: ["level"],
   quantile: ["y"],
   density_2d: ["level", "density"],
   density_2d_filled: ["level", "density"],
   qq: ["sample", "theoretical"],
   qq_line: ["sample", "theoretical"],
+};
+
+/**
+ * y-channel {stat} columns, mirroring core's STAT_Y_COLUMNS
+ * (packages/core/src/pipeline/bind-layer-stat-columns.ts — keep in sync). The
+ * generic STAT_COLUMNS table covers style channels; the y channel is stricter
+ * because summary-family stats write y as a frame coordinate (a measure
+ * output) and publish no y-mappable column. Validating against STAT_COLUMNS
+ * here let specs through that the renderer rejects with unknown-stat-column.
+ */
+const STAT_Y_CHANNEL_COLUMNS: Record<string, readonly string[]> = {
+  identity: [],
+  unique: [],
+  manual: [],
+  count: ["count"],
+  bin: ["count", "density", "ncount", "ndensity"],
+  density: ["density", "count", "scaled", "ndensity"],
+  ydensity: ["density", "count", "scaled", "violinwidth"],
+  density_2d: [],
+  density_2d_filled: [],
+  bindot: ["stackpos"],
+  smooth: [],
+  boxplot: [],
+  summary: [],
+  sum: [],
+  function: ["y"],
+  ecdf: ["ecdf"],
+  summary_bin: [],
+  summary_rolling: [],
+  contour: [],
+  connect: [],
+  align: [],
+  ellipse: [],
+  bin_hex: [],
+  bin_2d: [],
+  quantile: [],
+  sf: [],
+  sf_coordinates: [],
+  qq: [],
+  qq_line: [],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -247,7 +289,8 @@ export function collectLayerDataChecks(input: {
       const path = `/layers/${i}/aes/${channel}`;
 
       if ("stat" in mapped) {
-        const generated = STAT_COLUMNS[stat] ?? [];
+        const generated =
+          (channel === "y" ? STAT_Y_CHANNEL_COLUMNS[stat] : STAT_COLUMNS[stat]) ?? [];
         if (!generated.includes(mapped.stat)) {
           errors.push({
             code: "unknown-stat-column",

@@ -79,6 +79,7 @@ export const KNOWN_STATS = [
   "function",
   "ecdf",
   "summary_bin",
+  "summary_rolling",
   "contour",
   "align",
   "density_2d",
