@@ -41,20 +41,12 @@ and Windows.
 
 ## Benchmarks
 
-Versus its two direct Svelte peers — [SveltePlot](https://svelteplot.dev) and
-[LayerCake](https://layercake.graphics) — on the benchmarks where ggsvelte
-pulls ahead. Only benchmarks ggsvelte wins outright get a chart; the full
-matrix (d3, uPlot, Chart.js, and ECharts included) and the harness live in
-[`benchmarks/competitive`](benchmarks/competitive).
+Cold mount speed vs [SveltePlot](https://svelteplot.dev) and
+[LayerCake](https://layercake.graphics).
 
-![Mount a 10,000-point colored scatter: ggsvelte 75.5 ms, LayerCake 354.3 ms, SveltePlot 7,193 ms](apps/docs/static/benchmarks/bench-scatter-mount.svg)
+![10,000-point colored scatter: ggsvelte 75.5 ms, LayerCake 354.3 ms, SveltePlot 7,193 ms](apps/docs/static/benchmarks/bench-scatter-mount.svg)
 
-![Mount a 3 × 10,000-point line chart: ggsvelte 52 ms, LayerCake 65 ms, SveltePlot 1,889 ms](apps/docs/static/benchmarks/bench-line-mount.svg)
-
-Canvas render target footnotes: scatter — ggsvelte 33.1 ms, LayerCake 36.7 ms;
-line — ggsvelte 61.3 ms, LayerCake 50.2 ms. Median of 11 cold mounts, Chromium
-(Playwright), Linux x64; charts drawn with ggsvelte's headless renderer.
-Reproduce: `cd benchmarks/competitive && bun run measure:browser`.
+![3 × 10,000-point line chart: ggsvelte 52 ms, LayerCake 65 ms, SveltePlot 1,889 ms](apps/docs/static/benchmarks/bench-line-mount.svg)
 
 | Capability                                                 | ggsvelte  | SveltePlot           | LayerCake                    |
 | ---------------------------------------------------------- | --------- | -------------------- | ---------------------------- |
@@ -66,13 +58,11 @@ Reproduce: `cd benchmarks/competitive && bun run measure:browser`.
 | **Agent skill** (SKILL.md, llms.txt)                       | ✅        | ❌                   | ❌                           |
 | **Automatic temporal detection**                           | ✅        | ⚠️ Date objects only | ❌                           |
 | **Built-in interactions** (tooltip, select, zoom, linking) | ✅        | ⚠️ tooltip + brush   | ❌                           |
-| **Grammar-of-graphics API**                                | ✅        | ✅                   | ❌ hand-written marks        |
+| **ggplot2 API**                                            | ✅        | ❌                   | ❌ hand-written marks        |
 | **Scale, axis & coord control**                            | ✅        | ✅                   | ⚠️ hand-configured d3 scales |
 
-Limitations first, bun-style: ggsvelte pays for its full grammar runtime in
-bundle bytes, and it is pre-1.0. After that: neither peer ships a portable
-spec, schema, CLI validator, or agent skill; LayerCake leaves interactivity
-and mark drawing to you; SveltePlot renders an empty shell server-side.
+Harness and full matrix (d3, uPlot, Chart.js, ECharts):
+[`benchmarks/competitive`](benchmarks/competitive).
 
 ## Reference
 

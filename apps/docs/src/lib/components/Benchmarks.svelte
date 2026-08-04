@@ -16,7 +16,7 @@
 
   interface Row {
     readonly feature: string;
-    readonly desc: string;
+    readonly desc?: string;
     readonly gg: Cell;
     readonly sp: Cell;
     readonly lc: Cell;
@@ -42,90 +42,75 @@
   const rows: readonly Row[] = [
     {
       feature: "Bundle size",
-      desc: "Min+gzip, 1,000-point scatter app — the price of the full grammar runtime",
+      desc: "Min+gzip, 1k scatter app",
       gg: { mark: "partial", note: kb(BENCHMARK_BUNDLE_KB.ggsvelteKb) },
       sp: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.svelteplotKb) },
       lc: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.layercakeKb) },
     },
     {
       feature: "API stability",
-      desc: "Pre-1.0: minors can still break (lifecycle-tracked)",
+      desc: "Pre-1.0: minors can still break",
       gg: { mark: "partial", note: `v${BENCHMARK_VERSIONS.ggsvelte}` },
       sp: { mark: "partial", note: `v${BENCHMARK_VERSIONS.svelteplot}` },
       lc: { mark: "yes", note: `v${BENCHMARK_VERSIONS.layercake}` },
     },
     {
       feature: "Headless server-side SVG",
-      desc: "data → SVG string in Node/Bun, no DOM",
+      desc: "data → SVG string, no DOM",
       gg: yes,
-      sp: { mark: "no", note: "renders an empty shell" },
-      lc: { mark: "partial", note: "opt-in ssr flag" },
+      sp: { mark: "no", note: "empty shell" },
+      lc: { mark: "partial", note: "opt-in ssr" },
     },
     {
       feature: "Portable JSON spec + schema",
-      desc: "validate() returns machine-applicable fixes",
       gg: yes,
       sp: no,
       lc: no,
     },
     {
       feature: "CLI validator + renderer",
-      desc: "ggsvelte-render spec.json > out.svg",
       gg: yes,
       sp: no,
       lc: no,
     },
     {
       feature: "Agent skill",
-      desc: "SKILL.md + llms.txt corpus for coding agents",
       gg: yes,
       sp: no,
       lc: no,
     },
     {
       feature: "Automatic temporal detection",
-      desc: "ISO dates, year-months, and quarters infer time scales",
       gg: yes,
-      sp: { mark: "partial", note: "Date objects only" },
+      sp: { mark: "partial", note: "Date only" },
       lc: no,
     },
     {
       feature: "Built-in interactions",
-      desc: "Tooltips, selection, zoom, linked views",
+      desc: "Tooltip, select, zoom, link",
       gg: yes,
-      sp: { mark: "partial", note: "tooltip + brush marks" },
+      sp: { mark: "partial", note: "tooltip + brush" },
       lc: { mark: "no", note: "bring your own" },
     },
     {
-      feature: "Grammar-of-graphics API",
-      desc: "Geoms, stats, positions, and facets as composable layers",
+      feature: "ggplot2 API",
       gg: yes,
-      sp: yes,
+      sp: no,
       lc: { mark: "no", note: "hand-written marks" },
     },
     {
       feature: "Scale, axis & coord control",
-      desc: "Transforms, breaks, expansion, and flips declared as data",
       gg: yes,
       sp: yes,
-      lc: { mark: "partial", note: "hand-configured d3 scales" },
+      lc: { mark: "partial", note: "hand-configured d3" },
     },
   ];
 </script>
 
 <section class="benchmarks" aria-labelledby="benchmarks-heading">
   <header class="bench-intro">
-    <h2 id="benchmarks-heading">Benchmarks we win</h2>
-    <p>
-      Against its two direct Svelte peers, ggsvelte mounts real datasets faster
-      — and ships the agent tooling they don't. Only benchmarks ggsvelte wins
-      outright get a chart; the full matrix (d3, uPlot, Chart.js, and ECharts
-      included) lives in
-      <a
-        href="https://github.com/ljodea/ggsvelte/tree/main/benchmarks/competitive"
-        >benchmarks/competitive</a
-      >.
-    </p>
+    <h2 id="benchmarks-heading">Mounts first</h2>
+    <p>10,000-point charts. Cold start.</p>
   </header>
 
   <div class="bench-grid">
@@ -153,13 +138,16 @@
             loading="lazy"
           />
         </div>
-        <p class="bench-foot">{card.footnote}</p>
       </figure>
     {/each}
   </div>
 
   <div class="bench-table-wrap">
     <table>
+      <colgroup>
+        <col class="bench-col-feature" />
+        <col class="bench-col-lib" span="3" />
+      </colgroup>
       <thead>
         <tr>
           <th scope="col">Capability</th>
@@ -173,7 +161,7 @@
           <tr>
             <th scope="row">
               {row.feature}
-              <small>{row.desc}</small>
+              {#if row.desc !== undefined}<small>{row.desc}</small>{/if}
             </th>
             {#each [row.gg, row.sp, row.lc] as cell, i (i)}
               <td>
@@ -188,14 +176,4 @@
       </tbody>
     </table>
   </div>
-
-  <p class="bench-method">
-    ggsvelte {BENCHMARK_VERSIONS.ggsvelte} · SveltePlot {BENCHMARK_VERSIONS.svelteplot}
-    · LayerCake {BENCHMARK_VERSIONS.layercake} · median of 11 cold mounts, Chromium
-    (Playwright), Linux x64 · charts drawn with ggsvelte's headless renderer · reproduce:
-    <code
-      >cd benchmarks/competitive && bun run measure:browser && bun run
-      measure:bundles</code
-    >
-  </p>
 </section>
