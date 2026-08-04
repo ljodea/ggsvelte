@@ -298,7 +298,7 @@ function stringLooksNumeric(value: string): boolean {
  */
 function fieldTypeFromLiteDecision(
   decision: ParsedColumnView["decision"],
-  raw: readonly CellValue[],
+  getRaw: () => readonly CellValue[],
 ): FieldType | null {
   // Only lean parse keys carry monomorphic classification we can trust.
   if (decision.parserKey !== "lite:auto" && decision.parserKey !== "lite:numeric-only") {
@@ -310,6 +310,7 @@ function fieldTypeFromLiteDecision(
   if (validatedCount === nonNullCount) return "quantitative";
   // No finite semantic: pure labels or all-NaN numbers. One non-null probe.
   if (validatedCount === 0) {
+    const raw = getRaw();
     for (let i = 0; i < raw.length; i++) {
       const value = raw[i]!;
       if (value === null) continue;
@@ -625,7 +626,8 @@ export class ColumnTable {
           : // Lean monomorphic parse already classified the column once
             // (pure numbers / pure labels). Reuse that instead of a second
             // O(n) typeof walk — fieldType was a top bind cost on line-3×10k.
-            (fieldTypeFromLiteDecision(view.decision, this.column(name)) ??
+            // Lazy column() so facet O(n) read-count tests stay bounded (#183).
+            (fieldTypeFromLiteDecision(view.decision, () => this.column(name)) ??
             nonTemporalFieldType(this.column(name)));
     this.#typeCache.set(cacheKey, type);
     return type;
