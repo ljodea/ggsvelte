@@ -109,6 +109,12 @@ function binnedStyleColumn(
 
 export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] {
   const aes = binding.layer.aes ?? {};
+  // Explicit aes.group wins outright in deriveGroups — skip per-channel
+  // discreteness / binned style probes (table.discreteness parses columns).
+  const groupChannel = aes["group"];
+  if (groupChannel !== undefined && groupChannel !== null && !("stat" in groupChannel)) {
+    return deriveGroups(table.columns(), { group: groupChannel }).groups as number[];
+  }
   const declared: Record<string, Discreteness> = {};
   const overrides: Record<string, ChannelGroupingOverrides[string]> = {};
   for (const [channel, mapping] of Object.entries(aes)) {
@@ -161,7 +167,8 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
       };
     }
   }
-  return [...deriveGroups(table.columns(), aes, declared, overrides).groups];
+  // deriveGroups already returns a fresh number[]; do not spread-copy 30k ids.
+  return deriveGroups(table.columns(), aes, declared, overrides).groups as number[];
 }
 
 /** Carried mapped columns for stats (styles/label, minus the x field). */

@@ -122,29 +122,30 @@ export function drawPaths(
   const baseAlpha = ctx.globalAlpha;
   const restoreGlow = applyGlow(ctx, batch.glow);
   const themeColors = { ink: themeVar("ink", theme), accent: themeVar("accent", theme) };
+  const needBounds = batch.fillPaint !== undefined || batch.strokePaint !== undefined;
   for (let s = 0; s < subpaths; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
-    const bounds = subpathBounds(batch.positions, start, end);
+    // Bounds only for gradient paint (solid strokes skip the O(vertices) scan).
+    const bounds = needBounds ? subpathBounds(batch.positions, start, end) : null;
     const style = resolvePathMark(batch, s, themeColors);
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
     ctx.globalAlpha = baseAlpha * style.alpha;
     if (isArea) {
       const solid = style.fill === "none" ? themeColors.accent : style.fill;
-      ctx.fillStyle = resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
+      ctx.fillStyle =
+        bounds === null
+          ? resolve(solid)
+          : resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
       if (batch.fillRule === "evenodd") ctx.fill("evenodd");
       else ctx.fill();
       if (style.stroke !== "none") {
-        const strokeStyle = resolvePaintStyle(
-          ctx,
-          style.stroke,
-          batch.strokePaint,
-          bounds,
-          resolve,
-        );
-        ctx.strokeStyle = strokeStyle;
+        ctx.strokeStyle =
+          bounds === null
+            ? resolve(style.stroke)
+            : resolvePaintStyle(ctx, style.stroke, batch.strokePaint, bounds, resolve);
         ctx.lineWidth = style.width;
         if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
         ctx.lineJoin = style.linejoin;
@@ -153,8 +154,10 @@ export function drawPaths(
       }
     } else {
       const solid = style.stroke === "none" ? themeColors.ink : style.stroke;
-      const strokeStyle = resolvePaintStyle(ctx, solid, batch.strokePaint, bounds, resolve);
-      ctx.strokeStyle = strokeStyle;
+      ctx.strokeStyle =
+        bounds === null
+          ? resolve(solid)
+          : resolvePaintStyle(ctx, solid, batch.strokePaint, bounds, resolve);
       ctx.lineWidth = style.width;
       if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
       ctx.lineJoin = style.linejoin;

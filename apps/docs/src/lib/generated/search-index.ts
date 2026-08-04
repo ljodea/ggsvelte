@@ -21521,12 +21521,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:path:trajectory",
     kind: "example",
-    title: "Minard's march on Moscow, map and all",
+    title: "Minard's march on Moscow",
     summary:
       "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
     href: "/examples/path/trajectory",
     keywords: [
-      "Minard's march on Moscow, map and all",
+      "Minard's march on Moscow",
       "Maps & polygons",
       "path",
       "map",
@@ -21535,7 +21535,7 @@ export const DOCS_SEARCH_INDEX = [
       "text",
       "data-order",
     ],
-    exact: ["Minard's march on Moscow, map and all"],
+    exact: ["Minard's march on Moscow"],
   },
   {
     id: "example:point:abline-identity",

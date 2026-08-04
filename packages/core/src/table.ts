@@ -97,9 +97,8 @@ function liteParseColumn(
     );
   }
   const inferTemporal = options.inferTemporal !== false;
-  const nonNull = raw.filter((value) => value !== null);
   if (!inferTemporal) {
-    const { semantic, valid } = fallbackNumeric(raw, false);
+    const { semantic, valid, nonNullCount } = fallbackNumeric(raw, false);
     return {
       decision: {
         status: "nominal",
@@ -108,7 +107,7 @@ function liteParseColumn(
         kind: null,
         precision: null,
         evidence: [],
-        nonNullCount: nonNull.length,
+        nonNullCount,
         validatedCount: 0,
         failedCount: 0,
         candidates: [],
@@ -119,31 +118,43 @@ function liteParseColumn(
       precision: undefined,
     };
   }
-  // Detect ISO-like string columns without the Temporal polyfill.
-  // Every non-null cell must be an ISO-like string (or a finite Date); a
-  // mixed column such as ["2024-01-01", 5] must not become temporal — numbers
-  // would coerce to epoch ms near 1970 (parity with inferFieldType lean path
-  // and the full temporal runtime, which fails non-ISO cells).
+  // Single pass: classify the column and count non-nulls. Pure number columns
+  // (the competitive x/y path) and pure non-ISO string columns (color/group
+  // series labels) take monomorphic fast paths that skip ISO coercion.
+  let nonNullCount = 0;
   let isoCount = 0;
   let stringCount = 0;
   let sawClock = false;
+  let sawNumber = false;
+  let sawNumericLookingString = false;
   let blockingNonString = false;
+  let allNumberOrNull = true;
   for (const value of raw) {
     if (value === null) continue;
+    nonNullCount++;
+    if (typeof value === "number") {
+      sawNumber = true;
+      continue;
+    }
+    allNumberOrNull = false;
     if (typeof value === "string") {
       stringCount++;
       if (isIsoLikeString(value)) {
         isoCount++;
         if (isoHasClock(value)) sawClock = true;
+      } else if (stringLooksNumeric(value)) {
+        // "10" / " 3.5" must stay on cellsToNumeric (Number coercion), not the
+        // all-NaN label path — lean and full runtime must agree (#1468 review).
+        sawNumericLookingString = true;
       }
       continue;
     }
     if (value instanceof Date && Number.isFinite(value.getTime())) continue;
     blockingNonString = true;
   }
-  const temporal = !blockingNonString && stringCount > 0 && isoCount === stringCount;
-  if (!temporal) {
-    const { semantic, valid } = fallbackNumeric(raw, true);
+
+  if (allNumberOrNull) {
+    const { semantic, valid } = pureNumberSemantic(raw);
     return {
       decision: {
         status: "nominal",
@@ -152,7 +163,48 @@ function liteParseColumn(
         kind: null,
         precision: null,
         evidence: [],
-        nonNullCount: nonNull.length,
+        nonNullCount,
+        validatedCount: 0,
+        failedCount: 0,
+        candidates: [],
+      },
+      semantic,
+      valid,
+      kind: undefined,
+      precision: undefined,
+    };
+  }
+
+  // Detect ISO-like string columns without the Temporal polyfill.
+  // Every non-null cell must be an ISO-like string (or a finite Date); a
+  // mixed column such as ["2024-01-01", 5] must not become temporal — numbers
+  // would coerce to epoch ms near 1970 (parity with inferFieldType lean path
+  // and the full temporal runtime, which fails non-ISO cells).
+  // `sawNumber` is the original blockingNonString path for numbers, kept
+  // separate so pure-number columns can take the monomorphic fast path above.
+  const temporal = !blockingNonString && !sawNumber && stringCount > 0 && isoCount === stringCount;
+  if (!temporal) {
+    // Pure non-ISO *label* strings (series names): semantic is all-NaN — skip
+    // cellsToNumeric. Numeric text ("10") is NOT a label path.
+    const pureNonIsoLabelStrings =
+      !blockingNonString &&
+      !sawNumber &&
+      !sawNumericLookingString &&
+      stringCount > 0 &&
+      isoCount === 0 &&
+      stringCount === nonNullCount;
+    const { semantic, valid } = pureNonIsoLabelStrings
+      ? allInvalidSemantic(raw.length)
+      : fallbackNumeric(raw, true);
+    return {
+      decision: {
+        status: "nominal",
+        parser: null,
+        parserKey: "lite:auto",
+        kind: null,
+        precision: null,
+        evidence: [],
+        nonNullCount,
         validatedCount: 0,
         failedCount: 0,
         candidates: [],
@@ -174,6 +226,12 @@ function liteParseColumn(
   }
   const kind = sawClock ? "datetime" : "date";
   const precision = sawClock ? "second" : "date";
+  // Evidence is a short sample of non-null raw cells (not a full filter copy).
+  const evidence: (string | number | boolean | null)[] = [];
+  for (let i = 0; i < raw.length && evidence.length < 5; i++) {
+    const value = raw[i]!;
+    if (value !== null) evidence.push(value as string | number | boolean | null);
+  }
   return {
     decision: {
       status: "temporal",
@@ -181,10 +239,10 @@ function liteParseColumn(
       parserKey: "lite:iso",
       kind,
       precision,
-      evidence: nonNull.slice(0, 5) as (string | number | boolean | null)[],
-      nonNullCount: nonNull.length,
+      evidence,
+      nonNullCount,
       validatedCount,
-      failedCount: nonNull.length - validatedCount,
+      failedCount: nonNullCount - validatedCount,
       candidates: ["iso"],
     },
     semantic,
@@ -194,18 +252,58 @@ function liteParseColumn(
   };
 }
 
-function fallbackNumeric(
-  raw: readonly CellValue[],
-  inferTemporal: boolean,
-): { semantic: Float64Array; valid: Uint8Array } {
-  const semantic = inferTemporal ? cellsToNumeric(raw) : cellsToQuantitative(raw);
+/** Number-or-null columns: direct Float64 copy, no ISO/string branches. */
+function pureNumberSemantic(raw: readonly CellValue[]): {
+  semantic: Float64Array;
+  valid: Uint8Array;
+} {
+  const semantic = new Float64Array(raw.length);
   const valid = new Uint8Array(raw.length);
-  for (let index = 0; index < semantic.length; index++) {
-    if (Number.isFinite(semantic[index]!)) valid[index] = 1;
+  for (let index = 0; index < raw.length; index++) {
+    const value = raw[index]!;
+    if (typeof value === "number") {
+      semantic[index] = value;
+      if (Number.isFinite(value)) valid[index] = 1;
+    } else {
+      semantic[index] = Number.NaN;
+    }
   }
   return { semantic, valid };
 }
 
+/** Nominal string labels: all-invalid semantic (no per-cell coercion). */
+function allInvalidSemantic(length: number): { semantic: Float64Array; valid: Uint8Array } {
+  const semantic = new Float64Array(length);
+  semantic.fill(Number.NaN);
+  return { semantic, valid: new Uint8Array(length) };
+}
+
+/**
+ * True when a non-ISO string might still coerce via Number() (CSV-ish numeric
+ * text). Labels like "s0" / "series-1" are false (letter first after trim).
+ */
+function stringLooksNumeric(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return false;
+  const c0 = trimmed.codePointAt(0);
+  if (c0 === undefined) return false;
+  // digit, '+', '-', '.'
+  return (c0 >= 48 && c0 <= 57) || c0 === 43 || c0 === 45 || c0 === 46;
+}
+
+function fallbackNumeric(
+  raw: readonly CellValue[],
+  inferTemporal: boolean,
+): { semantic: Float64Array; valid: Uint8Array; nonNullCount: number } {
+  const semantic = inferTemporal ? cellsToNumeric(raw) : cellsToQuantitative(raw);
+  const valid = new Uint8Array(raw.length);
+  let nonNullCount = 0;
+  for (let index = 0; index < semantic.length; index++) {
+    if (raw[index] !== null) nonNullCount++;
+    if (Number.isFinite(semantic[index]!)) valid[index] = 1;
+  }
+  return { semantic, valid, nonNullCount };
+}
 export class ColumnTable {
   readonly #columns: Record<string, readonly CellValue[]>;
   readonly #rowCount: number;
@@ -325,9 +423,15 @@ export class ColumnTable {
         : runtime.parseColumn(raw, parser, options);
     const inferTemporal = options.inferTemporal !== false;
     const temporal = parser !== "auto" || (inferTemporal && parsed.decision.status === "temporal");
-    const values = temporal
-      ? { semantic: parsed.semantic, valid: parsed.valid }
-      : fallbackNumeric(raw, inferTemporal);
+    // Lean liteParseColumn already materializes semantic/valid for every
+    // decision (including nominal). Re-running fallbackNumeric doubled the
+    // per-cell coerce cost on every non-temporal column (line-3×10k bind
+    // was ~half of runPipeline). Full temporal runtime still falls back for
+    // nominal auto columns so mixed/non-ISO cells get cellsToNumeric.
+    const values =
+      temporal || runtime === null
+        ? { semantic: parsed.semantic, valid: parsed.valid }
+        : fallbackNumeric(raw, inferTemporal);
     const view: ParsedColumnView = {
       raw,
       semantic: values.semantic,

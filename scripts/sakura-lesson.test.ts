@@ -415,10 +415,10 @@ describe("gate G8 — annotations that do not fight the chart", () => {
         for (let p = 0; p < batch.positions.length / 2; p += 1) {
           const px = batch.positions[p * 2]!;
           const py = batch.positions[p * 2 + 1]!;
-          if (px >= box.x0 && px <= box.x1 && py >= box.y0 && py <= box.y1) {
-            if (batch.kind === "points") points += 1;
-            else trend += 1;
-          }
+          // Early continue keeps this under eslint max-depth (4).
+          if (px < box.x0 || px > box.x1 || py < box.y0 || py > box.y1) continue;
+          if (batch.kind === "points") points += 1;
+          else trend += 1;
         }
       }
       expect(trend, `baseline tag crosses the trend at ${width}px`).toBe(0);

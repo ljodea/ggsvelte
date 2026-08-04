@@ -18,6 +18,12 @@ export function isoHasClock(value: string): boolean {
 
 /** Parse common ISO date/datetime strings to UTC epoch ms, or undefined. */
 export function isoEpochMs(value: string): number | undefined {
+  // Cheap reject before the full regex: YYYY-MM-DD is 10 chars, and the year
+  // must start with a digit. Series labels ("s0") and other short strings hit
+  // this path on every cell during column coercion.
+  if (value.length < 10) return undefined;
+  const c0 = value.codePointAt(0);
+  if (c0 === undefined || c0 < 48 /* 0 */ || c0 > 57 /* 9 */) return undefined;
   const match = ISO_LIKE.exec(value);
   if (match === null) return undefined;
   const year = Number(match[1]);

@@ -1,0 +1,113 @@
+{
+  "$comment": "PROVISIONAL competitive browser budgets: measured on linux-x64 (bun 1.3.14) on 2026-08-03 via `bun run measure:browser`; budget = median * ~3 headroom, rounded up to ~2 significant figures, because these are paint-inclusive wall-clock medians (double-rAF mount) inside a CI container with real runner variance. Absolute budgets cover ggsvelte-svg + ggsvelte-canvas cells ONLY \u2014 peer libs (layercake, svelteplot, ...) are third-party and get no absolute budget; the Svelte-peer win is locked by the relative gate in check-budgets.ts instead (same-run same-runner comparison). Keys are '<lib> <caseId> mount' and must exactly match the ggsvelte cells emitted in results/browser.json; check-budgets.ts asserts coverage in both directions so a new ggsvelte cell cannot dodge budgeting and a stale budget cannot linger after a cell is removed. Cells are data-driven from results/browser.json \u2014 peers gaining area/bars cells (or new peer libs) need no edit here.",
+  "knownGaps": [
+    {
+      "ggsvelte": "ggsvelte-canvas",
+      "peer": "layercake-canvas",
+      "caseId": "scatter-color-10k",
+      "kind": "mount",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
+      "note": "~32ms vs ~27ms after lean parse + color-bucket draw (#1468). Still ~1.15× layercake-canvas on some runners; self-destructs when the gap closes."
+    },
+    {
+      "ggsvelte": "ggsvelte-canvas",
+      "peer": "layercake-canvas",
+      "caseId": "line-3x10k",
+      "kind": "mount",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
+      "note": "~56ms vs ~47ms after lean parse/grouping/builder snapshot (#1468). Node pipeline ~6ms; remaining gap is browser pipeline+paint vs naive loop. Self-destructs when the gap closes."
+    },
+    {
+      "ggsvelte": "ggsvelte-svg",
+      "peer": "layercake",
+      "caseId": "scatter-color-10k",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "~90ms vs ~62ms. Our update path is a documented full re-render; layercake updates reactively through $state. Attack: incremental update planning."
+    },
+    {
+      "ggsvelte": "ggsvelte-svg",
+      "peer": "layercake",
+      "caseId": "line-3x10k",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "~57ms vs ~31ms. Full re-render vs reactive update at 30k points."
+    },
+    {
+      "ggsvelte": "ggsvelte-canvas",
+      "peer": "layercake-canvas",
+      "caseId": "line-3x10k",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "~50ms vs ~39ms. Full pipeline re-run vs $effect redraw at 30k points."
+    }
+  ],
+  "budgets": {
+    "ggsvelte-canvas area-3x1k mount": {
+      "budgetMs": 81
+    },
+    "ggsvelte-canvas area-3x1k update": {
+      "budgetMs": 93
+    },
+    "ggsvelte-canvas line-3x10k mount": {
+      "budgetMs": 270
+    },
+    "ggsvelte-canvas line-3x10k update": {
+      "budgetMs": 210
+    },
+    "ggsvelte-canvas line-3x1k mount": {
+      "budgetMs": 84
+    },
+    "ggsvelte-canvas line-3x1k update": {
+      "budgetMs": 95
+    },
+    "ggsvelte-canvas scatter-color-10k mount": {
+      "budgetMs": 170
+    },
+    "ggsvelte-canvas scatter-color-10k update": {
+      "budgetMs": 100
+    },
+    "ggsvelte-canvas scatter-color-1k mount": {
+      "budgetMs": 85
+    },
+    "ggsvelte-canvas scatter-color-1k update": {
+      "budgetMs": 95
+    },
+    "ggsvelte-svg area-3x1k mount": {
+      "budgetMs": 91
+    },
+    "ggsvelte-svg area-3x1k update": {
+      "budgetMs": 95
+    },
+    "ggsvelte-svg bars-stacked-50x4 mount": {
+      "budgetMs": 84
+    },
+    "ggsvelte-svg bars-stacked-50x4 update": {
+      "budgetMs": 95
+    },
+    "ggsvelte-svg line-3x10k mount": {
+      "budgetMs": 270
+    },
+    "ggsvelte-svg line-3x10k update": {
+      "budgetMs": 180
+    },
+    "ggsvelte-svg line-3x1k mount": {
+      "budgetMs": 87
+    },
+    "ggsvelte-svg line-3x1k update": {
+      "budgetMs": 94
+    },
+    "ggsvelte-svg scatter-color-10k mount": {
+      "budgetMs": 370
+    },
+    "ggsvelte-svg scatter-color-10k update": {
+      "budgetMs": 280
+    },
+    "ggsvelte-svg scatter-color-1k mount": {
+      "budgetMs": 86
+    },
+    "ggsvelte-svg scatter-color-1k update": {
+      "budgetMs": 93
+    }
+  }
+}

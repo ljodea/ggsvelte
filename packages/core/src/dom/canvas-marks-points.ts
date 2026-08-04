@@ -85,7 +85,37 @@ export function drawPoints(
     ctx.fill();
     return;
   }
-  // Per-mark colors: batch consecutive same-color runs.
+  // Per-mark colors: bucket by color when cardinality is small (typical
+  // categorical scatter: 5 series interleaved → run-length would be 1).
+  // Contiguous runs stay as the high-cardinality fallback (O(n) one pass).
+  const uniqueColors: string[] = [];
+  const indicesByColor = new Map<string, number[]>();
+  let highCardinality = false;
+  for (let j = 0; j < n; j++) {
+    const color = batch.colors[j] ?? batch.fill ?? themeInk;
+    let list = indicesByColor.get(color);
+    if (list === undefined) {
+      list = [];
+      indicesByColor.set(color, list);
+      uniqueColors.push(color);
+      if (uniqueColors.length > 64) {
+        highCardinality = true;
+        break;
+      }
+    }
+    list.push(j);
+  }
+  if (!highCardinality) {
+    for (const color of uniqueColors) {
+      const list = indicesByColor.get(color)!;
+      ctx.fillStyle = resolve(color);
+      ctx.beginPath();
+      for (const j of list) tracePoint(ctx, batch, j);
+      ctx.fill();
+    }
+    return;
+  }
+  // High-cardinality: batch consecutive same-color runs.
   let runStart = 0;
   while (runStart < n) {
     const color = batch.colors[runStart] ?? batch.fill ?? themeInk;

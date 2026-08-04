@@ -13,7 +13,14 @@ import {
   type SeriesColumns,
 } from "../scenarios";
 
-export type MountResult = { markHint: number };
+export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+
+export type MountHandle = {
+  destroy: () => void;
+  update: (data: UpdateColumns) => void;
+};
+
+export type MountResult = { markHint: number; handle: MountHandle };
 
 function scatterSpec(data: ScatterColumns) {
   return gg(data, aes({ x: "x", y: "y", color: "cls" }))
@@ -45,25 +52,42 @@ export function mountGgsvelteSvg(
   data: ScatterColumns | SeriesColumns | BarsColumns,
   root: HTMLElement,
 ): MountResult {
-  let spec;
-  switch (scenario) {
-    case "scatter-color":
-      spec = scatterSpec(data as ScatterColumns);
-      break;
-    case "line-multiseries":
-      spec = lineSpec(data as SeriesColumns);
-      break;
-    case "area-multiseries":
-      spec = areaSpec(data as SeriesColumns);
-      break;
-    case "bars-stacked":
-      spec = barsSpec(data as BarsColumns);
-      break;
-  }
-  const svg = renderToSVGString(spec, { width: PLOT_WIDTH, height: PLOT_HEIGHT });
-  root.replaceChildren();
-  root.innerHTML = svg;
-  return { markHint: root.querySelectorAll("circle, path, rect, line").length };
+  const render = (d: UpdateColumns): number => {
+    let spec;
+    switch (scenario) {
+      case "scatter-color":
+        spec = scatterSpec(d as ScatterColumns);
+        break;
+      case "line-multiseries":
+        spec = lineSpec(d as SeriesColumns);
+        break;
+      case "area-multiseries":
+        spec = areaSpec(d as SeriesColumns);
+        break;
+      case "bars-stacked":
+        spec = barsSpec(d as BarsColumns);
+        break;
+    }
+    const svg = renderToSVGString(spec, { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+    root.replaceChildren();
+    root.innerHTML = svg;
+    return root.querySelectorAll("circle, path, rect, line").length;
+  };
+  const markHint = render(data);
+  return {
+    markHint,
+    handle: {
+      // Honest update path TODAY: ggsvelte's lean SVG path has no in-place DOM
+      // patching, so an update is a full re-render (new spec +
+      // renderToSVGString) followed by a DOM swap — update == remount here.
+      update: (d) => {
+        render(d);
+      },
+      destroy: () => {
+        root.replaceChildren();
+      },
+    },
+  };
 }
 
 export function bundleScatterSvg(data: ScatterColumns): string {

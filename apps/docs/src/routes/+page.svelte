@@ -48,13 +48,14 @@
   </ol>
 </section>
 
-<GrammarDemo
-  staticSvgLightSite={data.grammarStaticSvgLightSite}
-  staticSvgDarkSite={data.grammarStaticSvgDarkSite}
-/>
-
 <section class="code-path" aria-labelledby="code-path-heading">
-  <div>
+  <div class="code-path-chart">
+    <GrammarDemo
+      staticSvgLightSite={data.grammarStaticSvgLightSite}
+      staticSvgDarkSite={data.grammarStaticSvgDarkSite}
+    />
+  </div>
+  <div class="code-path-copy">
     <h2 id="code-path-heading">
       Svelte for builders, JSON for embedded agents.
     </h2>
@@ -63,7 +64,9 @@
       use JSON specs for interactive charts on demand.
     </p>
   </div>
-  <CodeTabs {tabs} />
+  <div class="code-path-tabs">
+    <CodeTabs {tabs} />
+  </div>
 </section>
 
 <section class="evidence" aria-labelledby="evidence-heading">
@@ -181,14 +184,36 @@
     object-fit: contain;
   }
 
+  /*
+   * One section: live/static penguins chart on top, then title + code tabs.
+   * Chart spans full width; copy and tabs sit side by side below.
+   */
   .code-path {
     display: grid;
+    grid-template-areas:
+      "chart chart"
+      "copy tabs";
     grid-template-columns: minmax(16rem, 0.65fr) minmax(0, 1.35fr);
-    gap: clamp(2rem, 6vw, 6rem);
+    gap: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 6vw, 6rem);
     padding-block: clamp(4rem, 9vw, 8rem);
+    border-top: 1px solid var(--line);
   }
 
-  .code-path > div:first-child > p:last-child {
+  .code-path-chart {
+    grid-area: chart;
+    min-width: 0;
+  }
+
+  .code-path-copy {
+    grid-area: copy;
+  }
+
+  .code-path-tabs {
+    grid-area: tabs;
+    min-width: 0;
+  }
+
+  .code-path-copy > p:last-child {
     color: var(--muted);
   }
 
@@ -256,7 +281,14 @@
       scroll-snap-align: start;
     }
 
-    .code-path,
+    .code-path {
+      grid-template-areas:
+        "chart"
+        "copy"
+        "tabs";
+      grid-template-columns: 1fr;
+    }
+
     .evidence dl {
       grid-template-columns: 1fr;
     }

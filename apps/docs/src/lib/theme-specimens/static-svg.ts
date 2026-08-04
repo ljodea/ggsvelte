@@ -292,9 +292,9 @@ export function sequentialRasterStaticSvg(input: {
 }
 
 /**
- * Homepage grammar-demo shell: full palmerPenguins scatter + loess, default
- * interaction step (color + smooth). Static only — no inspect/legendFocus.
- * Matches GrammarDemoPlot at active step 3 (Interaction).
+ * Homepage grammar-demo shell: full palmerPenguins scatter + loess (color +
+ * smooth). Static only — no inspect/legendFocus. Matches GrammarDemoPlot
+ * mark layers; live plot adds Inspect + GuideLegend focus on upgrade.
  */
 export function homeGrammarStaticSvgFromData(
   rows: readonly Record<string, unknown>[],

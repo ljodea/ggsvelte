@@ -43,7 +43,9 @@ repos:
         entry: bun node_modules/.bin/oxlint
         language: system
         files: \.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$
-        exclude: ^spikes/
+        exclude: ^(spikes/|benchmarks/competitive/)
+        # benchmarks/competitive is in .oxlintrc ignorePatterns; passing only
+        # competitive files makes oxlint exit 1 ("No files found to lint").
         # .oxlintrc.json also bans Math.random/Date.now inside examples/**
         # (VR determinism), so staged examples files are guarded here too.
 

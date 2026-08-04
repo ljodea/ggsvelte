@@ -81,6 +81,7 @@
     "bench:competitive": "cd benchmarks/competitive && bun run measure",
     "bench:competitive:bundles": "cd benchmarks/competitive && bun run measure:bundles",
     "bench:competitive:browser": "cd benchmarks/competitive && bun run measure:browser",
+    "bench:competitive:check": "cd benchmarks/competitive && bun run check:budgets",
     "bench:competitive:full": "cd benchmarks/competitive && bun run measure:bundles:full && bun run measure:browser:full",
     "evals": "bun tests/evals/run.ts",
     "render:fresh": "bun scripts/render-fresh.ts",

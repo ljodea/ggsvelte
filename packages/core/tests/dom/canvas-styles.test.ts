@@ -92,6 +92,35 @@ describe("canvas mapped style vectors", () => {
     expect(dash()).toEqual([]);
   });
 
+  it("buckets interleaved categorical colors into one fill per color", () => {
+    // Competitive scatter-color data is series-i%5 interleaved — contiguous
+    // runs would be length 1 and cost one fill per point.
+    const n = 10;
+    const positions = new Float32Array(n * 2);
+    const colors: string[] = [];
+    for (let i = 0; i < n; i++) {
+      positions[i * 2] = i;
+      positions[i * 2 + 1] = i;
+      colors.push(`c${i % 5}`);
+    }
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions,
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 0.7,
+      shape: "circle",
+      fill: null,
+      colors,
+    };
+    const { ctx, calls } = styleContext();
+    drawBatch(ctx, batch, theme, resolve);
+    expect(calls.filter(({ name }) => name === "fill")).toHaveLength(5);
+    expect(calls.filter(({ name }) => name === "arc")).toHaveLength(n);
+  });
+
   it("applies adjacent path width/alpha/dash styles without reordering and resets dash", () => {
     const batch: PathsBatch = {
       kind: "paths",
