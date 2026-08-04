@@ -207,19 +207,16 @@ ${SAKURA_RECORDS.map(
   ];`;
 
 /**
- * The baseline's in-panel label, at the right edge just below the rule. The
- * reference chart puts "pre-industrial median" outside the panel; marks are
- * clipped to the panel here, so the label sits inside at the right edge.
- * Below the rule: industrial-era blooms are all earlier (higher on the
- * reversed axis), and the trend crosses the baseline near the right edge, so
- * above the line the label would collide with it.
+ * The baseline's in-panel tag: the reference's single word "median", above
+ * the rule at the left edge. Measured against the rendered scene (gate G8):
+ * the only placement on the baseline row that overprints no bloom — the row
+ * is dense everywhere else, and the full phrase lives in the page footnote,
+ * like the reference's caption.
  */
-const SAKURA_BASELINE_LABEL = [
-  { year: 2026, bloomDate: SAKURA_BASELINE, label: "pre-industrial median" },
-];
+const SAKURA_BASELINE_LABEL = [{ year: 812, bloomDate: SAKURA_BASELINE, label: "median" }];
 
 const BASELINE_LABEL_CONST = `  const baselineLabel = [
-    { year: 2026, bloomDate: "${SAKURA_BASELINE}", label: "pre-industrial median" },
+    { year: 812, bloomDate: "${SAKURA_BASELINE}", label: "median" },
   ];`;
 
 const RINGS_CONST = `  // Ring treatment from the reference: an open blue ring on the latest
@@ -256,9 +253,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
 />
 <GeomRule yintercept="${SAKURA_Y_BREAKS[0]}" linewidth={0.75}
-  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }} />
+  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+  inspect={false} />
 <GeomRule yintercept="${SAKURA_Y_BREAKS[2]}" linewidth={0.75}
-  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }} />
+  aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+  inspect={false} />
 <GeomPoint alpha={0.55} size={1.4}
   aes={{ color: { value: "#4a5568" } }} />
 <GeomLine stat="summary_rolling" fun="median" window={${SAKURA_TREND_WINDOW}}
@@ -282,11 +281,14 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           geom: "rule",
           aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
           params: { yintercept: SAKURA_Y_BREAKS[0], linewidth: 0.75 },
+          // Chrome duplicating an axis break; answers no tooltip (#1068).
+          inspect: false,
         },
         chartlineLate: {
           geom: "rule",
           aes: { color: { value: "#b7c1cd" }, linetype: { value: "dotted" } },
           params: { yintercept: SAKURA_Y_BREAKS[2], linewidth: 0.75 },
+          inspect: false,
         },
         points: {
           geom: "point",
@@ -326,11 +328,13 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     yintercept="${SAKURA_Y_BREAKS[0]}"
     linewidth={0.75}
     aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+    inspect={false}
   />`,
         chartlineLate: `  <GeomRule
     yintercept="${SAKURA_Y_BREAKS[2]}"
     linewidth={0.75}
     aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
+    inspect={false}
   />`,
         points: `  <GeomPoint
     alpha={0.55}
@@ -467,10 +471,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "",
     explanation: "",
     fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={1}
-  aes={{ color: { value: "#6b7075" } }} />
+  aes={{ color: { value: "#6b7075" } }} inspect={false} />
 <GeomText data={baselineLabel}
   aes={{ x: "year", y: "bloomDate", label: "label",
-         color: { value: "#6b7075" } }} size={9} anchor="end" dy={12}
+         color: { value: "#6b7075" } }} size={9} anchor="start" dy={-10}
   inspect={false} />
 <GeomPoint data={ringLatest} shape="circle-open" size={3.5}
   aes={{ x: "year", y: "bloomDate", color: { value: "#2c5282" } }} />
@@ -489,9 +493,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         baseline: {
           geom: "rule",
           // Solid and full strength: it marks the pre-industrial median, and
-          // the label at the right edge says so in-panel (#727).
+          // the short in-panel tag at the left edge says so (#727).
           aes: { color: { value: "#6b7075" } },
           params: { yintercept: SAKURA_BASELINE, linewidth: 1 },
+          // Synthesizes an empty row — hovering it must not blank the blooms'
+          // tooltips (#1068, same as the chartlines).
+          inspect: false,
         },
         baselineLab: {
           geom: "text",
@@ -502,7 +509,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             label: { field: "label" },
             color: { value: "#6b7075" },
           },
-          params: { size: 9, anchor: "end", dy: 12 },
+          params: { size: 9, anchor: "start", dy: -10 },
           // Names the rule, like the epoch names name the bands (#1068).
           inspect: false,
         },
@@ -587,6 +594,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     yintercept="${SAKURA_BASELINE}"
     linewidth={1}
     aes={{ color: { value: "#6b7075" } }}
+    inspect={false}
   />`,
         baselineLab: `  <GeomText
     data={baselineLabel}
@@ -597,8 +605,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       color: { value: "#6b7075" },
     }}
     size={9}
-    anchor="end"
-    dy={12}
+    anchor="start"
+    dy={-10}
     inspect={false}
   />`,
         ringLatest: `  <GeomPoint

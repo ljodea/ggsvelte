@@ -134,8 +134,8 @@
 
   <footer class="lesson-footnote">
     <p>
-      Solid rule labeled “pre-industrial median”: the 1600–1850 median bloom
-      day, 15 April. {KYOTO_SAKURA_CITATION}
+      Solid rule: the pre-industrial median bloom day, 15 April (1600–1850).
+      {KYOTO_SAKURA_CITATION}
     </p>
   </footer>
 </article>
