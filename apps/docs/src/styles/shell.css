@@ -89,6 +89,22 @@
   cursor: pointer;
 }
 
+.github-link {
+  justify-content: center;
+  width: 44px;
+  color: var(--chrome-link);
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  color: var(--ink);
+}
+
+.github-link svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 .mobile-search-trigger,
 .menu-trigger {
   display: none;
