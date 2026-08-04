@@ -13323,6 +13323,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/showcase/kyoto-sakura",
+    title: "Kyoto cherry blossoms, 812–2026 — ggsvelte gallery",
+    description:
+      "Tufte's full-bloom chart at full fidelity: 30-year rolling median, epoch bands, labeled baseline, and circled records.",
+    canonicalPath: "/examples/showcase/kyoto-sakura",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/smooth/loess-scatter",
     title: "Cocoa percent against bar rating — ggsvelte gallery",
     description:

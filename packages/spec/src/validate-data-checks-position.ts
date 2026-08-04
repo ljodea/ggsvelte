@@ -85,7 +85,11 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
       continue;
     }
     if (config?.type === "band" || !scaleRequestsTime(scales, axis)) continue;
-    let configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
+    // Mirror the runtime effective parser (temporal-position.ts): unset parse
+    // on monthDay means `md`, not `auto`. Same expression as
+    // checkPositionScaleDataCompatibility below.
+    const effectiveParser = config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
+    let configurationError = temporalParserConfigurationError(effectiveParser, {
       ...(config?.timezone !== undefined && { timezone: config.timezone }),
       ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
     });
@@ -148,11 +152,14 @@ export function checkPositionScaleDataCompatibility(input: {
       const type = info?.type ?? null;
       if (type === null) continue;
       if (declared === "time") {
+        // Same effective parser as validateTemporalAxisConfiguration above.
+        const effectiveParser =
+          config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
           info,
-          config?.parse ?? "auto",
+          effectiveParser,
           {
             ...(config?.timezone !== undefined && { timezone: config.timezone }),
             ...(config?.disambiguation !== undefined && {
@@ -183,7 +190,7 @@ export function checkPositionScaleDataCompatibility(input: {
               : decision?.status === "invalid"
                 ? ` Automatic temporal inference failed whole-column validation for ${decision.failedCount} value(s).`
                 : ""
-            : ` Parser ${JSON.stringify(config?.parse ?? "auto")} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
+            : ` Parser ${JSON.stringify(effectiveParser)} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
         errors.push({
           code: "scale-type-mismatch",
           path: use.path,

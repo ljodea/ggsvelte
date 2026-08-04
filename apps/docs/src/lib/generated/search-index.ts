@@ -22098,6 +22098,25 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Snow's pumps, named in place"],
   },
   {
+    id: "example:showcase:kyoto-sakura",
+    kind: "example",
+    title: "Kyoto cherry blossoms, 812–2026",
+    summary:
+      "Tufte's full-bloom chart at full fidelity: 30-year rolling median, epoch bands, labeled baseline, and circled records.",
+    href: "/examples/showcase/kyoto-sakura",
+    keywords: [
+      "Kyoto cherry blossoms, 812–2026",
+      "Showcase",
+      "line",
+      "point",
+      "time",
+      "annotations",
+      "theme",
+      "case study",
+    ],
+    exact: ["Kyoto cherry blossoms, 812–2026"],
+  },
+  {
     id: "example:smooth:loess-scatter",
     kind: "example",
     title: "Cocoa percent against bar rating",
