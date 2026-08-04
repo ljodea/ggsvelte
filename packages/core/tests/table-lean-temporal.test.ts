@@ -74,6 +74,22 @@ describe("lean ColumnTable temporal detection (no runtime)", () => {
     }
   });
 
+  it("still coerces numeric text columns via Number (CSV-ish weights)", () => {
+    // Must not take the all-NaN label fast path — lean and full runtime agree.
+    const table = ColumnTable.fromColumns({
+      w: ["1", "2.5", " 3 ", null, "-4"],
+    });
+    const view = table.parsed("w");
+    expect(view.decision.status).toBe("nominal");
+    expect(view.semantic[0]).toBe(1);
+    expect(view.semantic[1]).toBe(2.5);
+    expect(view.semantic[2]).toBe(3);
+    expect(Number.isNaN(view.semantic[3]!)).toBe(true);
+    expect(view.semantic[4]).toBe(-4);
+    expect(view.valid[0]).toBe(1);
+    expect(view.valid[3]).toBe(0);
+  });
+
   it("still coerces mixed ISO + non-ISO strings via cellsToNumeric semantics", () => {
     const table = ColumnTable.fromColumns({
       mixed: ["2024-01-01", "label", "2024-01-03"],

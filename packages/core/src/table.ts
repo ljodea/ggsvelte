@@ -126,6 +126,7 @@ function liteParseColumn(
   let stringCount = 0;
   let sawClock = false;
   let sawNumber = false;
+  let sawNumericLookingString = false;
   let blockingNonString = false;
   let allNumberOrNull = true;
   for (const value of raw) {
@@ -141,6 +142,10 @@ function liteParseColumn(
       if (isIsoLikeString(value)) {
         isoCount++;
         if (isoHasClock(value)) sawClock = true;
+      } else if (stringLooksNumeric(value)) {
+        // "10" / " 3.5" must stay on cellsToNumeric (Number coercion), not the
+        // all-NaN label path — lean and full runtime must agree (#1468 review).
+        sawNumericLookingString = true;
       }
       continue;
     }
@@ -179,15 +184,16 @@ function liteParseColumn(
   // separate so pure-number columns can take the monomorphic fast path above.
   const temporal = !blockingNonString && !sawNumber && stringCount > 0 && isoCount === stringCount;
   if (!temporal) {
-    // Pure non-ISO strings (series labels): semantic is all-NaN — skip
-    // cellsToNumeric's per-cell isoEpochMs + Number path.
-    const pureNonIsoStrings =
+    // Pure non-ISO *label* strings (series names): semantic is all-NaN — skip
+    // cellsToNumeric. Numeric text ("10") is NOT a label path.
+    const pureNonIsoLabelStrings =
       !blockingNonString &&
       !sawNumber &&
+      !sawNumericLookingString &&
       stringCount > 0 &&
       isoCount === 0 &&
       stringCount === nonNullCount;
-    const { semantic, valid } = pureNonIsoStrings
+    const { semantic, valid } = pureNonIsoLabelStrings
       ? allInvalidSemantic(raw.length)
       : fallbackNumeric(raw, true);
     return {
@@ -270,6 +276,19 @@ function allInvalidSemantic(length: number): { semantic: Float64Array; valid: Ui
   const semantic = new Float64Array(length);
   semantic.fill(Number.NaN);
   return { semantic, valid: new Uint8Array(length) };
+}
+
+/**
+ * True when a non-ISO string might still coerce via Number() (CSV-ish numeric
+ * text). Labels like "s0" / "series-1" are false (letter first after trim).
+ */
+function stringLooksNumeric(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return false;
+  const c0 = trimmed.codePointAt(0);
+  if (c0 === undefined) return false;
+  // digit, '+', '-', '.'
+  return (c0 >= 48 && c0 <= 57) || c0 === 43 || c0 === 45 || c0 === 46;
 }
 
 function fallbackNumeric(

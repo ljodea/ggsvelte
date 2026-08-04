@@ -24,20 +24,15 @@ export type MountHandle = {
 
 export type MountResult = { markHint: number; handle: MountHandle };
 
-/** Marks-only harness: no legend layout (axes also undrawn — see mount). */
-const marksOnly = { legend: { position: "none" as const } };
-
 function scatterSpec(data: ScatterColumns) {
   return gg(data, aes({ x: "x", y: "y", color: "cls" }))
     .geomPoint({ size: 1.5, alpha: 0.7, render: "canvas" })
-    .theme(marksOnly)
     .toPortable();
 }
 
 function lineSpec(data: SeriesColumns) {
   return gg(data, aes({ x: "x", y: "y", color: "series", group: "series" }))
     .geomLine({ render: "canvas" })
-    .theme(marksOnly)
     .toPortable();
 }
 
@@ -45,7 +40,6 @@ function areaSpec(data: SeriesColumns) {
   // Identity (not stack): competitors overlay series; default geomArea is stack.
   return gg(data, aes({ x: "x", y: "y", fill: "series", group: "series" }))
     .geomArea({ position: "identity", render: "canvas" })
-    .theme(marksOnly)
     .toPortable();
 }
 
