@@ -37,6 +37,27 @@ describe("builder-data — authoring forms", () => {
     expect((snapped as Date).toISOString()).toBe("2024-06-15T12:00:00.000Z");
   });
 
+  it("snapshots non-Date columns so index/length mutation does not leak", () => {
+    const x = [1, 2, 3];
+    const series = ["s0", "s1", "s0"];
+    const authoring = toAuthoringDataRef({ x, series });
+    if (!("columns" in authoring)) throw new Error("expected columns form");
+    x[0] = 999;
+    x.push(4);
+    series[1] = "mutated";
+    expect(authoring.columns.x).toEqual([1, 2, 3]);
+    expect(authoring.columns.series).toEqual(["s0", "s1", "s0"]);
+  });
+
+  it("shares non-Date portable column arrays (no second copy on toDataRef)", () => {
+    const authoring = toAuthoringDataRef({ x: [1, 2], series: ["a", "b"] });
+    if (!("columns" in authoring)) throw new Error("expected columns form");
+    const portable = toDataRef(authoring, new Set());
+    if (!("columns" in portable)) throw new Error("expected columns form");
+    expect(portable.columns.x).toBe(authoring.columns.x);
+    expect(portable.columns.series).toBe(authoring.columns.series);
+  });
+
   it("materializes Date cells as full ISO unless the scale is calendar date", () => {
     const when = new Date("2024-06-15T12:00:00.000Z");
     const authoring = toAuthoringDataRef([{ when, value: 1 }]);

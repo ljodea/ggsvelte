@@ -7,7 +7,7 @@
       "caseId": "scatter-color-10k",
       "kind": "mount",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
-      "note": "~40ms vs ~28ms. Per-datum pipeline cost above the ~25ms double-rAF floor. Self-destructs when the gap closes."
+      "note": "~32ms vs ~27ms after lean parse + color-bucket draw (#1468). Still ~1.15× layercake-canvas on some runners; self-destructs when the gap closes."
     },
     {
       "ggsvelte": "ggsvelte-canvas",
@@ -15,7 +15,7 @@
       "caseId": "line-3x10k",
       "kind": "mount",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
-      "note": "~66ms vs ~47ms. Naive canvas line loop beats runPipeline+planStrata+drawStratum at 30k points; both are marks-only (no chrome). Self-destructs when the gap closes."
+      "note": "~56ms vs ~47ms after lean parse/grouping/builder snapshot (#1468). Node pipeline ~6ms; remaining gap is browser pipeline+paint vs naive loop. Self-destructs when the gap closes."
     },
     {
       "ggsvelte": "ggsvelte-svg",
@@ -36,18 +36,10 @@
     {
       "ggsvelte": "ggsvelte-canvas",
       "peer": "layercake-canvas",
-      "caseId": "scatter-color-10k",
-      "kind": "update",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "~33ms vs ~30ms. Marginal; our update re-runs the whole pipeline on the same canvas."
-    },
-    {
-      "ggsvelte": "ggsvelte-canvas",
-      "peer": "layercake-canvas",
       "caseId": "line-3x10k",
       "kind": "update",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "~68ms vs ~41ms. Full pipeline re-run vs $effect redraw at 30k points."
+      "note": "~50ms vs ~39ms. Full pipeline re-run vs $effect redraw at 30k points."
     }
   ],
   "budgets": {

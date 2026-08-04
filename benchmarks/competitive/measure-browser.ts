@@ -68,8 +68,11 @@ async function medianMs(
 
 function pairs(): { lib: LibMeta; caseId: string; scenario: string; n: number }[] {
   const out: { lib: LibMeta; caseId: string; scenario: string; n: number }[] = [];
-  for (const lib of browserLibs) {
-    for (const c of cases) {
+  // Case-outer so peer and ggsvelte cells for the same chart share warm
+  // Chromium/canvas state — lib-outer cold-started the first lib on each
+  // dense cell and inflated the relative gate (#1468).
+  for (const c of cases) {
+    for (const lib of browserLibs) {
       if (!libSupports(lib, c.scenario)) continue;
       out.push({ lib, caseId: c.id, scenario: c.scenario, n: c.n });
     }
