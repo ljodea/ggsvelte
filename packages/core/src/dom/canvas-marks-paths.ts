@@ -123,6 +123,47 @@ export function drawPaths(
   const restoreGlow = applyGlow(ctx, batch.glow);
   const themeColors = { ink: themeVar("ink", theme), accent: themeVar("accent", theme) };
   const needBounds = batch.fillPaint !== undefined || batch.strokePaint !== undefined;
+
+  // Solid multi-series lines (competitive line-3×N): no fills, no per-subpath
+  // alpha/linewidth/linetype, no gradient paint — one monomorphic stroke loop
+  // without resolvePathMark allocations or setLineDash per subpath (#1468).
+  const solidLineHot =
+    !isArea &&
+    !needBounds &&
+    batch.glow === undefined &&
+    batch.alphas === undefined &&
+    batch.linewidths === undefined &&
+    batch.linetypeIndexes === undefined &&
+    (batch.linetype === undefined || batch.linetype === "solid") &&
+    batch.curve === "linear";
+  if (solidLineHot) {
+    const linewidth = batch.linewidth;
+    const linejoin = batch.linejoin ?? "round";
+    const linecap = batch.linecap ?? "round";
+    const ink = themeColors.ink;
+    ctx.lineWidth = linewidth;
+    ctx.lineJoin = linejoin;
+    ctx.lineCap = linecap;
+    if (typeof ctx.setLineDash === "function") ctx.setLineDash([]);
+    for (let s = 0; s < subpaths; s++) {
+      const start = batch.pathOffsets[s]!;
+      const end = batch.pathOffsets[s + 1]!;
+      if (end <= start) continue;
+      const stroke = batch.strokes[s];
+      ctx.strokeStyle = resolve(stroke ?? batch.strokePaint?.fallback ?? ink);
+      ctx.beginPath();
+      // Linear open path: no step corners / ring holes.
+      ctx.moveTo(batch.positions[start * 2]!, batch.positions[start * 2 + 1]!);
+      for (let i = start + 1; i < end; i++) {
+        ctx.lineTo(batch.positions[i * 2]!, batch.positions[i * 2 + 1]!);
+      }
+      ctx.stroke();
+    }
+    restoreGlow();
+    ctx.globalAlpha = baseAlpha;
+    return;
+  }
+
   for (let s = 0; s < subpaths; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;

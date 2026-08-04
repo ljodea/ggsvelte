@@ -74,6 +74,17 @@ describe("lean ColumnTable temporal detection (no runtime)", () => {
     }
   });
 
+  it("fieldType uses lite decision without a second typeof walk on pure columns", () => {
+    // Pure numbers → quantitative; pure labels → nominal; both paths must
+    // agree with nonTemporalFieldType on the same cells (#1468).
+    const nums = ColumnTable.fromColumns({ x: [0, 1, 2, null, 3] });
+    expect(nums.fieldType("x")).toBe("quantitative");
+    expect(nums.discreteness("x")).toBe("continuous");
+    const labels = ColumnTable.fromColumns({ g: ["a", "b", "a"] });
+    expect(labels.fieldType("g")).toBe("nominal");
+    expect(labels.discreteness("g")).toBe("discrete");
+  });
+
   it("still coerces numeric text columns via Number (CSV-ish weights)", () => {
     // Must not take the all-NaN label fast path — lean and full runtime agree.
     const table = ColumnTable.fromColumns({

@@ -46,6 +46,57 @@ export function collectColorChannelValues(
   return { values, anyDiscreteField, anyField };
 }
 
+/**
+ * Frame-level mapping flags without materializing per-row values.
+ * Ordinal training uses the source catalog; sequential still needs the full
+ * values array from {@link collectColorChannelValues}.
+ */
+export function collectColorChannelFlags(
+  name: "color" | "fill",
+  frames: readonly LayerFrame[],
+  table: ColumnTable,
+): { anyDiscreteField: boolean; anyField: boolean } {
+  let anyDiscreteField = false;
+  let anyField = false;
+  for (const frame of frames) {
+    const channel = name === "color" ? frame.binding.color : frame.binding.fill;
+    const frameValues = name === "color" ? frame.colorValues : frame.fillValues;
+    if (frameValues !== null && (channel.field !== null || (channel.statColumn ?? null) !== null)) {
+      anyField = true;
+      if (
+        channel.field !== null &&
+        table.has(channel.field) &&
+        table.discreteness(channel.field) === "discrete"
+      ) {
+        anyDiscreteField = true;
+      }
+    }
+    if (channel.scaledConstant !== null) {
+      anyDiscreteField = true;
+      anyField = true;
+    }
+  }
+  return { anyDiscreteField, anyField };
+}
+
+/** Count null cells on the mapped color/fill channel (NA-color warning). */
+export function countNullColorChannelValues(
+  name: "color" | "fill",
+  frames: readonly LayerFrame[],
+): number {
+  let missing = 0;
+  for (const frame of frames) {
+    const channel = name === "color" ? frame.binding.color : frame.binding.fill;
+    const frameValues = name === "color" ? frame.colorValues : frame.fillValues;
+    if (frameValues !== null && (channel.field !== null || (channel.statColumn ?? null) !== null)) {
+      for (let i = 0; i < frameValues.length; i++) {
+        if (frameValues[i] === null) missing++;
+      }
+    }
+  }
+  return missing;
+}
+
 export interface CollectedColorCatalog {
   /** Distinct channel values from the unfiltered source table, in first-seen
    * order. Empty when no layer maps the channel. */
@@ -67,6 +118,15 @@ export function collectColorCatalogValues(
   const catalogValues: CellValue[] = [];
   const catalogKeys = new Set<string>();
   const addCatalogValue = (value: CellValue): void => {
+    // Monomorphic strings (series labels): Set membership on the string
+    // itself — encodeKey for plain strings is identity, but the call +
+    // startsWith("@") check still costs at 30k cells.
+    if (typeof value === "string" && !value.startsWith("@")) {
+      if (catalogKeys.has(value)) return;
+      catalogKeys.add(value);
+      catalogValues.push(value);
+      return;
+    }
     const key = encodeKey(value);
     if (catalogKeys.has(key)) return;
     catalogKeys.add(key);

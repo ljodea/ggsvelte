@@ -7,7 +7,7 @@
       "caseId": "scatter-color-10k",
       "kind": "mount",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
-      "note": "~32ms vs ~27ms after lean parse + color-bucket draw (#1468). Still ~1.15× layercake-canvas on some runners; self-destructs when the gap closes."
+      "note": "~32–34ms vs ~27–30ms after ordinal color collect + named-data adapter + paint path (#1468 follow-up). Gate thr = peer×1.02+2ms; self-destructs when the gap closes."
     },
     {
       "ggsvelte": "ggsvelte-canvas",
@@ -15,7 +15,7 @@
       "caseId": "line-3x10k",
       "kind": "mount",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1468",
-      "note": "~56ms vs ~47ms after lean parse/grouping/builder snapshot (#1468). Node pipeline ~6ms; remaining gap is browser pipeline+paint vs naive loop. Self-destructs when the gap closes."
+      "note": "~55–58ms vs ~44–49ms after one-pass line geometry + ordinal color skip + solid stroke hot path + named-data void adapter (#1468). Relative thr often ~peer+5–7ms still short; self-destructs when the gap closes."
     },
     {
       "ggsvelte": "ggsvelte-svg",

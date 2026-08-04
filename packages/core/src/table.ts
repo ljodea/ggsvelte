@@ -291,6 +291,36 @@ function stringLooksNumeric(value: string): boolean {
   return (c0 >= 48 && c0 <= 57) || c0 === 43 || c0 === 45 || c0 === 46;
 }
 
+/**
+ * Derive field type from a lean liteParse decision without re-scanning the
+ * column. Returns null when the decision is ambiguous (mixed cells) so the
+ * caller can fall back to {@link nonTemporalFieldType}.
+ */
+function fieldTypeFromLiteDecision(
+  decision: ParsedColumnView["decision"],
+  raw: readonly CellValue[],
+): FieldType | null {
+  // Only lean parse keys carry monomorphic classification we can trust.
+  if (decision.parserKey !== "lite:auto" && decision.parserKey !== "lite:numeric-only") {
+    return null;
+  }
+  const { nonNullCount, validatedCount } = decision;
+  if (nonNullCount === 0) return "quantitative";
+  // Every non-null cell produced a finite semantic → quantitative (pure numbers).
+  if (validatedCount === nonNullCount) return "quantitative";
+  // No finite semantic: pure labels or all-NaN numbers. One non-null probe.
+  if (validatedCount === 0) {
+    for (let i = 0; i < raw.length; i++) {
+      const value = raw[i]!;
+      if (value === null) continue;
+      return typeof value === "number" ? "quantitative" : "nominal";
+    }
+    return "quantitative";
+  }
+  // Partial validation (mixed / numeric-text / ISO fragments) — full scan.
+  return null;
+}
+
 function fallbackNumeric(
   raw: readonly CellValue[],
   inferTemporal: boolean,
@@ -592,7 +622,11 @@ export class ColumnTable {
           : "nominal"
         : view.decision.status === "temporal"
           ? "temporal"
-          : nonTemporalFieldType(this.column(name));
+          : // Lean monomorphic parse already classified the column once
+            // (pure numbers / pure labels). Reuse that instead of a second
+            // O(n) typeof walk — fieldType was a top bind cost on line-3×10k.
+            (fieldTypeFromLiteDecision(view.decision, this.column(name)) ??
+            nonTemporalFieldType(this.column(name)));
     this.#typeCache.set(cacheKey, type);
     return type;
   }

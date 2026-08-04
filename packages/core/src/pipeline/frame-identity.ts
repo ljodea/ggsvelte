@@ -110,7 +110,13 @@ export function buildIdentityFrame(
     groups,
     inputGroups: groups,
     inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+    // Identity row map: avoid Uint32Array.from(callback) (alloc + per-index
+    // call) — competitive line-3×10k builds this once per frame (#1468).
+    rowIndex: (() => {
+      const rows = new Uint32Array(n);
+      for (let i = 0; i < n; i++) rows[i] = i;
+      return rows;
+    })(),
     colorValues: binding.color.field === null ? null : table.column(binding.color.field),
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
     sizeValues: binding.size.field === null ? null : table.column(binding.size.field),
