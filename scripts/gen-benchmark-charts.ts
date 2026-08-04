@@ -67,6 +67,14 @@ function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
+/** True when the source benchmark results exist (local after measure:*, never in CI). */
+function resultsAvailable(): boolean {
+  return (
+    existsSync(join(COMPETITIVE, "results", "browser.json")) &&
+    existsSync(join(COMPETITIVE, "results", "bundles.json"))
+  );
+}
+
 /** Cold-mount median for a lib×case cell; fails loudly when absent. */
 function mountMs(browser: BrowserResults, lib: string, caseId: string): number {
   const cell = browser.results.find((r) => r.lib === lib && r.caseId === caseId && r.ok);
@@ -276,10 +284,21 @@ function build() {
 }
 
 async function check(): Promise<void> {
-  const { files, cards, versions, bundleKb, generatedAt } = build();
   if (!existsSync(OUTPUT_DIR) || !existsSync(PROJECTION)) {
     throw new Error("benchmark charts are MISSING. Run: bun scripts/gen-benchmark-charts.ts");
   }
+
+  // The results/*.json source of truth is gitignored (re-run measure:* to
+  // produce it), so CI has no benchmark data. When absent, verify the
+  // committed artifacts are internally consistent (projection ⇄ SVGs); when
+  // present (local), do the full regeneration-compare freshness check.
+  if (!resultsAvailable()) {
+    checkConsistent();
+    console.log("benchmark:charts artifacts are current (results absent — consistency only).");
+    return;
+  }
+
+  const { files, cards, versions, bundleKb, generatedAt } = build();
   const wantNames = new Set(files.map((f) => f.filename));
   const haveNames = new Set(readdirSync(OUTPUT_DIR).filter((n) => n.endsWith(".svg")));
   for (const name of wantNames) {
@@ -309,6 +328,43 @@ async function check(): Promise<void> {
     throw new Error("benchmark-charts projection STALE. Run: bun scripts/gen-benchmark-charts.ts");
   }
   console.log("benchmark:charts artifacts are current.");
+}
+
+/**
+ * CI-safe consistency check when benchmark results are absent: the committed
+ * projection must reference SVGs that all exist on disk, and each light SVG's
+ * on-disk content must match its recorded sha256 (proving artifacts weren't
+ * hand-edited). No regeneration — that requires the gitignored results.
+ */
+function checkConsistent(): void {
+  const proj = readFileSync(PROJECTION, "utf8");
+  const cardRe =
+    /path: "(\/benchmarks\/([^"]+))",\s*darkPath: "(\/benchmarks\/([^"]+))",\s*sha256: "([0-9a-f]{64})"/g;
+  let matched = 0;
+  for (const m of proj.matchAll(cardRe)) {
+    matched += 1;
+    const lightName = m[2]!;
+    const darkName = m[4]!;
+    const wantSha = m[5]!;
+    for (const name of [lightName, darkName]) {
+      if (!existsSync(join(OUTPUT_DIR, name))) {
+        throw new Error(
+          `benchmark charts INCONSISTENT (projection references missing ${name}). Run: bun scripts/gen-benchmark-charts.ts`,
+        );
+      }
+    }
+    const onDiskSha = createHash("sha256")
+      .update(readFileSync(join(OUTPUT_DIR, lightName), "utf8"))
+      .digest("hex");
+    if (onDiskSha !== wantSha) {
+      throw new Error(
+        `benchmark charts INCONSISTENT (${lightName} sha mismatch vs projection). Run: bun scripts/gen-benchmark-charts.ts`,
+      );
+    }
+  }
+  if (matched === 0) {
+    throw new Error("benchmark-charts projection has no parseable cards; cannot verify.");
+  }
 }
 
 async function write(): Promise<void> {
