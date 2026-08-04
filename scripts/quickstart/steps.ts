@@ -10,8 +10,11 @@ import type { GuidesSpec, Labs, LayerSpec, Scales, ThemeName } from "@ggsvelte/s
 
 export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 
-/** Bin width (years) for the binned-median trend line. */
-export const SAKURA_BINWIDTH = 15;
+/**
+ * Window (years) of the rolling-median trend line — the reference chart's
+ * "30-year running median".
+ */
+export const SAKURA_TREND_WINDOW = 30;
 
 /** Median bloom day 1600–1850, drawn as the pre-industrial baseline. */
 export const SAKURA_BASELINE = "04-15";
@@ -103,6 +106,22 @@ export const SAKURA_RECORDS = [
     labelDate: "03-20",
   },
 ];
+
+const recordRow = (year: number) => {
+  const record = SAKURA_RECORDS.find((r) => r.year === year);
+  if (!record) throw new Error(`SAKURA_RECORDS lost ${year}`);
+  return { year: record.year, bloomDate: record.bloomDate };
+};
+
+/**
+ * Ring treatment from the reference chart: an open blue ring on the latest
+ * bloom on record, an open red ring on the earliest for six centuries, and a
+ * filled red dot on the modern record. Derived from {@link SAKURA_RECORDS} so
+ * a ring can never drift from the point it circles.
+ */
+const SAKURA_RING_LATEST = [recordRow(1323)];
+const SAKURA_RING_EARLIEST = [recordRow(1409)];
+const SAKURA_RECORD_RECENT = [recordRow(2023)];
 
 // --- step model ------------------------------------------------------------
 
@@ -203,6 +222,12 @@ const BASELINE_LABEL_CONST = `  const baselineLabel = [
     { year: 2026, bloomDate: "${SAKURA_BASELINE}", label: "pre-industrial median" },
   ];`;
 
+const RINGS_CONST = `  // Ring treatment from the reference: an open blue ring on the latest
+  // bloom, an open red ring on the earliest, a filled red dot on the modern record.
+  const ringLatest = records.filter((r) => r.year === 1323);
+  const ringEarliest = records.filter((r) => r.year === 1409);
+  const recordRecent = records.filter((r) => r.year === 2023);`;
+
 const EPOCH_NAMES_CONST = `  const epochNames = [
 ${SAKURA_EPOCH_NAMES.map(
   (n) => `    { epoch: "${n.epoch}", midYear: ${n.midYear}, nameDate: "${n.nameDate}" },`,
@@ -236,7 +261,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }} />
 <GeomPoint alpha={0.55} size={1.4}
   aes={{ color: { value: "#4a5568" } }} />
-<GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
+<GeomLine stat="summary_rolling" fun="median" window={${SAKURA_TREND_WINDOW}}
   curve="linear" linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
     spec: {
@@ -270,11 +295,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         },
         trend: {
           geom: "line",
-          stat: "summary_bin",
+          stat: "summary_rolling",
           aes: { color: { value: "#262626" } },
           params: {
             fun: "median",
-            binwidth: SAKURA_BINWIDTH,
+            window: SAKURA_TREND_WINDOW,
             curve: "linear",
             linewidth: 1.8,
           },
@@ -284,8 +309,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     },
     source: {
       components: ["GeomLine", "GeomRule", "ThemeTufte"],
-      // stat="summary_bin" on the basic GeomLine shell: opt into the family.
-      registers: ["registerSummaryBin"],
+      // stat="summary_rolling" on the basic GeomLine shell: opt into the family.
+      registers: ["registerSummaryRolling"],
       grammar: {
         theme: `  <ThemeTufte />`,
         scaleY: `  <ScaleYMonthDay
@@ -313,9 +338,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     aes={{ color: { value: "#4a5568" } }}
   />`,
         trend: `  <GeomLine
-    stat="summary_bin"
+    stat="summary_rolling"
     fun="median"
-    binwidth={${SAKURA_BINWIDTH}}
+    window={${SAKURA_TREND_WINDOW}}
     curve="linear"
     linewidth={1.8}
     aes={{ color: { value: "#262626" } }}
@@ -447,6 +472,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ x: "year", y: "bloomDate", label: "label",
          color: { value: "#6b7075" } }} size={9} anchor="end" dy={12}
   inspect={false} />
+<GeomPoint data={ringLatest} shape="circle-open" size={3.5}
+  aes={{ x: "year", y: "bloomDate", color: { value: "#2c5282" } }} />
+<GeomPoint data={ringEarliest} shape="circle-open" size={3.5}
+  aes={{ x: "year", y: "bloomDate", color: { value: "#c53030" } }} />
+<GeomPoint data={recordRecent} size={3}
+  aes={{ x: "year", y: "bloomDate", color: { value: "#c53030" } }} />
 <GeomSegment data={records}
   aes={{ x: "labelYear", y: "labelDate", xend: "year",
          yend: "bloomDate", color: { value: "#b3452f" } }} linewidth={0.7} />
@@ -474,6 +505,36 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { size: 9, anchor: "end", dy: 12 },
           // Names the rule, like the epoch names name the bands (#1068).
           inspect: false,
+        },
+        ringLatest: {
+          geom: "point",
+          data: { values: SAKURA_RING_LATEST },
+          aes: {
+            x: { field: "year" },
+            y: { field: "bloomDate" },
+            color: { value: "#2c5282" },
+          },
+          params: { shape: "circle-open", size: 3.5 },
+        },
+        ringEarliest: {
+          geom: "point",
+          data: { values: SAKURA_RING_EARLIEST },
+          aes: {
+            x: { field: "year" },
+            y: { field: "bloomDate" },
+            color: { value: "#c53030" },
+          },
+          params: { shape: "circle-open", size: 3.5 },
+        },
+        recordRecent: {
+          geom: "point",
+          data: { values: SAKURA_RECORD_RECENT },
+          aes: {
+            x: { field: "year" },
+            y: { field: "bloomDate" },
+            color: { value: "#c53030" },
+          },
+          params: { size: 3 },
         },
         leaders: {
           geom: "segment",
@@ -511,13 +572,16 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         "baseline",
         "baselineLab",
         "trend",
+        "ringLatest",
+        "ringEarliest",
+        "recordRecent",
         "leaders",
         "callouts",
       ],
     },
     source: {
-      components: ["GeomRule", "GeomSegment", "GeomText"],
-      consts: [RECORDS_CONST, BASELINE_LABEL_CONST],
+      components: ["GeomPoint", "GeomRule", "GeomSegment", "GeomText"],
+      consts: [RECORDS_CONST, RINGS_CONST, BASELINE_LABEL_CONST],
       children: {
         baseline: `  <GeomRule
     yintercept="${SAKURA_BASELINE}"
@@ -536,6 +600,23 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     anchor="end"
     dy={12}
     inspect={false}
+  />`,
+        ringLatest: `  <GeomPoint
+    data={ringLatest}
+    shape="circle-open"
+    size={3.5}
+    aes={{ x: "year", y: "bloomDate", color: { value: "#2c5282" } }}
+  />`,
+        ringEarliest: `  <GeomPoint
+    data={ringEarliest}
+    shape="circle-open"
+    size={3.5}
+    aes={{ x: "year", y: "bloomDate", color: { value: "#c53030" } }}
+  />`,
+        recordRecent: `  <GeomPoint
+    data={recordRecent}
+    size={3}
+    aes={{ x: "year", y: "bloomDate", color: { value: "#c53030" } }}
   />`,
         leaders: `  <GeomSegment
     data={records}
@@ -571,6 +652,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         "baseline",
         "baselineLab",
         "trend",
+        "ringLatest",
+        "ringEarliest",
+        "recordRecent",
         "leaders",
         "callouts",
       ],

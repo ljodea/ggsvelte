@@ -8,7 +8,7 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import { foldSakura } from "./fold";
-import { SAKURA_BINWIDTH, SAKURA_STEPS } from "./steps";
+import { SAKURA_STEPS, SAKURA_TREND_WINDOW } from "./steps";
 
 /**
  * Section headings of the HUMAN getting-started page, in page order.
@@ -41,9 +41,9 @@ import { kyotoSakura } from "@ggsvelte/svelte/data";
 const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
   .geomPoint()
   .geomLine({
-    stat: "summary_bin",
+    stat: "summary_rolling",
     fun: "median",
-    binwidth: ${SAKURA_BINWIDTH},
+    window: ${SAKURA_TREND_WINDOW},
     curve: "linear",
   })
   .spec();`;

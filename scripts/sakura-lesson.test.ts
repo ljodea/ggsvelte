@@ -27,7 +27,7 @@ import {
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,
   SAKURA_BASELINE,
   SAKURA_RECORDS,
-  SAKURA_BINWIDTH,
+  SAKURA_TREND_WINDOW,
   SAKURA_EPOCHS,
   SAKURA_FINISHED_SVELTE,
   SAKURA_STEPS,
@@ -103,7 +103,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       return spec.layers.length;
     });
     // base → theme+trend+chartlines+y-ticks → epochs → annotate → finish
-    expect(layerCounts).toEqual([1, 4, 6, 10, 10]);
+    expect(layerCounts).toEqual([1, 4, 6, 13, 13]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -120,8 +120,8 @@ describe("the sakura lesson folds to renderable specs", () => {
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
-    expect((full.spec.layers as unknown[]).length).toBe(10);
-    expect((narrow.spec.layers as unknown[]).length).toBe(7);
+    expect((full.spec.layers as unknown[]).length).toBe(13);
+    expect((narrow.spec.layers as unknown[]).length).toBe(10);
     const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(kinds).not.toContain("segment");
     // The epoch names stay: they are spread one per band rather than clustered
@@ -177,9 +177,53 @@ describe("the sakura lesson folds to renderable specs", () => {
       "rule",
       "text",
       "line",
+      "point",
+      "point",
+      "point",
       "segment",
       "text",
     ]);
+  });
+
+  it("rings the three record years like the reference chart", () => {
+    // Tufte circles the records: open rings on the all-time earliest (1409,
+    // red) and latest (1323, blue), a filled red dot on the modern record
+    // (2023). Rings ride on the same rows as the callouts, so a record can
+    // never drift from its circle.
+    const layers = finished.spec.layers as {
+      geom: string;
+      data?: { values?: Record<string, unknown>[] };
+      aes?: Record<string, unknown>;
+      params?: Record<string, unknown>;
+    }[];
+    const ringLatest = layers.find(
+      (layer) =>
+        layer.geom === "point" &&
+        layer.params?.["shape"] === "circle-open" &&
+        JSON.stringify(layer.aes?.["color"]) === '{"value":"#2c5282"}',
+    );
+    const ringEarliest = layers.find(
+      (layer) =>
+        layer.geom === "point" &&
+        layer.params?.["shape"] === "circle-open" &&
+        JSON.stringify(layer.aes?.["color"]) === '{"value":"#c53030"}',
+    );
+    const recordRecent = layers.find(
+      (layer) =>
+        layer.geom === "point" &&
+        layer.params?.["shape"] === undefined &&
+        JSON.stringify(layer.aes?.["color"]) === '{"value":"#c53030"}',
+    );
+    expect(ringLatest?.data?.values).toEqual([{ year: 1323, bloomDate: "05-04" }]);
+    expect(ringLatest?.params?.["size"]).toBe(3.5);
+    expect(ringEarliest?.data?.values).toEqual([{ year: 1409, bloomDate: "03-27" }]);
+    expect(ringEarliest?.params?.["size"]).toBe(3.5);
+    expect(recordRecent?.data?.values).toEqual([{ year: 2023, bloomDate: "03-25" }]);
+    expect(recordRecent?.params?.["size"]).toBe(3);
+    // The trend is the reference's 30-year running median, not a binned stand-in.
+    const trend = layers.find((layer) => layer.geom === "line");
+    expect(trend?.params?.["window"]).toBe(SAKURA_TREND_WINDOW);
+    expect(trend?.params?.["fun"]).toBe("median");
   });
 
   it("publishes agent JSON that is the finished fold with named plot data only", () => {
@@ -209,6 +253,9 @@ describe("the sakura lesson folds to renderable specs", () => {
       "rule",
       "text",
       "line",
+      "point",
+      "point",
+      "point",
       "segment",
       "text",
     ]);
@@ -225,9 +272,9 @@ describe("the sakura lesson folds to renderable specs", () => {
     // are written independently on purpose: the test is the thing that stops
     // the two from drifting.
     const pairs: [number, string, string][] = [
-      [0, 'stat="summary_bin"', '"stat":"summary_bin"'],
+      [0, 'stat="summary_rolling"', '"stat":"summary_rolling"'],
       [0, 'fun="median"', '"fun":"median"'],
-      [0, `binwidth={${SAKURA_BINWIDTH}}`, `"binwidth":${SAKURA_BINWIDTH}`],
+      [0, `window={${SAKURA_TREND_WINDOW}}`, `"window":${SAKURA_TREND_WINDOW}`],
       [0, 'curve="linear"', '"curve":"linear"'],
       [0, "alpha={0.55}", '"alpha":0.55'],
       [0, `yintercept="${SAKURA_Y_BREAKS[0]}"`, `"yintercept":"${SAKURA_Y_BREAKS[0]}"`],
@@ -271,7 +318,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       "linewidth",
       "stat",
       "fun",
-      "binwidth",
+      "window",
+      "shape",
       "curve",
       "yintercept",
       "position",
@@ -450,18 +498,31 @@ describe("gate G8 — annotations that do not fight the chart", () => {
   });
 });
 
-describe("gate G4 — the binned-median trend", () => {
-  it("draws a polyline of bin medians, not a loess or the raw points", () => {
+/** Mean absolute step between consecutive y positions (screen px). */
+const meanYStep = (positions: ArrayLike<number>) => {
+  let sum = 0;
+  const n = positions.length / 2;
+  for (let i = 1; i < n; i += 1)
+    sum += Math.abs(positions[i * 2 + 1]! - positions[(i - 1) * 2 + 1]!);
+  return sum / (n - 1);
+};
+
+describe("gate G4 — the rolling-median trend", () => {
+  it("draws one window median per observation year, joined linearly", () => {
     // foldSakura(1): theme + trend + chartlines + y-tick polish (finished reading order for signal).
     const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
     expect(trend!.curve).toBe("linear");
     const vertices = trend!.positions.length / 2;
-    // ~1200 years / 15-year bins ≈ 80 non-empty bins — far fewer than 838 points.
-    expect(vertices).toBeGreaterThan(40);
-    expect(vertices).toBeLessThan(120);
-    expect(vertices).toBeLessThan(rows.length / 5);
+    // summary_rolling emits one row per unique x — the whole series, not a
+    // binned decimation.
+    expect(vertices).toBe(new Set(rows.map((row) => row.year)).size);
+    // And it is smoother than the raw series it summarizes: the average
+    // year-to-year vertical step of the line sits well under the points'.
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    expect(points).toBeDefined();
+    expect(meanYStep(trend!.positions)).toBeLessThan(meanYStep(points!.positions) / 2);
   });
 
   it("reads as one signal: flat for a millennium, then early", () => {
