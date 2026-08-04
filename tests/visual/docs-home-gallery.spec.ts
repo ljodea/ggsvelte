@@ -77,10 +77,12 @@ test("homepage grammar chart upgrades to full interactive layers on intent", asy
   await expect(output.locator(".gg-legend")).toHaveCount(1);
   await expect(output.locator(".gg-paths")).toHaveCount(1);
   await expect(output.locator(".gg-capture")).toBeVisible();
-  // Labs match the SSR shell — no flash of raw field names on upgrade.
+  // Labs match the SSR shell — no flash of raw field names on the axes.
+  // After keyboard upgrade, focus lands in .gg-capture (may open inspect UI
+  // that lists field tokens elsewhere); only axis titles are the flash risk.
   await expect(output.locator(".gg-axis-title", { hasText: "Flipper length mm" })).toBeVisible();
   await expect(output.locator(".gg-axis-title", { hasText: "Body mass g" })).toBeVisible();
-  await expect(output.getByText("flipperLengthMm")).toHaveCount(0);
+  await expect(output.locator(".gg-axis-title", { hasText: "flipperLengthMm" })).toHaveCount(0);
 });
 
 test("homepage grammar inspect draws xy crosshair and supports legend focus", async ({ page }) => {
