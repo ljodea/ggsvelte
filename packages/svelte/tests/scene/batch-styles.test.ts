@@ -33,6 +33,28 @@ describe("Batch mapped style vectors", () => {
     expect(diamond?.getAttribute("opacity")).toBe("0.75");
   });
 
+  it("renders circle-open as a stroked ring, not a filled dot", () => {
+    const { container } = render(Batch, {
+      batch: fromAny({
+        kind: "points",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: Float32Array.from([10, 10]),
+        rowIndex: Uint32Array.from([0]),
+        size: 3.5,
+        alpha: 1,
+        shape: "circle-open",
+        fill: "#2c5282",
+      }),
+      theme,
+    });
+    const ring = container.querySelector("circle.gg-shape-circle-open");
+    expect(ring).not.toBeNull();
+    expect(ring?.getAttribute("fill")).toBe("none");
+    expect(ring?.getAttribute("stroke")).toBe("#2c5282");
+    expect(Number(ring?.getAttribute("stroke-width"))).toBeGreaterThanOrEqual(1);
+  });
+
   it("renders per-subpath linewidth, alpha, and dash pattern", () => {
     const { container } = render(Batch, {
       batch: fromAny({

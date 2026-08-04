@@ -385,7 +385,11 @@
           cx={p.geometry.cx}
           cy={p.geometry.cy}
           r={p.geometry.r}
-          fill={p.fill}
+          fill={p.geometry.mode === "stroke" ? "none" : p.fill}
+          stroke={p.geometry.mode === "stroke" ? p.fill : undefined}
+          stroke-width={p.geometry.mode === "stroke"
+            ? p.geometry.strokeWidth
+            : undefined}
           opacity={itemOpacity(p.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
           {...focusAttrs}
