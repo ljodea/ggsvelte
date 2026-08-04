@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 import {
   CASES,
@@ -99,6 +99,26 @@ describe("competitive scenario catalog", () => {
     const canvas = readFileSync(new URL("./adapters/ggsvelte-canvas.ts", import.meta.url), "utf8");
     expect(svg).toMatch(/geomArea\(\s*\{\s*position:\s*["']identity["']/);
     expect(canvas).toMatch(/geomArea\(\s*\{[^}]*position:\s*["']identity["']/s);
+  });
+
+  test("SSR bench entries exist for ggsvelte + both Svelte peers (server-render matrix cannot collapse)", () => {
+    for (const lib of ["ggsvelte", "svelteplot", "layercake"]) {
+      for (const scenario of ["scatter-color", "line-multiseries"]) {
+        expect(existsSync(new URL(`./entries/ssr__${lib}__${scenario}.ts`, import.meta.url))).toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  test("SSR bench keeps the empty-shell guard plus the SveltePlot capability record", () => {
+    // minMarks: an unexpected empty server render fails loudly (no silent
+    // throughput "win"). expectEmptyShell/ssrCapable: SveltePlot's documented
+    // client-only mark rendering is recorded as a capability gap, not a 0 bar.
+    const src = readFileSync(new URL("./measure-ssr.ts", import.meta.url), "utf8");
+    expect(src).toMatch(/minMarks/);
+    expect(src).toMatch(/expectEmptyShell/);
+    expect(src).toMatch(/ssrCapable/);
   });
 
   test("browser harness does not re-sample replace as a second mount loop (#1357)", () => {

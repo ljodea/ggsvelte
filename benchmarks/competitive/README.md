@@ -29,7 +29,8 @@ Internal mitata workloads in `benchmarks/` remain the self-regression gate. This
 
 bun run measure:bundles    # Vite minify + gzip -9
 bun run measure:browser    # Playwright Chromium, default case matrix
-bun run measure            # both
+bun run measure:ssr        # server-side SVG render throughput (no browser)
+bun run measure            # bundles + browser
 
 COMPETITIVE_FULL=1 bun run measure:browser   # includes 100k / uPlot-scale cells
 COMPETITIVE_FULL=1 bun run measure:bundles
@@ -37,6 +38,18 @@ bun test                   # catalog integrity
 ```
 
 Results: `results/bundles.json`, `results/browser.json`.
+
+## Docs homepage charts
+
+The docs homepage and repo README chart only the cells where ggsvelte beats
+**both** Svelte peers (claim discipline is enforced in
+`scripts/gen-benchmark-charts.ts`, which refuses to emit a losing chart).
+After re-measuring, regenerate from the repo root:
+
+```sh
+bun scripts/gen-benchmark-charts.ts         # rewrites apps/docs/static/benchmarks/*.svg
+bun scripts/gen-benchmark-charts.ts --check # docs CI freshness gate
+```
 
 ## Fairness notes (read before optimising)
 
@@ -49,7 +62,8 @@ Results: `results/bundles.json`, `results/browser.json`.
 7. **SveltePlot / LayerCake** remain bundle-only until component fixtures mount in Playwright.
 8. Compare **within one machine and one run**. Absolute ms are host-sensitive (same as internal budgets).
 9. **Paint-inclusive timing** waits two animation frames after mount, so small cases sit near a ~1–2 frame floor. Use denser cases (`line-3x10k`, `scatter-color-10k`, full matrix) to rank libraries.
-10. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
+10. **SSR throughput (`measure:ssr`) is reported, not cherry-picked.** Each lib renders data -> SVG string with no browser: ggsvelte via `renderToSVGString`, peers via Svelte 5 `render()` of the same fixture components (LayerCake with its documented `ssr` prop). Two honest findings: **LayerCake out-renders ggsvelte at 1k** (plain string concat beats the full grammar pipeline at small N — the cell is kept, not hidden), and **SveltePlot server-renders an empty shell** (marks live in client-side `$effect` plot state), recorded as `ssrCapable: false` — never a 0 bar. Any _other_ lib regressing to an empty shell fails the run loudly (`minMarks`).
+11. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
 
 ## Scenario catalog
 
