@@ -11,6 +11,8 @@
    *
    * The static SVG has no focusable nodes, so a "Load interactive chart"
    * button keeps a keyboard path after the old step accordion was removed.
+   * After upgrade, focus is restored into .gg-capture so Tab does not jump to
+   * document.body when the load button unmounts (#1362).
    */
   let {
     staticSvgLightSite,
@@ -25,6 +27,8 @@
     typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
   >(null);
   let loadStarted = $state(false);
+  /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
+  let restoreKeyboardFocus = $state(false);
 
   function ensureLive(): void {
     if (loadStarted || Plot !== null) return;
@@ -34,14 +38,81 @@
     });
   }
 
+  function onShellFocusIn(): void {
+    if (Plot === null) restoreKeyboardFocus = true;
+  }
+
+  function onShellFocusOut(event: FocusEvent): void {
+    // relatedTarget === null means blur from unmount (keep restore pending).
+    const next = event.relatedTarget;
+    if (next === null) return;
+    if (next instanceof Node && host !== null && host.contains(next)) return;
+    restoreKeyboardFocus = false;
+  }
+
+  function focusAfterUpgrade(root: HTMLElement): boolean {
+    const capture = root.querySelector<HTMLElement>(".gg-capture");
+    const target =
+      capture ??
+      root.querySelector<HTMLElement>('.gg-plot-root[data-gg-ready="true"]') ??
+      root.querySelector<HTMLElement>(".gg-plot-root");
+    if (target === null) return false;
+    const active = document.activeElement;
+    if (
+      active !== null &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      !root.contains(active)
+    ) {
+      return true; // user moved on — clear without focusing
+    }
+    if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+      target.tabIndex = -1;
+    }
+    queueMicrotask(() => {
+      target.focus({ preventScroll: true });
+    });
+    return true;
+  }
+
   onMount(() => {
     const el = host;
     if (el === null) return;
     return observeUserIntent(el, ensureLive);
   });
+
+  // After keyboard-triggered upgrade, move focus into the plot so Tab order
+  // does not jump to <body> when the load button unmounts (#1362).
+  $effect(() => {
+    if (Plot === null || host === null || !restoreKeyboardFocus) return;
+    const root = host;
+    const tryFocus = (): boolean => {
+      if (!focusAfterUpgrade(root)) return false;
+      restoreKeyboardFocus = false;
+      return true;
+    };
+    if (tryFocus()) return;
+    const mo = new MutationObserver(() => {
+      if (tryFocus()) mo.disconnect();
+    });
+    mo.observe(root, { childList: true, subtree: true, attributes: true });
+    const stop = window.setTimeout(() => {
+      mo.disconnect();
+      restoreKeyboardFocus = false;
+    }, 30_000);
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(stop);
+    };
+  });
 </script>
 
-<div class="grammar-output" bind:this={host}>
+<div
+  class="grammar-output"
+  bind:this={host}
+  onfocusin={onShellFocusIn}
+  onfocusout={onShellFocusOut}
+>
   {#if Plot !== null}
     <Plot />
   {:else}
