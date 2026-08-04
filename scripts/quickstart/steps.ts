@@ -195,7 +195,7 @@ ${SAKURA_RECORDS.map(
  * reversed axis), and the trend crosses the baseline near the right edge, so
  * above the line the label would collide with it.
  */
-export const SAKURA_BASELINE_LABEL = [
+const SAKURA_BASELINE_LABEL = [
   { year: 2026, bloomDate: SAKURA_BASELINE, label: "pre-industrial median" },
 ];
 
@@ -299,12 +299,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       children: {
         chartlineEarly: `  <GeomRule
     yintercept="${SAKURA_Y_BREAKS[0]}"
-    linewidth={0.5}
+    linewidth={0.75}
     aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
   />`,
         chartlineLate: `  <GeomRule
     yintercept="${SAKURA_Y_BREAKS[2]}"
-    linewidth={0.5}
+    linewidth={0.75}
     aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
   />`,
         points: `  <GeomPoint
