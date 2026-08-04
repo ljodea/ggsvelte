@@ -268,7 +268,7 @@ pre {
   min-height: 2rem;
   padding: 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--radius);
   background: transparent;
   color: color-mix(in srgb, var(--code-ink) 55%, transparent);
   cursor: pointer;

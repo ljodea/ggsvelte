@@ -159,7 +159,7 @@
     flex: 0 0 auto;
     padding: 0.3rem 0.65rem;
     border: 0;
-    border-radius: 7px;
+    border-radius: var(--radius);
     background: none;
     color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     cursor: pointer;
@@ -196,7 +196,7 @@
     margin-left: auto;
     padding: 0;
     border: 0;
-    border-radius: 7px;
+    border-radius: var(--radius);
     background: none;
     color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     cursor: pointer;
