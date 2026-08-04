@@ -103,6 +103,9 @@ describe("buildFrame — density / smooth / boxplot / summary", () => {
   });
 
   it("summary produces y/ymin/ymax for mean_se style fun", () => {
+    // mean_se is the default bound when fun is "mean" and no explicit
+    // funMin/funMax are given — "mean_se" itself is not a registry fun and
+    // must never reach applySummaryFun.
     const table = ColumnTable.fromRows([
       { g: "a", y: 1 },
       { g: "a", y: 3 },
@@ -114,7 +117,7 @@ describe("buildFrame — density / smooth / boxplot / summary", () => {
         geom: "errorbar",
         aes: { x: { field: "g" }, y: { field: "y" } },
         stat: "summary",
-        params: { fun: "mean", funMin: "mean_se", funMax: "mean_se" },
+        params: { fun: "mean" },
       },
       0,
       table,
@@ -123,7 +126,11 @@ describe("buildFrame — density / smooth / boxplot / summary", () => {
     const frame = buildFrame(binding, table, [], []);
     expect(frame.n).toBe(2);
     expect(frame.yNumeric).not.toBeNull();
+    // Group a: mean 2 ± se 1 → [1, 3]; group b: mean 6 ± se 1 → [5, 7].
+    expect([...frame.yNumeric!]).toEqual([2, 6]);
     expect(frame.ymin).not.toBeNull();
     expect(frame.ymax).not.toBeNull();
+    expect([...frame.ymin!]).toEqual([1, 5]);
+    expect([...frame.ymax!]).toEqual([3, 7]);
   });
 });

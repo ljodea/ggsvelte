@@ -182,6 +182,26 @@ export function layerStructuralErrors(
     errors.push(...ribbonStructuralErrors(layer, layerPath, mapped));
   }
 
+  if (stat === "summary" || stat === "summary_bin" || stat === "summary_rolling") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const fun = params["fun"];
+    // first|last are stat manual's row-keep transforms. The point/line params
+    // union admits them for every stat, and core's summary registry does not
+    // implement them — they must fail here, not silently summarize as max.
+    if (fun === "first" || fun === "last") {
+      errors.push({
+        code: "summary-fun-unsupported",
+        path: `${layerPath}/params/fun`,
+        message: `The ${stat} stat summarizes with the registry funs mean|median|sum|min|max; params.fun "${fun}" is a manual-stat keep transform and has no meaning here.`,
+        fix: {
+          description:
+            "Use mean, median, or sum for the center summary (min/max via funMin/funMax where supported).",
+          example: { params: { fun: "median" } },
+        },
+      });
+    }
+  }
+
   if (stat === "summary_rolling") {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
     const window = params["window"];
