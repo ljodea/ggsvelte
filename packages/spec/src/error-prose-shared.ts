@@ -63,6 +63,10 @@ export const DUAL_ERROR_PROSE = {
     summary: "A layer uses stat summary_rolling without params.window.",
     fix: "Set params.window to the rolling-window width in x data units (greater than 0).",
   },
+  "summary-fun-unsupported": {
+    summary: "A summary stat uses params.fun first|last, which only stat manual implements.",
+    fix: "Use mean, median, or sum (min/max via funMin/funMax where supported); first|last belong to stat manual.",
+  },
   "ribbon-orientation-ambiguous": {
     summary:
       "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",

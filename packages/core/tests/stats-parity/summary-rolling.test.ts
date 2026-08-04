@@ -113,4 +113,17 @@ describe("statSummaryRolling", () => {
       /window/,
     );
   });
+
+  it("throws loudly for a manual keep fun instead of aliasing max", () => {
+    // first|last are stat manual's row-keep transforms; on a summary stat
+    // they must fail, not fall through applySummaryFun's default to max.
+    const x = Float64Array.from([1, 2]);
+    const y = Float64Array.from([4, 8]);
+    expect(() =>
+      statSummaryRolling({ x, y, groups: [0, 0], params: { window: 2, fun: "first" as never } }),
+    ).toThrow(/summary fun/);
+    expect(() =>
+      statSummaryRolling({ x, y, groups: [0, 0], params: { window: 2, fun: "last" as never } }),
+    ).toThrow(/summary fun/);
+  });
 });

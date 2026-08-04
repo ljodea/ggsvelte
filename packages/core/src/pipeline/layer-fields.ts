@@ -68,6 +68,7 @@ export function resolveLayerFields(
         stat === "smooth" ||
         stat === "summary" ||
         stat === "summary_bin" ||
+        stat === "summary_rolling" ||
         stat === "connect" ||
         stat === "quantile" ||
         stat === "manual" ||

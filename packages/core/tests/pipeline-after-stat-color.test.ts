@@ -47,6 +47,30 @@ describe("after_stat color/fill (#915)", () => {
     expect(statChannelWarnings(model.warnings).length).toBe(1);
   });
 
+  it("publishes the rolling summary to style channels like summary_bin does", () => {
+    // Review on #1470: spec validation accepts { stat: "y" } on any channel of
+    // a summary_rolling layer, but the style after-stat map had no entry, so
+    // a validated spec threw stat-channel-unsupported at render.
+    const model = runPipeline(
+      gg({ x: [1, 2, 3, 4, 5], y: [1, 4, 2, 8, 3] }, aes({ x: "x", y: "y" }))
+        .geomLine({ stat: "summary_rolling", window: 3, fun: "mean" })
+        .spec(),
+      size,
+    );
+    expect(model.scene.batches.length).toBeGreaterThan(0);
+    const styled = runPipeline(
+      gg(
+        { x: [1, 2, 3, 4, 5], y: [1, 4, 2, 8, 3] },
+        aes({ x: "x", y: "y", linewidth: { stat: "y" } }),
+      )
+        .geomLine({ stat: "summary_rolling", window: 3, fun: "mean" })
+        .spec(),
+      size,
+    );
+    expect(statChannelWarnings(styled.warnings)).toEqual([]);
+    expect(styled.scene.batches.length).toBeGreaterThan(0);
+  });
+
   it("stays silent for density_2d_filled fill = after_stat(level)", () => {
     const model = runPipeline(
       gg(cloud(60), aes({ x: "x", y: "y" }))

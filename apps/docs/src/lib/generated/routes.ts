@@ -11056,6 +11056,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "summary-fun-unsupported",
+        title: "summary-fun-unsupported",
+        level: 3,
+      },
+      {
         id: "invalid-data-profile",
         title: "invalid-data-profile",
         level: 3,

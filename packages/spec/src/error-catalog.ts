@@ -220,6 +220,11 @@ export const ERROR_CATALOG = {
     tier: 2,
     ...DUAL_ERROR_PROSE["summary-rolling-window-required"],
   },
+  "summary-fun-unsupported": {
+    // Structural grammar (layerStructuralErrors) — opt-in tier-2 only; not plain validate().
+    tier: 2,
+    ...DUAL_ERROR_PROSE["summary-fun-unsupported"],
+  },
   "invalid-data-profile": {
     tier: 2,
     summary: "The provided DataProfile is malformed.",

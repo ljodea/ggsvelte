@@ -17976,6 +17976,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["summary-rolling-window-required"],
   },
   {
+    id: "heading:guide-errors:summary-fun-unsupported",
+    kind: "heading",
+    title: "summary-fun-unsupported",
+    summary:
+      "summary-fun-unsupported in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#summary-fun-unsupported",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["summary-fun-unsupported"],
+  },
+  {
     id: "heading:guide-errors:invalid-data-profile",
     kind: "heading",
     title: "invalid-data-profile",
@@ -41780,6 +41790,19 @@ export const DOCS_SEARCH_INDEX = [
       "Set params.window to the rolling-window width in x data units (greater than 0).",
     ],
     exact: ["summary-rolling-window-required", "validation:summary-rolling-window-required"],
+  },
+  {
+    id: "diagnostic:validation:summary-fun-unsupported",
+    kind: "diagnostic",
+    title: "summary-fun-unsupported · validation",
+    summary: "A summary stat uses params.fun first|last, which only stat manual implements.",
+    href: "/guide/errors#summary-fun-unsupported",
+    keywords: [
+      "validation",
+      "error",
+      "Use mean, median, or sum (min/max via funMin/funMax where supported); first|last belong to stat manual.",
+    ],
+    exact: ["summary-fun-unsupported", "validation:summary-fun-unsupported"],
   },
   {
     id: "diagnostic:validation:invalid-data-profile",

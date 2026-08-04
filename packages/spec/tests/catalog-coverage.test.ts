@@ -123,6 +123,19 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     },
     options: {},
   },
+  "summary-fun-unsupported": {
+    spec: {
+      layers: [
+        {
+          geom: "line",
+          stat: "summary_rolling",
+          aes: { x: { field: "x" }, y: { field: "y" } },
+          params: { window: 30, fun: "first" },
+        },
+      ],
+    },
+    options: {},
+  },
   "facet-form-ambiguous": {
     spec: {
       layers: [point],
