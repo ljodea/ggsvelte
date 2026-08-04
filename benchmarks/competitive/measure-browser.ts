@@ -2,8 +2,10 @@
  * Browser paint competitive bench (Playwright Chromium).
  *
  * Matrix: browser-enabled libs × scenario cases (default subset, or COMPETITIVE_FULL=1).
- * Metrics per cell: cold mount median ms (includes double-rAF). replace* columns
- * mirror mount until in-place setData exists (full remount is not re-sampled).
+ * Metrics per cell: cold mount median ms (includes double-rAF) plus IN-PLACE
+ * update median ms (same medianMs helper, warmup 2 / samples 11, alternating
+ * perturbed data). replace* columns mirror mount until a distinct remount
+ * metric is wanted (full remount is not re-sampled).
  *
  *   bun run measure-browser.ts
  *   COMPETITIVE_FULL=1 bun run measure-browser.ts
@@ -21,12 +23,24 @@ const resultsDir = path.join(root, "results");
 mkdirSync(resultsDir, { recursive: true });
 
 const full = Boolean(process.env["COMPETITIVE_FULL"]);
-const cases = casesForRun(full);
-const browserLibs = LIBS.filter((l) => l.browser);
+// Optional focus filters for debugging contested cells:
+//   COMPETITIVE_LIBS=ggsvelte-svg,layercake COMPETITIVE_CASES=line-3x10k bun run measure-browser.ts
+const onlyLibs = process.env["COMPETITIVE_LIBS"]
+  ?.split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const onlyCases = process.env["COMPETITIVE_CASES"]
+  ?.split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const cases = casesForRun(full).filter((c) => !onlyCases || onlyCases.includes(c.id));
+const browserLibs = LIBS.filter((l) => l.browser && (!onlyLibs || onlyLibs.includes(l.id)));
 
 type BenchApi = {
   mount: (lib: string, caseId: string) => Promise<{ ms: number; markHint: number }>;
   replace: (lib: string, caseId: string) => Promise<{ ms: number }>;
+  update: (lib: string, caseId: string) => Promise<{ ms: number }>;
+  endUpdate: () => void;
   list: () => {
     libs: { id: string; browser: boolean }[];
     cases: { id: string }[];
@@ -70,8 +84,12 @@ const server = await createServer({
   plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
   resolve: {
     conditions: ["svelte", "browser", "import", "module", "default"],
+    dedupe: ["svelte"],
   },
   optimizeDeps: {
+    // Svelte component libs must share one svelte runtime with the fixture
+    // components (context + flushSync break across duplicated runtimes).
+    exclude: ["svelte", "svelteplot", "layercake"],
     include: [
       "@ggsvelte/core",
       "@ggsvelte/core/render",
@@ -93,9 +111,25 @@ const server = await createServer({
 });
 await server.listen();
 
+// Warm the vite transform graph BEFORE launching Chromium: on a cold
+// node_modules/.vite the first page load compiles the whole import graph
+// (fixture + all lib adapters) and can blow the 120s page timeout.
+// warmupRequest crawls the import graph from the entry module.
+await server.warmupRequest("/main.ts");
+
 const browser = await chromium.launch();
 let page = await browser.newPage();
 page.setDefaultTimeout(120_000);
+
+function wirePageDiagnostics(p: Page): void {
+  p.on("pageerror", (e) => process.stderr.write(`PAGEERROR: ${String(e).slice(0, 800)}\n`));
+  p.on("console", (m) => {
+    if (m.type() === "error") {
+      process.stderr.write(`CONSOLE-ERR: ${m.text().slice(0, 400)}\n`);
+    }
+  });
+}
+wirePageDiagnostics(page);
 
 const results: Record<string, unknown>[] = [];
 const matrix = pairs();
@@ -110,6 +144,24 @@ async function waitForBenchApi(): Promise<void> {
   });
 }
 
+function isTimeout(err: unknown): boolean {
+  return err instanceof Error && err.name === "TimeoutError";
+}
+
+/** Load the bench page and wait for the API, retrying once on goto timeout
+ * (a cold vite dep-optimize can stall the first load past the page timeout). */
+async function gotoBenchPage(p: Page): Promise<void> {
+  try {
+    await p.goto("http://127.0.0.1:5199/");
+    await waitForBenchApi();
+  } catch (err) {
+    if (!isTimeout(err)) throw err;
+    process.stderr.write("page load timed out; retrying once...\n");
+    await p.goto("http://127.0.0.1:5199/");
+    await waitForBenchApi();
+  }
+}
+
 async function recoverPage(): Promise<void> {
   try {
     await page.reload();
@@ -122,13 +174,12 @@ async function recoverPage(): Promise<void> {
     }
     page = await browser.newPage();
     page.setDefaultTimeout(120_000);
-    await page.goto("http://127.0.0.1:5199/");
-    await waitForBenchApi();
+    wirePageDiagnostics(page);
+    await gotoBenchPage(page);
   }
 }
 
-await page.goto("http://127.0.0.1:5199/");
-await waitForBenchApi();
+await gotoBenchPage(page);
 
 for (const cell of matrix) {
   const label = `${cell.lib.id} ${cell.caseId}`;
@@ -145,8 +196,24 @@ for (const cell of matrix) {
       return r.ms;
     });
     // replaceLib is a full remount alias of mountLib today — re-running the
-    // median loop doubles wall time with no new information (#1357). Mirror
-    // mount stats until a real in-place setData metric lands.
+    // median loop doubles wall time with no new information (#1357). replace*
+    // columns below mirror mount stats; update* is the real second axis.
+    const updateStats = await medianMs(async () => {
+      const r = await page.evaluate(
+        async ({ library, caseId }) => {
+          const w = window as unknown as { competitiveBench: BenchApi };
+          return w.competitiveBench.update(library, caseId);
+        },
+        { library: cell.lib.id, caseId: cell.caseId },
+      );
+      return r.ms;
+    });
+    // Teardown the live update handle for this cell (also automatic on the
+    // next cell's first update call — belt and braces, no leaks across cells).
+    await page.evaluate(() => {
+      const w = window as unknown as { competitiveBench: BenchApi };
+      w.competitiveBench.endUpdate();
+    });
     results.push({
       lib: cell.lib.id,
       caseId: cell.caseId,
@@ -159,6 +226,9 @@ for (const cell of matrix) {
       replaceMedianMs: mountStats.median,
       replaceMeanMs: mountStats.mean,
       replaceP95Ms: mountStats.p95,
+      updateMedianMs: updateStats.median,
+      updateMeanMs: updateStats.mean,
+      updateP95Ms: updateStats.p95,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -176,9 +246,15 @@ for (const cell of matrix) {
   }
 }
 
-console.log("\n=== Competitive browser mount / replace (Chromium, median) ===\n");
-console.log("lib".padEnd(18), "case".padEnd(22), "mount".padStart(10), "replace".padStart(10));
-console.log("-".repeat(62));
+console.log("\n=== Competitive browser mount / replace / update (Chromium, median) ===\n");
+console.log(
+  "lib".padEnd(18),
+  "case".padEnd(22),
+  "mount".padStart(10),
+  "replace".padStart(10),
+  "update".padStart(10),
+);
+console.log("-".repeat(72));
 for (const r of results) {
   if (!r["ok"]) {
     console.log(String(r["lib"]).padEnd(18), String(r["caseId"]).padEnd(22), "FAIL");
@@ -189,12 +265,14 @@ for (const r of results) {
     String(r["caseId"]).padEnd(22),
     `${r["mountMedianMs"]}ms`.padStart(10),
     `${r["replaceMedianMs"]}ms`.padStart(10),
+    `${r["updateMedianMs"]}ms`.padStart(10),
   );
 }
 
 const payload = {
   generatedAt: new Date().toISOString(),
   full,
+  measuresUpdate: true,
   caseCatalog: CASES,
   libs: LIBS,
   results,

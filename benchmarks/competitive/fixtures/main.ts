@@ -2,6 +2,8 @@
  * Browser harness API for Playwright:
  *   window.competitiveBench.mount(lib, caseId) -> { ms, markHint }
  *   window.competitiveBench.replace(lib, caseId) -> { ms }  // full remount with fresh data seed
+ *   window.competitiveBench.update(lib, caseId) -> { ms }   // IN-PLACE update (second scoreboard)
+ *   window.competitiveBench.endUpdate()                    // teardown the live update cell
  *   window.competitiveBench.list() -> { libs, cases }
  *   window.competitiveBench.clear()
  *
@@ -9,25 +11,50 @@
  * frames so layout/paint can flush (closer to LightningChart-style "visible on
  * screen" than pure JS-only timers). Small cases therefore sit near a ~1–2
  * frame floor; discriminate on denser cases (e.g. line-3x10k, scatter-10k).
+ *
+ * Update axis: the first update(lib, caseId) call for a cell mounts UNTIMED
+ * and keeps the handle alive page-side; later calls time handle.update(data)
+ * with the same double-rAF pattern. Data alternates between two determinis-
+ * tic perturbations of the mount dataset so no lib can no-op on identical
+ * input. Switching cells or calling mount()/replace() destroys the live
+ * update handle first.
  */
 import { mountChartJs } from "../adapters/chartjs";
 import { mountD3 } from "../adapters/d3";
 import { mountEcharts } from "../adapters/echarts";
 import { mountGgsvelteCanvas } from "../adapters/ggsvelte-canvas";
 import { mountGgsvelteSvg } from "../adapters/ggsvelte-svg";
+import { mountLayerCake, mountLayerCakeCanvas } from "../adapters/layercake";
+import { mountSveltePlot } from "../adapters/svelteplot";
 import { mountUplot } from "../adapters/uplot";
 import {
   CASES,
   dataForCase,
   LIBS,
+  type BarsColumns,
   type LibId,
   type ScenarioCase,
   type ScenarioId,
+  type ScatterColumns,
+  type SeriesColumns,
 } from "../scenarios";
 
-type Destroyable = { destroy: () => void };
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
 
-let liveHandle: Destroyable | null = null;
+type MountHandle = {
+  destroy: () => void;
+  update?: (data: UpdateColumns) => void;
+};
+
+let liveHandle: MountHandle | null = null;
+
+type UpdateSlot = {
+  key: string;
+  caseData: UpdateColumns;
+  calls: number;
+  handle: MountHandle & { update: (data: UpdateColumns) => void };
+};
+let updateSlot: UpdateSlot | null = null;
 
 function caseById(id: string): ScenarioCase {
   const found = CASES.find((c) => c.id === id);
@@ -46,6 +73,61 @@ function destroyLive(): void {
   }
 }
 
+/** Teardown the live update cell (called by the harness after the last sample
+ * of a cell; also automatic on any cell switch / mount / replace). */
+function endUpdate(): void {
+  if (updateSlot !== null) {
+    try {
+      updateSlot.handle.destroy();
+    } catch {
+      // ignore teardown errors between cells
+    }
+    updateSlot = null;
+  }
+}
+
+/** Rotate a trailing numeric label suffix ("series-3" / "stack-1") by shift.
+ * Deterministic; the label SET stays identical so per-name color domains and
+ * series counts don't change across update variants. */
+function rotateLabel(label: string, shift: number, count: number): string {
+  const m = /^(.*?)(\d+)$/.exec(label);
+  if (m === null || count <= 0) return label;
+  const idx = (Number.parseInt(m[2]!, 10) + shift) % count;
+  return `${m[1]}${idx}`;
+}
+
+/**
+ * Deterministic perturbation of the mount dataset for the update scoreboard:
+ * same shape/size, different values (y' = y*0.9 + 5*variant), cls/stack
+ * labels rotated by the variant. Two variants alternate across successive
+ * update calls so no lib can no-op on identical data. Series names for
+ * line/area stay stable (uPlot/Chart.js series counts are fixed at mount).
+ */
+function perturbed(data: UpdateColumns, variant: 1 | 2): UpdateColumns {
+  const bump = variant * 5;
+  if ("cls" in data) {
+    const classes = new Set(data.cls).size;
+    return {
+      x: data.x,
+      y: data.y.map((v) => v * 0.9 + bump),
+      cls: data.cls.map((c) => rotateLabel(c, variant, classes)),
+    };
+  }
+  if ("series" in data) {
+    return {
+      x: data.x,
+      y: data.y.map((v) => v * 0.9 + bump),
+      series: data.series,
+    };
+  }
+  const stacks = new Set(data.stack).size;
+  return {
+    category: data.category,
+    value: data.value.map((v) => v * 0.9 + bump),
+    stack: data.stack.map((s) => rotateLabel(s, variant, stacks)),
+  };
+}
+
 async function afterPaint(): Promise<void> {
   await new Promise<void>((resolve) => {
     requestAnimationFrame(() => {
@@ -59,7 +141,7 @@ function mountSync(
   scenario: ScenarioId,
   data: ReturnType<typeof dataForCase>,
   root: HTMLElement,
-): { markHint: number; handle?: Destroyable } {
+): { markHint: number; handle?: MountHandle } {
   switch (lib) {
     case "ggsvelte-svg":
       return mountGgsvelteSvg(scenario, data, root);
@@ -77,6 +159,18 @@ function mountSync(
     }
     case "echarts": {
       const r = mountEcharts(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "svelteplot": {
+      const r = mountSveltePlot(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "layercake": {
+      const r = mountLayerCake(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "layercake-canvas": {
+      const r = mountLayerCakeCanvas(scenario, data, root);
       return { markHint: r.markHint, handle: r.handle };
     }
     default:
@@ -97,6 +191,7 @@ async function mountLib(lib: string, caseId: string): Promise<{ ms: number; mark
 
   const mountEl = document.querySelector("#mount") as HTMLElement;
   const status = document.querySelector("#status") as HTMLElement;
+  endUpdate();
   destroyLive();
   mountEl.replaceChildren();
 
@@ -116,7 +211,51 @@ async function replaceLib(lib: string, caseId: string): Promise<{ ms: number }> 
   return { ms: result.ms };
 }
 
+/**
+ * IN-PLACE update (second scoreboard axis). First call for a (lib, caseId)
+ * cell mounts once UNTIMED and keeps the handle alive page-side; subsequent
+ * calls time handle.update(variantData) paint-inclusive with the same
+ * double-rAF pattern as mount. Data alternates between two deterministic
+ * perturbations so no lib can no-op on identical input.
+ */
+async function updateLib(lib: string, caseId: string): Promise<{ ms: number }> {
+  const key = `${lib}::${caseId}`;
+  if (updateSlot === null || updateSlot.key !== key) {
+    endUpdate();
+    destroyLive();
+    const c = caseById(caseId);
+    const meta = LIBS.find((l) => l.id === lib);
+    if (meta === undefined) throw new Error(`unknown lib ${lib}`);
+    if (!meta.browser) throw new Error(`${lib} is bundle-only in this harness`);
+    if (!meta.scenarios.includes(c.scenario)) {
+      throw new Error(`${lib} does not support scenario ${c.scenario}`);
+    }
+    const mountEl = document.querySelector("#mount") as HTMLElement;
+    mountEl.replaceChildren();
+    const data = dataForCase(c);
+    // UNTIMED mount — establishes the live handle this cell updates in place.
+    const result = mountSync(lib as LibId, c.scenario, data, mountEl);
+    const handle = result.handle;
+    if (handle === undefined || typeof handle.update !== "function") {
+      throw new Error(`${lib} has no in-place update path (update scoreboard)`);
+    }
+    updateSlot = { key, caseData: data, calls: 0, handle: handle as UpdateSlot["handle"] };
+  }
+  const slot = updateSlot;
+  slot.calls += 1;
+  const variant = (slot.calls % 2 === 1 ? 1 : 2) as 1 | 2;
+  const next = perturbed(slot.caseData, variant);
+  const status = document.querySelector("#status") as HTMLElement;
+  const t0 = performance.now();
+  slot.handle.update(next);
+  await afterPaint();
+  const ms = performance.now() - t0;
+  status.textContent = `${lib} ${caseId} update=${ms.toFixed(2)}ms variant=${variant}`;
+  return { ms };
+}
+
 function clearMount(): void {
+  endUpdate();
   destroyLive();
   document.querySelector("#mount")?.replaceChildren();
 }
@@ -145,8 +284,9 @@ declare global {
     competitiveBench: {
       mount: typeof mountLib;
       replace: typeof replaceLib;
-      /** @deprecated use replace — kept for older measure-browser callers */
-      update: typeof replaceLib;
+      /** In-place update scoreboard (previously a deprecated replace alias). */
+      update: typeof updateLib;
+      endUpdate: typeof endUpdate;
       clear: typeof clearMount;
       list: typeof listCatalog;
     };
@@ -156,7 +296,8 @@ declare global {
 window.competitiveBench = {
   mount: mountLib,
   replace: replaceLib,
-  update: replaceLib,
+  update: updateLib,
+  endUpdate,
   clear: clearMount,
   list: listCatalog,
 };

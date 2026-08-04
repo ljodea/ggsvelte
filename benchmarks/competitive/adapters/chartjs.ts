@@ -42,7 +42,13 @@ Chart.register(
   Legend,
 );
 
-export type ChartJsHandle = { destroy: () => void };
+type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+
+export type ChartJsHandle = {
+  destroy: () => void;
+  /** Chart.js in-place update: swap datasets/labels on chart.data + update(). */
+  update: (data: UpdateColumns) => void;
+};
 
 function canvasIn(root: HTMLElement): HTMLCanvasElement {
   root.replaceChildren();
@@ -84,26 +90,29 @@ export function mountChartJs(
 ): { markHint: number; handle: ChartJsHandle } {
   const canvas = canvasIn(root);
   if (scenario === "scatter-color") {
-    const scatter = data as ScatterColumns;
-    const bySeries = new Map<string, { x: number; y: number }[]>();
-    for (let i = 0; i < scatter.x.length; i++) {
-      const cls = scatter.cls[i]!;
-      let pts = bySeries.get(cls);
-      if (pts === undefined) {
-        pts = [];
-        bySeries.set(cls, pts);
+    const datasetsFor = (scatter: ScatterColumns) => {
+      const bySeries = new Map<string, { x: number; y: number }[]>();
+      for (let i = 0; i < scatter.x.length; i++) {
+        const cls = scatter.cls[i]!;
+        let pts = bySeries.get(cls);
+        if (pts === undefined) {
+          pts = [];
+          bySeries.set(cls, pts);
+        }
+        pts.push({ x: scatter.x[i]!, y: scatter.y[i]! });
       }
-      pts.push({ x: scatter.x[i]!, y: scatter.y[i]! });
-    }
+      return [...bySeries.entries()].map(([label, pts], i) => ({
+        label,
+        data: pts,
+        backgroundColor: COLORS[i % COLORS.length],
+        pointRadius: 1.5,
+      }));
+    };
+    const scatter = data as ScatterColumns;
     const chart = new Chart(canvas, {
       type: "scatter",
       data: {
-        datasets: [...bySeries.entries()].map(([label, pts], i) => ({
-          label,
-          data: pts,
-          backgroundColor: COLORS[i % COLORS.length],
-          pointRadius: 1.5,
-        })),
+        datasets: datasetsFor(scatter),
       },
       options: {
         animation: false,
@@ -114,28 +123,37 @@ export function mountChartJs(
     });
     return {
       markHint: scatter.x.length,
-      handle: { destroy: () => chart.destroy() },
+      handle: {
+        destroy: () => chart.destroy(),
+        update: (d) => {
+          chart.data.datasets = datasetsFor(d as ScatterColumns);
+          chart.update();
+        },
+      },
     };
   }
 
   if (scenario === "bars-stacked") {
+    const dataFor = (bars: BarsColumns) => {
+      const categories = [...new Set(bars.category)];
+      const stacks = [...new Set(bars.stack)];
+      const datasets = stacks.map((stack, i) => ({
+        label: stack,
+        data: categories.map((cat) => {
+          for (let j = 0; j < bars.category.length; j++) {
+            if (bars.category[j] === cat && bars.stack[j] === stack) return bars.value[j]!;
+          }
+          return 0;
+        }),
+        backgroundColor: COLORS[i % COLORS.length],
+        stack: "total",
+      }));
+      return { labels: categories, datasets };
+    };
     const bars = data as BarsColumns;
-    const categories = [...new Set(bars.category)];
-    const stacks = [...new Set(bars.stack)];
-    const datasets = stacks.map((stack, i) => ({
-      label: stack,
-      data: categories.map((cat) => {
-        for (let j = 0; j < bars.category.length; j++) {
-          if (bars.category[j] === cat && bars.stack[j] === stack) return bars.value[j]!;
-        }
-        return 0;
-      }),
-      backgroundColor: COLORS[i % COLORS.length],
-      stack: "total",
-    }));
     const chart = new Chart(canvas, {
       type: "bar",
-      data: { labels: categories, datasets },
+      data: dataFor(bars),
       options: {
         animation: false,
         responsive: false,
@@ -148,20 +166,31 @@ export function mountChartJs(
     });
     return {
       markHint: bars.category.length,
-      handle: { destroy: () => chart.destroy() },
+      handle: {
+        destroy: () => chart.destroy(),
+        update: (d) => {
+          const next = dataFor(d as BarsColumns);
+          chart.data.labels = next.labels;
+          chart.data.datasets = next.datasets;
+          chart.update();
+        },
+      },
     };
   }
 
   const seriesData = data as SeriesColumns;
-  const { labels, datasets } = seriesFromLong(seriesData);
   const filled = scenario === "area-multiseries";
-  for (const ds of datasets) {
-    ds.fill = filled;
-    if (filled) ds.backgroundColor = `${ds.backgroundColor}55`;
-  }
+  const dataFor = (d: SeriesColumns) => {
+    const { labels, datasets } = seriesFromLong(d);
+    for (const ds of datasets) {
+      ds.fill = filled;
+      if (filled) ds.backgroundColor = `${ds.backgroundColor}55`;
+    }
+    return { labels, datasets };
+  };
   const chart = new Chart(canvas, {
     type: "line",
-    data: { labels, datasets },
+    data: dataFor(seriesData),
     options: {
       animation: false,
       responsive: false,
@@ -175,6 +204,14 @@ export function mountChartJs(
   });
   return {
     markHint: seriesData.x.length,
-    handle: { destroy: () => chart.destroy() },
+    handle: {
+      destroy: () => chart.destroy(),
+      update: (d) => {
+        const next = dataFor(d as SeriesColumns);
+        chart.data.labels = next.labels;
+        chart.data.datasets = next.datasets;
+        chart.update();
+      },
+    },
   };
 }

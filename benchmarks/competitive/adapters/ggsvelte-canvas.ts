@@ -15,7 +15,14 @@ import {
   type SeriesColumns,
 } from "../scenarios";
 
-export type MountResult = { markHint: number };
+export type UpdateColumns = ScatterColumns | SeriesColumns;
+
+export type MountHandle = {
+  destroy: () => void;
+  update: (data: UpdateColumns) => void;
+};
+
+export type MountResult = { markHint: number; handle: MountHandle };
 
 function scatterSpec(data: ScatterColumns) {
   return gg(data, aes({ x: "x", y: "y", color: "cls" }))
@@ -44,22 +51,18 @@ export function mountGgsvelteCanvas(
   if (scenario === "bars-stacked") {
     throw new Error("ggsvelte-canvas competitive path skips bars-stacked");
   }
-  let spec;
-  switch (scenario) {
-    case "scatter-color":
-      spec = scatterSpec(data as ScatterColumns);
-      break;
-    case "line-multiseries":
-      spec = lineSpec(data as SeriesColumns);
-      break;
-    case "area-multiseries":
-      spec = areaSpec(data as SeriesColumns);
-      break;
-    default:
-      throw new Error(`unsupported canvas scenario ${scenario}`);
-  }
-  const model = runPipeline(spec, { width: PLOT_WIDTH, height: PLOT_HEIGHT });
-  const strata = planStrata(model.scene, model.layerBackends);
+  const specFor = (d: UpdateColumns) => {
+    switch (scenario) {
+      case "scatter-color":
+        return scatterSpec(d as ScatterColumns);
+      case "line-multiseries":
+        return lineSpec(d as SeriesColumns);
+      case "area-multiseries":
+        return areaSpec(d as SeriesColumns);
+      default:
+        throw new Error(`unsupported canvas scenario ${scenario}`);
+    }
+  };
   root.replaceChildren();
   // Axes/text stay un-drawn in this harness (canvas marks only) so paint cost
   // isolates mark drawing — documented in README fairness notes.
@@ -70,15 +73,41 @@ export function mountGgsvelteCanvas(
   const ctx = canvas.getContext("2d");
   if (ctx === null) throw new Error("2d context unavailable");
   const dpr = window.devicePixelRatio || 1;
-  sizeCanvasForDpr(canvas, ctx, model.scene.width, model.scene.height, dpr);
   const resolve = cssColorResolver(canvas);
-  let batches = 0;
-  for (const stratum of strata) {
-    if (stratum.backend !== "canvas") continue;
-    drawStratum(ctx, model.scene, stratum.batches, resolve);
-    batches += stratum.batches.length;
-  }
-  return { markHint: batches };
+  let sized = false;
+  const draw = (d: UpdateColumns): number => {
+    const model = runPipeline(specFor(d), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+    const strata = planStrata(model.scene, model.layerBackends);
+    if (!sized) {
+      sizeCanvasForDpr(canvas, ctx, model.scene.width, model.scene.height, dpr);
+      sized = true;
+    } else {
+      // Same canvas element on updates: clear the frame (logical coords — the
+      // dpr transform set by sizeCanvasForDpr persists) and redraw.
+      ctx.clearRect(0, 0, model.scene.width, model.scene.height);
+    }
+    let batches = 0;
+    for (const stratum of strata) {
+      if (stratum.backend !== "canvas") continue;
+      drawStratum(ctx, model.scene, stratum.batches, resolve);
+      batches += stratum.batches.length;
+    }
+    return batches;
+  };
+  const markHint = draw(data);
+  return {
+    markHint,
+    handle: {
+      // Full pipeline re-run on the SAME canvas element — ggsvelte's lean
+      // canvas path has no incremental redraw, so update == remount-minus-DOM.
+      update: (d) => {
+        draw(d);
+      },
+      destroy: () => {
+        root.replaceChildren();
+      },
+    },
+  };
 }
 
 export function bundleScatterCanvas(data: ScatterColumns): unknown {
