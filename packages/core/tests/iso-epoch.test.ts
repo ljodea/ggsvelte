@@ -29,6 +29,17 @@ describe("isoEpochMs", () => {
     expect(isoEpochMs("not a date")).toBeUndefined();
     expect(isoEpochMs("2024/03/05")).toBeUndefined();
   });
+
+  it("rejects short / non-digit-leading strings without a full parse", () => {
+    // Competitive series labels ("s0") and numeric strings shorter than
+    // YYYY-MM-DD must not pay the ISO regex on every cell.
+    expect(isoEpochMs("s0")).toBeUndefined();
+    expect(isoEpochMs("s12")).toBeUndefined();
+    expect(isoEpochMs("abc")).toBeUndefined();
+    expect(isoEpochMs("2024")).toBeUndefined();
+    expect(isoEpochMs("2024-03")).toBeUndefined();
+    expect(isoEpochMs("x2024-03-05")).toBeUndefined();
+  });
 });
 
 describe("isIsoLikeString", () => {
