@@ -267,6 +267,17 @@ describe("the sakura lesson folds to renderable specs", () => {
     });
   });
 
+  it("draws the finished file's chartlines as thick as the chart beside it", () => {
+    // Review on #1469 caught the copyable file drifting to 0.5 while the
+    // fragment and rendered spec used 0.75 — pin the third surface too.
+    for (const y of [SAKURA_Y_BREAKS[0], SAKURA_Y_BREAKS[2]]) {
+      expect(
+        SAKURA_FINISHED_SVELTE,
+        `finished file chartline at ${y} drifts from the chart`,
+      ).toContain(`yintercept="${y}"\n    linewidth={0.75}`);
+    }
+  });
+
   it("prints fragments that carry the values the chart is rendered with", () => {
     // Each pair is (what the reader reads, what the renderer is handed). They
     // are written independently on purpose: the test is the thing that stops

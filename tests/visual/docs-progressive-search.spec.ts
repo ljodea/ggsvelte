@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { LESSON_CHART_WIDTH } from "../../scripts/gen-lesson-charts.ts";
+
 async function expectNoDocumentOverflow(page: import("@playwright/test").Page): Promise<void> {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
@@ -16,7 +18,7 @@ test("Getting Started renders the packed file and the built-up chart", async ({ 
   // styling. It is a build-time render, so it is an image, not a live plot.
   const firstChart = guide.locator(".lesson-block img.lesson-chart");
   await expect(firstChart).toBeVisible();
-  await expect(firstChart).toHaveJSProperty("naturalWidth", 660);
+  await expect(firstChart).toHaveJSProperty("naturalWidth", LESSON_CHART_WIDTH);
 
   await expect(guide.locator(".lesson-source--file code").first()).toContainText(
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
