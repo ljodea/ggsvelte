@@ -221,11 +221,14 @@ const BASELINE_LABEL_CONST = `  const baselineLabel = [
     { year: 812, bloomDate: "${SAKURA_BASELINE}", label: "median" },
   ];`;
 
+// Two-column rows only — same shape as SAKURA_RING_* / the fold spec — so a
+// reader who copies the finished file does not get callout fields in ring
+// tooltips that the live lesson chart never shows.
 const RINGS_CONST = `  // Ring treatment from the reference: an open blue ring on the latest
   // bloom, an open red ring on the earliest, a filled red dot on the modern record.
-  const ringLatest = records.filter((r) => r.year === 1323);
-  const ringEarliest = records.filter((r) => r.year === 1409);
-  const recordRecent = records.filter((r) => r.year === 2023);`;
+  const ringLatest = [{ year: ${SAKURA_RING_LATEST[0]!.year}, bloomDate: "${SAKURA_RING_LATEST[0]!.bloomDate}" }];
+  const ringEarliest = [{ year: ${SAKURA_RING_EARLIEST[0]!.year}, bloomDate: "${SAKURA_RING_EARLIEST[0]!.bloomDate}" }];
+  const recordRecent = [{ year: ${SAKURA_RECORD_RECENT[0]!.year}, bloomDate: "${SAKURA_RECORD_RECENT[0]!.bloomDate}" }];`;
 
 const EPOCH_NAMES_CONST = `  const epochNames = [
 ${SAKURA_EPOCH_NAMES.map(

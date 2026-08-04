@@ -238,6 +238,12 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(ringLatest?.params?.["size"]).toBe(3.5);
     expect(ringEarliest?.data?.values).toEqual([{ year: 1409, bloomDate: "03-27" }]);
     expect(ringEarliest?.params?.["size"]).toBe(3.5);
+    // Copyable file must declare the same two-column rows — not records.filter,
+    // which would put callout fields into ring tooltips the live chart never shows.
+    expect(SAKURA_FINISHED_SVELTE).toContain(
+      'const ringLatest = [{ year: 1323, bloomDate: "05-04" }]',
+    );
+    expect(SAKURA_FINISHED_SVELTE).not.toContain("records.filter");
     expect(recordRecent?.data?.values).toEqual([{ year: 2023, bloomDate: "03-25" }]);
     expect(recordRecent?.params?.["size"]).toBe(3);
     // The trend is the reference's 30-year running median, not a binned stand-in.
