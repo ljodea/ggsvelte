@@ -159,7 +159,9 @@ function liteParseColumn(
       decision: {
         status: "nominal",
         parser: null,
-        parserKey: "lite:auto",
+        // Distinct key so fieldType can classify without re-scanning (and
+        // without a first-cell probe that mis-types Date / mixed columns).
+        parserKey: "lite:numbers",
         kind: null,
         precision: null,
         evidence: [],
@@ -200,7 +202,9 @@ function liteParseColumn(
       decision: {
         status: "nominal",
         parser: null,
-        parserKey: "lite:auto",
+        // lite:labels = pure non-ISO strings; lite:auto = mixed / numeric-text
+        // (fieldType must fall back to nonTemporalFieldType for the latter).
+        parserKey: pureNonIsoLabelStrings ? "lite:labels" : "lite:auto",
         kind: null,
         precision: null,
         evidence: [],
@@ -292,34 +296,21 @@ function stringLooksNumeric(value: string): boolean {
 }
 
 /**
- * Derive field type from a lean liteParse decision without re-scanning the
- * column. Returns null when the decision is ambiguous (mixed cells) so the
- * caller can fall back to {@link nonTemporalFieldType}.
+ * Map monomorphic lean parse keys to field types without re-scanning.
+ * Returns null for `lite:auto` (mixed / numeric-text / Dates) so the caller
+ * runs {@link nonTemporalFieldType} — a first-cell probe would mis-type pure
+ * Date columns as nominal and mixed number/text as quantitative (#1477 review).
  */
-function fieldTypeFromLiteDecision(
-  decision: ParsedColumnView["decision"],
-  getRaw: () => readonly CellValue[],
-): FieldType | null {
-  // Only lean parse keys carry monomorphic classification we can trust.
-  if (decision.parserKey !== "lite:auto" && decision.parserKey !== "lite:numeric-only") {
-    return null;
+function fieldTypeFromLiteDecision(decision: ParsedColumnView["decision"]): FieldType | null {
+  switch (decision.parserKey) {
+    case "lite:numbers":
+    case "lite:numeric-only":
+      return "quantitative";
+    case "lite:labels":
+      return "nominal";
+    default:
+      return null;
   }
-  const { nonNullCount, validatedCount } = decision;
-  if (nonNullCount === 0) return "quantitative";
-  // Every non-null cell produced a finite semantic → quantitative (pure numbers).
-  if (validatedCount === nonNullCount) return "quantitative";
-  // No finite semantic: pure labels or all-NaN numbers. One non-null probe.
-  if (validatedCount === 0) {
-    const raw = getRaw();
-    for (let i = 0; i < raw.length; i++) {
-      const value = raw[i]!;
-      if (value === null) continue;
-      return typeof value === "number" ? "quantitative" : "nominal";
-    }
-    return "quantitative";
-  }
-  // Partial validation (mixed / numeric-text / ISO fragments) — full scan.
-  return null;
 }
 
 function fallbackNumeric(
@@ -623,12 +614,10 @@ export class ColumnTable {
           : "nominal"
         : view.decision.status === "temporal"
           ? "temporal"
-          : // Lean monomorphic parse already classified the column once
-            // (pure numbers / pure labels). Reuse that instead of a second
-            // O(n) typeof walk — fieldType was a top bind cost on line-3×10k.
-            // Lazy column() so facet O(n) read-count tests stay bounded (#183).
-            (fieldTypeFromLiteDecision(view.decision, () => this.column(name)) ??
-            nonTemporalFieldType(this.column(name)));
+          : // Monomorphic lean keys (lite:numbers / lite:labels) skip the
+            // second O(n) typeof walk; mixed/Date fall through to
+            // nonTemporalFieldType so lean and full agree (#1477 review).
+            (fieldTypeFromLiteDecision(view.decision) ?? nonTemporalFieldType(this.column(name)));
     this.#typeCache.set(cacheKey, type);
     return type;
   }

@@ -78,11 +78,29 @@ describe("lean ColumnTable temporal detection (no runtime)", () => {
     // Pure numbers → quantitative; pure labels → nominal; both paths must
     // agree with nonTemporalFieldType on the same cells (#1468).
     const nums = ColumnTable.fromColumns({ x: [0, 1, 2, null, 3] });
+    expect(nums.parsed("x").decision.parserKey).toBe("lite:numbers");
     expect(nums.fieldType("x")).toBe("quantitative");
     expect(nums.discreteness("x")).toBe("continuous");
     const labels = ColumnTable.fromColumns({ g: ["a", "b", "a"] });
+    expect(labels.parsed("g").decision.parserKey).toBe("lite:labels");
     expect(labels.fieldType("g")).toBe("nominal");
     expect(labels.discreteness("g")).toBe("discrete");
+  });
+
+  it("fieldType still classifies pure Date columns as temporal on the lean path", () => {
+    // Devin #1477: first-cell probe would have returned nominal; nonTemporalFieldType
+    // must still run for lite:auto / Date-only columns.
+    const table = ColumnTable.fromColumns({
+      when: [new Date("2024-01-01T00:00:00Z"), new Date("2024-01-02T00:00:00Z")],
+    });
+    expect(table.parsed("when").decision.parserKey).toBe("lite:auto");
+    expect(table.fieldType("when")).toBe("temporal");
+  });
+
+  it("fieldType still classifies mixed number/text as nominal on the lean path", () => {
+    const table = ColumnTable.fromColumns({ mixed: [1, "a", 2] });
+    expect(table.parsed("mixed").decision.parserKey).toBe("lite:auto");
+    expect(table.fieldType("mixed")).toBe("nominal");
   });
 
   it("still coerces numeric text columns via Number (CSV-ish weights)", () => {
