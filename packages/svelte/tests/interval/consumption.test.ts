@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   consumeIntervalKeys,
   nextLocalIntervalRecords,
+  recomputePanelIntervalFromLookup,
   recomputePanelIntervalProjection,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
+  type PanelIntervalLookupCandidate,
 } from "../../src/lib/interval/consumption.js";
 import type { PlotInteractionInterval } from "../../src/lib/interaction/interaction.js";
 
@@ -501,5 +503,126 @@ describe("facet interval consumption", () => {
       ...Array.from({ length: 150 }, (_, i) => `p${300 + i}`),
     ];
     expect(keys).toEqual(expected);
+  });
+
+  it("recomputePanelIntervalFromLookup matches projection keys and unique lineage rows", () => {
+    const store: Array<PanelIntervalLookupCandidate<string> | null> = [
+      {
+        panelId: "south",
+        xValue: 2,
+        yValue: "low",
+        keys: ["s2", "shared"],
+        lineage: 1,
+        rowIndex: 10,
+      },
+      {
+        panelId: "south",
+        xValue: 2,
+        yValue: "low",
+        keys: ["s3"],
+        lineage: 1,
+        rowIndex: null,
+      },
+      {
+        panelId: "south",
+        xValue: 9,
+        yValue: "low",
+        keys: ["out"],
+        lineage: 2,
+        rowIndex: 50,
+      },
+      {
+        panelId: "north",
+        xValue: 2,
+        yValue: "low",
+        keys: ["n1"],
+        lineage: 3,
+        rowIndex: 99,
+      },
+      {
+        panelId: "south",
+        xValue: 2,
+        yValue: "low",
+        keys: ["extra-row"],
+        lineage: 1,
+        rowIndex: 12,
+      },
+    ];
+    const lineages = new Map<number, readonly number[]>([
+      [1, [10, 11]],
+      [2, [50, 51]],
+      [3, [99]],
+    ]);
+    const projection = recomputePanelIntervalFromLookup({
+      panelId: "south",
+      domains: {
+        x: { kind: "linear", domain: [1, 3] },
+        y: { kind: "band", values: ["low"] },
+      },
+      size: store.length,
+      candidate: (id) => store[id] ?? null,
+      lineageKeys: (lineageId) => lineages.get(lineageId) ?? [],
+    });
+    expect(projection.keys).toEqual(["s2", "shared", "s3", "extra-row"]);
+    // Lineage 1 → 10,11; matching candidate also contributes rowIndex 12.
+    expect(projection.lineageCount).toBe(3);
+  });
+
+  it("recomputePanelIntervalFromLookup expands each lineage once among matching candidates", () => {
+    const sharedLineage = 7;
+    const markCount = 80;
+    const store: Array<PanelIntervalLookupCandidate<string> | null> = Array.from(
+      { length: markCount + 2 },
+      (_, i) => {
+        if (i < markCount) {
+          return {
+            panelId: "south",
+            xValue: 2,
+            yValue: "low",
+            keys: [`m${i}`],
+            lineage: sharedLineage,
+            rowIndex: null,
+          };
+        }
+        if (i === markCount) {
+          // In-panel but outside domain — must not expand lineage 99.
+          return {
+            panelId: "south",
+            xValue: 99,
+            yValue: "low",
+            keys: ["outside"],
+            lineage: 99,
+            rowIndex: null,
+          };
+        }
+        return {
+          panelId: "north",
+          xValue: 2,
+          yValue: "low",
+          keys: ["other-panel"],
+          lineage: 100,
+          rowIndex: null,
+        };
+      },
+    );
+    const lineageCalls = new Map<number, number>();
+    const projection = recomputePanelIntervalFromLookup({
+      panelId: "south",
+      domains: {
+        x: { kind: "linear", domain: [1, 3] },
+        y: { kind: "band", values: ["low"] },
+      },
+      size: store.length,
+      candidate: (id) => store[id] ?? null,
+      lineageKeys: (lineageId) => {
+        lineageCalls.set(lineageId, (lineageCalls.get(lineageId) ?? 0) + 1);
+        return lineageId === sharedLineage ? [0, 1, 2, 3, 4] : [lineageId];
+      },
+    });
+    expect(projection.keys).toHaveLength(markCount);
+    expect(projection.lineageCount).toBe(5);
+    expect(lineageCalls.get(sharedLineage)).toBe(1);
+    expect(lineageCalls.has(99)).toBe(false);
+    expect(lineageCalls.has(100)).toBe(false);
   });
 });
