@@ -1,5 +1,11 @@
 # @ggsvelte/core
 
+## 0.30.1
+
+### Patch Changes
+
+- @ggsvelte/spec@0.30.1
+
 ## 0.30.0
 
 ### Minor Changes
