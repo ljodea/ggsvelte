@@ -25,9 +25,9 @@ describe("cssColorResolver", () => {
   const host = {} as Element;
 
   function installStyle() {
-    globalThis.getComputedStyle = ((el: Element) => {
+    globalThis.getComputedStyle = (el: Element): CSSStyleDeclaration => {
       expect(el).toBe(host);
-      return {
+      const style = {
         getPropertyValue(name: string) {
           propertyReads += 1;
           return properties[name] ?? "";
@@ -36,8 +36,9 @@ describe("cssColorResolver", () => {
           colorReads += 1;
           return color;
         },
-      } as CSSStyleDeclaration;
-    }) as typeof getComputedStyle;
+      };
+      return style as unknown as CSSStyleDeclaration;
+    };
   }
 
   it("resolves var(--token, fallback) from computed style", () => {
