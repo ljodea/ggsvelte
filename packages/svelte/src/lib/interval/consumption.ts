@@ -204,7 +204,10 @@ export function nextLocalIntervalRecords<Key extends PropertyKey>(
  * Single-pass panel recompute after an exact bounds edit: unique semantic keys
  * and optional lineage row count. Callers that need both keys and lineageCount
  * must supply `sourceRows` on each candidate so the store is not scanned twice
- * (interval-state precise-bounds path).
+ * (interval-state precise-bounds path). Prefer
+ * {@link recomputePanelIntervalFromLookup} when scanning a live candidate
+ * store — it domain-filters before lineage expansion and expands each
+ * lineage id once.
  */
 export function recomputePanelIntervalProjection<Key extends PropertyKey>(
   input: RecomputePanelIntervalProjectionInput<Key>,
@@ -223,5 +226,55 @@ export function recomputePanelIntervalProjection<Key extends PropertyKey>(
   return {
     keys: Object.freeze([...keys]),
     lineageCount: trackRows ? rows.size : 0,
+  };
+}
+
+/**
+ * Candidate facts for store-backed precise-bounds recompute. `keys` may be a
+ * getter so hosts pay semantic-key resolution only for domain matches.
+ */
+export type PanelIntervalLookupCandidate<Key extends PropertyKey> =
+  IntervalConsumptionCandidate<Key> & {
+    readonly lineage: number;
+    readonly rowIndex: number | null;
+  };
+
+export type RecomputePanelIntervalFromLookupInput<Key extends PropertyKey> = {
+  readonly panelId: string;
+  readonly domains: ReadonlyIntervalDomains;
+  readonly size: number;
+  candidate(id: number): PanelIntervalLookupCandidate<Key> | null;
+  lineageKeys(lineageId: number): Iterable<number>;
+};
+
+/**
+ * Precise-bounds panel recompute from a candidate store.
+ *
+ * Domain membership is tested before lineage expansion. Each lineage id among
+ * matching candidates is expanded once (smooth / aggregate eval grids share
+ * membership — not once per mark). Candidate-local `rowIndex` outside the
+ * shared bag still unions into lineageCount.
+ */
+export function recomputePanelIntervalFromLookup<Key extends PropertyKey>(
+  input: RecomputePanelIntervalFromLookupInput<Key>,
+): { readonly keys: readonly Key[]; readonly lineageCount: number } {
+  const inInterval = prepareCandidateInInterval(input.domains);
+  const keys = new Set<Key>();
+  const rows = new Set<number>();
+  const expandedLineages = new Set<number>();
+  for (let id = 0; id < input.size; id++) {
+    const candidate = input.candidate(id);
+    if (candidate === null || candidate.panelId !== input.panelId) continue;
+    if (!inInterval(candidate)) continue;
+    for (const key of candidate.keys) keys.add(key);
+    if (!expandedLineages.has(candidate.lineage)) {
+      expandedLineages.add(candidate.lineage);
+      for (const rowIndex of input.lineageKeys(candidate.lineage)) rows.add(rowIndex);
+    }
+    if (candidate.rowIndex !== null) rows.add(candidate.rowIndex);
+  }
+  return {
+    keys: Object.freeze([...keys]),
+    lineageCount: rows.size,
   };
 }

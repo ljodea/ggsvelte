@@ -45,10 +45,9 @@ import {
 } from "./interval.js";
 import {
   consumeIntervalKeys,
-  recomputePanelIntervalProjection,
+  recomputePanelIntervalFromLookup,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
-  type RecomputePanelIntervalProjectionInput,
 } from "./consumption.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
 
@@ -385,9 +384,9 @@ export function createIntervalState(
 
   /**
    * One full-store pass for precise-bounds apply: semantic keys + lineage row
-   * count for the target panel/domains. Projects the live CandidateStore into
-   * the pure consumption port (always with sourceRows so lineageCount tracks
-   * unique rows — the live path never omits them).
+   * count for the target panel/domains. Domain-filters before lineage
+   * expansion and expands each lineage id once among matches (shared smooth /
+   * aggregate bags — not once per mark).
    */
   function recomputePanelIntervalSelection(
     targetPanelId: string,
@@ -395,28 +394,26 @@ export function createIntervalState(
   ): { readonly keys: readonly PropertyKey[]; readonly lineageCount: number } {
     const model = context.model();
     if (model === null) return { keys: Object.freeze([]), lineageCount: 0 };
-    type ProjectionCandidate =
-      RecomputePanelIntervalProjectionInput<PropertyKey>["candidates"][number];
-    const candidates: ProjectionCandidate[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null || candidate.panelId !== targetPanelId) continue;
-      const sourceRows = [
-        ...model.lineage.keys(candidate.lineage),
-        ...(candidate.rowIndex === null ? [] : [candidate.rowIndex]),
-      ];
-      candidates.push({
-        panelId: candidate.panelId,
-        xValue: candidate.xValue,
-        yValue: candidate.yValue,
-        keys: context.candidateSemanticKeys(candidate),
-        sourceRows,
-      });
-    }
-    return recomputePanelIntervalProjection({
+    return recomputePanelIntervalFromLookup({
       panelId: targetPanelId,
       domains,
-      candidates,
+      size: model.candidates.size,
+      candidate: (id) => {
+        const candidate = model.candidates.candidate(id);
+        if (candidate === null) return null;
+        return {
+          panelId: candidate.panelId,
+          xValue: candidate.xValue,
+          yValue: candidate.yValue,
+          lineage: candidate.lineage,
+          rowIndex: candidate.rowIndex,
+          // Lazy: pay key resolution only after domain membership passes.
+          get keys() {
+            return context.candidateSemanticKeys(candidate);
+          },
+        };
+      },
+      lineageKeys: (lineageId) => model.lineage.keys(lineageId),
     });
   }
 
