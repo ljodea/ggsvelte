@@ -121,12 +121,14 @@ describe("buildSfFrame edges", () => {
       ],
       region: ["x"],
     });
-    expect(() => buildSfFrame(sfBinding(table), table, [0], [])).toThrow(
-      expect.objectContaining({
-        code: "sf-geometry-invalid",
-        message: expect.stringMatching(/no drawable coordinates/i),
-      } satisfies Partial<PipelineError>),
-    );
+    try {
+      buildSfFrame(sfBinding(table), table, [0], []);
+      expect.unreachable("should throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(PipelineError);
+      expect((error as PipelineError).code).toBe("sf-geometry-invalid");
+      expect((error as PipelineError).message).toMatch(/no drawable coordinates/i);
+    }
   });
 
   it("throws sf-geometry-missing when the geometry column is absent", () => {
