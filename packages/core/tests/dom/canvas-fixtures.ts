@@ -13,20 +13,26 @@ export interface RecordedCall {
   name: string;
   args: number[];
   alpha: number;
-  fillStyle: string;
-  strokeStyle: string;
+  fillStyle: string | CanvasGradient;
+  strokeStyle: string | CanvasGradient;
   lineWidth: number;
+  shadowColor?: string;
+  shadowBlur?: number;
+  /** Color stops for createLinearGradient / createRadialGradient calls. */
+  stops?: { offset: number; color: string }[];
 }
 
 export function recordingContext(): { ctx: CanvasRenderingContext2D; calls: RecordedCall[] } {
   const calls: RecordedCall[] = [];
   const target = {
     globalAlpha: 1,
-    fillStyle: "",
-    strokeStyle: "",
+    fillStyle: "" as string | CanvasGradient,
+    strokeStyle: "" as string | CanvasGradient,
     lineWidth: 1,
     lineJoin: "miter",
     lineCap: "butt",
+    shadowColor: "",
+    shadowBlur: 0,
   };
   const methods = new Set([
     "arc",
@@ -45,17 +51,52 @@ export function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Reco
     "strokeRect",
     "translate",
   ]);
+  const snapshot = () => ({
+    alpha: target.globalAlpha,
+    fillStyle: target.fillStyle,
+    strokeStyle: target.strokeStyle,
+    lineWidth: target.lineWidth,
+    shadowColor: target.shadowColor,
+    shadowBlur: target.shadowBlur,
+  });
+  const makeGradient = (kind: "linear" | "radial", args: number[]) => {
+    const stops: { offset: number; color: string }[] = [];
+    calls.push({
+      name: kind === "linear" ? "createLinearGradient" : "createRadialGradient",
+      args: [...args],
+      ...snapshot(),
+      stops,
+    });
+    return {
+      addColorStop(offset: number, color: string) {
+        stops.push({ offset, color });
+      },
+    } as CanvasGradient;
+  };
   const ctx = new Proxy(target, {
     get(object, property): unknown {
+      if (property === "createLinearGradient") {
+        return (...args: number[]) => makeGradient("linear", args);
+      }
+      if (property === "createRadialGradient") {
+        return (...args: number[]) => makeGradient("radial", args);
+      }
+      if (property === "setLineDash") {
+        return (value: number[]) => {
+          calls.push({
+            name: "setLineDash",
+            args: [...value],
+            ...snapshot(),
+          });
+        };
+      }
+      if (property === "getLineDash") return () => [] as number[];
       if (typeof property === "string" && methods.has(property)) {
         return (...args: number[]) => {
           calls.push({
             name: property,
             args,
-            alpha: object.globalAlpha,
-            fillStyle: object.fillStyle,
-            strokeStyle: object.strokeStyle,
-            lineWidth: object.lineWidth,
+            ...snapshot(),
           });
         };
       }
