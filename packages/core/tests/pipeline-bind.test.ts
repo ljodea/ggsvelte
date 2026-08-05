@@ -233,6 +233,70 @@ describe("bindLayer", () => {
     }
   });
 
+  it("rejects density on a nominal x", () => {
+    try {
+      bindLayer({ geom: "density", aes: { x: { field: "g" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).message).toMatch(/density stat needs a continuous x/i);
+      expect((e as PipelineError).path).toContain("x");
+    }
+  });
+
+  it("rejects boxplot with a nominal y", () => {
+    try {
+      bindLayer({ geom: "boxplot", aes: { x: { field: "g" }, y: { field: "g" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).message).toMatch(/boxplot stat needs a quantitative y/i);
+      expect((e as PipelineError).path).toContain("y");
+    }
+  });
+
+  it("rejects ellipse on nominal position channels", () => {
+    try {
+      bindLayer(
+        { geom: "path", stat: "ellipse", aes: { x: { field: "g" }, y: { field: "y" } } },
+        0,
+        table,
+        [],
+      );
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).message).toMatch(/ellipse stat needs quantitative/i);
+    }
+  });
+
+  it("rejects raster on a nominal y", () => {
+    try {
+      bindLayer({ geom: "raster", aes: { x: { field: "x" }, y: { field: "g" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).message).toMatch(/raster geom needs continuous y/i);
+      expect((e as PipelineError).path).toContain("y");
+    }
+  });
+
+  it("rejects spoke on a nominal x", () => {
+    try {
+      bindLayer({ geom: "spoke", aes: { x: { field: "g" }, y: { field: "y" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).message).toMatch(/spoke geom needs continuous x/i);
+      expect((e as PipelineError).path).toContain("x");
+    }
+  });
+
   it("requires ymin/ymax for identity errorbar", () => {
     try {
       bindLayer({ geom: "errorbar", aes: { x: { field: "g" } } }, 0, table, []);
