@@ -71,7 +71,7 @@ export function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Reco
       addColorStop(offset: number, color: string) {
         stops.push({ offset, color });
       },
-    } as CanvasGradient;
+    };
   };
   const ctx = new Proxy(target, {
     get(object, property): unknown {
