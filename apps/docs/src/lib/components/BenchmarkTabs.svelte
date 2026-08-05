@@ -26,8 +26,8 @@
     </Tabs.List>
     {#each cards as card (card.id)}
       <Tabs.Content class="bench-tabs-content" value={card.id}>
-        <h3 class="bench-tabs-title">{card.title}</h3>
-        <p class="bench-tabs-subtitle">{card.subtitle}</p>
+        <!-- Title + subtitle are drawn inside the SVG (labs) so README
+             embeds stay self-describing; no HTML echo here. -->
         <div class="bench-tabs-chart">
           <img
             class="bench-chart-img bench-chart--light"

@@ -635,19 +635,7 @@
   padding-top: 1.25rem;
 }
 
-.bench-tabs-title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.bench-tabs-subtitle {
-  margin: 0.25rem 0 0.9rem;
-  color: var(--muted);
-  font-size: 0.8rem;
-  text-align: center;
-}
+/* Title/subtitle live inside the SVG (labs) — no HTML chrome here. */
 
 .bench-tabs-chart {
   min-width: 0;
