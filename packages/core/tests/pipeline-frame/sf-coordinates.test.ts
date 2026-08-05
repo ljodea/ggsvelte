@@ -74,12 +74,9 @@ describe("buildSfCoordinatesFrame", () => {
     const warnings: PipelineWarning[] = [];
     const frame = buildSfCoordinatesFrame(textBinding(table), table, [0], warnings);
     expect(frame.n).toBe(0);
-    expect(warnings).toEqual([
-      expect.objectContaining({
-        code: "sf-coordinates-dropped",
-        message: expect.stringMatching(/dropped 1 feature/),
-      }),
-    ]);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]?.code).toBe("sf-coordinates-dropped");
+    expect(warnings[0]?.message).toMatch(/dropped 1 feature/);
   });
 
   it("expands MultiPoint parts and replicates style columns per part", () => {
