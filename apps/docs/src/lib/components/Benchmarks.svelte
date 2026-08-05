@@ -1,9 +1,6 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-
   import {
     BENCHMARK_BUNDLE_KB,
-    BENCHMARK_CHART_CARDS,
     BENCHMARK_VERSIONS,
   } from "$lib/generated/benchmark-charts";
 
@@ -96,7 +93,7 @@
       feature: "ggplot2 API",
       gg: yes,
       sp: no,
-      lc: { mark: "no", note: "hand-written marks" },
+      lc: no,
     },
     {
       feature: "Scale, axis & coord control",
@@ -109,37 +106,8 @@
 
 <section class="benchmarks" aria-labelledby="benchmarks-heading">
   <header class="bench-intro">
-    <h2 id="benchmarks-heading">ggsvelte is Fast</h2>
+    <h2 id="benchmarks-heading">Why ggsvelte?</h2>
   </header>
-
-  <div class="bench-grid">
-    {#each BENCHMARK_CHART_CARDS as card (card.id)}
-      <figure class="bench-card">
-        <figcaption>
-          <h3>{card.title}</h3>
-          <p>{card.subtitle}</p>
-        </figcaption>
-        <div class="bench-chart">
-          <img
-            class="bench-chart-img bench-chart--light"
-            src={`${base}${card.path}`}
-            alt={card.alt}
-            width={card.width}
-            height={card.height}
-            loading="lazy"
-          />
-          <img
-            class="bench-chart-img bench-chart--dark"
-            src={`${base}${card.darkPath}`}
-            alt={card.alt}
-            width={card.width}
-            height={card.height}
-            loading="lazy"
-          />
-        </div>
-      </figure>
-    {/each}
-  </div>
 
   <div class="bench-table-wrap">
     <table>

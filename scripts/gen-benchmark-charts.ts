@@ -123,67 +123,103 @@ function installedVersion(pkg: string): string {
 
 interface ChartCard {
   readonly id: string;
+  /** Short label on the homepage tab trigger (bun-style: one or two words). */
+  readonly tab: string;
   readonly title: string;
   readonly subtitle: string;
   readonly chart: BenchmarkChartInput;
 }
 
 function buildCards(browser: BrowserResults): readonly ChartCard[] {
-  const scatter = {
-    gg: mountMs(browser, "ggsvelte-svg", "scatter-color-10k"),
-    lc: mountMs(browser, "layercake", "scatter-color-10k"),
-    sp: mountMs(browser, "svelteplot", "scatter-color-10k"),
-  };
-  const line = {
-    gg: mountMs(browser, "ggsvelte-svg", "line-3x10k"),
-    lc: mountMs(browser, "layercake", "line-3x10k"),
-    sp: mountMs(browser, "svelteplot", "line-3x10k"),
+  /** Cold-mount cell for the three homepage libs at one case. */
+  const cell = (caseId: string) => ({
+    gg: mountMs(browser, "ggsvelte-svg", caseId),
+    lc: mountMs(browser, "layercake", caseId),
+    sp: mountMs(browser, "svelteplot", caseId),
+  });
+
+  const cells = {
+    scatter1k: cell("scatter-color-1k"),
+    scatter10k: cell("scatter-color-10k"),
+    line3x10k: cell("line-3x10k"),
+    area3x1k: cell("area-3x1k"),
+    bars50x4: cell("bars-stacked-50x4"),
   };
 
   // Claim discipline: refuse to publish a chart ggsvelte does not win.
-  for (const [name, cell] of Object.entries({ scatter, line })) {
-    if (!(cell.gg < cell.lc && cell.gg < cell.sp)) {
+  for (const [name, c] of Object.entries(cells)) {
+    if (!(c.gg < c.lc && c.gg < c.sp)) {
       throw new Error(
-        `${name}: ggsvelte (${String(cell.gg)} ms) no longer beats both peers ` +
-          `(LayerCake ${String(cell.lc)} ms, SveltePlot ${String(cell.sp)} ms). ` +
+        `${name}: ggsvelte (${String(c.gg)} ms) no longer beats both peers ` +
+          `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms). ` +
           "Drop the chart from buildCards() — the homepage only claims benchmarks ggsvelte wins.",
       );
     }
   }
 
   const subtitle = "Cold-mount milliseconds · lower is better";
-  const bars = (cell: { gg: number; lc: number; sp: number }) =>
+  const bars = (c: { gg: number; lc: number; sp: number }) =>
     [
-      { lib: "ggsvelte", value: cell.gg, kind: "ggsvelte", label: msLabel(cell.gg) },
-      { lib: "LayerCake", value: cell.lc, kind: "peer", label: msLabel(cell.lc) },
-      { lib: "SveltePlot", value: cell.sp, kind: "peer", label: msLabel(cell.sp) },
+      { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
+      { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
+      { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
     ] as const;
 
-  const aria = (what: string, cell: { gg: number; lc: number; sp: number }) =>
-    `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(cell.gg)}, ` +
-    `LayerCake ${msLabel(cell.lc)}, SveltePlot ${msLabel(cell.sp)}. Lower is better.`;
+  const aria = (what: string, c: { gg: number; lc: number; sp: number }) =>
+    `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(c.gg)}, ` +
+    `LayerCake ${msLabel(c.lc)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
 
+  const card = (
+    id: string,
+    tab: string,
+    title: string,
+    ariaWhat: string,
+    c: { gg: number; lc: number; sp: number },
+  ): ChartCard => ({
+    id,
+    tab,
+    title,
+    subtitle,
+    chart: { id, bars: bars(c), ariaLabel: aria(ariaWhat, c) },
+  });
+
+  // Tab order: the realistic 1k dashboard case leads; 10k and beyond follow.
   return [
-    {
-      id: "scatter-mount",
-      title: "10,000-point colored scatter",
-      subtitle,
-      chart: {
-        id: "scatter-mount",
-        bars: bars(scatter),
-        ariaLabel: aria("a 10,000-point colored scatter", scatter),
-      },
-    },
-    {
-      id: "line-mount",
-      title: "3 × 10,000-point line chart",
-      subtitle,
-      chart: {
-        id: "line-mount",
-        bars: bars(line),
-        ariaLabel: aria("a 3-series by 10,000-point line chart", line),
-      },
-    },
+    card(
+      "scatter-1k-mount",
+      "Scatter 1k",
+      "1,000-point colored scatter",
+      "a 1,000-point colored scatter",
+      cells.scatter1k,
+    ),
+    card(
+      "scatter-mount",
+      "Scatter 10k",
+      "10,000-point colored scatter",
+      "a 10,000-point colored scatter",
+      cells.scatter10k,
+    ),
+    card(
+      "line-mount",
+      "Line",
+      "3 × 10,000-point line chart",
+      "a 3-series by 10,000-point line chart",
+      cells.line3x10k,
+    ),
+    card(
+      "area-mount",
+      "Area",
+      "3 × 1,000-point area chart",
+      "a 3-series by 1,000-point area chart",
+      cells.area3x1k,
+    ),
+    card(
+      "bars-mount",
+      "Bars",
+      "50 categories × 4 stacks",
+      "a stacked bar chart of 50 categories by 4 stacks",
+      cells.bars50x4,
+    ),
   ];
 }
 
@@ -206,6 +242,7 @@ function projectionSource(
       const dark = files.find((f) => f.filename === `bench-${card.id}-dark-site.svg`)!;
       return `  {
     id: ${JSON.stringify(card.id)},
+    tab: ${JSON.stringify(card.tab)},
     title: ${JSON.stringify(card.title)},
     subtitle: ${JSON.stringify(card.subtitle)},
     path: ${JSON.stringify(`/benchmarks/${light.filename}`)},
@@ -222,6 +259,8 @@ function projectionSource(
 
 export interface BenchmarkChartCard {
   readonly id: string;
+  /** Short label on the homepage tab trigger. */
+  readonly tab: string;
   readonly title: string;
   readonly subtitle: string;
   readonly path: string;

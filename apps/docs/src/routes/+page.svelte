@@ -3,6 +3,7 @@
 
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
+  import BenchmarkTabs from "$lib/components/BenchmarkTabs.svelte";
   import Benchmarks from "$lib/components/Benchmarks.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import { EXAMPLES } from "$lib/examples-manifest";
@@ -21,8 +22,10 @@
 
 <section class="home-hero" aria-labelledby="home-heading">
   <h1 id="home-heading">
-    A layered grammar of graphics implemented for agents
+    ggsvelte is a <span class="hero-fast">fast</span>, agent-native
+    implementation of the layered grammar of graphics
   </h1>
+  <BenchmarkTabs />
 </section>
 
 <section class="home-featured" aria-label="Examples">
@@ -49,6 +52,8 @@
   </ol>
 </section>
 
+<Benchmarks />
+
 <section class="code-path" aria-labelledby="code-path-heading">
   <div class="code-path-chart">
     <GrammarDemo
@@ -69,8 +74,6 @@
     <CodeTabs {tabs} />
   </div>
 </section>
-
-<Benchmarks />
 
 <section class="evidence" aria-labelledby="evidence-heading">
   <header>
@@ -108,15 +111,24 @@
 
 <style>
   .home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    min-width: 0;
     padding: clamp(2rem, 5vw, 4rem) 0 0;
   }
 
   .home-hero h1 {
-    max-width: 16ch;
     margin: 0;
-    font-size: clamp(2.8rem, 5.5vw, 4.75rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-size: clamp(1.9rem, 3.4vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+  }
+
+  .hero-fast {
+    color: var(--accent);
+    font-style: italic;
   }
 
   .home-featured {
@@ -147,8 +159,9 @@
   .code-path h2 {
     max-width: 14ch;
     margin: 0.25rem 0 0;
-    font-size: clamp(2.5rem, 5vw, 4.75rem);
-    line-height: 0.94;
+    font-size: clamp(1.9rem, 3.4vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
   }
 
   .home-featured ol {
@@ -247,6 +260,11 @@
   }
 
   @media (max-width: 64rem) {
+    .home-hero {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+    }
+
     .home-featured ol {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -258,7 +276,7 @@
     }
 
     .home-hero h1 {
-      font-size: clamp(2.4rem, 11vw, 3.5rem);
+      font-size: clamp(1.8rem, 7.5vw, 2.5rem);
     }
 
     .home-featured {

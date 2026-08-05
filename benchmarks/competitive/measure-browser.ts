@@ -83,7 +83,7 @@ function pairs(): { lib: LibMeta; caseId: string; scenario: string; n: number }[
 const server = await createServer({
   configFile: false,
   root: path.join(root, "fixtures"),
-  server: { port: 5199, strictPort: true },
+  server: { host: "127.0.0.1", port: 5199, strictPort: true },
   plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
   resolve: {
     conditions: ["svelte", "browser", "import", "module", "default"],
@@ -120,7 +120,12 @@ await server.listen();
 // warmupRequest crawls the import graph from the entry module.
 await server.warmupRequest("/main.ts");
 
-const browser = await chromium.launch();
+// Paint-inclusive timing uses a double-rAF; a vsync-locked compositor floors
+// every cell at ~2 frames (~32 ms @60Hz) and hides real CPU differences.
+// Unthrottle frame production so mount time reflects work, not refresh rate.
+const browser = await chromium.launch({
+  args: ["--disable-frame-rate-limit", "--disable-gpu-vsync"],
+});
 let page = await browser.newPage();
 page.setDefaultTimeout(120_000);
 

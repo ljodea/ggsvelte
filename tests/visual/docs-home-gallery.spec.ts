@@ -11,14 +11,17 @@ async function expectNoOverflow(page: import("@playwright/test").Page): Promise<
   );
 }
 
-test("homepage first viewport leads with title then featured examples", async ({ page }) => {
+test("homepage first viewport leads with title, bench tabs, then featured examples", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "A layered grammar of graphics implemented for agents",
+    "ggsvelte is a fast, agent-native implementation of the layered grammar of graphics",
   );
-  // No Guerry hero, install strip, or CTA pair above the fold.
-  await expect(page.locator(".home-hero svg")).toHaveCount(0);
+  // Hero carries compact benchmark tabs (bun-style); no install strip / CTA pair.
+  await expect(page.getByRole("tablist", { name: "Benchmark scenarios" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Scatter 1k" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Examples", level: 2 })).toHaveCount(0);
@@ -27,21 +30,23 @@ test("homepage first viewport leads with title then featured examples", async ({
   await expectNoOverflow(page);
 });
 
-test("homepage title sits above the featured gallery without hero chrome", async ({ page }) => {
+test("homepage stacks title, benchmark tabs, then featured gallery", async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 900 });
   await page.goto("/?theme=light");
+  // Below 64rem the hero collapses to a single column: h1 → tabs → gallery.
   const metrics = await page.evaluate(() => {
     const title = document.querySelector(".home-hero h1")!.getBoundingClientRect();
+    const tabs = document.querySelector(".bench-tabs")!.getBoundingClientRect();
     const featured = document.querySelector(".home-featured")!.getBoundingClientRect();
     return {
       titleBottom: title.bottom,
+      tabsTop: tabs.top,
+      tabsBottom: tabs.bottom,
       featuredTop: featured.top,
-      gap: featured.top - title.bottom,
     };
   });
-  expect(metrics.featuredTop).toBeGreaterThan(metrics.titleBottom - 1);
-  // Title → examples should be a short stack (no chart/install block between).
-  expect(metrics.gap).toBeLessThan(160);
+  expect(metrics.tabsTop).toBeGreaterThan(metrics.titleBottom - 1);
+  expect(metrics.featuredTop).toBeGreaterThan(metrics.tabsBottom - 1);
 });
 
 test("homepage code-path section SSRs heading and a static chart shell", async ({ request }) => {
@@ -116,15 +121,21 @@ test("homepage grammar inspect draws xy crosshair and supports legend focus", as
   await expect(legendTarget).toBeFocused();
 });
 
-test("homepage mobile order is title then featured examples", async ({ page }) => {
+test("homepage mobile order is title, bench tabs, then featured examples", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/?theme=light");
   const metrics = await page.evaluate(() => {
     const title = document.querySelector(".home-hero h1")!.getBoundingClientRect();
+    const tabs = document.querySelector(".bench-tabs")!.getBoundingClientRect();
     const featured = document.querySelector(".home-featured")!.getBoundingClientRect();
-    return { titleTop: title.top, featuredTop: featured.top };
+    return {
+      titleTop: title.top,
+      tabsTop: tabs.top,
+      featuredTop: featured.top,
+    };
   });
-  expect(metrics.titleTop).toBeLessThan(metrics.featuredTop);
+  expect(metrics.titleTop).toBeLessThan(metrics.tabsTop);
+  expect(metrics.tabsTop).toBeLessThan(metrics.featuredTop);
   await expect(page.locator(".home-featured ol li")).toHaveCount(6);
   await expectNoOverflow(page);
 });

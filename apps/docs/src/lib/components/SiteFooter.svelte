@@ -6,7 +6,10 @@
   <div class="site-footer__inner">
     <div>
       <a class="site-brand" href={`${base}/`}>ggsvelte</a>
-      <p>Layered grammar of graphics for Svelte.</p>
+      <p>
+        ggsvelte is a fast agent-native implementation of the layered grammar of
+        graphics, inspired by ggplot2
+      </p>
     </div>
     <nav aria-label="Footer">
       <a href={`${base}/docs`}>Docs</a>
