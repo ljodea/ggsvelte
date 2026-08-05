@@ -25,17 +25,19 @@ describe("assertTemporalConfiguration", () => {
   });
 
   it("no-ops for forced discrete axes even with an explicit parser", () => {
-    expect(() =>
+    expect(() => {
       assertTemporalConfiguration("x", {
         ...AUTO_POSITION_CONVERSION,
         parser: "ymd",
         forcedDiscrete: true,
-      }),
-    ).not.toThrow();
+      });
+    }).not.toThrow();
   });
 
   it("allows auto parser without the temporal runtime", () => {
-    expect(() => assertTemporalConfiguration("y", AUTO_POSITION_CONVERSION)).not.toThrow();
+    expect(() => {
+      assertTemporalConfiguration("y", AUTO_POSITION_CONVERSION);
+    }).not.toThrow();
   });
 
   it("rejects explicit parsers when the temporal runtime is missing", () => {
