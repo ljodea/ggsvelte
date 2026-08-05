@@ -35,7 +35,8 @@ const OUTPUT_DIR = join(ROOT, "apps", "docs", "static", "benchmarks");
 const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "benchmark-charts.ts");
 
 const CHART_WIDTH = 560;
-const CHART_HEIGHT = 220;
+/** Extra vertical room for labs title + subtitle bands (22 + 16 px). */
+const CHART_HEIGHT = 260;
 
 interface BrowserResults {
   readonly generatedAt: string;
@@ -180,7 +181,13 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     tab,
     title,
     subtitle,
-    chart: { id, bars: bars(c), ariaLabel: aria(ariaWhat, c) },
+    chart: {
+      id,
+      bars: bars(c),
+      title,
+      subtitle,
+      ariaLabel: aria(ariaWhat, c),
+    },
   });
 
   // Tab order: the realistic 1k dashboard case leads; 10k and beyond follow.

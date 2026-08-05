@@ -75,6 +75,10 @@ export interface BenchmarkChartInput {
   readonly id: string;
   /** Bars in display order — subject first, then peers ascending. */
   readonly bars: readonly BenchmarkBar[];
+  /** Plot title drawn above the panel (self-describes README <img> embeds). */
+  readonly title: string;
+  /** Plot subtitle under the title (e.g. "Cold-mount milliseconds · lower is better"). */
+  readonly subtitle: string;
   /** Accessible summary baked into the SVG aria-label and <title>. */
   readonly ariaLabel: string;
 }
@@ -82,7 +86,8 @@ export interface BenchmarkChartInput {
 /**
  * Horizontal bar chart spec (coord flip): lower-is-better time benchmarks.
  * The quantitative axis is hidden (guides y none) — bar-end labels carry the
- * values, like bun's bundler chart.
+ * values, like bun's bundler chart. Title + subtitle live in the SVG so bare
+ * README embeds stay self-describing (GitHub renders the image alone).
  */
 export function benchmarkChartSpec(input: BenchmarkChartInput): PortableSpec {
   const spec = {
@@ -115,7 +120,7 @@ export function benchmarkChartSpec(input: BenchmarkChartInput): PortableSpec {
     },
     coord: { type: "flip" },
     guides: { fill: { type: "none" }, y: { type: "none" } },
-    labs: { x: "" },
+    labs: { title: input.title, subtitle: input.subtitle, x: "" },
     theme: BENCH_THEME,
   };
   return spec as unknown as PortableSpec;
