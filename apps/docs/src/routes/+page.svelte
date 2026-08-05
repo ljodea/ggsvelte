@@ -115,6 +115,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: clamp(2rem, 5vw, 4.5rem);
+    min-width: 0;
     padding: clamp(2rem, 5vw, 4rem) 0 0;
   }
 

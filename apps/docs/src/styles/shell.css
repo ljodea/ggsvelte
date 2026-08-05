@@ -552,8 +552,12 @@
  * threshold and csp.mode:"hash" only hashes scripts, not styles.
  */
 .benchmarks {
+  /* contain:paint — min-width table inside .bench-table-wrap must not expand
+   * the document scrollWidth on narrow viewports (overflow-x:clip alone does
+   * not stop root scroll contribution in Chromium for this layout). */
   min-width: 0;
   overflow-x: clip;
+  contain: paint;
   padding-block: clamp(2.5rem, 5vw, 4rem);
   border-top: 1px solid var(--line);
 }
@@ -581,6 +585,8 @@
  * dark-site SVG is transparent, so both portraits blend into the card. */
 .bench-tabs {
   min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .bench-tabs-list {
@@ -592,6 +598,8 @@
 }
 
 .bench-tabs-trigger {
+  position: relative; /* anchors the extended hit region */
+  min-height: 2.25rem;
   margin-bottom: -1px;
   padding: 0.45rem 0.15rem;
   border: none;
@@ -600,6 +608,13 @@
   color: var(--muted);
   font: 600 0.85rem/1.2 var(--body-font);
   cursor: pointer;
+}
+
+/* 36px visual height, 44px hit height (DESIGN.md hit-region floor). */
+.bench-tabs-trigger::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
 }
 
 .bench-tabs-trigger:hover {
@@ -635,6 +650,7 @@
 }
 
 .bench-tabs-chart {
+  min-width: 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
   border-radius: var(--code-radius);
@@ -644,6 +660,7 @@
 .bench-chart-img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
