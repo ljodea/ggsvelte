@@ -21,6 +21,7 @@ const DETAIL_DIRS = [
   "routes/reference/stats/[name]",
   "routes/reference/positions/[name]",
   "routes/reference/scales/[name]",
+  "routes/reference/coords/[name]",
   "routes/reference/guides/[name]",
 ] as const;
 

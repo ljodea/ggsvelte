@@ -26,6 +26,14 @@
       "Every position adjustment: stack, dodge, jitter params, and geoms.",
     ],
     [
+      "/reference/scales",
+      "Every Scale* component: position, color/fill, and style channels.",
+    ],
+    [
+      "/reference/coords",
+      "Every Coord* shell: cartesian, flip, transform, fixed, and sf.",
+    ],
+    [
       "/reference/guides",
       "GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone.",
     ],

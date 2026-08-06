@@ -302,6 +302,10 @@ export { POSITION_REFERENCE, positionReferenceList } from "./position-reference.
 /** @lifecycle experimental */
 export type { PositionParamDoc, PositionReferenceEntry } from "./position-reference.js";
 /** @lifecycle experimental */
+export { COORD_REFERENCE, KNOWN_COORD_TYPES, coordReferenceList } from "./coord-reference.js";
+/** @lifecycle experimental */
+export type { CoordParamDoc, CoordReferenceEntry, CoordTypeName } from "./coord-reference.js";
+/** @lifecycle experimental */
 export {
   SCALE_FAMILY_LABELS,
   SCALE_REFERENCE,

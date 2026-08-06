@@ -249,6 +249,46 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["How to set a scale"],
   },
   {
+    id: "page:reference-coords",
+    kind: "page",
+    title: "Coords",
+    summary:
+      "Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    href: "/reference/coords",
+    keywords: ["Reference"],
+    exact: ["Coords"],
+  },
+  {
+    id: "heading:reference-coords:all-coords",
+    kind: "heading",
+    title: "All coords",
+    summary:
+      "All coords in Coords. Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    href: "/reference/coords#all-coords",
+    keywords: ["Coords", "Reference"],
+    exact: ["All coords"],
+  },
+  {
+    id: "heading:reference-coords:how-to-set",
+    kind: "heading",
+    title: "How to set a coord",
+    summary:
+      "How to set a coord in Coords. Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    href: "/reference/coords#how-to-set",
+    keywords: ["Coords", "Reference"],
+    exact: ["How to set a coord"],
+  },
+  {
+    id: "heading:reference-coords:escape-hatch",
+    kind: "heading",
+    title: "Escape hatch",
+    summary:
+      "Escape hatch in Coords. Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    href: "/reference/coords#escape-hatch",
+    keywords: ["Coords", "Reference"],
+    exact: ["Escape hatch"],
+  },
+  {
     id: "page:reference-guides",
     kind: "page",
     title: "Guides and legends",
@@ -16095,6 +16135,276 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Examples"],
   },
   {
+    id: "page:reference-coords-cartesian",
+    kind: "page",
+    title: "CoordCartesian",
+    summary:
+      'CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    href: "/reference/coords/cartesian",
+    keywords: [],
+    exact: ["CoordCartesian"],
+  },
+  {
+    id: "heading:reference-coords-cartesian:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      'Svelte component in CoordCartesian. CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    href: "/reference/coords/cartesian#svelte",
+    keywords: ["CoordCartesian", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-coords-cartesian:json",
+    kind: "heading",
+    title: "JSON and helpers",
+    summary:
+      'JSON and helpers in CoordCartesian. CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    href: "/reference/coords/cartesian#json",
+    keywords: ["CoordCartesian", "documentation"],
+    exact: ["JSON and helpers"],
+  },
+  {
+    id: "heading:reference-coords-cartesian:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      'Props in CoordCartesian. CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    href: "/reference/coords/cartesian#props",
+    keywords: ["CoordCartesian", "documentation"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-coords-cartesian:related",
+    kind: "heading",
+    title: "Related",
+    summary:
+      'Related in CoordCartesian. CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    href: "/reference/coords/cartesian#related",
+    keywords: ["CoordCartesian", "documentation"],
+    exact: ["Related"],
+  },
+  {
+    id: "page:reference-coords-flip",
+    kind: "page",
+    title: "CoordFlip",
+    summary:
+      "CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    href: "/reference/coords/flip",
+    keywords: [],
+    exact: ["CoordFlip"],
+  },
+  {
+    id: "heading:reference-coords-flip:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in CoordFlip. CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    href: "/reference/coords/flip#svelte",
+    keywords: ["CoordFlip", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-coords-flip:json",
+    kind: "heading",
+    title: "JSON and helpers",
+    summary:
+      "JSON and helpers in CoordFlip. CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    href: "/reference/coords/flip#json",
+    keywords: ["CoordFlip", "documentation"],
+    exact: ["JSON and helpers"],
+  },
+  {
+    id: "heading:reference-coords-flip:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      "Props in CoordFlip. CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    href: "/reference/coords/flip#props",
+    keywords: ["CoordFlip", "documentation"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-coords-flip:related",
+    kind: "heading",
+    title: "Related",
+    summary:
+      "Related in CoordFlip. CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    href: "/reference/coords/flip#related",
+    keywords: ["CoordFlip", "documentation"],
+    exact: ["Related"],
+  },
+  {
+    id: "page:reference-coords-transform",
+    kind: "page",
+    title: "CoordTransform",
+    summary:
+      "CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform",
+    keywords: [],
+    exact: ["CoordTransform"],
+  },
+  {
+    id: "heading:reference-coords-transform:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in CoordTransform. CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform#svelte",
+    keywords: ["CoordTransform", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-coords-transform:json",
+    kind: "heading",
+    title: "JSON and helpers",
+    summary:
+      "JSON and helpers in CoordTransform. CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform#json",
+    keywords: ["CoordTransform", "documentation"],
+    exact: ["JSON and helpers"],
+  },
+  {
+    id: "heading:reference-coords-transform:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      "Props in CoordTransform. CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform#props",
+    keywords: ["CoordTransform", "documentation"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-coords-transform:axis-options",
+    kind: "heading",
+    title: "Axis options",
+    summary:
+      "Axis options in CoordTransform. CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform#axis-options",
+    keywords: ["CoordTransform", "documentation"],
+    exact: ["Axis options"],
+  },
+  {
+    id: "heading:reference-coords-transform:related",
+    kind: "heading",
+    title: "Related",
+    summary:
+      "Related in CoordTransform. CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    href: "/reference/coords/transform#related",
+    keywords: ["CoordTransform", "documentation"],
+    exact: ["Related"],
+  },
+  {
+    id: "page:reference-coords-fixed",
+    kind: "page",
+    title: "CoordFixed",
+    summary:
+      "CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed",
+    keywords: [],
+    exact: ["CoordFixed"],
+  },
+  {
+    id: "heading:reference-coords-fixed:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in CoordFixed. CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed#svelte",
+    keywords: ["CoordFixed", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-coords-fixed:json",
+    kind: "heading",
+    title: "JSON and helpers",
+    summary:
+      "JSON and helpers in CoordFixed. CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed#json",
+    keywords: ["CoordFixed", "documentation"],
+    exact: ["JSON and helpers"],
+  },
+  {
+    id: "heading:reference-coords-fixed:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      "Props in CoordFixed. CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed#props",
+    keywords: ["CoordFixed", "documentation"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-coords-fixed:aliases",
+    kind: "heading",
+    title: "Also exported as",
+    summary:
+      "Also exported as in CoordFixed. CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed#aliases",
+    keywords: ["CoordFixed", "documentation"],
+    exact: ["Also exported as"],
+  },
+  {
+    id: "heading:reference-coords-fixed:related",
+    kind: "heading",
+    title: "Related",
+    summary:
+      "Related in CoordFixed. CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    href: "/reference/coords/fixed#related",
+    keywords: ["CoordFixed", "documentation"],
+    exact: ["Related"],
+  },
+  {
+    id: "page:reference-coords-sf",
+    kind: "page",
+    title: "CoordSf",
+    summary:
+      "CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    href: "/reference/coords/sf",
+    keywords: [],
+    exact: ["CoordSf"],
+  },
+  {
+    id: "heading:reference-coords-sf:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in CoordSf. CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    href: "/reference/coords/sf#svelte",
+    keywords: ["CoordSf", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-coords-sf:json",
+    kind: "heading",
+    title: "JSON and helpers",
+    summary:
+      "JSON and helpers in CoordSf. CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    href: "/reference/coords/sf#json",
+    keywords: ["CoordSf", "documentation"],
+    exact: ["JSON and helpers"],
+  },
+  {
+    id: "heading:reference-coords-sf:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      "Props in CoordSf. CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    href: "/reference/coords/sf#props",
+    keywords: ["CoordSf", "documentation"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-coords-sf:related",
+    kind: "heading",
+    title: "Related",
+    summary:
+      "Related in CoordSf. CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    href: "/reference/coords/sf#related",
+    keywords: ["CoordSf", "documentation"],
+    exact: ["Related"],
+  },
+  {
     id: "page:reference-guides-legend",
     kind: "page",
     title: "GuideLegend",
@@ -19964,14 +20274,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-909",
+    id: "heading:guide-lifecycle:experimental-915",
     kind: "heading",
-    title: "experimental (909)",
+    title: "experimental (915)",
     summary:
-      "experimental (909) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-909",
+      "experimental (915) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-915",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (909)"],
+    exact: ["experimental (915)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -22593,6 +22903,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["COLOR_SCHEME_NAMES"],
   },
   {
+    id: "api:ggsvelte-spec:COORD_REFERENCE",
+    kind: "api",
+    title: "COORD_REFERENCE",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["COORD_REFERENCE"],
+  },
+  {
     id: "api:ggsvelte-spec:CURRENT_EDITION",
     kind: "api",
     title: "CURRENT_EDITION",
@@ -22854,6 +23173,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["CoordFixedSpecSchema"],
   },
   {
+    id: "api:ggsvelte-spec:CoordParamDoc",
+    kind: "api",
+    title: "CoordParamDoc",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["CoordParamDoc"],
+  },
+  {
+    id: "api:ggsvelte-spec:CoordReferenceEntry",
+    kind: "api",
+    title: "CoordReferenceEntry",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["CoordReferenceEntry"],
+  },
+  {
     id: "api:ggsvelte-spec:CoordSfOptions",
     kind: "api",
     title: "CoordSfOptions",
@@ -22960,6 +23297,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["CoordTransformSpecSchema"],
+  },
+  {
+    id: "api:ggsvelte-spec:CoordTypeName",
+    kind: "api",
+    title: "CoordTypeName",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["CoordTypeName"],
   },
   {
     id: "api:ggsvelte-spec:CountLayer",
@@ -24373,6 +24719,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["JitterLayerSchema"],
+  },
+  {
+    id: "api:ggsvelte-spec:KNOWN_COORD_TYPES",
+    kind: "api",
+    title: "KNOWN_COORD_TYPES",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["KNOWN_COORD_TYPES"],
   },
   {
     id: "api:ggsvelte-spec:KNOWN_GEOMS",
@@ -27208,6 +27563,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["coordFixed"],
+  },
+  {
+    id: "api:ggsvelte-spec:coordReferenceList",
+    kind: "api",
+    title: "coordReferenceList",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["coordReferenceList"],
   },
   {
     id: "api:ggsvelte-spec:coordSf",

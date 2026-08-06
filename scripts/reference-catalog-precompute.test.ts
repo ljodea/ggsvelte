@@ -16,6 +16,7 @@ const PUBLIC_CATALOG_MODULES = [
   "packages/spec/src/stat-reference.ts",
   "packages/spec/src/position-reference.ts",
   "packages/spec/src/guide-reference.ts",
+  "packages/spec/src/coord-reference.ts",
 ] as const;
 
 function read(rel: string): string {
@@ -65,6 +66,7 @@ describe("precomputed reference catalogs", () => {
     expect(validateBlock!).not.toContain("stat-reference");
     expect(validateBlock!).not.toContain("position-reference");
     expect(validateBlock!).not.toContain("guide-reference");
+    expect(validateBlock!).not.toContain("coord-reference");
     expect(validateBlock!).not.toContain("geom-params");
   });
 });

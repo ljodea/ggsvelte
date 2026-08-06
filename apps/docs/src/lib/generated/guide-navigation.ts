@@ -78,6 +78,10 @@ export const GUIDE_NAVIGATION = [
         label: "Scales",
       },
       {
+        path: "/reference/coords",
+        label: "Coords",
+      },
+      {
         path: "/reference/guides",
         label: "Guides and legends",
       },

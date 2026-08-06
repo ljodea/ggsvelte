@@ -157,6 +157,23 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/coords",
+    title: "Coords — ggsvelte",
+    description:
+      "Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    canonicalPath: "/reference/coords",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Coords", order: 55 },
+    headings: [
+      { id: "all-coords", title: "All coords", level: 2 },
+      { id: "how-to-set", title: "How to set a coord", level: 2 },
+      { id: "escape-hatch", title: "Escape hatch", level: 2 },
+    ],
+  },
+  {
     path: "/reference/guides",
     title: "Guides and legends — ggsvelte",
     description:
@@ -166,7 +183,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Guides and legends", order: 55 },
+    navigation: { section: "Reference", label: "Guides and legends", order: 56 },
     headings: [
       { id: "all-guides", title: "All guides", level: 2 },
       { id: "how-to-set", title: "How to set a guide", level: 2 },
@@ -183,7 +200,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Labs", order: 56 },
+    navigation: { section: "Reference", label: "Labs", order: 57 },
     headings: [
       { id: "props", title: "Props", level: 2 },
       { id: "svelte", title: "Svelte", level: 2 },
@@ -202,7 +219,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Axes and ticks", order: 57 },
+    navigation: { section: "Reference", label: "Axes and ticks", order: 58 },
     headings: [
       { id: "who-owns-what", title: "Who owns what", level: 2 },
       { id: "guide-axis", title: "GuideAxis", level: 2 },
@@ -223,7 +240,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Labels", order: 58 },
+    navigation: { section: "Reference", label: "Labels", order: 59 },
     headings: [
       { id: "three-kinds", title: "Three kinds of labels", level: 2 },
       { id: "geom-text", title: "GeomText", level: 2 },
@@ -243,7 +260,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 59 },
+    navigation: { section: "Reference", label: "Interaction reference", order: 60 },
   },
   {
     path: "/reference/themes",
@@ -255,7 +272,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Themes", order: 60 },
+    navigation: { section: "Reference", label: "Themes", order: 61 },
     headings: [
       { id: "components", title: "Components", level: 2 },
       { id: "usage", title: "Usage", level: 2 },
@@ -275,7 +292,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Palettes", order: 61 },
+    navigation: { section: "Reference", label: "Palettes", order: 62 },
     headings: [
       { id: "using-schemes", title: "Using schemes", level: 2 },
       { id: "helper-map", title: "Scale helpers", level: 2 },
@@ -296,7 +313,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 62 },
+    navigation: { section: "Reference", label: "CLI reference", order: 63 },
     headings: [
       { id: "install", title: "Install", level: 2 },
       { id: "input-and-output", title: "Input and output", level: 2 },
