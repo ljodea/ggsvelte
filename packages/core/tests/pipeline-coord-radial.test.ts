@@ -120,6 +120,26 @@ describe("coord_radial pipeline", () => {
     expect(panel.width).toBeCloseTo(panel.height, 0);
   });
 
+  it("sizes partial-arc panels to the polar bbox aspect (not a forced square)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .coordRadial({ start: -0.4 * Math.PI, end: 0.4 * Math.PI, expand: false })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const panel = model.scene.panels[0]!;
+    // Upper partial arc is wider than tall (bbox aspect ≠ 1), unlike full-circle pie.
+    expect(panel.height / panel.width).not.toBeCloseTo(1, 1);
+    expect(panel.height / panel.width).toBeLessThan(1);
+  });
+
   it("honors clip default off for radial and on for polar alias", () => {
     const radial = runPipeline(
       gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))

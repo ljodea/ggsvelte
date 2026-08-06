@@ -64,6 +64,10 @@ function rectsToPolarPaths(
   const strokes: (string | null)[] = [];
   const alphas: number[] = [];
   const hasAlphas = batch.alphas !== undefined;
+  const hasStrokeWidths = batch.strokeWidths !== undefined;
+  const strokeWidths: number[] = [];
+  const hasLinetypes = batch.linetypeIndexes !== undefined;
+  const linetypeIndexes: number[] = [];
 
   for (let i = 0; i < n; i++) {
     const o = i * 4;
@@ -102,13 +106,19 @@ function rectsToPolarPaths(
       rowIndex.push(row);
     }
     pathOffsets.push(positions.length / 2);
+    // fillRole "paper" + null fill is a hollow rect under Cartesian; PathsBatch
+    // has no fillRole, so keep null (theme accent) rather than inventing paper
+    // without a theme token here. Mapped fills always win.
     fills.push(batch.fills?.[i] ?? batch.fill);
     const stroke = batch.strokes?.[i] ?? (batch.stroke === undefined ? null : batch.stroke);
     strokes.push(stroke);
     if (hasAlphas) alphas.push(batch.alphas![i] ?? batch.alpha);
+    if (hasStrokeWidths) strokeWidths.push(batch.strokeWidths![i] ?? batch.strokeWidth ?? 1);
+    if (hasLinetypes) linetypeIndexes.push(batch.linetypeIndexes![i] ?? 0);
   }
 
-  const hasStroke = strokes.some((s) => s !== null) || batch.strokeWidth !== undefined;
+  const hasStroke =
+    strokes.some((s) => s !== null) || batch.strokeWidth !== undefined || hasStrokeWidths;
   const pathBatch: PathsBatch = {
     kind: "paths",
     layerIndex: batch.layerIndex,
@@ -126,5 +136,11 @@ function rectsToPolarPaths(
     curve: "linear",
   };
   if (hasAlphas) pathBatch.alphas = Float32Array.from(alphas);
+  if (hasStrokeWidths) pathBatch.linewidths = Float32Array.from(strokeWidths);
+  if (batch.linetype !== undefined) pathBatch.linetype = batch.linetype;
+  if (hasLinetypes) pathBatch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
+  if (batch.fillPaint !== undefined) pathBatch.fillPaint = batch.fillPaint;
+  if (batch.strokePaint !== undefined) pathBatch.strokePaint = batch.strokePaint;
+  if (batch.glow !== undefined) pathBatch.glow = batch.glow;
   return pathBatch;
 }

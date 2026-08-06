@@ -188,13 +188,16 @@ describe("docs route inventory", () => {
       navigation: { section: "Reference", label: "Coords", order: 55 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/coords/"));
-    expect(details.length).toBe(5);
+    expect(details.length).toBe(6);
     expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
     expect(inventory.find((entry) => entry.path === "/reference/coords/flip")?.title).toBe(
       "CoordFlip — ggsvelte",
     );
     expect(inventory.find((entry) => entry.path === "/reference/coords/transform")?.title).toBe(
       "CoordTransform — ggsvelte",
+    );
+    expect(inventory.find((entry) => entry.path === "/reference/coords/radial")?.title).toBe(
+      "CoordRadial — ggsvelte",
     );
   });
 

@@ -1,9 +1,10 @@
 /**
  * Finalize phase: two-pass panel layout only.
  */
-import type { CellValue, PortableSpec } from "@ggsvelte/spec";
+import type { CellValue, CoordRadialSpec, PortableSpec } from "@ggsvelte/spec";
 import { getTemporalRuntime } from "../temporal-runtime.js";
 
+import { buildPolarProjector } from "../coord-polar.js";
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
 
@@ -14,6 +15,23 @@ import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
 import { PipelineError, type PipelineWarning, type RunOptions } from "./types.js";
+
+/** ggplot2 polar panel aspect: diff(bbox.y) / diff(bbox.x). Full circle → 1. */
+function radialPanelAspect(coord: CoordRadialSpec): number {
+  const polar = buildPolarProjector({
+    ...(coord.theta !== undefined && { theta: coord.theta }),
+    ...(coord.start !== undefined && { start: coord.start }),
+    ...(coord.end !== undefined && { end: coord.end }),
+    ...(coord.innerRadius !== undefined && { innerRadius: coord.innerRadius }),
+    ...(coord.reverse !== undefined && { reverse: coord.reverse }),
+  });
+  const [x0, x1] = polar.bbox.x;
+  const [y0, y1] = polar.bbox.y;
+  const bx = x1 - x0;
+  const by = y1 - y0;
+  if (!(bx > 0) || !(by > 0) || !Number.isFinite(bx) || !Number.isFinite(by)) return 1;
+  return by / bx;
+}
 
 export function finalizePanelLayoutPass(input: {
   normalized: PortableSpec;
@@ -119,9 +137,12 @@ export function finalizePanelLayoutPass(input: {
       ...((normalized.coord?.type === "fixed" || normalized.coord?.type === "sf") && {
         coordFixed: normalized.coord,
       }),
-      // Full-circle polar uses a square data rectangle (ggplot2 aspect = 1).
+      // Polar panel aspect = polar_bbox height/width (1 for a full circle).
       ...(normalized.coord?.type === "radial" && {
-        coordFixed: { type: "radial" as const, ratio: 1 },
+        coordFixed: {
+          type: "radial" as const,
+          aspect: radialPanelAspect(normalized.coord),
+        },
       }),
       nrow,
       ncol,
