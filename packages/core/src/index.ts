@@ -197,8 +197,30 @@ export type { PositionTransformName, ScaleTransform } from "./scales/transform.j
 export { MAX_BINNED_BREAKS } from "./pipeline/binned-scale.js";
 
 // Post-stat coordinate projector (PR 4)
-export { buildCoordAxisProjector, buildPanelCoordProjector } from "./coord-projector.js";
-export type { CoordAxisProjector, PanelCoordProjector } from "./coord-projector.js";
+export {
+  buildCoordAxisProjector,
+  buildPanelCoordProjector,
+  scalesForCoordExpand,
+} from "./coord-projector.js";
+export type {
+  CoordAxisProjector,
+  CoordProjectorInput,
+  PanelCoordProjector,
+} from "./coord-projector.js";
+export {
+  buildPolarProjector,
+  polarBBox,
+  polarProject,
+  polarProjectPanelPoint,
+  polarUnproject,
+} from "./coord-polar.js";
+export type {
+  PolarBBox,
+  PolarProjector,
+  PolarProjectorConfig,
+  PolarReverse,
+  PolarTheta,
+} from "./coord-polar.js";
 
 // Model-owned plot-pixel ↔ semantic projection
 export type {

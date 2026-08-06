@@ -6039,16 +6039,94 @@ export const SpecDeclarations = {
     },
   ),
 
+  CoordRadialSpec: Type.Object(
+    {
+      type: Type.Literal("radial", {
+        description:
+          "Polar/radial coordinates (ggplot2 coord_radial / superseded coord_polar). Maps one axis to angle and the other to radius.",
+      }),
+      theta: Type.Optional(
+        Type.Union([Type.Literal("x"), Type.Literal("y")], {
+          description:
+            'Which aesthetic maps to angle: "x" (default) or "y". The other aesthetic maps to radius. Pie charts use theta: "y".',
+        }),
+      ),
+      start: Type.Optional(
+        Type.Number({
+          description:
+            "Offset of the starting angle from 12 o'clock, in radians (default 0). Positive angles proceed clockwise when reverse does not flip theta.",
+        }),
+      ),
+      end: Type.Optional(
+        Type.Number({
+          description:
+            "Angle where the plot ends, in radians measured from 12 o'clock. Default is start + 2π (full circle). Use with start for partial polar plots.",
+        }),
+      ),
+      innerRadius: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description:
+            "Size of the inner radius hole as a fraction of the outer radius (0–1, default 0). Values above 0 produce a donut.",
+        }),
+      ),
+      expand: Type.Optional(
+        Type.Boolean({
+          description:
+            "When true (default), add a small expansion so data does not sit on the axes. When false, limits come directly from the scale (typical for pie/coxcomb).",
+        }),
+      ),
+      clip: Type.Optional(
+        Type.Boolean({
+          description:
+            'Clip marks to the panel. ggplot2 coord_radial defaults to clip off; coord_polar defaults to clip on. ggsvelte stores the effective boolean (default false for type "radial").',
+        }),
+      ),
+      reverse: Type.Optional(
+        Type.Union(
+          [Type.Literal("none"), Type.Literal("theta"), Type.Literal("r"), Type.Literal("thetar")],
+          {
+            description:
+              'Which directions to reverse: "none" (default), "theta", "r", or "thetar" (both). coord_polar(direction = -1) maps to reverse: "theta".',
+          },
+        ),
+      ),
+      thetaLimits: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 2,
+          maxItems: 2,
+          description:
+            "Optional [min, max] limits for the theta (angle) aesthetic in semantic units. Exactly two numbers.",
+        }),
+      ),
+      rLimits: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 2,
+          maxItems: 2,
+          description:
+            "Optional [min, max] limits for the radius aesthetic in semantic units. Exactly two numbers.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Polar/radial coordinates for pie charts, coxcombs, wind roses, and partial polar scatter. Portable form of ggplot2 coord_radial (coord_polar is a helper alias).",
+    },
+  ),
+
   CoordSpec: Type.Union(
     [
       Type.Ref("CoordCartesianSpec"),
       Type.Ref("CoordTransformSpec"),
       Type.Ref("CoordFixedSpec"),
       Type.Ref("CoordSfSpec"),
+      Type.Ref("CoordRadialSpec"),
     ],
     {
       description:
-        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, fixed-aspect, or simple-features fixed-aspect.",
+        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, fixed-aspect, simple-features fixed-aspect, or radial/polar.",
     },
   ),
 

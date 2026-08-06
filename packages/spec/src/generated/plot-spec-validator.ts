@@ -213,6 +213,7 @@ let External = [
   /(^transform$|^limits$|^reverse$|^expand$)/,
   /(^type$|^ratio$)/,
   /(^type$|^ratio$)/,
+  /(^type$|^theta$|^start$|^end$|^innerRadius$|^expand$|^clip$|^reverse$|^thetaLimits$|^rLimits$)/,
   /(^x$|^y$|^color$|^fill$|^size$|^linewidth$|^alpha$|^shape$|^linetype$)/,
   /(^type$|^transform$|^temporalKind$|^parse$|^parseFailure$|^timezone$|^disambiguation$|^dateBreaks$|^dateMinorBreaks$|^dateLabels$|^locale$|^weekStart$|^domain$|^nice$|^zero$|^reverse$|^breaks$|^labels$|^expand$|^oob$|^naValue$|^minorBreaks$|^guide$)/,
   /^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$/u,
@@ -273,11 +274,11 @@ const check_1 = (value) =>
   value.layers.length >= 1 &&
   (!("facet" in value) || check_341(value.facet)) &&
   (!("coord" in value) || check_346(value.coord)) &&
-  (!("scales" in value) || check_352(value.scales)) &&
-  (!("guides" in value) || check_386(value.guides)) &&
-  (!("legend" in value) || check_388(value.legend)) &&
-  (!("labs" in value) || check_389(value.labs)) &&
-  (!("theme" in value) || check_390(value.theme) || check_391(value.theme)) &&
+  (!("scales" in value) || check_353(value.scales)) &&
+  (!("guides" in value) || check_387(value.guides)) &&
+  (!("legend" in value) || check_389(value.legend)) &&
+  (!("labs" in value) || check_390(value.labs)) &&
+  (!("theme" in value) || check_391(value.theme) || check_392(value.theme)) &&
   (!("width" in value) || (Number.isFinite(value.width) && value.width > 0)) &&
   (!("height" in value) || (Number.isFinite(value.height) && value.height > 0)) &&
   (!("a11y" in value) ||
@@ -5511,7 +5512,7 @@ const check_345 = (value) =>
 
 // @ts-ignore
 const check_346 = (value) =>
-  check_347(value) || check_348(value) || check_350(value) || check_351(value);
+  check_347(value) || check_348(value) || check_350(value) || check_351(value) || check_352(value);
 
 // @ts-ignore
 const check_347 = (value) =>
@@ -5589,18 +5590,36 @@ const check_352 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
+  "type" in value &&
   Object.getOwnPropertyNames(value).every(
     (var_346, var_347) => External[201].test(var_346) || false,
   ) &&
-  (!("x" in value) || check_353(value.x)) &&
-  (!("y" in value) || check_353(value.y)) &&
-  (!("color" in value) || check_368(value.color)) &&
-  (!("fill" in value) || check_368(value.fill)) &&
-  (!("size" in value) || check_372(value.size)) &&
-  (!("linewidth" in value) || check_372(value.linewidth)) &&
-  (!("alpha" in value) || check_376(value.alpha)) &&
-  (!("shape" in value) || check_380(value.shape)) &&
-  (!("linetype" in value) || check_383(value.linetype));
+  typeof value.type === "string" &&
+  value.type === "radial" &&
+  (!("theta" in value) ||
+    (typeof value.theta === "string" && value.theta === "x") ||
+    (typeof value.theta === "string" && value.theta === "y")) &&
+  (!("start" in value) || Number.isFinite(value.start)) &&
+  (!("end" in value) || Number.isFinite(value.end)) &&
+  (!("innerRadius" in value) ||
+    (Number.isFinite(value.innerRadius) && value.innerRadius <= 1 && value.innerRadius >= 0)) &&
+  (!("expand" in value) || typeof value.expand === "boolean") &&
+  (!("clip" in value) || typeof value.clip === "boolean") &&
+  (!("reverse" in value) ||
+    (typeof value.reverse === "string" && value.reverse === "none") ||
+    (typeof value.reverse === "string" && value.reverse === "theta") ||
+    (typeof value.reverse === "string" && value.reverse === "r") ||
+    (typeof value.reverse === "string" && value.reverse === "thetar")) &&
+  (!("thetaLimits" in value) ||
+    (Array.isArray(value.thetaLimits) &&
+      value.thetaLimits.every((element, index) => Number.isFinite(element)) &&
+      value.thetaLimits.length <= 2 &&
+      value.thetaLimits.length >= 2)) &&
+  (!("rLimits" in value) ||
+    (Array.isArray(value.rLimits) &&
+      value.rLimits.every((element, index) => Number.isFinite(element)) &&
+      value.rLimits.length <= 2 &&
+      value.rLimits.length >= 2));
 
 // @ts-ignore
 const check_353 = (value) =>
@@ -5609,6 +5628,24 @@ const check_353 = (value) =>
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_348, var_349) => External[202].test(var_348) || false,
+  ) &&
+  (!("x" in value) || check_354(value.x)) &&
+  (!("y" in value) || check_354(value.y)) &&
+  (!("color" in value) || check_369(value.color)) &&
+  (!("fill" in value) || check_369(value.fill)) &&
+  (!("size" in value) || check_373(value.size)) &&
+  (!("linewidth" in value) || check_373(value.linewidth)) &&
+  (!("alpha" in value) || check_377(value.alpha)) &&
+  (!("shape" in value) || check_381(value.shape)) &&
+  (!("linetype" in value) || check_384(value.linetype));
+
+// @ts-ignore
+const check_354 = (value) =>
+  typeof value === "object" &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.getOwnPropertyNames(value).every(
+    (var_350, var_351) => External[203].test(var_350) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "linear") ||
@@ -5625,7 +5662,7 @@ const check_353 = (value) =>
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "time") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "monthDay")) &&
-  (!("parse" in value) || check_354(value.parse)) &&
+  (!("parse" in value) || check_355(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -5642,17 +5679,17 @@ const check_353 = (value) =>
     (typeof value.dateBreaks === "string" &&
       Guard.IsMaxLength(value.dateBreaks, 128) &&
       Guard.IsMinLength(value.dateBreaks, 1) &&
-      External[203].test(value.dateBreaks))) &&
+      External[204].test(value.dateBreaks))) &&
   (!("dateMinorBreaks" in value) ||
     (typeof value.dateMinorBreaks === "string" &&
       Guard.IsMaxLength(value.dateMinorBreaks, 128) &&
       Guard.IsMinLength(value.dateMinorBreaks, 1) &&
-      External[204].test(value.dateMinorBreaks))) &&
+      External[205].test(value.dateMinorBreaks))) &&
   (!("dateLabels" in value) ||
     (typeof value.dateLabels === "string" &&
       Guard.IsMaxLength(value.dateLabels, 128) &&
       Guard.IsMinLength(value.dateLabels, 1) &&
-      External[205].test(value.dateLabels))) &&
+      External[206].test(value.dateLabels))) &&
   (!("locale" in value) ||
     (typeof value.locale === "string" &&
       Guard.IsMaxLength(value.locale, 128) &&
@@ -5667,7 +5704,7 @@ const check_353 = (value) =>
     (typeof value.weekStart === "string" && value.weekStart === "sunday")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_355(element)) &&
+      value.domain.every((element, index) => check_356(element)) &&
       value.domain.length >= 1)) &&
   (!("nice" in value) || typeof value.nice === "boolean") &&
   (!("zero" in value) || typeof value.zero === "boolean") &&
@@ -5679,7 +5716,7 @@ const check_353 = (value) =>
       ) &&
       value.breaks.length >= 1)) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("expand" in value) || check_356(value.expand)) &&
+  (!("expand" in value) || check_357(value.expand)) &&
   (!("oob" in value) ||
     (typeof value.oob === "string" && value.oob === "censor") ||
     (typeof value.oob === "string" && value.oob === "squish")) &&
@@ -5688,7 +5725,7 @@ const check_353 = (value) =>
     (Array.isArray(value.minorBreaks) &&
       value.minorBreaks.every((element, index) => Number.isFinite(element)) &&
       value.minorBreaks.length >= 1)) &&
-  (!("guide" in value) || check_357(value.guide) || check_367(value.guide)) &&
+  (!("guide" in value) || check_358(value.guide) || check_368(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -5711,7 +5748,7 @@ const check_353 = (value) =>
         (typeof value.type === "string" && value.type === "band"))));
 
 // @ts-ignore
-const check_354 = (value) =>
+const check_355 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -5753,19 +5790,19 @@ const check_354 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_355 = (value) =>
+const check_356 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_356 = (value) =>
+const check_357 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_350, var_351) => External[206].test(var_350) || false,
+    (var_352, var_353) => External[207].test(var_352) || false,
   ) &&
   (!("mult" in value) ||
     (Number.isFinite(value.mult) && value.mult >= 0) ||
@@ -5781,17 +5818,17 @@ const check_356 = (value) =>
       value.add.length >= 2));
 
 // @ts-ignore
-const check_357 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_358 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
-const check_358 = (value) =>
+const check_359 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   "type" in value &&
   Object.getOwnPropertyNames(value).every(
-    (var_352, var_353) => External[207].test(var_352) || false,
+    (var_354, var_355) => External[208].test(var_354) || false,
   ) &&
   typeof value.type === "string" &&
   value.type === "axis" &&
@@ -5803,15 +5840,15 @@ const check_358 = (value) =>
     (typeof value.collision === "string" && value.collision === "auto") ||
     (typeof value.collision === "string" && value.collision === "preserve") ||
     (typeof value.collision === "string" && value.collision === "ellipsis")) &&
-  (!("theme" in value) || check_359(value.theme));
+  (!("theme" in value) || check_360(value.theme));
 
 // @ts-ignore
-const check_359 = (value) =>
+const check_360 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_354, var_355) => External[208].test(var_354) || false,
+    (var_356, var_357) => External[209].test(var_356) || false,
   ) &&
   (!("titleSize" in value) ||
     (Number.isFinite(value.titleSize) && value.titleSize <= 32 && value.titleSize >= 8)) &&
@@ -5833,13 +5870,13 @@ const check_359 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_360 = (value) =>
+const check_361 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   "type" in value &&
   Object.getOwnPropertyNames(value).every(
-    (var_356, var_357) => External[209].test(var_356) || false,
+    (var_358, var_359) => External[210].test(var_358) || false,
   ) &&
   typeof value.type === "string" &&
   value.type === "legend" &&
@@ -5864,15 +5901,15 @@ const check_360 = (value) =>
     (typeof value.collision === "string" && value.collision === "wrap") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_361(value.theme));
+  (!("theme" in value) || check_362(value.theme));
 
 // @ts-ignore
-const check_361 = (value) =>
+const check_362 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_358, var_359) => External[210].test(var_358) || false,
+    (var_360, var_361) => External[211].test(var_360) || false,
   ) &&
   (!("titleSize" in value) ||
     (Number.isFinite(value.titleSize) && value.titleSize <= 32 && value.titleSize >= 8)) &&
@@ -5894,13 +5931,13 @@ const check_361 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_362 = (value) =>
+const check_363 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   "type" in value &&
   Object.getOwnPropertyNames(value).every(
-    (var_360, var_361) => External[211].test(var_360) || false,
+    (var_362, var_363) => External[212].test(var_362) || false,
   ) &&
   typeof value.type === "string" &&
   value.type === "colorbar" &&
@@ -5924,15 +5961,15 @@ const check_362 = (value) =>
     (typeof value.collision === "string" && value.collision === "ellipsis") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_363(value.theme));
+  (!("theme" in value) || check_364(value.theme));
 
 // @ts-ignore
-const check_363 = (value) =>
+const check_364 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_362, var_363) => External[212].test(var_362) || false,
+    (var_364, var_365) => External[213].test(var_364) || false,
   ) &&
   (!("titleSize" in value) ||
     (Number.isFinite(value.titleSize) && value.titleSize <= 32 && value.titleSize >= 8)) &&
@@ -5954,13 +5991,13 @@ const check_363 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_364 = (value) =>
+const check_365 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   "type" in value &&
   Object.getOwnPropertyNames(value).every(
-    (var_364, var_365) => External[213].test(var_364) || false,
+    (var_366, var_367) => External[214].test(var_366) || false,
   ) &&
   typeof value.type === "string" &&
   value.type === "colorsteps" &&
@@ -5983,15 +6020,15 @@ const check_364 = (value) =>
     (typeof value.collision === "string" && value.collision === "ellipsis") ||
     (typeof value.collision === "string" && value.collision === "error")) &&
   (!("force" in value) || typeof value.force === "boolean") &&
-  (!("theme" in value) || check_365(value.theme));
+  (!("theme" in value) || check_366(value.theme));
 
 // @ts-ignore
-const check_365 = (value) =>
+const check_366 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_366, var_367) => External[214].test(var_366) || false,
+    (var_368, var_369) => External[215].test(var_368) || false,
   ) &&
   (!("titleSize" in value) ||
     (Number.isFinite(value.titleSize) && value.titleSize <= 32 && value.titleSize >= 8)) &&
@@ -6013,7 +6050,7 @@ const check_365 = (value) =>
       value.colorbarLength >= 48));
 
 // @ts-ignore
-const check_366 = (value) =>
+const check_367 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
@@ -6023,12 +6060,12 @@ const check_366 = (value) =>
   value.type === "none";
 
 // @ts-ignore
-const check_367 = (value) =>
+const check_368 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_368, var_369) => External[215].test(var_368) || false,
+    (var_370, var_371) => External[216].test(var_370) || false,
   ) &&
   (!("mode" in value) ||
     (typeof value.mode === "string" && value.mode === "auto") ||
@@ -6040,12 +6077,12 @@ const check_367 = (value) =>
   (!("wrap" in value) || (Number.isFinite(value.wrap) && value.wrap <= 8 && value.wrap >= 1));
 
 // @ts-ignore
-const check_368 = (value) =>
+const check_369 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_370, var_371) => External[216].test(var_370) || false,
+    (var_372, var_373) => External[217].test(var_372) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "ordinal") ||
@@ -6060,7 +6097,7 @@ const check_368 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_369(value.parse)) &&
+  (!("parse" in value) || check_370(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6075,7 +6112,7 @@ const check_368 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_370(element)) &&
+      value.domain.every((element, index) => check_371(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6089,7 +6126,7 @@ const check_368 = (value) =>
   (!("range" in value) ||
     (Array.isArray(value.range) &&
       value.range.every(
-        (element, index) => typeof element === "string" && External[217].test(element),
+        (element, index) => typeof element === "string" && External[218].test(element),
       ) &&
       value.range.length >= 1)) &&
   (!("scheme" in value) ||
@@ -6174,14 +6211,14 @@ const check_368 = (value) =>
     (typeof value.oob === "string" && value.oob === "censor") ||
     (typeof value.oob === "string" && value.oob === "squish")) &&
   (!("naValue" in value) ||
-    (typeof value.naValue === "string" && External[218].test(value.naValue))) &&
+    (typeof value.naValue === "string" && External[219].test(value.naValue))) &&
   (!("unknownValue" in value) ||
-    (typeof value.unknownValue === "string" && External[219].test(value.unknownValue))) &&
+    (typeof value.unknownValue === "string" && External[220].test(value.unknownValue))) &&
   (!("onExhaust" in value) ||
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_371(value.guide)) &&
+  (!("guide" in value) || check_372(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6206,7 +6243,7 @@ const check_368 = (value) =>
       value.type === "manual" &&
       Array.isArray(value.range) &&
       value.range.every(
-        (element, index) => typeof element === "string" && External[220].test(element),
+        (element, index) => typeof element === "string" && External[221].test(element),
       ) &&
       value.range.length >= 1 &&
       (!("transform" in value) || !true) &&
@@ -6272,7 +6309,7 @@ const check_368 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_369 = (value) =>
+const check_370 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6314,23 +6351,23 @@ const check_369 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_370 = (value) =>
+const check_371 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_371 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_372 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
-const check_372 = (value) =>
+const check_373 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_372, var_373) => External[221].test(var_372) || false,
+    (var_374, var_375) => External[222].test(var_374) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "ordinal") ||
@@ -6341,7 +6378,7 @@ const check_372 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_373(value.parse)) &&
+  (!("parse" in value) || check_374(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6356,7 +6393,7 @@ const check_372 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_374(element)) &&
+      value.domain.every((element, index) => check_375(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6382,7 +6419,7 @@ const check_372 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_375(value.guide)) &&
+  (!("guide" in value) || check_376(value.guide)) &&
   (!("sizeUnit" in value) ||
     (typeof value.sizeUnit === "string" && value.sizeUnit === "area") ||
     (typeof value.sizeUnit === "string" && value.sizeUnit === "radius") ||
@@ -6395,7 +6432,7 @@ const check_372 = (value) =>
     value.type === "binned" &&
     (!("domain" in value) ||
       (Array.isArray(value.domain) &&
-        value.domain.every((element, index) => check_374(element)) &&
+        value.domain.every((element, index) => check_375(element)) &&
         value.domain.length <= 2 &&
         value.domain.length >= 2)) &&
     (!("breaks" in value) ||
@@ -6473,7 +6510,7 @@ const check_372 = (value) =>
       value.type === "sequential" &&
       (!("domain" in value) ||
         (Array.isArray(value.domain) &&
-          value.domain.every((element, index) => check_374(element)) &&
+          value.domain.every((element, index) => check_375(element)) &&
           value.domain.length <= 2 &&
           value.domain.length >= 2)) &&
       (!("range" in value) ||
@@ -6488,7 +6525,7 @@ const check_372 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_373 = (value) =>
+const check_374 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6530,23 +6567,23 @@ const check_373 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_374 = (value) =>
+const check_375 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_375 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_376 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
-const check_376 = (value) =>
+const check_377 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_374, var_375) => External[222].test(var_374) || false,
+    (var_376, var_377) => External[223].test(var_376) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "ordinal") ||
@@ -6557,7 +6594,7 @@ const check_376 = (value) =>
   (!("temporalKind" in value) ||
     (typeof value.temporalKind === "string" && value.temporalKind === "date") ||
     (typeof value.temporalKind === "string" && value.temporalKind === "datetime")) &&
-  (!("parse" in value) || check_377(value.parse)) &&
+  (!("parse" in value) || check_378(value.parse)) &&
   (!("parseFailure" in value) ||
     (typeof value.parseFailure === "string" && value.parseFailure === "error") ||
     (typeof value.parseFailure === "string" && value.parseFailure === "censor")) &&
@@ -6572,7 +6609,7 @@ const check_376 = (value) =>
     (typeof value.disambiguation === "string" && value.disambiguation === "reject")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_378(element)) &&
+      value.domain.every((element, index) => check_379(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6601,7 +6638,7 @@ const check_376 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_379(value.guide)) &&
+  (!("guide" in value) || check_380(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6610,7 +6647,7 @@ const check_376 = (value) =>
     value.type === "binned" &&
     (!("domain" in value) ||
       (Array.isArray(value.domain) &&
-        value.domain.every((element, index) => check_378(element)) &&
+        value.domain.every((element, index) => check_379(element)) &&
         value.domain.length <= 2 &&
         value.domain.length >= 2)) &&
     (!("breaks" in value) ||
@@ -6692,7 +6729,7 @@ const check_376 = (value) =>
       value.type === "sequential" &&
       (!("domain" in value) ||
         (Array.isArray(value.domain) &&
-          value.domain.every((element, index) => check_378(element)) &&
+          value.domain.every((element, index) => check_379(element)) &&
           value.domain.length <= 2 &&
           value.domain.length >= 2)) &&
       (!("range" in value) ||
@@ -6709,7 +6746,7 @@ const check_376 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_377 = (value) =>
+const check_378 = (value) =>
   (typeof value === "string" && value === "iso") ||
   (typeof value === "string" && value === "year") ||
   (typeof value === "string" && value === "ym") ||
@@ -6751,23 +6788,23 @@ const check_377 = (value) =>
       (typeof value.epoch === "string" && value.epoch === "milliseconds")));
 
 // @ts-ignore
-const check_378 = (value) =>
+const check_379 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_379 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_380 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
-const check_380 = (value) =>
+const check_381 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_376, var_377) => External[223].test(var_376) || false,
+    (var_378, var_379) => External[224].test(var_378) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "ordinal") ||
@@ -6776,7 +6813,7 @@ const check_380 = (value) =>
     (typeof value.type === "string" && value.type === "identity")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_381(element)) &&
+      value.domain.every((element, index) => check_382(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6819,7 +6856,7 @@ const check_380 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_382(value.guide)) &&
+  (!("guide" in value) || check_383(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -6889,23 +6926,23 @@ const check_380 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_381 = (value) =>
+const check_382 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_382 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
+const check_383 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
-const check_383 = (value) =>
+const check_384 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_378, var_379) => External[224].test(var_378) || false,
+    (var_380, var_381) => External[225].test(var_380) || false,
   ) &&
   (!("type" in value) ||
     (typeof value.type === "string" && value.type === "ordinal") ||
@@ -6914,7 +6951,7 @@ const check_383 = (value) =>
     (typeof value.type === "string" && value.type === "identity")) &&
   (!("domain" in value) ||
     (Array.isArray(value.domain) &&
-      value.domain.every((element, index) => check_384(element)) &&
+      value.domain.every((element, index) => check_385(element)) &&
       value.domain.length >= 1)) &&
   (!("domainMode" in value) ||
     (typeof value.domainMode === "string" && value.domainMode === "grow") ||
@@ -6954,7 +6991,7 @@ const check_383 = (value) =>
     (typeof value.onExhaust === "string" && value.onExhaust === "cycle") ||
     (typeof value.onExhaust === "string" && value.onExhaust === "error")) &&
   (!("labels" in value) || typeof value.labels === "string") &&
-  (!("guide" in value) || check_385(value.guide)) &&
+  (!("guide" in value) || check_386(value.guide)) &&
   ((typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
@@ -7023,50 +7060,37 @@ const check_383 = (value) =>
       (!("type" in value) || !true)));
 
 // @ts-ignore
-const check_384 = (value) =>
+const check_385 = (value) =>
   typeof value === "string" ||
   Number.isFinite(value) ||
   typeof value === "boolean" ||
   value === null;
 
 // @ts-ignore
-const check_385 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
-
-// @ts-ignore
 const check_386 = (value) =>
-  typeof value === "object" &&
-  value !== null &&
-  !Array.isArray(value) &&
-  Object.getOwnPropertyNames(value).every(
-    (var_380, var_381) => External[225].test(var_380) || false,
-  ) &&
-  (!("x" in value) || check_387(value.x)) &&
-  (!("y" in value) || check_387(value.y)) &&
-  (!("color" in value) || check_387(value.color)) &&
-  (!("fill" in value) || check_387(value.fill)) &&
-  (!("size" in value) || check_387(value.size)) &&
-  (!("linewidth" in value) || check_387(value.linewidth)) &&
-  (!("alpha" in value) || check_387(value.alpha)) &&
-  (!("shape" in value) || check_387(value.shape)) &&
-  (!("linetype" in value) || check_387(value.linetype));
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
 const check_387 = (value) =>
-  check_358(value) || check_360(value) || check_362(value) || check_364(value) || check_366(value);
-
-// @ts-ignore
-const check_388 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_382, var_383) => External[226].test(var_382) || false,
   ) &&
-  (!("order" in value) ||
-    (typeof value.order === "string" && value.order === "stable-domain") ||
-    (typeof value.order === "string" && value.order === "present-first-seen") ||
-    (typeof value.order === "string" && value.order === "sorted"));
+  (!("x" in value) || check_388(value.x)) &&
+  (!("y" in value) || check_388(value.y)) &&
+  (!("color" in value) || check_388(value.color)) &&
+  (!("fill" in value) || check_388(value.fill)) &&
+  (!("size" in value) || check_388(value.size)) &&
+  (!("linewidth" in value) || check_388(value.linewidth)) &&
+  (!("alpha" in value) || check_388(value.alpha)) &&
+  (!("shape" in value) || check_388(value.shape)) &&
+  (!("linetype" in value) || check_388(value.linetype));
+
+// @ts-ignore
+const check_388 = (value) =>
+  check_359(value) || check_361(value) || check_363(value) || check_365(value) || check_367(value);
 
 // @ts-ignore
 const check_389 = (value) =>
@@ -7075,6 +7099,19 @@ const check_389 = (value) =>
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
     (var_384, var_385) => External[227].test(var_384) || false,
+  ) &&
+  (!("order" in value) ||
+    (typeof value.order === "string" && value.order === "stable-domain") ||
+    (typeof value.order === "string" && value.order === "present-first-seen") ||
+    (typeof value.order === "string" && value.order === "sorted"));
+
+// @ts-ignore
+const check_390 = (value) =>
+  typeof value === "object" &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.getOwnPropertyNames(value).every(
+    (var_386, var_387) => External[228].test(var_386) || false,
   ) &&
   (!("title" in value) || typeof value.title === "string") &&
   (!("subtitle" in value) || typeof value.subtitle === "string") &&
@@ -7090,7 +7127,7 @@ const check_389 = (value) =>
   (!("linetype" in value) || typeof value.linetype === "string");
 
 // @ts-ignore
-const check_390 = (value) =>
+const check_391 = (value) =>
   (typeof value === "string" && value === "default") ||
   (typeof value === "string" && value === "light") ||
   (typeof value === "string" && value === "dark") ||
@@ -7126,14 +7163,14 @@ const check_390 = (value) =>
   (typeof value === "string" && value === "test");
 
 // @ts-ignore
-const check_391 = (value) =>
+const check_392 = (value) =>
   typeof value === "object" &&
   value !== null &&
   !Array.isArray(value) &&
   Object.getOwnPropertyNames(value).every(
-    (var_386, var_387) => External[228].test(var_386) || false,
+    (var_388, var_389) => External[229].test(var_388) || false,
   ) &&
-  (!("name" in value) || check_392(value.name)) &&
+  (!("name" in value) || check_393(value.name)) &&
   (!("ink" in value) || typeof value.ink === "string") &&
   (!("paper" in value) || typeof value.paper === "string") &&
   (!("accent" in value) || typeof value.accent === "string") &&
@@ -7225,7 +7262,7 @@ const check_391 = (value) =>
   (!("showPanelBorder" in value) || typeof value.showPanelBorder === "boolean");
 
 // @ts-ignore
-const check_392 = (value) =>
+const check_393 = (value) =>
   (typeof value === "string" && value === "default") ||
   (typeof value === "string" && value === "light") ||
   (typeof value === "string" && value === "dark") ||

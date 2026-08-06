@@ -13,7 +13,7 @@ import {
 describe("COORD_REFERENCE", () => {
   it("covers every KNOWN_COORD_TYPES entry exactly once", () => {
     expect(Object.keys(COORD_REFERENCE).toSorted()).toEqual([...KNOWN_COORD_TYPES].toSorted());
-    expect(KNOWN_COORD_TYPES).toHaveLength(5);
+    expect(KNOWN_COORD_TYPES).toHaveLength(6);
   });
 
   it("every entry has summary, component, typeLiteral, and matching slug", () => {
@@ -73,6 +73,30 @@ describe("COORD_REFERENCE", () => {
     expect(sf.helper).toBe("coordSf");
     expect(sf.helperAlias).toBe("coord_sf");
     expect(sf.alsoExportedAs).toEqual([]);
+  });
+
+  it("radial documents polar options and polar aliases", () => {
+    const radial = COORD_REFERENCE.radial;
+    expect(radial.component).toBe("CoordRadial");
+    expect(radial.helper).toBe("coordRadial");
+    expect(radial.helperAlias).toBe("coord_radial");
+    expect(radial.alsoHelpers).toContain("coordPolar");
+    expect(radial.alsoExportedAs).toEqual([]);
+    expect(radial.builderMethods).toContain("coordRadial");
+    expect(radial.params.map((p) => p.name).toSorted()).toEqual(
+      [
+        "clip",
+        "end",
+        "expand",
+        "innerRadius",
+        "rLimits",
+        "reverse",
+        "start",
+        "theta",
+        "thetaLimits",
+      ].toSorted(),
+    );
+    expect(radial.axisParams).toEqual([]);
   });
 });
 

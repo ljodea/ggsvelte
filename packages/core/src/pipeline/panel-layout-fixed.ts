@@ -66,7 +66,15 @@ export interface FixedAspectLayoutResult {
  * Chart chrome is therefore authoritative; this pass can only add paper gutters.
  */
 /** Fixed-aspect coord forms that share the same layout pass (`fixed` + `sf`). */
-export type FixedAspectCoordSpec = CoordFixedSpec | CoordSfSpec;
+/**
+ * Fixed-aspect layout inputs: fixed, sf, or radial.
+ * For radial, `aspect` is panel pixel height/width (ggplot2 polar bbox aspect:
+ * full circle → 1; partial arcs → diff(bbox.y)/diff(bbox.x)).
+ */
+export type FixedAspectCoordSpec =
+  | CoordFixedSpec
+  | CoordSfSpec
+  | { type: "radial"; aspect?: number };
 
 export function applyFixedAspectLayout(input: {
   placements: readonly PanelPlacement[];
@@ -78,9 +86,14 @@ export function applyFixedAspectLayout(input: {
   scalesConfig: Scales;
   warnings: PipelineWarning[];
 }): FixedAspectLayoutResult {
-  // Both coord_fixed and coord_sf route through this pass; diagnostics must name
-  // the coordinate the user actually wrote.
-  const name = input.coord.type === "sf" ? "coord_sf" : "coord_fixed";
+  // Fixed-aspect family (fixed / sf / radial) share this pass; diagnostics must
+  // name the coordinate the user actually wrote.
+  const name =
+    input.coord.type === "sf"
+      ? "coord_sf"
+      : input.coord.type === "radial"
+        ? "coord_radial"
+        : "coord_fixed";
   if (input.freeX || input.freeY) {
     const cause =
       "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";
@@ -99,10 +112,15 @@ export function applyFixedAspectLayout(input: {
   }
   if (input.placements.length === 0) return { placements: [], degraded: false };
 
-  const ratio = input.coord.ratio ?? 1;
   const firstScales = input.panelScales[0];
   if (firstScales === undefined) return { placements: [...input.placements], degraded: false };
-  const targetAspect = ratio * (scaleSpaceSpan(firstScales.y) / scaleSpaceSpan(firstScales.x));
+  // Radial: ggplot2 aspect = diff(polar_bbox.y) / diff(polar_bbox.x) so partial
+  // arcs stay circular under polarProject's independent axis rescales. Full
+  // circle → 1. Fixed/sf: physical data-unit ratio × trained scale spans.
+  const targetAspect =
+    input.coord.type === "radial"
+      ? (input.coord.aspect ?? 1)
+      : (input.coord.ratio ?? 1) * (scaleSpaceSpan(firstScales.y) / scaleSpaceSpan(firstScales.x));
   if (!Number.isFinite(targetAspect) || targetAspect <= 0) {
     const cause =
       "Fixed-aspect coordinates require a finite positive physical data-unit ratio after trained scale spans are applied.";

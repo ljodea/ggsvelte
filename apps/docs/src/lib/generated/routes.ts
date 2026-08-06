@@ -10174,6 +10174,39 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/coords/radial",
+    title: "CoordRadial — ggsvelte",
+    description:
+      "CoordRadial: Polar/radial coordinates (ggplot2 coord_radial). Maps one aesthetic to angle and the other to radius for pie charts, coxcombs, and polar scatter. coord_polar is a helper alias with clip on.",
+    canonicalPath: "/reference/coords/radial",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/guides/legend",
     title: "GuideLegend — ggsvelte",
     description:
@@ -12283,8 +12316,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-915",
-        title: "experimental (915)",
+        id: "experimental-925",
+        title: "experimental (925)",
         level: 3,
       },
       {
@@ -12308,8 +12341,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-356",
-        title: "experimental (356)",
+        id: "experimental-368",
+        title: "experimental (368)",
         level: 3,
       },
       {
@@ -12353,8 +12386,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-515",
-        title: "experimental (515)",
+        id: "experimental-526",
+        title: "experimental (526)",
         level: 3,
       },
       {

@@ -3,12 +3,13 @@
  */
 import type { NormalizedGeomName } from "@ggsvelte/spec";
 
-import type { PanelCoordProjector } from "../coord-projector.js";
+import { scalesForCoordExpand, type PanelCoordProjector } from "../coord-projector.js";
 import type { GeometryBatch } from "../scene.js";
 import type { PositionScale } from "../scales/train.js";
 
 import { geometryPanelFrame } from "./assemble-geometry-panel-frame.js";
 import { createCoordTessellationBudget, projectGeometryBatch } from "./coord-geometry.js";
+import { projectPolarGeometryBatches } from "./coord-polar-geometry.js";
 import type { FacetPanelDef } from "./facets.js";
 import { buildBatch, flipBatchInPlace } from "./geometry.js";
 import type { PanelPlacement } from "./panel-layout.js";
@@ -113,18 +114,40 @@ export function buildGeometryBatches(input: {
       if (frame === undefined) continue;
       const placement = placements[p]!;
       const projector = coordProjectors[p];
-      const pathLike = pathLikeGeom(frame);
+      const joint = projector?.joint === true;
+      const pathLike = joint || pathLikeGeom(frame);
+      const needsPolarScaleRemap =
+        projector !== undefined &&
+        (projector.joint ||
+          !projector.expand ||
+          projector.thetaLimits !== undefined ||
+          projector.rLimits !== undefined);
+      const panelScalesForGeom =
+        projector !== undefined && needsPolarScaleRemap
+          ? scalesForCoordExpand(panelScales[p]!, projector.expand, {
+              ...(projector.polarTheta !== undefined && { theta: projector.polarTheta }),
+              ...(projector.thetaLimits !== undefined && { thetaLimits: projector.thetaLimits }),
+              ...(projector.rLimits !== undefined && { rLimits: projector.rLimits }),
+            })
+          : panelScales[p]!;
       const built = buildBatch(
         frame,
         // Path topology must retain coordinate-invalid authored/stat vertices
         // until the post-stat projector can split finite runs without bridging.
-        geometryPanelFrame(placement, panelScales[p]!, flip, pathLike ? undefined : projector),
+        // Polar is always joint: never early-project through separable axes.
+        geometryPanelFrame(
+          placement,
+          panelScalesForGeom,
+          flip,
+          pathLike || joint ? undefined : projector,
+        ),
         color,
         fill,
         styles,
         warnings,
       );
       const tessellationBudget = createCoordTessellationBudget(built);
+      let panelBatches: GeometryBatch[] = [];
       for (const batch of built) {
         if (flip) flipBatchInPlace(batch, placement.width, placement.height);
         if (projector !== undefined) {
@@ -138,8 +161,19 @@ export function buildGeometryBatches(input: {
           );
         }
         batch.panelIndex = p;
-        batches.push(batch);
+        panelBatches.push(batch);
       }
+      if (projector?.polar !== undefined) {
+        panelBatches = projectPolarGeometryBatches(
+          panelBatches,
+          projector,
+          placement.width,
+          placement.height,
+          warnings,
+          tessellationBudget,
+        );
+      }
+      batches.push(...panelBatches);
     }
   }
   return batches;

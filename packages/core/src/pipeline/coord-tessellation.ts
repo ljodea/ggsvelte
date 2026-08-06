@@ -1,3 +1,4 @@
+import { polarProjectPanelPoint, polarUnproject } from "../coord-polar.js";
 import type { PanelCoordProjector } from "../coord-projector.js";
 import { segmentDistance } from "../candidate-geometry.js";
 import type { GeometryBatch } from "../scene.js";
@@ -33,6 +34,9 @@ export function projectPoint(
   x: number,
   y: number,
 ): readonly [number, number] {
+  if (projector.polar !== undefined) {
+    return polarProjectPanelPoint(projector.polar, x, y, width, height);
+  }
   const tx = projector.x.projectFraction(x / width);
   const ty = projector.y.projectFraction(1 - y / height);
   return [tx * width, (1 - ty) * height];
@@ -45,6 +49,10 @@ export function unprojectPoint(
   x: number,
   y: number,
 ): readonly [number, number] {
+  if (projector.polar !== undefined) {
+    const [xFrac, yFrac] = polarUnproject(projector.polar, x, y, width, height);
+    return [xFrac * width, (1 - yFrac) * height];
+  }
   const tx = projector.x.invertFraction(x / width);
   const ty = projector.y.invertFraction(1 - y / height);
   return [tx * width, (1 - ty) * height];

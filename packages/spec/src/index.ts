@@ -24,6 +24,7 @@ export {
   CoordSpecSchema,
   CoordFixedSpecSchema,
   CoordSfSpecSchema,
+  CoordRadialSpecSchema,
   CoordTransformAxisSpecSchema,
   CoordTransformSpecSchema,
   CURRENT_EDITION,
@@ -111,6 +112,7 @@ export type {
   CoordSpec,
   CoordFixedSpec,
   CoordSfSpec,
+  CoordRadialSpec,
   CoordTransformAxisSpec,
   CoordTransformSpec,
   DataColumns,
@@ -418,21 +420,28 @@ export type {
 export {
   coord_equal,
   coord_fixed,
+  coord_polar,
+  coord_radial,
   coord_sf,
   coord_transform,
   coordEqual,
   coordFixed,
+  coordPolar,
+  coordRadial,
   coordSf,
   coordTransform,
 } from "./coord-helpers.js";
 export type {
   CoordFixedOptions,
+  CoordPolarOptions,
+  CoordRadialOptions,
+  CoordRadialReverse,
+  CoordRadialTheta,
   CoordSfOptions,
   CoordTransformAxisOptions,
   CoordTransformName,
   CoordTransformOptions,
 } from "./coord-helpers.js";
-
 // Scale helpers
 export {
   configuredColorScaleType,

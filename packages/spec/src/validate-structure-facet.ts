@@ -18,10 +18,11 @@ export function coordFacetStructuralErrors(input: Record<string, unknown>): Spec
     return [];
   }
   const coordType = (coord as Record<string, unknown>)["type"];
-  if (coordType !== "fixed" && coordType !== "sf") return [];
+  if (coordType !== "fixed" && coordType !== "sf" && coordType !== "radial") return [];
   const scales = (facet as Record<string, unknown>)["scales"];
   if (scales === undefined || scales === "fixed") return [];
-  const coordName = coordType === "sf" ? "coord_sf" : "coord_fixed";
+  const coordName =
+    coordType === "sf" ? "coord_sf" : coordType === "radial" ? "coord_radial" : "coord_fixed";
   return [
     {
       code: "coord-fixed-free-scales",

@@ -12,7 +12,14 @@ import { SpecDeclarations } from "./schema-declarations.js";
  * Portable coord type literals (CoordSpec discriminants).
  * `flip` shares CoordCartesianSpec with `cartesian` but is a separate shell.
  */
-export const KNOWN_COORD_TYPES = ["cartesian", "flip", "transform", "fixed", "sf"] as const;
+export const KNOWN_COORD_TYPES = [
+  "cartesian",
+  "flip",
+  "transform",
+  "fixed",
+  "sf",
+  "radial",
+] as const;
 
 export type CoordTypeName = (typeof KNOWN_COORD_TYPES)[number];
 
@@ -73,6 +80,8 @@ const COORD_SUMMARIES: Readonly<Record<CoordTypeName, string>> = Object.freeze({
   fixed:
     "Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
   sf: "Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+  radial:
+    "Polar/radial coordinates (ggplot2 coord_radial). Maps one aesthetic to angle and the other to radius for pie charts, coxcombs, and polar scatter. coord_polar is a helper alias with clip on.",
 });
 
 const COORD_COMPONENTS: Readonly<Record<CoordTypeName, string>> = Object.freeze({
@@ -81,6 +90,7 @@ const COORD_COMPONENTS: Readonly<Record<CoordTypeName, string>> = Object.freeze(
   transform: "CoordTransform",
   fixed: "CoordFixed",
   sf: "CoordSf",
+  radial: "CoordRadial",
 });
 
 const COORD_SCHEMA_TYPES: Readonly<Record<CoordTypeName, string>> = Object.freeze({
@@ -89,6 +99,7 @@ const COORD_SCHEMA_TYPES: Readonly<Record<CoordTypeName, string>> = Object.freez
   transform: "CoordTransformSpec",
   fixed: "CoordFixedSpec",
   sf: "CoordSfSpec",
+  radial: "CoordRadialSpec",
 });
 
 const COORD_HELPERS: Readonly<
@@ -103,6 +114,11 @@ const COORD_HELPERS: Readonly<
     also: ["coordEqual", "coord_equal"],
   },
   sf: { camel: "coordSf", snake: "coord_sf", also: [] },
+  radial: {
+    camel: "coordRadial",
+    snake: "coord_radial",
+    also: ["coordPolar", "coord_polar"],
+  },
 });
 
 const COORD_BUILDER_METHODS: Readonly<Record<CoordTypeName, readonly string[]>> = Object.freeze({
@@ -111,6 +127,7 @@ const COORD_BUILDER_METHODS: Readonly<Record<CoordTypeName, readonly string[]>> 
   transform: ["coordTransform", "coord"],
   fixed: ["coordFixed", "coordEqual", "coord"],
   sf: ["coordSf", "coord"],
+  radial: ["coordRadial", "coordPolar", "coord"],
 });
 
 const COORD_ALSO_EXPORTED: Readonly<Record<CoordTypeName, readonly string[]>> = Object.freeze({
@@ -119,6 +136,8 @@ const COORD_ALSO_EXPORTED: Readonly<Record<CoordTypeName, readonly string[]>> = 
   transform: [],
   fixed: ["CoordEqual"],
   sf: [],
+  // CoordPolar is a separate shell (polar defaults), not a re-export of CoordRadial.
+  radial: [],
 });
 
 /**

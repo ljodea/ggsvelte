@@ -5,9 +5,13 @@
  */
 import {
   coordFixed,
+  coordPolar,
+  coordRadial,
   coordSf,
   coordTransform,
   type CoordFixedOptions,
+  type CoordPolarOptions,
+  type CoordRadialOptions,
   type CoordSfOptions,
   type CoordTransformOptions,
 } from "./coord-helpers.js";
@@ -172,6 +176,22 @@ export class GGBuilderCore {
    */
   coordSf(options: CoordSfOptions = {}): GGBuilder {
     return this.coord(coordSf(options));
+  }
+
+  /**
+   * Polar/radial coordinates (ggplot2 coord_radial). Pie charts use
+   * theta: "y" with expand: false on a stacked bar/col.
+   */
+  coordRadial(options: CoordRadialOptions = {}): GGBuilder {
+    return this.coord(coordRadial(options));
+  }
+
+  /**
+   * ggplot2 coord_polar alias — emits type "radial" with polar defaults
+   * (clip on; direction -1 → reverse theta).
+   */
+  coordPolar(options: CoordPolarOptions = {}): GGBuilder {
+    return this.coord(coordPolar(options));
   }
 
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */

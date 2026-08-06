@@ -12,7 +12,8 @@
  *
  * Rules considered and deliberately ABSENT (documented for auditability):
  *  - dual-axis misuse: the grammar has no dual axes — unrepresentable.
- *  - pie-chart equivalents: no polar coord in v1 — unrepresentable.
+ *  - pie-chart overuse: polar/radial coords exist; a dedicated "prefer bar
+ *    over pie" advisory is deferred until usage evidence exists.
  *  - text layer without a label aes: that is a validation ERROR
  *    (`missing-required-channel`), not an advisory.
  *  - transform scale over entirely out-of-domain data: the pipeline handles

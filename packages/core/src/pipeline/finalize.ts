@@ -11,7 +11,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import { getCandidateRuntime, RELEASED_CANDIDATE_STORE } from "../candidate-runtime.js";
 import type { CandidateBuildInput, LazyInteraction } from "../candidate-runtime.js";
 import type { CandidateStore } from "../candidate-store.js";
-import { buildPanelCoordProjector } from "../coord-projector.js";
+import { buildPanelCoordProjector, scalesForCoordExpand } from "../coord-projector.js";
 import { LineageStore } from "../identity.js";
 import type { ThemeTokens } from "../theme.js";
 
@@ -56,7 +56,10 @@ export function finalize(run: PipelineRunState): RenderModel {
     trained,
     warnings,
   });
-  const coord = normalized.coord?.type === "transform" ? normalized.coord : undefined;
+  const coord =
+    normalized.coord?.type === "transform" || normalized.coord?.type === "radial"
+      ? normalized.coord
+      : undefined;
   const coordProjectors = trained.panelScales.map((scales) =>
     buildPanelCoordProjector(scales, coord),
   );
@@ -87,7 +90,23 @@ export function finalize(run: PipelineRunState): RenderModel {
   // --- domain snapshots ---
   const { freeX, freeY, facetPanels, panelFrames } = prepared;
   const { xTraining, yTraining, panelScales, xInputs, yInputs } = trained;
-  const effectiveDomains = computeEffectiveDomains(xTraining.scale, yTraining.scale, panelScales);
+  // Radial expand:false / limits remaps geometry via scalesForCoordExpand —
+  // use the same remapped scales for reported domains so brush baselines and
+  // domain snapshots match the drawn sectors.
+  const panelScalesForDomains = panelScales.map((scales, i) => {
+    const projector = coordProjectors[i];
+    if (projector === undefined || !projector.joint) return scales;
+    return scalesForCoordExpand(scales, projector.expand, {
+      ...(projector.polarTheta !== undefined && { theta: projector.polarTheta }),
+      ...(projector.thetaLimits !== undefined && { thetaLimits: projector.thetaLimits }),
+      ...(projector.rLimits !== undefined && { rLimits: projector.rLimits }),
+    });
+  });
+  const effectiveDomains = computeEffectiveDomains(
+    xTraining.scale,
+    yTraining.scale,
+    panelScalesForDomains,
+  );
   const baselineDomains = computeBaselineDomains({
     options,
     freeX,
@@ -171,7 +190,7 @@ export function finalize(run: PipelineRunState): RenderModel {
         resolution.resolved,
       ]),
     ),
-    panelScales,
+    panelScales: panelScalesForDomains,
     colorState: colorResolution.state,
     fillState: fillResolution.state,
     styleStates: Object.fromEntries(

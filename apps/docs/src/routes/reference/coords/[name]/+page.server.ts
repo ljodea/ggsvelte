@@ -10,7 +10,8 @@ const COORD_SET = new Set<string>(KNOWN_COORD_TYPES);
 export const entries: EntryGenerator = () => KNOWN_COORD_TYPES.map((name) => ({ name }));
 
 export const load: PageServerLoad = ({ params }) => {
-  const name = params.name;
+  const raw: unknown = (params as { name?: unknown }).name;
+  const name = typeof raw === "string" ? raw : "";
   if (!COORD_SET.has(name)) {
     error(404, `No coord reference for "${name}".`);
   }

@@ -8,7 +8,14 @@
 import { COORD_REFERENCE_DATA } from "./generated/coord-reference-data.js";
 
 /** Portable coord type literals (CoordSpec discriminants + flip shell). */
-export const KNOWN_COORD_TYPES = ["cartesian", "flip", "transform", "fixed", "sf"] as const;
+export const KNOWN_COORD_TYPES = [
+  "cartesian",
+  "flip",
+  "transform",
+  "fixed",
+  "sf",
+  "radial",
+] as const;
 
 export type CoordTypeName = (typeof KNOWN_COORD_TYPES)[number];
 

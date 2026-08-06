@@ -152,4 +152,84 @@ export const COORD_REFERENCE_DATA = {
     ],
     axisParams: [],
   },
+  radial: {
+    name: "radial",
+    slug: "radial",
+    component: "CoordRadial",
+    typeLiteral: "radial",
+    schemaType: "CoordRadialSpec",
+    helper: "coordRadial",
+    helperAlias: "coord_radial",
+    alsoHelpers: ["coordPolar", "coord_polar"],
+    alsoExportedAs: [],
+    builderMethods: ["coordRadial", "coordPolar", "coord"],
+    summary:
+      "Polar/radial coordinates (ggplot2 coord_radial). Maps one aesthetic to angle and the other to radius for pie charts, coxcombs, and polar scatter. coord_polar is a helper alias with clip on.",
+    params: [
+      {
+        name: "theta",
+        description:
+          'Which aesthetic maps to angle: "x" (default) or "y". The other aesthetic maps to radius. Pie charts use theta: "y".',
+        typeSummary: '"x" | "y"',
+        required: false,
+      },
+      {
+        name: "start",
+        description:
+          "Offset of the starting angle from 12 o'clock, in radians (default 0). Positive angles proceed clockwise when reverse does not flip theta.",
+        typeSummary: "number",
+        required: false,
+      },
+      {
+        name: "end",
+        description:
+          "Angle where the plot ends, in radians measured from 12 o'clock. Default is start + 2π (full circle). Use with start for partial polar plots.",
+        typeSummary: "number",
+        required: false,
+      },
+      {
+        name: "innerRadius",
+        description:
+          "Size of the inner radius hole as a fraction of the outer radius (0–1, default 0). Values above 0 produce a donut.",
+        typeSummary: "number",
+        required: false,
+      },
+      {
+        name: "expand",
+        description:
+          "When true (default), add a small expansion so data does not sit on the axes. When false, limits come directly from the scale (typical for pie/coxcomb).",
+        typeSummary: "boolean",
+        required: false,
+      },
+      {
+        name: "clip",
+        description:
+          'Clip marks to the panel. ggplot2 coord_radial defaults to clip off; coord_polar defaults to clip on. ggsvelte stores the effective boolean (default false for type "radial").',
+        typeSummary: "boolean",
+        required: false,
+      },
+      {
+        name: "reverse",
+        description:
+          'Which directions to reverse: "none" (default), "theta", "r", or "thetar" (both). coord_polar(direction = -1) maps to reverse: "theta".',
+        typeSummary: '"none" | "theta" | "r" | "thetar"',
+        required: false,
+      },
+      {
+        name: "thetaLimits",
+        description:
+          "Optional [min, max] limits for the theta (angle) aesthetic in semantic units. Exactly two numbers.",
+        typeSummary: "[number, number]",
+        required: false,
+      },
+      {
+        name: "rLimits",
+        description:
+          "Optional [min, max] limits for the radius aesthetic in semantic units. Exactly two numbers.",
+        typeSummary: "[number, number]",
+        required: false,
+      },
+    ],
+    axisParams: [],
+  },
 } as const;
