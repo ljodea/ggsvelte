@@ -32,7 +32,9 @@ describe("coord_radial pipeline", () => {
     // Under polar, rects become closed filled paths (sectors).
     expect(rects).toHaveLength(0);
     expect(paths.length).toBeGreaterThan(0);
-    const filled = paths.filter((b) => b.kind === "paths" && b.closed === true && b.fills);
+    const filled = paths.filter(
+      (b) => b.kind === "paths" && b.closed === true && b.fills !== undefined,
+    );
     expect(filled.length).toBeGreaterThan(0);
     for (const batch of filled) {
       if (batch.kind !== "paths") continue;
