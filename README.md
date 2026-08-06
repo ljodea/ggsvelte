@@ -1,6 +1,9 @@
 # ggsvelte
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ljodea/ggsvelte/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/ljodea/ggsvelte/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40ggsvelte%2Fsvelte?style=flat-square)](https://www.npmjs.com/package/@ggsvelte/svelte)
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ljodea/ggsvelte)
+[![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 ggsvelte is a fast agent-native implementation of the layered grammar of
 graphics, inspired by ggplot2.
