@@ -49,9 +49,11 @@
 html[data-vr] *,
 html[data-vr] *::before,
 html[data-vr] *::after,
+html[data-vr] *::backdrop,
 html[data-visual-test] *,
 html[data-visual-test] *::before,
-html[data-visual-test] *::after {
+html[data-visual-test] *::after,
+html[data-visual-test] *::backdrop {
   transition: none !important;
   animation: none !important;
   caret-color: transparent !important;
