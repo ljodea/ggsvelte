@@ -136,7 +136,8 @@
   padding: 0;
   border: 0;
   background: transparent;
-  /* Keep display/overlay long enough for exit transforms on close() */
+  /* Exit keeps display for the slide; ignore hits so the page stays tappable */
+  pointer-events: none;
   transition:
     overlay var(--duration-drawer-exit) allow-discrete,
     display var(--duration-drawer-exit) allow-discrete;
@@ -144,6 +145,7 @@
 
 .site-menu[open],
 .chapter-dialog[open] {
+  pointer-events: auto;
   transition:
     overlay var(--duration-drawer-enter) allow-discrete,
     display var(--duration-drawer-enter) allow-discrete;
@@ -175,6 +177,7 @@
   }
 }
 
+/* Default dock: right edge (site menu always; chapter dialog on wide screens) */
 .site-menu__panel,
 .chapter-dialog__panel {
   width: min(88vw, 24rem);
@@ -183,36 +186,20 @@
   padding: 1rem 1.25rem 2rem;
   background: var(--paper);
   box-shadow: -12px 0 32px color-mix(in srgb, #000 18%, transparent);
-  /* Site menu docks right; exit faster than enter */
   transform: translateX(100%);
   transition: transform var(--duration-drawer-exit) var(--ease-drawer);
 }
 
-.site-menu[open] .site-menu__panel {
-  transform: translateX(0);
-  transition: transform var(--duration-drawer-enter) var(--ease-drawer);
-}
-
-@starting-style {
-  .site-menu[open] .site-menu__panel {
-    transform: translateX(100%);
-  }
-}
-
-/* Chapter dialog docks left (see mobile override on margin) */
-.chapter-dialog__panel {
-  transform: translateX(-100%);
-  box-shadow: 12px 0 32px color-mix(in srgb, #000 18%, transparent);
-}
-
+.site-menu[open] .site-menu__panel,
 .chapter-dialog[open] .chapter-dialog__panel {
   transform: translateX(0);
   transition: transform var(--duration-drawer-enter) var(--ease-drawer);
 }
 
 @starting-style {
+  .site-menu[open] .site-menu__panel,
   .chapter-dialog[open] .chapter-dialog__panel {
-    transform: translateX(-100%);
+    transform: translateX(100%);
   }
 }
 
@@ -533,9 +520,22 @@
     }
   }
 
+  /* Docs menu docks left under the mobile layout (matches the Menu control) */
   .chapter-dialog__panel {
     margin-right: auto;
     margin-left: 0;
+    box-shadow: 12px 0 32px color-mix(in srgb, #000 18%, transparent);
+    transform: translateX(-100%);
+  }
+
+  .chapter-dialog[open] .chapter-dialog__panel {
+    transform: translateX(0);
+  }
+
+  @starting-style {
+    .chapter-dialog[open] .chapter-dialog__panel {
+      transform: translateX(-100%);
+    }
   }
 
   .chapter-dialog .docs-sidebar {
