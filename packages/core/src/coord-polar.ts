@@ -38,6 +38,10 @@ export interface PolarProjector {
 
 const OUTER = 0.4;
 
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v));
+}
+
 /** ggplot2 polar_bbox for full and partial arcs. */
 export function polarBBox(
   arc: readonly [number, number],
@@ -154,7 +158,12 @@ export function polarProject(
   width: number,
   height: number,
 ): readonly [number, number] {
-  const [thetaFrac, rFrac] = projector.theta === "x" ? [xFrac, yFrac] : [yFrac, xFrac];
+  // Clamp so values outside trained/limited domains do not invert through the
+  // origin (negative radius) or wrap past the outer ring.
+  const rawTheta = projector.theta === "x" ? xFrac : yFrac;
+  const rawR = projector.theta === "x" ? yFrac : xFrac;
+  const thetaFrac = clamp01(rawTheta);
+  const rFrac = clamp01(rawR);
   const [a0, a1] = projector.arc;
   const [r0, r1] = projector.radius;
   const th = a0 + thetaFrac * (a1 - a0);
