@@ -93,16 +93,14 @@
     <button
       type="button"
       class="copy"
+      class:copied
       aria-label={copied ? "Copied" : "Copy code"}
       onclick={copy}
     >
-      {#if copied}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-        {@html CHECK_ICON_SVG}
-      {:else}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-        {@html COPY_ICON_SVG}
-      {/if}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      <span class="icon-copy" aria-hidden="true">{@html COPY_ICON_SVG}</span>
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      <span class="icon-check" aria-hidden="true">{@html CHECK_ICON_SVG}</span>
     </button>
     <span class="visually-hidden" role="status">{copyStatus}</span>
   </div>
@@ -166,7 +164,8 @@
     font: 600 0.82rem/1 var(--body-font);
     transition:
       background-color 120ms ease,
-      color 120ms ease;
+      color 120ms ease,
+      transform var(--duration-press) var(--ease-out);
   }
 
   /* 36px visual height, 44px hit height (DESIGN.md hit-region floor). */
@@ -176,8 +175,14 @@
     inset: -4px 0;
   }
 
-  .bar button[role="tab"]:hover {
-    color: var(--code-ink);
+  .bar button[role="tab"]:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bar button[role="tab"]:hover {
+      color: var(--code-ink);
+    }
   }
 
   /*
@@ -212,7 +217,8 @@
     cursor: pointer;
     transition:
       background-color 120ms ease,
-      color 120ms ease;
+      color 120ms ease,
+      transform var(--duration-press) var(--ease-out);
   }
 
   /* 32px visual, 44px hit region (DESIGN.md hit-region floor). */
@@ -222,9 +228,39 @@
     inset: -6px;
   }
 
-  .bar .copy:hover {
-    background: color-mix(in srgb, var(--code-ink) 12%, transparent);
-    color: var(--code-ink);
+  .bar .copy:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bar .copy:hover {
+      background: color-mix(in srgb, var(--code-ink) 12%, transparent);
+      color: var(--code-ink);
+    }
+  }
+
+  .bar .copy .icon-copy,
+  .bar .copy .icon-check {
+    grid-area: 1 / 1;
+    display: grid;
+    place-items: center;
+    transition: opacity var(--duration-icon) var(--ease-out);
+  }
+
+  .bar .copy .icon-copy {
+    opacity: 1;
+  }
+
+  .bar .copy .icon-check {
+    opacity: 0;
+  }
+
+  .bar .copy.copied .icon-copy {
+    opacity: 0;
+  }
+
+  .bar .copy.copied .icon-check {
+    opacity: 1;
   }
 
   /*

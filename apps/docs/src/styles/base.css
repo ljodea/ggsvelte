@@ -274,12 +274,19 @@ pre {
   cursor: pointer;
   transition:
     background-color 120ms ease,
-    color 120ms ease;
+    color 120ms ease,
+    transform var(--duration-press) var(--ease-out);
 }
 
-.guide-code-copy button:hover {
-  background: color-mix(in srgb, var(--code-ink) 12%, transparent);
-  color: var(--code-ink);
+.guide-code-copy button:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .guide-code-copy button:hover {
+    background: color-mix(in srgb, var(--code-ink) 12%, transparent);
+    color: var(--code-ink);
+  }
 }
 
 /* 32px visual, 44px hit region (DESIGN.md hit-region floor). */

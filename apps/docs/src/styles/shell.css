@@ -136,11 +136,43 @@
   padding: 0;
   border: 0;
   background: transparent;
+  /* Keep display/overlay long enough for exit transforms on close() */
+  transition:
+    overlay var(--duration-drawer-exit) allow-discrete,
+    display var(--duration-drawer-exit) allow-discrete;
+}
+
+.site-menu[open],
+.chapter-dialog[open] {
+  transition:
+    overlay var(--duration-drawer-enter) allow-discrete,
+    display var(--duration-drawer-enter) allow-discrete;
 }
 
 .site-menu::backdrop,
 .chapter-dialog::backdrop {
   background: color-mix(in srgb, #000 42%, transparent);
+  opacity: 0;
+  transition:
+    opacity var(--duration-drawer-exit) var(--ease-out),
+    overlay var(--duration-drawer-exit) allow-discrete,
+    display var(--duration-drawer-exit) allow-discrete;
+}
+
+.site-menu[open]::backdrop,
+.chapter-dialog[open]::backdrop {
+  opacity: 1;
+  transition:
+    opacity var(--duration-backdrop) var(--ease-out),
+    overlay var(--duration-drawer-enter) allow-discrete,
+    display var(--duration-drawer-enter) allow-discrete;
+}
+
+@starting-style {
+  .site-menu[open]::backdrop,
+  .chapter-dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 .site-menu__panel,
@@ -151,6 +183,37 @@
   padding: 1rem 1.25rem 2rem;
   background: var(--paper);
   box-shadow: -12px 0 32px color-mix(in srgb, #000 18%, transparent);
+  /* Site menu docks right; exit faster than enter */
+  transform: translateX(100%);
+  transition: transform var(--duration-drawer-exit) var(--ease-drawer);
+}
+
+.site-menu[open] .site-menu__panel {
+  transform: translateX(0);
+  transition: transform var(--duration-drawer-enter) var(--ease-drawer);
+}
+
+@starting-style {
+  .site-menu[open] .site-menu__panel {
+    transform: translateX(100%);
+  }
+}
+
+/* Chapter dialog docks left (see mobile override on margin) */
+.chapter-dialog__panel {
+  transform: translateX(-100%);
+  box-shadow: 12px 0 32px color-mix(in srgb, #000 18%, transparent);
+}
+
+.chapter-dialog[open] .chapter-dialog__panel {
+  transform: translateX(0);
+  transition: transform var(--duration-drawer-enter) var(--ease-drawer);
+}
+
+@starting-style {
+  .chapter-dialog[open] .chapter-dialog__panel {
+    transform: translateX(-100%);
+  }
 }
 
 .site-menu__heading,
@@ -436,7 +499,7 @@
     position: relative;
   }
 
-  .docs-mobile-tools details[open] .on-this-page {
+  .docs-mobile-tools details .on-this-page {
     position: absolute;
     right: 0;
     z-index: 20;
@@ -447,12 +510,32 @@
     border: 1px solid var(--line);
     background: var(--paper);
     box-shadow: 0 8px 24px color-mix(in srgb, #000 12%, transparent);
+    transform-origin: top right;
+    opacity: 0;
+    transform: scale(0.97);
+    transition:
+      opacity var(--duration-popover-exit) var(--ease-out),
+      transform var(--duration-popover-exit) var(--ease-out);
+  }
+
+  .docs-mobile-tools details[open] .on-this-page {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--duration-popover) var(--ease-out),
+      transform var(--duration-popover) var(--ease-out);
+  }
+
+  @starting-style {
+    .docs-mobile-tools details[open] .on-this-page {
+      opacity: 0;
+      transform: scale(0.97);
+    }
   }
 
   .chapter-dialog__panel {
     margin-right: auto;
     margin-left: 0;
-    box-shadow: 12px 0 32px color-mix(in srgb, #000 18%, transparent);
   }
 
   .chapter-dialog .docs-sidebar {
