@@ -43,32 +43,29 @@
       <button
         type="button"
         class="copy-trigger"
+        class:copied
         aria-label={copied ? "Copied" : accessibleLabel}
         onclick={copy}
       >
-        {#if copied}
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-          {@html CHECK_ICON_SVG}
-        {:else}
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-          {@html COPY_ICON_SVG}
-        {/if}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+        <span class="icon-copy" aria-hidden="true">{@html COPY_ICON_SVG}</span>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+        <span class="icon-check" aria-hidden="true">{@html CHECK_ICON_SVG}</span
+        >
       </button>
     </div>
   {:else}
     <button
       type="button"
       class="copy-trigger floating"
+      class:copied
       aria-label={copied ? "Copied" : accessibleLabel}
       onclick={copy}
     >
-      {#if copied}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-        {@html CHECK_ICON_SVG}
-      {:else}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
-        {@html COPY_ICON_SVG}
-      {/if}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      <span class="icon-copy" aria-hidden="true">{@html COPY_ICON_SVG}</span>
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      <span class="icon-check" aria-hidden="true">{@html CHECK_ICON_SVG}</span>
     </button>
   {/if}
   <div class="code-body" bind:this={source}>
@@ -134,7 +131,8 @@
     cursor: pointer;
     transition:
       background-color 120ms ease,
-      color 120ms ease;
+      color 120ms ease,
+      transform var(--duration-press) var(--ease-out);
   }
 
   /*
@@ -148,9 +146,40 @@
     inset: -6px;
   }
 
-  .copy-trigger:hover {
-    background: color-mix(in srgb, var(--code-ink) 12%, transparent);
-    color: var(--code-ink);
+  .copy-trigger:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .copy-trigger:hover {
+      background: color-mix(in srgb, var(--code-ink) 12%, transparent);
+      color: var(--code-ink);
+    }
+  }
+
+  /* Stacked icons; opacity crossfade on copy success (no layout thrash). */
+  .icon-copy,
+  .icon-check {
+    grid-area: 1 / 1;
+    display: grid;
+    place-items: center;
+    transition: opacity var(--duration-icon) var(--ease-out);
+  }
+
+  .icon-copy {
+    opacity: 1;
+  }
+
+  .icon-check {
+    opacity: 0;
+  }
+
+  .copy-trigger.copied .icon-copy {
+    opacity: 0;
+  }
+
+  .copy-trigger.copied .icon-check {
+    opacity: 1;
   }
 
   .copy-trigger.floating {

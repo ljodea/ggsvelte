@@ -56,7 +56,8 @@
       background-color 120ms ease,
       border-color 120ms ease,
       color 120ms ease,
-      opacity 120ms ease;
+      opacity 120ms ease,
+      transform var(--duration-press) var(--ease-out);
   }
 
   :global(.ui-button:focus-visible) {
@@ -70,6 +71,10 @@
     opacity: 0.45;
   }
 
+  :global(.ui-button:active:not(:disabled):not([aria-disabled="true"])) {
+    transform: scale(0.97);
+  }
+
   :global(.ui-button--primary),
   :global(a.ui-button--primary:visited) {
     border-color: var(--accent);
@@ -77,11 +82,26 @@
     color: #fff;
   }
 
-  :global(
-    .ui-button--primary:hover:not(:disabled):not([aria-disabled="true"])
-  ) {
-    background: color-mix(in srgb, var(--accent) 88%, var(--ink));
-    border-color: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  @media (hover: hover) and (pointer: fine) {
+    :global(
+      .ui-button--primary:hover:not(:disabled):not([aria-disabled="true"])
+    ) {
+      background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+      border-color: color-mix(in srgb, var(--accent) 88%, var(--ink));
+    }
+
+    :global(
+      .ui-button--secondary:hover:not(:disabled):not([aria-disabled="true"])
+    ) {
+      border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
+      background: var(--wash);
+    }
+
+    :global(
+      .ui-button--ghost:hover:not(:disabled):not([aria-disabled="true"])
+    ) {
+      background: color-mix(in srgb, var(--ink) 6%, transparent);
+    }
   }
 
   :global(.ui-button--secondary) {
@@ -90,21 +110,10 @@
     color: var(--ink);
   }
 
-  :global(
-    .ui-button--secondary:hover:not(:disabled):not([aria-disabled="true"])
-  ) {
-    border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
-    background: var(--wash);
-  }
-
   :global(.ui-button--ghost) {
     border-color: transparent;
     background: transparent;
     color: var(--ink);
-  }
-
-  :global(.ui-button--ghost:hover:not(:disabled):not([aria-disabled="true"])) {
-    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
 
   :root[data-theme="dark"] :global(.ui-button--primary),

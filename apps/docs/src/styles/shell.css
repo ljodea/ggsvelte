@@ -136,13 +136,48 @@
   padding: 0;
   border: 0;
   background: transparent;
+  /* Exit keeps display for the slide; ignore hits so the page stays tappable */
+  pointer-events: none;
+  transition:
+    overlay var(--duration-drawer-exit) allow-discrete,
+    display var(--duration-drawer-exit) allow-discrete;
+}
+
+.site-menu[open],
+.chapter-dialog[open] {
+  pointer-events: auto;
+  transition:
+    overlay var(--duration-drawer-enter) allow-discrete,
+    display var(--duration-drawer-enter) allow-discrete;
 }
 
 .site-menu::backdrop,
 .chapter-dialog::backdrop {
   background: color-mix(in srgb, #000 42%, transparent);
+  opacity: 0;
+  transition:
+    opacity var(--duration-drawer-exit) var(--ease-out),
+    overlay var(--duration-drawer-exit) allow-discrete,
+    display var(--duration-drawer-exit) allow-discrete;
 }
 
+.site-menu[open]::backdrop,
+.chapter-dialog[open]::backdrop {
+  opacity: 1;
+  transition:
+    opacity var(--duration-backdrop) var(--ease-out),
+    overlay var(--duration-drawer-enter) allow-discrete,
+    display var(--duration-drawer-enter) allow-discrete;
+}
+
+@starting-style {
+  .site-menu[open]::backdrop,
+  .chapter-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Default dock: right edge (site menu always; chapter dialog on wide screens) */
 .site-menu__panel,
 .chapter-dialog__panel {
   width: min(88vw, 24rem);
@@ -151,6 +186,21 @@
   padding: 1rem 1.25rem 2rem;
   background: var(--paper);
   box-shadow: -12px 0 32px color-mix(in srgb, #000 18%, transparent);
+  transform: translateX(100%);
+  transition: transform var(--duration-drawer-exit) var(--ease-drawer);
+}
+
+.site-menu[open] .site-menu__panel,
+.chapter-dialog[open] .chapter-dialog__panel {
+  transform: translateX(0);
+  transition: transform var(--duration-drawer-enter) var(--ease-drawer);
+}
+
+@starting-style {
+  .site-menu[open] .site-menu__panel,
+  .chapter-dialog[open] .chapter-dialog__panel {
+    transform: translateX(100%);
+  }
 }
 
 .site-menu__heading,
@@ -436,7 +486,7 @@
     position: relative;
   }
 
-  .docs-mobile-tools details[open] .on-this-page {
+  .docs-mobile-tools details .on-this-page {
     position: absolute;
     right: 0;
     z-index: 20;
@@ -447,12 +497,45 @@
     border: 1px solid var(--line);
     background: var(--paper);
     box-shadow: 0 8px 24px color-mix(in srgb, #000 12%, transparent);
+    transform-origin: top right;
+    opacity: 0;
+    transform: scale(0.97);
+    transition:
+      opacity var(--duration-popover-exit) var(--ease-out),
+      transform var(--duration-popover-exit) var(--ease-out);
   }
 
+  .docs-mobile-tools details[open] .on-this-page {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--duration-popover) var(--ease-out),
+      transform var(--duration-popover) var(--ease-out);
+  }
+
+  @starting-style {
+    .docs-mobile-tools details[open] .on-this-page {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+
+  /* Docs menu docks left under the mobile layout (matches the Menu control) */
   .chapter-dialog__panel {
     margin-right: auto;
     margin-left: 0;
     box-shadow: 12px 0 32px color-mix(in srgb, #000 18%, transparent);
+    transform: translateX(-100%);
+  }
+
+  .chapter-dialog[open] .chapter-dialog__panel {
+    transform: translateX(0);
+  }
+
+  @starting-style {
+    .chapter-dialog[open] .chapter-dialog__panel {
+      transform: translateX(-100%);
+    }
   }
 
   .chapter-dialog .docs-sidebar {

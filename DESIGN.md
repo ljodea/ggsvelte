@@ -245,8 +245,16 @@ pill shapes.
   being spoken automatically.
 - Under `forced-colors`, remove unreliable translucent fills, map focus/selection outlines
   to system colors, and preserve active-tool, zoom-label, and outline distinctions.
-- Use no decorative entrance or continuous animation. Short opacity feedback is allowed
-  only when reduced motion is not requested; meaning never depends on motion.
+- Chart marks and plot furniture use no decorative entrance or continuous animation.
+  Short opacity feedback is allowed only when reduced motion is not requested; meaning
+  never depends on motion.
+- The documentation shell may use short, functional motion only (not continuous loops):
+  edge-docked drawer enter/exit (`transform` + backdrop opacity), origin-aware popover
+  open (opacity + light scale from the trigger), press scale on controls (`scale(0.97)`),
+  and opacity icon crossfades. Shared tokens live under `:root` in
+  `apps/docs/src/styles/tokens.css` (`--ease-out`, `--ease-drawer`, duration tokens).
+  Under `prefers-reduced-motion: reduce` (and VR / visual-test), durations collapse —
+  including `::backdrop`, which is not matched by `*`. Meaning never depends on motion.
 
 ## Rejected patterns
 
@@ -274,6 +282,7 @@ release evidence, not optional decoration.
 
 | Date       | Decision                                                | Rationale                                                                                                      |
 | ---------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 2026-08-06 | Allow restrained functional docs-shell motion only      | Spatial drawers, press feedback, and opacity state crossfades; chart marks stay motion-free                    |
 | 2026-07-14 | Establish quiet editorial data graphics as the system   | Matches the audited ggplot2/hrbrthemes/ggthemes references and makes good defaults the product advantage       |
 | 2026-07-14 | Keep `theme.ts` as executable token truth               | Prevents prose from becoming a parallel styling implementation                                                 |
 | 2026-07-14 | Derive ten interaction roles from each theme foundation | Keeps controls and overlays coherent across light, dark, and custom themes without hard-coded universal colors |
