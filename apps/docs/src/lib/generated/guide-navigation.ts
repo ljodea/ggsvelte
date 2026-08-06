@@ -78,6 +78,10 @@ export const GUIDE_NAVIGATION = [
         label: "Scales",
       },
       {
+        path: "/reference/coords",
+        label: "Coords",
+      },
+      {
         path: "/reference/guides",
         label: "Guides and legends",
       },
@@ -106,12 +110,12 @@ export const GUIDE_NAVIGATION = [
         label: "Palettes",
       },
       {
-        path: "/reference/cli",
-        label: "CLI reference",
-      },
-      {
         path: "/guide/errors",
         label: "Errors reference",
+      },
+      {
+        path: "/reference/cli",
+        label: "CLI reference",
       },
       {
         path: "/guide/advisories",

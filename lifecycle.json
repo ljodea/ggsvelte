@@ -176,6 +176,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "COORD_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CURRENT_EDITION": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -292,6 +296,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CoordParamDoc": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordReferenceEntry": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CoordSfOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -338,6 +350,10 @@
         },
         "CoordTransformSpecSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordTypeName": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "CountLayer": {
@@ -965,6 +981,10 @@
           "lifecycle": "experimental"
         },
         "JitterLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "KNOWN_COORD_TYPES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2225,6 +2245,10 @@
           "lifecycle": "experimental"
         },
         "coordFixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordReferenceList": {
           "kind": "value",
           "lifecycle": "experimental"
         },

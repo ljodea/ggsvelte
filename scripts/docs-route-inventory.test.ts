@@ -175,6 +175,29 @@ describe("docs route inventory", () => {
     ).toBe("ScaleColorContinuous — ggsvelte");
   });
 
+  it("publishes the coords reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/coords");
+    expect(index).toMatchObject({
+      title: "Coords — ggsvelte",
+      canonicalPath: "/reference/coords",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Coords", order: 55 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/coords/"));
+    expect(details.length).toBe(5);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(inventory.find((entry) => entry.path === "/reference/coords/flip")?.title).toBe(
+      "CoordFlip — ggsvelte",
+    );
+    expect(inventory.find((entry) => entry.path === "/reference/coords/transform")?.title).toBe(
+      "CoordTransform — ggsvelte",
+    );
+  });
+
   it("publishes the guides reference inside the one Reference hierarchy", () => {
     const inventory = createDocsRouteInventory();
     const index = inventory.find((entry) => entry.path === "/reference/guides");
@@ -185,7 +208,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Guides and legends", order: 55 },
+      navigation: { section: "Reference", label: "Guides and legends", order: 56 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/guides/"));
     expect(details.length).toBe(5);
@@ -247,17 +270,17 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Labs", order: 56 },
+      navigation: { section: "Reference", label: "Labs", order: 57 },
     });
     expect(inventory.find((entry) => entry.path === "/reference/axes")).toMatchObject({
       title: "Axes and ticks — ggsvelte",
       canonicalPath: "/reference/axes",
-      navigation: { section: "Reference", label: "Axes and ticks", order: 57 },
+      navigation: { section: "Reference", label: "Axes and ticks", order: 58 },
     });
     expect(inventory.find((entry) => entry.path === "/reference/labels")).toMatchObject({
       title: "Labels — ggsvelte",
       canonicalPath: "/reference/labels",
-      navigation: { section: "Reference", label: "Labels", order: 58 },
+      navigation: { section: "Reference", label: "Labels", order: 59 },
     });
     expect(
       inventory.find((entry) => entry.path === "/reference/axes")?.headings?.map((h) => h.id),
@@ -273,7 +296,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Themes", order: 60 },
+      navigation: { section: "Reference", label: "Themes", order: 61 },
     });
     expect(inventory.find((entry) => entry.path === "/reference/palettes")).toMatchObject({
       title: "Palettes — ggsvelte",
@@ -282,7 +305,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Palettes", order: 61 },
+      navigation: { section: "Reference", label: "Palettes", order: 62 },
     });
   });
 
@@ -295,7 +318,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 62 },
+      navigation: { section: "Reference", label: "CLI reference", order: 63 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({

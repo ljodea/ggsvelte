@@ -39,6 +39,13 @@
         params and guides.</span
       >
     </a>
+    <a href={`${base}/reference/coords`}>
+      <strong>Coords</strong>
+      <span
+        >Every Coord* shell: cartesian, flip, transform, fixed, and sf with
+        helpers and props.</span
+      >
+    </a>
     <a href={`${base}/reference/guides`}>
       <strong>Guides and legends</strong>
       <span

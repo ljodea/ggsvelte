@@ -8,6 +8,7 @@ import {
   TOP_LEVEL_ROUTES,
 } from "./docs-route-inventory-pages.ts";
 import {
+  coordDetailRoutes,
   geomDetailRoutes,
   guideDetailRoutes,
   positionDetailRoutes,
@@ -91,6 +92,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...statDetailRoutes(),
     ...positionDetailRoutes(),
     ...scaleDetailRoutes(),
+    ...coordDetailRoutes(),
     ...guideDetailRoutes(),
     ...guides,
     ...examples,
