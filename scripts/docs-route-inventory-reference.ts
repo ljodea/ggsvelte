@@ -4,6 +4,7 @@
  */
 import { EXAMPLES } from "../examples/manifest.ts";
 import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route-types.ts";
+import { coordReferenceList } from "../packages/spec/src/coord-reference.ts";
 import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
 import { guideReferenceList } from "../packages/spec/src/guide-reference.ts";
 import { positionReferenceList } from "../packages/spec/src/position-reference.ts";
@@ -213,6 +214,35 @@ export function guideDetailRoutes(): DocsRouteRecord[] {
       title: `${entry.component} — ggsvelte`,
       description: `${entry.component}: ${entry.summary}`,
       canonicalPath: `/reference/guides/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
+
+/** One indexable page per KNOWN_COORD_TYPES entry. */
+export function coordDetailRoutes(): DocsRouteRecord[] {
+  return coordReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [
+      { id: "svelte", title: "Svelte component", level: 2 },
+      { id: "json", title: "JSON and helpers", level: 2 },
+      { id: "props", title: "Props", level: 2 },
+    ];
+    if (entry.axisParams.length > 0) {
+      headings.push({ id: "axis-options", title: "Axis options", level: 2 });
+    }
+    if (entry.alsoExportedAs.length > 0) {
+      headings.push({ id: "aliases", title: "Also exported as", level: 2 });
+    }
+    headings.push({ id: "related", title: "Related", level: 2 });
+    return {
+      path: `/reference/coords/${entry.slug}`,
+      title: `${entry.component} — ggsvelte`,
+      description: `${entry.component}: ${entry.summary}`,
+      canonicalPath: `/reference/coords/${entry.slug}`,
       kind: "page" as const,
       index: true,
       sitemap: true,

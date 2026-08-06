@@ -8,6 +8,7 @@
  */
 import { join } from "node:path";
 
+import { buildCoordReference } from "../packages/spec/src/coord-reference-build.ts";
 import { buildGeomParamKeys } from "../packages/spec/src/geom-params-build.ts";
 import { buildGeomReference } from "../packages/spec/src/geom-reference-build.ts";
 import { buildGuideReference } from "../packages/spec/src/guide-reference-build.ts";
@@ -55,6 +56,12 @@ const CATALOGS = [
     exportName: "GUIDE_REFERENCE_DATA",
     build: () => buildGuideReference(),
     summary: "GUIDE_REFERENCE — per-guide API docs.",
+  },
+  {
+    file: "coord-reference-data.ts",
+    exportName: "COORD_REFERENCE_DATA",
+    build: () => buildCoordReference(),
+    summary: "COORD_REFERENCE — per-coord API docs.",
   },
 ] as const;
 

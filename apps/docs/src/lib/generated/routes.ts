@@ -229,6 +229,39 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/coords",
+    title: "Coords — ggsvelte",
+    description:
+      "Schema-derived API reference for every Coord* shell: cartesian, flip, transform, fixed, and sf with helpers and props.",
+    canonicalPath: "/reference/coords",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Coords",
+      order: 55,
+    },
+    headings: [
+      {
+        id: "all-coords",
+        title: "All coords",
+        level: 2,
+      },
+      {
+        id: "how-to-set",
+        title: "How to set a coord",
+        level: 2,
+      },
+      {
+        id: "escape-hatch",
+        title: "Escape hatch",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/guides",
     title: "Guides and legends — ggsvelte",
     description:
@@ -241,7 +274,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Guides and legends",
-      order: 55,
+      order: 56,
     },
     headings: [
       {
@@ -274,7 +307,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Labs",
-      order: 56,
+      order: 57,
     },
     headings: [
       {
@@ -317,7 +350,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Axes and ticks",
-      order: 57,
+      order: 58,
     },
     headings: [
       {
@@ -370,7 +403,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Labels",
-      order: 58,
+      order: 59,
     },
     headings: [
       {
@@ -418,7 +451,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 59,
+      order: 60,
     },
   },
   {
@@ -434,7 +467,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Themes",
-      order: 60,
+      order: 61,
     },
     headings: [
       {
@@ -482,7 +515,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Palettes",
-      order: 61,
+      order: 62,
     },
     headings: [
       {
@@ -535,7 +568,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 62,
+      order: 63,
     },
     headings: [
       {
@@ -9966,6 +9999,214 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/coords/cartesian",
+    title: "CoordCartesian — ggsvelte",
+    description:
+      'CoordCartesian: Default Cartesian coordinates. Omit coord or use CoordCartesian to clear a prior REPLACE-family coord; normalize() drops bare { type: "cartesian" }.',
+    canonicalPath: "/reference/coords/cartesian",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/coords/flip",
+    title: "CoordFlip — ggsvelte",
+    description:
+      "CoordFlip: Swap display axes so semantic x paints vertically and y horizontally. The mechanism for horizontal bar charts; stack, dodge, and hit-testing follow the flip.",
+    canonicalPath: "/reference/coords/flip",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/coords/transform",
+    title: "CoordTransform — ggsvelte",
+    description:
+      "CoordTransform: Post-stat coordinate projection with independent x/y transforms (identity, log10, sqrt), semantic viewport limits, reverse, and panel clipping. Distinct from pre-stat scale transforms.",
+    canonicalPath: "/reference/coords/transform",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "axis-options",
+        title: "Axis options",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/coords/fixed",
+    title: "CoordFixed — ggsvelte",
+    description:
+      "CoordFixed: Fixed physical data-unit aspect ratio (y-unit length / x-unit length). Layout fits the largest centered data rectangle after chart chrome; rejects free positional facet scales.",
+    canonicalPath: "/reference/coords/fixed",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/coords/sf",
+    title: "CoordSf — ggsvelte",
+    description:
+      "CoordSf: Fixed-aspect coordinates for already-projected geom_sf maps. Same layout as fixed; no CRS reproject or graticules in v1 — data must already be in plot space.",
+    canonicalPath: "/reference/coords/sf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/coords/radial",
+    title: "CoordRadial — ggsvelte",
+    description:
+      "CoordRadial: Polar/radial coordinates (ggplot2 coord_radial). Maps one aesthetic to angle and the other to radius for pie charts, coxcombs, and polar scatter. coord_polar is a helper alias with clip on.",
+    canonicalPath: "/reference/coords/radial",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/guides/legend",
     title: "GuideLegend — ggsvelte",
     description:
@@ -10837,7 +11078,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 62,
+      order: 64,
     },
     headings: [
       {
@@ -11929,7 +12170,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 63,
+      order: 65,
     },
     headings: [
       {
@@ -12056,7 +12297,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 64,
+      order: 66,
     },
     headings: [
       {
@@ -12075,8 +12316,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-919",
-        title: "experimental (919)",
+        id: "experimental-925",
+        title: "experimental (925)",
         level: 3,
       },
       {

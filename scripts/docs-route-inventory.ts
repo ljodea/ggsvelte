@@ -8,6 +8,7 @@ import {
   TOP_LEVEL_ROUTES,
 } from "./docs-route-inventory-pages.ts";
 import {
+  coordDetailRoutes,
   geomDetailRoutes,
   guideDetailRoutes,
   positionDetailRoutes,
@@ -91,6 +92,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...statDetailRoutes(),
     ...positionDetailRoutes(),
     ...scaleDetailRoutes(),
+    ...coordDetailRoutes(),
     ...guideDetailRoutes(),
     ...guides,
     ...examples,
@@ -108,6 +110,8 @@ export function validateRouteInventory<Route extends DocsRouteRecord>(routes: Ro
   const byPath = new Map<string, Route>();
   const indexableTitles = new Map<string, string>();
   const indexableDescriptions = new Map<string, string>();
+  /** section → (order → path) so sidebar sort keys cannot silently collide. */
+  const navOrdersBySection = new Map<string, Map<number, string>>();
   for (const route of routes) {
     if (route.path !== "/" && (!route.path.startsWith("/") || route.path.endsWith("/"))) {
       fail(`route path must be an absolute path without a trailing slash: ${route.path}`);
@@ -126,6 +130,18 @@ export function validateRouteInventory<Route extends DocsRouteRecord>(routes: Ro
       fail(`performance route ${route.path} must be noindex and excluded from the sitemap`);
     }
     if (route.sitemap && !route.index) fail(`${route.path} cannot enter the sitemap while noindex`);
+    if (route.navigation !== undefined) {
+      const { section, order } = route.navigation;
+      const byOrder = navOrdersBySection.get(section) ?? new Map<number, string>();
+      const owner = byOrder.get(order);
+      if (owner !== undefined) {
+        fail(
+          `duplicate navigation order ${order} in section "${section}" for ${owner} and ${route.path}`,
+        );
+      }
+      byOrder.set(order, route.path);
+      navOrdersBySection.set(section, byOrder);
+    }
     if (route.index) {
       const titleOwner = indexableTitles.get(route.title);
       if (titleOwner !== undefined) {
