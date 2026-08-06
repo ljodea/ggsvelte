@@ -82,13 +82,15 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
     // Radial default clip is off (false); only keep explicit true (or malformed).
     if (radial.clip === false || radial.clip === undefined) delete radial.clip;
     if (radial.reverse === "none" || radial.reverse === undefined) delete radial.reverse;
-    if (Array.isArray(radial.thetaLimits)) {
-      radial.thetaLimits = [...(radial.thetaLimits as number[])] as [number, number];
+    // Shallow-copy valid-shaped limit tuples; leave malformed arrays intact so
+    // schema validation can reject wrong lengths (same as transform axes).
+    if (Array.isArray(radial.thetaLimits) && radial.thetaLimits.length === 2) {
+      radial.thetaLimits = [radial.thetaLimits[0]!, radial.thetaLimits[1]!];
     }
-    if (Array.isArray(radial.rLimits)) {
-      radial.rLimits = [...(radial.rLimits as number[])] as [number, number];
+    if (Array.isArray(radial.rLimits) && radial.rLimits.length === 2) {
+      radial.rLimits = [radial.rLimits[0]!, radial.rLimits[1]!];
     }
-    return radial as CoordSpec;
+    return radial;
   }
   if (record["type"] !== "transform") return { ...record } as CoordSpec;
   const transformed = coord as CoordTransformSpec;

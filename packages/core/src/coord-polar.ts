@@ -71,24 +71,21 @@ export function polarBBox(
   let ymin = Math.min(...ys);
   let ymax = Math.max(...ys);
 
-  // Margins on shortened edges (ggplot polar_bbox)
-  const posTheta = [0, 0.5 * Math.PI, Math.PI, 1.5 * Math.PI];
-  const inSector = posTheta.map((t) => inArc(t, [a0, a1]));
-  // top, right, bottom, left
-  if (!inSector[0]) ymax = Math.min(1, ymax + margin[0]);
-  else ymax = 1;
-  if (!inSector[1]) xmax = Math.min(1, xmax + margin[1]);
-  else xmax = 1;
-  if (!inSector[2]) ymin = Math.max(0, ymin - margin[2]);
-  else ymin = 0;
-  if (!inSector[3]) xmin = Math.max(0, xmin - margin[3]);
-  else xmin = 0;
-
-  // When a cardinal is in the sector, lock that side to the unit edge.
-  if (inSector[0]) ymax = 1;
-  if (inSector[1]) xmax = 1;
-  if (inSector[2]) ymin = 0;
-  if (inSector[3]) xmin = 0;
+  // Margins on shortened edges (ggplot polar_bbox). Cardinals: top, right,
+  // bottom, left. When a cardinal sits inside the arc, lock that side to the
+  // unit edge; otherwise pad the shortened side.
+  const topIn = inArc(0, [a0, a1]);
+  const rightIn = inArc(0.5 * Math.PI, [a0, a1]);
+  const bottomIn = inArc(Math.PI, [a0, a1]);
+  const leftIn = inArc(1.5 * Math.PI, [a0, a1]);
+  if (topIn) ymax = 1;
+  else ymax = Math.min(1, ymax + margin[0]);
+  if (rightIn) xmax = 1;
+  else xmax = Math.min(1, xmax + margin[1]);
+  if (bottomIn) ymin = 0;
+  else ymin = Math.max(0, ymin - margin[2]);
+  if (leftIn) xmin = 0;
+  else xmin = Math.max(0, xmin - margin[3]);
 
   return { x: [xmin, xmax], y: [ymin, ymax] };
 }
