@@ -1,5 +1,17 @@
 # @ggsvelte/svelte
 
+## 0.30.1
+
+### Patch Changes
+
+- 950de58: # Expand shared lineages once on precise-bounds recompute
+
+  Migration: none — internal precise-bounds apply path only; same interval keys and lineageCount.
+
+  Precise-bounds apply now domain-filters candidates before expanding `lineage.keys()`, and expands each lineage id once among matches (smooth/aggregate eval grids no longer re-spread the same bag once per mark). Semantic keys resolve only for in-interval candidates.
+  - @ggsvelte/spec@0.30.1
+  - @ggsvelte/core@0.30.1
+
 ## 0.30.0
 
 ### Minor Changes
