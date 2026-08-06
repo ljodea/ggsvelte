@@ -21,9 +21,6 @@ graphics, inspired by ggplot2.
 
 ![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 3 ms, LayerCake 3.7 ms, SveltePlot 41.6 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
 
-Cold-mount milliseconds vs [SveltePlot](https://svelteplot.dev) and
-[LayerCake](https://layercake.graphics); lower is better.
-
 ## Install
 
 ```sh
