@@ -58,18 +58,18 @@ and Windows.
 
 ## Why ggsvelte?
 
-| Capability                                 | ggsvelte  | SveltePlot           | LayerCake                    |
-| ------------------------------------------ | --------- | -------------------- | ---------------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 138 KB | ✅ 109 KB            | ✅ 41 KB                     |
-| **API stability**                          | ⚠️ v0.30  | ⚠️ v0.14             | ✅ v10                       |
-| **Headless server-side SVG** (no DOM)      | ✅        | ❌ empty shell       | ⚠️ opt-in `ssr` flag         |
-| **Portable JSON spec + schema**            | ✅        | ❌                   | ❌                           |
-| **CLI validator + renderer**               | ✅        | ❌                   | ❌                           |
-| **Agent skill**                            | ✅        | ❌                   | ❌                           |
-| **Automatic temporal detection**           | ✅        | ⚠️ Date objects only | ❌                           |
-| **Built-in interactions**                  | ✅        | ⚠️ tooltip + brush   | ❌                           |
-| **ggplot2 API**                            | ✅        | ❌                   | ❌                           |
-| **Scale, axis & coord control**            | ✅        | ✅                   | ⚠️ hand-configured d3 scales |
+| Capability                                 | ggsvelte  | SveltePlot           | LayerCake            |
+| ------------------------------------------ | --------- | -------------------- | -------------------- |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 138 KB | ✅ 109 KB            | ✅ 41 KB             |
+| **API stability**                          | ⚠️ v0.30  | ⚠️ v0.14             | ✅ v10               |
+| **Headless server-side SVG** (no DOM)      | ✅        | ❌ empty shell       | ⚠️ opt-in `ssr` flag |
+| **Portable JSON spec + schema**            | ✅        | ❌                   | ❌                   |
+| **CLI validator + renderer**               | ✅        | ❌                   | ❌                   |
+| **Agent skill**                            | ✅        | ❌                   | ❌                   |
+| **Automatic temporal detection**           | ✅        | ⚠️ Date objects only | ❌                   |
+| **Built-in interactions**                  | ✅        | ⚠️ tooltip + brush   | ❌                   |
+| **ggplot2 API**                            | ✅        | ❌                   | ❌                   |
+| **Scale, axis & coord control**            | ✅        | ✅                   | ⚠️ d3 scales         |
 
 ## Reference
 
