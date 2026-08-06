@@ -99,7 +99,7 @@
       feature: "Scale, axis & coord control",
       gg: yes,
       sp: yes,
-      lc: { mark: "partial", note: "hand-configured d3" },
+      lc: { mark: "partial", note: "d3 scales" },
     },
   ];
 </script>
