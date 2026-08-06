@@ -24,9 +24,10 @@ see replace-vs-merge below.
 
 Components: `Coord` (escape hatch, `value: CoordSpec | "flip"`), `CoordFlip`,
 `CoordCartesian`, `CoordTransform`, `CoordFixed`, `CoordEqual` (alias of
-`CoordFixed`), `CoordSf`. `<CoordCartesian/>` registers `{"type":"cartesian"}`,
-which `normalize()` drops when bare — use it to clear an earlier coord under
-REPLACE. JSON forms:
+`CoordFixed`), `CoordSf`, `CoordRadial`, `CoordPolar` (ggplot2 `coord_polar`
+alias shell — prefer `CoordRadial` for new work). `<CoordCartesian/>`
+registers `{"type":"cartesian"}`, which `normalize()` drops when bare — use
+it to clear an earlier coord under REPLACE. JSON forms:
 
 ```json fragment
 "coord": {"type": "flip"}
@@ -38,6 +39,15 @@ REPLACE. JSON forms:
   "x": {"transform": "log10", "limits": [1, 1000], "reverse": false, "expand": true},
   "y": {"transform": "sqrt"},
   "clip": true
+}
+```
+
+```json fragment
+"coord": {
+  "type": "radial",
+  "theta": "y",
+  "innerRadius": 0.4,
+  "expand": false
 }
 ```
 
@@ -54,6 +64,20 @@ REPLACE. JSON forms:
   facet scales (`coord-fixed-free-scales` error).
 - `{"type": "sf"}` (`<CoordSf/>`): fixed-aspect coords for already-projected
   map data; no CRS reprojection in v1. Accepts `ratio` like fixed.
+- `{"type": "radial", …}` (`<CoordRadial/>`, helpers `coordRadial` /
+  `coord_radial`): polar coordinates (ggplot2 `coord_radial`). Maps one
+  aesthetic to angle and the other to radius — pie, coxcomb, polar scatter.
+  Options: `theta` (`"x"` default | `"y"` for pie), `start` / `end` (radians
+  from 12 o'clock; default full circle), `innerRadius` (0–1 fraction, donut
+  hole), `expand` (default true; false for pie/coxcomb), `clip` (default
+  off), `reverse` (`"none"` | `"theta"` | `"r"` | `"thetar"`),
+  `thetaLimits` / `rLimits`. Full-circle panels use a square data rectangle.
+  Equivalent skins: JSON ≡ `coordRadial({…})` ≡ `.coordRadial({…})` ≡
+  `<CoordRadial …/>`.
+- `CoordPolar` / `coordPolar` / `coord_polar`: superseded ggplot2
+  `coord_polar` alias. Emits `{ type: "radial", clip: true, … }`;
+  `direction: -1` maps to `reverse: "theta"`. Prefer `<CoordRadial/>` for
+  partial arcs, inner radius, and reverse.
 
 ## Facets
 
