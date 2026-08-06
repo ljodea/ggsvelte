@@ -57,7 +57,21 @@ in every sandbox where an agent authors specs.
 
 ## Guarantees
 
-The skill cannot quietly fall behind the library: CI fails any PR that adds a
-geom, stat, position, theme, or color scheme to `@ggsvelte/spec` without
-documenting it here, and every fenced JSON example in the skill is normalized
-and validated against the current spec.
+The skill cannot quietly fall behind the library. CI enforces three layers:
+
+1. **Content contracts** (`scripts/skill-content.test.ts`,
+   `scripts/skill-package.test.ts`) — inventory completeness for every geom,
+   stat, position, theme, and color scheme; every complete JSON fence
+   normalizes and validates; pack shape and lock-step version.
+2. **Trigger / disclosure contracts** (`scripts/skill-trigger.test.ts`) —
+   frontmatter description quality (the loader's selection signal), balanced
+   positive/negative trigger fixtures under `evals/trigger-cases.json`,
+   relative-link integrity, and progressive disclosure of every `references/`
+   file from `SKILL.md`.
+3. **Held-out NL→spec evals** (`tests/evals/`, `bun run evals`) — model
+   capability on PortableSpec authoring with deterministic graders. These do
+   **not** load this skill today; agent-in-the-loop skill evals (with/without
+   skill A/B, multi-trial trigger accuracy) are tracked as follow-up work.
+
+`evals/trigger-cases.json` is not packed to npm (`files` is only `SKILL.md` +
+`references/`). It is the living seed for future skill-loaded agent evals.

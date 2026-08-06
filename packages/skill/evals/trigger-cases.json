@@ -1,0 +1,92 @@
+[
+  {
+    "id": "explicit-skill-name",
+    "should_trigger": true,
+    "prompt": "Use the ggsvelte skill to build a scatter plot of mass vs flipper length colored by species.",
+    "notes": "Direct skill name invocation must keep working after description rewrites."
+  },
+  {
+    "id": "implicit-chart-svelte",
+    "should_trigger": true,
+    "prompt": "In this Svelte app, make a bar chart of signups by region.",
+    "notes": "Everyday chart request in a Svelte project without naming the package."
+  },
+  {
+    "id": "import-ggsvelte-svelte",
+    "should_trigger": true,
+    "prompt": "I'm importing GeomPoint and GGPlot from @ggsvelte/svelte — help me add a smooth layer and a minimal theme.",
+    "notes": "Import path is an explicit frontmatter trigger signal."
+  },
+  {
+    "id": "portable-spec-json",
+    "should_trigger": true,
+    "prompt": "Emit a ggsvelte PortableSpec JSON for a histogram of latency_ms with 30 bins.",
+    "notes": "Agent/headless authoring path: JSON specs."
+  },
+  {
+    "id": "validate-debug",
+    "should_trigger": true,
+    "prompt": "This ggsvelte plot spec fails validation — fix the aes and re-validate.",
+    "notes": "Debugging/validating charts is in the description trigger set."
+  },
+  {
+    "id": "headless-svg",
+    "should_trigger": true,
+    "prompt": "Render this chart server-side to SVG with ggsvelte in Node.",
+    "notes": "Headless/server-side SVG rendering is a primary agent surface."
+  },
+  {
+    "id": "facet-small-multiples",
+    "should_trigger": true,
+    "prompt": "Create faceted small-multiple line charts of temperature by city.",
+    "notes": "Faceted charts are named in the description."
+  },
+  {
+    "id": "boxplot-density",
+    "should_trigger": true,
+    "prompt": "Plot boxplots of score by group, and overlay a density plot for the overall distribution.",
+    "notes": "Named chart types in the description (boxplot, density)."
+  },
+  {
+    "id": "heatmap-map",
+    "should_trigger": true,
+    "prompt": "Draw a heatmap of counts by hour and day, then a simple map choropleth if the data has regions.",
+    "notes": "Heatmaps and maps are listed trigger terms."
+  },
+  {
+    "id": "negative-matplotlib",
+    "should_trigger": false,
+    "prompt": "Write a Python script that reads a CSV and plots a bar chart with matplotlib.",
+    "notes": "Classic false-positive: chart request in an unrelated stack."
+  },
+  {
+    "id": "negative-recharts",
+    "should_trigger": false,
+    "prompt": "Add a Recharts line chart to this React dashboard for weekly revenue.",
+    "notes": "Adjacent charting library must not select ggsvelte solely because the word chart appears."
+  },
+  {
+    "id": "negative-d3-force",
+    "should_trigger": false,
+    "prompt": "Build a D3 force-directed network graph of package dependencies.",
+    "notes": "Network layout is outside ggsvelte grammar; description must not claim graphs in the network sense only."
+  },
+  {
+    "id": "negative-css-layout",
+    "should_trigger": false,
+    "prompt": "Fix the CSS grid layout so the sidebar stops overlapping the main content.",
+    "notes": "Pure layout work should not load a charting skill."
+  },
+  {
+    "id": "negative-sql",
+    "should_trigger": false,
+    "prompt": "Optimize this SQL query that aggregates daily signups by region.",
+    "notes": "Data aggregation without visualization intent."
+  },
+  {
+    "id": "negative-tailwind-existing-app",
+    "should_trigger": false,
+    "prompt": "Add Tailwind styling to my existing Svelte app header and buttons.",
+    "notes": "Svelte mention alone must not fire the skill (OpenAI eval pattern: adjacent false positive)."
+  }
+]
