@@ -129,8 +129,8 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText(["Reference"]);
   await expect(sidebar.getByRole("heading", { name: "Start" })).toHaveCount(0);
   await expect(sidebar.getByRole("heading", { name: "Core grammar" })).toHaveCount(0);
-  // Overview + consolidated guide/reference chapters (Scales + Labs/Axes/Labels + Themes/Palettes).
-  await expect(sidebar.getByRole("link")).toHaveCount(25);
+  // Overview + consolidated guide/reference chapters (Scales + Coords + Labs/Axes/Labels + Themes/Palettes).
+  await expect(sidebar.getByRole("link")).toHaveCount(26);
   await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expectNoDocumentOverflow(page);
 

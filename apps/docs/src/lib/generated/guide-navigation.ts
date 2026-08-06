@@ -110,12 +110,12 @@ export const GUIDE_NAVIGATION = [
         label: "Palettes",
       },
       {
-        path: "/guide/errors",
-        label: "Errors reference",
-      },
-      {
         path: "/reference/cli",
         label: "CLI reference",
+      },
+      {
+        path: "/guide/errors",
+        label: "Errors reference",
       },
       {
         path: "/guide/advisories",

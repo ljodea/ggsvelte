@@ -11045,7 +11045,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 62,
+      order: 64,
     },
     headings: [
       {
@@ -12137,7 +12137,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 63,
+      order: 65,
     },
     headings: [
       {
@@ -12264,7 +12264,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 64,
+      order: 66,
     },
     headings: [
       {
