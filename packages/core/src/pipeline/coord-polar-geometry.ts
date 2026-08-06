@@ -60,6 +60,8 @@ function rectsToPolarPaths(
   const positions: number[] = [];
   const rowIndex: number[] = [];
   const pathOffsets: number[] = [0];
+  const semanticAnchors: number[] = [];
+  const semanticIndex: number[] = [];
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
   const alphas: number[] = [];
@@ -106,6 +108,9 @@ function rectsToPolarPaths(
     for (let v = 0; v < vertCount; v++) {
       positions.push(ring[v * 2]!, ring[v * 2 + 1]!);
       rowIndex.push(row);
+      // One semantic candidate per sector (munch vertices are presentation-only).
+      semanticAnchors.push(v === 0 ? 1 : 0);
+      semanticIndex.push(i);
     }
     pathOffsets.push(positions.length / 2);
     // fillRole "paper" + null fill is a hollow rect under Cartesian; PathsBatch
@@ -127,6 +132,8 @@ function rectsToPolarPaths(
     panelIndex: batch.panelIndex,
     positions: Float32Array.from(positions),
     rowIndex: Uint32Array.from(rowIndex),
+    semanticAnchors: Uint8Array.from(semanticAnchors),
+    semanticIndex: Uint32Array.from(semanticIndex),
     pathOffsets: Uint32Array.from(pathOffsets),
     strokes,
     fills,
