@@ -311,6 +311,11 @@ function createPanel(
       return axisEditModelForScale(scales[axis]);
     },
     invert(rect) {
+      // Joint polar projectors store the real map on `coord.polar`; axis
+      // invertFraction is identity. Refuse cartesian invert rather than return
+      // wrong domains for brush/zoom/bounds editors (full polar invert is a
+      // follow-up).
+      if (coord?.joint === true) return {};
       const screenX0 = clamp((rect.x0 - panel.x) / panel.width);
       const screenX1 = clamp((rect.x1 - panel.x) / panel.width);
       const screenY0 = clamp(1 - (rect.y1 - panel.y) / panel.height);
@@ -329,6 +334,16 @@ function createPanel(
       };
     },
     project(selection) {
+      // Same joint-polar guard as invert: do not project selections through
+      // identity axis fractions as if the panel were Cartesian.
+      if (coord?.joint === true) {
+        return {
+          x0: panel.x,
+          x1: panel.x + panel.width,
+          y0: panel.y,
+          y1: panel.y + panel.height,
+        };
+      }
       const x = projectedSpan(scales.x, selection.x, coord?.x, xBandValuesByKey);
       const y = projectedSpan(scales.y, selection.y, coord?.y, yBandValuesByKey);
       const horizontal = flipped ? y : x;

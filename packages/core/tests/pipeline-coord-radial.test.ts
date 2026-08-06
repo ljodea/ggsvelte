@@ -161,4 +161,30 @@ describe("coord_radial pipeline", () => {
     );
     expect(polar.scene.panels[0]?.clip).toBe(true);
   });
+
+  it("does not invent cartesian domains from pixel invert under polar", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { pie: "all", cat: "a", n: 1 },
+          { pie: "all", cat: "b", n: 2 },
+        ],
+        aes({ x: "pie", y: "n", fill: "cat" }),
+      )
+        .geomCol({ width: 1, position: "stack" })
+        .coordRadial({ theta: "y", expand: false })
+        .spec(),
+      size,
+    );
+    const panel = model.viewport.panels[0]!;
+    const inverted = panel.invert({
+      x0: panel.bounds.x0 + 10,
+      y0: panel.bounds.y0 + 10,
+      x1: panel.bounds.x1 - 10,
+      y1: panel.bounds.y1 - 10,
+    });
+    // Joint polar refuses cartesian invert rather than lying about domains.
+    expect(inverted.x).toBeUndefined();
+    expect(inverted.y).toBeUndefined();
+  });
 });
