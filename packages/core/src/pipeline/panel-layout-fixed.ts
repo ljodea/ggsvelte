@@ -111,7 +111,12 @@ export function applyFixedAspectLayout(input: {
   const ratio = input.coord.ratio ?? 1;
   const firstScales = input.panelScales[0];
   if (firstScales === undefined) return { placements: [...input.placements], degraded: false };
-  const targetAspect = ratio * (scaleSpaceSpan(firstScales.y) / scaleSpaceSpan(firstScales.x));
+  // Polar full-circle panels are square in pixel space (ggplot2 aspect = 1 for
+  // a full arc). Fixed/sf keep physical data-unit ratio × trained scale spans.
+  const targetAspect =
+    input.coord.type === "radial"
+      ? 1
+      : ratio * (scaleSpaceSpan(firstScales.y) / scaleSpaceSpan(firstScales.x));
   if (!Number.isFinite(targetAspect) || targetAspect <= 0) {
     const cause =
       "Fixed-aspect coordinates require a finite positive physical data-unit ratio after trained scale spans are applied.";

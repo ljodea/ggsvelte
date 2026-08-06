@@ -116,9 +116,19 @@ export function buildGeometryBatches(input: {
       const projector = coordProjectors[p];
       const joint = projector?.joint === true;
       const pathLike = joint || pathLikeGeom(frame);
+      const needsPolarScaleRemap =
+        projector !== undefined &&
+        (projector.joint ||
+          !projector.expand ||
+          projector.thetaLimits !== undefined ||
+          projector.rLimits !== undefined);
       const panelScalesForGeom =
-        projector !== undefined && !projector.expand
-          ? scalesForCoordExpand(panelScales[p]!, false)
+        projector !== undefined && needsPolarScaleRemap
+          ? scalesForCoordExpand(panelScales[p]!, projector.expand, {
+              ...(projector.polarTheta !== undefined && { theta: projector.polarTheta }),
+              ...(projector.thetaLimits !== undefined && { thetaLimits: projector.thetaLimits }),
+              ...(projector.rLimits !== undefined && { rLimits: projector.rLimits }),
+            })
           : panelScales[p]!;
       const built = buildBatch(
         frame,

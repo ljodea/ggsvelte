@@ -12,7 +12,7 @@ import {
 import type { PipelineWarning } from "./types.js";
 
 /** Samples per rect edge under polar (outer/inner arcs need denser sampling). */
-const POLAR_RECT_EDGE_SAMPLES = 24;
+const POLAR_RECT_EDGE_SAMPLES = 16;
 
 /**
  * Convert axis-aligned panel rects into closed polar sector paths and project
@@ -103,10 +103,12 @@ function rectsToPolarPaths(
     }
     pathOffsets.push(positions.length / 2);
     fills.push(batch.fills?.[i] ?? batch.fill);
-    strokes.push(batch.strokes?.[i] ?? (batch.stroke !== undefined ? batch.stroke : null));
+    const stroke = batch.strokes?.[i] ?? (batch.stroke === undefined ? null : batch.stroke);
+    strokes.push(stroke);
     if (hasAlphas) alphas.push(batch.alphas![i] ?? batch.alpha);
   }
 
+  const hasStroke = strokes.some((s) => s !== null) || batch.strokeWidth !== undefined;
   const pathBatch: PathsBatch = {
     kind: "paths",
     layerIndex: batch.layerIndex,
@@ -117,13 +119,12 @@ function rectsToPolarPaths(
     strokes,
     fills,
     closed: true,
-    linewidth: batch.strokeWidth ?? 0,
+    // Preserve author outlines: explicit strokeWidth, else a 1px hairline when a
+    // stroke color is present. No stroke color + no width → unstroked sectors.
+    linewidth: batch.strokeWidth ?? (hasStroke ? 1 : 0),
     alpha: hasAlphas ? 1 : batch.alpha,
     curve: "linear",
   };
   if (hasAlphas) pathBatch.alphas = Float32Array.from(alphas);
-  if (batch.strokeWidths !== undefined) {
-    // Constant width only in v1 sector conversion.
-  }
   return pathBatch;
 }

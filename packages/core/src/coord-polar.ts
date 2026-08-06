@@ -191,16 +191,17 @@ export function polarUnproject(
   const r = Math.hypot(dx, dy);
   const [a0, a1] = projector.arc;
   const [r0, r1] = projector.radius;
-  // Map th into the arc span (unwrap near the branch cut)
-  let thetaFrac = a1 === a0 ? 0.5 : (th - a0) / (a1 - a0);
-  // When arc runs backward, th may need shifting by 2π
-  if (a1 < a0) {
-    let t = th;
-    if (t < Math.min(a0, a1) || t > Math.max(a0, a1)) {
-      // already ok via linear map across decreasing span
-    }
-    thetaFrac = (th - a0) / (a1 - a0);
+  // Unwrap th into the arc span so start offsets and reverse arcs invert.
+  const span = a1 - a0;
+  let rel = th - a0;
+  if (span > 0) {
+    while (rel < 0) rel += 2 * Math.PI;
+    while (rel > span && rel - 2 * Math.PI >= 0) rel -= 2 * Math.PI;
+  } else if (span < 0) {
+    while (rel > 0) rel -= 2 * Math.PI;
+    while (rel < span && rel + 2 * Math.PI <= 0) rel += 2 * Math.PI;
   }
+  const thetaFrac = span === 0 ? 0.5 : rel / span;
   const rFrac = r1 === r0 ? 0.5 : (r - r0) / (r1 - r0);
   if (projector.theta === "x") return [thetaFrac, rFrac];
   return [rFrac, thetaFrac];

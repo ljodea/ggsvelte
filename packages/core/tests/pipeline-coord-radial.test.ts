@@ -102,6 +102,24 @@ describe("coord_radial pipeline", () => {
     expect(panel.width).toBeCloseTo(panel.height, 0);
   });
 
+  it("keeps pie panels square even when theta/r data spans differ", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { pie: "all", cat: "a", n: 1 },
+          { pie: "all", cat: "b", n: 99 },
+        ],
+        aes({ x: "pie", y: "n", fill: "cat" }),
+      )
+        .geomCol({ width: 1, position: "stack" })
+        .coordRadial({ theta: "y", expand: false })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const panel = model.scene.panels[0]!;
+    expect(panel.width).toBeCloseTo(panel.height, 0);
+  });
+
   it("honors clip default off for radial and on for polar alias", () => {
     const radial = runPipeline(
       gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))

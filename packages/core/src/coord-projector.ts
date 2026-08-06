@@ -232,6 +232,10 @@ export interface PanelCoordProjector {
    * the evidence domain so pie/coxcomb fill the full arc.
    */
   readonly expand: boolean;
+  /** Theta aesthetic when polar; used with limits for scale remapping. */
+  readonly polarTheta?: "x" | "y";
+  readonly thetaLimits?: readonly [number, number];
+  readonly rLimits?: readonly [number, number];
 }
 
 export type CoordProjectorInput =
@@ -280,6 +284,15 @@ export function buildPanelCoordProjector(
       polar,
       joint: true,
       expand: coord.expand !== false,
+      polarTheta: coord.theta === "y" ? "y" : "x",
+      ...(coord.thetaLimits !== undefined &&
+        coord.thetaLimits.length === 2 && {
+          thetaLimits: [coord.thetaLimits[0]!, coord.thetaLimits[1]!] as const,
+        }),
+      ...(coord.rLimits !== undefined &&
+        coord.rLimits.length === 2 && {
+          rLimits: [coord.rLimits[0]!, coord.rLimits[1]!] as const,
+        }),
     };
   }
   return {
@@ -292,23 +305,61 @@ export function buildPanelCoordProjector(
 }
 
 /**
- * Continuous scales with expand:false: remapped so evidence domain fills [0, 1].
- * Band scales pass through unchanged.
+ * Continuous scales for polar: expand:false remaps evidence domain to [0, 1];
+ * optional theta/r limits remap the assigned axis domain. Band scales pass
+ * through unless limits are set (limits require continuous).
  */
 export function scalesForCoordExpand(
   scales: { x: PositionScale; y: PositionScale },
   expand: boolean,
+  radial?: {
+    theta?: "x" | "y";
+    thetaLimits?: readonly [number, number];
+    rLimits?: readonly [number, number];
+  },
 ): { x: PositionScale; y: PositionScale } {
-  if (expand) return scales;
-  return {
-    x: unexpandedPositionScale(scales.x),
-    y: unexpandedPositionScale(scales.y),
-  };
+  const thetaAxis = radial?.theta === "y" ? "y" : "x";
+  const rAxis = thetaAxis === "x" ? "y" : "x";
+  let x = scales.x;
+  let y = scales.y;
+  if (!expand) {
+    x = unexpandedPositionScale(x);
+    y = unexpandedPositionScale(y);
+  }
+  if (radial?.thetaLimits !== undefined) {
+    if (thetaAxis === "x") x = limitedPositionScale(x, radial.thetaLimits);
+    else y = limitedPositionScale(y, radial.thetaLimits);
+  }
+  if (radial?.rLimits !== undefined) {
+    if (rAxis === "x") x = limitedPositionScale(x, radial.rLimits);
+    else y = limitedPositionScale(y, radial.rLimits);
+  }
+  return { x, y };
 }
 
 function unexpandedPositionScale(scale: PositionScale): PositionScale {
   if (scale.type === "band") return scale;
-  const [lo, hi] = scale.evidenceTransformedDomain;
+  return remapContinuousDomain(scale, scale.evidenceTransformedDomain);
+}
+
+function limitedPositionScale(
+  scale: PositionScale,
+  limits: readonly [number, number],
+): PositionScale {
+  if (scale.type === "band") return scale;
+  const tx = scaleTransform(scale.transform);
+  if (!tx.valid(limits[0]) || !tx.valid(limits[1])) return scale;
+  const lo = tx.forward(limits[0]);
+  const hi = tx.forward(limits[1]);
+  if (!(Number.isFinite(lo) && Number.isFinite(hi)) || lo === hi) return scale;
+  return remapContinuousDomain(scale, [Math.min(lo, hi), Math.max(lo, hi)]);
+}
+
+function remapContinuousDomain(
+  scale: Extract<PositionScale, { type: "linear" | "time" }>,
+  transformedDomain: readonly [number, number],
+): PositionScale {
+  const [lo, hi] = transformedDomain;
   const span = hi - lo;
   if (!(span > 0) || !Number.isFinite(span)) return scale;
   const tx = scaleTransform(scale.transform);

@@ -91,6 +91,14 @@ describe("polar projector algebra (ggplot2 coord_radial)", () => {
     expect(rf).toBeCloseTo(0.8, 4);
   });
 
+  it("inverts polar projection with a non-zero start offset", () => {
+    const p = fullCircle({ start: Math.PI / 3 });
+    const [px, py] = polarProject(p, 0.4, 0.7, 200, 200);
+    const [tf, rf] = polarUnproject(p, px, py, 200, 200);
+    expect(tf).toBeCloseTo(0.4, 3);
+    expect(rf).toBeCloseTo(0.7, 3);
+  });
+
   it("computes full-circle and partial bounding boxes", () => {
     expect(polarBBox([0, 2 * Math.PI], [0, 0.4])).toEqual({ x: [0, 1], y: [0, 1] });
     const half = polarBBox([0, Math.PI], [0, 0.4]);
