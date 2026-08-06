@@ -292,6 +292,30 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CoordPolarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialReverse": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialTheta": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CoordSfOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2228,6 +2252,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordPolar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordRadial": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordSf": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2241,6 +2273,14 @@
           "lifecycle": "experimental"
         },
         "coord_fixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_polar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_radial": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3982,6 +4022,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CoordProjectorInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CountStatInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4295,6 +4339,26 @@
           "lifecycle": "experimental"
         },
         "PointsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolarBBox": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolarProjector": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolarProjectorConfig": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolarReverse": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolarTheta": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4694,6 +4758,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "buildPolarProjector": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildPrimitiveInteractionMasks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4899,6 +4967,22 @@
           "lifecycle": "experimental"
         },
         "pointShapePathD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "polarBBox": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "polarProject": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "polarProjectPanelPoint": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "polarUnproject": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5135,6 +5219,10 @@
           "lifecycle": "experimental"
         },
         "scaleTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scalesForCoordExpand": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5653,6 +5741,34 @@
         "CoordFlip": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "CoordPolar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordPolarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadial": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialReverse": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordRadialTheta": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "CoordSf": {
           "kind": "value",
@@ -7334,6 +7450,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordPolar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordRadial": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordSf": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -7347,6 +7471,14 @@
           "lifecycle": "experimental"
         },
         "coord_fixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_polar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_radial": {
           "kind": "value",
           "lifecycle": "experimental"
         },

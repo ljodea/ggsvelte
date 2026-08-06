@@ -182,6 +182,7 @@ export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxi
 export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
 export const CoordFixedSpecSchema = SpecModule.Import("CoordFixedSpec");
 export const CoordSfSpecSchema = SpecModule.Import("CoordSfSpec");
+export const CoordRadialSpecSchema = SpecModule.Import("CoordRadialSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
 // ---------------------------------------------------------------------------
@@ -523,7 +524,9 @@ export type CoordTransformSpec = SpecType<"CoordTransformSpec">;
 export type CoordFixedSpec = SpecType<"CoordFixedSpec">;
 /** Simple-features fixed-aspect coordinates (already-projected maps; #809). */
 export type CoordSfSpec = SpecType<"CoordSfSpec">;
-/** Cartesian, flipped, post-stat transformed, fixed-aspect, or SF fixed-aspect. */
+/** Polar/radial coordinates (ggplot2 coord_radial / coord_polar). */
+export type CoordRadialSpec = SpecType<"CoordRadialSpec">;
+/** Cartesian, flipped, post-stat transformed, fixed-aspect, SF, or radial. */
 export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
 export type RenderBackend = SpecType<"RenderBackend">;

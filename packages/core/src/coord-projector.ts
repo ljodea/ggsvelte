@@ -1,5 +1,6 @@
-import type { CoordTransformAxisSpec } from "@ggsvelte/spec";
+import type { CoordRadialSpec, CoordTransformAxisSpec } from "@ggsvelte/spec";
 
+import { buildPolarProjector, type PolarProjector } from "./coord-polar.js";
 import type { PipelineErrorCode } from "./diagnostics-error-catalog.js";
 import { PipelineError } from "./pipeline/types.js";
 import type { PositionScale } from "./scales/train.js";
@@ -219,17 +220,119 @@ export interface PanelCoordProjector {
   readonly x: CoordAxisProjector;
   readonly y: CoordAxisProjector;
   readonly clip: boolean;
+  /** Present when the coordinate system is polar/radial (joint x/y map). */
+  readonly polar?: PolarProjector;
+  /**
+   * When true, geometry must not use early axis-separable scale projection;
+   * all vertices go through the post-batch polar projector.
+   */
+  readonly joint: boolean;
+  /**
+   * When polar expand is false, continuous scales should train geometry against
+   * the evidence domain so pie/coxcomb fill the full arc.
+   */
+  readonly expand: boolean;
 }
+
+export type CoordProjectorInput =
+  | {
+      type: "transform";
+      x?: CoordTransformAxisSpec;
+      y?: CoordTransformAxisSpec;
+      clip?: boolean;
+    }
+  | CoordRadialSpec
+  | undefined;
 
 export function buildPanelCoordProjector(
   scales: { x: PositionScale; y: PositionScale },
-  coord:
-    | { type: "transform"; x?: CoordTransformAxisSpec; y?: CoordTransformAxisSpec; clip?: boolean }
-    | undefined,
+  coord: CoordProjectorInput,
 ): PanelCoordProjector {
+  if (coord?.type === "radial") {
+    const polar = buildPolarProjector({
+      ...(coord.theta !== undefined && { theta: coord.theta }),
+      ...(coord.start !== undefined && { start: coord.start }),
+      ...(coord.end !== undefined && { end: coord.end }),
+      ...(coord.innerRadius !== undefined && { innerRadius: coord.innerRadius }),
+      ...(coord.reverse !== undefined && { reverse: coord.reverse }),
+    });
+    // Identity axis projectors: geometry is built in unprojected panel space,
+    // then polarProjectPanelPoint maps jointly. Mark active so path/segment
+    // projection does not early-return.
+    return {
+      x: {
+        axis: "x",
+        transform: "identity",
+        active: true,
+        coordinateDomain: [0, 1],
+        projectFraction: (f) => f,
+        invertFraction: (f) => f,
+      },
+      y: {
+        axis: "y",
+        transform: "identity",
+        active: true,
+        coordinateDomain: [0, 1],
+        projectFraction: (f) => f,
+        invertFraction: (f) => f,
+      },
+      clip: coord.clip === true,
+      polar,
+      joint: true,
+      expand: coord.expand !== false,
+    };
+  }
   return {
-    x: buildCoordAxisProjector("x", scales.x, coord?.x),
-    y: buildCoordAxisProjector("y", scales.y, coord?.y),
-    clip: coord?.clip !== false,
+    x: buildCoordAxisProjector("x", scales.x, coord?.type === "transform" ? coord.x : undefined),
+    y: buildCoordAxisProjector("y", scales.y, coord?.type === "transform" ? coord.y : undefined),
+    clip: coord?.type === "transform" ? coord.clip !== false : true,
+    joint: false,
+    expand: true,
+  };
+}
+
+/**
+ * Continuous scales with expand:false: remapped so evidence domain fills [0, 1].
+ * Band scales pass through unchanged.
+ */
+export function scalesForCoordExpand(
+  scales: { x: PositionScale; y: PositionScale },
+  expand: boolean,
+): { x: PositionScale; y: PositionScale } {
+  if (expand) return scales;
+  return {
+    x: unexpandedPositionScale(scales.x),
+    y: unexpandedPositionScale(scales.y),
+  };
+}
+
+function unexpandedPositionScale(scale: PositionScale): PositionScale {
+  if (scale.type === "band") return scale;
+  const [lo, hi] = scale.evidenceTransformedDomain;
+  const span = hi - lo;
+  if (!(span > 0) || !Number.isFinite(span)) return scale;
+  const tx = scaleTransform(scale.transform);
+  const reversed =
+    scale.normalizeTransformed(scale.transformedDomain[0]) >
+    scale.normalizeTransformed(scale.transformedDomain[1]);
+  const toFrac = (t: number): number => {
+    const affine = (t - lo) / span;
+    return reversed ? 1 - affine : affine;
+  };
+  return {
+    ...scale,
+    transformedDomain: [lo, hi],
+    domain: [tx.inverse(lo), tx.inverse(hi)],
+    normalize(value: number) {
+      if (!tx.valid(value)) return Number.NaN;
+      return toFrac(tx.forward(value));
+    },
+    normalizeTransformed(value: number) {
+      return toFrac(value);
+    },
+    invert(fraction: number) {
+      const affine = reversed ? 1 - fraction : fraction;
+      return tx.inverse(lo + affine * span);
+    },
   };
 }

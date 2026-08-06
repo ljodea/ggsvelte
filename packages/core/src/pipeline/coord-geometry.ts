@@ -28,27 +28,26 @@ export function projectGeometryBatch(
     projectPathBatch(batch, projector, width, height, warnings, sharedBudget);
     return;
   }
+  // Points/glyphs/rects under axis-separable transforms are early-projected via
+  // panel scales. Under polar, projectPolarGeometryBatches owns them (rects →
+  // sector paths; point/glyph anchors).
   if (batch.kind === "points" || batch.kind === "glyphs" || batch.kind === "rects") return;
   if (batch.kind === "segments") {
+    const joint = projector.joint;
     const renderPositions: number[] = [];
     const renderPathOffsets: number[] = [0];
     const anchorPositions: number[] = [];
     let capped = false;
     for (let i = 0; i < batch.segments.length; i += 4) {
-      const [sourceX1, sourceY1] = unprojectPoint(
-        projector,
-        width,
-        height,
-        batch.segments[i]!,
-        batch.segments[i + 1]!,
-      );
-      const [sourceX2, sourceY2] = unprojectPoint(
-        projector,
-        width,
-        height,
-        batch.segments[i + 2]!,
-        batch.segments[i + 3]!,
-      );
+      // Axis-separable transforms built geometry through projected scales, so
+      // endpoints must be unprojected back to source fractions first. Polar
+      // joint builds in unprojected panel space already.
+      const [sourceX1, sourceY1] = joint
+        ? [batch.segments[i]!, batch.segments[i + 1]!]
+        : unprojectPoint(projector, width, height, batch.segments[i]!, batch.segments[i + 1]!);
+      const [sourceX2, sourceY2] = joint
+        ? [batch.segments[i + 2]!, batch.segments[i + 3]!]
+        : unprojectPoint(projector, width, height, batch.segments[i + 2]!, batch.segments[i + 3]!);
       const [x1, y1] = projectPoint(projector, width, height, sourceX1, sourceY1);
       const [x2, y2] = projectPoint(projector, width, height, sourceX2, sourceY2);
       const [anchorX, anchorY] = projectPoint(

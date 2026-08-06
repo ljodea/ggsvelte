@@ -541,6 +541,10 @@ export { default as CoordFixed } from "./coord/CoordFixed.svelte";
 export { default as CoordSf } from "./coord/CoordSf.svelte";
 /** @lifecycle stable-intent */
 export { default as CoordEqual } from "./coord/CoordFixed.svelte";
+/** @lifecycle experimental */
+export { default as CoordRadial } from "./coord/CoordRadial.svelte";
+/** @lifecycle experimental */
+export { default as CoordPolar } from "./coord/CoordPolar.svelte";
 
 // Facet children (#659 slice 5) — stable-intent: complete <Facet> surface +
 // ggplot2-spelling shells; destination for the deprecated `facet` prop.
@@ -630,10 +634,14 @@ export {
   GGBuilder,
   coord_equal,
   coord_fixed,
+  coord_polar,
+  coord_radial,
   coord_sf,
   coord_transform,
   coordEqual,
   coordFixed,
+  coordPolar,
+  coordRadial,
   coordSf,
   coordTransform,
   isPortable,
@@ -823,8 +831,13 @@ export type {
   ColorScaleSpec,
   CoordSpec,
   CoordFixedOptions,
+  CoordPolarOptions,
+  CoordRadialOptions,
+  CoordRadialReverse,
+  CoordRadialTheta,
   CoordSfOptions,
   CoordFixedSpec,
+  CoordRadialSpec,
   CoordSfSpec,
   CoordTransformAxisOptions,
   CoordTransformAxisSpec,

@@ -56,7 +56,10 @@ export function finalize(run: PipelineRunState): RenderModel {
     trained,
     warnings,
   });
-  const coord = normalized.coord?.type === "transform" ? normalized.coord : undefined;
+  const coord =
+    normalized.coord?.type === "transform" || normalized.coord?.type === "radial"
+      ? normalized.coord
+      : undefined;
   const coordProjectors = trained.panelScales.map((scales) =>
     buildPanelCoordProjector(scales, coord),
   );

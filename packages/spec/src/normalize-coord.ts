@@ -1,9 +1,15 @@
 /**
- * Coordinate-system canonicalization for normalize() (cartesian/flip/transform/fixed).
+ * Coordinate-system canonicalization for normalize()
+ * (cartesian/flip/transform/fixed/sf/radial).
  * Scales: normalize-scales.ts. Layer/aes orchestration: normalize.ts.
  */
 
-import type { CoordSpec, CoordTransformAxisSpec, CoordTransformSpec } from "./schema.js";
+import type {
+  CoordRadialSpec,
+  CoordSpec,
+  CoordTransformAxisSpec,
+  CoordTransformSpec,
+} from "./schema.js";
 
 function normalizeCoordAxis(
   axis: CoordTransformAxisSpec | undefined,
@@ -66,6 +72,23 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
     const fixed = { ...record } as unknown as { type: "fixed" | "sf"; ratio?: unknown };
     if (fixed.ratio === 1 || fixed.ratio === undefined) delete fixed.ratio;
     return fixed as CoordSpec;
+  }
+  if (record["type"] === "radial") {
+    const radial = { ...record } as unknown as CoordRadialSpec & Record<string, unknown>;
+    if (radial.theta === "x" || radial.theta === undefined) delete radial.theta;
+    if (radial.start === 0 || radial.start === undefined) delete radial.start;
+    if (radial.innerRadius === 0 || radial.innerRadius === undefined) delete radial.innerRadius;
+    if (radial.expand === true || radial.expand === undefined) delete radial.expand;
+    // Radial default clip is off (false); only keep explicit true (or malformed).
+    if (radial.clip === false || radial.clip === undefined) delete radial.clip;
+    if (radial.reverse === "none" || radial.reverse === undefined) delete radial.reverse;
+    if (Array.isArray(radial.thetaLimits)) {
+      radial.thetaLimits = [...(radial.thetaLimits as number[])] as [number, number];
+    }
+    if (Array.isArray(radial.rLimits)) {
+      radial.rLimits = [...(radial.rLimits as number[])] as [number, number];
+    }
+    return radial as CoordSpec;
   }
   if (record["type"] !== "transform") return { ...record } as CoordSpec;
   const transformed = coord as CoordTransformSpec;

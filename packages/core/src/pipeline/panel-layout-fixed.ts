@@ -66,7 +66,11 @@ export interface FixedAspectLayoutResult {
  * Chart chrome is therefore authoritative; this pass can only add paper gutters.
  */
 /** Fixed-aspect coord forms that share the same layout pass (`fixed` + `sf`). */
-export type FixedAspectCoordSpec = CoordFixedSpec | CoordSfSpec;
+/** Fixed-aspect layout inputs: fixed, sf, or radial (square full-circle panel). */
+export type FixedAspectCoordSpec =
+  | CoordFixedSpec
+  | CoordSfSpec
+  | { type: "radial"; ratio?: number };
 
 export function applyFixedAspectLayout(input: {
   placements: readonly PanelPlacement[];
@@ -78,9 +82,14 @@ export function applyFixedAspectLayout(input: {
   scalesConfig: Scales;
   warnings: PipelineWarning[];
 }): FixedAspectLayoutResult {
-  // Both coord_fixed and coord_sf route through this pass; diagnostics must name
-  // the coordinate the user actually wrote.
-  const name = input.coord.type === "sf" ? "coord_sf" : "coord_fixed";
+  // Fixed-aspect family (fixed / sf / radial square) share this pass; diagnostics
+  // must name the coordinate the user actually wrote.
+  const name =
+    input.coord.type === "sf"
+      ? "coord_sf"
+      : input.coord.type === "radial"
+        ? "coord_radial"
+        : "coord_fixed";
   if (input.freeX || input.freeY) {
     const cause =
       "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";

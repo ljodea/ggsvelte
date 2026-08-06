@@ -119,6 +119,10 @@ export function finalizePanelLayoutPass(input: {
       ...((normalized.coord?.type === "fixed" || normalized.coord?.type === "sf") && {
         coordFixed: normalized.coord,
       }),
+      // Full-circle polar uses a square data rectangle (ggplot2 aspect = 1).
+      ...(normalized.coord?.type === "radial" && {
+        coordFixed: { type: "radial" as const, ratio: 1 },
+      }),
       nrow,
       ncol,
       facetPanels,
