@@ -88,8 +88,10 @@ function rectsToPolarPaths(
       const [x0, y0] = corners[e]!;
       const [x1, y1] = corners[(e + 1) % 4]!;
       const samples = POLAR_RECT_EDGE_SAMPLES;
+      // Emit each edge's start corner (t=0) and stop short of the next (t < 1).
+      // The next edge supplies that corner — do NOT skip s===0 on later edges
+      // (that chamfers corners and leaves gaps between pie slices).
       for (let s = 0; s < samples; s++) {
-        if (e > 0 && s === 0) continue; // shared corner with previous edge
         const t = s / samples;
         const px = x0 + (x1 - x0) * t;
         const py = y0 + (y1 - y0) * t;
