@@ -22,9 +22,7 @@ graphics, inspired by ggplot2.
 ![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 3 ms, LayerCake 3.7 ms, SveltePlot 41.6 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
 
 Cold-mount milliseconds vs [SveltePlot](https://svelteplot.dev) and
-[LayerCake](https://layercake.graphics); lower is better. Harness and full
-matrix (d3, uPlot, Chart.js, ECharts):
-[`benchmarks/competitive`](benchmarks/competitive).
+[LayerCake](https://layercake.graphics); lower is better.
 
 ## Install
 
@@ -60,18 +58,18 @@ and Windows.
 
 ## Why ggsvelte?
 
-| Capability                                                 | ggsvelte  | SveltePlot           | LayerCake                    |
-| ---------------------------------------------------------- | --------- | -------------------- | ---------------------------- |
-| **Bundle size** (min+gzip, 1k scatter app)                 | ⚠️ 138 KB | ✅ 109 KB            | ✅ 41 KB                     |
-| **API stability** (pre-1.0 can break)                      | ⚠️ v0.30  | ⚠️ v0.14             | ✅ v10                       |
-| **Headless server-side SVG** (no DOM)                      | ✅        | ❌ empty shell       | ⚠️ opt-in `ssr` flag         |
-| **Portable JSON spec + schema**                            | ✅        | ❌                   | ❌                           |
-| **CLI validator + renderer**                               | ✅        | ❌                   | ❌                           |
-| **Agent skill** (SKILL.md, llms.txt)                       | ✅        | ❌                   | ❌                           |
-| **Automatic temporal detection**                           | ✅        | ⚠️ Date objects only | ❌                           |
-| **Built-in interactions** (tooltip, select, zoom, linking) | ✅        | ⚠️ tooltip + brush   | ❌                           |
-| **ggplot2 API**                                            | ✅        | ❌                   | ❌                           |
-| **Scale, axis & coord control**                            | ✅        | ✅                   | ⚠️ hand-configured d3 scales |
+| Capability                                 | ggsvelte  | SveltePlot           | LayerCake                    |
+| ------------------------------------------ | --------- | -------------------- | ---------------------------- |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 138 KB | ✅ 109 KB            | ✅ 41 KB                     |
+| **API stability**                          | ⚠️ v0.30  | ⚠️ v0.14             | ✅ v10                       |
+| **Headless server-side SVG** (no DOM)      | ✅        | ❌ empty shell       | ⚠️ opt-in `ssr` flag         |
+| **Portable JSON spec + schema**            | ✅        | ❌                   | ❌                           |
+| **CLI validator + renderer**               | ✅        | ❌                   | ❌                           |
+| **Agent skill**                            | ✅        | ❌                   | ❌                           |
+| **Automatic temporal detection**           | ✅        | ⚠️ Date objects only | ❌                           |
+| **Built-in interactions**                  | ✅        | ⚠️ tooltip + brush   | ❌                           |
+| **ggplot2 API**                            | ✅        | ❌                   | ❌                           |
+| **Scale, axis & coord control**            | ✅        | ✅                   | ⚠️ hand-configured d3 scales |
 
 ## Reference
 
