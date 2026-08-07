@@ -288,7 +288,7 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
     }
     const fromCandidate = candidateValue(field.channel);
     const value =
-      fromCandidate !== undefined ? fromCandidate : lineageFieldValue(field.channel, field.field);
+      fromCandidate === undefined ? lineageFieldValue(field.channel, field.field) : fromCandidate;
     return { ...field, value };
   });
   return Object.freeze({

@@ -305,9 +305,9 @@ describe("inspection snapshot resolve", () => {
       { width: 400, height: 300 },
     );
     // Berks bar aggregates two rows; fill is still the series identity.
-    const berks = [...Array(model.candidates.size).keys()]
-      .map((id) => model.candidates.candidate(id)!)
-      .find((c) => c.yValue === 2)!;
+    const berks = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id)!,
+    ).find((c) => c.yValue === 2)!;
     expect(berks.rowIndex).toBeNull();
     expect(model.lineage.count(berks.lineage)).toBe(2);
     const inspection = resolveInspection({
@@ -393,9 +393,9 @@ describe("inspection snapshot resolve", () => {
       },
       { width: 400, height: 300 },
     );
-    const multi = [...Array(model.candidates.size).keys()]
-      .map((id) => model.candidates.candidate(id)!)
-      .find((c) => model.lineage.count(c.lineage) > 1);
+    const multi = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id)!,
+    ).find((c) => model.lineage.count(c.lineage) > 1);
     expect(multi).toBeDefined();
     expect(multi!.rowIndex).toBeNull();
     const inspection = resolveInspection({
