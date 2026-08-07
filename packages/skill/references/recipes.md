@@ -86,8 +86,7 @@ The `stat="summary"` override needs one call at app startup:
 
 ## Big scatter on canvas
 
-`"render": "canvas"` forces the canvas path; layers over 2000 marks switch on their own. Plot-level `"a11y": "force-svg"` overrides for assistive tech.
-<!-- adapted from examples/point/canvas-scatter/ -->
+`"render": "canvas"` forces the canvas path; layers over `CANVAS_AUTO_THRESHOLD` (2000) marks switch on their own. Plot-level `"a11y": "force-svg"` overrides for assistive tech.
 
 ```json complete
 {

@@ -87,7 +87,7 @@ describe("progressive Docs journey", () => {
 
 const PRODUCTION_EVIDENCE = [
   "/guide/errors#quickstart-troubleshooting",
-  "/examples/point/canvas-scatter",
+  "/examples/point/scatter-color",
   "/reference/cli",
   "support-matrix.json",
 ] as const;

@@ -49,12 +49,12 @@ describe("decideChangesetComment", () => {
     expect(decision.touched).toEqual([]);
   });
 
-  it("reports unwarranted for examples-only changesets (canvas-scatter VR budget)", () => {
+  it("reports unwarranted for examples-only changesets (example trim)", () => {
     const decision = decideChangesetComment(
       [
-        ".changeset/926-canvas-scatter-vr-budget.md",
-        "examples/point/canvas-scatter/Example.svelte",
-        "examples/point/canvas-scatter/data.ts",
+        ".changeset/example-trim.md",
+        "examples/point/scatter-color/Example.svelte",
+        "examples/point/scatter-color/data.ts",
         "examples/manifest.ts",
       ],
       PACKAGES,
