@@ -175,21 +175,18 @@ export type DefaultTooltipRow = Readonly<{
   valueChannel: string;
 }>;
 
+/**
+ * Categorical series identity only. Continuous color/fill (numbers, dates)
+ * must keep traditional field-label rows so the tooltip does not print
+ * "12345: 41" with no titles (Devin review on #1527).
+ */
 function seriesIdentityField(fields: readonly TooltipField[]): TooltipField | null {
   for (const channel of SERIES_IDENTITY_CHANNELS) {
     for (const field of fields) {
       if (field.channel !== channel) continue;
-      // Prefer a field that actually has a series label; null/empty is noise.
-      if (field.value === null) continue;
-      if (typeof field.value === "string" && field.value.trim() === "") continue;
+      if (typeof field.value !== "string") continue;
+      if (field.value.trim() === "") continue;
       return field;
-    }
-  }
-  // Fall back to the first series channel even when blank so callers can
-  // still choose the traditional multi-row layout when identity is missing.
-  for (const channel of SERIES_IDENTITY_CHANNELS) {
-    for (const field of fields) {
-      if (field.channel === channel) return field;
     }
   }
   return null;
@@ -226,12 +223,7 @@ export function defaultTooltipRows(
       }
     }
     const seriesField = seriesIdentityField(body);
-    if (
-      valueField !== null &&
-      seriesField !== null &&
-      seriesField.value !== null &&
-      !(typeof seriesField.value === "string" && seriesField.value.trim() === "")
-    ) {
+    if (valueField !== null && seriesField !== null) {
       // Series name as the row label; measure as the reading. Drop weight /
       // size / echo columns that only restate what the mark already encodes.
       return [
@@ -255,22 +247,27 @@ export function defaultTooltipRows(
 
 /**
  * Stable token for one member's default-tooltip body.
- * Uses field *names* (dt text) + formatted values (dd text), not channel —
- * channels are not shown and must not split visually identical rows.
+ *
+ * Hashes the rows that will actually paint (`defaultTooltipRows`), not the
+ * full field map — otherwise series-centric axis-group layout can drop
+ * label/weight/size while two layers stay distinct and the same line prints
+ * twice (Devin review on #1527).
  */
 export function tooltipDisplayPayloadToken(
   fields: readonly TooltipField[],
   axisFormatters: TooltipAxisFormatters | null = null,
+  mode: "exact" | "xy" | "x" | "y" = "exact",
 ): string {
-  // Length-prefix each segment so field names / values cannot forge delimiters.
+  // Length-prefix each segment so labels / values cannot forge delimiters.
   const parts: string[] = [];
-  for (const field of fields) {
-    const name = field.field;
-    const display = formatTooltipCell(field.value, {
-      channel: field.channel,
+  for (const row of defaultTooltipRows(fields, mode)) {
+    const display = formatTooltipCell(row.value, {
+      channel: row.valueChannel,
       axisFormatters,
     });
-    parts.push(`${name.length}:${name}|${display.length}:${display}`);
+    parts.push(
+      `${row.key.length}:${row.key}|${row.label.length}:${row.label}|${display.length}:${display}`,
+    );
   }
   return parts.join("\n");
 }
@@ -356,6 +353,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
   members: readonly PlotDatum<Row, Key>[],
   focus: PlotDatum<Row, Key>,
   axisFormatters: TooltipAxisFormatters | null = null,
+  mode: "exact" | "xy" | "x" | "y" = "exact",
 ): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
   if (members.length === 0) return [focus];
 
@@ -370,7 +368,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
 
   for (const member of members) {
     if (member === focus) focusInMembers = true;
-    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member));
+    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member), mode);
     const existing = chosen.get(token);
     if (existing === undefined) {
       chosen.set(token, member);
@@ -381,7 +379,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
     if (member === focus) chosen.set(token, member);
   }
 
-  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus));
+  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus), mode);
   if (chosen.has(focusToken)) {
     // Same display as a retained member — always surface focus for styling.
     chosen.set(focusToken, focus);

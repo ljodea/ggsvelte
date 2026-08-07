@@ -131,6 +131,7 @@
       inspection.members,
       inspection.focus,
       axisFormatters,
+      inspection.mode,
     ),
   );
 

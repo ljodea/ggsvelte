@@ -282,6 +282,20 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
       },
     ]);
   });
+
+  it("keeps traditional rows when color/fill is continuous (number or date)", () => {
+    // aes(x=date, y=price, color=volume) must not collapse to "12345: 41".
+    const continuous = [
+      field("x", "date", "2020-01-01"),
+      field("y", "price", 41),
+      field("color", "volume", 12345),
+    ];
+    const rows = defaultTooltipRows(continuous, "x", {
+      labs: { x: "Date", y: "Price", color: "Volume" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Price", "Volume"]);
+    expect(rows.map((r) => r.value)).toEqual([41, 12345]);
+  });
 });
 
 describe("tooltipDisplayPayloadToken", () => {
@@ -344,7 +358,7 @@ describe("collapseIdenticalDisplayMembers", () => {
       key: "b1",
       fields: [field("x", "x", 1), field("y", "y", 7), field("color", "series", "b")],
     });
-    const collapsed = collapseIdenticalDisplayMembers([a, b], a);
+    const collapsed = collapseIdenticalDisplayMembers([a, b], a, null, "x");
     expect(collapsed).toHaveLength(2);
     expect(collapsed).toEqual([a, b]);
   });
@@ -360,9 +374,37 @@ describe("collapseIdenticalDisplayMembers", () => {
       key: "one",
       fields: [field("x", "x", 1), field("y", "y", 2), field("fill", "fillGroup", "X")],
     });
-    const collapsed = collapseIdenticalDisplayMembers([point, col], point);
+    // Exact/xy still surfaces both when series channels differ.
+    const collapsed = collapseIdenticalDisplayMembers([point, col], point, null, "exact");
     expect(collapsed).toHaveLength(2);
     expect(collapsed.map((m) => m.layerIndex)).toEqual([0, 1]);
+  });
+
+  it("collapses col+text that only differ in dropped label fields under axis mode", () => {
+    // Series-centric body is just series → measure; an extra label channel
+    // must not keep a duplicate display row (Devin review on #1527).
+    const col = member({
+      layerIndex: 0,
+      key: "one",
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+      ],
+    });
+    const text = member({
+      layerIndex: 1,
+      key: "one",
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+        field("label", "label", "1022.8"),
+      ],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([col, text], col, null, "x");
+    expect(collapsed).toHaveLength(1);
+    expect(collapsed[0]).toBe(col);
   });
 
   it("preserves first-seen order of distinct display payloads", () => {
