@@ -90,7 +90,7 @@ export function layoutDomain(
  * Year data labels as years even when a cursor sits between year ticks;
  * day data still gets full calendar dates.
  */
-export function defaultTemporalAxisPattern(
+function defaultTemporalAxisPattern(
   kind: TemporalScaleKind,
   precision: TemporalPrecision | null | undefined,
   options?: { lean?: boolean },
