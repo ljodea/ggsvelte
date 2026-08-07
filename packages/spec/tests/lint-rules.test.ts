@@ -318,6 +318,150 @@ describe("transform-domain-data", () => {
   });
 });
 
+describe("fractional-calendar-years", () => {
+  /** Nightingale-style year + month/12 (Apr 1854 … Mar 1856). */
+  const nightingaleMonths = (): number[] => {
+    const out: number[] = [];
+    // Apr 1854 = month index 3 → 1854 + 3/12
+    for (let i = 0; i < 24; i++) {
+      const monthIndex = 3 + i; // 0-based from Jan 1854
+      const year = 1854 + Math.floor(monthIndex / 12);
+      const m = monthIndex % 12;
+      out.push(year + m / 12);
+    }
+    return out;
+  };
+
+  const areaSpec = (x: number[], scales?: Record<string, unknown>) => ({
+    data: {
+      columns: {
+        x,
+        y: x.map((_, i) => (i % 3) + 1),
+        g: x.map((_, i) => ["Disease", "Wounds", "Other"][i % 3]!),
+      },
+    },
+    aes: { x: { field: "x" }, y: { field: "y" }, fill: { field: "g" } },
+    layers: [{ geom: "area" }],
+    ...(scales !== undefined && { scales }),
+  });
+
+  it("fires on year+month/12 linear coordinates (the Nightingale pitfall)", () => {
+    const advisories = lintSpec(areaSpec(nightingaleMonths()));
+    expect(codesOf(advisories)).toContain("fractional-calendar-years");
+    const hit = advisories.find((a) => a.code === "fractional-calendar-years")!;
+    expect(hit.path).toBe("/aes/x");
+    expect(hit.message).toMatch(/month/i);
+    expect(hit.message).toMatch(/185\d/);
+    expect(hit.suggestion?.example).toEqual({
+      scales: { x: { type: "time", labels: "%b %Y" } },
+    });
+  });
+
+  it("fires when an explicit linear scale is present (not only default)", () => {
+    const advisories = lintSpec(
+      areaSpec(nightingaleMonths(), { x: { type: "linear", nice: false } }),
+    );
+    expect(codesOf(advisories)).toContain("fractional-calendar-years");
+  });
+
+  it("silent for integer annual years (legitimate linear year series)", () => {
+    const years = Array.from({ length: 20 }, (_, i) => 1855 + i);
+    expect(lintSpec(areaSpec(years)).filter((a) => a.code === "fractional-calendar-years")).toEqual(
+      [],
+    );
+  });
+
+  it("silent for ordinary quantitative ranges (not year-like)", () => {
+    expect(
+      lintSpec(areaSpec([0.25, 0.5, 0.75, 1, 1.25, 1.5])).filter(
+        (a) => a.code === "fractional-calendar-years",
+      ),
+    ).toEqual([]);
+    expect(
+      lintSpec(areaSpec([10.1, 10.2, 10.3, 10.4, 11.1, 11.2])).filter(
+        (a) => a.code === "fractional-calendar-years",
+      ),
+    ).toEqual([]);
+  });
+
+  it("silent when the axis is already a time or band scale", () => {
+    // Fractional numbers on a time scale are a separate validation problem;
+    // this lint targets the silent linear path only.
+    expect(
+      lintSpec(areaSpec(nightingaleMonths(), { x: { type: "time" } })).filter(
+        (a) => a.code === "fractional-calendar-years",
+      ),
+    ).toEqual([]);
+    expect(
+      lintSpec(areaSpec(nightingaleMonths(), { x: { type: "band" } })).filter(
+        (a) => a.code === "fractional-calendar-years",
+      ),
+    ).toEqual([]);
+  });
+
+  it("silent without inline values (profile-only evidence)", () => {
+    const advisories = lintSpec(
+      {
+        aes: { x: { field: "year" }, y: { field: "rate" } },
+        layers: [{ geom: "area" }],
+      },
+      {
+        profile: {
+          fields: [
+            { name: "year", type: "quantitative" },
+            { name: "rate", type: "quantitative" },
+          ],
+        },
+      },
+    );
+    expect(advisories.filter((a) => a.code === "fractional-calendar-years")).toEqual([]);
+  });
+
+  it("silent for day-of-year style fractions that miss the month grid", () => {
+    // Continuous within-year fractions not snapped to k/12 (e.g. day/365).
+    const days = Array.from({ length: 24 }, (_, i) => 1855 + (i * 15) / 365);
+    expect(lintSpec(areaSpec(days)).filter((a) => a.code === "fractional-calendar-years")).toEqual(
+      [],
+    );
+  });
+
+  it("silent for ordinary 1000–9999 measures quantized to quarters/halves", () => {
+    // Devin FP: .25/.5/.75 are exactly 3/12, 6/12, 9/12 — not enough months.
+    const prices = [1000.5, 2500.25, 3000.75, 4000.5, 5000.25, 6000.5];
+    expect(
+      lintSpec(areaSpec(prices)).filter((a) => a.code === "fractional-calendar-years"),
+    ).toEqual([]);
+  });
+
+  it("silent when only a few year-like values sit inside a non-year column", () => {
+    const mixed = [...Array.from({ length: 40 }, (_, i) => i + 0.5), 1854.25, 1854.333, 1854.5];
+    expect(lintSpec(areaSpec(mixed)).filter((a) => a.code === "fractional-calendar-years")).toEqual(
+      [],
+    );
+  });
+
+  it("silent for fractional years mapped on y (rule is x-only)", () => {
+    const months = nightingaleMonths();
+    const advisories = lintSpec({
+      data: { columns: { x: months.map((_, i) => i), y: months } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "line" }],
+    }).filter((a) => a.code === "fractional-calendar-years");
+    expect(advisories).toEqual([]);
+  });
+
+  it("emits one advisory when multiple layers share the field", () => {
+    const x = nightingaleMonths();
+    const advisories = lintSpec({
+      data: { columns: { x, y: x.map(() => 1) } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "area" }, { geom: "line" }],
+    }).filter((a) => a.code === "fractional-calendar-years");
+    expect(advisories).toHaveLength(1);
+    expect(advisories[0]!.path).toBe("/aes/x");
+  });
+});
+
 describe("LINT_CATALOG coverage", () => {
   it("every cataloged advisory code fired in this suite", () => {
     expect([...firedCodes].toSorted()).toEqual(Object.keys(LINT_CATALOG).toSorted());

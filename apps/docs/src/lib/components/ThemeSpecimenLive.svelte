@@ -17,6 +17,7 @@
     Inspect,
     Labs,
     Scale,
+    ScaleXDate,
     scaleXLog10,
     Theme,
   } from "@ggsvelte/svelte";
@@ -126,15 +127,13 @@
       <GuideLegend channel="fill" focus />
     {/if}
     <Theme {name} {...themeRoles} />
-    <Scale
-      value={{
-        x: { nice: false },
-        fill: colorScale,
-      }}
-    />
+    <!-- Month observations as ISO dates; ScaleXDate keeps axis/tooltip as calendar
+         units (e.g. Dec 1855), never linear fractional years (1855.9). -->
+    <ScaleXDate labels="%b %Y" />
+    <Scale value={{ fill: colorScale }} />
     <Labs
       title="Crimean deaths by cause, 1854–56"
-      x="Year"
+      x="Month"
       y="Deaths per 1,000 per year"
       fill="Cause"
     />

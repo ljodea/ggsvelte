@@ -24,7 +24,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-dark",
     filename: "theme-dark.svg",
     path: "/theme-shells/theme-dark.svg",
-    sha256: "096c37e5750caa7fef8931417c45b8601d79a87e3a9869cdafa121c5c2a0e1b0",
+    sha256: "01146992f3b3417fbec8a6780bffbc919b58dbd4574cce8733c0ffcc754a0045",
   },
   {
     id: "theme-minimal",
@@ -72,7 +72,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-fivethirtyeight",
     filename: "theme-fivethirtyeight.svg",
     path: "/theme-shells/theme-fivethirtyeight.svg",
-    sha256: "46254ad9ab798e1eacb78b3b17a92d959c0b6e97e4380c1dc7d4363221e4e839",
+    sha256: "c1724c42f42866c3b6c7a1eb8de4c378103c5deae9ba7236370af734ba1d4327",
   },
   {
     id: "theme-economist",
@@ -120,7 +120,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarized",
     filename: "theme-solarized.svg",
     path: "/theme-shells/theme-solarized.svg",
-    sha256: "00b8cc226dabe475282e5e7fcc0fda8b808f96c877570dd32931ed3320cd94d8",
+    sha256: "ef75bf5494cc613a5a29ba2f0f33a2fbd30c411b1d4ea296990ea71e2f91856d",
   },
   {
     id: "theme-solarizeddark",
@@ -144,7 +144,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarized_2dark",
     filename: "theme-solarized_2dark.svg",
     path: "/theme-shells/theme-solarized_2dark.svg",
-    sha256: "35e4921ae22822bb3914f78e868d6a581d6ea787a0c21c87bb6f21596038fab3",
+    sha256: "24146f5f359e4ae6a05d0adb91a782036b19bdd615ce431fcfb6cc00b9aed798",
   },
   {
     id: "theme-wsj",
@@ -162,7 +162,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-hcdark",
     filename: "theme-hcdark.svg",
     path: "/theme-shells/theme-hcdark.svg",
-    sha256: "164b0577db903569cfafe966f8de62f3f94235d8ed00ba0e15efdec0d36199eb",
+    sha256: "a593d7ea31ebd4a6c24350697ad5e08cba45e213087f96905021e63aacb4d6eb",
   },
   {
     id: "theme-pander",

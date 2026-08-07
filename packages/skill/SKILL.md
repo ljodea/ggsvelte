@@ -243,8 +243,9 @@ checks against a `DataProfile` —
 `validate(spec, { lint: true })` additionally returns advisories for
 valid-but-questionable specs (line over unordered categories, >10 discrete
 colors, stacked negative areas, discrete×discrete scatter, transform-domain
-mixed-sign data); `lintSpec(spec)` is the standalone equivalent. Advisories
-never block; fix them when they match intent. `normalize(input)` canonicalizes
+mixed-sign data, fractional calendar years on a linear scale); `lintSpec(spec)`
+is the standalone equivalent. Advisories never block; fix them when they match
+intent. `normalize(input)` canonicalizes
 authoring sugar into a `PortableSpec`; `isPortable`/`toPortable` check and
 strip runtime-only fields. CLIs: `ggsvelte-render spec.json > out.svg`
 (from `@ggsvelte/cli`; JSON-line diagnostics on stderr — exit 3 means
