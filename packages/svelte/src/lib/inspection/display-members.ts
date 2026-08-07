@@ -163,7 +163,8 @@ export type DefaultTooltipRow = Readonly<{
   key: string;
   label: string;
   value: CellValue;
-  valueChannel?: string;
+  /** Channel used for axis-aware value formatting (`x`/`y` or other). */
+  valueChannel: string;
 }>;
 
 function seriesIdentityField(fields: readonly TooltipField[]): TooltipField | null {
