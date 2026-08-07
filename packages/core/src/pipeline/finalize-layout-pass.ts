@@ -104,6 +104,17 @@ export function finalizePanelLayoutPass(input: {
     return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };
 
+  /** Shared column precision for axisFormatters defaults; mixed precisions → null. */
+  const temporalPrecision = (axis: "x" | "y") => {
+    const precisions = prepared.scaleDecisions
+      .filter((decision) => decision.aesthetic === axis && decision.status === "temporal")
+      .map((decision) => decision.precision)
+      .filter((value): value is NonNullable<typeof value> => value !== null);
+    if (precisions.length === 0) return null;
+    const first = precisions[0]!;
+    return precisions.every((value) => value === first) ? first : null;
+  };
+
   const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides, theme);
   const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides, theme);
   const labs = { ...normalized.labs };
@@ -158,6 +169,8 @@ export function finalizePanelLayoutPass(input: {
       yScale: yTraining.scale,
       xTemporalKind: temporalKind("x"),
       yTemporalKind: temporalKind("y"),
+      xTemporalPrecision: temporalPrecision("x"),
+      yTemporalPrecision: temporalPrecision("y"),
       legendInputs,
       legendOrder: normalized.legend?.order ?? "stable-domain",
       theme,

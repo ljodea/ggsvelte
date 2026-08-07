@@ -285,7 +285,10 @@ describe("temporal pipeline: annotations and preflight", () => {
       portableOverride: { type: "time", temporalKind: "date", parse: "year" },
     });
     expect(model.row(0)).toEqual(yearRows[0]);
-    expect(model.axisFormatters.x("1835")).toBe("1835-01-01");
+    // Year-unit data: empty-space pin / crosshair share axisFormatters with the
+    // tooltip header. Labels must use the channel unit, not a fixed day stamp.
+    expect(model.axisFormatters.x("1835")).toBe("1835");
+    expect(model.axisFormatters.x(Date.UTC(1900, 0, 1))).toBe("1900");
     expect(Object.isFrozen(model.guidePlans)).toBe(true);
   });
 });
