@@ -29,6 +29,9 @@
 #      commit is still missing from npm — no silent skips.
 #   6. changesets/action opens/updates the "Version Packages" PR when
 #      .changeset/*.md files are present (version-only — no publish script).
+#      Custom `version: bun run version` runs `changeset version` then
+#      sync-comparison-versions so README + docs homepage API-stability
+#      cells land at the same lockstep version as package.json.
 #      The action leaves the workspace on changeset-release/main; that is fine
 #      because publish/assert already finished against the main tip.
 #
@@ -177,7 +180,15 @@ jobs:
       # Version PR only — never pass `publish` to changesets/action. Publish is
       # a separate step so leftover changesets cannot suppress shipping
       # already-bumped versions (the concurrent-merge race).
+      #
+      # `version: bun run version` replaces the default `changeset version`.
+      # Root package.json's version script runs changeset version, then
+      # sync-comparison-versions so the Version Packages PR also rewrites the
+      # README + docs homepage API-stability cells to the just-bumped lockstep
+      # version (otherwise those tables lag every release).
       - name: changesets — open/update Version Packages PR
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        with:
+          version: bun run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

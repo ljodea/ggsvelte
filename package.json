@@ -11,7 +11,7 @@
   ],
   "type": "module",
   "scripts": {
-    "check": "tsc -b packages/spec packages/core packages/cli && bun run check:type-contracts && bun run check:scripts-ci-routing && bun run check:scripts && bun run lifecycle:check",
+    "check": "tsc -b packages/spec packages/core packages/cli && bun run check:type-contracts && bun run check:scripts-ci-routing && bun run check:scripts && bun run lifecycle:check && bun run comparison:versions:check",
     "check:scripts-ci-routing": "bun node_modules/.bin/tsc -p scripts/ci-routing --noEmit",
     "check:scripts": "bun node_modules/.bin/tsc -p scripts --noEmit",
     "check:type-contracts": "tsc -p packages/spec/type-tests/tsconfig.json",
@@ -48,6 +48,8 @@
     "manifest:check": "bun scripts/gen-manifest.ts --check",
     "lifecycle:gen": "bun scripts/gen-lifecycle.ts",
     "lifecycle:check": "bun scripts/gen-lifecycle.ts --check",
+    "comparison:versions:sync": "bun scripts/sync-comparison-versions.ts",
+    "comparison:versions:check": "bun scripts/sync-comparison-versions.ts --check",
     "scale:children:gen": "bun scripts/gen-scale-children.ts",
     "scale:children:check": "bun scripts/gen-scale-children.ts --check",
     "builder:scales:gen": "bun scripts/gen-builder-scales.ts",
@@ -87,7 +89,8 @@
     "render:fresh": "bun scripts/render-fresh.ts",
     "render:theme-evidence": "bun scripts/render-theme-evidence.ts && Rscript scripts/render-theme-references.R",
     "validator:gen": "bun scripts/gen-plot-validator.ts",
-    "validator:check": "bun scripts/gen-plot-validator.ts --check"
+    "validator:check": "bun scripts/gen-plot-validator.ts --check",
+    "version": "changeset version && bun scripts/sync-comparison-versions.ts"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
