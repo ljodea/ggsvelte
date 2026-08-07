@@ -128,12 +128,12 @@
     },
     "errorbar/mean-se": {
       "filename": "errorbar-mean-se-light.png",
-      "sourceSha256": "fc7e2c9d0c31d7094d3889040b1d46a9493d780e8350b376a85a83a6e4608f45",
+      "sourceSha256": "66226eae3a85dd6e98d5375c8344013f8206958c7120962cf3b7ef1eb63f9db4",
       "pngSha256": "dc0de79b6f2f3269ebf5632b580708609faf09b470fad83a7c089aec00ac2a42"
     },
     "errorbar/summary-bin": {
       "filename": "errorbar-summary-bin-light.png",
-      "sourceSha256": "234e8ae817ff340a249bd62f8bde712acdec8cc3288f883f9db8e15e881bf94a",
+      "sourceSha256": "644e0ef05574d7bb910201041f800015730d168566986bc5efdf9eade524665e",
       "pngSha256": "d7976f316ae4950012d6d3cdc93806c00f7145a168f617597123b1b61792adfe"
     },
     "facet/ordered-side-strips": {
@@ -258,7 +258,7 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "506292c16c33bf5e7d821158fc95de53acc1c6b121de9f559d8d3ab26556b90c",
+      "sourceSha256": "fae61f571f3751cad5d0b1383126a072d5441e91fac0cf052d9494bbebefb7c1",
       "pngSha256": "2949dc19048c52de04fced10fa7a563726b70d02b5f091f35f84c7d8a7b7f157"
     },
     "point/abline-identity": {

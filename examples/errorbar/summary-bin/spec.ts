@@ -7,7 +7,7 @@ export default defineExample(
   // summary_bin collapses each non-empty bin of x to mean ± se; the errorbar
   // and the line share one bin grid, so they mark the same eleven means.
   gg(galtonHeights, aes({ x: "parent", y: "child" }))
-    .geomPoint({ alpha: 0.15, size: 2.4 })
+    .geomPoint({ alpha: 0.15, size: 2.4, inspect: false })
     .geomErrorbar({
       stat: "summary_bin",
       binwidth: 1,
