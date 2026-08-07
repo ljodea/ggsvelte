@@ -75,6 +75,40 @@ describe("runCLI", () => {
     );
   });
 
+  it("surfaces fractional-calendar-years on stderr as a spec-lint advisory", async () => {
+    // Nightingale-style year + month/12 on a linear scale — silent decimal
+    // labels without this lint. Exit stays 0 (advisories never block).
+    const months: number[] = [];
+    for (let i = 0; i < 24; i++) {
+      const monthIndex = 3 + i;
+      months.push(1854 + Math.floor(monthIndex / 12) + (monthIndex % 12) / 12);
+    }
+    const fractionalYearsSpec = {
+      data: {
+        columns: {
+          year: months,
+          rate: months.map((_, i) => i + 1),
+        },
+      },
+      aes: { x: { field: "year" }, y: { field: "rate" } },
+      layers: [{ geom: "area" }],
+      labs: { title: "fractional years trap" },
+    };
+    const { io, out, err } = makeIO(JSON.stringify(fractionalYearsSpec));
+    const code = await runCLI([], io);
+    expect(code).toBe(0);
+    expect(out.join("")).toStartWith("<svg ");
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(
+      lines.some(
+        (l) =>
+          l["kind"] === "advisory" &&
+          l["source"] === "spec-lint" &&
+          l["code"] === "fractional-calendar-years",
+      ),
+    ).toBe(true);
+  });
+
   it("maps scale diagnostics onto the documented error|warning|advisory kinds", async () => {
     const temporalSpec = {
       data: {

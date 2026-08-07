@@ -12,6 +12,7 @@ registerAll();
 import {
   aes,
   gg,
+  scaleXDate,
   scaleXLog10,
   type AuthoringRows,
   type ThemeName,
@@ -122,13 +123,16 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
         })
         .spec();
     case "generation-area":
+      // ISO month dates + scaleXDate: same contract as examples/area/stacked.
+      // Do not re-encode months as year+month/12 linear numbers — that paints
+      // axes/tooltips as decimals (1855.9) and silently mislabels the unit.
       return gg(generation, aes({ x: "year", y: "twh", fill: "source" }))
         .geomArea({ alpha: 0.9 })
-        .scales({ x: { nice: false }, fill: color })
+        .scales({ ...scaleXDate({ labels: "%b %Y" }), fill: color })
         .theme(theme)
         .labs({
           title: "Crimean deaths by cause, 1854–56",
-          x: "Year",
+          x: "Month",
           y: "Deaths per 1,000 per year",
           fill: "Cause",
         })

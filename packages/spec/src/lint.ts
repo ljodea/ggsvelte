@@ -25,7 +25,8 @@
  * Implementation:
  *  - lint-catalog.ts — pure advisory catalog (re-exported here)
  *  - lint-layer-rules.ts — layer-scoped rules
- *  - lint-scale-rules.ts — scale-level transform-domain-data
+ *  - lint-scale-rules.ts — scale-level transform-domain-data and
+ *    fractional-calendar-years (year+month/12 linear pitfall)
  *
  * Wired into `validate(spec, { lint: true })` (advisories ride the result)
  * and into the `ggsvelte-render` CLI (stderr JSON lines, kind "advisory",

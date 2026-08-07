@@ -11,6 +11,8 @@ import {
   RASTER_Z_DOMAIN,
   THEME_SPECIMENS,
 } from "../apps/docs/src/lib/theme-specimens/catalog.ts";
+import { generation } from "../apps/docs/src/lib/theme-specimens/data.ts";
+import { themeSpecimenStaticSvg } from "../apps/docs/src/lib/theme-specimens/static-svg.ts";
 import { TEMPERATURES_CHART } from "../apps/docs/src/lib/theme-specimens/temperatures-chart.ts";
 
 describe("themes catalog", () => {
@@ -154,5 +156,59 @@ describe("hero temperatures chart config", () => {
     // Row identity defaults to id/index — chart config no longer carries key.
     expect("key" in TEMPERATURES_CHART).toBe(false);
     expect([...TEMPERATURES_CHART.monthBreaks]).toEqual([...MONTH_BREAKS]);
+  });
+});
+
+/**
+ * Nightingale Crimean series is monthly (HistData::Nightingale). Encoding months
+ * as year + month/12 linear numbers (1854.25, 1855.917) makes axis ticks and
+ * Inspect pins show decimals like 1855.9 — a silent unit lie. Keep ISO month
+ * dates so ScaleXDate labels as calendar months.
+ */
+describe("Nightingale generation-area temporal encoding", () => {
+  const isoMonth = /^\d{4}-\d{2}-\d{2}$/;
+  const fractionalYear = /^\d{4}\.\d+$/;
+
+  it("stores 24 months × 3 causes as ISO month dates, not fractional years", () => {
+    expect(generation).toHaveLength(72);
+    const months = new Set(generation.map((row) => row.year));
+    expect(months.size).toBe(24);
+    for (const row of generation) {
+      expect(typeof row.year).toBe("string");
+      expect(row.year).toMatch(isoMonth);
+      expect(String(row.year)).not.toMatch(fractionalYear);
+      // No linear year+month/12 coordinate (e.g. 1855.917 → "1855.9" on pin).
+      expect(typeof row.year === "number").toBe(false);
+    }
+    expect(months.has("1854-04-01")).toBe(true);
+    expect(months.has("1855-12-01")).toBe(true);
+    expect(months.has("1856-03-01")).toBe(true);
+  });
+
+  it("renders axis tick labels as calendar months, never decimal years", () => {
+    const darkSpecimen = THEME_SPECIMENS.find((s) => s.name === "dark");
+    expect(darkSpecimen?.kind).toBe("generation-area");
+    if (darkSpecimen === undefined) return;
+
+    const svg = themeSpecimenStaticSvg({
+      name: darkSpecimen.name,
+      kind: darkSpecimen.kind,
+      scheme: darkSpecimen.scheme,
+      height: 380,
+    });
+
+    // Tick text nodes must not be fractional years (the bug symptom).
+    const tickLabels = [...svg.matchAll(/<text[^>]*>([^<]+)<\/text>/g)].map((m) => m[1]!.trim());
+    const yearish = tickLabels.filter((label) => /^\d{4}/.test(label));
+    expect(yearish.length).toBeGreaterThan(0);
+    for (const label of yearish) {
+      expect(label, `decimal-year tick leaked: ${label}`).not.toMatch(/^\d{4}\.\d/);
+    }
+    // At least one month-style label from ScaleXDate labels="%b %Y".
+    expect(
+      tickLabels.some((label) =>
+        /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/.test(label),
+      ),
+    ).toBe(true);
   });
 });

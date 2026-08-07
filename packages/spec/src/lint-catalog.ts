@@ -45,6 +45,13 @@ export const LINT_CATALOG = {
     rationale:
       "log10 rejects values <= 0 and sqrt rejects values < 0; the transform silently drops out-of-domain rows before stats (the pipeline warns at render). Filter the data deliberately, or use an identity/linear scale if those values are meaningful.",
   },
+  "fractional-calendar-years": {
+    summary:
+      "A position channel holds year-like numbers with month fractions (year + month/12) on a linear scale.",
+    needs: "data",
+    rationale:
+      'Encoding calendar months as 1854.25 / 1855.917 makes linear tick and tooltip formatters print decimals like 1855.9 — a silent unit lie. Store ISO year-month or date strings ("1854-04" / "1854-04-01") and use a time scale (ScaleXDate, labels "%b %Y") so axes and Inspect pins read as calendar months.',
+  },
 } as const satisfies Record<string, LintCatalogEntry>;
 
 export type LintAdvisoryCode = keyof typeof LINT_CATALOG;
