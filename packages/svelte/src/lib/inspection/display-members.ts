@@ -230,9 +230,10 @@ export function defaultTooltipRows(
     }
     const seriesField = seriesIdentityField(body);
     if (valueField !== null && seriesField !== null) {
-      // Series name as the row label; measure as the reading. Drop weight /
-      // size / echo columns that only restate what the mark already encodes.
-      return [
+      // Series name as the row label; measure as the reading. Keep other
+      // data-bearing channels (ymin/ymax, mapped size, label, …) as normal
+      // labelled rows so intervals and dual aesthetics are not dropped.
+      const rows: DefaultTooltipRow[] = [
         {
           key: `${seriesField.channel}:${seriesField.field}:${valueField.field}`,
           label: formatTooltipCell(seriesField.value),
@@ -241,6 +242,19 @@ export function defaultTooltipRows(
           valueField: valueField.field,
         },
       ];
+      for (const field of body) {
+        if (field.channel === valueField.channel) continue;
+        if (field.channel === seriesField.channel) continue;
+        if (field.field === seriesField.field) continue;
+        rows.push({
+          key: field.channel,
+          label: tooltipFieldLabel(field.field, { channel: field.channel, labs }),
+          value: field.value,
+          valueChannel: field.channel,
+          valueField: field.field,
+        });
+      }
+      return rows;
     }
   }
 

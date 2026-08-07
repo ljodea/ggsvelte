@@ -384,10 +384,9 @@ describe("collapseIdenticalDisplayMembers", () => {
     expect(collapsed.map((m) => m.layerIndex)).toEqual([0, 1]);
   });
 
-  it("collapses col+text that only differ in dropped label fields under axis mode", () => {
-    // Series-centric body is just series → measure; an extra label channel
-    // must not keep a duplicate display row (Devin review on #1527).
-    const col = member({
+  it("collapses line+point that share series-centric payloads under axis mode", () => {
+    // Same series → measure, no extra aesthetics: double paint collapses.
+    const line = member({
       layerIndex: 0,
       key: "one",
       fields: [
@@ -396,19 +395,18 @@ describe("collapseIdenticalDisplayMembers", () => {
         field("fill", "source", "Disease"),
       ],
     });
-    const text = member({
+    const point = member({
       layerIndex: 1,
       key: "one",
       fields: [
         field("x", "year", 1855),
         field("y", "twh", 1022.8),
         field("fill", "source", "Disease"),
-        field("label", "label", "1022.8"),
       ],
     });
-    const collapsed = collapseIdenticalDisplayMembers([col, text], col, null, "x");
+    const collapsed = collapseIdenticalDisplayMembers([line, point], line, null, "x");
     expect(collapsed).toHaveLength(1);
-    expect(collapsed[0]).toBe(col);
+    expect(collapsed[0]).toBe(line);
   });
 
   it("collapses fill vs color for the same series name under axis mode", () => {
@@ -432,6 +430,21 @@ describe("collapseIdenticalDisplayMembers", () => {
     const collapsed = collapseIdenticalDisplayMembers([area, line], area, null, "x");
     expect(collapsed).toHaveLength(1);
     expect(collapsed[0]).toBe(area);
+  });
+
+  it("keeps ymin/ymax alongside series-centric measure rows", () => {
+    const errorbar = [
+      field("x", "year", 1855),
+      field("y", "rate", 12.4),
+      field("ymin", "lo", 10.1),
+      field("ymax", "hi", 14.8),
+      field("color", "cause", "Disease"),
+    ];
+    const rows = defaultTooltipRows(errorbar, "x", {
+      labs: { x: "Year", y: "Rate", color: "Cause" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Disease", "lo", "hi"]);
+    expect(rows.map((r) => r.value)).toEqual([12.4, 10.1, 14.8]);
   });
 
   it("keeps sales vs target layers distinct even when the reading matches", () => {
