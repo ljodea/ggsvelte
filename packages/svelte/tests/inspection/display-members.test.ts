@@ -9,6 +9,7 @@ import { runPipeline, type CellValue } from "@ggsvelte/core";
 
 import {
   collapseIdenticalDisplayMembers,
+  defaultTooltipRows,
   fieldsForDefaultTooltip,
   formatTooltipCell,
   selectHoverDisplayMembers,
@@ -153,12 +154,151 @@ describe("fieldsForDefaultTooltip (#754)", () => {
     expect(exact.map((f) => f.channel)).toEqual(["x", "y"]);
     expect(exact.map((f) => f.field)).toEqual(["language", "respondents"]);
 
+    // Axis-group: header already prints the category; fill echo of the same
+    // column must drop so only the measure remains (Devin review on #1527).
+    expect(fieldsForDefaultTooltip(barFields, "x").map((f) => f.field)).toEqual(["respondents"]);
+
     // Distinct columns stay even when values happen to match.
     const distinct = [field("x", "name", "Adelie"), field("color", "species", "Adelie")];
     expect(fieldsForDefaultTooltip(distinct, "exact").map((f) => f.field)).toEqual([
       "name",
       "species",
     ]);
+  });
+});
+
+describe("defaultTooltipRows (series-centric axis groups)", () => {
+  const labs = {
+    x: "Year",
+    y: "Shillings",
+    color: "Series",
+  };
+
+  it("collapses multi-series x-group members to series name → measure value", () => {
+    // Themes wheat/wages style: aes(x=year, y=riders, color=mode).
+    // Without this, each member renders "Shillings: 41" + "Series: Wheat price"
+    // and three series become six noisy key-value lines.
+    const wheat = [
+      field("x", "month", 1565),
+      field("y", "riders", 41),
+      field("color", "mode", "Wheat price"),
+    ];
+    const rows = defaultTooltipRows(wheat, "x", { labs });
+    expect(rows).toEqual([
+      {
+        key: "color:mode:riders",
+        label: "Wheat price",
+        value: 41,
+        valueChannel: "y",
+        valueField: "riders",
+      },
+    ]);
+  });
+
+  it("uses fill as series identity for stacked area groups", () => {
+    const disease = [
+      field("x", "year", 1855),
+      field("y", "twh", 1022.8),
+      field("fill", "source", "Disease"),
+    ];
+    const rows = defaultTooltipRows(disease, "x", {
+      labs: {
+        x: "Year",
+        y: "Deaths per 1,000 per year",
+        fill: "Cause",
+      },
+    });
+    expect(rows).toEqual([
+      {
+        key: "fill:source:twh",
+        label: "Disease",
+        value: 1022.8,
+        valueChannel: "y",
+        valueField: "twh",
+      },
+    ]);
+  });
+
+  it("keeps traditional field labels for exact / xy point inspection", () => {
+    const penguin = [
+      field("x", "flipper", 180),
+      field("y", "mass", 3700),
+      field("color", "species", "Adelie"),
+    ];
+    const rows = defaultTooltipRows(penguin, "xy", {
+      labs: {
+        x: "Flipper length (mm)",
+        y: "Body mass (g)",
+        color: "Species",
+      },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Flipper length (mm)", "Body mass (g)", "Species"]);
+    expect(rows.map((r) => r.value)).toEqual([180, 3700, "Adelie"]);
+  });
+
+  it("falls back to traditional rows when series identity is blank", () => {
+    // Stat aggregates can advertise fill/weight fields with null values
+    // (no source row + CandidateFacts has no fillValue). Do not invent a
+    // "– → measure" row; keep readable field labels so y at least shows.
+    const blankSeries = [
+      field("x", "x", "1876"),
+      field("y", "count", 175),
+      field("fill", "level", null),
+      field("weight", "deaths", null),
+    ];
+    const rows = defaultTooltipRows(blankSeries, "x", {
+      labs: { x: "Year", y: "Deaths per million", fill: "County" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Deaths per million", "County", "deaths"]);
+    expect(rows.map((r) => r.value)).toEqual([175, null, null]);
+  });
+
+  it("falls back when there is no series aesthetic (single-series line)", () => {
+    const single = [field("x", "year", 1855), field("y", "value", 95.7)];
+    const rows = defaultTooltipRows(single, "x", {
+      labs: { x: "Year", y: "£ millions" },
+    });
+    expect(rows).toEqual([
+      {
+        key: "y",
+        label: "£ millions",
+        value: 95.7,
+        valueChannel: "y",
+        valueField: "value",
+      },
+    ]);
+  });
+
+  it("keeps the measure label when fill only echoes the grouping axis column", () => {
+    // Violin/bar palette: aes(x=run, y=velocity, fill=run). Axis header is the
+    // run; body must stay "velocity: …", not "runValue: velocity".
+    const violin = [field("x", "run", 3), field("y", "velocity", 850), field("fill", "run", 3)];
+    const rows = defaultTooltipRows(violin, "x", {
+      labs: { x: "Run", y: "Velocity" },
+    });
+    expect(rows).toEqual([
+      {
+        key: "y",
+        label: "Velocity",
+        value: 850,
+        valueChannel: "y",
+        valueField: "velocity",
+      },
+    ]);
+  });
+
+  it("keeps traditional rows when color/fill is continuous (number or date)", () => {
+    // aes(x=date, y=price, color=volume) must not collapse to "12345: 41".
+    const continuous = [
+      field("x", "date", "2020-01-01"),
+      field("y", "price", 41),
+      field("color", "volume", 12345),
+    ];
+    const rows = defaultTooltipRows(continuous, "x", {
+      labs: { x: "Date", y: "Price", color: "Volume" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Price", "Volume"]);
+    expect(rows.map((r) => r.value)).toEqual([41, 12345]);
   });
 });
 
@@ -222,7 +362,7 @@ describe("collapseIdenticalDisplayMembers", () => {
       key: "b1",
       fields: [field("x", "x", 1), field("y", "y", 7), field("color", "series", "b")],
     });
-    const collapsed = collapseIdenticalDisplayMembers([a, b], a);
+    const collapsed = collapseIdenticalDisplayMembers([a, b], a, null, "x");
     expect(collapsed).toHaveLength(2);
     expect(collapsed).toEqual([a, b]);
   });
@@ -238,9 +378,88 @@ describe("collapseIdenticalDisplayMembers", () => {
       key: "one",
       fields: [field("x", "x", 1), field("y", "y", 2), field("fill", "fillGroup", "X")],
     });
-    const collapsed = collapseIdenticalDisplayMembers([point, col], point);
+    // Exact/xy still surfaces both when series channels differ.
+    const collapsed = collapseIdenticalDisplayMembers([point, col], point, null, "exact");
     expect(collapsed).toHaveLength(2);
     expect(collapsed.map((m) => m.layerIndex)).toEqual([0, 1]);
+  });
+
+  it("collapses line+point that share series-centric payloads under axis mode", () => {
+    // Same series → measure, no extra aesthetics: double paint collapses.
+    const line = member({
+      layerIndex: 0,
+      key: "one",
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+      ],
+    });
+    const point = member({
+      layerIndex: 1,
+      key: "one",
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+      ],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([line, point], line, null, "x");
+    expect(collapsed).toHaveLength(1);
+    expect(collapsed[0]).toBe(line);
+  });
+
+  it("collapses fill vs color for the same series name under axis mode", () => {
+    // Area fill=source + line color=source both paint "Disease → 1022.8".
+    const area = member({
+      layerIndex: 0,
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+      ],
+    });
+    const line = member({
+      layerIndex: 1,
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("color", "source", "Disease"),
+      ],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([area, line], area, null, "x");
+    expect(collapsed).toHaveLength(1);
+    expect(collapsed[0]).toBe(area);
+  });
+
+  it("keeps ymin/ymax alongside series-centric measure rows", () => {
+    const errorbar = [
+      field("x", "year", 1855),
+      field("y", "rate", 12.4),
+      field("ymin", "lo", 10.1),
+      field("ymax", "hi", 14.8),
+      field("color", "cause", "Disease"),
+    ];
+    const rows = defaultTooltipRows(errorbar, "x", {
+      labs: { x: "Year", y: "Rate", color: "Cause" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Disease", "lo", "hi"]);
+    expect(rows.map((r) => r.value)).toEqual([12.4, 10.1, 14.8]);
+  });
+
+  it("keeps sales vs target layers distinct even when the reading matches", () => {
+    // Multi-measure overlay: same series name, same number, different y columns.
+    // Token retains measure field so Total still matches listed rows.
+    const sales = member({
+      layerIndex: 0,
+      fields: [field("x", "x", 1), field("y", "sales", 100), field("color", "series", "North")],
+    });
+    const target = member({
+      layerIndex: 1,
+      fields: [field("x", "x", 1), field("y", "target", 100), field("color", "series", "North")],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([sales, target], sales, null, "x");
+    expect(collapsed).toHaveLength(2);
   });
 
   it("preserves first-seen order of distinct display payloads", () => {

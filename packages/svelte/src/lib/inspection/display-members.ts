@@ -137,7 +137,15 @@ export function fieldsForDefaultTooltip(
 ): readonly TooltipField[] {
   const withoutAxis =
     mode === "x" || mode === "y" ? fields.filter((field) => field.channel !== mode) : fields;
+  // Seed with the axis column when it is already the header, so palette-only
+  // `fill = x` (or color = x) echoes do not reappear as a body row and do not
+  // trigger series-centric collapse that would hide the measure label.
   const seenColumns = new Set<string>();
+  if (mode === "x" || mode === "y") {
+    for (const field of fields) {
+      if (field.channel === mode) seenColumns.add(field.field);
+    }
+  }
   return withoutAxis.filter((field) => {
     if (seenColumns.has(field.field)) return false;
     seenColumns.add(field.field);
@@ -146,23 +154,145 @@ export function fieldsForDefaultTooltip(
 }
 
 /**
+ * Channels that identify a series/group in long-form data. First match wins
+ * when building the compact axis-group tooltip row.
+ */
+const SERIES_IDENTITY_CHANNELS = ["color", "fill", "linetype", "shape"] as const;
+
+/**
+ * One rendered `<dt>/<dd>` pair in the default tooltip body.
+ *
+ * - `label` is the left-column text (may be a series value, not a field name)
+ * - `value` is the right-column cell (formatted via `formatTooltipCell`)
+ * - `valueChannel` selects axis formatters for position values
+ * - `key` is a stable each-block key
+ */
+export type DefaultTooltipRow = Readonly<{
+  key: string;
+  label: string;
+  value: CellValue;
+  /** Channel used for axis-aware value formatting (`x`/`y` or other). */
+  valueChannel: string;
+  /**
+   * Source column for the reading. Included in collapse tokens so two layers
+   * with the same series name but different measures (sales vs target) stay
+   * distinct even when the formatted numbers match.
+   */
+  valueField: string;
+}>;
+
+/**
+ * Categorical series identity only. Continuous color/fill (numbers, dates)
+ * must keep traditional field-label rows so the tooltip does not print
+ * "12345: 41" with no titles (Devin review on #1527).
+ */
+function seriesIdentityField(fields: readonly TooltipField[]): TooltipField | null {
+  for (const channel of SERIES_IDENTITY_CHANNELS) {
+    for (const field of fields) {
+      if (field.channel !== channel) continue;
+      if (typeof field.value !== "string") continue;
+      if (field.value.trim() === "") continue;
+      return field;
+    }
+  }
+  return null;
+}
+
+/**
+ * Default tooltip body rows for one display member.
+ *
+ * Axis-group mode (`x` / `y`) with a series aesthetic collapses to one row
+ * per member: **series value → measure value**. That removes the repeated
+ * key-value noise of "Index: 12 / Series: Wheat / Index: 8 / Series: Bread…"
+ * (themes multi-series specimens, stacked areas, multi-line groups).
+ *
+ * Exact / xy inspection, single-field members, and members without a usable
+ * series identity keep the traditional field-label → value rows.
+ */
+export function defaultTooltipRows(
+  fields: readonly TooltipField[],
+  mode: "exact" | "xy" | "x" | "y",
+  options?: {
+    readonly labs?: TooltipFieldLabs | null | undefined;
+  },
+): readonly DefaultTooltipRow[] {
+  const body = fieldsForDefaultTooltip(fields, mode);
+  const labs = options?.labs;
+
+  if (mode === "x" || mode === "y") {
+    const valueChannel = mode === "x" ? "y" : "x";
+    let valueField: TooltipField | null = null;
+    for (const field of body) {
+      if (field.channel === valueChannel) {
+        valueField = field;
+        break;
+      }
+    }
+    const seriesField = seriesIdentityField(body);
+    if (valueField !== null && seriesField !== null) {
+      // Series name as the row label; measure as the reading. Keep other
+      // data-bearing channels (ymin/ymax, mapped size, label, …) as normal
+      // labelled rows so intervals and dual aesthetics are not dropped.
+      const rows: DefaultTooltipRow[] = [
+        {
+          key: `${seriesField.channel}:${seriesField.field}:${valueField.field}`,
+          label: formatTooltipCell(seriesField.value),
+          value: valueField.value,
+          valueChannel: valueField.channel,
+          valueField: valueField.field,
+        },
+      ];
+      for (const field of body) {
+        if (field.channel === valueField.channel) continue;
+        if (field.channel === seriesField.channel) continue;
+        if (field.field === seriesField.field) continue;
+        rows.push({
+          key: field.channel,
+          label: tooltipFieldLabel(field.field, { channel: field.channel, labs }),
+          value: field.value,
+          valueChannel: field.channel,
+          valueField: field.field,
+        });
+      }
+      return rows;
+    }
+  }
+
+  return body.map((field) => ({
+    key: field.channel,
+    label: tooltipFieldLabel(field.field, { channel: field.channel, labs }),
+    value: field.value,
+    valueChannel: field.channel,
+    valueField: field.field,
+  }));
+}
+
+/**
  * Stable token for one member's default-tooltip body.
- * Uses field *names* (dt text) + formatted values (dd text), not channel —
- * channels are not shown and must not split visually identical rows.
+ *
+ * Hashes the rows that will actually paint (`defaultTooltipRows`), not the
+ * full field map — otherwise series-centric axis-group layout can drop
+ * label/weight/size while two layers stay distinct and the same line prints
+ * twice (Devin review on #1527).
  */
 export function tooltipDisplayPayloadToken(
   fields: readonly TooltipField[],
   axisFormatters: TooltipAxisFormatters | null = null,
+  mode: "exact" | "xy" | "x" | "y" = "exact",
 ): string {
-  // Length-prefix each segment so field names / values cannot forge delimiters.
+  // Length-prefix each segment so labels / values cannot forge delimiters.
   const parts: string[] = [];
-  for (const field of fields) {
-    const name = field.field;
-    const display = formatTooltipCell(field.value, {
-      channel: field.channel,
+  for (const row of defaultTooltipRows(fields, mode)) {
+    const display = formatTooltipCell(row.value, {
+      channel: row.valueChannel,
       axisFormatters,
     });
-    parts.push(`${name.length}:${name}|${display.length}:${display}`);
+    // Label + measure column + value. Omit channel (fill vs color for the same
+    // series collapses). Keep measure column so sales vs target at the same
+    // reading do not collapse while Total still counts both (#1527 Devin).
+    parts.push(
+      `${row.label.length}:${row.label}|${row.valueField.length}:${row.valueField}|${display.length}:${display}`,
+    );
   }
   return parts.join("\n");
 }
@@ -248,6 +378,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
   members: readonly PlotDatum<Row, Key>[],
   focus: PlotDatum<Row, Key>,
   axisFormatters: TooltipAxisFormatters | null = null,
+  mode: "exact" | "xy" | "x" | "y" = "exact",
 ): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
   if (members.length === 0) return [focus];
 
@@ -262,7 +393,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
 
   for (const member of members) {
     if (member === focus) focusInMembers = true;
-    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member));
+    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member), mode);
     const existing = chosen.get(token);
     if (existing === undefined) {
       chosen.set(token, member);
@@ -273,7 +404,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
     if (member === focus) chosen.set(token, member);
   }
 
-  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus));
+  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus), mode);
   if (chosen.has(focusToken)) {
     // Same display as a retained member — always surface focus for styling.
     chosen.set(focusToken, focus);
