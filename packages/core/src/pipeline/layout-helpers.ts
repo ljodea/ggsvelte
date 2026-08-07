@@ -93,8 +93,9 @@ export function layoutDomain(
 export function defaultTemporalAxisPattern(
   kind: TemporalScaleKind,
   precision: TemporalPrecision | null | undefined,
-  options: { lean: boolean } = { lean: false },
+  options?: { lean?: boolean },
 ): string {
+  const lean = options?.lean === true;
   if (kind === "monthDay") return "%b %e";
   if (kind === "time") {
     if (precision === "millisecond") return "%H:%M:%S.%L";
@@ -107,29 +108,25 @@ export function defaultTemporalAxisPattern(
       return "%Y";
     case "quarter":
       // formatTime (lean) has no %q token.
-      return options.lean ? "%Y-%m" : "%Y-Q%q";
+      return lean ? "%Y-%m" : "%Y-Q%q";
     case "month":
       return "%Y-%m";
     case "date":
       return "%Y-%m-%d";
     case "minute":
-      return kind === "date" ? "%Y-%m-%d" : options.lean ? "%Y-%m-%d %H:%M" : "%Y-%m-%d %H:%M %Z";
+      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M" : "%Y-%m-%d %H:%M %Z";
     case "second":
-      return kind === "date"
-        ? "%Y-%m-%d"
-        : options.lean
-          ? "%Y-%m-%d %H:%M:%S"
-          : "%Y-%m-%d %H:%M:%S %Z";
+      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
     case "millisecond":
       return kind === "date"
         ? "%Y-%m-%d"
-        : options.lean
+        : lean
           ? "%Y-%m-%d %H:%M:%S.%L"
           : "%Y-%m-%d %H:%M:%S.%L %Z";
     default:
       // Unknown precision: prior kind-only defaults.
       if (kind === "date") return "%Y-%m-%d";
-      return options.lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+      return lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
   }
 }
 
