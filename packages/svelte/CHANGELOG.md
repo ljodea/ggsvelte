@@ -1,5 +1,13 @@
 # @ggsvelte/svelte
 
+## 0.31.2
+
+### Patch Changes
+
+- Updated dependencies [a740c50]
+  - @ggsvelte/core@0.31.2
+  - @ggsvelte/spec@0.31.2
+
 ## 0.31.1
 
 ### Patch Changes
