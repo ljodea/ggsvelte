@@ -425,7 +425,32 @@ describe("fractional-calendar-years", () => {
     );
   });
 
-  it("emits one advisory per axis when multiple layers share the field", () => {
+  it("silent for ordinary 1000–9999 measures quantized to quarters/halves", () => {
+    // Devin FP: .25/.5/.75 are exactly 3/12, 6/12, 9/12 — not enough months.
+    const prices = [1000.5, 2500.25, 3000.75, 4000.5, 5000.25, 6000.5];
+    expect(
+      lintSpec(areaSpec(prices)).filter((a) => a.code === "fractional-calendar-years"),
+    ).toEqual([]);
+  });
+
+  it("silent when only a few year-like values sit inside a non-year column", () => {
+    const mixed = [...Array.from({ length: 40 }, (_, i) => i + 0.5), 1854.25, 1854.333, 1854.5];
+    expect(lintSpec(areaSpec(mixed)).filter((a) => a.code === "fractional-calendar-years")).toEqual(
+      [],
+    );
+  });
+
+  it("silent for fractional years mapped on y (rule is x-only)", () => {
+    const months = nightingaleMonths();
+    const advisories = lintSpec({
+      data: { columns: { x: months.map((_, i) => i), y: months } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "line" }],
+    }).filter((a) => a.code === "fractional-calendar-years");
+    expect(advisories).toEqual([]);
+  });
+
+  it("emits one advisory when multiple layers share the field", () => {
     const x = nightingaleMonths();
     const advisories = lintSpec({
       data: { columns: { x, y: x.map(() => 1) } },
