@@ -1054,9 +1054,11 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "tile",
     name: "heatmap",
     title: "Cholera in England and Wales, 1849",
-    description: "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of tiles so the summer peak reads as a block.",
+    description: "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of square tiles so the summer peak reads as a block.",
     tags: ["tile", "heatmap", "categorical", "calendar"],
     docsSection: "Rectangles & grids",
+    vrHeight: 380,
+    vrWidth: 1200,
     hasData: true,
   },
   {

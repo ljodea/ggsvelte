@@ -22554,7 +22554,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Cholera in England and Wales, 1849",
     summary:
-      "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of tiles so the summer peak reads as a block.",
+      "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of square tiles so the summer peak reads as a block.",
     href: "/examples/tile/heatmap",
     keywords: [
       "Cholera in England and Wales, 1849",

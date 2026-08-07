@@ -1,33 +1,16 @@
 <script lang="ts">
-  import {
-    GeomTile,
-    GGPlot,
-    Labs,
-    ScaleFillContinuous,
-    ScaleXDiscrete,
-    ScaleYDiscrete,
-    ThemeDark,
-  } from "@ggsvelte/svelte";
+  /**
+   * Object-form theme (light + no grid) lives in spec.ts only — theme-parity
+   * requires hand-written plots to stay on string themes or use {spec}.
+   */
+  import { GGPlot } from "@ggsvelte/svelte";
 
-  import { cholera1849 } from "./data.js";
+  import spec from "./spec.js";
 </script>
 
-<GGPlot
-  data={cholera1849}
-  aes={{ x: "week", y: "weekday", fill: "deaths" }}
-  width={640}
-  height={400}
->
-  <ThemeDark />
-  <ScaleXDiscrete />
-  <ScaleYDiscrete domain={["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"]} />
-  <ScaleFillContinuous scheme="viridis" />
-  <Labs
-    title="Cholera in England and Wales, 1849"
-    subtitle="Registered deaths every day of the year; 53,293 in all, peaking at 1,121 on 6 September"
-    x="Week of 1849"
-    y=""
-    fill="Deaths"
-  />
-  <GeomTile />
-</GGPlot>
+<!--
+  1200×380 (not the default 640×400): a 53-week × 7-day calendar needs a wide,
+  short frame so CoordFixed can keep each band cell square and large enough
+  to read. Spec turns grid off so incomplete weeks are real holes.
+-->
+<GGPlot {spec} width={1200} height={380} />

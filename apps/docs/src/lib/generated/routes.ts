@@ -13642,7 +13642,7 @@ export const DOCS_ROUTES = [
     path: "/examples/tile/heatmap",
     title: "Cholera in England and Wales, 1849 — ggsvelte gallery",
     description:
-      "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of tiles so the summer peak reads as a block.",
+      "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of square tiles so the summer peak reads as a block.",
     canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,

@@ -570,7 +570,7 @@ export const GALLERY_PREVIEWS = [
     id: "tile/heatmap",
     filename: "tile-heatmap-light.png",
     path: "/previews/tile-heatmap-light.png",
-    sha256: "ded2293ccca87a99cf9aa7a034fa5bf5b2b578a8ee613f17a35e3bc36c57dde2",
+    sha256: "19bc71b1103f298ecdbbc69b1dd1f4bdd791c6e27df82ae6a30d34ba3b26c857",
   },
   {
     id: "vline/cutoff",
