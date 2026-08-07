@@ -367,6 +367,50 @@ describe("inspection snapshot resolve", () => {
     model.dispose();
   });
 
+  it("does not invent fill when multi-row lineage fill values disagree (#1526)", () => {
+    // Continuous fill never participates in grouping, so a histogram bin's
+    // lineage can span rows with different fill values. Tooltip must not
+    // pick the first row's fill as if it described the whole bin.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1.1, heat: 10 },
+            { x: 1.2, heat: 90 },
+            { x: 5.0, heat: 40 },
+          ],
+        },
+        layers: [
+          {
+            geom: "histogram",
+            params: { bins: 2 },
+            aes: {
+              x: { field: "x" },
+              fill: { field: "heat" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const multi = [...Array(model.candidates.size).keys()]
+      .map((id) => model.candidates.candidate(id)!)
+      .find((c) => model.lineage.count(c.lineage) > 1);
+    expect(multi).toBeDefined();
+    expect(multi!.rowIndex).toBeNull();
+    const inspection = resolveInspection({
+      model,
+      seed: multi!,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const fill = inspection.focus.fields.find((f) => f.channel === "fill");
+    expect(fill?.value).toBeNull();
+    model.dispose();
+  });
+
   it("reads non-position candidate channels when the seed has no source row", () => {
     // Stat bins have null rowIndex; tooltip fields must still surface size /
     // linewidth / alpha / shape / linetype from the candidate bag, and map

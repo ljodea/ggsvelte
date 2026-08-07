@@ -254,18 +254,33 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
   };
   /**
    * Recover a non-CandidateFacts field from lineage source rows.
-   * - Group-constant aesthetics (fill/color/group): first source row (O(1)).
+   * - fill/color/group: first source row only when every lineage row agrees
+   *   (discrete series identity is constant; continuous mappings can disagree).
    * - Everything else (weight, …): only when lineage has exactly one row so
    *   we do not invent an arbitrary sample of a multi-row aggregate.
+   *
+   * Indexes + first row are memoized for this datum so multi-field tooltips
+   * do not re-materialize the same source row per channel.
    */
+  let lineageIndexes: readonly number[] | undefined;
+  let firstLineageRow: Record<string, CellValue> | null | undefined;
   const lineageFieldValue = (channel: string, fieldName: string): CellValue => {
-    const indexes = model.lineage.keys(candidate.lineage);
-    if (indexes.length === 0) return null;
-    const groupConstant = channel === "fill" || channel === "color" || channel === "group";
-    if (!groupConstant && indexes.length !== 1) return null;
-    const src = model.row(indexes[0]!) as Row | null;
-    if (src === null) return null;
-    return (src[fieldName] as CellValue | undefined) ?? null;
+    lineageIndexes ??= model.lineage.keys(candidate.lineage);
+    if (lineageIndexes.length === 0) return null;
+    const seriesIdentity = channel === "fill" || channel === "color" || channel === "group";
+    if (!seriesIdentity && lineageIndexes.length !== 1) return null;
+    if (firstLineageRow === undefined) {
+      firstLineageRow = model.row(lineageIndexes[0]!);
+    }
+    if (firstLineageRow === null) return null;
+    const first = firstLineageRow[fieldName] ?? null;
+    if (seriesIdentity && lineageIndexes.length > 1) {
+      for (let i = 1; i < lineageIndexes.length; i++) {
+        const other = model.row(lineageIndexes[i]!);
+        if (other === null || (other[fieldName] ?? null) !== first) return null;
+      }
+    }
+    return first;
   };
   const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => {
     if (row !== null) {
