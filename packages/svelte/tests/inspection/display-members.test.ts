@@ -186,10 +186,11 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
     const rows = defaultTooltipRows(wheat, "x", { labs });
     expect(rows).toEqual([
       {
-        key: "color:mode",
+        key: "color:mode:riders",
         label: "Wheat price",
         value: 41,
         valueChannel: "y",
+        valueField: "riders",
       },
     ]);
   });
@@ -209,10 +210,11 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
     });
     expect(rows).toEqual([
       {
-        key: "fill:source",
+        key: "fill:source:twh",
         label: "Disease",
         value: 1022.8,
         valueChannel: "y",
+        valueField: "twh",
       },
     ]);
   });
@@ -262,6 +264,7 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
         label: "£ millions",
         value: 95.7,
         valueChannel: "y",
+        valueField: "value",
       },
     ]);
   });
@@ -279,6 +282,7 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
         label: "Velocity",
         value: 850,
         valueChannel: "y",
+        valueField: "velocity",
       },
     ]);
   });
@@ -428,6 +432,21 @@ describe("collapseIdenticalDisplayMembers", () => {
     const collapsed = collapseIdenticalDisplayMembers([area, line], area, null, "x");
     expect(collapsed).toHaveLength(1);
     expect(collapsed[0]).toBe(area);
+  });
+
+  it("keeps sales vs target layers distinct even when the reading matches", () => {
+    // Multi-measure overlay: same series name, same number, different y columns.
+    // Token retains measure field so Total still matches listed rows.
+    const sales = member({
+      layerIndex: 0,
+      fields: [field("x", "x", 1), field("y", "sales", 100), field("color", "series", "North")],
+    });
+    const target = member({
+      layerIndex: 1,
+      fields: [field("x", "x", 1), field("y", "target", 100), field("color", "series", "North")],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([sales, target], sales, null, "x");
+    expect(collapsed).toHaveLength(2);
   });
 
   it("preserves first-seen order of distinct display payloads", () => {

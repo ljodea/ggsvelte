@@ -173,6 +173,12 @@ export type DefaultTooltipRow = Readonly<{
   value: CellValue;
   /** Channel used for axis-aware value formatting (`x`/`y` or other). */
   valueChannel: string;
+  /**
+   * Source column for the reading. Included in collapse tokens so two layers
+   * with the same series name but different measures (sales vs target) stay
+   * distinct even when the formatted numbers match.
+   */
+  valueField: string;
 }>;
 
 /**
@@ -228,10 +234,11 @@ export function defaultTooltipRows(
       // size / echo columns that only restate what the mark already encodes.
       return [
         {
-          key: `${seriesField.channel}:${seriesField.field}`,
+          key: `${seriesField.channel}:${seriesField.field}:${valueField.field}`,
           label: formatTooltipCell(seriesField.value),
           value: valueField.value,
           valueChannel: valueField.channel,
+          valueField: valueField.field,
         },
       ];
     }
@@ -242,6 +249,7 @@ export function defaultTooltipRows(
     label: tooltipFieldLabel(field.field, { channel: field.channel, labs }),
     value: field.value,
     valueChannel: field.channel,
+    valueField: field.field,
   }));
 }
 
@@ -265,9 +273,12 @@ export function tooltipDisplayPayloadToken(
       channel: row.valueChannel,
       axisFormatters,
     });
-    // Label + value only — not row.key (channel). fill vs color for the same
-    // series must collapse to one painted line (#385 / Devin on #1527).
-    parts.push(`${row.label.length}:${row.label}|${display.length}:${display}`);
+    // Label + measure column + value. Omit channel (fill vs color for the same
+    // series collapses). Keep measure column so sales vs target at the same
+    // reading do not collapse while Total still counts both (#1527 Devin).
+    parts.push(
+      `${row.label.length}:${row.label}|${row.valueField.length}:${row.valueField}|${display.length}:${display}`,
+    );
   }
   return parts.join("\n");
 }
