@@ -407,6 +407,29 @@ describe("collapseIdenticalDisplayMembers", () => {
     expect(collapsed[0]).toBe(col);
   });
 
+  it("collapses fill vs color for the same series name under axis mode", () => {
+    // Area fill=source + line color=source both paint "Disease → 1022.8".
+    const area = member({
+      layerIndex: 0,
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("fill", "source", "Disease"),
+      ],
+    });
+    const line = member({
+      layerIndex: 1,
+      fields: [
+        field("x", "year", 1855),
+        field("y", "twh", 1022.8),
+        field("color", "source", "Disease"),
+      ],
+    });
+    const collapsed = collapseIdenticalDisplayMembers([area, line], area, null, "x");
+    expect(collapsed).toHaveLength(1);
+    expect(collapsed[0]).toBe(area);
+  });
+
   it("preserves first-seen order of distinct display payloads", () => {
     const first = member({
       layerIndex: 0,

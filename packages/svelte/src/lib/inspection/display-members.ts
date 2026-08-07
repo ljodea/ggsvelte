@@ -265,9 +265,9 @@ export function tooltipDisplayPayloadToken(
       channel: row.valueChannel,
       axisFormatters,
     });
-    parts.push(
-      `${row.key.length}:${row.key}|${row.label.length}:${row.label}|${display.length}:${display}`,
-    );
+    // Label + value only — not row.key (channel). fill vs color for the same
+    // series must collapse to one painted line (#385 / Devin on #1527).
+    parts.push(`${row.label.length}:${row.label}|${display.length}:${display}`);
   }
   return parts.join("\n");
 }
