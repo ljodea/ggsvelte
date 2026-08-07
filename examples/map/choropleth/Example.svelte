@@ -6,7 +6,7 @@
     Inspect,
     Labs,
     ScaleFillContinuous,
-    ThemeClassic,
+    ThemeMap,
   } from "@ggsvelte/svelte";
 
   import { neighbourhoodDeaths, pumpNeighbourhoods } from "./data.js";
@@ -19,7 +19,7 @@
   height={400}
 >
   <Inspect mode="exact" pin identity="pump" />
-  <ThemeClassic />
+  <ThemeMap />
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />
   <Labs

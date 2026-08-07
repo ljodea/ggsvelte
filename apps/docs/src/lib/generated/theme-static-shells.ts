@@ -186,13 +186,13 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-map",
     filename: "theme-map.svg",
     path: "/theme-shells/theme-map.svg",
-    sha256: "04a2e4ae687aaaba48aa844678ca556d2232ab7cbefa75fa932b2eff88cb7aaa",
+    sha256: "c2f79ec4c83ecb901cc0ca90131cda7e99ed6d211ccbb0e037ae2762bd6bd9d0",
   },
   {
     id: "theme-map-dark-site",
     filename: "theme-map-dark-site.svg",
     path: "/theme-shells/theme-map-dark-site.svg",
-    sha256: "c9204e27eca240ac6a0048a06f09ed7acc2275c180ac9942ff53325620bca09b",
+    sha256: "ca30a5c2ce44d0582abe5898b29c8a3ac088ee28e54c30f9f64637d170735593",
   },
   {
     id: "theme-solid",

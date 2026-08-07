@@ -12,6 +12,7 @@ registerAll();
 import {
   aes,
   gg,
+  scaleFillContinuous,
   scaleXDate,
   scaleXLog10,
   type AuthoringRows,
@@ -30,6 +31,8 @@ import {
   penguins,
   revenue,
   ridership,
+  sohoNeighbourhoodDeaths,
+  sohoPumpNeighbourhoods,
   temperaturesKeyed,
 } from "./data.js";
 import { paletteSpecimenChart } from "./palette-bars.js";
@@ -193,6 +196,23 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
           title: "Van Langren longitude estimates, 1644",
           x: "Toledo–Rome longitude (°)",
           y: "Estimate rank",
+        })
+        .spec();
+    case "soho-choropleth":
+      // Marks-only map theme needs a map-shaped mark: geom_map choropleth, not a scatter.
+      return gg(sohoNeighbourhoodDeaths, aes({ map_id: "pump", fill: "deaths" }))
+        .geomMap({
+          map: { values: sohoPumpNeighbourhoods },
+          mapId: "pump",
+          linewidth: 1.2,
+          alpha: 0.95,
+        })
+        .scales(scaleFillContinuous({ scheme: "viridis" }))
+        .coordFixed()
+        .theme(theme)
+        .labs({
+          title: "1854 Soho cholera deaths by pump neighbourhood",
+          fill: "Deaths",
         })
         .spec();
     default: {

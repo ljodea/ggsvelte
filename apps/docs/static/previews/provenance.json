@@ -243,8 +243,8 @@
     },
     "map/choropleth": {
       "filename": "map-choropleth-light.png",
-      "sourceSha256": "8607761359dddced2b7d93eae1ac6eefa547c0314a109d0e16e9aaf16fad3462",
-      "pngSha256": "931716ee612b1c3b01da6ef74f1d765e062532a024ae3fb47b7006e0f3f9a240"
+      "sourceSha256": "4551a4b21b848dbc3cabab3c449d5a872b9633f83499dff0f6a10569e9520533",
+      "pngSha256": "8c9462f51fc60c56c2cddcf33fa3d1df3175afc4efb395943d9d7ce24674cded"
     },
     "path/connect-hv": {
       "filename": "path-connect-hv-light.png",
