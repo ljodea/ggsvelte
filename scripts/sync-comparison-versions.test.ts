@@ -62,6 +62,13 @@ describe("syncReadmeApiStability", () => {
     expect(() => syncReadmeApiStability("# bare", "0.32.0")).toThrow(/API stability/);
     expect(() => syncReadmeApiStability(SAMPLE_README, "not-a-version")).toThrow(/semver/);
   });
+
+  it("accepts a different-length version string (1.0.0 vs 0.32.0)", () => {
+    // Width change is why write mode runs prettier after the rewrite.
+    const out = syncReadmeApiStability(SAMPLE_README, "1.0.0");
+    expect(out).toMatch(/\|\s*\*\*API stability\*\*\s*\|\s*⚠️ v1\.0\.0\s*\|/);
+    expect(out).not.toContain("⚠️ v0.30");
+  });
 });
 
 describe("syncBenchmarkGgsvelteVersion", () => {
@@ -101,8 +108,14 @@ describe("live comparison tables match the published lockstep version", () => {
 
   it("README API-stability cell cites that version", () => {
     const readme = readFileSync(join(ROOT, "README.md"), "utf8");
+    // Same version → rewrite is a no-op (padding preserved). Check path uses a
+    // version-presence regex so prettier column padding is not part of the gate.
     expect(syncReadmeApiStability(readme, version)).toBe(readme);
-    expect(readme).toContain(`⚠️ v${version}`);
+    expect(readme).toMatch(
+      new RegExp(
+        String.raw`\|\s*\*\*API stability\*\*\s*\|\s*⚠️ v${version.replaceAll(".", String.raw`\.`)}\s*\|`,
+      ),
+    );
   });
 
   it("docs homepage BENCHMARK_VERSIONS.ggsvelte cites that version", () => {

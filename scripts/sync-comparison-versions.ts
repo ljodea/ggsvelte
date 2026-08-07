@@ -15,6 +15,7 @@
  *   bun scripts/sync-comparison-versions.ts           # rewrite if needed
  *   bun scripts/sync-comparison-versions.ts --check   # exit 1 if stale
  */
+import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
@@ -51,6 +52,9 @@ export function readLockstepVersion(root: string = ROOT): string {
 /**
  * Rewrite the README "API stability" ggsvelte cell to `⚠️ v{version}`.
  * Peer cells (SveltePlot / LayerCake) are left alone.
+ *
+ * Does not re-pad the markdown table: a version string of a different width
+ * can leave the column uneven until `prettierFormatMarkdown` runs (write path).
  */
 export function syncReadmeApiStability(markdown: string, version: string): string {
   assertSemver(version);
@@ -75,6 +79,26 @@ export function syncBenchmarkGgsvelteVersion(source: string, version: string): s
   return source.replace(PROJECTION_GGSVELTE, `$1${version}$2`);
 }
 
+/**
+ * Prettier owns markdown table column padding in this repo. After a version
+ * rewrite changes cell width, re-run prettier so the Version Packages PR
+ * does not fail fmt:check / the pre-commit prettier hook.
+ */
+export function prettierFormatMarkdown(filePath: string, root: string = ROOT): void {
+  // Same invocation shape as package.json `fmt` (bun drives the prettier bin).
+  const result = spawnSync(
+    "bun",
+    ["node_modules/.bin/prettier", "--write", "--log-level", "warn", filePath],
+    { cwd: root, encoding: "utf8" },
+  );
+  if (result.status !== 0) {
+    const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+    throw new Error(
+      `prettier failed on ${filePath} (status ${String(result.status)})${detail ? `: ${detail}` : ""}`,
+    );
+  }
+}
+
 export type SyncResult = {
   readonly version: string;
   readonly readmeChanged: boolean;
@@ -87,9 +111,13 @@ export function syncComparisonVersions(root: string = ROOT): SyncResult {
   const projectionPath = join(root, "apps/docs/src/lib/generated/benchmark-charts.ts");
 
   const readmeBefore = readFileSync(readmePath, "utf8");
-  const readmeAfter = syncReadmeApiStability(readmeBefore, version);
-  const readmeChanged = readmeAfter !== readmeBefore;
-  if (readmeChanged) writeFileSync(readmePath, readmeAfter);
+  const readmeRewritten = syncReadmeApiStability(readmeBefore, version);
+  let readmeChanged = readmeRewritten !== readmeBefore;
+  if (readmeChanged) {
+    writeFileSync(readmePath, readmeRewritten);
+    // Re-pad the comparison table when version width changed (Devin finding).
+    prettierFormatMarkdown(readmePath, root);
+  }
 
   const projBefore = readFileSync(projectionPath, "utf8");
   const projAfter = syncBenchmarkGgsvelteVersion(projBefore, version);
@@ -107,10 +135,13 @@ export function checkComparisonVersions(root: string = ROOT): void {
     "utf8",
   );
 
-  const wantReadme = syncReadmeApiStability(readme, version);
-  const wantProj = syncBenchmarkGgsvelteVersion(projection, version);
+  // Version presence (not full-file equality after prettier padding).
+  const apiCell = new RegExp(
+    String.raw`\|\s*\*\*API stability\*\*\s*\|\s*⚠️ v${version.replaceAll(".", String.raw`\.`)}\s*\|`,
+  );
   const stale: string[] = [];
-  if (wantReadme !== readme) stale.push("README.md");
+  if (!apiCell.test(readme)) stale.push("README.md");
+  const wantProj = syncBenchmarkGgsvelteVersion(projection, version);
   if (wantProj !== projection) {
     stale.push("apps/docs/src/lib/generated/benchmark-charts.ts");
   }
@@ -122,7 +153,7 @@ export function checkComparisonVersions(root: string = ROOT): void {
   }
 }
 
-async function main(argv: readonly string[]): Promise<void> {
+function main(argv: readonly string[]): void {
   const check = argv.includes("--check");
   if (check) {
     checkComparisonVersions(ROOT);
@@ -144,5 +175,5 @@ async function main(argv: readonly string[]): Promise<void> {
 }
 
 if (import.meta.main) {
-  await main(process.argv.slice(2));
+  main(process.argv.slice(2));
 }
