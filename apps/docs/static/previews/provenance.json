@@ -48,12 +48,12 @@
     },
     "boxplot/by-category": {
       "filename": "boxplot-by-category-light.png",
-      "sourceSha256": "73da93d07cc9be59707a4fc0e90d93096ea830880ba16e114db66f28129619d2",
+      "sourceSha256": "1229307401f08687c5cbf9023070404678ae6f6a5f5199d6daddc93985fe3b52",
       "pngSha256": "2ea691d1e47b78191c4afdf04e1dff453811e44503fc2cf71564d6eccac4db8a"
     },
     "boxplot/violin": {
       "filename": "boxplot-violin-light.png",
-      "sourceSha256": "2e414410ff2be2c34b8472f31e3ed51e6b55bdaf3bb69fe323fab36ee8c463dd",
+      "sourceSha256": "0fb638e02d1d638273a80c943749acc340057590e15ee1adb9b8defb9436d7b8",
       "pngSha256": "f46358a2ce5822905cd7bb481003aa139b8ba06f80ca2d1e98294c7c7bc47823"
     },
     "col/basic": {
@@ -123,17 +123,17 @@
     },
     "errorbar/caps": {
       "filename": "errorbar-caps-light.png",
-      "sourceSha256": "94df4cf5017245ec82e5fa0f5141d547ce8c7c1b50c4af812f573275f88da090",
+      "sourceSha256": "9d97f71be8b46f29eb4c8d5b65cc3801864b8d2b933ba5948d1d338e6780ae0a",
       "pngSha256": "f232ca152874d8b4306b1c6439bdfb5dc0328acf66310d21bff65b5a459e6019"
     },
     "errorbar/mean-se": {
       "filename": "errorbar-mean-se-light.png",
-      "sourceSha256": "dc7265d8fe8f96cfa5371dacd1a83907ce9947979dca1a0e013e59fe5df97210",
+      "sourceSha256": "fc7e2c9d0c31d7094d3889040b1d46a9493d780e8350b376a85a83a6e4608f45",
       "pngSha256": "dc0de79b6f2f3269ebf5632b580708609faf09b470fad83a7c089aec00ac2a42"
     },
     "errorbar/summary-bin": {
       "filename": "errorbar-summary-bin-light.png",
-      "sourceSha256": "11dde7cbeabedc34ddc64666c387dff91f47dc0e08b5d1c8c1579d2f7896b6db",
+      "sourceSha256": "234e8ae817ff340a249bd62f8bde712acdec8cc3288f883f9db8e15e881bf94a",
       "pngSha256": "d7976f316ae4950012d6d3cdc93806c00f7145a168f617597123b1b61792adfe"
     },
     "facet/ordered-side-strips": {
@@ -238,7 +238,7 @@
     },
     "linerange/stems": {
       "filename": "linerange-stems-light.png",
-      "sourceSha256": "af2d594680083af373de229a8e3a076903e294c126a38848b73adb0131a986cd",
+      "sourceSha256": "0db971b6b8c5357f732d24f45f3c141371a8b0f4aab4d8df6ad188854f74683a",
       "pngSha256": "0958c1a7195d001f16489ac74d888c375752fa115d1ddf283328c0f0dee2f432"
     },
     "map/choropleth": {
@@ -258,7 +258,7 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "fade47e6bf58ddb65a52700da574703745dfb7deff8d5da13507233ba8ece350",
+      "sourceSha256": "506292c16c33bf5e7d821158fc95de53acc1c6b121de9f559d8d3ab26556b90c",
       "pngSha256": "2949dc19048c52de04fced10fa7a563726b70d02b5f091f35f84c7d8a7b7f157"
     },
     "point/abline-identity": {
@@ -333,7 +333,7 @@
     },
     "pointrange/midpoints": {
       "filename": "pointrange-midpoints-light.png",
-      "sourceSha256": "e23196233bdae64e23becabb64345cf1b32e74309167c3a73e5fb5a007ccc035",
+      "sourceSha256": "491bc48136511779595ba9bd583d16c7b7f771eed0bccdb1b711df18b47c9a3b",
       "pngSha256": "5c44493e2ba5b9da11cb83d536a95c567ea220ef9d106365af4e025474c2de91"
     },
     "polygon/regions": {

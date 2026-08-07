@@ -118,4 +118,57 @@ describe("example interaction API (v0.20)", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  /**
+   * Discrete / categorical interval and distribution examples must not use
+   * freescrolling axis-guide modes (`x` / `xy`). Those modes freescroll across
+   * category slots and blank x tooltip rows. Hit the mark geometry with
+   * `mode="exact"` instead (#1529).
+   *
+   * Continuous shared-x series (lines, areas, densities) keep `mode="x"`.
+   * `crossbar/boxes` is allowlisted: category-center snap makes `x` feel OK.
+   */
+  const DISCRETE_INTERVAL_EXACT = [
+    "boxplot/violin",
+    "boxplot/by-category",
+    "errorbar/caps",
+    "errorbar/mean-se",
+    "errorbar/summary-bin",
+    "pointrange/midpoints",
+    "linerange/stems",
+  ] as const;
+
+  for (const id of DISCRETE_INTERVAL_EXACT) {
+    it(`${id}: uses mode="exact" (not freescrolling x/xy) on categorical/interval charts`, () => {
+      const path = join(EXAMPLES, id, "Example.svelte");
+      const source = readFileSync(path, "utf8");
+      expect(source).toMatch(/<Inspect\b[^>]*\bmode=["']exact["']/);
+      expect(source).not.toMatch(/<Inspect\b[^>]*\bmode=["']x["']/);
+      expect(source).not.toMatch(/<Inspect\b[^>]*\bmode=["']xy["']/);
+    });
+  }
+
+  it("errorbar/mean-se: jitter background points are not hit targets", () => {
+    const source = readFileSync(join(EXAMPLES, "errorbar/mean-se/Example.svelte"), "utf8");
+    // GeomPoint carries inspect={false}; the summary errorbar remains inspectable.
+    expect(source).toMatch(/<GeomPoint[\s\S]*?inspect=\{false\}/);
+  });
+
+  it("errorbar/summary-bin: raw scatter is not a hit target", () => {
+    const source = readFileSync(join(EXAMPLES, "errorbar/summary-bin/Example.svelte"), "utf8");
+    expect(source).toMatch(/<GeomPoint[\s\S]*?inspect=\{false\}/);
+  });
+
+  it("path/trajectory: decorative rivers and text labels opt out of inspection", () => {
+    const source = readFileSync(join(EXAMPLES, "path/trajectory/Example.svelte"), "utf8");
+    // River furniture (campaignRivers) and every GeomText (city/strength/date labels)
+    // must set inspect={false}. Troop path + cold path/point stay inspectable.
+    const riverBlock = source.match(/<GeomPath[\s\S]*?data=\{campaignRivers\}[\s\S]*?\/>/);
+    expect(riverBlock?.[0] ?? "").toContain("inspect={false}");
+    const textBlocks = source.match(/<GeomText[\s\S]*?\/>/g) ?? [];
+    expect(textBlocks.length).toBeGreaterThanOrEqual(3);
+    for (const block of textBlocks) {
+      expect(block).toContain("inspect={false}");
+    }
+  });
 });

@@ -18,7 +18,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
+  <Inspect mode="exact" pin />
   <ThemeMinimal />
   <ScaleXDiscrete domain={["A", "B", "C"]} />
   <ScaleYContinuous limits={[0, 12]} />
