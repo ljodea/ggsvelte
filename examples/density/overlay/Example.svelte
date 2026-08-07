@@ -2,6 +2,7 @@
   import {
     GeomDensity,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillManual,
     ThemeMinimal,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeMinimal />
   <ScaleFillManual
     domain={["Daughters", "Sons"]}

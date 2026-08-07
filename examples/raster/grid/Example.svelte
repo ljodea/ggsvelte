@@ -2,6 +2,7 @@
   import {
     GeomRaster,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillContinuous,
     ThemeFew,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeFew />
   <ScaleFillContinuous scheme="viridis" />
   <Labs

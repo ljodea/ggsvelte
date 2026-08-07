@@ -16,13 +16,24 @@ const EXAMPLES = join(ROOT, "examples");
 
 function walkExampleSvelte(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
+    if (name === "node_modules" || name.startsWith(".")) return [];
     const path = join(dir, name);
-    if (statSync(path).isDirectory()) return walkExampleSvelte(path);
+    // Skip broken symlinks (workspace package links in examples/node_modules).
+    let st;
+    try {
+      st = statSync(path);
+    } catch {
+      return [];
+    }
+    if (st.isDirectory()) return walkExampleSvelte(path);
     return name === "Example.svelte" ? [path] : [];
   });
 }
 
 const files = walkExampleSvelte(EXAMPLES);
+
+/** Charts with no hit targets — Inspect would teach nothing. */
+const INSPECT_OPTIONAL = new Set(["blank/axes-only"]);
 
 describe("example interaction API (v0.20)", () => {
   it("finds gallery Example.svelte files", () => {
@@ -37,6 +48,15 @@ describe("example interaction API (v0.20)", () => {
         plotLevelInteractionOffenders(attrs),
       );
       expect(offenders).toEqual([]);
+    });
+  }
+
+  for (const path of files) {
+    const id = relative(EXAMPLES, path).replace(/\/Example\.svelte$/, "");
+    if (INSPECT_OPTIONAL.has(id)) continue;
+    it(`${id}: ships <Inspect> so live gallery charts are inspectable`, () => {
+      const source = readFileSync(path, "utf8");
+      expect(source).toContain("<Inspect");
     });
   }
 

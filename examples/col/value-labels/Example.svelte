@@ -3,6 +3,7 @@
     GeomCol,
     GeomText,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXDiscrete,
     ThemeFivethirtyeight,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeFivethirtyeight />
   <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
   <Labs

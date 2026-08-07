@@ -3,6 +3,7 @@
     CoordFlip,
     GeomCol,
     GGPlot,
+    Inspect,
     Labs,
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeFivethirtyeight />
   <CoordFlip />
   <Labs

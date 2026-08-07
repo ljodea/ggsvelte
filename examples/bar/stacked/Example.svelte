@@ -3,6 +3,7 @@
     GeomBar,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleFillDiscrete,
     ScaleXDiscrete,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeLight />
   <ScaleXDiscrete
     domain={["1 and 2", "3", "4", "5", "6", "7", "8", "9", "10"]}

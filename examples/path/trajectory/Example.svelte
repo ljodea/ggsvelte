@@ -5,6 +5,7 @@
     GeomPoint,
     GeomText,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorManual,
     ScaleLinewidthContinuous,
@@ -23,6 +24,7 @@
 
 <div class="minard">
   <GGPlot width={960} height={520}>
+    <Inspect mode="xy" pin maxDistance={24} />
     <ThemeClassic />
     <!-- lon/lat degrees are not the same length on the ground at 55°N -->
     <CoordFixed ratio={1.6} />
@@ -75,6 +77,7 @@
   </GGPlot>
 
   <GGPlot width={960} height={190}>
+    <Inspect mode="xy" pin maxDistance={24} />
     <ThemeClassic />
     <ScaleXContinuous limits={[23.5, 38.2]} />
     <Labs title="The cold on the road back" x="Longitude east" y="°Réaumur" />

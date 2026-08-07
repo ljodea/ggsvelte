@@ -2,6 +2,7 @@
   import {
     GeomDotplot,
     GGPlot,
+    Inspect,
     Labs,
     ScaleYContinuous,
     ThemeClassic,
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={earthDensity} aes={{ x: "density" }} width={640} height={400}>
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <Labs
     title="One dot per measurement, stacked in bins"

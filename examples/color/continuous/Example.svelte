@@ -3,6 +3,7 @@
     CoordFixed,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorContinuous,
     ThemeDark,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeDark />
   <CoordFixed />
   <ScaleColorContinuous scheme="viridis" labels="d" />

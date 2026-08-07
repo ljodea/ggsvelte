@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     registerUnique,
     ThemeClassic,
@@ -19,6 +20,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <Labs
     title="Collapse duplicate coordinates to unique marks"

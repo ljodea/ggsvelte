@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomCol, GGPlot, Labs } from "@ggsvelte/svelte";
+  import { GeomCol, GGPlot, Inspect, Labs } from "@ggsvelte/svelte";
 
   import { filings } from "./data.js";
 </script>
@@ -14,6 +14,7 @@
   width={640}
   height={320}
 >
+  <Inspect mode="exact" pin />
   <Labs
     title="One long label among short ones"
     subtitle="At a normal panel width the axis should wrap the outlier, not rotate every label"

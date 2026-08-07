@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomCount, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    GeomCount,
+    GGPlot,
+    Inspect,
+    Labs,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
   import { galtonHeights } from "./data.js";
 </script>
@@ -10,6 +16,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <Labs
     title="Overlapping points sized by how many share a cell"

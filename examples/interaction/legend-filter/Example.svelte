@@ -4,6 +4,7 @@
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ThemeFivethirtyeight,
@@ -30,6 +31,7 @@
           : `${String(event.clause.values.length)} ${event.clause.values.length === 1 ? "series is" : "series are"} hidden; the legend keeps every series available.`;
     }}
   >
+    <Inspect mode="x" pin />
     <ThemeFivethirtyeight />
     <ScaleXContinuous labels="d" />
     <Labs

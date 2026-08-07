@@ -4,6 +4,7 @@
     GeomCol,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     ScaleFillDiscrete,
     ThemeLight,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeLight />
   <FacetWrap
     field={{

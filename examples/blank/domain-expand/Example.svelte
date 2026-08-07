@@ -3,6 +3,7 @@
     GeomBlank,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <Labs
     title="Expanded domain with no marks"

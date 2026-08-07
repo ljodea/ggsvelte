@@ -3,6 +3,7 @@
     GeomPoint,
     GeomRule,
     GGPlot,
+    Inspect,
     Labs,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <Labs
     title="A crosshair of two fixed intercepts"

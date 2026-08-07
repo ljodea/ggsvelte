@@ -2,6 +2,7 @@
   import {
     GeomBin2d,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillContinuous,
     ThemeMinimal,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeMinimal />
   <ScaleFillContinuous scheme="viridis" />
   <Labs

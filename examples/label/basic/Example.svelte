@@ -1,8 +1,9 @@
 <script lang="ts">
   import {
-    GeomPoint,
     GeomLabel,
+    GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ScaleYContinuous,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <ScaleXContinuous limits={[18, 30]} />
   <ScaleYContinuous limits={[0.2, 3.8]} />

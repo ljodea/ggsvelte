@@ -3,6 +3,7 @@
     CoordFixed,
     GeomSpoke,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ScaleYContinuous,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <CoordFixed />
   <ScaleXContinuous limits={[-5, 5]} />

@@ -3,6 +3,7 @@
     GeomLine,
     GeomRect,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillManual,
     ScaleXContinuous,
@@ -13,6 +14,7 @@
 </script>
 
 <GGPlot data={reigns} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeEconomist />
   <ScaleXContinuous labels="d" />
   <ScaleFillManual

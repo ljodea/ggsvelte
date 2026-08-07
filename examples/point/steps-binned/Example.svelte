@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorSteps,
     ThemeMinimal,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <ScaleColorSteps low="#132B43" high="#56B1F7" />
   <Labs

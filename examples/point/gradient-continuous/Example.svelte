@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorGradient,
     ScaleXContinuous,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <ScaleColorGradient low="#132B43" high="#56B1F7" />
   <ScaleXContinuous breaks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} />

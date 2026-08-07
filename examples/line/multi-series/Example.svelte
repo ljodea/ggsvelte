@@ -4,6 +4,7 @@
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleColorManual,
     ScaleXContinuous,
@@ -19,6 +20,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeEconomist />
   <ScaleXContinuous
     breaks={[1600, 1650, 1700, 1750, 1800]}

@@ -3,6 +3,7 @@
     GeomFunction,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={chestSizes} aes={{ x: "chest" }} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeClassic />
   <Labs
     title="Observed counts against a fitted curve"

@@ -3,6 +3,7 @@
     GeomErrorbar,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     registerSummary,
     ScaleXDiscrete,
@@ -21,6 +22,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeHrbr />
   <ScaleXDiscrete
     domain={["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"]}

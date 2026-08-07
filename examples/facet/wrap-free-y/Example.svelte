@@ -4,6 +4,7 @@
     GeomLine,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ThemeFivethirtyeight,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeFivethirtyeight />
   <FacetWrap
     field={{

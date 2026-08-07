@@ -3,6 +3,7 @@
     CoordFixed,
     GeomSf,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillContinuous,
     ThemeClassic,
@@ -12,6 +13,7 @@
 </script>
 
 <GGPlot data={heightRings} aes={{ fill: "height" }} width={640} height={400}>
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />

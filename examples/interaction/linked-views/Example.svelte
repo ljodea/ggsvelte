@@ -3,6 +3,7 @@
     createPlotInteraction,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
@@ -82,6 +83,7 @@
       height={360}
       ariaLabel="Penguins by flipper length and body mass, colored by species"
     >
+      <Inspect mode="xy" pin maxDistance={24} identity="id" />
       <ThemeMinimal />
       <Labs
         title="Select in either view"
@@ -103,6 +105,7 @@
       height={360}
       ariaLabel="Penguins by flipper length and body mass in a quieter style"
     >
+      <Inspect mode="xy" pin maxDistance={24} identity="id" />
       <ThemeMinimal />
       <Labs
         title="The same keys, quieter styling"

@@ -3,6 +3,7 @@
     FacetWrap,
     GeomHistogram,
     GGPlot,
+    Inspect,
     Labs,
     ThemeGgplot2,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeGgplot2 />
   <FacetWrap field="pair" ncol={2} />
   <Labs

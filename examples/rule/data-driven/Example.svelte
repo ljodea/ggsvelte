@@ -3,6 +3,7 @@
     GeomRule,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeMinimal />
   <Labs
     title="A rug of every cupping score"

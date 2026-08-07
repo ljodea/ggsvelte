@@ -2,6 +2,7 @@
   import {
     GeomStep,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ScaleYContinuous,
@@ -12,6 +13,7 @@
 </script>
 
 <GGPlot data={stairVertices} aes={{ x: "x", y: "y" }} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeMinimal />
   <ScaleXContinuous limits={[0.5, 5.5]} />
   <ScaleYContinuous limits={[0, 6]} />
