@@ -158,6 +158,30 @@ test("code tabs share the manual-copy fallback", async ({ page }) => {
   );
 });
 
+test("home grammar chart keeps static dimensions through live upgrade", async ({ page }) => {
+  // Wider than the 832px shell cap so an uncapped container-responsive live
+  // plot would visibly stretch (the default 800px viewport cannot show it).
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  const shell = page.locator(".grammar-output");
+  await expect(shell).toBeVisible();
+  const column = await page.locator(".code-path-chart").boundingBox();
+  const before = await shell.boundingBox();
+  expect(before).not.toBeNull();
+  expect(column).not.toBeNull();
+  expect(column!.width).toBeGreaterThan(832);
+  // Cap is DOCS_STATIC_PLOT_WIDTH_PX (832); static svg renders at exactly that.
+  expect(Math.round(before!.width)).toBe(832);
+  // pointerenter intent upgrades the shell to the live plot.
+  await shell.hover();
+  await expect(shell.locator(".gg-plot-root")).toBeVisible({ timeout: 15_000 });
+  const after = await shell.boundingBox();
+  expect(after).not.toBeNull();
+  expect(Math.round(after!.width)).toBe(Math.round(before!.width));
+  expect(Math.round(after!.height)).toBe(Math.round(before!.height));
+  expect(after!.width).toBeLessThan(column!.width);
+});
+
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).

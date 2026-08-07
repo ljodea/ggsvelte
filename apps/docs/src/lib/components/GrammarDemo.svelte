@@ -143,6 +143,15 @@
   .grammar-output {
     position: relative;
     min-width: 0;
+    /*
+     * Cap at the static shell width (DOCS_STATIC_PLOT_WIDTH_PX) and center.
+     * The live plot is container-responsive, so an uncapped shell stretched
+     * to the full code-path column on hover intent — far too wide vs its
+     * 400px height. Keep the literal: importing the constant would pull the
+     * headless renderer into the home client bundle.
+     */
+    max-width: 832px;
+    margin-inline: auto;
   }
 
   .grammar-output :global(svg) {
