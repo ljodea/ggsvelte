@@ -6,10 +6,9 @@
   import type { PlotInspectionChange } from "../interaction/interaction.js";
   import {
     collapseIdenticalDisplayMembers,
-    fieldsForDefaultTooltip,
+    defaultTooltipRows,
     formatTooltipCell,
     selectHoverDisplayMembers,
-    tooltipFieldLabel,
     type TooltipAxisFormatters,
     type TooltipFieldLabs,
   } from "./display-members.js";
@@ -201,13 +200,11 @@
     <div class="gg-tooltip-members">
       {#each shownMembers as member, index (`${member.layerIndex}:${String(member.key)}:${index}`)}
         <dl class:gg-tooltip-focus={member === inspection.focus}>
-          {#each fieldsForDefaultTooltip(member.fields, inspection.mode) as field (field.channel)}
-            <dt>
-              {tooltipFieldLabel(field.field, { channel: field.channel, labs })}
-            </dt>
+          {#each defaultTooltipRows( member.fields, inspection.mode, { labs } ) as row (row.key)}
+            <dt>{row.label}</dt>
             <dd>
-              {formatTooltipCell(field.value, {
-                channel: field.channel,
+              {formatTooltipCell(row.value, {
+                channel: row.valueChannel,
                 axisFormatters: member.row === null ? axisFormatters : null,
               })}
             </dd>

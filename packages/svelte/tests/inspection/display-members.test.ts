@@ -9,6 +9,7 @@ import { runPipeline, type CellValue } from "@ggsvelte/core";
 
 import {
   collapseIdenticalDisplayMembers,
+  defaultTooltipRows,
   fieldsForDefaultTooltip,
   formatTooltipCell,
   selectHoverDisplayMembers,
@@ -158,6 +159,106 @@ describe("fieldsForDefaultTooltip (#754)", () => {
     expect(fieldsForDefaultTooltip(distinct, "exact").map((f) => f.field)).toEqual([
       "name",
       "species",
+    ]);
+  });
+});
+
+describe("defaultTooltipRows (series-centric axis groups)", () => {
+  const labs = {
+    x: "Year",
+    y: "Shillings",
+    color: "Series",
+  };
+
+  it("collapses multi-series x-group members to series name → measure value", () => {
+    // Themes wheat/wages style: aes(x=year, y=riders, color=mode).
+    // Without this, each member renders "Shillings: 41" + "Series: Wheat price"
+    // and three series become six noisy key-value lines.
+    const wheat = [
+      field("x", "month", 1565),
+      field("y", "riders", 41),
+      field("color", "mode", "Wheat price"),
+    ];
+    const rows = defaultTooltipRows(wheat, "x", { labs });
+    expect(rows).toEqual([
+      {
+        key: "color:mode",
+        label: "Wheat price",
+        value: 41,
+        valueChannel: "y",
+      },
+    ]);
+  });
+
+  it("uses fill as series identity for stacked area groups", () => {
+    const disease = [
+      field("x", "year", 1855),
+      field("y", "twh", 1022.8),
+      field("fill", "source", "Disease"),
+    ];
+    const rows = defaultTooltipRows(disease, "x", {
+      labs: {
+        x: "Year",
+        y: "Deaths per 1,000 per year",
+        fill: "Cause",
+      },
+    });
+    expect(rows).toEqual([
+      {
+        key: "fill:source",
+        label: "Disease",
+        value: 1022.8,
+        valueChannel: "y",
+      },
+    ]);
+  });
+
+  it("keeps traditional field labels for exact / xy point inspection", () => {
+    const penguin = [
+      field("x", "flipper", 180),
+      field("y", "mass", 3700),
+      field("color", "species", "Adelie"),
+    ];
+    const rows = defaultTooltipRows(penguin, "xy", {
+      labs: {
+        x: "Flipper length (mm)",
+        y: "Body mass (g)",
+        color: "Species",
+      },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Flipper length (mm)", "Body mass (g)", "Species"]);
+    expect(rows.map((r) => r.value)).toEqual([180, 3700, "Adelie"]);
+  });
+
+  it("falls back to traditional rows when series identity is blank", () => {
+    // Stat aggregates can advertise fill/weight fields with null values
+    // (no source row + CandidateFacts has no fillValue). Do not invent a
+    // "– → measure" row; keep readable field labels so y at least shows.
+    const blankSeries = [
+      field("x", "x", "1876"),
+      field("y", "count", 175),
+      field("fill", "level", null),
+      field("weight", "deaths", null),
+    ];
+    const rows = defaultTooltipRows(blankSeries, "x", {
+      labs: { x: "Year", y: "Deaths per million", fill: "County" },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Deaths per million", "County", "deaths"]);
+    expect(rows.map((r) => r.value)).toEqual([175, null, null]);
+  });
+
+  it("falls back when there is no series aesthetic (single-series line)", () => {
+    const single = [field("x", "year", 1855), field("y", "value", 95.7)];
+    const rows = defaultTooltipRows(single, "x", {
+      labs: { x: "Year", y: "£ millions" },
+    });
+    expect(rows).toEqual([
+      {
+        key: "y",
+        label: "£ millions",
+        value: 95.7,
+        valueChannel: "y",
+      },
     ]);
   });
 });

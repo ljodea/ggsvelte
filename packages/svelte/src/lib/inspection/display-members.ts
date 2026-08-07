@@ -146,6 +146,105 @@ export function fieldsForDefaultTooltip(
 }
 
 /**
+ * Channels that identify a series/group in long-form data. First match wins
+ * when building the compact axis-group tooltip row.
+ */
+const SERIES_IDENTITY_CHANNELS = ["color", "fill", "linetype", "shape"] as const;
+
+/**
+ * One rendered `<dt>/<dd>` pair in the default tooltip body.
+ *
+ * - `label` is the left-column text (may be a series value, not a field name)
+ * - `value` is the right-column cell (formatted via `formatTooltipCell`)
+ * - `valueChannel` selects axis formatters for position values
+ * - `key` is a stable each-block key
+ */
+export type DefaultTooltipRow = Readonly<{
+  key: string;
+  label: string;
+  value: CellValue;
+  valueChannel?: string;
+}>;
+
+function seriesIdentityField(fields: readonly TooltipField[]): TooltipField | null {
+  for (const channel of SERIES_IDENTITY_CHANNELS) {
+    for (const field of fields) {
+      if (field.channel !== channel) continue;
+      // Prefer a field that actually has a series label; null/empty is noise.
+      if (field.value === null) continue;
+      if (typeof field.value === "string" && field.value.trim() === "") continue;
+      return field;
+    }
+  }
+  // Fall back to the first series channel even when blank so callers can
+  // still choose the traditional multi-row layout when identity is missing.
+  for (const channel of SERIES_IDENTITY_CHANNELS) {
+    for (const field of fields) {
+      if (field.channel === channel) return field;
+    }
+  }
+  return null;
+}
+
+/**
+ * Default tooltip body rows for one display member.
+ *
+ * Axis-group mode (`x` / `y`) with a series aesthetic collapses to one row
+ * per member: **series value → measure value**. That removes the repeated
+ * key-value noise of "Index: 12 / Series: Wheat / Index: 8 / Series: Bread…"
+ * (themes multi-series specimens, stacked areas, multi-line groups).
+ *
+ * Exact / xy inspection, single-field members, and members without a usable
+ * series identity keep the traditional field-label → value rows.
+ */
+export function defaultTooltipRows(
+  fields: readonly TooltipField[],
+  mode: "exact" | "xy" | "x" | "y",
+  options?: {
+    readonly labs?: TooltipFieldLabs | null | undefined;
+  },
+): readonly DefaultTooltipRow[] {
+  const body = fieldsForDefaultTooltip(fields, mode);
+  const labs = options?.labs;
+
+  if (mode === "x" || mode === "y") {
+    const valueChannel = mode === "x" ? "y" : "x";
+    let valueField: TooltipField | null = null;
+    for (const field of body) {
+      if (field.channel === valueChannel) {
+        valueField = field;
+        break;
+      }
+    }
+    const seriesField = seriesIdentityField(body);
+    if (
+      valueField !== null &&
+      seriesField !== null &&
+      seriesField.value !== null &&
+      !(typeof seriesField.value === "string" && seriesField.value.trim() === "")
+    ) {
+      // Series name as the row label; measure as the reading. Drop weight /
+      // size / echo columns that only restate what the mark already encodes.
+      return [
+        {
+          key: `${seriesField.channel}:${seriesField.field}`,
+          label: formatTooltipCell(seriesField.value),
+          value: valueField.value,
+          valueChannel: valueField.channel,
+        },
+      ];
+    }
+  }
+
+  return body.map((field) => ({
+    key: field.channel,
+    label: tooltipFieldLabel(field.field, { channel: field.channel, labs }),
+    value: field.value,
+    valueChannel: field.channel,
+  }));
+}
+
+/**
  * Stable token for one member's default-tooltip body.
  * Uses field *names* (dt text) + formatted values (dd text), not channel —
  * channels are not shown and must not split visually identical rows.
