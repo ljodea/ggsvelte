@@ -137,7 +137,15 @@ export function fieldsForDefaultTooltip(
 ): readonly TooltipField[] {
   const withoutAxis =
     mode === "x" || mode === "y" ? fields.filter((field) => field.channel !== mode) : fields;
+  // Seed with the axis column when it is already the header, so palette-only
+  // `fill = x` (or color = x) echoes do not reappear as a body row and do not
+  // trigger series-centric collapse that would hide the measure label.
   const seenColumns = new Set<string>();
+  if (mode === "x" || mode === "y") {
+    for (const field of fields) {
+      if (field.channel === mode) seenColumns.add(field.field);
+    }
+  }
   return withoutAxis.filter((field) => {
     if (seenColumns.has(field.field)) return false;
     seenColumns.add(field.field);

@@ -154,6 +154,10 @@ describe("fieldsForDefaultTooltip (#754)", () => {
     expect(exact.map((f) => f.channel)).toEqual(["x", "y"]);
     expect(exact.map((f) => f.field)).toEqual(["language", "respondents"]);
 
+    // Axis-group: header already prints the category; fill echo of the same
+    // column must drop so only the measure remains (Devin review on #1527).
+    expect(fieldsForDefaultTooltip(barFields, "x").map((f) => f.field)).toEqual(["respondents"]);
+
     // Distinct columns stay even when values happen to match.
     const distinct = [field("x", "name", "Adelie"), field("color", "species", "Adelie")];
     expect(fieldsForDefaultTooltip(distinct, "exact").map((f) => f.field)).toEqual([
@@ -257,6 +261,23 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
         key: "y",
         label: "£ millions",
         value: 95.7,
+        valueChannel: "y",
+      },
+    ]);
+  });
+
+  it("keeps the measure label when fill only echoes the grouping axis column", () => {
+    // Violin/bar palette: aes(x=run, y=velocity, fill=run). Axis header is the
+    // run; body must stay "velocity: …", not "runValue: velocity".
+    const violin = [field("x", "run", 3), field("y", "velocity", 850), field("fill", "run", 3)];
+    const rows = defaultTooltipRows(violin, "x", {
+      labs: { x: "Run", y: "Velocity" },
+    });
+    expect(rows).toEqual([
+      {
+        key: "y",
+        label: "Velocity",
+        value: 850,
         valueChannel: "y",
       },
     ]);
