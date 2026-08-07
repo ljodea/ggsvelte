@@ -1,7 +1,7 @@
 /**
  * Panel layout chrome: labs, axis titles (coord flip), formatters, legends.
  */
-import type { PortableSpec, TemporalScaleKind } from "@ggsvelte/spec";
+import type { PortableSpec, TemporalPrecision, TemporalScaleKind } from "@ggsvelte/spec";
 
 import { humanizeFieldTitle } from "../humanize-field.js";
 import { FONT_METRICS } from "../layout/font-metrics.js";
@@ -66,6 +66,8 @@ export interface PanelLayoutChromeInput {
   yScale: PositionScale;
   xTemporalKind: TemporalScaleKind | null;
   yTemporalKind: TemporalScaleKind | null;
+  xTemporalPrecision: TemporalPrecision | null;
+  yTemporalPrecision: TemporalPrecision | null;
   legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
@@ -197,6 +199,8 @@ function resolvePanelLayoutDisplay(input: {
   yScale: PositionScale;
   xTemporalKind: TemporalScaleKind | null;
   yTemporalKind: TemporalScaleKind | null;
+  xTemporalPrecision: TemporalPrecision | null;
+  yTemporalPrecision: TemporalPrecision | null;
   xTitle: string;
   yTitle: string;
   warnings: PipelineWarning[];
@@ -214,8 +218,22 @@ function resolvePanelLayoutDisplay(input: {
     warnings,
   } = input;
 
-  const formatX = makeAxisFormatter("x", xScale, scalesConfig.x, warnings, input.xTemporalKind);
-  const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings, input.yTemporalKind);
+  const formatX = makeAxisFormatter(
+    "x",
+    xScale,
+    scalesConfig.x,
+    warnings,
+    input.xTemporalKind,
+    input.xTemporalPrecision,
+  );
+  const formatY = makeAxisFormatter(
+    "y",
+    yScale,
+    scalesConfig.y,
+    warnings,
+    input.yTemporalKind,
+    input.yTemporalPrecision,
+  );
   const { hTitle, vTitle } = flipDisplayTitles(flip, xTitle, yTitle);
   const { formatH, formatV } = flipDisplayFormatters(flip, formatX, formatY);
   const convertedBreaks = (axis: "x" | "y"): (number | string)[] | undefined => {
@@ -389,6 +407,8 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
     yScale: input.yScale,
     xTemporalKind: input.xTemporalKind,
     yTemporalKind: input.yTemporalKind,
+    xTemporalPrecision: input.xTemporalPrecision,
+    yTemporalPrecision: input.yTemporalPrecision,
     xTitle: labsChrome.xTitle,
     yTitle: labsChrome.yTitle,
     warnings: input.warnings,

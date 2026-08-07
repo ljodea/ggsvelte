@@ -2,7 +2,7 @@
  * Layout/scene assembly helpers used by runPipeline: domain projection,
  * tick formatters, margin max, and warning/advisory dedupe.
  */
-import type { PositionScaleSpec, TemporalScaleKind } from "@ggsvelte/spec";
+import type { PositionScaleSpec, TemporalPrecision, TemporalScaleKind } from "@ggsvelte/spec";
 
 import type {
   BandLayoutDomainContext,
@@ -83,12 +83,60 @@ export function layoutDomain(
   };
 }
 
+/**
+ * Default strftime pattern for tooltip / crosshair axis values.
+ *
+ * Patterns track the **channel unit** (column precision), not tick spacing.
+ * Year data labels as years even when a cursor sits between year ticks;
+ * day data still gets full calendar dates.
+ */
+function defaultTemporalAxisPattern(
+  kind: TemporalScaleKind,
+  precision: TemporalPrecision | null | undefined,
+  options?: { lean?: boolean },
+): string {
+  const lean = options?.lean === true;
+  if (kind === "monthDay") return "%b %e";
+  if (kind === "time") {
+    if (precision === "millisecond") return "%H:%M:%S.%L";
+    if (precision === "minute") return "%H:%M";
+    return "%H:%M:%S";
+  }
+
+  switch (precision) {
+    case "year":
+      return "%Y";
+    case "quarter":
+      // formatTime (lean) has no %q token.
+      return lean ? "%Y-%m" : "%Y-Q%q";
+    case "month":
+      return "%Y-%m";
+    case "date":
+      return "%Y-%m-%d";
+    case "minute":
+      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M" : "%Y-%m-%d %H:%M %Z";
+    case "second":
+      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+    case "millisecond":
+      return kind === "date"
+        ? "%Y-%m-%d"
+        : lean
+          ? "%Y-%m-%d %H:%M:%S.%L"
+          : "%Y-%m-%d %H:%M:%S.%L %Z";
+    default:
+      // Unknown precision: prior kind-only defaults.
+      if (kind === "date") return "%Y-%m-%d";
+      return lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+  }
+}
+
 export function makeAxisFormatter(
   axis: "x" | "y",
   scale: PositionScale,
   config: PositionScaleSpec | undefined,
   warnings: PipelineWarning[],
   resolvedTemporalKind?: TemporalScaleKind | null,
+  resolvedTemporalPrecision?: TemporalPrecision | null,
 ): TickFormatter | undefined {
   if (config?.breaks !== undefined && config.dateBreaks !== undefined) {
     warnings.push({
@@ -112,23 +160,18 @@ export function makeAxisFormatter(
   if (labels === undefined) {
     if (scale.type !== "time") return undefined;
     const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
-    const defaultPattern =
-      kind === "date"
-        ? "%Y-%m-%d"
-        : kind === "time"
-          ? "%H:%M:%S"
-          : // The crosshair and tooltip header read through here, so this is
-            // where a month-day axis says "Apr 1" rather than a stamped date.
-            kind === "monthDay"
-            ? "%b %e"
-            : "%Y-%m-%d %H:%M:%S %Z";
+    // Crosshair and tooltip header share this formatter. Unit comes from
+    // column precision (year → %Y), not from how densely ticks are drawn.
     const compile = getTemporalRuntime()?.compileLabelFormat;
     if (compile === undefined) {
-      // formatTime has no %Z; use a zone-free lean default.
-      const leanPattern =
-        kind === "date" ? "%Y-%m-%d" : kind === "time" ? "%H:%M:%S" : "%Y-%m-%d %H:%M:%S";
+      const leanPattern = defaultTemporalAxisPattern(kind, resolvedTemporalPrecision, {
+        lean: true,
+      });
       return (value) => formatTime(value as number, leanPattern);
     }
+    const defaultPattern = defaultTemporalAxisPattern(kind, resolvedTemporalPrecision, {
+      lean: false,
+    });
     const format = compile(defaultPattern, {
       kind,
       locale: config?.locale ?? "en-US",

@@ -57,6 +57,8 @@ function baseInput(over: Partial<PanelLayoutInput> = {}): PanelLayoutInput {
     yScale,
     xTemporalKind: null,
     yTemporalKind: null,
+    xTemporalPrecision: null,
+    yTemporalPrecision: null,
     legendInputs: [],
     legendOrder: "stable-domain",
     theme: resolveTheme("default"),

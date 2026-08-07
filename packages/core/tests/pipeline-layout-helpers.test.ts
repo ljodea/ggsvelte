@@ -16,11 +16,14 @@ import {
   dedupeWarnings,
   elementwiseMaxMargins,
   layoutDomain,
+  makeAxisFormatter,
   makeAxisValueFormatter,
   scaleDomainSnapshot,
 } from "../src/pipeline/layout-helpers.ts";
 import type { Advisory, PipelineWarning } from "../src/pipeline/types.ts";
 import type { PositionScale } from "../src/scales/train.ts";
+import { installTemporal } from "../src/install-temporal.ts";
+import { getTemporalRuntime } from "../src/temporal-runtime.ts";
 
 describe("layout chrome constants", () => {
   it("keeps title/legend band sizes stable", () => {
@@ -131,6 +134,38 @@ describe("makeAxisValueFormatter", () => {
     const fmt = makeAxisValueFormatter(band);
     expect(fmt("a")).toBe("a");
     expect(fmt(null)).toBe("–");
+  });
+});
+
+describe("makeAxisFormatter temporal unit defaults", () => {
+  const timeScale: PositionScale = {
+    type: "time",
+    domain: [Date.UTC(1835, 0, 1), Date.UTC(2026, 0, 1)],
+    range: [0, 1],
+    normalize: () => 0,
+  };
+
+  it("defaults date-kind labels to the column precision unit", () => {
+    // bunfig preload installs temporal; keep compile path for %Y / %q tokens.
+    if (getTemporalRuntime() === null) installTemporal();
+    const warnings: PipelineWarning[] = [];
+    const year = makeAxisFormatter("x", timeScale, undefined, warnings, "date", "year");
+    const month = makeAxisFormatter("x", timeScale, undefined, warnings, "date", "month");
+    const day = makeAxisFormatter("x", timeScale, undefined, warnings, "date", "date");
+    expect(year).toBeDefined();
+    expect(month).toBeDefined();
+    expect(day).toBeDefined();
+    expect(year!(Date.UTC(1835, 0, 1), 0)).toBe("1835");
+    expect(month!(Date.UTC(2024, 6, 1), 0)).toBe("2024-07");
+    expect(day!(Date.UTC(2024, 6, 9), 0)).toBe("2024-07-09");
+    expect(warnings).toEqual([]);
+  });
+
+  it("keeps calendar-day defaults when precision is unknown", () => {
+    if (getTemporalRuntime() === null) installTemporal();
+    const warnings: PipelineWarning[] = [];
+    const fmt = makeAxisFormatter("x", timeScale, undefined, warnings, "date", null);
+    expect(fmt!(Date.UTC(1835, 0, 1), 0)).toBe("1835-01-01");
   });
 });
 
