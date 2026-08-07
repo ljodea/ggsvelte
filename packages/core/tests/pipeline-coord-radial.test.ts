@@ -187,4 +187,46 @@ describe("coord_radial pipeline", () => {
     expect(inverted.x).toBeUndefined();
     expect(inverted.y).toBeUndefined();
   });
+
+  it("aligns expand:false axis ticks with evidence domain (not padded range)", () => {
+    // Stacked pie: y evidence is [0, 6]. expand:false remaps geometry and
+    // panel domains to that span; cartesian chrome must not still tick the
+    // padded trained domain (e.g. [-0.3, 6.3]) with inset endpoint positions.
+    // Explicit breaks pin endpoints so the assertion does not depend on the
+    // continuous break algorithm choosing 0 and 6.
+    const model = runPipeline(
+      gg(
+        [
+          { pie: "all", cat: "a", n: 1 },
+          { pie: "all", cat: "b", n: 2 },
+          { pie: "all", cat: "c", n: 3 },
+        ],
+        aes({ x: "pie", y: "n", fill: "cat" }),
+      )
+        .geomCol({ width: 1, position: "stack" })
+        .scales({ y: { breaks: [0, 6] } })
+        .coordRadial({ theta: "y", expand: false })
+        .spec(),
+      size,
+    );
+    const panel = model.scene.panels[0]!;
+    const panelDomainY = model.domains.effective.panels[0]?.y;
+    expect(panelDomainY).toEqual([0, 6]);
+
+    const ticksY = panel.axisY ?? [];
+    expect(ticksY.length).toBeGreaterThan(0);
+    for (const tick of ticksY) {
+      if (typeof tick.value !== "number") continue;
+      expect(tick.value).toBeGreaterThanOrEqual(0);
+      expect(tick.value).toBeLessThanOrEqual(6);
+    }
+
+    const lo = ticksY.find((t) => t.value === 0);
+    const hi = ticksY.find((t) => t.value === 6);
+    expect(lo).toBeDefined();
+    expect(hi).toBeDefined();
+    // fromEnd y: value 0 → bottom edge, value 6 → top edge under remapped scale.
+    expect(lo!.pos).toBeCloseTo(panel.height, 0);
+    expect(hi!.pos).toBeCloseTo(0, 0);
+  });
 });

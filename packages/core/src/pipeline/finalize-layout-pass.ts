@@ -5,6 +5,7 @@ import type { CellValue, CoordRadialSpec, PortableSpec } from "@ggsvelte/spec";
 import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import { buildPolarProjector } from "../coord-polar.js";
+import { scalesForCoordExpand } from "../coord-projector.js";
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
 
@@ -138,6 +139,28 @@ export function finalizePanelLayoutPass(input: {
     guides: normalized.guides,
   });
 
+  // Radial expand:false / theta·r limits remaps geometry via scalesForCoordExpand
+  // (assemble-geometry-batches). Layout ticks and displayScales must use the same
+  // remapped domains so cartesian chrome describes the arc that sectors fill
+  // (#1514). Polar-aware guide_axis_theta remains deferred v1 work.
+  const radialCoord = normalized.coord?.type === "radial" ? normalized.coord : undefined;
+  const panelScalesForLayout =
+    radialCoord === undefined
+      ? panelScales
+      : panelScales.map((scales) =>
+          scalesForCoordExpand(scales, radialCoord.expand !== false, {
+            theta: radialCoord.theta === "y" ? "y" : "x",
+            ...(radialCoord.thetaLimits !== undefined &&
+              radialCoord.thetaLimits.length === 2 && {
+                thetaLimits: [radialCoord.thetaLimits[0]!, radialCoord.thetaLimits[1]!] as const,
+              }),
+            ...(radialCoord.rLimits !== undefined &&
+              radialCoord.rLimits.length === 2 && {
+                rLimits: [radialCoord.rLimits[0]!, radialCoord.rLimits[1]!] as const,
+              }),
+          }),
+        );
+
   perfMark("ggsvelte:layout:start");
   let panelLayout: PanelLayoutResult;
   try {
@@ -159,7 +182,7 @@ export function finalizePanelLayoutPass(input: {
       ncol,
       facetPanels,
       strip,
-      panelScales,
+      panelScales: panelScalesForLayout,
       allFrames,
       hGuide: flip ? yGuide : xGuide,
       vGuide: flip ? xGuide : yGuide,
