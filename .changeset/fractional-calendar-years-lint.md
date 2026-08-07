@@ -1,6 +1,6 @@
 ---
-"@ggsvelte/spec": patch
-"@ggsvelte/skill": patch
+"@ggsvelte/spec": minor
+"@ggsvelte/skill": minor
 ---
 
 Detect year+month/12 linear coordinates as a lint advisory

@@ -36,10 +36,9 @@ const MIN_FRACTIONAL_RATE = 0.1;
  * True when values look like calendar months encoded as year + month/12 on a
  * linear scale — the Nightingale theme-specimen pitfall that labels axes and
  * Inspect pins as decimals (`1855.9`). Pure integer years stay silent.
- *
- * Exported for unit tests of the heuristic in isolation.
+ * Exercised through lintSpec (lint-rules.test.ts), not as a public export.
  */
-export function looksLikeFractionalCalendarYears(values: readonly CellValue[]): boolean {
+function looksLikeFractionalCalendarYears(values: readonly CellValue[]): boolean {
   const yearLike: number[] = [];
   for (const value of values) {
     if (typeof value !== "number" || !Number.isFinite(value)) continue;
