@@ -5,10 +5,12 @@
    * hydrate dozens of full GGPlot controllers on first paint.
    */
   import {
+    CoordFixed,
     GeomArea,
     GeomBar,
     GeomCol,
     GeomLine,
+    GeomMap,
     GeomPoint,
     GeomSmooth,
     GeomText,
@@ -17,6 +19,7 @@
     Inspect,
     Labs,
     Scale,
+    ScaleFillContinuous,
     ScaleXDate,
     scaleXLog10,
     Theme,
@@ -39,6 +42,8 @@
     penguins,
     revenue,
     ridership,
+    sohoNeighbourhoodDeaths,
+    sohoPumpNeighbourhoods,
   } from "$lib/theme-specimens/data";
 
   const {
@@ -221,6 +226,28 @@
     />
     <GeomCol width={0.7} />
     <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+  </GGPlot>
+{:else if kind === "soho-choropleth"}
+  <GGPlot
+    data={sohoNeighbourhoodDeaths}
+    aes={{ map_id: "pump", fill: "deaths" }}
+    {height}
+    ariaLabel={`${label} theme Soho cholera choropleth`}
+  >
+    <Inspect mode="exact" pin identity="pump" />
+    <Theme {name} {...themeRoles} />
+    <CoordFixed />
+    <ScaleFillContinuous scheme="viridis" />
+    <Labs
+      title="1854 Soho cholera deaths by pump neighbourhood"
+      fill="Deaths"
+    />
+    <GeomMap
+      map={{ values: sohoPumpNeighbourhoods }}
+      mapId="pump"
+      linewidth={1.2}
+      alpha={0.95}
+    />
   </GGPlot>
 {:else}
   <GGPlot

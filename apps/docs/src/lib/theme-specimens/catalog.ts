@@ -20,7 +20,9 @@ export type ThemeSpecimenKind =
   | "penguins-scatter"
   | "countries-scatter"
   | "revenue-cols"
-  | "cities-labels";
+  | "cities-labels"
+  /** Snow 1854 Soho pump-neighbourhood choropleth (geom_map + coord_fixed). */
+  | "soho-choropleth";
 
 export type ThemeSpecimenConfig = {
   readonly name: ThemeName;
@@ -267,9 +269,9 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     name: "map",
     label: BY_NAME.map.label,
     caption: "No axes, grid, or chrome — marks only, for maps.",
-    kind: "countries-scatter",
+    kind: "soho-choropleth",
     scheme: BY_NAME.map.scheme,
-    legendFocus: true,
+    legendFocus: false,
   },
   {
     name: "solid",

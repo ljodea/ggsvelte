@@ -300,7 +300,7 @@ export const GALLERY_PREVIEWS = [
     id: "map/choropleth",
     filename: "map-choropleth-light.png",
     path: "/previews/map-choropleth-light.png",
-    sha256: "931716ee612b1c3b01da6ef74f1d765e062532a024ae3fb47b7006e0f3f9a240",
+    sha256: "8c9462f51fc60c56c2cddcf33fa3d1df3175afc4efb395943d9d7ce24674cded",
   },
   {
     id: "path/connect-hv",

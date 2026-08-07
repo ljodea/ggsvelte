@@ -15,7 +15,7 @@ export default defineExample(
     })
     .scales(scaleFillContinuous({ scheme: "viridis" }))
     .coordFixed()
-    .theme("classic")
+    .theme("map")
     .labs({
       title: "359 of 578 deaths were nearest the Broad Street pump",
       subtitle: "The 1854 Soho outbreak counted into the area closest to each public pump",
