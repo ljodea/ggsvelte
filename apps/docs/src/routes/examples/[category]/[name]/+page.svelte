@@ -183,16 +183,18 @@
   }
 
   h1 {
-    max-width: 13ch;
-    margin: 0.25rem 0 1rem;
-    font-size: clamp(3rem, 7vw, 6.5rem);
-    line-height: 0.88;
+    margin: 0.25rem 0 0.75rem;
+    font-size: clamp(1.9rem, 3.4vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
   }
 
   .proof {
-    max-width: 45rem;
+    max-width: 40rem;
+    margin: 0;
     color: var(--muted);
-    font-size: 1.1rem;
+    font-size: 1rem;
+    line-height: 1.45;
   }
 
   .try-it {
