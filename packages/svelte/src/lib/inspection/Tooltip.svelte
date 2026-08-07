@@ -339,7 +339,9 @@
   .gg-tooltip-more,
   .gg-tooltip-hint {
     margin: 7px 0 0;
-    color: color-mix(in srgb, currentColor 65%, transparent);
+    /* Solid mix (not alpha) so secondary lines clear WCAG AA 4.5:1 on the
+       default paper — transparent 65% failed axe on linked-views with pin. */
+    color: color-mix(in srgb, currentColor 72%, var(--gg-paper, #fff));
     font-size: 10px;
   }
 
