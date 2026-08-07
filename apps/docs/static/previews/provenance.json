@@ -468,8 +468,8 @@
     },
     "tile/heatmap": {
       "filename": "tile-heatmap-light.png",
-      "sourceSha256": "818a90274e5872282c03cafa8d39384c92f3e647685cf3f80382ae45a3a91e28",
-      "pngSha256": "ded2293ccca87a99cf9aa7a034fa5bf5b2b578a8ee613f17a35e3bc36c57dde2"
+      "sourceSha256": "875d260d4b78cbbdb6f4686d4dd168ec8ec51f7ce0235ebbb07b66d1957c66c0",
+      "pngSha256": "19bc71b1103f298ecdbbc69b1dd1f4bdd791c6e27df82ae6a30d34ba3b26c857"
     },
     "vline/cutoff": {
       "filename": "vline-cutoff-light.png",
