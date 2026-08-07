@@ -4,6 +4,7 @@
     FacetWrap,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClean,
   } from "@ggsvelte/svelte";
@@ -57,6 +58,7 @@
           : `${event.phase}: ${String(event.keys.length)} rows selected from ${event.panelId}.`;
     }}
   >
+    <Inspect mode="xy" pin maxDistance={24} />
     <ThemeClean />
     <FacetWrap field="island" ncol={3} />
     <Labs

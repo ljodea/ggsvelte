@@ -4,6 +4,7 @@
     GeomDensity2dFilled,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ScaleYContinuous,
@@ -14,6 +15,7 @@
 </script>
 
 <GGPlot data={choleraDeaths} aes={{ x: "x", y: "y" }} width={640} height={400}>
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <CoordFixed />
   <ScaleXContinuous breaks={[8, 10, 12, 14, 16, 18]} />

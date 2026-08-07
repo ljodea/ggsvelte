@@ -8,6 +8,7 @@
     GeomText,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     registerSummaryRolling,
     ScaleFillManual,
@@ -72,6 +73,7 @@
   width={768}
   height={420}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeTufte />
   <ScaleXContinuous labels="d" domain={[800, 2030]} />
   <ScaleYMonthDay

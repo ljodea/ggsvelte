@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorManual,
     ThemeDark,
@@ -20,6 +21,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeDark />
   <ScaleColorManual domain={["a", "b"]} values={["#da702c", "#4385be"]} />
   <Labs {title} {subtitle} x="x" y="y" color="Cluster" />

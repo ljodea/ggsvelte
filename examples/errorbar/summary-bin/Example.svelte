@@ -4,6 +4,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     registerSummaryBin,
     ThemeClassic,
@@ -21,6 +22,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeClassic />
   <Labs
     title="Mean and standard error in each x class"

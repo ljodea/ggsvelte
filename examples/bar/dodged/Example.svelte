@@ -3,6 +3,7 @@
     GeomBar,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleFillDiscrete,
     ThemeFew,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeFew />
   <ScaleFillDiscrete scheme="observable10" />
   <Labs

@@ -3,6 +3,7 @@
     GeomArea,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleFillManual,
     ScaleXDate,
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeEconomist />
   <ScaleXDate labels="%b %Y" />
   <ScaleFillManual

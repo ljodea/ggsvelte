@@ -3,6 +3,7 @@
     GeomPath,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     registerEllipse,
     ScaleColorDiscrete,
@@ -21,6 +22,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <ScaleColorDiscrete scheme="observable10" />
   <Labs

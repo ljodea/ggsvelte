@@ -3,6 +3,7 @@
     GeomPoint,
     GeomSegment,
     GGPlot,
+    Inspect,
     Labs,
     ScaleColorManual,
     ThemeClassic,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <ScaleColorManual
     domain={["Cross-fertilised taller", "Self-fertilised taller"]}

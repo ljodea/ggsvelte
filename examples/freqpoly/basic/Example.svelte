@@ -3,6 +3,7 @@
     GeomFreqpoly,
     GeomRule,
     GGPlot,
+    Inspect,
     Labs,
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={michelson} aes={{ x: "velocity" }} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeFivethirtyeight />
   <Labs
     title="Frequency polygon through bin centres"

@@ -3,6 +3,7 @@
     CoordFixed,
     GeomContour,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeClassic />
   <CoordFixed />
   <Labs

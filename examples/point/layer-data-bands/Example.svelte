@@ -4,6 +4,7 @@
     GeomRect,
     GeomText,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -12,6 +13,7 @@
 </script>
 
 <GGPlot width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeClassic />
   <Labs
     title="What the wars did to the national debt"

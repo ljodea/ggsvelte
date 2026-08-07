@@ -2,6 +2,7 @@
   import {
     GeomCol,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ThemeClassic,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <ScaleXContinuous nice={false} />
   <Labs

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomCol, GGPlot, Labs } from "@ggsvelte/svelte";
+  import { GeomCol, GGPlot, Inspect, Labs } from "@ggsvelte/svelte";
 
   import { filings } from "./data.js";
 </script>
@@ -14,6 +14,7 @@
   width={480}
   height={420}
 >
+  <Inspect mode="exact" pin />
   <Labs
     title="Long category labels at a narrow width"
     subtitle="The band axis has to wrap and rotate to fit these names at 480px"

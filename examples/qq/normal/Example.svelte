@@ -3,6 +3,7 @@
     GeomQq,
     GeomQqLine,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={michelson} aes={{ sample: "velocity" }} width={640} height={400}>
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClassic />
   <Labs
     title="Sample quantiles against the normal"

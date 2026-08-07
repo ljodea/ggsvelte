@@ -339,7 +339,20 @@
   .gg-tooltip-more,
   .gg-tooltip-hint {
     margin: 7px 0 0;
-    color: color-mix(in srgb, currentColor 65%, transparent);
+    /* Solid mix (not alpha) so secondary lines clear WCAG AA 4.5:1 on the
+       tooltip paper — transparent 65% failed axe on linked-views with pin.
+       Mix against the tooltip card, not page --gg-paper (dark themes). */
+    color: color-mix(
+      in srgb,
+      currentColor 72%,
+      var(
+        --gg-tooltipPaper,
+        var(
+          --gg-tooltip-background,
+          var(--gg-theme-tooltipPaper, var(--gg-paper, #fff))
+        )
+      )
+    );
     font-size: 10px;
   }
 

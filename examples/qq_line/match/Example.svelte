@@ -1,10 +1,17 @@
 <script lang="ts">
-  import { GeomQqLine, GGPlot, Labs, ThemeMinimal } from "@ggsvelte/svelte";
+  import {
+    GeomQqLine,
+    GGPlot,
+    Inspect,
+    Labs,
+    ThemeMinimal,
+  } from "@ggsvelte/svelte";
 
   import { shortSample } from "./data.js";
 </script>
 
 <GGPlot data={shortSample} aes={{ sample: "value" }} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeMinimal />
   <Labs
     title="Q–Q reference line"

@@ -2,6 +2,7 @@
   import {
     GeomBoxplot,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXDiscrete,
     ThemeFew,
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeFew />
   <ScaleXDiscrete domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]} />
   <Labs

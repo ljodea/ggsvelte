@@ -3,6 +3,7 @@
     CoordFixed,
     GeomMap,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillContinuous,
     ThemeClassic,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin identity="pump" />
   <ThemeClassic />
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />

@@ -3,6 +3,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeVoid,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeVoid />
   <Labs
     title="A sparkline without axes or grid"

@@ -5,6 +5,7 @@
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ThemeFew,
@@ -46,6 +47,7 @@
       height={310}
       onlegendfocus={describe}
     >
+      <Inspect mode="xy" pin maxDistance={24} />
       <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />
@@ -61,6 +63,7 @@
       height={310}
       onlegendfocus={describe}
     >
+      <Inspect mode="xy" pin maxDistance={24} />
       <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />
@@ -76,6 +79,7 @@
       height={310}
       onlegendfocus={describe}
     >
+      <Inspect mode="xy" pin maxDistance={24} />
       <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />

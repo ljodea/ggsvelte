@@ -5,6 +5,7 @@
     GeomPolygon,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -18,6 +19,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <CoordFixed />
   <GuideNone channel="fill" />

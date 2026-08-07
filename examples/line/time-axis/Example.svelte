@@ -2,6 +2,7 @@
   import {
     GeomLine,
     GGPlot,
+    Inspect,
     Labs,
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
@@ -15,6 +16,7 @@
   width="container"
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeFivethirtyeight />
   <Labs
     title="Years inferred from raw four-digit strings"

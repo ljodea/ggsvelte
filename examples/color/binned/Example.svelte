@@ -3,6 +3,7 @@
     GeomPoint,
     GGPlot,
     GuideColorsteps,
+    Inspect,
     Labs,
     ScaleColorBinned,
     ThemeBw,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeBw />
   <ScaleColorBinned
     breaks={[0, 5, 20, 60, 130]}

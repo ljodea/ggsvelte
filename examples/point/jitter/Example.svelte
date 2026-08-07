@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, Labs, ThemeClean } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    Labs,
+    ThemeClean,
+  } from "@ggsvelte/svelte";
 
   import { fastfoodMenu } from "./data.js";
 </script>
@@ -10,6 +16,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeClean />
   <Labs
     title="The same calories, with position jitter"

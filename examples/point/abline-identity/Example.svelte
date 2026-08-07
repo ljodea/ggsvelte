@@ -3,6 +3,7 @@
     GeomAbline,
     GeomPoint,
     GGPlot,
+    Inspect,
     Labs,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} identity="patient" />
   <ThemeMinimal />
   <Labs
     title="Points against the identity line"

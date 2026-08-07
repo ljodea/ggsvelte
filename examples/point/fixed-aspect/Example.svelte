@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { CoordFixed, GeomPoint, GGPlot, Labs } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    Labs,
+  } from "@ggsvelte/svelte";
 
   import { unitCircle } from "./data.js";
 </script>
@@ -10,6 +16,7 @@
   width="container"
   height={440}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <CoordFixed />
   <Labs
     title="Equal data units on both axes"

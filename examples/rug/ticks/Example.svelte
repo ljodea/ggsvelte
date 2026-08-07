@@ -3,6 +3,7 @@
     GeomRug,
     GGPlot,
     GuideNone,
+    Inspect,
     Labs,
     ScaleXContinuous,
     ThemeMinimal,
@@ -12,6 +13,7 @@
 </script>
 
 <GGPlot data={spacedScores} aes={{ x: "score" }} width={640} height={400}>
+  <Inspect mode="exact" pin />
   <ThemeMinimal />
   <ScaleXContinuous limits={[0, 11]} />
   <Labs

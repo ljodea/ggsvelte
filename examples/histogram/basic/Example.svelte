@@ -3,6 +3,7 @@
     GeomHistogram,
     GeomRule,
     GGPlot,
+    Inspect,
     Labs,
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={michelson} aes={{ x: "velocity" }} width={640} height={400}>
+  <Inspect mode="exact" pin />
   <ThemeFivethirtyeight />
   <Labs
     title="Histogram of a hundred experimental runs"

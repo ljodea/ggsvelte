@@ -2,6 +2,7 @@
   import {
     GeomLine,
     GGPlot,
+    Inspect,
     Labs,
     registerEcdf,
     ThemeClassic,
@@ -14,6 +15,7 @@
 </script>
 
 <GGPlot data={deadlyQuarrels} aes={{ x: "magnitude" }} width={640} height={400}>
+  <Inspect mode="x" pin />
   <ThemeClassic />
   <Labs
     title="Empirical distribution of event sizes"

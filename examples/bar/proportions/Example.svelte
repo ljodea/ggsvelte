@@ -2,6 +2,7 @@
   import {
     GeomBar,
     GGPlot,
+    Inspect,
     Labs,
     ScaleFillManual,
     ScaleYContinuous,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="exact" pin />
   <ThemeFivethirtyeight />
   <ScaleYContinuous labels=".0%" />
   <ScaleFillManual

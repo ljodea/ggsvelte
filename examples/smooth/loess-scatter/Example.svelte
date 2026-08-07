@@ -3,6 +3,7 @@
     GeomPoint,
     GeomSmooth,
     GGPlot,
+    Inspect,
     Labs,
     ThemeTufte,
   } from "@ggsvelte/svelte";
@@ -16,6 +17,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeTufte />
   <Labs
     title="Cocoa percent against bar rating"

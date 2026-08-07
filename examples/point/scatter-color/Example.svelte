@@ -3,6 +3,7 @@
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleColorDiscrete,
     ThemeFew,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeFew />
   <ScaleColorDiscrete scheme="observable10" />
   <Labs

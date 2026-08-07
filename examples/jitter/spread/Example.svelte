@@ -2,6 +2,7 @@
   import {
     GeomJitter,
     GGPlot,
+    Inspect,
     Labs,
     ScaleXDiscrete,
     ScaleYContinuous,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <ThemeMinimal />
   <ScaleXDiscrete domain={["A", "B", "C"]} />
   <ScaleYContinuous limits={[0, 10]} />

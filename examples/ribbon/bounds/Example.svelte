@@ -3,6 +3,7 @@
     GeomLine,
     GeomRibbon,
     GGPlot,
+    Inspect,
     Labs,
     ScaleYSqrt,
     ThemeClean,
@@ -17,6 +18,7 @@
   width={640}
   height={400}
 >
+  <Inspect mode="x" pin />
   <ThemeClean />
   <ScaleYSqrt />
   <Labs

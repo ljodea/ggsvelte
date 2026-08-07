@@ -3,6 +3,7 @@
     CoordFixed,
     GeomSf,
     GGPlot,
+    Inspect,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
@@ -11,6 +12,7 @@
 </script>
 
 <GGPlot data={aboveOneEighty} aes={{ fill: "ground" }} width={640} height={400}>
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <CoordFixed />
   <Labs
