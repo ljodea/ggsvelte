@@ -229,7 +229,10 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
     model.lineage.keys(candidate.lineage),
     keyAt,
   ) as Key[];
-  const candidateValue = (channel: string): CellValue => {
+  // CandidateFacts only bag position + size channels. Discrete series
+  // aesthetics (fill/color) and weight live on source rows; for stat
+  // aggregates those rows are reachable via lineage only (#1526).
+  const candidateValue = (channel: string): CellValue | undefined => {
     switch (channel) {
       case "x":
         return candidate.xValue;
@@ -246,13 +249,56 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
       case "linetype":
         return candidate.linetypeValue;
       default:
-        return null;
+        return undefined;
     }
   };
-  const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => ({
-    ...field,
-    value: row?.[field.field] ?? (row === null ? candidateValue(field.channel) : null),
-  }));
+  /**
+   * Recover a non-CandidateFacts field from lineage source rows.
+   * - fill/color/group when discrete (ordinal/manual/identity scale, or group):
+   *   first source row, O(1) — grouping makes the value constant.
+   * - fill/color when continuous (sequential/binned) and multi-row lineage:
+   *   null — continuous channels do not participate in grouping, so values
+   *   can disagree and we refuse to invent a series identity.
+   * - Everything else (weight, …): only when lineage has exactly one row.
+   *
+   * Indexes + first row are memoized for this datum so multi-field tooltips
+   * do not re-materialize the same source row per channel.
+   */
+  let lineageIndexes: readonly number[] | undefined;
+  let firstLineageRow: Record<string, CellValue> | null | undefined;
+  const seriesConstantByConstruction = (channel: string): boolean => {
+    if (channel === "group") return true;
+    if (channel !== "fill" && channel !== "color") return false;
+    const scale = channel === "fill" ? model.scales.fill : model.scales.color;
+    if (scale === null) return true;
+    return scale.kind === "ordinal" || scale.kind === "manual" || scale.kind === "identity";
+  };
+  const lineageFieldValue = (channel: string, fieldName: string): CellValue => {
+    lineageIndexes ??= model.lineage.keys(candidate.lineage);
+    if (lineageIndexes.length === 0) return null;
+    const seriesIdentity = channel === "fill" || channel === "color" || channel === "group";
+    if (seriesIdentity) {
+      if (lineageIndexes.length > 1 && !seriesConstantByConstruction(channel)) return null;
+    } else if (lineageIndexes.length !== 1) {
+      return null;
+    }
+    if (firstLineageRow === undefined) {
+      firstLineageRow = model.row(lineageIndexes[0]!);
+    }
+    if (firstLineageRow === null) return null;
+    return firstLineageRow[fieldName] ?? null;
+  };
+  const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => {
+    if (row !== null) {
+      return { ...field, value: row[field.field] ?? null };
+    }
+    const fromCandidate = candidateValue(field.channel);
+    if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
+    // Stat outputs are not source-table columns; a same-named source column
+    // would print an unrelated value.
+    if (field.source === "stat") return { ...field, value: null };
+    return { ...field, value: lineageFieldValue(field.channel, field.field) };
+  });
   return Object.freeze({
     key,
     row,

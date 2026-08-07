@@ -236,6 +236,181 @@ describe("inspection snapshot resolve", () => {
     model.dispose();
   });
 
+  it("recovers fill and weight from lineage for single-row stat bars (#1526)", () => {
+    // geom_bar + weight: candidates are aggregates (rowIndex null) but lineage
+    // still points at the source row that holds fill identity and weight.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks", deaths: 175 },
+            { track: "1876", level: "Herts", deaths: 174 },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            position: "dodge",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+              weight: { field: "deaths" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    expect(seed.yValue).toBe(175);
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const byChannel = Object.fromEntries(
+      inspection.focus.fields.map((field) => [field.channel, field.value]),
+    );
+    expect(byChannel.fill).toBe("Berks");
+    expect(byChannel.weight).toBe(175);
+    expect(byChannel.y).toBe(175);
+    model.dispose();
+  });
+
+  it("recovers group-constant fill from multi-row bar lineage (#1526)", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks" },
+            { track: "1876", level: "Berks" },
+            { track: "1876", level: "Herts" },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            position: "dodge",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    // Berks bar aggregates two rows; fill is still the series identity.
+    const berks = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id)!,
+    ).find((c) => c.yValue === 2)!;
+    expect(berks.rowIndex).toBeNull();
+    expect(model.lineage.count(berks.lineage)).toBe(2);
+    const inspection = resolveInspection({
+      model,
+      seed: berks,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const fill = inspection.focus.fields.find((f) => f.channel === "fill");
+    expect(fill?.value).toBe("Berks");
+    model.dispose();
+  });
+
+  it("does not invent a weight when multi-row lineage weights differ (#1526)", () => {
+    // Prefer y (the aggregate) over a single arbitrary source weight.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks", deaths: 100 },
+            { track: "1876", level: "Berks", deaths: 75 },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+              weight: { field: "deaths" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    expect(model.lineage.count(seed.lineage)).toBe(2);
+    expect(seed.yValue).toBe(175);
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const byChannel = Object.fromEntries(
+      inspection.focus.fields.map((field) => [field.channel, field.value]),
+    );
+    expect(byChannel.fill).toBe("Berks");
+    expect(byChannel.weight).toBeNull();
+    expect(byChannel.y).toBe(175);
+    model.dispose();
+  });
+
+  it("does not invent fill when multi-row lineage fill values disagree (#1526)", () => {
+    // Continuous fill never participates in grouping, so a histogram bin's
+    // lineage can span rows with different fill values. Tooltip must not
+    // pick the first row's fill as if it described the whole bin.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1.1, heat: 10 },
+            { x: 1.2, heat: 90 },
+            { x: 5.0, heat: 40 },
+          ],
+        },
+        layers: [
+          {
+            geom: "histogram",
+            params: { bins: 2 },
+            aes: {
+              x: { field: "x" },
+              fill: { field: "heat" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const multi = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id)!,
+    ).find((c) => model.lineage.count(c.lineage) > 1);
+    expect(multi).toBeDefined();
+    expect(multi!.rowIndex).toBeNull();
+    const inspection = resolveInspection({
+      model,
+      seed: multi!,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const fill = inspection.focus.fields.find((f) => f.channel === "fill");
+    expect(fill?.value).toBeNull();
+    model.dispose();
+  });
+
   it("reads non-position candidate channels when the seed has no source row", () => {
     // Stat bins have null rowIndex; tooltip fields must still surface size /
     // linewidth / alpha / shape / linetype from the candidate bag, and map
