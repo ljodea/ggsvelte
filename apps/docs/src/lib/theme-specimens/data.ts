@@ -698,7 +698,7 @@ export const temperaturesKeyed = temperaturesRaw.map((row) => ({
 /** Nightingale mortality with stable keys for legend focus. */
 export const generation = generationRaw.map((row) => ({
   ...row,
-  id: `${row.source}-${String(row.year)}`,
+  id: `${row.source}-${row.year}`,
 }));
 
 /** Edgeworth county-year rows with stable keys for legend focus. */

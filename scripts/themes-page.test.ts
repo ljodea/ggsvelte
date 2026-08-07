@@ -176,9 +176,7 @@ describe("Nightingale generation-area temporal encoding", () => {
     for (const row of generation) {
       expect(typeof row.year).toBe("string");
       expect(row.year).toMatch(isoMonth);
-      expect(String(row.year)).not.toMatch(fractionalYear);
-      // No linear year+month/12 coordinate (e.g. 1855.917 → "1855.9" on pin).
-      expect(typeof row.year === "number").toBe(false);
+      expect(row.year).not.toMatch(fractionalYear);
     }
     expect(months.has("1854-04-01")).toBe(true);
     expect(months.has("1855-12-01")).toBe(true);
