@@ -236,6 +236,137 @@ describe("inspection snapshot resolve", () => {
     model.dispose();
   });
 
+  it("recovers fill and weight from lineage for single-row stat bars (#1526)", () => {
+    // geom_bar + weight: candidates are aggregates (rowIndex null) but lineage
+    // still points at the source row that holds fill identity and weight.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks", deaths: 175 },
+            { track: "1876", level: "Herts", deaths: 174 },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            position: "dodge",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+              weight: { field: "deaths" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    expect(seed.yValue).toBe(175);
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const byChannel = Object.fromEntries(
+      inspection.focus.fields.map((field) => [field.channel, field.value]),
+    );
+    expect(byChannel.fill).toBe("Berks");
+    expect(byChannel.weight).toBe(175);
+    expect(byChannel.y).toBe(175);
+    model.dispose();
+  });
+
+  it("recovers group-constant fill from multi-row bar lineage (#1526)", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks" },
+            { track: "1876", level: "Berks" },
+            { track: "1876", level: "Herts" },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            position: "dodge",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    // Berks bar aggregates two rows; fill is still the series identity.
+    const berks = [...Array(model.candidates.size).keys()]
+      .map((id) => model.candidates.candidate(id)!)
+      .find((c) => c.yValue === 2)!;
+    expect(berks.rowIndex).toBeNull();
+    expect(model.lineage.count(berks.lineage)).toBe(2);
+    const inspection = resolveInspection({
+      model,
+      seed: berks,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const fill = inspection.focus.fields.find((f) => f.channel === "fill");
+    expect(fill?.value).toBe("Berks");
+    model.dispose();
+  });
+
+  it("does not invent a weight when multi-row lineage weights differ (#1526)", () => {
+    // Prefer y (the aggregate) over a single arbitrary source weight.
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { track: "1876", level: "Berks", deaths: 100 },
+            { track: "1876", level: "Berks", deaths: 75 },
+          ],
+        },
+        layers: [
+          {
+            geom: "bar",
+            aes: {
+              x: { field: "track" },
+              fill: { field: "level" },
+              weight: { field: "deaths" },
+            },
+          },
+        ],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    expect(model.lineage.count(seed.lineage)).toBe(2);
+    expect(seed.yValue).toBe(175);
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    const byChannel = Object.fromEntries(
+      inspection.focus.fields.map((field) => [field.channel, field.value]),
+    );
+    expect(byChannel.fill).toBe("Berks");
+    expect(byChannel.weight).toBeNull();
+    expect(byChannel.y).toBe(175);
+    model.dispose();
+  });
+
   it("reads non-position candidate channels when the seed has no source row", () => {
     // Stat bins have null rowIndex; tooltip fields must still surface size /
     // linewidth / alpha / shape / linetype from the candidate bag, and map

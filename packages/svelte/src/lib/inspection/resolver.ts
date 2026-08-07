@@ -229,7 +229,10 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
     model.lineage.keys(candidate.lineage),
     keyAt,
   ) as Key[];
-  const candidateValue = (channel: string): CellValue => {
+  // CandidateFacts only bag position + size channels. Discrete series
+  // aesthetics (fill/color) and weight live on source rows; for stat
+  // aggregates those rows are reachable via lineage only (#1526).
+  const candidateValue = (channel: string): CellValue | undefined => {
     switch (channel) {
       case "x":
         return candidate.xValue;
@@ -246,13 +249,33 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
       case "linetype":
         return candidate.linetypeValue;
       default:
-        return null;
+        return undefined;
     }
   };
-  const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => ({
-    ...field,
-    value: row?.[field.field] ?? (row === null ? candidateValue(field.channel) : null),
-  }));
+  /**
+   * Recover a non-CandidateFacts field from lineage source rows.
+   * - Group-constant aesthetics (fill/color/group): first source row (O(1)).
+   * - Everything else (weight, …): only when lineage has exactly one row so
+   *   we do not invent an arbitrary sample of a multi-row aggregate.
+   */
+  const lineageFieldValue = (channel: string, fieldName: string): CellValue => {
+    const indexes = model.lineage.keys(candidate.lineage);
+    if (indexes.length === 0) return null;
+    const groupConstant = channel === "fill" || channel === "color" || channel === "group";
+    if (!groupConstant && indexes.length !== 1) return null;
+    const src = model.row(indexes[0]!) as Row | null;
+    if (src === null) return null;
+    return (src[fieldName] as CellValue | undefined) ?? null;
+  };
+  const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => {
+    if (row !== null) {
+      return { ...field, value: row[field.field] ?? null };
+    }
+    const fromCandidate = candidateValue(field.channel);
+    const value =
+      fromCandidate !== undefined ? fromCandidate : lineageFieldValue(field.channel, field.field);
+    return { ...field, value };
+  });
   return Object.freeze({
     key,
     row,
