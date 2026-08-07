@@ -254,42 +254,50 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
   };
   /**
    * Recover a non-CandidateFacts field from lineage source rows.
-   * - fill/color/group: first source row only when every lineage row agrees
-   *   (discrete series identity is constant; continuous mappings can disagree).
-   * - Everything else (weight, …): only when lineage has exactly one row so
-   *   we do not invent an arbitrary sample of a multi-row aggregate.
+   * - fill/color/group when discrete (ordinal/manual/identity scale, or group):
+   *   first source row, O(1) — grouping makes the value constant.
+   * - fill/color when continuous (sequential/binned) and multi-row lineage:
+   *   null — continuous channels do not participate in grouping, so values
+   *   can disagree and we refuse to invent a series identity.
+   * - Everything else (weight, …): only when lineage has exactly one row.
    *
    * Indexes + first row are memoized for this datum so multi-field tooltips
    * do not re-materialize the same source row per channel.
    */
   let lineageIndexes: readonly number[] | undefined;
   let firstLineageRow: Record<string, CellValue> | null | undefined;
+  const seriesConstantByConstruction = (channel: string): boolean => {
+    if (channel === "group") return true;
+    if (channel !== "fill" && channel !== "color") return false;
+    const scale = channel === "fill" ? model.scales.fill : model.scales.color;
+    if (scale === null) return true;
+    return scale.kind === "ordinal" || scale.kind === "manual" || scale.kind === "identity";
+  };
   const lineageFieldValue = (channel: string, fieldName: string): CellValue => {
     lineageIndexes ??= model.lineage.keys(candidate.lineage);
     if (lineageIndexes.length === 0) return null;
     const seriesIdentity = channel === "fill" || channel === "color" || channel === "group";
-    if (!seriesIdentity && lineageIndexes.length !== 1) return null;
+    if (seriesIdentity) {
+      if (lineageIndexes.length > 1 && !seriesConstantByConstruction(channel)) return null;
+    } else if (lineageIndexes.length !== 1) {
+      return null;
+    }
     if (firstLineageRow === undefined) {
       firstLineageRow = model.row(lineageIndexes[0]!);
     }
     if (firstLineageRow === null) return null;
-    const first = firstLineageRow[fieldName] ?? null;
-    if (seriesIdentity && lineageIndexes.length > 1) {
-      for (let i = 1; i < lineageIndexes.length; i++) {
-        const other = model.row(lineageIndexes[i]!);
-        if (other === null || (other[fieldName] ?? null) !== first) return null;
-      }
-    }
-    return first;
+    return firstLineageRow[fieldName] ?? null;
   };
   const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => {
     if (row !== null) {
       return { ...field, value: row[field.field] ?? null };
     }
     const fromCandidate = candidateValue(field.channel);
-    const value =
-      fromCandidate === undefined ? lineageFieldValue(field.channel, field.field) : fromCandidate;
-    return { ...field, value };
+    if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
+    // Stat outputs are not source-table columns; a same-named source column
+    // would print an unrelated value.
+    if (field.source === "stat") return { ...field, value: null };
+    return { ...field, value: lineageFieldValue(field.channel, field.field) };
   });
   return Object.freeze({
     key,
