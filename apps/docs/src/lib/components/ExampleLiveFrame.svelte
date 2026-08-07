@@ -16,8 +16,10 @@
   import { onMount } from "svelte";
   import type { Component } from "svelte";
 
+  import { docsAppearance } from "$lib/docs-appearance-state.svelte";
   import { loadExampleComponent } from "$lib/examples";
   import { observeUserIntent } from "$lib/load-on-intent";
+  import { marksOnlyDarkSiteCssVars } from "$lib/marks-only-theme-contrast";
 
   const {
     exampleId,
@@ -26,6 +28,8 @@
     width,
     height,
     fullWidth = false,
+    /** Spec theme name when a string (marks-only dark-site ink remap). */
+    themeName,
   }: {
     exampleId: string;
     previewPath: string;
@@ -33,7 +37,21 @@
     width: number;
     height: number;
     fullWidth?: boolean;
+    themeName?: string;
   } = $props();
+
+  /** Transparent-paper themes need light ink on the dark docs shell. */
+  const frameStyle = $derived(
+    [
+      `--example-vr-width:${String(width)}px`,
+      `--example-vr-height:${String(height)}px`,
+      `--example-vr-w:${String(width)}`,
+      `--example-vr-h:${String(height)}`,
+      marksOnlyDarkSiteCssVars(themeName, docsAppearance.current),
+    ]
+      .filter((part) => part.length > 0)
+      .join(";"),
+  );
 
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
@@ -192,7 +210,7 @@
   bind:this={host}
   onfocusin={onShellFocusIn}
   onfocusout={onShellFocusOut}
-  style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px;--example-vr-w:${String(width)};--example-vr-h:${String(height)}`}
+  style={frameStyle}
 >
   {#if !liveReady}
     <img

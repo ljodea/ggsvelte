@@ -4,6 +4,7 @@ import {
   isMarksOnlyTheme,
   MARKS_ONLY_DARK_SITE_ROLES,
   MARKS_ONLY_THEME_NAMES,
+  marksOnlyDarkSiteCssVars,
   marksOnlyDarkSiteShellPath,
   marksOnlyThemeRoles,
 } from "../apps/docs/src/lib/marks-only-theme-contrast.ts";
@@ -77,5 +78,19 @@ describe("marks-only theme contrast (docs dark shell)", () => {
     expect(roles).not.toHaveProperty("toolActive");
     expect(roles).not.toHaveProperty("tooltipPaper");
     expect(roles).toHaveProperty("ink", MARKS_ONLY_DARK_SITE_ROLES.ink);
+  });
+
+  it("emits host CSS vars for gallery frames only when marks-only + dark", () => {
+    expect(marksOnlyDarkSiteCssVars("map", "dark")).toBe(
+      [
+        `--gg-ink:${MARKS_ONLY_DARK_SITE_ROLES.ink}`,
+        `--gg-axisText:${MARKS_ONLY_DARK_SITE_ROLES.axisText}`,
+        `--gg-axisLine:${MARKS_ONLY_DARK_SITE_ROLES.axisLine}`,
+        `--gg-tickColor:${MARKS_ONLY_DARK_SITE_ROLES.tickColor}`,
+      ].join(";"),
+    );
+    expect(marksOnlyDarkSiteCssVars("void", "light")).toBe("");
+    expect(marksOnlyDarkSiteCssVars("classic", "dark")).toBe("");
+    expect(marksOnlyDarkSiteCssVars(undefined, "dark")).toBe("");
   });
 });

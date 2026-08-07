@@ -12,6 +12,10 @@
   const { data }: PageProps = $props();
   const frameWidth = $derived(data.entry.vrWidth ?? 640);
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
+  /** Named theme only — object-form overrides skip the marks-only dark remap. */
+  const themeName = $derived(
+    typeof data.spec.theme === "string" ? data.spec.theme : undefined,
+  );
   const galleryEntries = galleryCatalog(EXAMPLES);
   // Seed from the page entry so exposition aliases (outside galleryCatalog)
   // still get gallery neighbours instead of an empty "More examples" section.
@@ -69,6 +73,7 @@
       width={frameWidth}
       height={frameHeight}
       fullWidth={data.entry.journey?.fullWidth ?? false}
+      {themeName}
     />
   {/key}
 

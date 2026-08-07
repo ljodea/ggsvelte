@@ -58,3 +58,24 @@ export function marksOnlyThemeRoles(
 export function marksOnlyDarkSiteShellPath(themeName: MarksOnlyThemeName): string {
   return `/theme-shells/theme-${themeName}-dark-site.svg`;
 }
+
+/**
+ * CSS custom properties for gallery ExampleLiveFrame when a marks-only theme
+ * sits on the dark docs shell. Empty when light or the theme has opaque paper.
+ * Host vars override `var(--gg-*, fallback)` on the rendered SVG.
+ */
+export function marksOnlyDarkSiteCssVars(
+  themeName: string | undefined,
+  appearance: DocsAppearance,
+): string {
+  if (appearance !== "dark" || themeName === undefined || !isMarksOnlyTheme(themeName)) {
+    return "";
+  }
+  const roles = MARKS_ONLY_DARK_SITE_ROLES;
+  return [
+    `--gg-ink:${roles.ink}`,
+    `--gg-axisText:${roles.axisText}`,
+    `--gg-axisLine:${roles.axisLine}`,
+    `--gg-tickColor:${roles.tickColor}`,
+  ].join(";");
+}

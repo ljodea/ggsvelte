@@ -28,6 +28,9 @@ describe("docs example PNG-first (PR3)", () => {
     expect(page).not.toMatch(/<\s*Example\s*\/>/);
     // Remount on client nav so Live state does not stick to the prior id.
     expect(page).toContain("{#key data.entry.id}");
+    // Marks-only themes need themeName so the frame can remap --gg-ink on dark.
+    expect(page).toContain("{themeName}");
+    expect(page).toMatch(/typeof data\.spec\.theme === "string"/);
   });
 
   it("defers Example.svelte via user intent, button, or ?vr eager load", () => {
@@ -43,6 +46,9 @@ describe("docs example PNG-first (PR3)", () => {
     expect(frame).toContain('typeof window !== "undefined"');
     // Keyboard path is a real button (not tabindex on a noninteractive div).
     expect(frame).not.toContain('tabindex="0"');
+    // Gallery map/void/solid stay legible on the dark docs shell.
+    expect(frame).toContain("marksOnlyDarkSiteCssVars");
+    expect(frame).toContain("themeName");
   });
 
   it("keeps the static shell until data-gg-ready so the plot box does not poof", () => {
