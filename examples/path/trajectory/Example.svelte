@@ -52,6 +52,7 @@
       aes={{ x: "long", y: "lat", group: "river", color: { value: "#8fa8c0" } }}
       linewidth={0.8}
       alpha={0.7}
+      inspect={false}
     />
     <GeomPath
       data={minardTroops}
@@ -68,11 +69,13 @@
       aes={{ x: "lx", y: "ly", label: "city", color: { value: "#4a4237" } }}
       size={10}
       dy={-9}
+      inspect={false}
     />
     <GeomText
       data={minardStrengthLabels}
       aes={{ x: "long", y: "lat", label: "count", color: { value: "#6b5d4a" } }}
       size={9}
+      inspect={false}
     />
   </GGPlot>
 
@@ -96,6 +99,7 @@
       aes={{ x: "long", y: "temp", label: "date", color: { value: "#374151" } }}
       size={10}
       dy={-11}
+      inspect={false}
     />
   </GGPlot>
 </div>

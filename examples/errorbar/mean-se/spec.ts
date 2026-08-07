@@ -10,6 +10,7 @@ export default defineExample(
       positionParams: { width: 0.12, height: 0, seed: 7 },
       alpha: 0.4,
       size: 2.4,
+      inspect: false,
     })
     .geomErrorbar({ stat: "summary", width: 0.35, linewidth: 1.5 })
     // Control first, then the three hypnotics in the order Student tabulated

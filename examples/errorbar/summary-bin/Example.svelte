@@ -22,7 +22,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
+  <Inspect mode="exact" pin />
   <ThemeClassic />
   <Labs
     title="Mean and standard error in each x class"
@@ -30,7 +30,7 @@
     x="Mid-parent height (inches)"
     y="Child height (inches)"
   />
-  <GeomPoint alpha={0.15} size={2.4} />
+  <GeomPoint alpha={0.15} size={2.4} inspect={false} />
   <GeomErrorbar
     stat="summary_bin"
     binwidth={1}

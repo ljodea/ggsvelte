@@ -22,7 +22,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
+  <Inspect mode="exact" pin />
   <ThemeHrbr />
   <ScaleXDiscrete
     domain={["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"]}
@@ -38,6 +38,7 @@
     positionParams={{ width: 0.12, height: 0, seed: 7 }}
     alpha={0.4}
     size={2.4}
+    inspect={false}
   />
   <GeomErrorbar stat="summary" width={0.35} linewidth={1.5} />
 </GGPlot>

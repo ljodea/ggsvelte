@@ -21,6 +21,7 @@ export default defineExample(
       aes: aes({ group: "river", color: { value: "#8fa8c0" } }),
       linewidth: 0.8,
       alpha: 0.7,
+      inspect: false,
     })
     .geomPath({
       aes: aes({
@@ -34,11 +35,13 @@ export default defineExample(
       aes: aes({ x: "lx", y: "ly", label: "city", color: { value: "#4a4237" } }),
       size: 10,
       dy: -9,
+      inspect: false,
     })
     .geomText({
       data: minardStrengthLabels,
       aes: aes({ label: "count", color: { value: "#6b5d4a" } }),
       size: 9,
+      inspect: false,
     })
     .scales({
       ...scaleXContinuous({ limits: [23.5, 38.2] }),
