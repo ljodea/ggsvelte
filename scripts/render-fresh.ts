@@ -18,7 +18,6 @@ import stacked from "../examples/bar/stacked/spec.js";
 import box from "../examples/boxplot/by-category/spec.js";
 import col from "../examples/col/basic/spec.js";
 import valueLabels from "../examples/col/value-labels/spec.js";
-import continuous from "../examples/color/continuous/spec.js";
 import density from "../examples/density/overlay/spec.js";
 import errorbar from "../examples/errorbar/mean-se/spec.js";
 import freeY from "../examples/facet/wrap-free-y/spec.js";
@@ -26,7 +25,6 @@ import facet from "../examples/facet/wrap/spec.js";
 import hist from "../examples/histogram/basic/spec.js";
 import line from "../examples/line/multi-series/spec.js";
 import time from "../examples/line/time-axis/spec.js";
-import canvas from "../examples/point/canvas-scatter/spec.js";
 import jitter from "../examples/point/jitter/spec.js";
 import log from "../examples/point/log-scale/spec.js";
 import scatter from "../examples/point/scatter-color/spec.js";
@@ -42,9 +40,7 @@ const FONT_DIR = "../../../packages/svelte/src/lib/fonts";
 const examples = {
   area,
   box,
-  canvas,
   col,
-  continuous,
   density,
   dodged,
   errorbar,

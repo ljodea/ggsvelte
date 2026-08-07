@@ -111,12 +111,6 @@ export const GALLERY_PREVIEWS = [
     sha256: "13f673d791a74dba889d10eca783e6fb5cbeddb93bf66eb6d4112f368b1d3f9e",
   },
   {
-    id: "color/continuous",
-    filename: "color-continuous-light.png",
-    path: "/previews/color-continuous-light.png",
-    sha256: "998b2958878eaa7b202ff9337f6da6d559ebb8d0c97ae5580b65f58e28a77d54",
-  },
-  {
     id: "contour/basic",
     filename: "contour-basic-light.png",
     path: "/previews/contour-basic-light.png",
@@ -330,13 +324,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/abline-identity",
     filename: "point-abline-identity-light.png",
     path: "/previews/point-abline-identity-light.png",
-    sha256: "6dcef81575c71c114ae5f2cfede72aa199da11b45de2f07d910b31c6b703fc36",
-  },
-  {
-    id: "point/canvas-scatter",
-    filename: "point-canvas-scatter-light.png",
-    path: "/previews/point-canvas-scatter-light.png",
-    sha256: "834408b42545e258b4e549bb30bf5fe0cee7341fd3332e51941e20d302720ae1",
+    sha256: "fcbe69bb0999b47b9206241b0f1174e73a1bb94fe314d9cc4f8dceb0fdec501f",
   },
   {
     id: "point/count",

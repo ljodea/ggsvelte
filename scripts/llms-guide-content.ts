@@ -949,8 +949,8 @@ helpers reuse the strict parser registry and semantic epoch representation:
 \`scaleColorDate\`, \`scaleColorDatetime\`, \`scaleFillDate\`, and
 \`scaleFillDatetime\`.
 
-Open [continuous color](/examples/color/continuous) for a colorbar and
-[binned color](/examples/color/binned) for colorsteps.
+Open [binned color](/examples/color/binned) for colorsteps, and continuous
+color scales via \`scaleColorContinuous\` / \`scale_color_continuous\`.
 
 ## Size, linewidth, alpha, shape, and linetype
 
@@ -1172,12 +1172,14 @@ Renderer follows mark density and interaction needs. Axes, legends, labels, and
 a11y chrome stay semantic regardless of SVG vs canvas.
 
 SVG: DOM marks. Canvas: dense strata. Auto: switches above the published
-threshold and emits \`canvas-auto\`. [2.5k-point scatter](/examples/point/canvas-scatter):
-canvas marks, SVG axes/legend.
+threshold (\`CANVAS_AUTO_THRESHOLD\`) and emits \`canvas-auto\`. Force with
+layer \`"render": "canvas"\` or \`render="canvas"\`; axes, legends, and a11y
+chrome stay SVG.
 
 Inspection and selection use the model-owned candidate store, not DOM hit tests.
 Stable keys keep identity across SVG/canvas; renderer indices never appear in
 public callbacks. Measure with repo fixtures before forcing canvas globally.
+For a real-data scatter surface, see [scatter color](/examples/point/scatter-color).
 
 ## Server and export
 

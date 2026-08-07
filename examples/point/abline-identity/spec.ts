@@ -9,7 +9,7 @@ export default defineExample(
   gg(soporifics, aes({ x: "hyoscyamine", y: "hyoscine" }))
     .geomAbline({ slope: 1, intercept: 0, linewidth: 1.2 })
     .geomPoint({ size: 3.5 })
-    .theme("minimal")
+    .theme("dark")
     .labs({
       title: "Points against the identity line",
       subtitle: "Ten of eleven patients improve more on one drug than the other",

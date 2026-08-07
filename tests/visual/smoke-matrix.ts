@@ -65,23 +65,22 @@ function interaction(
 }
 
 /**
- * 17 seats: 11 example lights + 1 example dark + 5 interaction (incl. 1 dark).
+ * 16 seats: 10 example lights + 1 example dark + 5 interaction (incl. 1 dark).
  * Keep count in [15, 18] and ≥2 dark (see smoke-matrix.test.ts).
  */
 export const SMOKE_SCENARIOS: readonly SmokeScenario[] = [
   example("point/scatter-color", "light"),
-  // point/canvas-scatter declares .theme("dark"), so this seat captures a
-  // genuinely dark chart. The old point/scatter-color dark seat did not: no
-  // example set a theme, the docs shell never defines --gg-*, and the frame is
-  // container-only — its baseline was byte-identical to the light one.
-  example("point/canvas-scatter", "dark"),
+  // point/abline-identity declares .theme("dark") / ThemeDark, so this seat
+  // captures real dark chart tokens. A marks-only void seat under ?theme=dark
+  // is not enough: ExampleLiveFrame does not remap --gg-ink (only theme
+  // specimens do), so transparent paper + light-site ink is nearly blank.
+  example("point/abline-identity", "dark"),
   example("line/multi-series", "light"),
   example("bar/stacked", "light"),
   example("area/basic", "light"),
   // Replaces histogram/basic — locks measured band wrap/rotate pixels (#406).
   example("col/long-labels", "light"),
   example("facet/wrap", "light"),
-  example("point/canvas-scatter", "light"),
   example("smooth/loess-scatter", "light"),
   // Child-API conversion thinned integer x-ticks vs the pre-#765 prop form.
   example("col/basic", "light"),

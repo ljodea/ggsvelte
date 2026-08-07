@@ -166,11 +166,6 @@ const INTERACTION_HANDLERS: Record<
 for (const scenario of SMOKE_SCENARIOS) {
   if (scenario.kind === "example") {
     test(`${scenario.exampleId} — ${scenario.theme}`, async ({ page }) => {
-      // Canvas-scatter mark count is tuned just above CANVAS_AUTO_THRESHOLD
-      // (#926); under CI load hydrate still straddles the default 30s budget.
-      if (scenario.exampleId === "point/canvas-scatter") {
-        test.setTimeout(60_000);
-      }
       await shotExample(page, scenario.exampleId, scenario.theme, scenario.basename);
     });
     continue;

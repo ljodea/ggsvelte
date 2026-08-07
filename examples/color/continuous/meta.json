@@ -1,6 +1,0 @@
-{
-  "title": "Map attempts against true positions",
-  "description": "Continuous colour on year (or another measure) over a scatter of known anchors.",
-  "tags": ["point", "color", "sequential", "viridis", "legend", "coord-fixed"],
-  "docsSection": "Color & legends"
-}

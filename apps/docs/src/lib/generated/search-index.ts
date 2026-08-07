@@ -21272,24 +21272,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["How many items you can tell apart at once"],
   },
   {
-    id: "example:color:continuous",
-    kind: "example",
-    title: "Map attempts against true positions",
-    summary: "Continuous colour on year (or another measure) over a scatter of known anchors.",
-    href: "/examples/color/continuous",
-    keywords: [
-      "Map attempts against true positions",
-      "Color & legends",
-      "point",
-      "color",
-      "sequential",
-      "viridis",
-      "legend",
-      "coord-fixed",
-    ],
-    exact: ["Map attempts against true positions"],
-  },
-  {
     id: "example:contour:basic",
     kind: "example",
     title: "Contours of height on a grid",
@@ -21912,23 +21894,6 @@ export const DOCS_SEARCH_INDEX = [
       "reference",
     ],
     exact: ["Points against the identity line"],
-  },
-  {
-    id: "example:point:canvas-scatter",
-    kind: "example",
-    title: "Two and a half thousand points on canvas",
-    summary:
-      "Above the automatic threshold ggsvelte renders marks to canvas instead of SVG, which is what keeps a scatter this size interactive.",
-    href: "/examples/point/canvas-scatter",
-    keywords: [
-      "Two and a half thousand points on canvas",
-      "Points & scatter",
-      "point",
-      "canvas",
-      "performance",
-      "theme",
-    ],
-    exact: ["Two and a half thousand points on canvas"],
   },
   {
     id: "example:point:count",
