@@ -1,6 +1,6 @@
 /**
- * Home code-path triptych: the same penguins chart as GrammarDemo, shown as
- * Svelte children, the TypeScript builder, and agent JSON.
+ * Home code-path diptych: the same penguins chart as GrammarDemo, shown as
+ * Svelte children and agent JSON.
  *
  * Hand-authored (not loadExample) so the JSON tab can use data: { name } and
  * never dump every row into a mile-tall panel. Matches the interactive
@@ -14,7 +14,6 @@
  * plus GuideLegend focus. Prefer `<Inspect>` for the host capability; legend
  * focus is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
  * - Svelte: `<Inspect>` child; `focus` on <GuideLegend>
- * - Builder + spec: same host children; inspect via `<Inspect>`
  * - Row identity defaults to the `id` column on palmerPenguins (no `key` prop)
  * - JSON: agent envelope `{ interactions, spec }` may flag inspect; legend
  *   focus/filter are Svelte GuideLegend children, not envelope fields.
@@ -36,32 +35,6 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
   <GeomJitter alpha={0.88} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
-</GGPlot>
-`;
-
-/** Builder produces PortableSpec; inspect is a host `<Inspect>` child; focus is GuideLegend. */
-const HOME_CODE_PATH_BUILDER = `<script lang="ts">
-  import { aes, gg } from "@ggsvelte/spec";
-  import { GGPlot, GuideLegend, Inspect } from "@ggsvelte/svelte";
-  import { palmerPenguins } from "@ggsvelte/svelte/data";
-
-  const spec = gg(
-    palmerPenguins,
-    aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
-  )
-    .geomJitter({ alpha: 0.88 })
-    .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
-    .labs({ x: "Flipper length mm", y: "Body mass g", color: "species" })
-    .spec();
-</script>
-
-<GGPlot
-  {spec}
-  width={640}
-  height={400}
->
-  <Inspect mode="xy" pin maxDistance={24} />
-  <GuideLegend channel="color" focus />
 </GGPlot>
 `;
 
@@ -119,11 +92,6 @@ export const HOME_CODE_PATH_TABS: {
   language: string;
 }[] = [
   { label: "Svelte", code: HOME_CODE_PATH_SVELTE, language: "svelte" },
-  {
-    label: "Builder (TS)",
-    code: HOME_CODE_PATH_BUILDER,
-    language: "svelte",
-  },
   {
     label: "Spec (JSON)",
     code: HOME_CODE_PATH_SPEC_JSON,
