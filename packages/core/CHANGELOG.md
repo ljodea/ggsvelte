@@ -1,5 +1,12 @@
 # @ggsvelte/core
 
+## 0.32.0
+
+### Patch Changes
+
+- Updated dependencies [9f9fafd]
+  - @ggsvelte/spec@0.32.0
+
 ## 0.31.2
 
 ### Patch Changes

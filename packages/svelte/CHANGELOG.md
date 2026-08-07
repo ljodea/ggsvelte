@@ -1,5 +1,16 @@
 # @ggsvelte/svelte
 
+## 0.32.0
+
+### Patch Changes
+
+- 7b1a947: Recover fill/color and single-row weight values from lineage for stat-aggregate bar tooltips so series identity and weights are not blank.
+- 237adaa: Raise secondary tooltip line contrast ("Click to pin", overflow) so pin affordances clear WCAG AA on the default paper.
+- 7e3b6bc: Axis-group default tooltips show one series-name → reading row per series instead of repeated measure/series key-value pairs.
+- Updated dependencies [9f9fafd]
+  - @ggsvelte/spec@0.32.0
+  - @ggsvelte/core@0.32.0
+
 ## 0.31.2
 
 ### Patch Changes

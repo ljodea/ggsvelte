@@ -1,5 +1,11 @@
 # @ggsvelte/cli
 
+## 0.32.0
+
+### Patch Changes
+
+- @ggsvelte/core@0.32.0
+
 ## 0.31.2
 
 ### Patch Changes
