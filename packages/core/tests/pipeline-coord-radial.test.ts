@@ -192,6 +192,8 @@ describe("coord_radial pipeline", () => {
     // Stacked pie: y evidence is [0, 6]. expand:false remaps geometry and
     // panel domains to that span; cartesian chrome must not still tick the
     // padded trained domain (e.g. [-0.3, 6.3]) with inset endpoint positions.
+    // Explicit breaks pin endpoints so the assertion does not depend on the
+    // continuous break algorithm choosing 0 and 6.
     const model = runPipeline(
       gg(
         [
@@ -202,6 +204,7 @@ describe("coord_radial pipeline", () => {
         aes({ x: "pie", y: "n", fill: "cat" }),
       )
         .geomCol({ width: 1, position: "stack" })
+        .scales({ y: { breaks: [0, 6] } })
         .coordRadial({ theta: "y", expand: false })
         .spec(),
       size,
