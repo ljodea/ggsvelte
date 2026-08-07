@@ -263,8 +263,8 @@
     },
     "point/abline-identity": {
       "filename": "point-abline-identity-light.png",
-      "sourceSha256": "b14692b8f029e09ed04b68915740aeb86b7d4034c2435f6803feec476110cc0b",
-      "pngSha256": "6dcef81575c71c114ae5f2cfede72aa199da11b45de2f07d910b31c6b703fc36"
+      "sourceSha256": "cb6b4612005fef7919d7febd7c315b2952674d6155c156a2ef19d3c051aa9583",
+      "pngSha256": "fcbe69bb0999b47b9206241b0f1174e73a1bb94fe314d9cc4f8dceb0fdec501f"
     },
     "point/count": {
       "filename": "point-count-light.png",

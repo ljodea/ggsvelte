@@ -70,10 +70,11 @@ function interaction(
  */
 export const SMOKE_SCENARIOS: readonly SmokeScenario[] = [
   example("point/scatter-color", "light"),
-  // Void is marks-only (transparent paper). Under ?theme=dark the docs shell
-  // remaps ink so the frame is a real dark-site chart, not a light baseline
-  // with dark chrome around it.
-  example("point/void-chrome", "dark"),
+  // point/abline-identity declares .theme("dark") / ThemeDark, so this seat
+  // captures real dark chart tokens. A marks-only void seat under ?theme=dark
+  // is not enough: ExampleLiveFrame does not remap --gg-ink (only theme
+  // specimens do), so transparent paper + light-site ink is nearly blank.
+  example("point/abline-identity", "dark"),
   example("line/multi-series", "light"),
   example("bar/stacked", "light"),
   example("area/basic", "light"),

@@ -5,7 +5,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ThemeMinimal,
+    ThemeDark,
   } from "@ggsvelte/svelte";
 
   import { soporifics } from "./data.js";
@@ -18,7 +18,7 @@
   height={400}
 >
   <Inspect mode="xy" pin maxDistance={24} identity="patient" />
-  <ThemeMinimal />
+  <ThemeDark />
   <Labs
     title="Points against the identity line"
     subtitle="Ten of eleven patients improve more on one drug than the other"

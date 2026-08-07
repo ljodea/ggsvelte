@@ -324,7 +324,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/abline-identity",
     filename: "point-abline-identity-light.png",
     path: "/previews/point-abline-identity-light.png",
-    sha256: "6dcef81575c71c114ae5f2cfede72aa199da11b45de2f07d910b31c6b703fc36",
+    sha256: "fcbe69bb0999b47b9206241b0f1174e73a1bb94fe314d9cc4f8dceb0fdec501f",
   },
   {
     id: "point/count",
