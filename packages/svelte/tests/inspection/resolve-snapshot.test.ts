@@ -473,6 +473,49 @@ describe("inspection snapshot resolve", () => {
     });
     model.dispose();
   });
+
+  it("resolves bindot after_stat x/y when candidates keep a source rowIndex", () => {
+    // geom_dotplot is hybrid: real source rows for color/lineage, after_stat
+    // x (bin center) + stackpos for positions. Tooltip fields must not look
+    // up generated names on the source table (would print "–" for every dot).
+    const model = runPipeline(
+      gg({ density: [1, 2, 2, 2] }, aes({ x: "density" }))
+        .geomDotplot({ binwidth: 1, boundary: 0.5, stackdir: "up" })
+        .spec(),
+      { width: 480, height: 320 },
+    );
+    expect(model.candidates.size).toBe(4);
+
+    const byKey = new Map<string, number>();
+    for (let id = 0; id < model.candidates.size; id++) {
+      const seed = model.candidates.candidate(id)!;
+      expect(seed.rowIndex).not.toBeNull();
+      expect(seed.xValue).not.toBeNull();
+      expect(seed.yValue).not.toBeNull();
+
+      const inspection = resolveInspection({
+        model,
+        seed,
+        mode: "exact",
+        state: "transient",
+        source: "pointer",
+        keyOf: () => null,
+      });
+      // Source row is present, but focus.fields still carry after_stat values.
+      expect(inspection.focus.row).not.toBeNull();
+      const byChannel = Object.fromEntries(
+        inspection.focus.fields.map((field) => [field.channel, field.value]),
+      );
+      expect(byChannel.x).toBe(seed.xValue);
+      expect(byChannel.y).toBe(seed.yValue);
+      expect(byChannel.x).not.toBeNull();
+      expect(byChannel.y).not.toBeNull();
+      byKey.set(`${String(byChannel.x)}:${String(byChannel.y)}`, id);
+    }
+    // Different dots must not all collapse to one tooltip payload.
+    expect(byKey.size).toBeGreaterThan(1);
+    model.dispose();
+  });
 });
 
 describe("selectTransientMembers top-k by value (#1274)", () => {

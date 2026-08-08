@@ -48,6 +48,17 @@ function semanticFrameNumber(
   return transform === undefined ? value : transform.inverse(value);
 }
 
+function frameLogicalX(frame: LayerFrame | undefined, frameRow: number): CellValue {
+  return frame?.xValues?.[frameRow] ?? semanticFrameNumber(frame, "x", frame?.xNumeric?.[frameRow]);
+}
+
+function frameLogicalY(frame: LayerFrame | undefined, frameRow: number): CellValue {
+  return (
+    frame?.yValues?.[frameRow] ??
+    semanticFrameNumber(frame, "y", frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow])
+  );
+}
+
 export function resolveCandidateLogicalValues(input: {
   annotationRule: boolean;
   annotationX: CellValue;
@@ -75,12 +86,15 @@ export function resolveCandidateLogicalValues(input: {
     yField,
   } = input;
 
+  // Identity rows read mapped source columns. When a channel is after_stat only
+  // (bindot: x/stackpos while sourceRow stays set for color/lineage — #803),
+  // `xField`/`yField` are undefined and the frame holds the generated values.
+  // Fall through to frame numerics rather than sourceValue(undefined) → null.
   const xValue = annotationRule
     ? annotationX
     : outlierSourceRow === null
-      ? sourceRow === null
-        ? (frame?.xValues?.[frameRow] ??
-          semanticFrameNumber(frame, "x", frame?.xNumeric?.[frameRow]))
+      ? sourceRow === null || xField === undefined
+        ? frameLogicalX(frame, frameRow)
         : sourceValue(xField)
       : (frame?.box?.outlierX[primitiveIndex] ?? null);
 
@@ -93,13 +107,8 @@ export function resolveCandidateLogicalValues(input: {
     ? annotationY
     : outlierSourceRow === null
       ? stackHeight === undefined
-        ? sourceRow === null
-          ? (frame?.yValues?.[frameRow] ??
-            semanticFrameNumber(
-              frame,
-              "y",
-              frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
-            ))
+        ? sourceRow === null || yField === undefined
+          ? frameLogicalY(frame, frameRow)
           : sourceValue(yField)
         : semanticFrameNumber(frame, "y", stackHeight)
       : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);

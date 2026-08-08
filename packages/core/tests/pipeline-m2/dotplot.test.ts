@@ -119,4 +119,41 @@ describe("dotplot geom (histodot bindot)", () => {
     // fill has 2 levels; color is constant — paint must follow fill.
     expect(new Set(batch.colors).size).toBe(2);
   });
+
+  it("exposes per-dot xValue/yValue for inspect tooltips (hybrid source row + after_stat)", () => {
+    // One observation alone at x=1 → stackpos 1; three at x=2 → stackpos 1,2,3.
+    // Candidates keep real source rowIndex for aesthetics, but x/y are after_stat.
+    const model = runPipeline(
+      gg({ x: [1, 2, 2, 2] }, aes({ x: "x" }))
+        .geomDotplot({ binwidth: 1, boundary: 0.5, stackdir: "up" })
+        .spec(),
+      size,
+    );
+    expect(model.layerFields[0]).toEqual([
+      { channel: "x", field: "x", source: "stat" },
+      { channel: "y", field: "stackpos", source: "stat" },
+    ]);
+
+    const values: { xValue: unknown; yValue: unknown; rowIndex: number | null }[] = [];
+    for (let id = 0; model.candidates.candidate(id) !== null; id++) {
+      const candidate = model.candidates.candidate(id)!;
+      values.push({
+        xValue: candidate.xValue,
+        yValue: candidate.yValue,
+        rowIndex: candidate.rowIndex,
+      });
+    }
+    expect(values).toHaveLength(4);
+    // Every dot carries a real source row and non-null position semantics.
+    for (const value of values) {
+      expect(value.rowIndex).not.toBeNull();
+      expect(value.xValue).not.toBeNull();
+      expect(value.yValue).not.toBeNull();
+    }
+    // Stack ranks differ inside the denser bin; x values differ across bins.
+    expect(new Set(values.map((v) => v.xValue)).size).toBeGreaterThan(1);
+    expect(new Set(values.map((v) => v.yValue)).size).toBeGreaterThan(1);
+    // Tallest stack at the denser bin reaches 3 under stackdir=up.
+    expect(values.some((v) => v.yValue === 3)).toBe(true);
+  });
 });

@@ -127,4 +127,59 @@ describe("resolveCandidateLogicalValues", () => {
       }),
     ).toEqual({ xValue: 1.5, yValue: 99 });
   });
+
+  it("uses frame positions when sourceRow is set but x/y are after_stat only (bindot)", () => {
+    // Hybrid identity+stat: bindot keeps a real source row for color/lineage
+    // while x/y are generated (bin center + stackpos). Source field names are
+    // undefined after resolveCandidateFieldChannels skips source:"stat".
+    const frame = fromAny({
+      xValues: null,
+      yValues: null,
+      xNumeric: new Float64Array([5.275, 5.325]),
+      yNumeric: new Float64Array([1, 2]),
+      box: null,
+      binding: {},
+    });
+    expect(
+      resolveCandidateLogicalValues({
+        annotationRule: false,
+        annotationX: null,
+        annotationY: null,
+        outlierSourceRow: null,
+        sourceRow: 4,
+        frame,
+        frameRow: 1,
+        primitiveIndex: 0,
+        sourceValue: () => "must-not-read",
+        xField: undefined,
+        yField: undefined,
+      }),
+    ).toEqual({ xValue: 5.325, yValue: 2 });
+  });
+
+  it("uses frame y when only y is after_stat while x stays a source field", () => {
+    const frame = fromAny({
+      xValues: null,
+      yValues: null,
+      xNumeric: new Float64Array([0]),
+      yNumeric: new Float64Array([3]),
+      box: null,
+      binding: {},
+    });
+    expect(
+      resolveCandidateLogicalValues({
+        annotationRule: false,
+        annotationX: null,
+        annotationY: null,
+        outlierSourceRow: null,
+        sourceRow: 0,
+        frame,
+        frameRow: 0,
+        primitiveIndex: 0,
+        sourceValue: (field) => (field === "density" ? 5.5 : "wrong"),
+        xField: "density",
+        yField: undefined,
+      }),
+    ).toEqual({ xValue: 5.5, yValue: 3 });
+  });
 });
