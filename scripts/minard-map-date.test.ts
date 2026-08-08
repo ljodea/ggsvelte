@@ -61,4 +61,11 @@ describe("path/trajectory Example map date tooltip wiring", () => {
     const mapPlot = (source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [])[0] ?? "";
     expect(mapPlot).not.toMatch(/data=\{minardColdStations\}/);
   });
+
+  it("keeps the portable map spec on the stamped troop path with date labels", () => {
+    const spec = readFileSync(join(ROOT, "examples/path/trajectory/spec.ts"), "utf8");
+    expect(spec).toContain("minardTroopsWithCold");
+    expect(spec).toMatch(/label:\s*["']date["']/);
+    expect(spec).not.toMatch(/gg\(minardTroops\b/);
+  });
 });
