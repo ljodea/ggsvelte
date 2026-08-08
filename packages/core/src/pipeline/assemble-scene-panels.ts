@@ -113,6 +113,8 @@ export function assembleScenePanels(input: {
   vAxisTextSize?: number;
   /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
   tickChromePx?: number;
+  /** Tick chrome left of the y axis (theme tickLength + label gap); renderer-matched. */
+  yTickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
   degraded?: boolean;
@@ -219,7 +221,10 @@ export function assembleScenePanels(input: {
   // Tick chrome from the active theme (renderer-matched), not a fixed default, so
   // a custom longer-tick theme still pushes the x title below the label band.
   const tickChromePx = input.tickChromePx ?? 9; // tickLength(6) + gap(3) defaults
+  const yTickChromePx = input.yTickChromePx ?? tickChromePx;
   const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
+  // Renderer default title offset (x and y) when scene leaves titleOffset unset.
+  const DEFAULT_TITLE_OFFSET_PX = 32;
   const bandTitleOffset = placements.reduce((max, placement) => {
     const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
     if (
@@ -236,7 +241,31 @@ export function assembleScenePanels(input: {
     title: hTitle,
     ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
   };
-  const yAxis: SceneAxis = { ticks: firstY?.axisY ?? [], title: vTitle };
+
+  // Wide y tick labels need the y-axis title pushed left of the label band so
+  // gridLeft - titleOffset clears them (mirrors x band-titleOffset; #1570).
+  const yTicks = firstY?.axisY ?? [];
+  let yLabelBandPx = 0;
+  if (vTitle !== "" && yTicks.length > 0) {
+    const fontSize = input.vAxisTextSize ?? input.axisTextSize;
+    for (const tick of yTicks) {
+      if (tick.label === "" || tick.showLabel === false) continue;
+      const size = tick.labelSize ?? fontSize;
+      if (tick.lines !== undefined && tick.lines.length > 0) {
+        for (const line of tick.lines) {
+          yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(line, size));
+        }
+      } else {
+        yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(tick.label, size));
+      }
+    }
+  }
+  const yTitleClearance = yLabelBandPx > 0 ? yTickChromePx + yLabelBandPx + TITLE_GAP_PX : 0;
+  const yAxis: SceneAxis = {
+    ticks: yTicks,
+    title: vTitle,
+    ...(yTitleClearance > DEFAULT_TITLE_OFFSET_PX && { titleOffset: yTitleClearance }),
+  };
 
   return { scenePanels, xAxis, yAxis };
 }

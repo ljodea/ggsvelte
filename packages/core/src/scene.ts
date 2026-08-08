@@ -273,8 +273,11 @@ export interface SceneAxis {
   /** Axis title ("" = none). */
   title: string;
   titleSize?: number;
-  /** Title offset below the panel grid, px (derived from a multi-line/rotated
-   * band label band; falls back to the fixed default when absent). */
+  /**
+   * Title offset from the panel grid edge, px.
+   * - x: below gridBottom (multi-line/rotated band labels; default 32 in renderer)
+   * - y: left of gridLeft (wide y tick labels; default 32 in renderer)
+   */
   titleOffset?: number;
 }
 
