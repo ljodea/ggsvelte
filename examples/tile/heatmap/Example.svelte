@@ -1,21 +1,49 @@
 <script lang="ts">
-  /**
-   * Object-form theme (light + no grid) lives in spec.ts only — theme-parity
-   * requires hand-written plots to stay on string themes or use {spec}.
-   * Spec-driven charts skip the GeomTile shell, so register the tile batch here (#1420).
-   */
-  import { GGPlot, Inspect, registerTile } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomTile,
+    GGPlot,
+    GuideColorbar,
+    Inspect,
+    Labs,
+    ScaleFillContinuous,
+    ScaleXDiscrete,
+    ScaleYDiscrete,
+    ThemeLight,
+  } from "@ggsvelte/svelte";
 
-  registerTile();
-
-  import spec from "./spec.js";
+  import { cholera1849 } from "./data.js";
 </script>
 
 <!--
   1200×380 (not the default 640×400): a 53-week × 7-day calendar needs a wide,
   short frame so CoordFixed can keep each band cell square and large enough
-  to read. Spec turns grid off so incomplete weeks are real holes.
+  to read. Theme turns grid off so incomplete weeks are real holes.
 -->
-<GGPlot {spec} width={1200} height={380}>
+<GGPlot
+  data={cholera1849}
+  aes={{ x: "week", y: "weekday", fill: "deaths" }}
+  width={1200}
+  height={380}
+>
   <Inspect mode="exact" pin />
+  <ThemeLight grid="none" gridX={false} gridY={false} />
+  <CoordFixed />
+  <ScaleFillContinuous scheme="viridis" />
+  <!-- Weeks are numeric but read as a band — one column per week. -->
+  <ScaleXDiscrete />
+  <!-- Weekday domain reversed so Sunday sits at the top of a calendar. -->
+  <ScaleYDiscrete
+    domain={["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"]}
+    breaks={["Mon", "Wed", "Fri"]}
+  />
+  <GuideColorbar channel="fill" position="bottom" direction="horizontal" />
+  <Labs
+    title="Cholera in England and Wales, 1849"
+    subtitle="Registered deaths every day of the year; 53,293 in all, peaking at 1,121 on 6 September"
+    x="Week of 1849"
+    y=""
+    fill="Deaths"
+  />
+  <GeomTile />
 </GGPlot>

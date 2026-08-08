@@ -88,17 +88,17 @@ function basicGeoms(): Set<string> {
 /** `.geomTile()` / `.geomDensity2dFilled()` → `tile` / `density_2d_filled`. */
 function geomMethodToName(method: string): string {
   return method
-    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
     .toLowerCase();
 }
 
 /** Drop JS/HTML comments so comment prose cannot fake a Geom child. */
 function stripComments(source: string): string {
   return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1")
-    .replace(/<!--[\s\S]*?-->/g, "");
+    .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+    .replaceAll(/(^|[^:])\/\/.*$/gm, "$1")
+    .replaceAll(/<!--[\s\S]*?-->/g, "");
 }
 
 /** True when Example.svelte mounts a portable spec without a Geom* child. */

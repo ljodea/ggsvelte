@@ -122,9 +122,20 @@ describe("example theme parity (spec.ts vs Example.svelte)", () => {
       const handWritten = plots - passthrough;
 
       if (typeof theme !== "string") {
-        // Object-form theme overrides are too fiddly to mirror by hand; such an
-        // example must render through {spec} so there is only one source.
-        expect(handWritten).toBe(0);
+        // Object-form theme (name + role overrides). Either pure {spec}
+        // passthrough, or hand-written plots that declare the matching Theme
+        // shell and every role key as a prop — so the Svelte tab still shows
+        // the full chart instead of a thin {spec} shell.
+        if (handWritten === 0) {
+          expect(passthrough).toBeGreaterThan(0);
+          return;
+        }
+        const name = typeof theme.name === "string" ? theme.name : "default";
+        expect(themeDeclarations(source, name)).toBe(handWritten);
+        for (const key of Object.keys(theme)) {
+          if (key === "name") continue;
+          expect(source).toMatch(new RegExp(`\\b${key}=`));
+        }
         return;
       }
 
