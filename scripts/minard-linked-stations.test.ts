@@ -28,11 +28,12 @@ describe("path/trajectory inspect-driven cold-station link", () => {
     }
   });
 
-  it("wires oninspect to setSelection / clearSelection by stationKey", () => {
+  it("wires oninspect to setSelection by stationKey (sticky; no wipe on clear)", () => {
     expect(source).toContain("oninspect");
     expect(source).toContain("setSelection");
-    expect(source).toContain("clearSelection");
     expect(source).toContain("stationKeyFromInspectRow");
+    // Sticky link: clear / empty stationKey must not clearSelection (cross-chart look).
+    expect(source).not.toContain("clearSelection");
   });
 
   it("puts cold stations on the strip and as map ring owners", () => {
