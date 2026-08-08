@@ -55,7 +55,8 @@
       alpha={0.7}
       inspect={false}
     />
-    <!-- label: "date" is tooltip-only on path (no text marks); empty away from cold stations -->
+    <!-- Troops keep stationKey for linking; date is on cold-station points only so
+         path pins do not show an empty date row on Advance / non-station vertices. -->
     <GeomPath
       data={minardTroopsWithCold}
       aes={{
@@ -64,10 +65,9 @@
         group: "leg",
         color: "direction",
         linewidth: "survivors",
-        label: "date",
       }}
     />
-    <!-- Cold stations: easy pin targets with date first in the default tooltip -->
+    <!-- Cold stations: pin targets with date in the default tooltip (label is tooltip-only on point) -->
     <GeomPoint
       data={minardColdStations}
       aes={{

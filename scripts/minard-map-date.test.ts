@@ -54,25 +54,23 @@ describe("path/trajectory Example map date tooltip wiring", () => {
     expect(source).toMatch(/data=\{minardTroopsWithCold\}/);
   });
 
-  it("maps label to date on the inspectable troop path so pin shows the date", () => {
-    // Slice from the troops data prop only (avoids matching the rivers GeomPath).
+  it("does not map date on the troop path (avoids empty date rows on Advance pins)", () => {
     const dataAt = source.indexOf("data={minardTroopsWithCold}");
     expect(dataAt).toBeGreaterThan(-1);
     const openAt = source.lastIndexOf("<GeomPath", dataAt);
     const closeAt = source.indexOf("/>", dataAt);
-    expect(openAt).toBeGreaterThan(-1);
-    expect(closeAt).toBeGreaterThan(openAt);
     const troopPath = source.slice(openAt, closeAt + 2);
-    expect(troopPath).toMatch(/label:\s*["']date["']/);
+    expect(troopPath).not.toMatch(/label:\s*["']date["']/);
     expect(troopPath).not.toContain("inspect={false}");
   });
 
-  it("keeps cold-station points on the map with date in aes for pin targets", () => {
+  it("maps label to date on cold-station points so map pin shows the date", () => {
     expect(source).toContain("minardColdStations");
     const stationPoint = source.match(
       /<GeomPoint[\s\S]*?data=\{minardColdStations\}[\s\S]*?\/>/,
     )?.[0];
     expect(stationPoint).toBeDefined();
     expect(stationPoint!).toMatch(/label:\s*["']date["']/);
+    expect(stationPoint!).not.toContain("inspect={false}");
   });
 });
