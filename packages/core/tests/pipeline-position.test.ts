@@ -89,7 +89,7 @@ describe("applyPosition — stack/fill/dodge on bars", () => {
     // must not publish a hard 0 for tooltips.
     frame.yNumeric![1] = Number.NaN;
     applyPosition(frame, [], table);
-    expect(Number.isNaN(frame.yNumeric![1]!)).toBe(true);
+    expect(Number.isNaN(frame.yNumeric![1])).toBe(true);
     expect(frame.yNumeric![0]).toBeCloseTo(5, 8);
   });
 
