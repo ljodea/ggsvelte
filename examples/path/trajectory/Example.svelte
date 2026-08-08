@@ -66,7 +66,7 @@
 {/snippet}
 
 <div class="minard">
-  <GGPlot width={960} height={520}>
+  <GGPlot width="container" height={520}>
     <GeomPath
       data={campaignRivers}
       aes={{ x: "long", y: "lat", group: "river", color: { value: "#8fa8c0" } }}
@@ -122,7 +122,7 @@
     <Inspect mode="xy" pin maxDistance={24} content={mapTooltip} />
   </GGPlot>
 
-  <GGPlot data={minardCold} width={960} height={190}>
+  <GGPlot data={minardCold} width="container" height={190}>
     <GeomPath
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
@@ -154,6 +154,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    /* fullWidth frame + container-width plots: fill the shell so live
+       matches the stretched gallery PNG instead of snapping to a fixed px. */
+    width: 100%;
+    min-width: 0;
   }
 
   .minard-tip {
