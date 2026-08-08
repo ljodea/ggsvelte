@@ -65,10 +65,10 @@ export function coldStripTooltipFields(row: ColdTooltipRow): TooltipField[] {
  * so advance vertices clear the shared selection instead of publishing "".
  */
 export function stationKeyFromInspectRow(
-  row: { readonly stationKey?: unknown } | null | undefined,
+  row: Record<string, unknown> | null | undefined,
 ): string | null {
   if (row === null || row === undefined) return null;
-  const key = row.stationKey;
+  const key = row["stationKey"];
   if (typeof key === "string" && key !== "") return key;
   return null;
 }
