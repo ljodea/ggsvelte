@@ -237,7 +237,14 @@ custom content snippet.
 ## Diagnostics
 
 `ondiagnostic` receives `PlotDiagnostic`, the union of three catalogs (each
-entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
+entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`).
+
+**Agent/CLI path:** inspect mode is host-only. `ggsvelte-render --inspect MODE`
+runs the same pure inspect×geom collectors and emits matching codes on stderr
+with `source: "interaction"` (for example `INTERACTION_INSPECT_X_ON_COL` when
+`MODE` is `x`/`xy` and the spec has a `col` layer). Without `--inspect`, the
+CLI does not invent host intent. Full wiring/key/lineage diagnostics still need
+a mounted plot.
 
 - `INTERACTION_DIAGNOSTIC_CATALOG` — capability/key/lineage checks, e.g.
   `INTERACTION_POINT_REQUIRES_KEY`, `INTERACTION_DUPLICATE_KEY`,

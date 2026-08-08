@@ -4,7 +4,11 @@
  *
  * Extracted from interaction.ts so pure catalog data is not mixed with event
  * types and normalizeInteractionConfig.
+ *
+ * Inspect×geom advisories (bar/col x-guide + high-cardinality) are owned by
+ * @ggsvelte/core so the CLI --inspect path reuses the same messages (#1531).
  */
+import { INSPECT_GEOM_DIAGNOSTIC_CATALOG } from "@ggsvelte/core";
 
 export type InteractionDiagnosticCode =
   | "INTERACTION_INTERVAL_FACET_UNSUPPORTED"
@@ -195,129 +199,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-handler-without-capability",
   },
-  INTERACTION_INSPECT_X_ON_COL: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_X_ON_COL",
-    message:
-      "inspect.mode draws a vertical guide through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCol',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-on-col",
-  },
-  INTERACTION_INSPECT_X_ON_BAR: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_X_ON_BAR",
-    message:
-      "inspect.mode draws a vertical guide through bar marks; bars already encode the band axis as a filled region, so the guide cuts the bar body and rarely adds information.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBar',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-on-bar",
-  },
-  INTERACTION_INSPECT_X_BISECTS_COL_LABELS: {
-    severity: "warning",
-    code: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
-    message:
-      "inspect.mode draws a vertical guide through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when columns have value labels',
-      "Keep value labels; drop the x/xy guide rather than dropping the labels",
-    ],
-    docUrl:
-      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-col-labels",
-  },
-  INTERACTION_INSPECT_X_BISECTS_BAR_LABELS: {
-    severity: "warning",
-    code: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
-    message:
-      "inspect.mode draws a vertical guide through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when bars have value labels',
-      "Keep value labels; drop the x/xy guide rather than dropping the labels",
-    ],
-    docUrl:
-      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
-  },
-  INTERACTION_INSPECT_AXIS_ON_VIOLIN: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
-    message:
-      "inspect.mode draws an axis guide through violin marks; violins sit on a discrete band, so freescrolling x/y/xy guides cut the density body and often leave the band tooltip row blank.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomViolin',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-violin",
-  },
-  INTERACTION_INSPECT_AXIS_ON_BOXPLOT: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
-    message:
-      "inspect.mode draws an axis guide through boxplot marks; boxes sit on a discrete band, so freescrolling x/y/xy guides cut the box body and rarely add information.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBoxplot',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-boxplot",
-  },
-  INTERACTION_INSPECT_AXIS_ON_ERRORBAR: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
-    message:
-      "inspect.mode draws an axis guide through errorbar marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomErrorbar',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-errorbar",
-  },
-  INTERACTION_INSPECT_AXIS_ON_LINERANGE: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
-    message:
-      "inspect.mode draws an axis guide through linerange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomLinerange',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-linerange",
-  },
-  INTERACTION_INSPECT_AXIS_ON_POINTRANGE: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
-    message:
-      "inspect.mode draws an axis guide through pointrange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomPointrange',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl:
-      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-pointrange",
-  },
-  INTERACTION_INSPECT_AXIS_ON_CROSSBAR: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
-    message:
-      "inspect.mode draws an axis guide through crossbar marks; even when hits pin to a category, freescrolling x/y/xy guides rarely add information beyond exact mark focus.",
-    prop: "inspect.mode",
-    suggestions: [
-      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCrossbar',
-      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
-    ],
-    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-crossbar",
-  },
+  ...INSPECT_GEOM_DIAGNOSTIC_CATALOG,
   INTERACTION_INSPECT_IDENTITY_DROPPED: {
     severity: "advisory",
     code: "INTERACTION_INSPECT_IDENTITY_DROPPED",
@@ -342,19 +224,5 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-inspect-capability",
-  },
-  INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE: {
-    severity: "advisory",
-    code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-    message:
-      "Inspect is enabled with a high-cardinality discrete color/fill domain; the default tooltip shows the focused series, the largest contributors at that x (or y), a stack total, and an overflow line — not every series.",
-    prop: "inspect",
-    suggestions: [
-      "Prep top-n data before plotting if only the largest series matter",
-      "Pass a custom content snippet on <Inspect content={…} /> for a full multi-series listing",
-      "Pin the tooltip to scroll the full group when every series must be readable",
-    ],
-    docUrl:
-      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-high-cardinality-discrete",
   },
 });

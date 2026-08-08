@@ -252,6 +252,23 @@ strip runtime-only fields. CLIs: `ggsvelte-render spec.json > out.svg`
 validation errors, exit 0 with stderr output means quality warnings worth
 fixing) and `ggsvelte-codemod [--write] src` (ships with `@ggsvelte/svelte`).
 
+**CLI coverage for interaction:** the CLI always covers PortableSpec validation,
+pipeline warnings/advisories, scale diagnostics (`source: "scale"`), and
+spec-lint (`source: "spec-lint"`). Host inspect **mode** is not a PortableSpec
+field — without intent the agent loop never sees inspect×geom bar/col guide
+codes such as `INTERACTION_INSPECT_X_ON_COL`. When the host will enable inspect,
+declare it:
+
+```sh fragment
+ggsvelte-render --inspect xy spec.json > out.svg
+# stderr: kind advisory|warning, source "interaction", bar/col x-guide codes
+```
+
+Modes match the host enum (`auto|exact|x|y|xy`). This path covers the pure
+bar/col axis-guide collectors only (same codes as host for that slice).
+High-cardinality discrete and runtime key/lineage/wiring diagnostics still
+require a mounted host's `ondiagnostic`.
+
 ## Recipes (spec JSON — the everyday twelve)
 
 All specs assume inline `"data": {"values": [...]}` or a named dataset.
