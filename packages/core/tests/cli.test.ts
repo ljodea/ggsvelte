@@ -302,4 +302,49 @@ describe("runCLI", () => {
     expect(await runCLI(["--inspect", "nearest"], io)).toBe(2);
     expect(err.join("\n")).toContain("--inspect");
   });
+
+  it("rewrites histogram→bar so --inspect xy matches host ondiagnostic", async () => {
+    // Host assembled layers run through normalize(); raw CLI JSON does not.
+    // Alias rewrite in layerGeomsFromSpecLayers keeps the agent path honest.
+    const histogramSpec = {
+      data: {
+        values: [{ measure: 1 }, { measure: 2 }, { measure: 2 }, { measure: 3 }],
+      },
+      aes: { x: { field: "measure" } },
+      layers: [{ geom: "histogram" }],
+    };
+    const { io, err } = makeIO(JSON.stringify(histogramSpec));
+    expect(await runCLI(["--inspect", "xy"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(
+      lines.some(
+        (l) => l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_ON_BAR",
+      ),
+    ).toBe(true);
+  });
+
+  it("maps bisect severity to kind warning on stderr", async () => {
+    const labeledCol = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }, { geom: "text", aes: { label: { field: "amount" } } }],
+    };
+    const { io, err } = makeIO(JSON.stringify(labeledCol));
+    expect(await runCLI(["--inspect", "xy"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    const bisect = lines.find(
+      (l) =>
+        l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    );
+    expect(bisect).toMatchObject({
+      kind: "warning",
+      source: "interaction",
+      code: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    });
+  });
 });

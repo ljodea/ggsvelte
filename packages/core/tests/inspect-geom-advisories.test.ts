@@ -103,12 +103,24 @@ describe("layerGeomsFromSpecLayers", () => {
       ]),
     ).toEqual(["col", "text"]);
   });
+
+  it("rewrites alias geoms the same way normalize does (histogram→bar)", () => {
+    expect(layerGeomsFromSpecLayers([{ geom: "histogram" }, { geom: "jitter" }])).toEqual([
+      "bar",
+      "point",
+    ]);
+  });
 });
 
 describe("collectInspectIntentDiagnostics", () => {
   it("emits INTERACTION_INSPECT_X_ON_COL from PortableSpec layers + host intent", () => {
     const list = collectInspectIntentDiagnostics([{ geom: "col" }], "xy");
     expect(list.map((d) => d.code)).toEqual(["INTERACTION_INSPECT_X_ON_COL"]);
+  });
+
+  it("emits INTERACTION_INSPECT_X_ON_BAR for authoring alias geom histogram", () => {
+    const list = collectInspectIntentDiagnostics([{ geom: "histogram" }], "xy");
+    expect(list.map((d) => d.code)).toEqual(["INTERACTION_INSPECT_X_ON_BAR"]);
   });
 
   it("is silent without host intent or for auto/exact", () => {

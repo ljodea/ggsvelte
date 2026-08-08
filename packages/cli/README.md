@@ -42,7 +42,10 @@ ggsvelte-render --inspect xy spec.json > out.svg
 
 Modes: `auto`, `exact`, `x`, `y`, `xy` (same enum as the host). Without
 `--inspect`, interaction codes are not invented — headless SVG-only charts
-stay quiet. See [ADR 0024](../../docs/decisions/0024-cli-interaction-intent.md).
+stay quiet. Today this path covers bar/col x-guide pure collectors (including
+alias rewrite so `geom: "histogram"` matches host `normalize`); high-cardinality
+and runtime key/lineage diagnostics still need a mounted host. See
+[ADR 0024](../../docs/decisions/0024-cli-interaction-intent.md).
 
 ## Install
 

@@ -14,6 +14,8 @@
  */
 // @lifecycle stable
 
+import { GEOM_ALIASES } from "@ggsvelte/spec";
+
 /** Codes owned by this pure collector surface (subset of host interaction codes). */
 export type InspectGeomAdvisoryCode =
   | "INTERACTION_INSPECT_X_ON_COL"
@@ -166,14 +168,24 @@ export function inspectAxisOnBarColDiagnostics(
   return list;
 }
 
-/** Layer geom names from a PortableSpec-like layers array. */
+/**
+ * Layer geom names from a PortableSpec-like layers array.
+ * Alias geoms (`histogram`→`bar`, …) are rewritten to the same canonical names
+ * `normalize()` stamps, so CLI host-intent lint matches host ondiagnostic
+ * (assembled layers are already normalized; raw JSON layers are not).
+ */
 export function layerGeomsFromSpecLayers(layers: unknown): readonly string[] {
   if (!Array.isArray(layers)) return [];
   const geoms: string[] = [];
   for (const layer of layers) {
     if (layer === null || typeof layer !== "object" || Array.isArray(layer)) continue;
     const geom = (layer as { geom?: unknown }).geom;
-    if (typeof geom === "string" && geom.length > 0) geoms.push(geom);
+    if (typeof geom !== "string" || geom.length === 0) continue;
+    if (Object.hasOwn(GEOM_ALIASES, geom)) {
+      geoms.push(GEOM_ALIASES[geom as keyof typeof GEOM_ALIASES]);
+    } else {
+      geoms.push(geom);
+    }
   }
   return geoms;
 }
