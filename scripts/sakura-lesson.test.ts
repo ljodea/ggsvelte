@@ -58,6 +58,15 @@ function countHitsInBox(
   return { points, trend };
 }
 
+/** ggplot2 thinking-order rank for a GGPlot child tag name (lower = earlier). */
+function thinkingOrderRank(tag: string): number {
+  if (tag.startsWith("Geom")) return 0;
+  if (/^(Scale|Coord|Facet)/.test(tag)) return 1;
+  if (/^(Theme|Guide|Labs)/.test(tag)) return 2;
+  if (tag === "Inspect") return 3;
+  return 1;
+}
+
 /** Tick labels of one axis, top-to-bottom in screen order. */
 function yTicks(spec: unknown): { label: string; pos: number }[] {
   const model = runPipeline(spec as never, { width: 900, height: 480 });
@@ -338,6 +347,23 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
     // key/inspect are runtime props, not spec fields — assert them there.
     expect(finished.key).toBe("year");
+  });
+
+  it("authors step fragments in ggplot2 thinking order", () => {
+    // GettingStartedGuide prints step.fragment verbatim — foldSakura only
+    // reorders the finished file. Theme/scale-before-mark fragments are a
+    // silent docs regression (caught on #1555 leftovers).
+    const tagRe = /<(Theme\w+|Inspect|Geom\w+|Scale\w+|Coord\w+|Facet\w+|Guide\w+|Labs)\b/g;
+    for (const step of SAKURA_STEPS) {
+      const tags = [...step.fragment.matchAll(tagRe)].map((m) => m[1]!);
+      if (tags.length < 2) continue;
+      for (let i = 1; i < tags.length; i += 1) {
+        expect(
+          thinkingOrderRank(tags[i]!) >= thinkingOrderRank(tags[i - 1]!),
+          `${step.id}: fragment out of thinking order: ${tags.join(" → ")}`,
+        ).toBe(true);
+      }
+    }
   });
 
   it("uses only attributes the geom components actually accept", () => {
