@@ -1,5 +1,7 @@
 # @ggsvelte/skill
 
+## 0.32.1
+
 ## 0.32.0
 
 ### Minor Changes

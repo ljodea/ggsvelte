@@ -1,5 +1,12 @@
 # @ggsvelte/core
 
+## 0.32.1
+
+### Patch Changes
+
+- b6a2e33: Remap radial layout axis ticks through `scalesForCoordExpand` so expand:false / theta·r limits match sector fill (not the padded trained domain).
+  - @ggsvelte/spec@0.32.1
+
 ## 0.32.0
 
 ### Patch Changes
