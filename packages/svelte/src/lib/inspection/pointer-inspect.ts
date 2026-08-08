@@ -37,28 +37,29 @@ export type SchedulePointerInspectInput = {
 /**
  * hitTest resurrection when nearest misses.
  *
- * Axis modes (`x` / `y` / `xy`) already applied maxDistance in nearest —
- * including under coord_flip (dominant axis is screen y when flipped).
- * hitTest ignores that policy and returns any mark under the pointer; on a
- * two-vertex path (geom_qq_line) that teleports between endpoints mid-stroke.
+ * nearest under axis modes measures distance to the **anchor**, not painted
+ * geometry. hitTest finds whatever mark is under the pointer:
+ * - **rects** (bars/tiles): containment of the bar body — keep rescuing so
+ *   wide columns under mode x still tooltips when the pointer is on the fill
+ *   but farther than maxDistance from the centre anchor.
+ * - **paths/segments** (lines, areas, qq_line): stroke/fill can hit far from
+ *   vertex anchors; on a two-vertex path that teleports between ends
+ *   mid-stroke. Drop those under axis modes (and auto→axis autoMode).
  *
- * Exact keeps geometric stroke/fill hits. Auto only resurrects marks whose
- * own autoMode is exact (points); line/area autoMode x/y stay quiet after a
- * nearest miss — same contract as explicit axis modes, flip-safe without
- * re-implementing nearest's distance formula here.
+ * Exact always keeps geometric hits. Auto→exact marks (points, default bars)
+ * keep full hitTest. Flip-safe: no re-implementation of nearest's axis swap.
  */
 function hitTestFallback(
   model: RenderModel,
   input: SchedulePointerInspectInput,
 ): CandidateFacts | null {
-  if (input.mode === "x" || input.mode === "y" || input.mode === "xy") return null;
   const hit = model.candidates.hitTest(input.point.x, input.point.y);
   if (hit === null) return null;
-  if (input.mode === "auto") {
-    const resolved = hit.autoMode ?? "exact";
-    if (resolved !== "exact") return null;
-  }
-  return hit;
+  if (input.mode === "exact") return hit;
+  const resolved = input.mode === "auto" ? (hit.autoMode ?? "exact") : input.mode;
+  if (resolved === "exact") return hit;
+  // Axis mode (explicit or auto→x/y): rect containment only.
+  return hit.kind === "rects" ? hit : null;
 }
 
 /** Cancel policy for pending pointer-inspect work. */

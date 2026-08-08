@@ -270,6 +270,55 @@ describe("createPointerInspectQueue", () => {
     hitTest.mockRestore();
   });
 
+  it("still rescues wide bar bodies under mode x via rect hitTest", () => {
+    // Devin review on #1577: bars anchor at centre/top; mode x nearest can
+    // miss the fill body while hitTest containment still sees the rect.
+    const barModel = runPipeline(
+      gg(
+        [
+          { g: "a", n: 40 },
+          { g: "b", n: 80 },
+        ],
+        aes({ x: "g", y: "n" }),
+      )
+        .geomCol()
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const bar = barModel.candidates.candidate(0)!;
+    expect(bar.kind).toBe("rects");
+    // Force nearest miss + rect hit so the fallback path is the only hit.
+    // panel.nearest is used by resolveTarget — stub the store nearest too so
+    // any path that reaches candidates.nearest also misses.
+    const nearestSpy = vi.spyOn(barModel.candidates, "nearest").mockReturnValue(null);
+    const hitTestSpy = vi.spyOn(barModel.candidates, "hitTest").mockReturnValue(bar);
+    const queued: QueuedInspect[] = [];
+    const queue = createPointerInspectQueue({
+      model: () => barModel,
+      reducer: () =>
+        makeReducer({
+          frameToken: () => token(8),
+          queuePointer: (action) => {
+            if (action.type === "inspect") queued.push(action);
+          },
+        }),
+      inspectionState: () => "none",
+      setInspection: noopCancel,
+    });
+    queue.schedule({
+      point: { x: bar.x + 80, y: bar.y + 40 },
+      source: "pointer",
+      mode: "x",
+      maxDistance: 12,
+    });
+    expect(hitTestSpy).toHaveBeenCalled();
+    // Reducer candidate ref carries the rescued bar id.
+    expect(queued[0]?.candidate?.id).toBe(bar.id);
+    nearestSpy.mockRestore();
+    hitTestSpy.mockRestore();
+    barModel.dispose();
+  });
+
   it("does not teleport between qq_line endpoints mid-stroke under mode x or auto", () => {
     // Regression: nearest(mode=x) misses mid-line (anchor maxDistance), then
     // hitTest returned the path stroke and flipped left/right endpoints.
