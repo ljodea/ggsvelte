@@ -194,10 +194,13 @@ export function renderAxisTitles(scene: Scene): string {
     // Mirror x-axis title placement: offset left of the panel grid past the
     // y tick-label band (default 32; scene may raise titleOffset for wide labels).
     // Hardcoding SVG x=12 left the title behind when the left margin grew (#1570).
-    // Clamp at 0 so a large offset cannot push the title off the left edge.
-    const yTitleX = Math.max(0, gridLeft - (scene.axes.y.titleOffset ?? 32));
+    // Floor at half the title size: rotate(-90) + text-anchor middle extends the
+    // glyph toward negative x, so a 0 clamp clips it off-canvas when the left
+    // margin is only the axis-title reserve (labels hidden).
+    const yTitleSize = scene.axes.y.titleSize ?? scene.theme.axisTitleSize;
+    const yTitleX = Math.max(yTitleSize / 2, gridLeft - (scene.axes.y.titleOffset ?? 32));
     parts.push(
-      `<text class="gg-axis-title" transform="translate(${px(yTitleX)},${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(scene.axes.y.titleSize ?? scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
+      `<text class="gg-axis-title" transform="translate(${px(yTitleX)},${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(yTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
     );
   }
   return parts.join("");

@@ -134,8 +134,9 @@ describe("y-axis title placement (#1570)", () => {
     expect(titleX).toBeGreaterThanOrEqual(0);
   });
 
-  it("clamps a synthetic titleOffset that would go past the left edge", () => {
+  it("floors a synthetic titleOffset so rotated glyphs stay on-canvas", () => {
     const html = renderAxisTitles(sceneWithYTitle(40, 80));
-    expect(yTitleTranslateX(html)).toBe(0);
+    // Half of default axisTitleSize (11) keeps rotate(-90) ink inside the viewBox.
+    expect(yTitleTranslateX(html)).toBe(resolveTheme().axisTitleSize / 2);
   });
 });
