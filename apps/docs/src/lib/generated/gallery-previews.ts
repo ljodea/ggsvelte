@@ -228,7 +228,7 @@ export const GALLERY_PREVIEWS = [
     id: "interaction/legend-filter",
     filename: "interaction-legend-filter-light.png",
     path: "/previews/interaction-legend-filter-light.png",
-    sha256: "dd96e6a89863305234d4c6b0f9db7170149c20af109fa23bd85c0d8fa6a30cf7",
+    sha256: "68851dbf856cd09b2c5f31a0f32e5ce4cad9867723342036137a8e57386aaf39",
   },
   {
     id: "interaction/legend-focus",

@@ -183,8 +183,8 @@
     },
     "interaction/legend-filter": {
       "filename": "interaction-legend-filter-light.png",
-      "sourceSha256": "14d575c94807f55b3ce4b108d169e4d27ceb2b09dd6d6d535a3f708b01846047",
-      "pngSha256": "dd96e6a89863305234d4c6b0f9db7170149c20af109fa23bd85c0d8fa6a30cf7"
+      "sourceSha256": "7217c70a849ffac88aed92234e43f05762fd33d8df0a0030384ed56dbfca08a1",
+      "pngSha256": "68851dbf856cd09b2c5f31a0f32e5ce4cad9867723342036137a8e57386aaf39"
     },
     "interaction/legend-focus": {
       "filename": "interaction-legend-focus-light.png",
