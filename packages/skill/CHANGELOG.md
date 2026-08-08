@@ -1,5 +1,40 @@
 # @ggsvelte/skill
 
+## 0.33.0
+
+### Minor Changes
+
+- f1aa36d: # CLI host inspect intent (`--inspect`) closes the agent interaction gap
+
+  Agents that only run `ggsvelte-render` never saw inspect×geom advisories
+  (`INTERACTION_INSPECT_X_ON_COL`, …) because those fired only through Svelte
+  `ondiagnostic`. Inspect mode stays host-only (not PortableSpec).
+
+  - `ggsvelte-render --inspect auto|exact|x|y|xy` declares host intent and emits
+    bar/col x-guide pure-collector codes on stderr with `source: "interaction"`.
+  - Pure collectors and catalog messages for those codes live in `@ggsvelte/core`
+    (`collectInspectIntentDiagnostics`, `INSPECT_GEOM_DIAGNOSTIC_CATALOG`); the
+    Svelte host re-exports them so host and CLI share one implementation.
+  - Alias geoms (`histogram`→`bar`) are rewritten so CLI matches host normalize.
+  - Skill + CLI README document what the CLI covers vs host-only interaction.
+
+  Migration: none — additive. Default render without `--inspect` is unchanged.
+
+- f6cad53: Prefer exact inspect auto-mode for violin/boxplot/interval geoms, and advise when freescrolling x/y/xy guides are used on those band marks. Adds INTERACTION_INSPECT_AXIS_ON_* diagnostic codes (Migration: none — additive).
+
+### Patch Changes
+
+- cf484fe: # Teach inspect mode selection and multi-layer hit hygiene
+
+  Migration: none — skill reference prose only; no API change.
+
+  Expand `references/interactions.md` and the SKILL.md Interactions pointer so
+  agents prefer `mode="auto"` when product auto matches geometry, pin
+  `mode="exact"` on violin / boxplot / discrete error bars (auto still freescrolls
+  those until #1528), mark decorative furniture `inspect={false}` (Minard-class
+  multi-layer hits), and verify hover/pin outside the CLI SVG loop. Records
+  keep-single skill packaging for #1530.
+
 ## 0.32.1
 
 ## 0.32.0

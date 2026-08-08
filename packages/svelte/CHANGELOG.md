@@ -1,5 +1,45 @@
 # @ggsvelte/svelte
 
+## 0.33.0
+
+### Minor Changes
+
+- f1aa36d: # CLI host inspect intent (`--inspect`) closes the agent interaction gap
+
+  Agents that only run `ggsvelte-render` never saw inspect×geom advisories
+  (`INTERACTION_INSPECT_X_ON_COL`, …) because those fired only through Svelte
+  `ondiagnostic`. Inspect mode stays host-only (not PortableSpec).
+
+  - `ggsvelte-render --inspect auto|exact|x|y|xy` declares host intent and emits
+    bar/col x-guide pure-collector codes on stderr with `source: "interaction"`.
+  - Pure collectors and catalog messages for those codes live in `@ggsvelte/core`
+    (`collectInspectIntentDiagnostics`, `INSPECT_GEOM_DIAGNOSTIC_CATALOG`); the
+    Svelte host re-exports them so host and CLI share one implementation.
+  - Alias geoms (`histogram`→`bar`) are rewritten so CLI matches host normalize.
+  - Skill + CLI README document what the CLI covers vs host-only interaction.
+
+  Migration: none — additive. Default render without `--inspect` is unchanged.
+
+- f6cad53: Prefer exact inspect auto-mode for violin/boxplot/interval geoms, and advise when freescrolling x/y/xy guides are used on those band marks. Adds INTERACTION_INSPECT_AXIS_ON_* diagnostic codes (Migration: none — additive).
+
+### Patch Changes
+
+- 817efae: # Inspect x-guide advisories under coord_flip (#1409)
+
+  Product decision: mode `x`/`xy` bar/col advisories still fire under
+  `coord_flip`. The crosshair tracks the data-x band even when the guide is
+  horizontal on screen, so it still cuts the filled mark.
+
+  Catalog messages no longer claim the guide is always "vertical"; they name
+  `coord_flip` so agents do not treat flip as a free pass to keep x/xy inspect
+  on bar/col.
+
+- Updated dependencies [f1aa36d]
+- Updated dependencies [f6cad53]
+- Updated dependencies [817efae]
+  - @ggsvelte/core@0.33.0
+  - @ggsvelte/spec@0.33.0
+
 ## 0.32.1
 
 ### Patch Changes

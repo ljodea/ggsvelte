@@ -1,5 +1,32 @@
 # @ggsvelte/cli
 
+## 0.33.0
+
+### Minor Changes
+
+- f1aa36d: # CLI host inspect intent (`--inspect`) closes the agent interaction gap
+
+  Agents that only run `ggsvelte-render` never saw inspect×geom advisories
+  (`INTERACTION_INSPECT_X_ON_COL`, …) because those fired only through Svelte
+  `ondiagnostic`. Inspect mode stays host-only (not PortableSpec).
+
+  - `ggsvelte-render --inspect auto|exact|x|y|xy` declares host intent and emits
+    bar/col x-guide pure-collector codes on stderr with `source: "interaction"`.
+  - Pure collectors and catalog messages for those codes live in `@ggsvelte/core`
+    (`collectInspectIntentDiagnostics`, `INSPECT_GEOM_DIAGNOSTIC_CATALOG`); the
+    Svelte host re-exports them so host and CLI share one implementation.
+  - Alias geoms (`histogram`→`bar`) are rewritten so CLI matches host normalize.
+  - Skill + CLI README document what the CLI covers vs host-only interaction.
+
+  Migration: none — additive. Default render without `--inspect` is unchanged.
+
+### Patch Changes
+
+- Updated dependencies [f1aa36d]
+- Updated dependencies [f6cad53]
+- Updated dependencies [817efae]
+  - @ggsvelte/core@0.33.0
+
 ## 0.32.1
 
 ### Patch Changes
