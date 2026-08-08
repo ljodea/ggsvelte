@@ -12264,6 +12264,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "fractional-calendar-years-needs-data",
+        title: "fractional-calendar-years (needs: data)",
+        level: 3,
+      },
+      {
         id: "pipeline-heuristic-advisories-ggsvelte-core",
         title: "Pipeline heuristic advisories (@ggsvelte/core)",
         level: 2,

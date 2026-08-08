@@ -20245,6 +20245,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["transform-domain-data (needs: data)"],
   },
   {
+    id: "heading:guide-advisories:fractional-calendar-years-needs-data",
+    kind: "heading",
+    title: "fractional-calendar-years (needs: data)",
+    summary:
+      "fractional-calendar-years (needs: data) in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#fractional-calendar-years-needs-data",
+    keywords: ["Advisories", "Reference"],
+    exact: ["fractional-calendar-years (needs: data)"],
+  },
+  {
     id: "heading:guide-advisories:pipeline-heuristic-advisories-ggsvelte-core",
     kind: "heading",
     title: "Pipeline heuristic advisories (@ggsvelte/core)",
