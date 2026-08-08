@@ -458,7 +458,7 @@
     },
     "tile/heatmap": {
       "filename": "tile-heatmap-light.png",
-      "sourceSha256": "fdb6f9850842963e13a9c084c3896030a8d7ce63399bbd6b2eac414e4c452b85",
+      "sourceSha256": "292f44efa46d0ccd602f8d05fec8d1eb6076fb3cc01cfca1bd51962ce51e5561",
       "pngSha256": "19bc71b1103f298ecdbbc69b1dd1f4bdd791c6e27df82ae6a30d34ba3b26c857"
     },
     "vline/cutoff": {
