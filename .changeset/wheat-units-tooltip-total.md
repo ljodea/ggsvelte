@@ -6,12 +6,11 @@
 
 # Gate axis-inspect Total to stack/fill; clarify Playfair wheat chart
 
-Migration: hosts that read `groupTotal` on axis inspections for multi-series
-lines or points must treat `null` as “no composition total.” Parallel
-multi-series (identity/dodge) no longer show a default tooltip **Total** row —
-`groupTotal` is `null` when the axis group has no stack/fill layer. Stacked
-and filled compositions still sum unique series contributions as before.
-`RenderModel.layerPositions` is additive (resolved position per layer).
+Migration: none — additive (`RenderModel.layerPositions`). Parallel multi-series
+(identity/dodge) no longer show a default tooltip **Total** row —
+`groupTotal` is `null` when the axis group has no stack/fill layer; hosts that
+read `groupTotal` for comparison series must treat `null` as “no composition
+total.” Stacked and filled compositions still sum unique series contributions.
 
 Why: summing non-additive series (e.g. wheat price + weekly wage) invented a
 meaningless total. The gallery multi-series Playfair example now names units
