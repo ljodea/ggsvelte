@@ -132,7 +132,7 @@ export const GALLERY_PREVIEWS = [
     id: "density/kde-2d",
     filename: "density-kde-2d-light.png",
     path: "/previews/density-kde-2d-light.png",
-    sha256: "0d80f5f6db38accb5000eba3f777747e31fc4349bfd8894e8d643190b28068b2",
+    sha256: "ee5081de8d6e959b7ab747a4b49615668af08c0511d11dfcd5eab780c351b8d3",
   },
   {
     id: "density/kde-2d-filled",

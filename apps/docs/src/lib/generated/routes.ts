@@ -12937,9 +12937,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/kde-2d",
-    title: "Snow's cholera deaths, contoured — ggsvelte gallery",
+    title: "2D density isolines — ggsvelte gallery",
     description:
-      "A kernel density over the 578 deaths of the 1854 Soho outbreak. The isolines close around Broad Street, where Snow said the pump was.",
+      "Kernel density drawn as contour lines over 578 point locations. The rings tighten where the points cluster — here, the streets around one pump on Snow's 1854 Soho map.",
     canonicalPath: "/examples/density/kde-2d",
     kind: "page",
     index: true,

@@ -21454,12 +21454,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:density:kde-2d",
     kind: "example",
-    title: "Snow's cholera deaths, contoured",
+    title: "2D density isolines",
     summary:
-      "A kernel density over the 578 deaths of the 1854 Soho outbreak. The isolines close around Broad Street, where Snow said the pump was.",
+      "Kernel density drawn as contour lines over 578 point locations. The rings tighten where the points cluster — here, the streets around one pump on Snow's 1854 Soho map.",
     href: "/examples/density/kde-2d",
     keywords: [
-      "Snow's cholera deaths, contoured",
+      "2D density isolines",
       "Distributions",
       "density",
       "density_2d",
@@ -21467,9 +21467,9 @@ export const DOCS_SEARCH_INDEX = [
       "kde",
       "contour",
       "point",
-      "theme",
+      "map",
     ],
-    exact: ["Snow's cholera deaths, contoured"],
+    exact: ["2D density isolines"],
   },
   {
     id: "example:density:kde-2d-filled",

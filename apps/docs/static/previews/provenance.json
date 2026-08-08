@@ -103,8 +103,8 @@
     },
     "density/kde-2d": {
       "filename": "density-kde-2d-light.png",
-      "sourceSha256": "b59f8a1e98183282bbe70e89c00439f5225226a919c9367af862d44c2d93b436",
-      "pngSha256": "0d80f5f6db38accb5000eba3f777747e31fc4349bfd8894e8d643190b28068b2"
+      "sourceSha256": "2a6cce3d2deed33c93b5a4a87e1ebead3663ad234fd938424048e0328261917f",
+      "pngSha256": "ee5081de8d6e959b7ab747a4b49615668af08c0511d11dfcd5eab780c351b8d3"
     },
     "density/kde-2d-filled": {
       "filename": "density-kde-2d-filled-light.png",
