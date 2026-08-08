@@ -45,7 +45,7 @@ Modes: `auto`, `exact`, `x`, `y`, `xy` (same enum as the host). Without
 stay quiet. Today this path covers bar/col x-guide pure collectors (including
 alias rewrite so `geom: "histogram"` matches host `normalize`); high-cardinality
 and runtime key/lineage diagnostics still need a mounted host. See
-[ADR 0024](../../docs/decisions/0024-cli-interaction-intent.md).
+[ADR 0024](https://github.com/ljodea/ggsvelte/blob/main/docs/decisions/0024-cli-interaction-intent.md).
 
 ## Install
 

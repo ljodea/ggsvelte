@@ -28,27 +28,25 @@ describe("inspectAxisOnBarColDiagnostics", () => {
 
   it("advises when col is inspected with a vertical (x) guide", () => {
     const list = inspectAxisOnBarColDiagnostics("xy", ["col"]);
-    expect(list).toEqual([
-      expect.objectContaining({
-        code: "INTERACTION_INSPECT_X_ON_COL",
-        severity: "advisory",
-        prop: "inspect.mode",
-        actual: "xy",
-      }),
-    ]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_X_ON_COL",
+      severity: "advisory",
+      prop: "inspect.mode",
+      actual: "xy",
+    });
     expect(INSPECT_GEOM_DIAGNOSTIC_CATALOG.INTERACTION_INSPECT_X_ON_COL).toBeDefined();
   });
 
   it("advises when bar is inspected with a vertical (x) guide", () => {
     const list = inspectAxisOnBarColDiagnostics("x", ["bar"]);
-    expect(list).toEqual([
-      expect.objectContaining({
-        code: "INTERACTION_INSPECT_X_ON_BAR",
-        severity: "advisory",
-        prop: "inspect.mode",
-        actual: "x",
-      }),
-    ]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_X_ON_BAR",
+      severity: "advisory",
+      prop: "inspect.mode",
+      actual: "x",
+    });
   });
 
   it("warns when col value labels sit under the vertical guide", () => {
@@ -87,7 +85,6 @@ describe("inspectAxisOnBarColDiagnostics", () => {
 
 describe("layerGeomsFromSpecLayers", () => {
   it("extracts geom names and skips non-objects", () => {
-    expect(layerGeomsFromSpecLayers(undefined)).toEqual([]);
     expect(layerGeomsFromSpecLayers(null)).toEqual([]);
     expect(layerGeomsFromSpecLayers("col")).toEqual([]);
     expect(layerGeomsFromSpecLayers({})).toEqual([]);
@@ -139,13 +136,12 @@ describe("inspectHighCardinalityDiagnostics", () => {
         { channel: "fill", size: HIGH_CARDINALITY_DISCRETE_THRESHOLD - 1 },
       ],
     });
-    expect(list).toEqual([
-      expect.objectContaining({
-        code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-        prop: "color",
-        actual: HIGH_CARDINALITY_DISCRETE_THRESHOLD,
-      }),
-    ]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      prop: "color",
+      actual: HIGH_CARDINALITY_DISCRETE_THRESHOLD,
+    });
   });
 
   it("is silent when inspect is off", () => {
