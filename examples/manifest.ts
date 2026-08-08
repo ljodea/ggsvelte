@@ -65,7 +65,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "bar",
     name: "dodged",
     title: "US beer production by package type",
-    description: "Dodged bars of national production by year and package. Copy this when categories share an x-axis and need side-by-side comparison.",
+    description: "Dodged bars of national production by year and package.",
     tags: ["bar", "count", "dodge", "fill", "legend", "weight", "theme", "palette"],
     docsSection: "Bars & columns",
     hasData: true,
