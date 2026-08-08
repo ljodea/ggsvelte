@@ -17857,6 +17857,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-inspect-high-cardinality-discrete",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    summary:
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-high-cardinality-discrete",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
+  },
+  {
     id: "heading:guide-interaction-reference:interaction-inspect-identity-dropped",
     kind: "heading",
     title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
@@ -17875,16 +17885,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/interaction-reference#interaction-duplicate-inspect-capability",
     keywords: ["Interaction reference", "documentation"],
     exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
-  },
-  {
-    id: "heading:guide-interaction-reference:interaction-inspect-high-cardinality-discrete",
-    kind: "heading",
-    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-    summary:
-      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
-    href: "/guide/interaction-reference#interaction-inspect-high-cardinality-discrete",
-    keywords: ["Interaction reference", "documentation"],
-    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
   },
   {
     id: "heading:guide-interaction-reference:accessibility",
@@ -19956,6 +19956,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-errors:interaction-inspect-high-cardinality-discrete",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    summary:
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
+  },
+  {
     id: "heading:guide-errors:interaction-inspect-identity-dropped",
     kind: "heading",
     title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
@@ -19974,16 +19984,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#interaction-duplicate-inspect-capability",
     keywords: ["Errors reference", "Reference"],
     exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
-  },
-  {
-    id: "heading:guide-errors:interaction-inspect-high-cardinality-discrete",
-    kind: "heading",
-    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-    summary:
-      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE"],
   },
   {
     id: "heading:guide-errors:cli-diagnostics-ggsvelte-render",
@@ -20384,14 +20384,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-368",
+    id: "heading:guide-lifecycle:experimental-380",
     kind: "heading",
-    title: "experimental (368)",
+    title: "experimental (380)",
     summary:
-      "experimental (368) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-368",
+      "experimental (380) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-380",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (368)"],
+    exact: ["experimental (380)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -31937,6 +31937,33 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["GuidePlan"],
   },
   {
+    id: "api:ggsvelte-core:HIGH_CARDINALITY_DISCRETE_THRESHOLD",
+    kind: "api",
+    title: "HIGH_CARDINALITY_DISCRETE_THRESHOLD",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["HIGH_CARDINALITY_DISCRETE_THRESHOLD"],
+  },
+  {
+    id: "api:ggsvelte-core:INSPECT_GEOM_DIAGNOSTIC_CATALOG",
+    kind: "api",
+    title: "INSPECT_GEOM_DIAGNOSTIC_CATALOG",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["INSPECT_GEOM_DIAGNOSTIC_CATALOG"],
+  },
+  {
+    id: "api:ggsvelte-core:INSPECT_INTENT_MODES",
+    kind: "api",
+    title: "INSPECT_INTENT_MODES",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["INSPECT_INTENT_MODES"],
+  },
+  {
     id: "api:ggsvelte-core:IPSUM_PALETTE",
     kind: "api",
     title: "IPSUM_PALETTE",
@@ -31944,6 +31971,33 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["IPSUM_PALETTE"],
+  },
+  {
+    id: "api:ggsvelte-core:InspectGeomAdvisory",
+    kind: "api",
+    title: "InspectGeomAdvisory",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["InspectGeomAdvisory"],
+  },
+  {
+    id: "api:ggsvelte-core:InspectGeomAdvisoryCode",
+    kind: "api",
+    title: "InspectGeomAdvisoryCode",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["InspectGeomAdvisoryCode"],
+  },
+  {
+    id: "api:ggsvelte-core:InspectIntentMode",
+    kind: "api",
+    title: "InspectIntentMode",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["InspectIntentMode"],
   },
   {
     id: "api:ggsvelte-core:LEGEND_ROW_HEIGHT",
@@ -33314,6 +33368,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["cellsToNumeric"],
   },
   {
+    id: "api:ggsvelte-core:collectInspectIntentDiagnostics",
+    kind: "api",
+    title: "collectInspectIntentDiagnostics",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["collectInspectIntentDiagnostics"],
+  },
+  {
     id: "api:ggsvelte-core:compileRuntimeRowIndexFilter",
     kind: "api",
     title: "compileRuntimeRowIndexFilter",
@@ -33402,6 +33465,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["disambiguatedLabels"],
+  },
+  {
+    id: "api:ggsvelte-core:discreteColorFillDomainSizes",
+    kind: "api",
+    title: "discreteColorFillDomainSizes",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["discreteColorFillDomainSizes"],
   },
   {
     id: "api:ggsvelte-core:discretenessOf",
@@ -33512,6 +33584,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["inferFieldType"],
   },
   {
+    id: "api:ggsvelte-core:inspectAxisOnBarColDiagnostics",
+    kind: "api",
+    title: "inspectAxisOnBarColDiagnostics",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["inspectAxisOnBarColDiagnostics"],
+  },
+  {
+    id: "api:ggsvelte-core:inspectHighCardinalityDiagnostics",
+    kind: "api",
+    title: "inspectHighCardinalityDiagnostics",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["inspectHighCardinalityDiagnostics"],
+  },
+  {
     id: "api:ggsvelte-core:installCandidates",
     kind: "api",
     title: "installCandidates",
@@ -33537,6 +33627,24 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["isISODateString"],
+  },
+  {
+    id: "api:ggsvelte-core:isInspectIntentMode",
+    kind: "api",
+    title: "isInspectIntentMode",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["isInspectIntentMode"],
+  },
+  {
+    id: "api:ggsvelte-core:layerGeomsFromSpecLayers",
+    kind: "api",
+    title: "layerGeomsFromSpecLayers",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["layerGeomsFromSpecLayers"],
   },
   {
     id: "api:ggsvelte-core:layout",
@@ -44576,6 +44684,23 @@ export const DOCS_SEARCH_INDEX = [
     ],
   },
   {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE · interaction",
+    summary:
+      "Inspect is enabled with a high-cardinality discrete color/fill domain; the default tooltip shows the focused series, the largest contributors at that x (or y), a stack total, and an overflow line — not every series.",
+    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
+    keywords: [
+      "interaction",
+      "advisory",
+      "Prep top-n data before plotting if only the largest series matter; Pass a custom content snippet on <Inspect content={…} /> for a full multi-series listing; Pin the tooltip to scroll the full group when every series must be readable",
+    ],
+    exact: [
+      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      "interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+    ],
+  },
+  {
     id: "diagnostic:interaction:INTERACTION_INSPECT_IDENTITY_DROPPED",
     kind: "diagnostic",
     title: "INTERACTION_INSPECT_IDENTITY_DROPPED · interaction",
@@ -44607,23 +44732,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
       "interaction:INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
-    ],
-  },
-  {
-    id: "diagnostic:interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-    kind: "diagnostic",
-    title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE · interaction",
-    summary:
-      "Inspect is enabled with a high-cardinality discrete color/fill domain; the default tooltip shows the focused series, the largest contributors at that x (or y), a stack total, and an overflow line — not every series.",
-    href: "/guide/errors#interaction-inspect-high-cardinality-discrete",
-    keywords: [
-      "interaction",
-      "advisory",
-      "Prep top-n data before plotting if only the largest series matter; Pass a custom content snippet on <Inspect content={…} /> for a full multi-series listing; Pin the tooltip to scroll the full group when every series must be readable",
-    ],
-    exact: [
-      "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
-      "interaction:INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
     ],
   },
   {
@@ -44731,6 +44839,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/cli#max-marks",
     keywords: ["N"],
     exact: ["--max-marks"],
+  },
+  {
+    id: "cli:inspect",
+    kind: "cli",
+    title: "--inspect",
+    summary: "Host inspect intent for interaction advisories",
+    href: "/reference/cli#inspect",
+    keywords: ["MODE", "auto|exact|x|y|xy — host-only; not a PortableSpec field"],
+    exact: ["--inspect"],
   },
   {
     id: "cli:version",

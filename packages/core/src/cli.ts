@@ -5,17 +5,21 @@
  *
  * Contract:
  *   ggsvelte-render [spec.json] [--width N] [--height N] [--data file.json]
- *                   [--max-marks N]
+ *                   [--max-marks N] [--inspect MODE]
  *
  *   - The spec is read from the file argument, or from stdin when omitted.
  *   - --data file.json provides NAMED datasets: the file is an object mapping
  *     dataset names to inline data ({values}/{columns}/rows/columns).
+ *   - --inspect MODE declares host inspect intent (auto|exact|x|y|xy). Inspect
+ *     mode is host-only, not a PortableSpec field; the flag lets agents run the
+ *     same pure inspect×geom collectors that feed ondiagnostic (#1531).
  *   - SVG goes to stdout. Nothing else ever does.
  *   - Errors and advisories go to stderr as JSON LINES:
  *       {"kind":"error","code",...} | {"kind":"warning",...} |
  *       {"kind":"advisory",...}
  *     Scale inference diagnostics reuse those same `kind` values (mapped from
  *     their internal severity) and set `source: "scale"` so hosts can filter.
+ *     Interaction intent diagnostics set `source: "interaction"`.
  *
  * Exit codes (documented contract):
  *   0  rendered
@@ -27,6 +31,11 @@ import type { SpecInput } from "@ggsvelte/spec";
 import { lintSpec, SpecValidationError, validate } from "@ggsvelte/spec";
 
 import type { CLIDiagnosticCode } from "./diagnostics.js";
+import {
+  collectInspectIntentDiagnostics,
+  isInspectIntentMode,
+  type InspectIntentMode,
+} from "./inspect-geom-advisories.js";
 import type { NamedData } from "./pipeline.js";
 import { PipelineError, runPipeline } from "./pipeline.js";
 import { registerAll } from "./register.js";
@@ -82,6 +91,15 @@ export const CLI_OPTIONS = [
     target: "maxMarks",
   },
   {
+    anchor: "inspect",
+    flag: "--inspect",
+    value: "MODE",
+    description: "Host inspect intent for interaction advisories",
+    detail: "auto|exact|x|y|xy — host-only; not a PortableSpec field",
+    kind: "inspectMode",
+    target: "inspectMode",
+  },
+  {
     anchor: "version",
     flag: "--version",
     value: "",
@@ -126,6 +144,7 @@ interface ParsedArgs {
   height: number | null;
   dataPath: string | null;
   maxMarks: number | null;
+  inspectMode: InspectIntentMode | null;
   help: boolean;
   version: boolean;
 }
@@ -139,6 +158,7 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     height: null,
     dataPath: null,
     maxMarks: null,
+    inspectMode: null,
     help: false,
     version: false,
   };
@@ -156,6 +176,15 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     }
     return n;
   };
+  const inspectFlag = (raw: string | undefined): InspectIntentMode => {
+    if (raw === undefined) {
+      throw new UsageError("--inspect needs a mode (auto|exact|x|y|xy)");
+    }
+    if (!isInspectIntentMode(raw)) {
+      throw new UsageError(`--inspect mode must be auto|exact|x|y|xy (got ${JSON.stringify(raw)})`);
+    }
+    return raw;
+  };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
     const option = optionByFlag.get(arg);
@@ -164,6 +193,8 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
         out[option.target] = true;
       } else if (option.kind === "number") {
         out[option.target] = numberFlag(option.flag, argv[++i]);
+      } else if (option.kind === "inspectMode") {
+        out[option.target] = inspectFlag(argv[++i]);
       } else {
         const path = argv[++i];
         if (path === undefined) throw new UsageError(`${option.flag} needs a file path`);
@@ -231,7 +262,8 @@ export async function runCLI(
       args.width !== null ||
       args.height !== null ||
       args.dataPath !== null ||
-      args.maxMarks !== null;
+      args.maxMarks !== null ||
+      args.inspectMode !== null;
     if (hasOtherArguments || options.version === undefined) {
       cliError(
         io,
@@ -325,6 +357,26 @@ export async function runCLI(
     // Distinguished from pipeline heuristics by source: "spec-lint".
     for (const advisory of lintSpec(spec)) {
       errLine(io, { kind: "advisory", source: "spec-lint", ...advisory });
+    }
+    // Host interaction intent (#1531): pure inspect×geom collectors. Opt-in
+    // via --inspect because inspect.mode is host-only, not PortableSpec.
+    if (args.inspectMode !== null) {
+      const layers =
+        typeof spec === "object" && spec !== null
+          ? (spec as { layers?: unknown }).layers
+          : undefined;
+      for (const diagnostic of collectInspectIntentDiagnostics(layers, args.inspectMode)) {
+        errLine(io, {
+          kind: diagnostic.severity,
+          source: "interaction",
+          code: diagnostic.code,
+          message: diagnostic.message,
+          prop: diagnostic.prop,
+          suggestions: diagnostic.suggestions,
+          docUrl: diagnostic.docUrl,
+          ...(diagnostic.actual !== undefined && { actual: diagnostic.actual }),
+        });
+      }
     }
     const limit = args.maxMarks ?? 100_000;
     const marks = countMarks(model.scene);

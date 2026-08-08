@@ -607,6 +607,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "inspect",
+        title: "--inspect",
+        level: 3,
+      },
+      {
         id: "version",
         title: "--version",
         level: 3,
@@ -11044,6 +11049,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-high-cardinality-discrete",
+        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+        level: 3,
+      },
+      {
         id: "interaction-inspect-identity-dropped",
         title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
         level: 3,
@@ -11051,11 +11061,6 @@ export const DOCS_ROUTES = [
       {
         id: "interaction-duplicate-inspect-capability",
         title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
-        level: 3,
-      },
-      {
-        id: "interaction-inspect-high-cardinality-discrete",
-        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
         level: 3,
       },
       {
@@ -12107,6 +12112,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-high-cardinality-discrete",
+        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+        level: 3,
+      },
+      {
         id: "interaction-inspect-identity-dropped",
         title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
         level: 3,
@@ -12114,11 +12124,6 @@ export const DOCS_ROUTES = [
       {
         id: "interaction-duplicate-inspect-capability",
         title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
-        level: 3,
-      },
-      {
-        id: "interaction-inspect-high-cardinality-discrete",
-        title: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
         level: 3,
       },
       {
@@ -12346,8 +12351,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-368",
-        title: "experimental (368)",
+        id: "experimental-380",
+        title: "experimental (380)",
         level: 3,
       },
       {

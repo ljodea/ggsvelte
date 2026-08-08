@@ -54,10 +54,12 @@ describe("runCLI", () => {
       "--height",
       "--data",
       "--max-marks",
+      "--inspect",
       "--version",
       "--help",
     ]);
     expect(CLI_OPTIONS.find((option) => option.flag === "--max-marks")?.anchor).toBe("max-marks");
+    expect(CLI_OPTIONS.find((option) => option.flag === "--inspect")?.anchor).toBe("inspect");
     const { io, err } = makeIO();
     expect(await runCLI(["--help"], io)).toBe(0);
     for (const option of CLI_OPTIONS) expect(err.join("\n")).toContain(option.flag);
@@ -228,5 +230,121 @@ describe("runCLI", () => {
     if (dataOption && "detail" in dataOption) {
       expect(help).toContain(dataOption.detail);
     }
+  });
+
+  it("emits INTERACTION_INSPECT_X_ON_COL on stderr when --inspect xy meets a col layer", async () => {
+    // Host inspect mode is not PortableSpec; agents declare intent so the
+    // same pure collectors that feed ondiagnostic reach the CLI JSONL loop.
+    const colSpec = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }],
+    };
+    const { io, out, err } = makeIO(JSON.stringify(colSpec));
+    const code = await runCLI(["--inspect", "xy"], io);
+    expect(code).toBe(0);
+    expect(out.join("")).toStartWith("<svg ");
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    const interaction = lines.find(
+      (l) => l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_ON_COL",
+    );
+    expect(interaction).toMatchObject({
+      kind: "advisory",
+      source: "interaction",
+      code: "INTERACTION_INSPECT_X_ON_COL",
+      prop: "inspect.mode",
+      actual: "xy",
+    });
+    expect(typeof interaction?.["message"]).toBe("string");
+  });
+
+  it("does not emit interaction inspect advisories without --inspect", async () => {
+    const colSpec = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }],
+    };
+    const { io, err } = makeIO(JSON.stringify(colSpec));
+    expect(await runCLI([], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(lines.some((l) => l["source"] === "interaction")).toBe(false);
+  });
+
+  it("is silent for --inspect exact on col (auto/exact never fire x-guide codes)", async () => {
+    const colSpec = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }],
+    };
+    const { io, err } = makeIO(JSON.stringify(colSpec));
+    expect(await runCLI(["--inspect", "exact"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(lines.some((l) => l["code"] === "INTERACTION_INSPECT_X_ON_COL")).toBe(false);
+  });
+
+  it("exit 2 for an unknown --inspect mode", async () => {
+    const { io, err } = makeIO(JSON.stringify(SPEC));
+    expect(await runCLI(["--inspect", "nearest"], io)).toBe(2);
+    expect(err.join("\n")).toContain("--inspect");
+  });
+
+  it("rewrites histogram→bar so --inspect xy matches host ondiagnostic", async () => {
+    // Host assembled layers run through normalize(); raw CLI JSON does not.
+    // Alias rewrite in layerGeomsFromSpecLayers keeps the agent path honest.
+    const histogramSpec = {
+      data: {
+        values: [{ measure: 1 }, { measure: 2 }, { measure: 2 }, { measure: 3 }],
+      },
+      aes: { x: { field: "measure" } },
+      layers: [{ geom: "histogram" }],
+    };
+    const { io, err } = makeIO(JSON.stringify(histogramSpec));
+    expect(await runCLI(["--inspect", "xy"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(
+      lines.some(
+        (l) => l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_ON_BAR",
+      ),
+    ).toBe(true);
+  });
+
+  it("maps bisect severity to kind warning on stderr", async () => {
+    const labeledCol = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }, { geom: "text", aes: { label: { field: "amount" } } }],
+    };
+    const { io, err } = makeIO(JSON.stringify(labeledCol));
+    expect(await runCLI(["--inspect", "xy"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    const bisect = lines.find(
+      (l) =>
+        l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    );
+    expect(bisect).toMatchObject({
+      kind: "warning",
+      source: "interaction",
+      code: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    });
   });
 });
