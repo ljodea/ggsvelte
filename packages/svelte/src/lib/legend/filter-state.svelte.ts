@@ -76,7 +76,13 @@ export type LegendFilterState = {
    */
   readonly hasActiveFilters: boolean;
   computeEntries(model: RenderModel | null): FilterableLegendEntry[];
-  toggle(target: FilterableLegendEntry, event: MouseEvent): void;
+  /**
+   * Toggle one legend entry. Returns the post-toggle visibility so the host
+   * can force the controlled checkbox DOM (Svelte's set_checked cache skips
+   * writes when its last value matches, and trusted clicks can mutate
+   * input.checked after the reactive flush).
+   */
+  toggle(target: FilterableLegendEntry, event: MouseEvent): boolean;
   reset(event: MouseEvent): void;
   setPointerType(type: string | null): void;
 };
@@ -232,10 +238,11 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     return legendFilterPointerType === "touch" ? "touch" : "pointer";
   }
 
-  function toggle(target: FilterableLegendEntry, event: MouseEvent): void {
-    if (legendFilterOptions === null) return;
-    // This is a controlled checkbox. Prevent the browser's post-handler
-    // default toggle from racing the reactive checked value.
+  function toggle(target: FilterableLegendEntry, event: MouseEvent): boolean {
+    if (legendFilterOptions === null) return target.visible;
+    // Controlled checkbox: cancel the UA toggle when this still runs inside
+    // the click event. Delegated/async handlers can miss that window — the
+    // host forces input.checked from the returned visibility.
     event.preventDefault();
     const catalog = target.legend.entries.map((entry) => entry.value as CellValue);
     const index = localLegendFilters.findIndex(
@@ -264,6 +271,11 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
           );
     const source = legendFilterSource(event);
     legendFilterPointerType = null;
+    const visible = isLegendValueVisible(
+      values,
+      target.entry.value as CellValue,
+      legendFilterOptions.mode,
+    );
     const filterEvent: LegendFilterEvent = Object.freeze({
       type: "legend-filter",
       phase: "change",
@@ -271,9 +283,8 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       clause,
     });
     emitLegendFilter(filterEvent);
-    deps.announce(
-      `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
-    );
+    deps.announce(`${target.entry.label} ${visible ? "shown" : "hidden"}.`);
+    return visible;
   }
 
   function reset(event: MouseEvent): void {

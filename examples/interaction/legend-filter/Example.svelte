@@ -38,7 +38,7 @@
     <GuideLegend channel="color" filter />
     <Labs
       title="Filter series from the legend"
-      subtitle="Debt, revenue, and expenditure; restored groups keep their original colour"
+      subtitle="Debt, revenue, and expenditure"
       x="Year"
       y="Playfair's index units"
       color="Series"
