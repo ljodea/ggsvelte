@@ -8,6 +8,19 @@ import { TRANSFORMED_ZERO_BASELINE } from "./position-baseline.js";
 import { isBarLike } from "./scale-axis-train.js";
 import type { LayerFrame } from "./types.js";
 
+/**
+ * Signed segment height from stack/fill ymin/ymax.
+ * Positive runs: ymax − ymin. Negative runs stack below 0 with ymin more
+ * negative than ymax, so the unsigned gap must be re-signed.
+ */
+export function signedStackSegmentHeight(ymin: number, ymax: number): number {
+  if (!Number.isFinite(ymin) || !Number.isFinite(ymax)) return Number.NaN;
+  const height = ymax - ymin;
+  // Negative run: both edges ≤ 0 (ymax at the prior total, ymin further down).
+  if (ymax <= 0 && ymin < 0) return -height;
+  return height;
+}
+
 /** Per-row slot keys: band categories, or bin centers for binned bars.
  * `encodeKey` matches the band scale's typed identity, so categories with
  * colliding labels (`1` vs `"1"`) occupy distinct slots. */
@@ -39,15 +52,15 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     const { ymin, ymax } = positionStack({ slots, groups: frame.groups, y, mode: position });
     frame.ymin = ymin;
     frame.ymax = ymax;
-    // Keep yNumeric in post-position data space so inspect/tooltips match the
-    // axis. Stack: ymax−ymin equals the original contribution. Fill: it is the
-    // share of the band (proportions in [0,1]). Without this, percent labels
-    // (".0%") format raw counts as absurd percentages (873 → "87300%").
+    // Fresh array — yNumeric may alias a table-cached column (identity) or a
+    // stat series (forwardMeasureOnce with no transform); never mutate in place.
+    // Segment height matches axis space: share for fill, contribution for stack.
+    // Negative runs stack below 0 (ymax ≤ 0, ymin more negative), so re-sign.
+    const heights = new Float64Array(frame.n);
     for (let i = 0; i < frame.n; i++) {
-      const lo = ymin[i]!;
-      const hi = ymax[i]!;
-      y[i] = Number.isFinite(lo) && Number.isFinite(hi) ? hi - lo : 0;
+      heights[i] = signedStackSegmentHeight(ymin[i]!, ymax[i]!);
     }
+    frame.yNumeric = heights;
     return true;
   }
   // identity / dodge: bars grow from the shared transformed-origin baseline.

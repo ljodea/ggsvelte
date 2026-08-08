@@ -1,4 +1,6 @@
 import type { CellValue } from "../../table.js";
+import { signedStackSegmentHeight } from "../position-bar.js";
+import { isBarLike } from "../scale-axis-train.js";
 import type { LayerFrame, ResolvedColorScale } from "../types.js";
 
 /**
@@ -106,8 +108,9 @@ export function resolveCandidateLogicalValues(input: {
 }
 
 /**
- * Post-position segment height for stack/fill (ymax − ymin), or undefined when
- * the layer is not stack/fill or edges are missing/non-finite.
+ * Post-position segment height for bar-like stack/fill, or undefined when the
+ * layer is not a bar/col/area under stack/fill (so smooth/errorbar ymin/ymax
+ * bands are never mistaken for stack heights).
  */
 function stackOrFillSegmentHeight(
   frame: LayerFrame | undefined,
@@ -115,12 +118,13 @@ function stackOrFillSegmentHeight(
 ): number | undefined {
   if (frame === undefined || frame.ymin === null || frame.ymax === null) return undefined;
   // Partial frames (unit fixtures) may omit binding — treat as non-stack.
+  const geom = frame.binding?.layer?.geom;
+  if (geom === undefined || !isBarLike(geom)) return undefined;
   const position = frame.binding?.layer?.position ?? "identity";
   if (position !== "stack" && position !== "fill") return undefined;
   const lo = frame.ymin[frameRow];
   const hi = frame.ymax[frameRow];
-  if (lo === undefined || hi === undefined || !Number.isFinite(lo) || !Number.isFinite(hi)) {
-    return undefined;
-  }
-  return hi - lo;
+  if (lo === undefined || hi === undefined) return undefined;
+  const signed = signedStackSegmentHeight(lo, hi);
+  return Number.isFinite(signed) ? signed : undefined;
 }

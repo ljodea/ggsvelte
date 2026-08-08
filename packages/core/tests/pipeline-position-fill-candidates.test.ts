@@ -69,6 +69,46 @@ describe("position fill — candidate y matches axis space", () => {
     expect(yValues[0]).toBeCloseTo(468, 8);
     expect(yValues[1]).toBeCloseTo(873, 8);
   });
+
+  it("preserves sign for negative stacked contributions", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { g: "a", cls: "pos", y: 3 },
+          { g: "a", cls: "neg", y: -2 },
+        ],
+        aes({ x: "g", y: "y", fill: "cls" }),
+      )
+        .geomCol({ position: "stack" })
+        .spec(),
+      size,
+    );
+    const yValues = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    )
+      .filter((c) => c !== null)
+      .map((c) => c.yValue as number)
+      .toSorted((a, b) => a - b);
+    expect(yValues[0]).toBeCloseTo(-2, 8);
+    expect(yValues[1]).toBeCloseTo(3, 8);
+  });
+
+  it("does not mutate the shared source y column under identity stack", () => {
+    const rows = [
+      { g: "a", cls: "x", y: 10 },
+      { g: "a", cls: "y", y: 20 },
+    ];
+    runPipeline(
+      gg(rows, aes({ x: "g", y: "y", fill: "cls" }))
+        .geomCol({ position: "fill" })
+        .spec(),
+      size,
+    );
+    // Source rows must still hold the authored values after fill rewrites
+    // frame.yNumeric (no in-place alias mutation of the table cache).
+    expect(rows[0]!.y).toBe(10);
+    expect(rows[1]!.y).toBe(20);
+  });
 });
 
 describe("percent labels out-of-range advisory", () => {
