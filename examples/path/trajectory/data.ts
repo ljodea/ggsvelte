@@ -183,6 +183,59 @@ export function buildColdStations(
 
 export const minardColdStations: MinardColdStation[] = buildColdStations(minardCold, minardTroops);
 
+/**
+ * Troop vertex with optional cold-station fields for map Inspect tooltips.
+ * `date` / `stationKey` are set only on the Column-1 retreat vertex nearest
+ * each cold reading; other vertices keep empty strings.
+ */
+export type MinardTroopWithCold = TroopVertex & {
+  date: string;
+  stationKey: string;
+};
+
+/**
+ * Stamp each cold station onto its nearest Column-1 retreat troop vertex so
+ * mapping `label: "date"` on the march path puts Minard's date in the default
+ * tooltip when that vertex is pinned.
+ */
+export function attachColdDatesToTroops(
+  troops: readonly TroopVertex[],
+  stations: readonly MinardColdStation[],
+): MinardTroopWithCold[] {
+  const retreat = troops
+    .map((troop, index) => ({ troop, index }))
+    .filter(({ troop }) => troop.leg === "Column 1 Retreat");
+  const stamped = new Map<number, MinardColdStation>();
+  for (const station of stations) {
+    let bestIndex = retreat[0]?.index;
+    let bestDist = Number.POSITIVE_INFINITY;
+    if (bestIndex === undefined) {
+      throw new Error("attachColdDatesToTroops requires at least one Column 1 Retreat vertex");
+    }
+    for (const { troop, index } of retreat) {
+      const dist = Math.abs(troop.long - station.long);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIndex = index;
+      }
+    }
+    stamped.set(bestIndex, station);
+  }
+  return troops.map((troop, index) => {
+    const station = stamped.get(index);
+    return {
+      ...troop,
+      date: station?.date ?? "",
+      stationKey: station?.stationKey ?? "",
+    };
+  });
+}
+
+export const minardTroopsWithCold: MinardTroopWithCold[] = attachColdDatesToTroops(
+  minardTroops,
+  minardColdStations,
+);
+
 // Town-name nudges in degrees, so labels clear the bands the way Minard
 // placed them: Kowno left of the crossing, the Vilna-loop names off the ink.
 // Both the Svelte example and the builder spec label from `lx`/`ly`.

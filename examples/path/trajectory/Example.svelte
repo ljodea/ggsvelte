@@ -17,8 +17,9 @@
     campaignRivers,
     minardCityLabels,
     minardCold,
+    minardColdStations,
     minardStrengthLabels,
-    minardTroops,
+    minardTroopsWithCold,
   } from "./data.js";
 </script>
 
@@ -54,15 +55,28 @@
       alpha={0.7}
       inspect={false}
     />
+    <!-- label: "date" is tooltip-only on path (no text marks); empty away from cold stations -->
     <GeomPath
-      data={minardTroops}
+      data={minardTroopsWithCold}
       aes={{
         x: "long",
         y: "lat",
         group: "leg",
         color: "direction",
         linewidth: "survivors",
+        label: "date",
       }}
+    />
+    <!-- Cold stations: easy pin targets with date first in the default tooltip -->
+    <GeomPoint
+      data={minardColdStations}
+      aes={{
+        x: "long",
+        y: "lat",
+        color: "direction",
+        label: "date",
+      }}
+      size={2.5}
     />
     <GeomText
       data={minardCityLabels}
