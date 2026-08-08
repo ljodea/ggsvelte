@@ -358,3 +358,103 @@ describe("SKILL.md lead-line scheme/theme inventory matches registries", () => {
     expect(missing).toEqual([]);
   });
 });
+
+/**
+ * #1530: Inspect mode selection + multi-layer hit hygiene.
+ *
+ * API surface (mode options, inspect={false}) is already documented. Agents
+ * still ship wrong modes (violin with mode="x", Minard with hit-testable
+ * rivers) because the skill never said "do not do that." CLI SVG render
+ * cannot catch host Inspect mode — only the skill + a real hover check can.
+ * These contracts lock the design rules so skill content stays the gate.
+ */
+describe("skill teaches inspect mode selection and hit hygiene (#1530)", () => {
+  const skill = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+  const interactions = FILES.find((f) => f.name === "references/interactions.md");
+
+  it("interactions.md has a Choosing inspect mode section", () => {
+    expect(interactions).toBeDefined();
+    expect(interactions!.markdown).toMatch(/## Choosing inspect mode/i);
+  });
+
+  it("Choosing inspect mode prefers auto when product auto matches geometry", () => {
+    const section = interactions!.markdown.match(/## Choosing inspect mode[\s\S]*?(?=\n## )/)?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/Prefer `mode="auto"` when library auto matches/);
+    // Axis-group modes only when continuous shared-x (or y) series justify them.
+    expect(section!).toMatch(/continuous shared-x|time series|multi-series/i);
+  });
+
+  it("pins exact on violin/boxplot/discrete intervals; forbids relying on auto there", () => {
+    const section = interactions!.markdown.match(/## Choosing inspect mode[\s\S]*?(?=\n## )/)?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/Anti-patterns/);
+    // Discrete distribution/interval geoms: pin exact; do not leave auto (#1528).
+    expect(section!).toMatch(/Pin `mode="exact"`/);
+    expect(section!).toMatch(/Violin with `mode="x"`/);
+    expect(section!).toMatch(/Boxplot with `mode="x"`/);
+    expect(section!).toMatch(/errorbar/);
+    expect(section!).toMatch(/pointrange/);
+    expect(section!).toMatch(/linerange/);
+    expect(section!).toMatch(/Do \*\*not\*\* leave `auto`|do \*\*not\*\* leave `auto`|#1528/);
+    // Use-instead cells must not recommend bare auto for those geoms.
+    expect(section!).not.toMatch(/Pin `mode="exact"` or leave `auto`/);
+    expect(section!).not.toMatch(/\| `mode="exact"` or leave `auto` \|/);
+  });
+
+  it("documents multi-layer hit hygiene with Minard-class furniture opt-out", () => {
+    const section = interactions!.markdown.match(
+      /## Multi-layer hit hygiene[\s\S]*?(?=\n## )/,
+    )?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/inspect=\{false\}/);
+    expect(section!).toMatch(/Minard/);
+    expect(section!).toMatch(/path\/trajectory/);
+    expect(section!).toMatch(/one primary[\s*]+inspectable mark family/);
+    expect(section!).toMatch(/troop path/);
+    expect(section!).toMatch(/summary/i);
+  });
+
+  it("notes that CLI SVG render does not validate host inspect behaviour", () => {
+    const section = interactions!.markdown.match(
+      /## CLI cannot catch host inspect behaviour[\s\S]*?(?=\n## )/,
+    )?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/ggsvelte-render/);
+    expect(section!).toMatch(
+      /does \*\*not\*\* validate host Inspect mode|does not validate host Inspect mode/i,
+    );
+  });
+
+  it("requires a real hover/pin check after changing interaction (not SVG-only)", () => {
+    const section = interactions!.markdown.match(
+      /## CLI cannot catch host inspect behaviour[\s\S]*?(?=\n## )/,
+    )?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/real hover and pin/i);
+    expect(section!).toMatch(/docs site|playground|browser/i);
+  });
+
+  it("SKILL.md Interactions section points at mode selection and hit hygiene rules", () => {
+    // One short pointer, not a second full copy of the reference.
+    const interactionsSection = skill.match(/## Interactions[\s\S]*?(?=\n## )/)?.[0] ?? "";
+    expect(interactionsSection.length).toBeGreaterThan(100);
+    expect(interactionsSection).toMatch(/references\/interactions\.md/);
+    expect(interactionsSection).toMatch(/Choosing inspect\s+mode/);
+    expect(interactionsSection).toMatch(/pin `mode="exact"` on violin/i);
+    expect(interactionsSection).toMatch(/inspect=\{false\}/);
+    expect(interactionsSection).toMatch(/before enabling Inspect/);
+  });
+
+  it("records keep-single skill (no split) decision for #1530", () => {
+    // Default remains one @ggsvelte/skill until progressive disclosure fails.
+    // Recorded in interactions.md so the decision travels with the package.
+    const section = interactions!.markdown.match(
+      /## CLI cannot catch host inspect behaviour[\s\S]*?(?=\n## )/,
+    )?.[0];
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/Skill packaging decision \(#1530\)/);
+    expect(section!).toMatch(/single skill/);
+    expect(section!).toMatch(/Do not split/);
+  });
+});
