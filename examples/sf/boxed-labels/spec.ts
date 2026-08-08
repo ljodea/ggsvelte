@@ -14,8 +14,8 @@ export default defineExample(
     .coordFixed()
     .theme("classic")
     .labs({
-      title: "The same names, on paper",
-      subtitle: "Each pump name sits on a measured box so the map stays readable",
+      title: "Pump names on measured boxes",
+      subtitle: "Each label sits on a padded box so it stays readable over a busy fill",
     })
     .spec(),
 );

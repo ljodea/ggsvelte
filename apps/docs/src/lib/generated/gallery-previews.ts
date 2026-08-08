@@ -96,7 +96,7 @@ export const GALLERY_PREVIEWS = [
     id: "col/theme-linedraw",
     filename: "col-theme-linedraw-light.png",
     path: "/previews/col-theme-linedraw-light.png",
-    sha256: "ce38e03f29b19f23ff11d03d3600239abdb32149ff1b50378e7faf4f8e60c593",
+    sha256: "5cd18b346db3dcbf288db1dcf388a31a13a4a1542b3d42a5a5dc609ec2460a10",
   },
   {
     id: "col/value-labels",
@@ -240,7 +240,7 @@ export const GALLERY_PREVIEWS = [
     id: "interaction/linked-views",
     filename: "interaction-linked-views-light.png",
     path: "/previews/interaction-linked-views-light.png",
-    sha256: "1fa4a7616a152c455ad5e4048e28ffb71ccc2aa355dd41f5d7c4818e790e2d85",
+    sha256: "9ef9520899329952c1bb774c462e8eed8cf8b9824064fe5c74b8ec663446b5a6",
   },
   {
     id: "interaction/tooltip",
@@ -360,7 +360,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",
-    sha256: "c7b3ca2dd472c53f53ab8903f31c5db2361e667932f62034516a236b9ad05992",
+    sha256: "4edccb3b7800a01511a62482d02e5f5263a73b72ed33be62d6ea45d079e1a192",
   },
   {
     id: "point/layer-data-bands",
@@ -498,7 +498,7 @@ export const GALLERY_PREVIEWS = [
     id: "sf/boxed-labels",
     filename: "sf-boxed-labels-light.png",
     path: "/previews/sf-boxed-labels-light.png",
-    sha256: "97219b225c360dffd66ed50e0fd16ef8b079137637091e7ad8fbd4c0919be306",
+    sha256: "46800bc9517e983bf92f1a3de20f4f0de1bf63aa813b5bbd5823ec2ce5ec7147",
   },
   {
     id: "sf/geometry-collection",

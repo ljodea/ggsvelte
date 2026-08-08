@@ -1,6 +1,6 @@
 {
-  "title": "The same columns under a linedraw theme",
-  "description": "Theme swap on a column chart without changing the data or geometry.",
+  "title": "Linedraw theme on chest-size columns",
+  "description": "Linedraw theme on ordered chest counts: hard black axes and grid on white, with no grey chrome.",
   "tags": ["col", "bars", "theme", "linedraw"],
   "docsSection": "Bars & columns"
 }

@@ -8,8 +8,8 @@ export default defineExample(
     .geomPoint({ position: "jitter", positionParams: { width: 0.22, height: 0 }, alpha: 0.65 })
     .theme("clean")
     .labs({
-      title: "The same calories, with position jitter",
-      subtitle: "Jitter applied through the point position, not the dedicated jitter geom",
+      title: "Calories by restaurant, with jitter",
+      subtitle: "Horizontal jitter spreads marks that share a restaurant",
       x: "Restaurant",
       y: "Calories",
     })

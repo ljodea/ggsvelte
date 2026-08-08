@@ -21,8 +21,8 @@
   <ScaleXContinuous nice={false} />
   <ThemeLinedraw />
   <Labs
-    title="The same columns under a linedraw theme"
-    subtitle="Same chest counts with hard black lines and no grey fill"
+    title="Linedraw theme on chest-size columns"
+    subtitle="Hard black lines, white panel, no grey fill"
     x="Chest circumference (inches)"
     y="Soldiers"
   />

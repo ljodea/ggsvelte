@@ -1,6 +1,6 @@
 {
   "title": "Snow's outbreak by nearest pump",
-  "description": "The same thirteen Soho neighbourhoods, shaded by the cholera deaths inside each. One region holds 359 of the 578, and it is the one around Broad Street.",
+  "description": "Thirteen Soho neighbourhoods shaded by cholera deaths inside each. One region holds 359 of the 578, around Broad Street.",
   "tags": ["map", "choropleth", "region", "join", "fill"],
   "docsSection": "Maps & polygons"
 }
