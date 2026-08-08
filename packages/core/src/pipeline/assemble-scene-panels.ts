@@ -256,18 +256,14 @@ export function assembleScenePanels(input: {
   let yLabelBandPx = 0;
   if (vTitle !== "" && yLabelsVisible) {
     const fontSize = input.vAxisTextSize ?? input.axisTextSize;
-    for (const panel of scenePanels) {
-      if (panel.axisY === null) continue;
-      for (const tick of panel.axisY) {
-        if (tick.label === "" || tick.showLabel === false) continue;
-        const size = tick.labelSize ?? fontSize;
-        if (tick.lines !== undefined && tick.lines.length > 0) {
-          for (const line of tick.lines) {
-            yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(line, size));
-          }
-        } else {
-          yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(tick.label, size));
-        }
+    const yAxisTicks = scenePanels.flatMap((panel) => panel.axisY ?? []);
+    for (const tick of yAxisTicks) {
+      if (tick.label === "" || tick.showLabel === false) continue;
+      const size = tick.labelSize ?? fontSize;
+      const fragments =
+        tick.lines !== undefined && tick.lines.length > 0 ? tick.lines : [tick.label];
+      for (const fragment of fragments) {
+        yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(fragment, size));
       }
     }
   }
