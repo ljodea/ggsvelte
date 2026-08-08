@@ -452,5 +452,23 @@ export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 export { runCLI } from "./cli.js";
 export type { CLIIO } from "./cli.js";
 
+// Inspect×geom pure collectors (host ondiagnostic + CLI --inspect, #1531)
+export {
+  collectInspectIntentDiagnostics,
+  discreteColorFillDomainSizes,
+  HIGH_CARDINALITY_DISCRETE_THRESHOLD,
+  INSPECT_GEOM_DIAGNOSTIC_CATALOG,
+  INSPECT_INTENT_MODES,
+  inspectAxisOnBarColDiagnostics,
+  inspectHighCardinalityDiagnostics,
+  isInspectIntentMode,
+  layerGeomsFromSpecLayers,
+} from "./inspect-geom-advisories.js";
+export type {
+  InspectGeomAdvisory,
+  InspectGeomAdvisoryCode,
+  InspectIntentMode,
+} from "./inspect-geom-advisories.js";
+
 // Instrumentation
 export { perfMark, perfMeasure } from "./perf.js";

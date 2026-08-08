@@ -11,10 +11,14 @@ export type {
   InteractionDiagnosticCode,
 } from "./interaction-diagnostics.js";
 export {
+  collectInspectIntentDiagnostics,
   discreteColorFillDomainSizes,
   HIGH_CARDINALITY_DISCRETE_THRESHOLD,
+  INSPECT_GEOM_DIAGNOSTIC_CATALOG,
+  INSPECT_INTENT_MODES,
   inspectAxisOnBarColDiagnostics,
   inspectHighCardinalityDiagnostics,
+  isInspectIntentMode,
   layerGeomsFromSpecLayers,
 } from "./inspect-geom-advisories.js";
 

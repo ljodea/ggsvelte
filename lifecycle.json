@@ -4194,8 +4194,32 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "HIGH_CARDINALITY_DISCRETE_THRESHOLD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "INSPECT_GEOM_DIAGNOSTIC_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "INSPECT_INTENT_MODES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "IPSUM_PALETTE": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "InspectGeomAdvisory": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InspectGeomAdvisoryCode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InspectIntentMode": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "LEGEND_ROW_HEIGHT": {
@@ -4806,6 +4830,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "collectInspectIntentDiagnostics": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "compileRuntimeRowIndexFilter": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4843,6 +4871,10 @@
           "lifecycle": "experimental"
         },
         "disambiguatedLabels": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "discreteColorFillDomainSizes": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4894,6 +4926,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "inspectAxisOnBarColDiagnostics": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "inspectHighCardinalityDiagnostics": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "installCandidates": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4903,6 +4943,14 @@
           "lifecycle": "experimental"
         },
         "isISODateString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isInspectIntentMode": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "layerGeomsFromSpecLayers": {
           "kind": "value",
           "lifecycle": "experimental"
         },

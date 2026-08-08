@@ -20,6 +20,30 @@ the spec before anyone sees it.
 If you embed spec-writing agents, treat this package as part of the install
 contract, not an option.
 
+## What the CLI covers (and what it does not)
+
+| Covered on every render                         | Opt-in / host-side                                    |
+| ----------------------------------------------- | ----------------------------------------------------- |
+| Schema validation (`validate`)                  | Host inspect **mode** and most interaction wiring     |
+| Pipeline warnings and advisories                | Runtime key/lineage errors (need a live plot)         |
+| Scale-inference diagnostics (`source: "scale"`) | Composition/deprecation `ondiagnostic` without a host |
+| Spec-lint advisories (`source: "spec-lint"`)    | Full tooltip visual QA                                |
+
+Inspect mode is a **host** capability (`<Inspect mode="xy" />` / plot
+`inspect`), not a PortableSpec field. To surface the same inspect×geom
+advisories agents would only see via `ondiagnostic` in a browser, declare host
+intent:
+
+```sh
+ggsvelte-render --inspect xy spec.json > out.svg
+# stderr may include:
+# {"kind":"advisory","source":"interaction","code":"INTERACTION_INSPECT_X_ON_COL",…}
+```
+
+Modes: `auto`, `exact`, `x`, `y`, `xy` (same enum as the host). Without
+`--inspect`, interaction codes are not invented — headless SVG-only charts
+stay quiet. See [ADR 0024](../../docs/decisions/0024-cli-interaction-intent.md).
+
 ## Install
 
 ```sh
@@ -46,12 +70,15 @@ ggsvelte-render spec.json > out.svg          # spec from a file
 ggsvelte-render < spec.json > out.svg        # spec from stdin
 ggsvelte-render spec.json --data data.json   # named datasets from a file
 ggsvelte-render spec.json --width 832 --height 400
+ggsvelte-render --inspect xy spec.json > out.svg   # host inspect intent
 ```
 
 - SVG goes to stdout. Nothing else ever does.
 - Diagnostics go to stderr as JSON lines:
   `{"kind":"error",…}` | `{"kind":"warning",…}` | `{"kind":"advisory",…}`.
-  Scale-inference diagnostics set `source: "scale"` so hosts can filter.
+  Scale-inference diagnostics set `source: "scale"`; spec-lint sets
+  `source: "spec-lint"`; interaction intent (`--inspect`) sets
+  `source: "interaction"`.
 
 ## Exit codes
 
