@@ -1,5 +1,18 @@
 # @ggsvelte/svelte
 
+## 0.34.3
+
+### Patch Changes
+
+- 3b04a07: Fix geom_dotplot Inspect tooltips: hybrid identity+after_stat candidates now expose per-dot x (bin center) and stackpos instead of printing "–" for every mark.
+- df6cb6a: Fix position-fill tooltips that printed absurd percentages (e.g. "87300%") by publishing post-position proportions as candidate y values, and emit a `percent-labels-out-of-range` advisory when scale labels are percent formats on non-proportion domains.
+- c883335: Omit aes.weight from the default tooltip body — y already carries the weighted measure for count/sum bars, so printing the source weight column was pure redundancy.
+- Updated dependencies [3b04a07]
+- Updated dependencies [df6cb6a]
+- Updated dependencies [86964d8]
+  - @ggsvelte/core@0.34.3
+  - @ggsvelte/spec@0.34.3
+
 ## 0.34.2
 
 ### Patch Changes

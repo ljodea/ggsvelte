@@ -1,5 +1,15 @@
 # @ggsvelte/core
 
+## 0.34.3
+
+### Patch Changes
+
+- 3b04a07: Fix geom_dotplot Inspect tooltips: hybrid identity+after_stat candidates now expose per-dot x (bin center) and stackpos instead of printing "–" for every mark.
+- df6cb6a: Fix position-fill tooltips that printed absurd percentages (e.g. "87300%") by publishing post-position proportions as candidate y values, and emit a `percent-labels-out-of-range` advisory when scale labels are percent formats on non-proportion domains.
+- 86964d8: Discrete colour/fill legend keys for point-family layers now use the layer's constant shape (param, aes constant, or default circle) instead of anonymous coloured squares, so multi-layer charts like Snow cholera (grey death points + red pump crosses) stay readable without colour alone.
+- Updated dependencies [df6cb6a]
+  - @ggsvelte/spec@0.34.3
+
 ## 0.34.2
 
 ### Patch Changes
