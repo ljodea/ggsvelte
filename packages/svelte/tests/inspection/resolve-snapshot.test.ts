@@ -591,42 +591,68 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
         .spec(),
       { width: 400, height: 300 },
     );
+    const filled = runPipeline(
+      gg(data, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "fill" })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const dodged = runPipeline(
+      gg(data, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "dodge" })
+        .spec(),
+      { width: 400, height: 300 },
+    );
     const parallel = runPipeline(
       gg(data, aes({ x: "x", y: "y", color: "series" }))
         .geomLine()
         .spec(),
       { width: 400, height: 300 },
     );
-    const stackedSeed = stacked.candidates.candidate(0)!;
-    const parallelSeed = parallel.candidates.candidate(0)!;
-    const stackedInspection = materializeInspection(
-      {
-        model: stacked,
-        seed: stackedSeed,
-        mode: "x",
-        state: "transient",
-        source: "pointer",
-      },
-      resolvedTarget(stacked, stackedSeed, "x")!,
-      "complete",
-      (index) => (stacked.row(index) as { id: string } | null)?.id ?? null,
-    );
-    const parallelInspection = materializeInspection(
-      {
-        model: parallel,
-        seed: parallelSeed,
-        mode: "x",
-        state: "transient",
-        source: "pointer",
-      },
-      resolvedTarget(parallel, parallelSeed, "x")!,
-      "complete",
-      (index) => (parallel.row(index) as { id: string } | null)?.id ?? null,
-    );
+
+    function completeAxisInspection(
+      model: ReturnType<typeof runPipeline>,
+    ): ReturnType<typeof materializeInspection> {
+      const seed = model.candidates.candidate(0)!;
+      return materializeInspection(
+        {
+          model,
+          seed,
+          mode: "x",
+          state: "transient",
+          source: "pointer",
+        },
+        resolvedTarget(model, seed, "x")!,
+        "complete",
+        (index) => (model.row(index) as { id: string } | null)?.id ?? null,
+      );
+    }
+
+    const stackedInspection = completeAxisInspection(stacked);
+    const filledInspection = completeAxisInspection(filled);
+    const dodgedInspection = completeAxisInspection(dodged);
+    const parallelInspection = completeAxisInspection(parallel);
+
+    expect(stacked.layerPositions).toEqual(["stack"]);
+    expect(filled.layerPositions).toEqual(["fill"]);
+    expect(dodged.layerPositions).toEqual(["dodge"]);
+    expect(parallel.layerPositions).toEqual(["identity"]);
+
     expect(stackedInspection.mode).toBe("x");
     if (stackedInspection.mode === "x" || stackedInspection.mode === "y") {
       expect(stackedInspection.groupTotal).toBe(15); // 1+2+3+4+5
       expect(stackedInspection.groupMemberCount).toBe(5);
+    }
+    expect(filledInspection.mode).toBe("x");
+    if (filledInspection.mode === "x" || filledInspection.mode === "y") {
+      // Fill still contributes source y magnitudes for the stack Total.
+      expect(filledInspection.groupTotal).toBe(15);
+      expect(filledInspection.groupMemberCount).toBe(5);
+    }
+    expect(dodgedInspection.mode).toBe("x");
+    if (dodgedInspection.mode === "x" || dodgedInspection.mode === "y") {
+      expect(dodgedInspection.groupTotal).toBeNull();
+      expect(dodgedInspection.groupMemberCount).toBe(5);
     }
     expect(parallelInspection.mode).toBe("x");
     if (parallelInspection.mode === "x" || parallelInspection.mode === "y") {
@@ -634,6 +660,8 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
       expect(parallelInspection.groupMemberCount).toBe(5);
     }
     stacked.dispose();
+    filled.dispose();
+    dodged.dispose();
     parallel.dispose();
   });
 });

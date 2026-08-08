@@ -14,8 +14,8 @@
  * ratio directly.
  *
  * Transcribed from HistData::Wheat (see NOTICE); 53 years, 103 rows in long
- * form. The 1821 wage is absent from the original and is left out of the wage
- * series rather than imputed.
+ * form. Wages for 1815, 1820, and 1821 are absent from the original and are
+ * left out of the wage series rather than imputed.
  */
 export const wheatAndWages = [
   { year: 1565, series: "Wheat / quarter", value: 41 },

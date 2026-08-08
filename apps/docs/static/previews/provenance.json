@@ -228,12 +228,12 @@
     },
     "line/labor-cost-of-wheat": {
       "filename": "line-labor-cost-of-wheat-light.png",
-      "sourceSha256": "aa71dc1d49e3e953ea542266c508c63e39ca23e1f289e996a61dd86e39114e2d",
+      "sourceSha256": "b234fd786e2406e5aa08aa1d7e9a77dde210d26348f0dcb7d0b4a984afbcb3f5",
       "pngSha256": "061ecd7c317e705cf3a8d6833142ceb92856a1c7ee89cf9fbfcad59c47005492"
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "9512dee2bad0eda427b282556d2ec86d42510e87e65eeda34468aa0421293154",
+      "sourceSha256": "fd2bca19766c4699a3e916b7428540386ae0e8ee65c1c9ecb9afcf922a06a3ac",
       "pngSha256": "5677954e011409163dc8d36a04e739604960a0e4b9faad5743ac434ba6f7e1c6"
     },
     "line/time-axis": {
