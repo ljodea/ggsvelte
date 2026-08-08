@@ -324,7 +324,7 @@ export const GALLERY_PREVIEWS = [
     id: "path/trajectory",
     filename: "path-trajectory-light.png",
     path: "/previews/path-trajectory-light.png",
-    sha256: "33e75d9ddb7ed09c894db0c0327632c4fa8a4ab1b49665d4a5b7618a5f7bd2d4",
+    sha256: "3bdcf1e2977ff4f3b931ef989cdc8fc5daf661063826e0bebdeb9323d667088c",
   },
   {
     id: "point/abline-identity",
