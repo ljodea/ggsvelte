@@ -6,6 +6,6 @@
 "@ggsvelte/svelte": patch
 ---
 
-Teach Minard-class multi-layer hit hygiene without inventing ring-anchor links across series of different cardinality.
+Drop Minard ring-anchor / false linked-selection guidance; teach independent dual panels when series cardinalities differ.
 
 Migration: none — skill reference only.

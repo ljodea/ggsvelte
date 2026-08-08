@@ -1,5 +1,26 @@
 # @ggsvelte/svelte
 
+## 0.34.1
+
+### Patch Changes
+
+- b981a3a: # Document GGPlot children in ggplot2 thinking order
+
+  Migration: none — docs and skill convention only. Svelte examples, the agent
+  skill, and the package README now author mark layers first, then scales /
+  coords / facets, then theme / guides / labs, with host-only `<Inspect>` last.
+  Runtime assembly was already bag-based; child interleave does not change the
+  PortableSpec beyond mark z-order and last-wins folds within a grammar family.
+
+- b038333: fix legend-filter checkbox visuals: drive `input.checked` from controller state instead of Svelte's `checked={}` binding so trusted label clicks uncheck when a series is hidden. Trim the legend-filter gallery subtitle.
+- f93cc00: Document Minard-class ring-anchor points in multi-layer hit hygiene guidance.
+
+  Migration: none — skill reference only.
+
+- Updated dependencies [f93cc00]
+  - @ggsvelte/core@0.34.1
+  - @ggsvelte/spec@0.34.1
+
 ## 0.34.0
 
 ### Minor Changes
