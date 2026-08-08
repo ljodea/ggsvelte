@@ -12950,9 +12950,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/kde-2d-filled",
-    title: "Cholera deaths as filled density bands — ggsvelte gallery",
+    title: "Filled 2D density bands — ggsvelte gallery",
     description:
-      "The same 1854 Soho map, with the density drawn as closed bands rather than lines: the darkest band covers the streets fed by the Broad Street pump.",
+      "Kernel density drawn as shaded rings over 578 point locations. Darker bands sit where the points are densest — here, the streets around one pump on Snow's 1854 Soho map.",
     canonicalPath: "/examples/density/kde-2d-filled",
     kind: "page",
     index: true,
