@@ -17,8 +17,9 @@
  *
  * Cold stations: `buildColdStations` joins each temperature reading to the
  * nearest Column-1 retreat vertex by longitude; `attachColdDatesToTroops`
- * stamps those dates onto the march path so Inspect pins can show Minard's
- * date on cold-aligned retreat vertices.
+ * stamps those dates and stationKeys onto the march path so Inspect can show
+ * Minard's date and drive linked selection on the cold strip (custom tooltip
+ * content — not the default kitchen-sink field dump).
  *
  * Rivers: the Niemen, Vilija, Berezina, Western Dvina, Dnieper and Moskva,
  * simplified to ~55 points each from OpenStreetMap relations (Niemen,

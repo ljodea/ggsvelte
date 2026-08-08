@@ -1,6 +1,5 @@
 /**
- * Minard rectification: restore inspect-only dual chart (no dual-tool rail).
- * Linked Select-point chrome was a product misfit; cold dates stay on the path pin.
+ * Minard: no dual-tool rail; clean custom tooltips; inspect-driven link.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -9,9 +8,8 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dir, "..");
 const EXAMPLE = join(ROOT, "examples/path/trajectory/Example.svelte");
 const META = join(ROOT, "examples/path/trajectory/meta.json");
-const INTERACTION_API = join(ROOT, "scripts/example-interaction-api.test.ts");
 
-describe("path/trajectory inspect-only rectification", () => {
+describe("path/trajectory no dual-tool rail", () => {
   const source = readFileSync(EXAMPLE, "utf8");
   const plots = source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [];
 
@@ -19,53 +17,46 @@ describe("path/trajectory inspect-only rectification", () => {
     expect(plots.length).toBe(2);
   });
 
-  it("drops dual-tool chrome enablers (select, tool=point, shared controller)", () => {
+  it("drops Select-point chrome enablers (select type point, tool=point)", () => {
     expect(source).not.toMatch(/select=\{\{\s*type:\s*["']point["']/);
     expect(source).not.toMatch(/tool=["']point["']/);
-    expect(source).not.toContain("createPlotInteraction");
-    expect(source).not.toContain("interactionScope");
-    expect(source).not.toMatch(/\{interaction\}/);
   });
 
-  it("keeps Inspect pin on both plots without stationKey identity", () => {
+  it("keeps Inspect pin on both plots", () => {
     for (const plot of plots) {
-      expect(plot).toMatch(/<Inspect\b[^>]*\bpin\b/);
-      expect(plot).not.toMatch(/identity=["']stationKey["']/);
+      expect(plot).toMatch(/<Inspect\b[\s\S]*?\bpin\b/);
     }
   });
 
-  it("uses stamped troop path so cold dates reach the map pin", () => {
+  it("uses custom Inspect content instead of kitchen-sink defaults", () => {
+    expect(source).toMatch(/content=\{/);
+    expect(source).toContain("mapMarchTooltipFields");
+    expect(source).toContain("coldStripTooltipFields");
+  });
+
+  it("stamps cold dates on the troop path for oninspect / tooltip rows", () => {
     const mapPlot = plots[0] ?? "";
     expect(mapPlot).toContain("minardTroopsWithCold");
-    expect(mapPlot).toMatch(/label:\s*["']date["']/);
-    // Path is the primary inspectable family — no competing cold-station points.
-    expect(mapPlot).not.toMatch(/data=\{minardColdStations\}/);
   });
 
-  it("restores temperature-only cold strip data (minardCold)", () => {
-    const coldPlot = plots[1] ?? "";
-    expect(coldPlot).toMatch(/minardCold\b/);
-    expect(coldPlot).not.toContain("minardColdStations");
-  });
-
-  it("does not promise Select-point linking in the cold subtitle", () => {
-    expect(source).not.toMatch(/Select a reading to highlight/);
+  it("does not force Select-point copy in the cold subtitle", () => {
+    expect(source).not.toMatch(/Select a reading to highlight the same station/);
   });
 });
 
-describe("path/trajectory meta after rectification", () => {
+describe("path/trajectory meta after inspect-link fix", () => {
   const meta = JSON.parse(readFileSync(META, "utf8")) as {
     description: string;
     tags: string[];
-    journey?: { pointer?: string; keyboard?: string; touch?: string; references?: unknown[] };
+    journey?: { pointer?: string; keyboard?: string; touch?: string };
   };
 
-  it("drops linked-views discovery tag", () => {
-    expect(meta.tags).not.toContain("linked-views");
+  it("tags inspect and linked-views without promising Select-point chrome", () => {
     expect(meta.tags).toContain("inspect");
+    expect(meta.tags).toContain("linked-views");
   });
 
-  it("describes the figurative map and cold dates without Select-point chrome", () => {
+  it("describes survivors, dates, and cross-chart highlight without tool rail language", () => {
     const blob = [
       meta.description,
       meta.journey?.pointer ?? "",
@@ -75,15 +66,8 @@ describe("path/trajectory meta after rectification", () => {
       .join(" ")
       .toLowerCase();
     expect(blob).not.toMatch(/select point|clear selection|tool rail/);
-    expect(blob).not.toMatch(/the other chart selects|highlight the same station/);
-    expect(blob).toMatch(/inspect|pin|hover|date/);
-  });
-});
-
-describe("example-interaction-api allowlist after Minard unlink", () => {
-  it("no longer allowlists path/trajectory for createPlotInteraction", () => {
-    const gate = readFileSync(INTERACTION_API, "utf8");
-    expect(gate).not.toContain('LINKED_VIEW_ALLOWLIST = new Set(["path/trajectory"])');
-    expect(gate).not.toMatch(/path\/trajectory.*allowlist|allowlist.*path\/trajectory/i);
+    expect(blob).toMatch(/pin|hover/);
+    expect(blob).toMatch(/date|cold|survivors/);
+    expect(blob).toMatch(/strip|below|other|highlight|same|lights/);
   });
 });

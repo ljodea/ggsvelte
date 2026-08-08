@@ -1,5 +1,6 @@
 /**
- * Gallery meta teaches inspect + cold dates on the figurative map — not dual-tool select.
+ * Gallery meta teaches inspect + cold dates + cross-chart highlight —
+ * not Select-point dual-tool chrome.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -16,21 +17,22 @@ describe("path/trajectory meta polish", () => {
     journey?: { pointer?: string; keyboard?: string; touch?: string };
   };
 
-  it("tags the example for inspect discovery without linked-views dual-tool chrome", () => {
+  it("tags the example for inspect + linked-views discovery", () => {
     expect(meta.tags).toContain("inspect");
     expect(meta.tags).toContain("path");
-    expect(meta.tags).not.toContain("linked-views");
+    expect(meta.tags).toContain("linked-views");
   });
 
-  it("describes the cold strip and dates in plain language", () => {
+  it("describes the cold strip and linked highlight without Select-point chrome", () => {
     expect(meta.description.toLowerCase()).toMatch(/cold|date|retreat|minard/);
-    expect(meta.description.toLowerCase()).not.toMatch(/select point|linked view/);
+    expect(meta.description.toLowerCase()).not.toMatch(/select point/);
   });
 
-  it("ships a journey pointer for hover/pin inspect, not Select point", () => {
+  it("ships a journey pointer for hover/pin + strip highlight", () => {
     const pointer = meta.journey?.pointer ?? "";
     expect(pointer).toMatch(/pin|hover|inspect|date/i);
     expect(pointer.toLowerCase()).not.toMatch(/select point|clear selection/);
+    expect(pointer.toLowerCase()).toMatch(/strip|below|other|highlight|same/);
   });
 });
 

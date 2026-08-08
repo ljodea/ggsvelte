@@ -18,9 +18,11 @@ export default defineExample(
   // Minard's flow map: band width carries surviving strength, so linewidth is
   // a mapped aesthetic here, and geom_path keeps row order within each leg -
   // the retreat walks back over the longitudes of the advance. Cold dates are
-  // stamped onto retreat vertices (minardTroopsWithCold) so Inspect pins match
-  // the Svelte example. The Svelte surface also stacks the temperature strip
-  // beneath this map; a single PortableSpec describes the map panel only.
+  // stamped onto retreat vertices (minardTroopsWithCold) for the Svelte pin.
+  // PortableSpec has no custom Inspect content; date stays on the data table
+  // (not mapped as label) so static renders match the band without empty
+  // kitchen-sink fields. The Svelte surface stacks the temperature strip under
+  // this map; a single PortableSpec describes the map panel only.
   gg(minardTroopsWithCold, aes({ x: "long", y: "lat" }))
     .geomPath({
       data: campaignRivers,
@@ -34,7 +36,6 @@ export default defineExample(
         group: "leg",
         color: "direction",
         linewidth: "survivors",
-        label: "date",
       }),
     })
     .geomText({

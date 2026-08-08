@@ -1,6 +1,6 @@
 /**
- * Linked Select-point dual chrome was removed from Minard (product rectification).
- * Shared createPlotInteraction no longer belongs on this figurative map.
+ * Minard map ↔ cold strip link via inspect-driven selection (no Select-point
+ * dual-tool rail). Shared createPlotInteraction + oninspect setSelection.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -10,27 +10,43 @@ const ROOT = join(import.meta.dir, "..");
 const EXAMPLE = join(ROOT, "examples/path/trajectory/Example.svelte");
 const INTERACTION_API = join(ROOT, "scripts/example-interaction-api.test.ts");
 
-describe("path/trajectory no longer publishes linked point-select", () => {
+describe("path/trajectory inspect-driven cold-station link", () => {
   const source = readFileSync(EXAMPLE, "utf8");
 
-  it("does not share a createPlotInteraction controller across plots", () => {
-    expect(source).not.toContain("createPlotInteraction");
-    expect(source).not.toContain("interactionScope");
-    expect(source).not.toMatch(/\{interaction\}/);
+  it("shares a createPlotInteraction controller across both plots", () => {
+    expect(source).toContain("createPlotInteraction");
+    expect(source).toContain("interactionScope");
+    expect(source).toMatch(/\{interaction\}/);
   });
 
-  it("does not enable point-select on either plot", () => {
+  it("never enables Select-point dual-tool chrome", () => {
     const plots = source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [];
     expect(plots.length).toBe(2);
     for (const plot of plots) {
       expect(plot).not.toMatch(/select=\{\{\s*type:\s*["']point["']/);
+      expect(plot).not.toMatch(/tool=["']point["']/);
     }
+  });
+
+  it("wires oninspect to setSelection / clearSelection by stationKey", () => {
+    expect(source).toContain("oninspect");
+    expect(source).toContain("setSelection");
+    expect(source).toContain("clearSelection");
+    expect(source).toContain("stationKeyFromInspectRow");
+  });
+
+  it("puts cold stations on the strip and as map ring owners", () => {
+    const plots = source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [];
+    const mapPlot = plots[0] ?? "";
+    const coldPlot = plots[1] ?? "";
+    expect(mapPlot).toMatch(/data=\{minardColdStations\}/);
+    expect(coldPlot).toMatch(/minardColdStations/);
   });
 });
 
-describe("example-interaction-api allowlist no longer special-cases Minard", () => {
-  it("does not allowlist path/trajectory for linked-view controller APIs", () => {
+describe("example-interaction-api allowlist for Minard link", () => {
+  it("allowlists path/trajectory for shared controller APIs", () => {
     const gate = readFileSync(INTERACTION_API, "utf8");
-    expect(gate).not.toContain('LINKED_VIEW_ALLOWLIST = new Set(["path/trajectory"])');
+    expect(gate).toMatch(/LINKED_VIEW_ALLOWLIST[\s\S]*path\/trajectory/);
   });
 });

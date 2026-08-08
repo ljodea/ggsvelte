@@ -1,6 +1,7 @@
 /**
- * Cold dates stamp onto Column-1 retreat vertices for the map path pin.
- * Live Example maps label:"date" on minardTroopsWithCold (inspect-only path).
+ * Cold dates stamp onto Column-1 retreat vertices for map inspect tooltips
+ * and stationKey linking. Live Example uses custom Inspect content (not
+ * path-wide label:date kitchen sink).
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -45,27 +46,26 @@ describe("attachColdDatesToTroops", () => {
   });
 });
 
-describe("path/trajectory Example map date tooltip wiring", () => {
+describe("path/trajectory Example map date / link wiring", () => {
   const source = readFileSync(EXAMPLE, "utf8");
 
-  it("maps label to date on the stamped troop path so the pin can show the date", () => {
+  it("keeps stamped troops on the march path for date + stationKey on inspect", () => {
     expect(source).toContain("minardTroopsWithCold");
-    // Match the open tag after data={minardTroopsWithCold} only (not rivers).
     const path = source.match(/<GeomPath\s+data=\{minardTroopsWithCold\}[\s\S]*?\/>/)?.[0];
     expect(path).toBeDefined();
-    expect(path!).toMatch(/label:\s*["']date["']/);
     expect(path!).not.toContain("inspect={false}");
+    // Kitchen-sink default used label:date; custom content reads row.date instead.
+    expect(source).toContain("mapMarchTooltipFields");
   });
 
-  it("does not mount a second cold-station point layer on the map", () => {
+  it("mounts cold-station points on the map for selection rings", () => {
     const mapPlot = (source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [])[0] ?? "";
-    expect(mapPlot).not.toMatch(/data=\{minardColdStations\}/);
+    expect(mapPlot).toMatch(/data=\{minardColdStations\}/);
   });
 
-  it("keeps the portable map spec on the stamped troop path with date labels", () => {
+  it("keeps the portable map spec on the stamped troop path", () => {
     const spec = readFileSync(join(ROOT, "examples/path/trajectory/spec.ts"), "utf8");
     expect(spec).toContain("minardTroopsWithCold");
-    expect(spec).toMatch(/label:\s*["']date["']/);
     expect(spec).not.toMatch(/gg\(minardTroops\b/);
   });
 });
