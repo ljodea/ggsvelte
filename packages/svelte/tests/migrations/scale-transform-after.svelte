@@ -15,12 +15,12 @@
 </script>
 
 <GGPlot data={rows} aes={{ x: "latency", y: "throughput" }}>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
   <ScaleXLog10
     domain={[1, 1000]}
     oob="censor"
     expand={{ mult: 0, add: 0 }}
     nice={false}
   />
-  <GeomPoint />
-  <GeomSmooth method="lm" />
 </GGPlot>

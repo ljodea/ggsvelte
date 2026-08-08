@@ -9,6 +9,6 @@
 
 <!-- After 0.11: compose the theme as a declaration-only child layer. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y" }}>
-  <ThemeDark />
   <GeomPoint />
+  <ThemeDark />
 </GGPlot>

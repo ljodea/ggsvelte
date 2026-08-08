@@ -12,6 +12,6 @@
 </script>
 
 <GGPlot data={circle} aes={{ x: "x", y: "y" }}>
-  <CoordFixed />
   <GeomLine />
+  <CoordFixed />
 </GGPlot>

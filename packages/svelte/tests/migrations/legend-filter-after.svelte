@@ -9,6 +9,6 @@
 
 <!-- After 0.19: filter lives on GuideLegend for that aesthetic. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
-  <GuideLegend channel="color" filter />
   <GeomPoint />
+  <GuideLegend channel="color" filter />
 </GGPlot>

@@ -9,6 +9,6 @@
 
 <!-- Before 0.21: plot-level key. -->
 <GGPlot data={rows} aes={{ x: "year", y: "temp" }} key="country">
-  <Inspect />
   <GeomPoint />
+  <Inspect />
 </GGPlot>

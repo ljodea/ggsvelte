@@ -9,6 +9,6 @@
 
 <!-- After 0.19: focus lives on GuideLegend for that aesthetic. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
-  <GuideLegend channel="color" focus />
   <GeomPoint />
+  <GuideLegend channel="color" focus />
 </GGPlot>

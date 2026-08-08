@@ -13,6 +13,6 @@
 
 <!-- After 0.11: compose scales as declaration-only child layers. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "c" }}>
-  <ScaleColorDiscrete scheme="colorblind" />
   <GeomPoint />
+  <ScaleColorDiscrete scheme="colorblind" />
 </GGPlot>

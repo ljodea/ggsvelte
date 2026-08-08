@@ -24,8 +24,8 @@
   key="id"
   onrender={(next) => (model = next)}
 >
-  <Inspect />
   <GeomPoint />
+  <Inspect />
 </GGPlot>
 
 <button type="button" onclick={() => inspectPlotPixel(100, 100)}>
