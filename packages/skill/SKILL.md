@@ -305,8 +305,8 @@ and matching `interactionScope` channels; observe everything through
 `oninteraction` or per-capability handlers.
 
 **Inspect mode and hit hygiene:** prefer `mode="auto"` when library auto matches
-the mark; pin `mode="exact"` on violin, boxplot, and discrete-axis error bars
-(product auto still freescrolls those — do not leave bare `auto`); use
+the mark; pin `mode="exact"` (or leave auto) on violin, boxplot, and discrete-axis
+error bars — never freescrolling `x`/`y`/`xy` on those band geoms; use
 `x`/`y`/`xy` only for continuous shared-axis or free 2d hits; set
 `inspect={false}` on decorative layers in multi-layer stories. The CLI SVG
 loop cannot validate host inspect mode — hover/pin in a browser after edits.

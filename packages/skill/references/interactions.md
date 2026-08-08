@@ -51,39 +51,38 @@ and unrelated to the host `<Inspect>` capability.
 
 `mode` is a **host** option on `<Inspect>` (and the dual-read plot `inspect`
 alias). It is **not** a PortableSpec field. Empty `<Inspect />` defaults to
-`mode="auto"`. Auto is safe for many mark families (bar/col → exact; continuous
-lines → x), but **not** for discrete distribution and interval geoms — product
-auto still resolves those to freescrolling `x` (library fix tracked as #1528).
-Until that ships, pin an explicit mode when geometry needs it.
+`mode="auto"`. Auto matches common mark families (bar/col/violin/boxplot/
+interval geoms → exact; continuous lines → x). Prefer auto unless geometry
+needs an explicit axis-group or free 2d mode.
 
 ### Default preference
 
 1. Prefer `mode="auto"` when library auto matches the mark (bar, col, tile, point,
-   continuous line/area/freqpoly). Prefer an explicit mode when you know the
-   geometry better than auto, or when auto is still wrong for the mark (below).
+   violin, boxplot, interval geoms, continuous line/area/freqpoly). Prefer an
+   explicit mode when you know the geometry better than auto.
 2. Use `mode="x"` only for continuous shared-x series: time series, multi-series
    lines/areas/freqpolys at a common continuous x, stacked continuous areas.
 3. Use `mode="y"` only when the shared continuous axis is vertical and grouping
    by y is the product intent.
 4. Use `mode="xy"` for free 2d hits (scatters, paths, maps, jitter clouds) when
    nearest-point inspection is better than snapping to one axis.
-5. **Pin `mode="exact"`** on violin, boxplot, and discrete-axis errorbar /
-   pointrange / linerange. Do **not** leave `auto` for those marks while product
-   auto still maps them to freescrolling `x` (#1528).
+5. **Pin `mode="exact"`** (or leave `auto`) on violin, boxplot, errorbar,
+   pointrange, linerange, and crossbar. Never use freescrolling `x` / `y` / `xy`
+   on those band geoms (#1528).
 
 ### Anti-patterns (do not ship these)
 
-| Pattern                                                                                          | Why it is wrong                                                                                    | Use instead                                               |
-| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Violin with `mode="x"` / `"y"` / `"xy"`, or bare `auto`                                          | Categorical run labels get freescrolling axis guides and blank axis tooltip rows; auto still → `x` | Pin `mode="exact"`                                        |
-| Boxplot with `mode="x"` / `"y"` / `"xy"`, or bare `auto`                                         | Same discrete-group problem as violin                                                              | Pin `mode="exact"`                                        |
-| Discrete-axis errorbar / pointrange / linerange with `mode="x"` / `"y"` / `"xy"`, or bare `auto` | Caps and intervals are not continuous shared-x series; auto still → `x`                            | Pin `mode="exact"`                                        |
-| Bar / col with explicit `mode="x"` or `"xy"`                                                     | Vertical guide cuts filled bands; library already advises exact/auto                               | `mode="exact"` or leave `auto` (auto → exact for bar/col) |
-| Copying a gallery family's mode without reading the mark geometry                                | Family-to-mode tables go stale; geometry decides                                                   | Match scale type + mark geometry                          |
+| Pattern                                                                      | Why it is wrong                                                                       | Use instead                                               |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Violin with `mode="x"` / `"y"` / `"xy"`                                      | Categorical run labels get freescrolling axis guides and blank axis tooltip rows      | Pin `mode="exact"` or leave `auto` (auto → exact)         |
+| Boxplot with `mode="x"` / `"y"` / `"xy"`                                     | Same discrete-group problem as violin                                                 | Pin `mode="exact"` or leave `auto`                        |
+| Discrete-axis errorbar / pointrange / linerange / crossbar with `x`/`y`/`xy` | Caps and intervals are not continuous shared-x series; freescrolling guides add noise | Pin `mode="exact"` or leave `auto`                        |
+| Bar / col with explicit `mode="x"` or `"xy"`                                 | Vertical guide cuts filled bands; library already advises exact/auto                  | `mode="exact"` or leave `auto` (auto → exact for bar/col) |
+| Copying a gallery family's mode without reading the mark geometry            | Family-to-mode tables go stale; geometry decides                                      | Match scale type + mark geometry                          |
 
-Treat **violin, boxplot, and discrete-axis errorbar / pointrange / linerange**
-the same: pin `exact` unless product auto is fixed and this skill is updated in
-lock-step. When in doubt on other geoms, ship `auto`.
+Treat **violin, boxplot, and discrete-axis errorbar / pointrange / linerange /
+crossbar** the same: exact mark focus (auto or explicit). When in doubt on other
+geoms, ship `auto`.
 
 ## Multi-layer hit hygiene
 

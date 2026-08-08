@@ -385,21 +385,22 @@ describe("skill teaches inspect mode selection and hit hygiene (#1530)", () => {
     expect(section!).toMatch(/continuous shared-x|time series|multi-series/i);
   });
 
-  it("pins exact on violin/boxplot/discrete intervals; forbids relying on auto there", () => {
+  it("pins exact on violin/boxplot/discrete intervals; forbids freescrolling axis guides", () => {
     const section = interactions!.markdown.match(/## Choosing inspect mode[\s\S]*?(?=\n## )/)?.[0];
     expect(section).toBeDefined();
     expect(section!).toMatch(/Anti-patterns/);
-    // Discrete distribution/interval geoms: pin exact; do not leave auto (#1528).
+    // Discrete distribution/interval geoms: exact focus; never freescrolling x/y/xy (#1528).
     expect(section!).toMatch(/Pin `mode="exact"`/);
     expect(section!).toMatch(/Violin with `mode="x"`/);
     expect(section!).toMatch(/Boxplot with `mode="x"`/);
     expect(section!).toMatch(/errorbar/);
     expect(section!).toMatch(/pointrange/);
     expect(section!).toMatch(/linerange/);
-    expect(section!).toMatch(/Do \*\*not\*\* leave `auto`|do \*\*not\*\* leave `auto`|#1528/);
-    // Use-instead cells must not recommend bare auto for those geoms.
-    expect(section!).not.toMatch(/Pin `mode="exact"` or leave `auto`/);
-    expect(section!).not.toMatch(/\| `mode="exact"` or leave `auto` \|/);
+    expect(section!).toMatch(/#1528/);
+    // Auto now maps those geoms to exact — skill may recommend exact or leave auto.
+    expect(section!).toMatch(/leave `auto`|auto → exact/);
+    // Must not claim product auto still freescrolls those marks.
+    expect(section!).not.toMatch(/auto still → `x`|auto still maps them to freescrolling/);
   });
 
   it("documents multi-layer hit hygiene with Minard-class furniture opt-out", () => {
@@ -441,7 +442,7 @@ describe("skill teaches inspect mode selection and hit hygiene (#1530)", () => {
     expect(interactionsSection.length).toBeGreaterThan(100);
     expect(interactionsSection).toMatch(/references\/interactions\.md/);
     expect(interactionsSection).toMatch(/Choosing inspect\s+mode/);
-    expect(interactionsSection).toMatch(/pin `mode="exact"` on violin/i);
+    expect(interactionsSection).toMatch(/pin `mode="exact"` \(or leave auto\) on violin/i);
     expect(interactionsSection).toMatch(/inspect=\{false\}/);
     expect(interactionsSection).toMatch(/before enabling Inspect/);
   });
