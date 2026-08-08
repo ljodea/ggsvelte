@@ -1,5 +1,11 @@
 # @ggsvelte/skill
 
+## 0.34.4
+
+### Patch Changes
+
+- 8e07451: Fix y-axis title placement: position relative to the panel grid (`gridLeft - titleOffset`) instead of a hardcoded SVG `x=12`, so the title tracks the left margin and clears wide tick labels.
+
 ## 0.34.3
 
 ### Patch Changes

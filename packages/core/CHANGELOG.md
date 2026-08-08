@@ -1,5 +1,17 @@
 # @ggsvelte/core
 
+## 0.34.4
+
+### Patch Changes
+
+- 5b6f317: Fix geom_qq_line Inspect: mid-stroke hover no longer teleports between line ends, and tooltips show theoretical/sample quantiles instead of a blank value row.
+
+  Migration: none — bugfix.
+
+- 8e07451: Fix y-axis title placement: position relative to the panel grid (`gridLeft - titleOffset`) instead of a hardcoded SVG `x=12`, so the title tracks the left margin and clears wide tick labels.
+- Updated dependencies [8e07451]
+  - @ggsvelte/spec@0.34.4
+
 ## 0.34.3
 
 ### Patch Changes
