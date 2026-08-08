@@ -1,16 +1,18 @@
 /**
- * Inspect-mode × geom advisories: vertical axis guides that fight bar/col
- * geometry or bisect on-mark value labels, plus high-cardinality discrete
+ * Inspect-mode × geom advisories: axis guides that fight bar/col geometry or
+ * bisect on-mark value labels; freescrolling guides through distribution and
+ * interval geoms on discrete bands (#1528); plus high-cardinality discrete
  * color/fill + inspect (#1274).
  *
  * Pure collection — plot-engine delivers once per code:prop when inspect.mode
- * is explicit x/xy and the assembled layers include bar/col (and optionally
- * text/label). Auto/exact modes never fire: auto already picks exact for
- * bar/col (candidateAutoMode).
+ * is an explicit axis guide and the assembled layers include matching geoms.
+ * Auto/exact modes never fire: auto already picks exact for these geoms
+ * (candidateAutoMode).
  */
 import {
   INTERACTION_DIAGNOSTIC_CATALOG,
   type InteractionDiagnostic,
+  type InteractionDiagnosticCode,
 } from "./interaction-diagnostics.js";
 
 /**
@@ -22,7 +24,20 @@ export const HIGH_CARDINALITY_DISCRETE_THRESHOLD = 16;
 /** Modes that draw a vertical (x) crosshair guide in non-flipped coords. */
 const X_GUIDE_MODES = new Set(["x", "xy"]);
 
+/** Modes that freescroll any axis guide (vertical, horizontal, or both). */
+const AXIS_GUIDE_MODES = new Set(["x", "y", "xy"]);
+
 const VALUE_LABEL_GEOMS = new Set(["text", "label", "sf_text", "sf_label"]);
+
+/** Distribution / interval geoms where freescrolling axis guides rarely help. */
+const DISTRIBUTION_INTERVAL_GEOM_CODES = {
+  violin: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+  boxplot: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+  errorbar: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+  linerange: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+  pointrange: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+  crossbar: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+} as const satisfies Record<string, InteractionDiagnosticCode>;
 
 /**
  * Advisories when inspect.mode draws an x-axis guide through bar/col marks.
@@ -60,6 +75,35 @@ export function inspectAxisOnBarColDiagnostics(
       ...(hasValueLabels
         ? INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INSPECT_X_BISECTS_BAR_LABELS
         : INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INSPECT_X_ON_BAR),
+      actual: inspectMode,
+    });
+  }
+  return list;
+}
+
+/**
+ * Advisories when inspect.mode draws a freescrolling axis guide through
+ * violin / boxplot / interval geoms that sit on a discrete band (#1528).
+ * Fires for mode x, y, or xy; auto and exact stay silent.
+ */
+export function inspectAxisOnDistributionDiagnostics(
+  inspectMode: string | null | undefined,
+  geoms: readonly string[],
+): InteractionDiagnostic[] {
+  if (inspectMode === null || inspectMode === undefined || !AXIS_GUIDE_MODES.has(inspectMode)) {
+    return [];
+  }
+
+  const list: InteractionDiagnostic[] = [];
+  const seen = new Set<string>();
+  for (const geom of geoms) {
+    if (seen.has(geom)) continue;
+    const code =
+      DISTRIBUTION_INTERVAL_GEOM_CODES[geom as keyof typeof DISTRIBUTION_INTERVAL_GEOM_CODES];
+    if (code === undefined) continue;
+    seen.add(geom);
+    list.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG[code],
       actual: inspectMode,
     });
   }

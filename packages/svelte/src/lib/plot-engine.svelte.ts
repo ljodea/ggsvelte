@@ -66,6 +66,7 @@ import {
 import {
   discreteColorFillDomainSizes,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
   normalizeInteractionConfig,
@@ -471,12 +472,17 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   );
   deliverAdvisoriesOnce(() => compositionDiagnostics, compositionAdvisoryDedupKey);
 
-  // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
+  // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels)
+  // and freescrolling guides through distribution/interval band geoms (#1528).
   // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
   const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
     const mode = interactionConfig().inspect?.mode;
     if (mode === undefined) return [];
-    return inspectAxisOnBarColDiagnostics(mode, layerGeomsFromSpecLayers(assembled()?.layers));
+    const geoms = layerGeomsFromSpecLayers(assembled()?.layers);
+    return [
+      ...inspectAxisOnBarColDiagnostics(mode, geoms),
+      ...inspectAxisOnDistributionDiagnostics(mode, geoms),
+    ];
   });
   deliverAdvisoriesOnce(() => inspectGeomDiagnostics);
 

@@ -86,6 +86,16 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     },
   ],
   [
+    "interaction:INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    {
+      language: "svelte",
+      code: `<GGPlot data={rows} aes={{ x: "run", y: "value" }}>
+  <Inspect mode="exact" />
+  <GeomViolin />
+</GGPlot>`,
+    },
+  ],
+  [
     "interaction:INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
     {
       language: "svelte",

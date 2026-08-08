@@ -11,6 +11,7 @@ import {
   HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   INTERACTION_DIAGNOSTIC_CATALOG,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "../../src/lib/interaction/interaction.js";
@@ -94,9 +95,92 @@ describe("inspectAxisOnBarColDiagnostics", () => {
       "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
       "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+      "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+      "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+      "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
     ] as const) {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[code].code).toBe(code);
     }
+  });
+});
+
+describe("inspectAxisOnDistributionDiagnostics (#1528)", () => {
+  const DISTRIBUTION_GEOMS = [
+    "violin",
+    "boxplot",
+    "errorbar",
+    "linerange",
+    "pointrange",
+    "crossbar",
+  ] as const;
+
+  const CODE_BY_GEOM = {
+    violin: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    boxplot: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    errorbar: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    linerange: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    pointrange: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    crossbar: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+  } as const;
+
+  it("is empty when inspect is off or mode is auto/exact", () => {
+    expect(inspectAxisOnDistributionDiagnostics(null, ["violin"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("auto", ["violin", "boxplot"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("exact", ["errorbar"])).toEqual([]);
+  });
+
+  it("is empty when mode is an axis guide but no distribution/interval layers exist", () => {
+    expect(inspectAxisOnDistributionDiagnostics("x", ["point", "line"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("xy", ["col", "bar"])).toEqual([]);
+  });
+
+  it("advises for each distribution/interval geom under mode x (vertical freescroll)", () => {
+    for (const geom of DISTRIBUTION_GEOMS) {
+      const list = inspectAxisOnDistributionDiagnostics("x", [geom]);
+      expect(list).toEqual([
+        expect.objectContaining({
+          code: CODE_BY_GEOM[geom],
+          severity: "advisory",
+          prop: "inspect.mode",
+          actual: "x",
+        }),
+      ]);
+    }
+  });
+
+  it("advises for mode y and xy (any freescrolling axis guide)", () => {
+    expect(inspectAxisOnDistributionDiagnostics("y", ["violin"]).map((d) => d.code)).toEqual([
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    ]);
+    expect(inspectAxisOnDistributionDiagnostics("xy", ["boxplot"])[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+      actual: "xy",
+    });
+  });
+
+  it("emits one advisory per matching geom in layer order", () => {
+    const list = inspectAxisOnDistributionDiagnostics("x", ["violin", "point", "errorbar", "col"]);
+    expect(list.map((d) => d.code)).toEqual([
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    ]);
+  });
+
+  it("covers the concrete gallery bad case: violin + categorical x + mode x", () => {
+    // examples/boxplot/violin: run labels on discrete x; freescrolling x guide
+    // moves inside a single violin and often leaves the x tooltip row blank.
+    const list = inspectAxisOnDistributionDiagnostics("x", ["violin"]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      severity: "advisory",
+      prop: "inspect.mode",
+      actual: "x",
+    });
+    expect(list[0]?.suggestions.some((s) => s.includes("exact"))).toBe(true);
   });
 });
 

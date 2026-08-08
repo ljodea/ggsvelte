@@ -25,6 +25,12 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INSPECT_X_ON_BAR"
   | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
   | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"
+  | "INTERACTION_INSPECT_AXIS_ON_VIOLIN"
+  | "INTERACTION_INSPECT_AXIS_ON_BOXPLOT"
+  | "INTERACTION_INSPECT_AXIS_ON_ERRORBAR"
+  | "INTERACTION_INSPECT_AXIS_ON_LINERANGE"
+  | "INTERACTION_INSPECT_AXIS_ON_POINTRANGE"
+  | "INTERACTION_INSPECT_AXIS_ON_CROSSBAR"
   | "INTERACTION_INSPECT_IDENTITY_DROPPED"
   | "INTERACTION_DUPLICATE_INSPECT_CAPABILITY"
   | "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE";
@@ -238,6 +244,79 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
+  },
+  INTERACTION_INSPECT_AXIS_ON_VIOLIN: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    message:
+      "inspect.mode draws an axis guide through violin marks; violins sit on a discrete band, so freescrolling x/y/xy guides cut the density body and often leave the band tooltip row blank.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomViolin',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-violin",
+  },
+  INTERACTION_INSPECT_AXIS_ON_BOXPLOT: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    message:
+      "inspect.mode draws an axis guide through boxplot marks; boxes sit on a discrete band, so freescrolling x/y/xy guides cut the box body and rarely add information.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBoxplot',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-boxplot",
+  },
+  INTERACTION_INSPECT_AXIS_ON_ERRORBAR: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    message:
+      "inspect.mode draws an axis guide through errorbar marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomErrorbar',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-errorbar",
+  },
+  INTERACTION_INSPECT_AXIS_ON_LINERANGE: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    message:
+      "inspect.mode draws an axis guide through linerange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomLinerange',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-linerange",
+  },
+  INTERACTION_INSPECT_AXIS_ON_POINTRANGE: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    message:
+      "inspect.mode draws an axis guide through pointrange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomPointrange',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-pointrange",
+  },
+  INTERACTION_INSPECT_AXIS_ON_CROSSBAR: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+    message:
+      "inspect.mode draws an axis guide through crossbar marks; even when hits pin to a category, freescrolling x/y/xy guides rarely add information beyond exact mark focus.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCrossbar',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-crossbar",
   },
   INTERACTION_INSPECT_IDENTITY_DROPPED: {
     severity: "advisory",

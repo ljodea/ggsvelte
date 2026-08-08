@@ -17857,6 +17857,66 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-violin",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-violin",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_VIOLIN"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-boxplot",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_BOXPLOT in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-boxplot",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_BOXPLOT"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-errorbar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-errorbar",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_ERRORBAR"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-linerange",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_LINERANGE in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-linerange",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_LINERANGE"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-pointrange",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_POINTRANGE in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-pointrange",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_POINTRANGE"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-axis-on-crossbar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_CROSSBAR in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-axis-on-crossbar",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_CROSSBAR"],
+  },
+  {
     id: "heading:guide-interaction-reference:interaction-inspect-identity-dropped",
     kind: "heading",
     title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
@@ -19956,6 +20016,66 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-errors:interaction-inspect-axis-on-violin",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-violin",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_VIOLIN"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-axis-on-boxplot",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_BOXPLOT in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-boxplot",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_BOXPLOT"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-axis-on-errorbar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-errorbar",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_ERRORBAR"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-axis-on-linerange",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_LINERANGE in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-linerange",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_LINERANGE"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-axis-on-pointrange",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_POINTRANGE in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-pointrange",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_POINTRANGE"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-axis-on-crossbar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+    summary:
+      "INTERACTION_INSPECT_AXIS_ON_CROSSBAR in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-axis-on-crossbar",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_CROSSBAR"],
+  },
+  {
     id: "heading:guide-errors:interaction-inspect-identity-dropped",
     kind: "heading",
     title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
@@ -20123,16 +20243,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/advisories#transform-domain-data-needs-data",
     keywords: ["Advisories", "Reference"],
     exact: ["transform-domain-data (needs: data)"],
-  },
-  {
-    id: "heading:guide-advisories:fractional-calendar-years-needs-data",
-    kind: "heading",
-    title: "fractional-calendar-years (needs: data)",
-    summary:
-      "fractional-calendar-years (needs: data) in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
-    href: "/guide/advisories#fractional-calendar-years-needs-data",
-    keywords: ["Advisories", "Reference"],
-    exact: ["fractional-calendar-years (needs: data)"],
   },
   {
     id: "heading:guide-advisories:pipeline-heuristic-advisories-ggsvelte-core",
@@ -44573,6 +44683,105 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
       "interaction:INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_VIOLIN · interaction",
+    summary:
+      "inspect.mode draws an axis guide through violin marks; violins sit on a discrete band, so freescrolling x/y/xy guides cut the density body and often leave the band tooltip row blank.",
+    href: "/guide/errors#interaction-inspect-axis-on-violin",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomViolin; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: ["INTERACTION_INSPECT_AXIS_ON_VIOLIN", "interaction:INTERACTION_INSPECT_AXIS_ON_VIOLIN"],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT · interaction",
+    summary:
+      "inspect.mode draws an axis guide through boxplot marks; boxes sit on a discrete band, so freescrolling x/y/xy guides cut the box body and rarely add information.",
+    href: "/guide/errors#interaction-inspect-axis-on-boxplot",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBoxplot; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+      "interaction:INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR · interaction",
+    summary:
+      "inspect.mode draws an axis guide through errorbar marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    href: "/guide/errors#interaction-inspect-axis-on-errorbar",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomErrorbar; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+      "interaction:INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_LINERANGE · interaction",
+    summary:
+      "inspect.mode draws an axis guide through linerange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    href: "/guide/errors#interaction-inspect-axis-on-linerange",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomLinerange; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+      "interaction:INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE · interaction",
+    summary:
+      "inspect.mode draws an axis guide through pointrange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    href: "/guide/errors#interaction-inspect-axis-on-pointrange",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomPointrange; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+      "interaction:INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR · interaction",
+    summary:
+      "inspect.mode draws an axis guide through crossbar marks; even when hits pin to a category, freescrolling x/y/xy guides rarely add information beyond exact mark focus.",
+    href: "/guide/errors#interaction-inspect-axis-on-crossbar",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCrossbar; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+      "interaction:INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
     ],
   },
   {

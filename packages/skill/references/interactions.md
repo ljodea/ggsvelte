@@ -29,6 +29,17 @@ Empty `<Inspect />` enables defaults. Options match `InspectOptions`: `mode`,
 accessor), `content` (Snippet). Prefer the child form in new code; the GGPlot
 `inspect` prop is a dual-read alias, not the primary teaching surface.
 
+### Inspect mode by geom family
+
+Leave `mode` as `"auto"` (or set `"exact"`) unless the chart needs axis-group
+hover on a continuous series. **Never put `x` / `y` / `xy` guides on violin,
+boxplot, errorbar, linerange, pointrange, or crossbar** — those marks sit on a
+discrete band; freescrolling guides cut the mark body and often leave the band
+tooltip row blank. Prefer exact mark focus (click/hover the violin or interval
+itself). The same rule already applies to bar/col. Explicit axis guides on
+those families emit advisories (`INTERACTION_INSPECT_AXIS_ON_*`,
+`INTERACTION_INSPECT_X_ON_COL` / `_BAR`).
+
 ### Mark eligibility (opt-out)
 
 Layers are inspectable by default. Set `inspect={false}` on a geom (or
@@ -161,9 +172,12 @@ entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
   `INTERACTION_INSPECT_X_ON_COL` / `INTERACTION_INSPECT_X_ON_BAR` (vertical
   guide through columns/bars), `INTERACTION_INSPECT_X_BISECTS_COL_LABELS` /
   `INTERACTION_INSPECT_X_BISECTS_BAR_LABELS` (same guide through on-bar value
-  labels), `INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE` (discrete color/fill
-  domain ≥ 16 with inspect on — default tooltip is top-k + total, not a full
-  dump), and the two wiring advisories named above.
+  labels), `INTERACTION_INSPECT_AXIS_ON_VIOLIN` / `_BOXPLOT` / `_ERRORBAR` /
+  `_LINERANGE` / `_POINTRANGE` / `_CROSSBAR` (any freescrolling x/y/xy guide
+  through distribution or interval band geoms — use exact),
+  `INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE` (discrete color/fill domain
+  ≥ 16 with inspect on — default tooltip is top-k + total, not a full dump),
+  and the two wiring advisories named above.
 - `DEPRECATION_DIAGNOSTIC_CATALOG` — one code, `DEPRECATED_PLOT_PROP`, for
   every grammar prop deprecated in 0.11.0 (`prop` carries the name).
 - `COMPOSITION_DIAGNOSTIC_CATALOG` — child-layer composition collisions:

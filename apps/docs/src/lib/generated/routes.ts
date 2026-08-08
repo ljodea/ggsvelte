@@ -11044,6 +11044,36 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-axis-on-violin",
+        title: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-boxplot",
+        title: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-errorbar",
+        title: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-linerange",
+        title: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-pointrange",
+        title: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-crossbar",
+        title: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+        level: 3,
+      },
+      {
         id: "interaction-inspect-identity-dropped",
         title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
         level: 3,
@@ -12107,6 +12137,36 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-axis-on-violin",
+        title: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-boxplot",
+        title: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-errorbar",
+        title: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-linerange",
+        title: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-pointrange",
+        title: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-axis-on-crossbar",
+        title: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+        level: 3,
+      },
+      {
         id: "interaction-inspect-identity-dropped",
         title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
         level: 3,
@@ -12201,11 +12261,6 @@ export const DOCS_ROUTES = [
       {
         id: "transform-domain-data-needs-data",
         title: "transform-domain-data (needs: data)",
-        level: 3,
-      },
-      {
-        id: "fractional-calendar-years-needs-data",
-        title: "fractional-calendar-years (needs: data)",
         level: 3,
       },
       {

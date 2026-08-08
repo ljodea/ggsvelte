@@ -32,8 +32,17 @@ describe("candidateAutoMode (#1042)", () => {
   });
 
   it("gives line-shaped marks x-axis grouping", () => {
-    for (const geom of ["line", "path", "area", "smooth", "boxplot", "violin"]) {
+    for (const geom of ["line", "path", "area", "smooth"]) {
       expect(candidateAutoMode(binding(geom), 0)).toBe("x");
+    }
+  });
+
+  // Distribution / interval geoms sit on a discrete band axis; freescrolling
+  // x guides cut the mark body and leave blank tooltips (#1528). Prefer
+  // exact focus (tooltip on the mark) — authors can still opt into x/y/xy.
+  it("gives distribution and interval geoms exact focus (#1528)", () => {
+    for (const geom of ["boxplot", "violin", "errorbar", "linerange", "pointrange", "crossbar"]) {
+      expect(candidateAutoMode(binding(geom), 0)).toBe("exact");
     }
   });
 
