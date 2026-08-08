@@ -16,7 +16,7 @@ import GGPlot from "../../src/lib/GGPlot.svelte";
 import InspectGeomAdvisoriesFixture from "../fixtures/InspectGeomAdvisoriesFixture.svelte";
 import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 import { render } from "../helpers/render.js";
-import { collect, settled } from "./diagnostic-harness.js";
+import { collect, settled } from "../helpers/diagnostic-harness.js";
 
 // Violin / errorbar need their package-level registrars (stat + geom batch);
 // the browser lane setup only runs registerAllGeomBatches / StatFrames.
@@ -154,6 +154,45 @@ describe("inspect x-guide advisories on bar/col (#1206)", () => {
       ondiagnostic,
       ...size,
     });
+    await settled(container);
+    for (const code of X_GUIDE_CODES) expect(diagnostics.map((d) => d.code)).not.toContain(code);
+  });
+
+  // #1409 — band-axis advisories still fire under coord_flip (not a false positive).
+  // coord is children-only on GGPlot (#704); fold via withGrammarAsSpec.
+  it("fires X_ON_COL for mode x under coord=flip (band guide remains)", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes,
+        layers: [{ geom: "col" as const }],
+        coord: "flip" as const,
+        inspect: { mode: "x" as const },
+        ondiagnostic,
+        ...size,
+      }),
+    );
+    await expect
+      .poll(() => diagnostics.find((d) => d.code === "INTERACTION_INSPECT_X_ON_COL"))
+      .toMatchObject({ severity: "advisory", actual: "x" });
+  });
+
+  it("stays silent for mode y under coord=flip (value axis, not the x band)", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes,
+        layers: [{ geom: "col" as const }],
+        coord: "flip" as const,
+        inspect: { mode: "y" as const },
+        ondiagnostic,
+        ...size,
+      }),
+    );
     await settled(container);
     for (const code of X_GUIDE_CODES) expect(diagnostics.map((d) => d.code)).not.toContain(code);
   });

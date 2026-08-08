@@ -52,7 +52,7 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
     severity: "advisory",
     code: "INTERACTION_INSPECT_X_ON_COL",
     message:
-      "inspect.mode draws a vertical guide through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information.",
+      "inspect.mode x/xy draws a crosshair on the x (band) axis through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information. Under coord_flip the guide is horizontal but still tracks the band.",
     prop: "inspect.mode",
     suggestions: [
       'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCol',
@@ -64,7 +64,7 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
     severity: "advisory",
     code: "INTERACTION_INSPECT_X_ON_BAR",
     message:
-      "inspect.mode draws a vertical guide through bar marks; bars already encode the band axis as a filled region, so the guide cuts the bar body and rarely adds information.",
+      "inspect.mode x/xy draws a crosshair through bar marks; bars are filled regions on the band axis, so the guide cuts the bar body and rarely adds information. Under coord_flip the guide orientation swaps with the axes but still fights the marks.",
     prop: "inspect.mode",
     suggestions: [
       'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBar',
@@ -76,7 +76,7 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
     severity: "warning",
     code: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
     message:
-      "inspect.mode draws a vertical guide through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+      "inspect.mode x/xy draws a crosshair through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read (including under coord_flip, when the guide is horizontal).",
     prop: "inspect.mode",
     suggestions: [
       'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when columns have value labels',
@@ -89,7 +89,7 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
     severity: "warning",
     code: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
     message:
-      "inspect.mode draws a vertical guide through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+      "inspect.mode x/xy draws a crosshair through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read (including under coord_flip).",
     prop: "inspect.mode",
     suggestions: [
       'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when bars have value labels',
@@ -193,8 +193,13 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
  */
 export const HIGH_CARDINALITY_DISCRETE_THRESHOLD = 16;
 
-/** Modes that draw a vertical (x) crosshair guide in non-flipped coords. */
-const X_GUIDE_MODES = new Set(["x", "xy"]);
+/**
+ * Inspect modes that draw a crosshair on the data-x (band) axis for bar/col.
+ * Screen orientation swaps under coord_flip (InteractionOverlay remaps x/y to
+ * horizontal/vertical), but the guide still tracks the filled band — so these
+ * advisories fire for x/xy regardless of flip (#1409 product decision).
+ */
+const X_BAND_GUIDE_MODES = new Set(["x", "xy"]);
 
 /** Modes that freescroll any axis guide (vertical, horizontal, or both). */
 const AXIS_GUIDE_MODES = new Set(["x", "y", "xy"]);
@@ -239,14 +244,18 @@ export function isInspectIntentMode(value: string): value is InspectIntentMode {
 }
 
 /**
- * Advisories when inspect.mode draws an x-axis guide through bar/col marks.
- * Labels present → stronger bisect warning replaces the plain-geom advisory.
+ * Advisories when inspect.mode x/xy draws a band-axis crosshair through bar/col
+ * marks. Labels present → stronger bisect warning replaces the plain-geom advisory.
+ *
+ * #1409: coord_flip does **not** suppress these. Mode x still tracks data-x
+ * (the col band); under flip the guide is horizontal and still bisects the
+ * filled mark. Mode y alone never fires here (value-axis guide, not band).
  */
 export function inspectAxisOnBarColDiagnostics(
   inspectMode: string | null | undefined,
   geoms: readonly string[],
 ): InspectGeomAdvisory[] {
-  if (inspectMode === null || inspectMode === undefined || !X_GUIDE_MODES.has(inspectMode)) {
+  if (inspectMode === null || inspectMode === undefined || !X_BAND_GUIDE_MODES.has(inspectMode)) {
     return [];
   }
 

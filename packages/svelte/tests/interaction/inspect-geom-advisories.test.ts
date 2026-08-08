@@ -105,6 +105,33 @@ describe("inspectAxisOnBarColDiagnostics", () => {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[code].code).toBe(code);
     }
   });
+
+  // #1409 — x/xy still fire under coord_flip (band guide remains); y stays silent.
+  describe("coord_flip (#1409)", () => {
+    it("still advises for mode x/xy (band-axis guide still fights the mark)", () => {
+      expect(inspectAxisOnBarColDiagnostics("x", ["col"]).map((d) => d.code)).toEqual([
+        "INTERACTION_INSPECT_X_ON_COL",
+      ]);
+      expect(inspectAxisOnBarColDiagnostics("xy", ["bar"]).map((d) => d.code)).toEqual([
+        "INTERACTION_INSPECT_X_ON_BAR",
+      ]);
+    });
+
+    it("stays silent for mode y", () => {
+      expect(inspectAxisOnBarColDiagnostics("y", ["col", "bar"])).toEqual([]);
+    });
+
+    it("catalog messages mention coord_flip", () => {
+      for (const code of [
+        "INTERACTION_INSPECT_X_ON_COL",
+        "INTERACTION_INSPECT_X_ON_BAR",
+        "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+        "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+      ] as const) {
+        expect(INTERACTION_DIAGNOSTIC_CATALOG[code].message.toLowerCase()).toContain("coord_flip");
+      }
+    });
+  });
 });
 
 describe("inspectAxisOnDistributionDiagnostics (#1528)", () => {
