@@ -88,6 +88,7 @@ function basicGeoms(): Set<string> {
 /** `.geomTile()` / `.geomDensity2dFilled()` → `tile` / `density_2d_filled`. */
 function geomMethodToName(method: string): string {
   return method
+    .replaceAll(/([a-z])([0-9])/g, "$1_$2")
     .replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2")
     .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
     .toLowerCase();
