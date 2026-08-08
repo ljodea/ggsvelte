@@ -81,6 +81,34 @@ describe("inspectAxisOnBarColDiagnostics", () => {
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
     ]);
   });
+
+  // #1409 — product decision: x/xy still fire under coord_flip (band guide
+  // remains; only screen orientation swaps). Mode y alone never fires.
+  describe("coord_flip (#1409)", () => {
+    it("still fires for mode x and xy (band-axis guide still fights the mark)", () => {
+      expect(inspectAxisOnBarColDiagnostics("x", ["col"]).map((d) => d.code)).toEqual([
+        "INTERACTION_INSPECT_X_ON_COL",
+      ]);
+      expect(inspectAxisOnBarColDiagnostics("xy", ["bar", "text"]).map((d) => d.code)).toEqual([
+        "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+      ]);
+    });
+
+    it("stays silent for mode y (value-axis guide, not the x band)", () => {
+      expect(inspectAxisOnBarColDiagnostics("y", ["col", "bar", "text"])).toEqual([]);
+    });
+
+    it("catalog messages mention coord_flip so agents do not treat orientation as a free pass", () => {
+      for (const code of [
+        "INTERACTION_INSPECT_X_ON_COL",
+        "INTERACTION_INSPECT_X_ON_BAR",
+        "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+        "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+      ] as const) {
+        expect(INSPECT_GEOM_DIAGNOSTIC_CATALOG[code].message.toLowerCase()).toContain("coord_flip");
+      }
+    });
+  });
 });
 
 describe("layerGeomsFromSpecLayers", () => {

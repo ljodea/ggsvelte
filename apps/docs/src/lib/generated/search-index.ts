@@ -44626,7 +44626,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_INSPECT_X_ON_COL · interaction",
     summary:
-      "inspect.mode draws a vertical guide through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information.",
+      "inspect.mode x/xy draws a crosshair on the x (band) axis through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information. Under coord_flip the guide is horizontal but still tracks the band.",
     href: "/guide/errors#interaction-inspect-x-on-col",
     keywords: [
       "interaction",
@@ -44640,7 +44640,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_INSPECT_X_ON_BAR · interaction",
     summary:
-      "inspect.mode draws a vertical guide through bar marks; bars already encode the band axis as a filled region, so the guide cuts the bar body and rarely adds information.",
+      "inspect.mode x/xy draws a crosshair through bar marks; bars are filled regions on the band axis, so the guide cuts the bar body and rarely adds information. Under coord_flip the guide orientation swaps with the axes but still fights the marks.",
     href: "/guide/errors#interaction-inspect-x-on-bar",
     keywords: [
       "interaction",
@@ -44654,7 +44654,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS · interaction",
     summary:
-      "inspect.mode draws a vertical guide through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+      "inspect.mode x/xy draws a crosshair through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read (including under coord_flip, when the guide is horizontal).",
     href: "/guide/errors#interaction-inspect-x-bisects-col-labels",
     keywords: [
       "interaction",
@@ -44671,7 +44671,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS · interaction",
     summary:
-      "inspect.mode draws a vertical guide through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+      "inspect.mode x/xy draws a crosshair through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read (including under coord_flip).",
     href: "/guide/errors#interaction-inspect-x-bisects-bar-labels",
     keywords: [
       "interaction",
