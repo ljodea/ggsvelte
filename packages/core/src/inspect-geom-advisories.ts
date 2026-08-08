@@ -12,7 +12,7 @@
  * Auto/exact modes never fire the bar/col axis-guide codes: auto already picks
  * exact for bar/col (candidateAutoMode).
  */
-// @lifecycle stable
+// @lifecycle experimental
 
 import { GEOM_ALIASES } from "@ggsvelte/spec";
 
