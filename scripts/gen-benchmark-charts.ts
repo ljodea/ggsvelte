@@ -5,7 +5,7 @@
  * `bun run measure:browser && bun run measure:bundles` there first). Charts
  * are drawn with ggsvelte itself (headless renderToSVGString) — see
  * apps/docs/src/lib/benchmarks/charts.ts for the claim discipline: only
- * benchmarks where ggsvelte beats BOTH direct Svelte peers get a chart.
+ * benchmarks where ggsvelte beats ALL direct Svelte peers get a chart.
  *
  *   bun scripts/gen-benchmark-charts.ts
  *   bun scripts/gen-benchmark-charts.ts --check
@@ -35,8 +35,8 @@ const OUTPUT_DIR = join(ROOT, "apps", "docs", "static", "benchmarks");
 const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "benchmark-charts.ts");
 
 const CHART_WIDTH = 560;
-/** Extra vertical room for labs title + subtitle bands (22 + 16 px). */
-const CHART_HEIGHT = 260;
+/** Extra vertical room for labs title + subtitle bands (22 + 16 px) and 4 peer bars. */
+const CHART_HEIGHT = 290;
 
 interface BrowserResults {
   readonly generatedAt: string;
@@ -131,12 +131,15 @@ interface ChartCard {
   readonly chart: BenchmarkChartInput;
 }
 
+type PeerCell = { gg: number; lc: number; sp: number; uv: number };
+
 function buildCards(browser: BrowserResults): readonly ChartCard[] {
-  /** Cold-mount cell for the three homepage libs at one case. */
-  const cell = (caseId: string) => ({
+  /** Cold-mount cell for the homepage Svelte-peer set at one case. */
+  const cell = (caseId: string): PeerCell => ({
     gg: mountMs(browser, "ggsvelte-svg", caseId),
     lc: mountMs(browser, "layercake", caseId),
     sp: mountMs(browser, "svelteplot", caseId),
+    uv: mountMs(browser, "unovis", caseId),
   });
 
   const cells = {
@@ -149,33 +152,37 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
 
   // Claim discipline: refuse to publish a chart ggsvelte does not win.
   for (const [name, c] of Object.entries(cells)) {
-    if (!(c.gg < c.lc && c.gg < c.sp)) {
+    if (!(c.gg < c.lc && c.gg < c.sp && c.gg < c.uv)) {
       throw new Error(
-        `${name}: ggsvelte (${String(c.gg)} ms) no longer beats both peers ` +
-          `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms). ` +
+        `${name}: ggsvelte (${String(c.gg)} ms) no longer beats all Svelte peers ` +
+          `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
           "Drop the chart from buildCards() — the homepage only claims benchmarks ggsvelte wins.",
       );
     }
   }
 
   const subtitle = "Cold-mount milliseconds · lower is better";
-  const bars = (c: { gg: number; lc: number; sp: number }) =>
+  // Display order top→bottom tracks cold-mount rank: ggsvelte, LayerCake,
+  // Unovis, SveltePlot. charts.ts reverses for the coord-flip band domain
+  // so the first entry paints on top.
+  const bars = (c: PeerCell) =>
     [
       { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
       { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
+      { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
       { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
     ] as const;
 
-  const aria = (what: string, c: { gg: number; lc: number; sp: number }) =>
+  const aria = (what: string, c: PeerCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(c.gg)}, ` +
-    `LayerCake ${msLabel(c.lc)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
+    `LayerCake ${msLabel(c.lc)}, Unovis ${msLabel(c.uv)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
 
   const card = (
     id: string,
     tab: string,
     title: string,
     ariaWhat: string,
-    c: { gg: number; lc: number; sp: number },
+    c: PeerCell,
   ): ChartCard => ({
     id,
     tab,
@@ -239,8 +246,13 @@ type ShellFile = { filename: string; body: string };
 function projectionSource(
   files: readonly ShellFile[],
   cards: readonly ChartCard[],
-  versions: { ggsvelte: string; svelteplot: string; layercake: string },
-  bundles: { ggsvelteKb: number; svelteplotKb: number; layercakeKb: number },
+  versions: { ggsvelte: string; svelteplot: string; layercake: string; unovis: string },
+  bundles: {
+    ggsvelteKb: number;
+    svelteplotKb: number;
+    layercakeKb: number;
+    unovisKb: number;
+  },
   generatedAt: string,
 ): Promise<string> {
   const entries = cards
@@ -311,11 +323,13 @@ function build() {
     ).version,
     svelteplot: installedVersion("svelteplot"),
     layercake: installedVersion("layercake"),
+    unovis: installedVersion("@unovis/svelte"),
   };
   const bundleKb = {
     ggsvelteKb: bundleGzipKb(bundles, "ggsvelte-svg", "scatter-color"),
     svelteplotKb: bundleGzipKb(bundles, "svelteplot", "scatter-color"),
     layercakeKb: bundleGzipKb(bundles, "layercake", "scatter-color"),
+    unovisKb: bundleGzipKb(bundles, "unovis", "scatter-color"),
   };
   return { files, cards, versions, bundleKb, generatedAt: browser.generatedAt };
 }

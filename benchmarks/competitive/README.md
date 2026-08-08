@@ -13,12 +13,12 @@ The first competitive harness measured **one** colored scatter (SVG) at 1k/10k a
 
 This suite expands:
 
-| Axis    | Coverage                                                                                                    |
-| ------- | ----------------------------------------------------------------------------------------------------------- |
-| Geoms   | scatter, multi-series line, multi-series area, stacked bars                                                 |
-| Sizes   | 1k → 10k default; full matrix adds 100k scatter, uPlot-scale 3×55.5k line, 10×10k line                      |
-| Libs    | ggsvelte SVG, ggsvelte canvas, D3, **uPlot**, **Chart.js**, **ECharts**, plus SveltePlot/LayerCake (bundle) |
-| Metrics | gzip bundle per lib×scenario; browser cold mount + full remount (median)                                    |
+| Axis    | Coverage                                                                                                  |
+| ------- | --------------------------------------------------------------------------------------------------------- |
+| Geoms   | scatter, multi-series line, multi-series area, stacked bars                                               |
+| Sizes   | 1k → 10k default; full matrix adds 100k scatter, uPlot-scale 3×55.5k line, 10×10k line                    |
+| Libs    | ggsvelte SVG, ggsvelte canvas, D3, **uPlot**, **Chart.js**, **ECharts**, plus SveltePlot/LayerCake/Unovis |
+| Metrics | gzip bundle per lib×scenario; browser cold mount + full remount (median)                                  |
 
 Internal mitata workloads in `benchmarks/` remain the self-regression gate. This package is the **external** comparison.
 
@@ -42,9 +42,9 @@ Results: `results/bundles.json`, `results/browser.json`.
 ## Docs homepage charts
 
 The docs homepage and repo README chart only the cells where ggsvelte beats
-**both** Svelte peers (claim discipline is enforced in
-`scripts/gen-benchmark-charts.ts`, which refuses to emit a losing chart).
-After re-measuring, regenerate from the repo root:
+**all** direct Svelte peers (LayerCake, SveltePlot, Unovis — claim discipline
+is enforced in `scripts/gen-benchmark-charts.ts`, which refuses to emit a
+losing chart). After re-measuring, regenerate from the repo root:
 
 ```sh
 bun scripts/gen-benchmark-charts.ts         # rewrites apps/docs/static/benchmarks/*.svg
@@ -59,10 +59,10 @@ bun scripts/gen-benchmark-charts.ts --check # docs CI freshness gate
 4. **`replace` is a full remount**, not in-place `setData`. The browser harness therefore **does not re-sample** replace (it mirrors mount stats) until a real in-place update metric lands (LightningChart's streaming score).
 5. **`area-multiseries` is overlaid (identity), not stacked.** ggsvelte `geomArea` defaults to `stack`; adapters pass `position: "identity"` so ggsvelte matches D3/Chart.js/ECharts/uPlot overlays. `bars-stacked` remains the stack fairness cell.
 6. **No interaction (mousemove) or max-capacity sweep yet.** uPlot's table and LC's capacity/stream metrics are the next expansion targets.
-7. **SveltePlot / LayerCake** remain bundle-only until component fixtures mount in Playwright.
+7. **Svelte peers** (SveltePlot, LayerCake, Unovis) mount real component fixtures in Playwright for browser + bundle; SSR is measured separately.
 8. Compare **within one machine and one run**. Absolute ms are host-sensitive (same as internal budgets).
 9. **Paint-inclusive timing** waits two animation frames after mount, so small cases sit near a ~1–2 frame floor. Use denser cases (`line-3x10k`, `scatter-color-10k`, full matrix) to rank libraries.
-10. **SSR throughput (`measure:ssr`) is reported, not cherry-picked.** Each lib renders data -> SVG string with no browser: ggsvelte via `renderToSVGString`, peers via Svelte 5 `render()` of the same fixture components (LayerCake with its documented `ssr` prop). Two honest findings: **LayerCake out-renders ggsvelte at 1k** (plain string concat beats the full grammar pipeline at small N — the cell is kept, not hidden), and **SveltePlot server-renders an empty shell** (marks live in client-side `$effect` plot state), recorded as `ssrCapable: false` — never a 0 bar. Any _other_ lib regressing to an empty shell fails the run loudly (`minMarks`).
+10. **SSR throughput (`measure:ssr`) is reported, not cherry-picked.** Each lib renders data -> SVG string with no browser: ggsvelte via `renderToSVGString`, peers via Svelte 5 `render()` of the same fixture components (LayerCake with its documented `ssr` prop). Honest findings: **LayerCake out-renders ggsvelte at 1k** (plain string concat beats the full grammar pipeline at small N — the cell is kept, not hidden); **SveltePlot and Unovis server-render empty shells** (marks live in client-side `$effect` / `onMount`), recorded as `ssrCapable: false` — never a 0 bar. Any _other_ lib regressing to an empty shell fails the run loudly (`minMarks`).
 11. **uPlot scatter** sorts x ascending before paint (uPlot requires monotonic `data[0]`); that sort is inside the timed path for this adapter.
 
 ## Scenario catalog

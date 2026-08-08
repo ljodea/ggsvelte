@@ -5,8 +5,8 @@
  * never hand-edit the rendered SVGs.
  *
  * Claim discipline: a chart exists only for a benchmark where ggsvelte beats
- * BOTH direct Svelte peers (SveltePlot and LayerCake). Cells we lose stay in
- * the results JSON and off the homepage. Conventions follow bun.sh: the
+ * ALL direct Svelte peers (SveltePlot, LayerCake, Unovis). Cells we lose stay
+ * in the results JSON and off the homepage. Conventions follow bun.sh: the
  * subject bar is shaded in the brand accent, peer bars stay grey, value
  * labels sit at bar ends, and time benchmarks ("faster") use horizontal bars.
  */
@@ -73,7 +73,7 @@ export interface BenchmarkBar {
 
 export interface BenchmarkChartInput {
   readonly id: string;
-  /** Bars in display order — subject first, then peers ascending. */
+  /** Bars in display order top→bottom — subject first, then peers by rank. */
   readonly bars: readonly BenchmarkBar[];
   /** Plot title drawn above the panel (self-describes README <img> embeds). */
   readonly title: string;

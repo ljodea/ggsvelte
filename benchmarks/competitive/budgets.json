@@ -18,6 +18,30 @@
       "note": "~90ms vs ~62ms. Our update path is a documented full re-render; layercake updates reactively through $state. Attack: incremental update planning."
     },
     {
+      "ggsvelte": "ggsvelte-svg",
+      "peer": "layercake",
+      "caseId": "line-3x10k",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "Full SVG re-render vs LayerCake $state update at 30k points (~27–31ms vs ~16ms). Same root cause as scatter-10k update (#1471); listed for the unthrottled gate (#1486)."
+    },
+    {
+      "ggsvelte": "ggsvelte-svg",
+      "peer": "unovis",
+      "caseId": "scatter-color-10k",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "Unovis setData on Scatter is a lean in-place redraw (~18ms) vs ggsvelte full re-render (~50–57ms) at 10k. Same incremental-update attack as vs LayerCake (#1471)."
+    },
+    {
+      "ggsvelte": "ggsvelte-svg",
+      "peer": "layercake",
+      "caseId": "bars-stacked-50x4",
+      "kind": "update",
+      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
+      "note": "Small stacked-bar update: LayerCake $state path (~2.7ms) beats ggsvelte full re-render (~4.8ms). Same incremental-update attack (#1471)."
+    },
+    {
       "ggsvelte": "ggsvelte-canvas",
       "peer": "layercake-canvas",
       "caseId": "line-3x10k",

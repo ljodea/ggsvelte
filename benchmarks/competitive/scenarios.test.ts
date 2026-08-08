@@ -49,6 +49,7 @@ describe("competitive scenario catalog", () => {
     const ids = new Set(LIBS.map((l) => l.id));
     expect(ids.has("svelteplot")).toBe(true);
     expect(ids.has("layercake")).toBe(true);
+    expect(ids.has("unovis")).toBe(true);
   });
 
   test("data generators are deterministic and sized correctly", () => {
@@ -101,8 +102,8 @@ describe("competitive scenario catalog", () => {
     expect(canvas).toMatch(/geomArea\(\s*\{[^}]*position:\s*["']identity["']/s);
   });
 
-  test("SSR bench entries exist for ggsvelte + both Svelte peers (server-render matrix cannot collapse)", () => {
-    for (const lib of ["ggsvelte", "svelteplot", "layercake"]) {
+  test("SSR bench entries exist for ggsvelte + Svelte peers (server-render matrix cannot collapse)", () => {
+    for (const lib of ["ggsvelte", "svelteplot", "layercake", "unovis"]) {
       for (const scenario of ["scatter-color", "line-multiseries"]) {
         expect(existsSync(new URL(`./entries/ssr__${lib}__${scenario}.ts`, import.meta.url))).toBe(
           true,

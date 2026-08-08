@@ -235,6 +235,7 @@ export type LibId =
   | "svelteplot"
   | "layercake"
   | "layercake-canvas"
+  | "unovis"
   | "ggsvelte-ggplot"
   | "ggsvelte-full";
 
@@ -355,6 +356,15 @@ export const LIBS: readonly LibMeta[] = [
     bundle: false,
     scenarios: ["scatter-color", "line-multiseries"],
     note: "LayerCake Canvas-layout fast path — one 2D-context draw pass, no per-mark DOM (rebuttal-proofing vs 'SVG-only peer' critique)",
+  },
+  {
+    id: "unovis",
+    label: "Unovis",
+    form: "svg",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Svelte peer (@unovis/svelte + @unovis/ts) — VisXYContainer + VisScatter/VisLine/VisArea/VisStackedBar + VisAxis",
   },
 ] as const;
 

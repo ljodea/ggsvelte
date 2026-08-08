@@ -51,7 +51,7 @@ export function readLockstepVersion(root: string = ROOT): string {
 
 /**
  * Rewrite the README "API stability" ggsvelte cell to `⚠️ v{version}`.
- * Peer cells (SveltePlot / LayerCake) are left alone.
+ * Peer cells (SveltePlot / LayerCake / Unovis) are left alone.
  *
  * Does not re-pad the markdown table: a version string of a different width
  * can leave the column uneven until `prettierFormatMarkdown` runs (write path).

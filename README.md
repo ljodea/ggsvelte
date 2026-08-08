@@ -11,15 +11,15 @@ graphics, inspired by ggplot2.
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started)
 
-![Bar chart of cold-mount time for a 1,000-point colored scatter: ggsvelte 6.3 ms, LayerCake 13.2 ms, SveltePlot 241.1 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-1k-mount.svg)
+![Bar chart of cold-mount time for a 1,000-point colored scatter: ggsvelte 9.4 ms, LayerCake 22.1 ms, Unovis 92.2 ms, SveltePlot 311.3 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-1k-mount.svg)
 
-![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 34.5 ms, LayerCake 139.7 ms, SveltePlot 3,032 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
+![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 57.6 ms, LayerCake 214.2 ms, Unovis 577.2 ms, SveltePlot 4,385 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
 
-![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 16 ms, LayerCake 26.5 ms, SveltePlot 1,143 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
+![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 21.9 ms, LayerCake 36.6 ms, Unovis 173.1 ms, SveltePlot 1,133 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
 
-![Bar chart of cold-mount time for a 3-series by 1,000-point area chart: ggsvelte 4.2 ms, LayerCake 5.2 ms, SveltePlot 177.4 ms. Lower is better.](apps/docs/static/benchmarks/bench-area-mount.svg)
+![Bar chart of cold-mount time for a 3-series by 1,000-point area chart: ggsvelte 4.6 ms, LayerCake 5.6 ms, Unovis 67.1 ms, SveltePlot 188.7 ms. Lower is better.](apps/docs/static/benchmarks/bench-area-mount.svg)
 
-![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 3 ms, LayerCake 3.7 ms, SveltePlot 41.6 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
+![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 4.6 ms, LayerCake 5.2 ms, Unovis 28.9 ms, SveltePlot 62.7 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
 
 ## Install
 
@@ -55,18 +55,18 @@ and Windows.
 
 ## Why ggsvelte?
 
-| Capability                                 | ggsvelte   | SveltePlot           | LayerCake            |
-| ------------------------------------------ | ---------- | -------------------- | -------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 138 KB  | ✅ 109 KB            | ✅ 41 KB             |
-| **API stability**                          | ⚠️ v0.34.2 | ⚠️ v0.14             | ✅ v10               |
-| **Headless server-side SVG** (no DOM)      | ✅         | ❌ empty shell       | ⚠️ opt-in `ssr` flag |
-| **Portable JSON spec + schema**            | ✅         | ❌                   | ❌                   |
-| **CLI validator + renderer**               | ✅         | ❌                   | ❌                   |
-| **Agent skill**                            | ✅         | ❌                   | ❌                   |
-| **Automatic temporal detection**           | ✅         | ⚠️ Date objects only | ❌                   |
-| **Built-in interactions**                  | ✅         | ⚠️ tooltip + brush   | ❌                   |
-| **ggplot2 API**                            | ✅         | ❌                   | ❌                   |
-| **Scale, axis & coord control**            | ✅         | ✅                   | ⚠️ d3 scales         |
+| Capability                                 | ggsvelte   | LayerCake            | Unovis                 | SveltePlot           |
+| ------------------------------------------ | ---------- | -------------------- | ---------------------- | -------------------- |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 141 KB  | ✅ 41 KB             | ✅ 80 KB               | ✅ 109 KB            |
+| **API stability**                          | ⚠️ v0.34.2 | ✅ v10               | ✅ v1.6                | ⚠️ v0.14             |
+| **Headless server-side SVG** (no DOM)      | ✅         | ⚠️ opt-in `ssr` flag | ❌ client `onMount`    | ❌ empty shell       |
+| **Portable JSON spec + schema**            | ✅         | ❌                   | ❌                     | ❌                   |
+| **CLI validator + renderer**               | ✅         | ❌                   | ❌                     | ❌                   |
+| **Agent skill**                            | ✅         | ❌                   | ❌                     | ❌                   |
+| **Automatic temporal detection**           | ✅         | ❌                   | ❌                     | ⚠️ Date objects only |
+| **Built-in interactions**                  | ✅         | ❌                   | ⚠️ tooltip + crosshair | ⚠️ tooltip + brush   |
+| **ggplot2 API**                            | ✅         | ❌                   | ❌                     | ❌                   |
+| **Scale, axis & coord control**            | ✅         | ⚠️ d3 scales         | ✅                     | ✅                   |
 
 ## Reference
 
