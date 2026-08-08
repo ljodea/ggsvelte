@@ -302,10 +302,17 @@ Override with `identity` on `<Inspect>`, object-form `select`, or
 (for example `<Inspect identity="year" />`). Plot-level `key` is deprecated
 since 0.21. Link plots by sharing one `createPlotInteraction()` controller
 and matching `interactionScope` channels; observe everything through
-`oninteraction` or per-capability handlers. Faceted interval presets, the
-controller API, `Tooltip`, handler payloads, and diagnostics:
-[references/interactions.md](references/interactions.md) — read it before
-writing any interactive or linked-view code.
+`oninteraction` or per-capability handlers.
+
+**Inspect mode and hit hygiene:** prefer `mode="auto"` when library auto matches
+the mark; pin `mode="exact"` on violin, boxplot, and discrete-axis error bars
+(product auto still freescrolls those — do not leave bare `auto`); use
+`x`/`y`/`xy` only for continuous shared-axis or free 2d hits; set
+`inspect={false}` on decorative layers in multi-layer stories. The CLI SVG
+loop cannot validate host inspect mode — hover/pin in a browser after edits.
+Read [references/interactions.md](references/interactions.md) (Choosing inspect
+mode, Multi-layer hit hygiene) before enabling Inspect or writing interactive
+or linked-view code.
 
 ## Pointers
 
