@@ -22,7 +22,7 @@ import CoordFacetChildrenPlot from "../fixtures/CoordFacetChildrenPlot.svelte";
 import LabsGuidesLegendPlot from "../fixtures/LabsGuidesLegendPlot.svelte";
 import ScaleChildrenPlot from "../fixtures/ScaleChildrenPlot.svelte";
 import { render } from "../helpers/render.js";
-import { collect, settled } from "../interaction/diagnostic-harness.js";
+import { collect, settled } from "../helpers/diagnostic-harness.js";
 
 const COMPOSITION_CODES = [
   "DUPLICATE_SCALE_CHANNEL",

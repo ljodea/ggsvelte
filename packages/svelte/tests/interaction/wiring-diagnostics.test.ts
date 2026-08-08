@@ -10,7 +10,7 @@ import GGPlot from "../../src/lib/GGPlot.svelte";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import type { InteractionDiagnostic } from "../../src/lib/interaction/interaction.js";
 import { render } from "../helpers/render.js";
-import { collect, settled } from "./diagnostic-harness.js";
+import { collect, settled } from "../helpers/diagnostic-harness.js";
 
 const rows = [
   { id: "a", x: 1, y: 10 },
