@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     CoordFixed,
+    createPlotInteraction,
     GeomPath,
     GeomPoint,
     GeomText,
@@ -16,16 +17,26 @@
   import {
     campaignRivers,
     minardCityLabels,
-    minardCold,
     minardColdStations,
     minardStrengthLabels,
     minardTroopsWithCold,
   } from "./data.js";
+
+  // Shared keys: cold strip and map station points both use stationKey so a
+  // click on Nov 09 selects the same retreat station on the march map.
+  const interaction = createPlotInteraction<string>();
+  const scope = { keys: "minard-cold-station" } as const;
 </script>
 
 <div class="minard">
-  <GGPlot width={960} height={520}>
-    <Inspect mode="xy" pin maxDistance={24} />
+  <GGPlot
+    width={960}
+    height={520}
+    select={{ type: "point" }}
+    {interaction}
+    interactionScope={scope}
+  >
+    <Inspect mode="xy" pin maxDistance={24} identity="stationKey" />
     <ThemeClassic />
     <!-- lon/lat degrees are not the same length on the ground at 55°N -->
     <CoordFixed ratio={1.6} />
@@ -67,7 +78,7 @@
         linewidth: "survivors",
       }}
     />
-    <!-- Cold stations: pin targets with date in the default tooltip (label is tooltip-only on point) -->
+    <!-- Cold stations: pin targets with date + shared selection keys -->
     <GeomPoint
       data={minardColdStations}
       aes={{
@@ -93,23 +104,29 @@
     />
   </GGPlot>
 
-  <GGPlot width={960} height={190}>
-    <Inspect mode="xy" pin maxDistance={24} />
+  <GGPlot
+    width={960}
+    height={190}
+    select={{ type: "point" }}
+    {interaction}
+    interactionScope={scope}
+  >
+    <Inspect mode="xy" pin maxDistance={24} identity="stationKey" />
     <ThemeClassic />
     <ScaleXContinuous limits={[23.5, 38.2]} />
     <Labs title="The cold on the road back" x="Longitude east" y="°Réaumur" />
     <GeomPath
-      data={minardCold}
+      data={minardColdStations}
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
     />
     <GeomPoint
-      data={minardCold}
-      aes={{ x: "long", y: "temp", color: { value: "#374151" } }}
+      data={minardColdStations}
+      aes={{ x: "long", y: "temp", color: { value: "#374151" }, label: "date" }}
       size={2.5}
     />
     <GeomText
-      data={minardCold}
+      data={minardColdStations}
       aes={{ x: "long", y: "temp", label: "date", color: { value: "#374151" } }}
       size={10}
       dy={-11}

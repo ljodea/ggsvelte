@@ -258,7 +258,7 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "40e4a38882d14be06a6324e7a41d09391acceb71e4d97d763a071fabb7f79732",
+      "sourceSha256": "43dc2ff3332c6c78c6d74c8b53d62f5fdae579ed05b0bb59b8ae4df85c3e09fe",
       "pngSha256": "842aca1ae410868acfa0e51ce0515191e01ac9b78907870fbea1d6a8cde28a6a"
     },
     "point/abline-identity": {
