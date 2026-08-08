@@ -18,8 +18,8 @@
     },
     "bar/horizontal": {
       "filename": "bar-horizontal-light.png",
-      "sourceSha256": "7c203e9683f60bd3476f3d8cbf9718db4f790abe5d06b75b87dc3d8a3c1ab53b",
-      "pngSha256": "719c550899b65738c22bcebf1e6fc4cdaa13517911fdbb8c87f8fe84a1154041"
+      "sourceSha256": "bb6df816e773cd3c3051e5b837bd4f83bb5b5051c1f14c83d58612f5c72c6f7c",
+      "pngSha256": "20d0c0d98510c2e69ad4379b6edd56b25a28d211f4deb2e8bbacee816015376d"
     },
     "bar/proportions": {
       "filename": "bar-proportions-light.png",

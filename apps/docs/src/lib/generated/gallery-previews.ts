@@ -30,7 +30,7 @@ export const GALLERY_PREVIEWS = [
     id: "bar/horizontal",
     filename: "bar-horizontal-light.png",
     path: "/previews/bar-horizontal-light.png",
-    sha256: "719c550899b65738c22bcebf1e6fc4cdaa13517911fdbb8c87f8fe84a1154041",
+    sha256: "20d0c0d98510c2e69ad4379b6edd56b25a28d211f4deb2e8bbacee816015376d",
   },
   {
     id: "bar/proportions",
