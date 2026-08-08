@@ -82,18 +82,44 @@ export function resolveCandidateLogicalValues(input: {
         : sourceValue(xField)
       : (frame?.box?.outlierX[primitiveIndex] ?? null);
 
+  // Stack/fill rewrite ymin/ymax (and yNumeric after position-bar). Prefer the
+  // post-position segment height so identity cols and stat bars both report the
+  // drawn share/contribution — not the pre-position source column.
+  const stackHeight = stackOrFillSegmentHeight(frame, frameRow);
+
   const yValue = annotationRule
     ? annotationY
     : outlierSourceRow === null
-      ? sourceRow === null
-        ? (frame?.yValues?.[frameRow] ??
-          semanticFrameNumber(
-            frame,
-            "y",
-            frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
-          ))
-        : sourceValue(yField)
+      ? stackHeight !== undefined
+        ? semanticFrameNumber(frame, "y", stackHeight)
+        : sourceRow === null
+          ? (frame?.yValues?.[frameRow] ??
+            semanticFrameNumber(
+              frame,
+              "y",
+              frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
+            ))
+          : sourceValue(yField)
       : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);
 
   return { xValue, yValue };
+}
+
+/**
+ * Post-position segment height for stack/fill (ymax − ymin), or undefined when
+ * the layer is not stack/fill or edges are missing/non-finite.
+ */
+function stackOrFillSegmentHeight(
+  frame: LayerFrame | undefined,
+  frameRow: number,
+): number | undefined {
+  if (frame === undefined || frame.ymin === null || frame.ymax === null) return undefined;
+  const position = frame.binding.layer.position ?? "identity";
+  if (position !== "stack" && position !== "fill") return undefined;
+  const lo = frame.ymin[frameRow];
+  const hi = frame.ymax[frameRow];
+  if (lo === undefined || hi === undefined || !Number.isFinite(lo) || !Number.isFinite(hi)) {
+    return undefined;
+  }
+  return hi - lo;
 }

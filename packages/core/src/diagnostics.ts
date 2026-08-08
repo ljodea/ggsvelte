@@ -95,6 +95,10 @@ export const ADVISORY_CATALOG = {
     summary:
       "Long categorical x labels were rotated to avoid collisions; pin with scales.x.guide.mode/angle, or coordFlip() for horizontal rows.",
   },
+  "percent-labels-out-of-range": {
+    summary:
+      "A continuous scale uses a percent labels format (…%) but its domain is far outside proportion space — ticks/tooltips would print values like 87300%.",
+  },
 } as const satisfies Record<string, { summary: string }>;
 
 export type AdvisoryCode = keyof typeof ADVISORY_CATALOG;

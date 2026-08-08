@@ -39,6 +39,15 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     const { ymin, ymax } = positionStack({ slots, groups: frame.groups, y, mode: position });
     frame.ymin = ymin;
     frame.ymax = ymax;
+    // Keep yNumeric in post-position data space so inspect/tooltips match the
+    // axis. Stack: ymax−ymin equals the original contribution. Fill: it is the
+    // share of the band (proportions in [0,1]). Without this, percent labels
+    // (".0%") format raw counts as absurd percentages (873 → "87300%").
+    for (let i = 0; i < frame.n; i++) {
+      const lo = ymin[i]!;
+      const hi = ymax[i]!;
+      y[i] = Number.isFinite(lo) && Number.isFinite(hi) ? hi - lo : 0;
+    }
     return true;
   }
   // identity / dodge: bars grow from the shared transformed-origin baseline.
