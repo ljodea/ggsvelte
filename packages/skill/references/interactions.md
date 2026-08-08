@@ -292,9 +292,9 @@ a mounted plot.
   interactionScope={scope}
   oninteraction={(event) => console.log(event.type, event)}
 >
-  <GuideLegend channel="color" focus filter />
-  <Facet wrap="region" ncol={3} />
   <GeomPoint />
+  <Facet wrap="region" ncol={3} />
+  <GuideLegend channel="color" focus filter />
 </GGPlot>
 ```
 

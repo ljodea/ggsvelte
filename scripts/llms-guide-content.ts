@@ -772,8 +772,8 @@ The Svelte surface accepts the same JSON and re-exports the same helpers:
   <GeomSmooth method="lm" />
   <Scale
     value={{
-    x: { type: "linear", transform: "log10" },
-    y: { type: "linear", transform: "sqrt" },
+      x: { type: "linear", transform: "log10" },
+      y: { type: "linear", transform: "sqrt" },
     }}
   />
 </GGPlot>

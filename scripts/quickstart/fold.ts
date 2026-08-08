@@ -57,10 +57,10 @@ const BASE_COMPONENTS = [
  * these can override a different family, so this is readability only.
  */
 const GRAMMAR_ORDER = [
-  "theme",
   "scaleY",
   "scaleX",
   "scaleFill",
+  "theme",
   "guides",
   "labs",
   "inspect",

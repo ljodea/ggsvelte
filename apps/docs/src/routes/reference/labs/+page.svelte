@@ -8,12 +8,12 @@
 <GGPlot data={rows} aes={{ x: "quarter", y: "sales" }}>
   <GeomCol />
   <Labs
-      title="Quarterly sales"
-      subtitle="FY25"
-      caption="Source: internal ledger"
-      x="Quarter"
-      y="Sales (M USD)"
-    />
+    title="Quarterly sales"
+    subtitle="FY25"
+    caption="Source: internal ledger"
+    x="Quarter"
+    y="Sales (M USD)"
+  />
 </GGPlot>`;
 
   const jsonExample = `{

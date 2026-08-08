@@ -13,6 +13,7 @@
 </GGPlot>`;
 
   const scaleBreaksExample = `<GGPlot data={rows} aes={{ x: "weight", y: "economy" }}>
+  <GeomPoint />
   <Scale
     value={{
       x: {
@@ -24,10 +25,10 @@
       y: { type: "linear", labels: ".1f" },
     }}
   />
-  <GeomPoint />
 </GGPlot>`;
 
   const bandGuideExample = `<GGPlot data={rows} aes={{ x: "category", y: "count" }}>
+  <GeomCol />
   <Scale
     value={{
       x: {
@@ -36,7 +37,6 @@
       },
     }}
   />
-  <GeomCol />
 </GGPlot>`;
 
   const builderGuidesExample = `import { guideAxis, guideNone } from "@ggsvelte/spec";
