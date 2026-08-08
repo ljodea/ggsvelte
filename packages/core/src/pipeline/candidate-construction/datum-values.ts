@@ -90,9 +90,8 @@ export function resolveCandidateLogicalValues(input: {
   const yValue = annotationRule
     ? annotationY
     : outlierSourceRow === null
-      ? stackHeight !== undefined
-        ? semanticFrameNumber(frame, "y", stackHeight)
-        : sourceRow === null
+      ? stackHeight === undefined
+        ? sourceRow === null
           ? (frame?.yValues?.[frameRow] ??
             semanticFrameNumber(
               frame,
@@ -100,6 +99,7 @@ export function resolveCandidateLogicalValues(input: {
               frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
             ))
           : sourceValue(yField)
+        : semanticFrameNumber(frame, "y", stackHeight)
       : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);
 
   return { xValue, yValue };
@@ -114,7 +114,8 @@ function stackOrFillSegmentHeight(
   frameRow: number,
 ): number | undefined {
   if (frame === undefined || frame.ymin === null || frame.ymax === null) return undefined;
-  const position = frame.binding.layer.position ?? "identity";
+  // Partial frames (unit fixtures) may omit binding — treat as non-stack.
+  const position = frame.binding?.layer?.position ?? "identity";
   if (position !== "stack" && position !== "fill") return undefined;
   const lo = frame.ymin[frameRow];
   const hi = frame.ymax[frameRow];
