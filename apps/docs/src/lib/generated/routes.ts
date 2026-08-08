@@ -12353,6 +12353,11 @@ export const DOCS_ROUTES = [
         title: "band-labels-rotated",
         level: 3,
       },
+      {
+        id: "percent-labels-out-of-range",
+        title: "percent-labels-out-of-range",
+        level: 3,
+      },
     ],
   },
   {
