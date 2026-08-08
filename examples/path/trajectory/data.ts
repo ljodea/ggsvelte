@@ -15,6 +15,10 @@
  * in degrees Reaumur (-30 Reaumur is about -37.5 Celsius). `date` is the day
  * Minard recorded; the fifth reading has none in the source and is blank.
  *
+ * Cold stations: `buildColdStations` joins each temperature reading to the
+ * nearest Column-1 retreat vertex by longitude, producing `minardColdStations`
+ * with a shared `stationKey` for linked map/strip selection.
+ *
  * Rivers: the Niemen, Vilija, Berezina, Western Dvina, Dnieper and Moskva,
  * simplified to ~55 points each from OpenStreetMap relations (Niemen,
  * Berezina; (c) OpenStreetMap contributors, ODbL) and Natural Earth 10m
@@ -114,6 +118,70 @@ export const minardCold: { long: number; temp: number; date: string }[] = [
   { long: 26.7, temp: -30, date: "Dec 06" },
   { long: 25.3, temp: -26, date: "Dec 07" },
 ];
+
+/**
+ * One cold reading joined to the nearest Column-1 retreat vertex so the map
+ * and temperature strip share a durable `stationKey` for linked selection.
+ * Minard aligned the cold strip under the retreat by longitude; troop longs
+ * do not always match exactly (e.g. Nov 09 at 33.2° sits nearest 33.3°).
+ */
+export type MinardColdStation = {
+  stationKey: string;
+  long: number;
+  lat: number;
+  temp: number;
+  date: string;
+  survivors: number;
+  direction: string;
+};
+
+type ColdReading = { long: number; temp: number; date: string };
+type TroopVertex = {
+  long: number;
+  lat: number;
+  survivors: number;
+  direction: string;
+  leg: string;
+};
+
+/**
+ * Join each cold reading to the nearest Column-1 retreat vertex by longitude.
+ * Advance and side columns are ignored: the temperature series is retreat-only.
+ * stationKey is String(cold.long) so map and strip share durable identity.
+ */
+export function buildColdStations(
+  cold: readonly ColdReading[],
+  troops: readonly TroopVertex[],
+): MinardColdStation[] {
+  const retreat = troops.filter((t) => t.leg === "Column 1 Retreat");
+  return cold.map((reading) => {
+    let nearest = retreat[0];
+    if (nearest === undefined) {
+      throw new Error("buildColdStations requires at least one Column 1 Retreat vertex");
+    }
+    let best = Math.abs(nearest.long - reading.long);
+    for (let i = 1; i < retreat.length; i++) {
+      const candidate = retreat[i]!;
+      const dist = Math.abs(candidate.long - reading.long);
+      if (dist < best) {
+        best = dist;
+        nearest = candidate;
+      }
+    }
+    return {
+      // Cold longitude, not the troop long — identity for linked selection.
+      stationKey: String(reading.long),
+      long: reading.long,
+      lat: nearest.lat,
+      temp: reading.temp,
+      date: reading.date,
+      survivors: nearest.survivors,
+      direction: nearest.direction,
+    };
+  });
+}
+
+export const minardColdStations: MinardColdStation[] = buildColdStations(minardCold, minardTroops);
 
 // Town-name nudges in degrees, so labels clear the bands the way Minard
 // placed them: Kowno left of the crossing, the Vilna-loop names off the ink.
