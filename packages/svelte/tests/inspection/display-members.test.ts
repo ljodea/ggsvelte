@@ -165,6 +165,23 @@ describe("fieldsForDefaultTooltip (#754)", () => {
       "species",
     ]);
   });
+
+  it("omits weight when y already carries the aggregated reading (#1526)", () => {
+    // geom_bar + weight: layerFields advertise weight for custom content, but
+    // the default tooltip must not re-print barrelsMillions next to y.
+    const weightedBar = [
+      field("x", "year", 2014),
+      field("y", "count", 158.54),
+      field("fill", "package", "Bottles and cans"),
+      field("weight", "barrelsMillions", 158.54),
+    ];
+    expect(fieldsForDefaultTooltip(weightedBar, "exact").map((f) => f.channel)).toEqual([
+      "x",
+      "y",
+      "fill",
+    ]);
+    expect(fieldsForDefaultTooltip(weightedBar, "x").map((f) => f.channel)).toEqual(["y", "fill"]);
+  });
 });
 
 describe("defaultTooltipRows (series-centric axis groups)", () => {
@@ -240,6 +257,7 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
     // Stat aggregates can advertise fill/weight fields with null values
     // (no source row + CandidateFacts has no fillValue). Do not invent a
     // "– → measure" row; keep readable field labels so y at least shows.
+    // Weight is a stat input — omit even when blank (y is the reading).
     const blankSeries = [
       field("x", "x", "1876"),
       field("y", "count", 175),
@@ -249,8 +267,53 @@ describe("defaultTooltipRows (series-centric axis groups)", () => {
     const rows = defaultTooltipRows(blankSeries, "x", {
       labs: { x: "Year", y: "Deaths per million", fill: "County" },
     });
-    expect(rows.map((r) => r.label)).toEqual(["Deaths per million", "County", "deaths"]);
-    expect(rows.map((r) => r.value)).toEqual([175, null, null]);
+    expect(rows.map((r) => r.label)).toEqual(["Deaths per million", "County"]);
+    expect(rows.map((r) => r.value)).toEqual([175, null]);
+  });
+
+  it("does not re-print weight next to the measure for exact weighted bars", () => {
+    // Gallery beer dodged bars: aes(x=year, fill=package, weight=barrelsMillions).
+    // Exact mode used to dump Year / Millions of barrels / Package / barrels millions.
+    const beer = [
+      field("x", "year", 2014),
+      field("y", "count", 158.54),
+      field("fill", "package", "Bottles and cans"),
+      field("weight", "barrelsMillions", 158.54),
+    ];
+    const rows = defaultTooltipRows(beer, "exact", {
+      labs: {
+        x: "Year",
+        y: "Millions of barrels",
+        fill: "Package",
+      },
+    });
+    expect(rows.map((r) => r.label)).toEqual(["Year", "Millions of barrels", "Package"]);
+    expect(rows.map((r) => r.value)).toEqual([2014, 158.54, "Bottles and cans"]);
+  });
+
+  it("series-centric axis groups also drop the weight echo", () => {
+    const beer = [
+      field("x", "year", 2016),
+      field("y", "count", 17),
+      field("fill", "package", "Kegs and barrels"),
+      field("weight", "barrelsMillions", 17),
+    ];
+    const rows = defaultTooltipRows(beer, "x", {
+      labs: {
+        x: "Year",
+        y: "Millions of barrels",
+        fill: "Package",
+      },
+    });
+    expect(rows).toEqual([
+      {
+        key: "fill:package:count",
+        label: "Kegs and barrels",
+        value: 17,
+        valueChannel: "y",
+        valueField: "count",
+      },
+    ]);
   });
 
   it("falls back when there is no series aesthetic (single-series line)", () => {

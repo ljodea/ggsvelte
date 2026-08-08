@@ -130,6 +130,12 @@ export function tooltipFieldLabel(
  * on categorical bars keeps the x row (labs-titled) and drops the fill echo.
  * A11y live-text already dedupes by field name in `labels.ts`; default
  * tooltips match that contract so paint-only remaps never invent a third row.
+ *
+ * Weight is a statistical input (feeds count/sum into y), not a display
+ * aesthetic. When y already carries the aggregated reading, painting weight
+ * as a second numeric row is pure redundancy (#1526 preferred this; #1532
+ * recovered weight on the public snapshot for custom content, but default
+ * presentation must still omit it).
  */
 export function fieldsForDefaultTooltip(
   fields: readonly TooltipField[],
@@ -147,6 +153,8 @@ export function fieldsForDefaultTooltip(
     }
   }
   return withoutAxis.filter((field) => {
+    // Stat input, not a visual channel — y (or x on flipped) is the reading.
+    if (field.channel === "weight") return false;
     if (seenColumns.has(field.field)) return false;
     seenColumns.add(field.field);
     return true;

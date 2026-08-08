@@ -21152,8 +21152,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:dodged",
     kind: "example",
     title: "US beer production by package type",
-    summary:
-      "Dodged bars of national production by year and package. Copy this when categories share an x-axis and need side-by-side comparison.",
+    summary: "Dodged bars of national production by year and package.",
     href: "/examples/bar/dodged",
     keywords: [
       "US beer production by package type",
