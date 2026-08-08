@@ -106,18 +106,35 @@ function contributionIdentity(
 }
 
 /**
+ * True when the axis group includes at least one layer drawn with an additive
+ * position (`stack` or `fill`). Parallel multi-series lines/points use
+ * `identity` (or dodge) — summing them invents a meaningless Total.
+ */
+function groupHasAdditivePosition(model: RenderModel, members: readonly CandidateFacts[]): boolean {
+  const positions = model.layerPositions ?? [];
+  for (const member of members) {
+    const position = positions[member.layerIndex];
+    if (position === "stack" || position === "fill") return true;
+  }
+  return false;
+}
+
+/**
  * Stack total for the default tooltip (#1274 / #1389).
  *
- * Sums unique series contributions across the full axis group (every layer),
- * not only the focus layer — so a thin overlay over a high-n stack still
- * reports a total that matches the listed rows. Dedup prevents line+point
- * (and col+text) double-counting of the same source series.
+ * Only when the group includes a stack/fill layer: sums unique series
+ * contributions across the full axis group (every layer), not only the focus
+ * layer — so a thin overlay over a high-n stack still reports a total that
+ * matches the listed rows. Dedup prevents line+point (and col+text)
+ * double-counting of the same source series. Returns `null` for parallel
+ * (identity/dodge) multi-series groups so the tooltip omits Total.
  */
 function groupMagnitudeTotal(
   model: RenderModel,
   members: readonly CandidateFacts[],
   groupAxis: "x" | "y",
 ): number | null {
+  if (!groupHasAdditivePosition(model, members)) return null;
   const byIdentity = new Map<string, number>();
   for (const member of members) {
     const contribution = candidateValueContribution(member, groupAxis);
@@ -361,6 +378,9 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       });
     }
     const axisValue = mode === "x" ? seed.xValue : seed.yValue;
+    // Same stack/fill gate as groupMagnitudeTotal so oninspect consumers
+    // never see a composition total for identity/dodge seeds.
+    const additive = groupHasAdditivePosition(model, [seed]);
     return Object.freeze({
       type: "inspect",
       phase: "change",
@@ -372,7 +392,7 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       members: [single] as const,
       axisValue,
       axisLabel: axisLabel(model, mode, axisValue),
-      groupTotal: candidateValueContribution(seed, mode),
+      groupTotal: additive ? candidateValueContribution(seed, mode) : null,
       // Single-member fallback — one series on the seed layer.
       groupMemberCount: 1,
     });

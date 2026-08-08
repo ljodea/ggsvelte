@@ -279,10 +279,16 @@ export const GALLERY_PREVIEWS = [
     sha256: "ab6e3889dd38cfe949a124939cb2926fb732bb16033ccd7e8572212018cc6fa6",
   },
   {
+    id: "line/labor-cost-of-wheat",
+    filename: "line-labor-cost-of-wheat-light.png",
+    path: "/previews/line-labor-cost-of-wheat-light.png",
+    sha256: "061ecd7c317e705cf3a8d6833142ceb92856a1c7ee89cf9fbfcad59c47005492",
+  },
+  {
     id: "line/multi-series",
     filename: "line-multi-series-light.png",
     path: "/previews/line-multi-series-light.png",
-    sha256: "127a26c44cf0cfe95add36d646eeef57e29e36ae1f98f0e6d3d8018cf2038a13",
+    sha256: "5677954e011409163dc8d36a04e739604960a0e4b9faad5743ac434ba6f7e1c6",
   },
   {
     id: "line/time-axis",

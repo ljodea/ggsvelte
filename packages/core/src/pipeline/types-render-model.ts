@@ -46,6 +46,12 @@ export interface RenderModel {
   /** Field-mapped channels per layer (drives default tooltip content). */
   layerFields: MappedField[][];
   /**
+   * Resolved position adjustment per layer (`identity` / `stack` / `fill` /
+   * `dodge` / …). Axis-inspect tooltips use this to show a stack Total only
+   * when the group includes an additive (`stack` or `fill`) layer.
+   */
+  layerPositions: readonly string[];
+  /**
    * Scaled constant aes values per layer (`{ value, scale: true }` on color/fill).
    * Used by legend-focus key indexing when no field mapping exists for a scale.
    */

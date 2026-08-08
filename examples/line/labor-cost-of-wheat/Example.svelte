@@ -1,0 +1,36 @@
+<script lang="ts">
+  import {
+    GeomLine,
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    Labs,
+    ScaleXContinuous,
+    ThemeEconomist,
+  } from "@ggsvelte/svelte";
+
+  import { laborCostOfWheat } from "./data.js";
+</script>
+
+<GGPlot
+  data={laborCostOfWheat}
+  aes={{ x: "year", y: "weeks" }}
+  width={640}
+  height={400}
+>
+  <Inspect mode="x" pin />
+  <ThemeEconomist />
+  <ScaleXContinuous
+    breaks={[1600, 1650, 1700, 1750, 1800]}
+    labels="d"
+    nice={false}
+  />
+  <Labs
+    title="Weeks of work for a quarter of wheat"
+    subtitle="Wheat price ÷ weekly wage of a good mechanic; a quarter is ~8 bushels of grain"
+    x="Year"
+    y="Weeks of work"
+  />
+  <GeomLine linewidth={2} aes={{ color: { value: "#014d64" } }} />
+  <GeomPoint size={1.6} aes={{ color: { value: "#014d64" } }} />
+</GGPlot>

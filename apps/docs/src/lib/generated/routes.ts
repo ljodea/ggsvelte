@@ -13201,9 +13201,21 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/line/labor-cost-of-wheat",
+    title: "Weeks of work for a quarter of wheat — ggsvelte gallery",
+    description:
+      "Playfair's purchasing-power argument as a single series: wheat price divided by a mechanic's weekly wage. A quarter is about eight bushels of grain — lower is cheaper grain in labor terms.",
+    canonicalPath: "/examples/line/labor-cost-of-wheat",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/line/multi-series",
-    title: "Two series on one panel — ggsvelte gallery",
-    description: "Multi-series lines for comparing series that share units.",
+    title: "Wheat price and a mechanic's weekly wage — ggsvelte gallery",
+    description:
+      "Playfair's 1821 levels chart: the price of one quarter of wheat (~8 bushels) and a good mechanic's weekly pay, both in shillings. Same currency, different baskets — he wanted you to eye the ratio, not add the series.",
     canonicalPath: "/examples/line/multi-series",
     kind: "page",
     index: true,

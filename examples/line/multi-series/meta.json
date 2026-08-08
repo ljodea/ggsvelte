@@ -1,6 +1,6 @@
 {
-  "title": "Two series on one panel",
-  "description": "Multi-series lines for comparing series that share units.",
+  "title": "Wheat price and a mechanic's weekly wage",
+  "description": "Playfair's 1821 levels chart: the price of one quarter of wheat (~8 bushels) and a good mechanic's weekly pay, both in shillings. Same currency, different baskets — he wanted you to eye the ratio, not add the series.",
   "tags": ["line", "point", "color", "legend", "layers", "theme", "palette"],
   "docsSection": "Lines & time"
 }

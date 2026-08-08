@@ -569,13 +569,100 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
       .map((m) => Number(m.fields.find((f) => f.channel === "y")?.value));
     nonFocusY.sort((a, b) => b - a);
     expect(nonFocusY).toEqual([20, 19, 18, 17, 16, 15, 14]);
-    // Full-group stack total (sum 1..20), not the capped window.
+    // Parallel multi-series points: no additive position → no Total.
     expect(inspection.mode).toBe("x");
     if (inspection.mode === "x" || inspection.mode === "y") {
-      expect(inspection.groupTotal).toBe(210);
+      expect(inspection.groupTotal).toBeNull();
       expect(inspection.groupMemberCount).toBe(20);
     }
     model.dispose();
+  });
+
+  it("materializeInspection reports stack Total only for stack/fill positions", () => {
+    const data = Array.from({ length: 5 }, (_, index) => ({
+      id: `s${index}`,
+      x: "A",
+      y: index + 1,
+      series: `s${index}`,
+    }));
+    const stacked = runPipeline(
+      gg(data, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "stack" })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const filled = runPipeline(
+      gg(data, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "fill" })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const dodged = runPipeline(
+      gg(data, aes({ x: "x", y: "y", fill: "series" }))
+        .geomCol({ position: "dodge" })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const parallel = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "series" }))
+        .geomLine()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+
+    function completeAxisInspection(
+      model: ReturnType<typeof runPipeline>,
+    ): ReturnType<typeof materializeInspection> {
+      const seed = model.candidates.candidate(0)!;
+      return materializeInspection(
+        {
+          model,
+          seed,
+          mode: "x",
+          state: "transient",
+          source: "pointer",
+        },
+        resolvedTarget(model, seed, "x")!,
+        "complete",
+        (index) => (model.row(index) as { id: string } | null)?.id ?? null,
+      );
+    }
+
+    const stackedInspection = completeAxisInspection(stacked);
+    const filledInspection = completeAxisInspection(filled);
+    const dodgedInspection = completeAxisInspection(dodged);
+    const parallelInspection = completeAxisInspection(parallel);
+
+    expect(stacked.layerPositions).toEqual(["stack"]);
+    expect(filled.layerPositions).toEqual(["fill"]);
+    expect(dodged.layerPositions).toEqual(["dodge"]);
+    expect(parallel.layerPositions).toEqual(["identity"]);
+
+    expect(stackedInspection.mode).toBe("x");
+    if (stackedInspection.mode === "x" || stackedInspection.mode === "y") {
+      expect(stackedInspection.groupTotal).toBe(15); // 1+2+3+4+5
+      expect(stackedInspection.groupMemberCount).toBe(5);
+    }
+    expect(filledInspection.mode).toBe("x");
+    if (filledInspection.mode === "x" || filledInspection.mode === "y") {
+      // Fill still contributes source y magnitudes for the stack Total.
+      expect(filledInspection.groupTotal).toBe(15);
+      expect(filledInspection.groupMemberCount).toBe(5);
+    }
+    expect(dodgedInspection.mode).toBe("x");
+    if (dodgedInspection.mode === "x" || dodgedInspection.mode === "y") {
+      expect(dodgedInspection.groupTotal).toBeNull();
+      expect(dodgedInspection.groupMemberCount).toBe(5);
+    }
+    expect(parallelInspection.mode).toBe("x");
+    if (parallelInspection.mode === "x" || parallelInspection.mode === "y") {
+      expect(parallelInspection.groupTotal).toBeNull();
+      expect(parallelInspection.groupMemberCount).toBe(5);
+    }
+    stacked.dispose();
+    filled.dispose();
+    dodged.dispose();
+    parallel.dispose();
   });
 });
 
@@ -610,7 +697,7 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
     throw new Error(`no candidate on layer ${layerIndex}`);
   }
 
-  it("does not double-count line+point paints of the same series", () => {
+  it("does not invent a Total for identity-position multi-series line+point", () => {
     const data = [
       { id: "a1", x: 1, y: 3, series: "a" },
       { id: "b1", x: 1, y: 7, series: "b" },
@@ -624,7 +711,8 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
         .spec(),
       { width: 400, height: 300 },
     );
-    // Focus either layer at x=1 — total is 3+7 once, not twice.
+    // Parallel series: no stack/fill layer → Total is null; member count
+    // still collapses line+point of the same series to one contribution.
     for (const layerIndex of [0, 1]) {
       const seed = candidateOnLayer(model, layerIndex);
       // Prefer an x=1 seed when the first layer candidate is elsewhere.
@@ -639,7 +727,7 @@ describe("groupTotal / groupMemberCount multi-layer honesty (#1389)", () => {
       const inspection = axisInspection(model, focus);
       expect(inspection.mode).toBe("x");
       if (inspection.mode === "x" || inspection.mode === "y") {
-        expect(inspection.groupTotal).toBe(10);
+        expect(inspection.groupTotal).toBeNull();
         expect(inspection.groupMemberCount).toBe(2);
       }
     }

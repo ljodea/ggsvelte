@@ -191,10 +191,11 @@ test("gallery exposes every generated preview exactly once", async ({ page }) =>
   // interval-family identity specimens (errorbar/caps, linerange/stems,
   // pointrange/midpoints, crossbar/boxes), sparse mark specimens
   // (jitter/spread, spoke/rays, rug/ticks, step/stairs, qq/cloud,
-  // qq_line/match), etc. Drops to 91 when point/style-scales was retired
-  // (its Minard content is subsumed by path/trajectory, #1460). Drops to
-  // 90 after deleting synthetic point/canvas-scatter and color/continuous.
-  const exampleCount = 90;
+  // qq_line/match), line/labor-cost-of-wheat (Playfair ratio companion).
+  // Drops to 91 when point/style-scales was retired (its Minard content is
+  // subsumed by path/trajectory, #1460). Drops to 90 after deleting synthetic
+  // point/canvas-scatter and color/continuous; +1 labor-cost → 91.
+  const exampleCount = 91;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

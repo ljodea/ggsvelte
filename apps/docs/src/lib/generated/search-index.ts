@@ -21881,13 +21881,31 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Observed counts against a fitted curve"],
   },
   {
+    id: "example:line:labor-cost-of-wheat",
+    kind: "example",
+    title: "Weeks of work for a quarter of wheat",
+    summary:
+      "Playfair's purchasing-power argument as a single series: wheat price divided by a mechanic's weekly wage. A quarter is about eight bushels of grain — lower is cheaper grain in labor terms.",
+    href: "/examples/line/labor-cost-of-wheat",
+    keywords: [
+      "Weeks of work for a quarter of wheat",
+      "Lines & time",
+      "line",
+      "point",
+      "ratio",
+      "theme",
+    ],
+    exact: ["Weeks of work for a quarter of wheat"],
+  },
+  {
     id: "example:line:multi-series",
     kind: "example",
-    title: "Two series on one panel",
-    summary: "Multi-series lines for comparing series that share units.",
+    title: "Wheat price and a mechanic's weekly wage",
+    summary:
+      "Playfair's 1821 levels chart: the price of one quarter of wheat (~8 bushels) and a good mechanic's weekly pay, both in shillings. Same currency, different baskets — he wanted you to eye the ratio, not add the series.",
     href: "/examples/line/multi-series",
     keywords: [
-      "Two series on one panel",
+      "Wheat price and a mechanic's weekly wage",
       "Lines & time",
       "line",
       "point",
@@ -21897,7 +21915,7 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
       "palette",
     ],
-    exact: ["Two series on one panel"],
+    exact: ["Wheat price and a mechanic's weekly wage"],
   },
   {
     id: "example:line:time-axis",

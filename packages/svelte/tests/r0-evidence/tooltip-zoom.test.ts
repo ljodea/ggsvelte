@@ -245,13 +245,14 @@ describe("R0 tooltip-zoom evidence", () => {
     pointEvent(surface, "pointermove", seed.x, seed.y);
     await nextFrame();
     surface.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    // 1000 series rows + 1 stack Total row on multi-member axis groups (#1274).
+    // 1000 series rows, no Total: points use identity position (#1274 gate).
     await expect
       .poll(() => view.container.querySelectorAll(".gg-tooltip-members > dl").length)
-      .toBe(1_001);
+      .toBe(1_000);
     expect(
       view.container.querySelectorAll(".gg-tooltip-members > dl:not(.gg-tooltip-total)"),
     ).toHaveLength(1_000);
+    expect(view.container.querySelector(".gg-tooltip-total")).toBeNull();
     const tooltip = view.container.querySelector<HTMLElement>(".gg-tooltip")!;
     expect(["auto", "scroll"]).toContain(getComputedStyle(tooltip).overflowY);
     const close = tooltip.querySelector<HTMLButtonElement>("button")!;
@@ -262,6 +263,6 @@ describe("R0 tooltip-zoom evidence", () => {
     await expect
       .poll(() => view.container.querySelector("svg.gg-plot")?.getAttribute("height"))
       .toBe("360");
-    expect(view.container.querySelectorAll(".gg-tooltip-members > dl")).toHaveLength(1_001);
+    expect(view.container.querySelectorAll(".gg-tooltip-members > dl")).toHaveLength(1_000);
   }, 180_000); // Linux Firefox hit 90s twice; Chromium/WebKit complete this 1,000-member axe walk in 67s/54s.
 });

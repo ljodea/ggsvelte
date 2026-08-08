@@ -310,12 +310,13 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
       defaultSeed.y,
     );
     await until(() => defaultPlot.container.querySelector(".gg-tooltip") !== null);
-    // 8 series rows + 1 stack Total row (#1274). Member cap is still 8;
-    // overflow uses full group size so "+N more" still appears.
+    // 8 series rows, no Total: geom_point uses identity position, so series
+    // are parallel comparison, not stack composition (#1274 gate).
+    // Overflow uses full group size so "+N more" still appears.
     expect(
       defaultPlot.container.querySelectorAll(".gg-tooltip-members > dl:not(.gg-tooltip-total)"),
     ).toHaveLength(8);
-    expect(defaultPlot.container.querySelector(".gg-tooltip-total")).not.toBeNull();
+    expect(defaultPlot.container.querySelector(".gg-tooltip-total")).toBeNull();
     expect(defaultPlot.container.querySelector(".gg-tooltip-more")?.textContent).toMatch(
       /\+4 more/,
     );
