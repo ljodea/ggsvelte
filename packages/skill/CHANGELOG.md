@@ -1,5 +1,21 @@
 # @ggsvelte/skill
 
+## 0.34.1
+
+### Patch Changes
+
+- b981a3a: # Document GGPlot children in ggplot2 thinking order
+
+  Migration: none — docs and skill convention only. Svelte examples, the agent
+  skill, and the package README now author mark layers first, then scales /
+  coords / facets, then theme / guides / labs, with host-only `<Inspect>` last.
+  Runtime assembly was already bag-based; child interleave does not change the
+  PortableSpec beyond mark z-order and last-wins folds within a grammar family.
+
+- f93cc00: Document Minard-class ring-anchor points in multi-layer hit hygiene guidance.
+
+  Migration: none — skill reference only.
+
 ## 0.34.0
 
 ### Patch Changes
