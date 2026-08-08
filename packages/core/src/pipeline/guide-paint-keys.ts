@@ -74,13 +74,19 @@ function layerContributesPaintValue(
 }
 
 /**
- * Constant shape for a shape-capable geom: aes constant, geom param, or the
- * plot default circle. Mapped shape (field/stat) returns undefined so the
- * shape scale can own the key.
+ * Constant shape for a point-mark geom: aes constant, geom param, or the plot
+ * default circle. Field / after-stat / scaled-constant shape returns undefined
+ * so the shape scale owns the key.
  */
 function layerConstantShape(binding: LayerBinding): PointShape | undefined {
   if (!POINT_MARK_GEOMS.has(binding.layer.geom)) return undefined;
-  if (binding.shape.field !== null || binding.shape.statColumn !== null) return undefined;
+  if (
+    binding.shape.field !== null ||
+    binding.shape.statColumn !== null ||
+    binding.shape.scaledConstant !== null
+  ) {
+    return undefined;
+  }
   if (typeof binding.shape.constant === "string" && POINT_SHAPE_SET.has(binding.shape.constant)) {
     return binding.shape.constant as PointShape;
   }
