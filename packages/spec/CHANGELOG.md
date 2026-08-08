@@ -1,5 +1,13 @@
 # @ggsvelte/spec
 
+## 0.34.1
+
+### Patch Changes
+
+- f93cc00: Document Minard-class ring-anchor points in multi-layer hit hygiene guidance.
+
+  Migration: none — skill reference only.
+
 ## 0.34.0
 
 ## 0.33.0
