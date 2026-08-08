@@ -19,11 +19,13 @@
     minardCityLabels,
     minardColdStations,
     minardStrengthLabels,
-    minardTroopsWithCold,
+    minardTroops,
   } from "./data.js";
 
   // Shared keys: cold strip and map station points both use stationKey so a
   // click on Nov 09 selects the same retreat station on the march map.
+  // Only one inspectable layer per plot may own those keys (engine: unique
+  // PropertyKey per plot). Path uses plain troops without stationKey.
   const interaction = createPlotInteraction<string>();
   const scope = { keys: "minard-cold-station" } as const;
 </script>
@@ -66,10 +68,9 @@
       alpha={0.7}
       inspect={false}
     />
-    <!-- Troops keep stationKey for linking; date is on cold-station points only so
-         path pins do not show an empty date row on Advance / non-station vertices. -->
+    <!-- Plain troops: no stationKey so path inspect stays free of key collisions -->
     <GeomPath
-      data={minardTroopsWithCold}
+      data={minardTroops}
       aes={{
         x: "long",
         y: "lat",
@@ -78,7 +79,7 @@
         linewidth: "survivors",
       }}
     />
-    <!-- Cold stations: pin targets with date + shared selection keys -->
+    <!-- Sole map owner of stationKey: pin targets with date + linked selection -->
     <GeomPoint
       data={minardColdStations}
       aes={{
@@ -104,7 +105,9 @@
     />
   </GGPlot>
 
+  <!-- Plot-level data so path + point share one row namespace for stationKey -->
   <GGPlot
+    data={minardColdStations}
     width={960}
     height={190}
     select={{ type: "point" }}
@@ -116,17 +119,14 @@
     <ScaleXContinuous limits={[23.5, 38.2]} />
     <Labs title="The cold on the road back" x="Longitude east" y="°Réaumur" />
     <GeomPath
-      data={minardColdStations}
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
     />
     <GeomPoint
-      data={minardColdStations}
       aes={{ x: "long", y: "temp", color: { value: "#374151" }, label: "date" }}
       size={2.5}
     />
     <GeomText
-      data={minardColdStations}
       aes={{ x: "long", y: "temp", label: "date", color: { value: "#374151" } }}
       size={10}
       dy={-11}

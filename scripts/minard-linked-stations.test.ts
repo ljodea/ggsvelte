@@ -34,12 +34,20 @@ describe("path/trajectory linked cold stations", () => {
     }
   });
 
-  it("uses minardColdStations for cold-strip points (shared keys with the map)", () => {
-    // Cold chart point layer must use stations so keys match the map points.
-    expect(source).toMatch(/data=\{minardColdStations\}/);
+  it("uses plot-level minardColdStations on the cold strip (shared rows for path+point)", () => {
     const coldPlot = (source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [])[1] ?? "";
-    expect(coldPlot).toContain("data={minardColdStations}");
-    expect(coldPlot).toMatch(/identity=["']stationKey["']/);
+    expect(coldPlot).toMatch(/data=\{minardColdStations\}/);
+    // Layers inherit plot data — no second layer-local copy of stations.
+    expect(coldPlot).not.toMatch(/<GeomPath[\s\S]*data=\{minardColdStations\}/);
+    expect(coldPlot).not.toMatch(/<GeomPoint[\s\S]*data=\{minardColdStations\}/);
+  });
+
+  it("keeps map stationKey only on cold-station points (not the troop path)", () => {
+    const mapPlot = (source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [])[0] ?? "";
+    expect(mapPlot).toMatch(/data=\{minardTroops\}/);
+    expect(mapPlot).toMatch(/data=\{minardColdStations\}/);
+    // Path must not use the date-stamped table (would collide keys with points).
+    expect(mapPlot).not.toContain("minardTroopsWithCold");
   });
 });
 
