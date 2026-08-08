@@ -201,15 +201,34 @@ const AXIS_GUIDE_MODES = new Set(["x", "y", "xy"]);
 
 const VALUE_LABEL_GEOMS = new Set(["text", "label", "sf_text", "sf_label"]);
 
-/** Distribution / interval geoms where freescrolling axis guides rarely help. */
-const DISTRIBUTION_INTERVAL_GEOM_CODES = {
+/**
+ * Always-band distribution geoms (discrete category axis by construction).
+ * Freescrolling x/y/xy guides never help; advisories fire without scale info.
+ */
+const ALWAYS_BAND_GEOM_CODES = {
   violin: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
   boxplot: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+} as const satisfies Record<string, InspectGeomAdvisoryCode>;
+
+/**
+ * Interval geoms that are often discrete-band but also appear on continuous
+ * shared-x series (line + errorbar). Advisories only when the caller confirms
+ * a discrete band axis — otherwise continuous mode="x" is a false positive.
+ */
+const INTERVAL_GEOM_CODES = {
   errorbar: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
   linerange: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
   pointrange: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
   crossbar: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
 } as const satisfies Record<string, InspectGeomAdvisoryCode>;
+
+export type InspectAxisOnDistributionOptions = {
+  /**
+   * When true, also advise on errorbar / linerange / pointrange / crossbar.
+   * Default false: only violin / boxplot (always discrete-band).
+   */
+  readonly discreteBandAxis?: boolean;
+};
 
 /** Host inspect modes accepted by `ggsvelte-render --inspect`. */
 export const INSPECT_INTENT_MODES = ["auto", "exact", "x", "y", "xy"] as const;
@@ -263,23 +282,32 @@ export function inspectAxisOnBarColDiagnostics(
 
 /**
  * Advisories when inspect.mode draws a freescrolling axis guide through
- * violin / boxplot / interval geoms that sit on a discrete band (#1528).
- * Fires for mode x, y, or xy; auto and exact stay silent.
+ * violin / boxplot (always) and interval geoms when the band axis is discrete
+ * (#1528). Fires for mode x, y, or xy; auto and exact stay silent.
+ *
+ * Interval geoms (errorbar / linerange / pointrange / crossbar) require
+ * `discreteBandAxis: true` so continuous shared-x series with a legitimate
+ * mode="x" guide do not get a false positive.
  */
 export function inspectAxisOnDistributionDiagnostics(
   inspectMode: string | null | undefined,
   geoms: readonly string[],
+  options?: InspectAxisOnDistributionOptions,
 ): InspectGeomAdvisory[] {
   if (inspectMode === null || inspectMode === undefined || !AXIS_GUIDE_MODES.has(inspectMode)) {
     return [];
   }
 
+  const includeInterval = options?.discreteBandAxis === true;
   const list: InspectGeomAdvisory[] = [];
   const seen = new Set<string>();
   for (const geom of geoms) {
     if (seen.has(geom)) continue;
-    const code =
-      DISTRIBUTION_INTERVAL_GEOM_CODES[geom as keyof typeof DISTRIBUTION_INTERVAL_GEOM_CODES];
+    const always = ALWAYS_BAND_GEOM_CODES[geom as keyof typeof ALWAYS_BAND_GEOM_CODES];
+    const interval = includeInterval
+      ? INTERVAL_GEOM_CODES[geom as keyof typeof INTERVAL_GEOM_CODES]
+      : undefined;
+    const code = always ?? interval;
     if (code === undefined) continue;
     seen.add(geom);
     list.push({
@@ -319,11 +347,12 @@ export function layerGeomsFromSpecLayers(layers: unknown): readonly string[] {
 export function collectInspectIntentDiagnostics(
   layers: unknown,
   inspectMode: string | null | undefined,
+  options?: InspectAxisOnDistributionOptions,
 ): InspectGeomAdvisory[] {
   const geoms = layerGeomsFromSpecLayers(layers);
   return [
     ...inspectAxisOnBarColDiagnostics(inspectMode, geoms),
-    ...inspectAxisOnDistributionDiagnostics(inspectMode, geoms),
+    ...inspectAxisOnDistributionDiagnostics(inspectMode, geoms, options),
   ];
 }
 
