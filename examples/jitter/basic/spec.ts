@@ -1,11 +1,13 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, guideNone } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
 import { fastfoodMenu } from "./data.js";
 
 export default defineExample(
-  gg(fastfoodMenu, aes({ x: "restaurant", y: "calories" }))
+  gg(fastfoodMenu, aes({ x: "restaurant", y: "calories", color: "restaurant" }))
     .geomJitter({ width: 0.22, height: 0, alpha: 0.65 })
+    .scales({ color: { type: "ordinal", scheme: "observable10" } })
+    .guides({ color: guideNone() })
     .theme("clean")
     .labs({
       title: "Menu calories, spread so items do not stack",

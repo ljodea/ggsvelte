@@ -203,8 +203,8 @@
     },
     "jitter/basic": {
       "filename": "jitter-basic-light.png",
-      "sourceSha256": "6063aafc33e7742cb91a4457a71bede8a05207847dd23d681dc6c4ea5117de82",
-      "pngSha256": "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4"
+      "sourceSha256": "5a336813cdb46179aba34a0a8a0ef15a8f7c3e9a2316ebbd7af80dbd69610551",
+      "pngSha256": "0b1310f46783225a2d08bff4795320e6c1a1827390167cb21b4aaa180c58b990"
     },
     "jitter/spread": {
       "filename": "jitter-spread-light.png",
@@ -293,8 +293,8 @@
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
-      "sourceSha256": "04d7e9b7214b876ef317b72e59a316bc42b58e42a13b0ca659c0dda0e748015b",
-      "pngSha256": "4edccb3b7800a01511a62482d02e5f5263a73b72ed33be62d6ea45d079e1a192"
+      "sourceSha256": "fca112f9d1ce0a5702f89c55e5fd21f0dabbc3fb4d4d52ac98f8eff67e465748",
+      "pngSha256": "476c3ed904bc93c3714023c95fa2c965deb7418ec594e737e473a1fdc66a4fed"
     },
     "point/layer-data-bands": {
       "filename": "point-layer-data-bands-light.png",

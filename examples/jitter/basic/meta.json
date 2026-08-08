@@ -1,6 +1,6 @@
 {
   "title": "Menu calories, spread so items do not stack",
   "description": "Jittered entrée calories by restaurant. Use this when many points share a category and would otherwise cover each other.",
-  "tags": ["jitter", "scatter", "categorical", "overplotting"],
+  "tags": ["jitter", "scatter", "categorical", "overplotting", "color"],
   "docsSection": "Points & scatter"
 }
