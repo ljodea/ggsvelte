@@ -57,7 +57,7 @@ and Windows.
 
 | Capability                                 | ggsvelte   | LayerCake            | Unovis                 | SveltePlot           |
 | ------------------------------------------ | ---------- | -------------------- | ---------------------- | -------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 141 KB  | ✅ 41 KB             | ⚠️ 80 KB               | ✅ 109 KB            |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 141 KB  | ✅ 41 KB             | ✅ 80 KB               | ✅ 109 KB            |
 | **API stability**                          | ⚠️ v0.34.2 | ✅ v10               | ✅ v1.6                | ⚠️ v0.14             |
 | **Headless server-side SVG** (no DOM)      | ✅         | ⚠️ opt-in `ssr` flag | ❌ client `onMount`    | ❌ empty shell       |
 | **Portable JSON spec + schema**            | ✅         | ❌                   | ❌                     | ❌                   |

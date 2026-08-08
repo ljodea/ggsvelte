@@ -44,7 +44,7 @@
       desc: "Min+gzip, 1k scatter app",
       gg: { mark: "partial", note: kb(BENCHMARK_BUNDLE_KB.ggsvelteKb) },
       lc: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.layercakeKb) },
-      uv: { mark: "partial", note: kb(BENCHMARK_BUNDLE_KB.unovisKb) },
+      uv: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.unovisKb) },
       sp: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.svelteplotKb) },
     },
     {
