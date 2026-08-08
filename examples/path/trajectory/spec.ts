@@ -10,6 +10,7 @@ import { defineExample } from "../../define.js";
 import {
   campaignRivers,
   minardCityLabels,
+  minardColdStations,
   minardStrengthLabels,
   minardTroopsWithCold,
 } from "./data.js";
@@ -37,6 +38,14 @@ export default defineExample(
         color: "direction",
         linewidth: "survivors",
       }),
+    })
+    // Quiet cold-station anchors (match the Svelte surface; host uses them for
+    // linked selection rings). Low alpha so they do not read as a second series.
+    .geomPoint({
+      data: minardColdStations,
+      aes: aes({ color: { value: "#25221e" } }),
+      size: 1.75,
+      alpha: 0.4,
     })
     .geomText({
       data: minardCityLabels,
