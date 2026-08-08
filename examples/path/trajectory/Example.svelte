@@ -45,89 +45,94 @@
   let frozenColdRightMargin: number | null = null;
   let frozenForMapRootWidth = -1;
 
-  function alignColdPanelToMap(): void {
-    const host = minardEl;
-    const mapRoot = mapHost?.querySelector(".gg-plot-root");
-    const mapPanel = mapHost?.querySelector(".gg-panel");
-    const coldPanel = coldHost?.querySelector(".gg-panel");
-    const coldRoot = coldHost?.querySelector(".gg-plot-root");
-    if (
-      host === null ||
-      mapRoot === null ||
-      mapRoot === undefined ||
-      mapPanel === null ||
-      mapPanel === undefined ||
-      coldPanel === null ||
-      coldPanel === undefined ||
-      coldRoot === null ||
-      coldRoot === undefined
-    ) {
-      return;
-    }
-    if (
-      mapRoot.dataset["ggReady"] !== "true" ||
-      coldRoot.dataset["ggReady"] !== "true"
-    ) {
-      return;
-    }
-
-    const hostBox = host.getBoundingClientRect();
-    const mapRootBox = mapRoot.getBoundingClientRect();
-    const mapPanelBox = mapPanel.getBoundingClientRect();
-    if (mapPanelBox.width < 8 || mapRootBox.width < 8) return;
-
-    const mapRootWidth = Math.round(mapRootBox.width);
-    // Container width changed: drop the pin, sample chrome at full width next frame.
-    if (frozenForMapRootWidth !== mapRootWidth && coldWidthPx !== null) {
-      frozenColdLeftMargin = null;
-      frozenColdRightMargin = null;
-      frozenForMapRootWidth = mapRootWidth;
-      coldWidthPx = null;
-      coldShiftPx = 0;
-      requestAnimationFrame(alignColdPanelToMap);
-      return;
-    }
-    frozenForMapRootWidth = mapRootWidth;
-
-    // Sample cold left/right chrome once per container width, while the strip
-    // is still full-bleed — never after our pin reflow (that caused right-edge
-    // width oscillation).
-    if (frozenColdLeftMargin === null || frozenColdRightMargin === null) {
-      const coldPanelBox = coldPanel.getBoundingClientRect();
-      const coldRootBox = coldRoot.getBoundingClientRect();
-      if (coldPanelBox.width < 8) return;
-      frozenColdLeftMargin = coldPanelBox.left - coldRootBox.left;
-      frozenColdRightMargin = coldRootBox.right - coldPanelBox.right;
-    }
-
-    const nextWidth = Math.round(
-      mapPanelBox.width + frozenColdLeftMargin + frozenColdRightMargin,
-    );
-    const nextShift = Math.round(
-      mapPanelBox.left - hostBox.left - frozenColdLeftMargin,
-    );
-    if (
-      !Number.isFinite(nextWidth) ||
-      !Number.isFinite(nextShift) ||
-      nextWidth < 32
-    ) {
-      return;
-    }
-    if (coldWidthPx === nextWidth && coldShiftPx === nextShift) return;
-    coldWidthPx = nextWidth;
-    coldShiftPx = nextShift;
-  }
-
   $effect(() => {
     const map = mapHost;
     const cold = coldHost;
     if (map === null || cold === null) return;
 
     let raf = 0;
+    let alive = true;
     const schedule = (): void => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(alignColdPanelToMap);
+      raf = requestAnimationFrame(() => {
+        if (!alive) return;
+        alignColdPanelToMap(schedule);
+      });
     };
+
+    function alignColdPanelToMap(reschedule: () => void): void {
+      const host = minardEl;
+      const mapRoot = mapHost?.querySelector(".gg-plot-root");
+      const mapPanel = mapHost?.querySelector(".gg-panel");
+      const coldPanel = coldHost?.querySelector(".gg-panel");
+      const coldRoot = coldHost?.querySelector(".gg-plot-root");
+      if (
+        host === null ||
+        mapRoot === null ||
+        mapRoot === undefined ||
+        mapPanel === null ||
+        mapPanel === undefined ||
+        coldPanel === null ||
+        coldPanel === undefined ||
+        coldRoot === null ||
+        coldRoot === undefined
+      ) {
+        return;
+      }
+      if (
+        mapRoot.dataset["ggReady"] !== "true" ||
+        coldRoot.dataset["ggReady"] !== "true"
+      ) {
+        return;
+      }
+
+      const hostBox = host.getBoundingClientRect();
+      const mapRootBox = mapRoot.getBoundingClientRect();
+      const mapPanelBox = mapPanel.getBoundingClientRect();
+      if (mapPanelBox.width < 8 || mapRootBox.width < 8) return;
+
+      const mapRootWidth = Math.round(mapRootBox.width);
+      // Container width changed: drop the pin, sample chrome at full width next frame.
+      if (frozenForMapRootWidth !== mapRootWidth && coldWidthPx !== null) {
+        frozenColdLeftMargin = null;
+        frozenColdRightMargin = null;
+        frozenForMapRootWidth = mapRootWidth;
+        coldWidthPx = null;
+        coldShiftPx = 0;
+        // Tracked via schedule() so effect cleanup cancels this rAF on unmount.
+        reschedule();
+        return;
+      }
+      frozenForMapRootWidth = mapRootWidth;
+
+      // Sample cold left/right chrome once per container width, while the strip
+      // is still full-bleed — never after our pin reflow (that caused right-edge
+      // width oscillation).
+      if (frozenColdLeftMargin === null || frozenColdRightMargin === null) {
+        const coldPanelBox = coldPanel.getBoundingClientRect();
+        const coldRootBox = coldRoot.getBoundingClientRect();
+        if (coldPanelBox.width < 8) return;
+        frozenColdLeftMargin = coldPanelBox.left - coldRootBox.left;
+        frozenColdRightMargin = coldRootBox.right - coldPanelBox.right;
+      }
+
+      const nextWidth = Math.round(
+        mapPanelBox.width + frozenColdLeftMargin + frozenColdRightMargin,
+      );
+      const nextShift = Math.round(
+        mapPanelBox.left - hostBox.left - frozenColdLeftMargin,
+      );
+      if (
+        !Number.isFinite(nextWidth) ||
+        !Number.isFinite(nextShift) ||
+        nextWidth < 32
+      ) {
+        return;
+      }
+      if (coldWidthPx === nextWidth && coldShiftPx === nextShift) return;
+      coldWidthPx = nextWidth;
+      coldShiftPx = nextShift;
+    }
 
     // Map size / letterbox is the source of truth. Do not observe cold: writing
     // coldWidthPx/coldShiftPx resizes cold and would re-enter align forever.
@@ -151,6 +156,7 @@
 
     schedule();
     return () => {
+      alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
       mo.disconnect();
