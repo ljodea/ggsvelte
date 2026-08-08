@@ -411,8 +411,9 @@ describe("skill teaches inspect mode selection and hit hygiene (#1530)", () => {
     expect(section!).toMatch(/inspect=\{false\}/);
     expect(section!).toMatch(/Minard/);
     expect(section!).toMatch(/path\/trajectory/);
-    expect(section!).toMatch(/one primary[\s*]+inspectable mark family/);
+    expect(section!).toMatch(/one primary[\s*]+story family/);
     expect(section!).toMatch(/troop path/);
+    expect(section!).toMatch(/ring-anchor|ring anchors/);
     expect(section!).toMatch(/summary/i);
   });
 
