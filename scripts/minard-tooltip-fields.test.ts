@@ -17,7 +17,7 @@ const TOOLTIP = join(ROOT, "examples/path/trajectory/tooltip.ts");
 
 describe("mapMarchTooltipFields", () => {
   it("shows survivors only (dates live on the cold strip, not the path)", () => {
-    expect(mapMarchTooltipFields({ survivors: 340000, date: "Oct 18" })).toEqual([
+    expect(mapMarchTooltipFields({ survivors: 340000 })).toEqual([
       { label: "Survivors", value: "340,000" },
     ]);
     expect(mapMarchTooltipFields({ survivors: 37000 })).toEqual([
@@ -25,20 +25,9 @@ describe("mapMarchTooltipFields", () => {
     ]);
   });
 
-  it("never includes direction, long, lat, or date", () => {
-    const fields = mapMarchTooltipFields({
-      survivors: 20000,
-      date: "Nov 28",
-      direction: "Retreat",
-      long: 28.5,
-      lat: 54.2,
-    });
-    const labels = fields.map((f) => f.label.toLowerCase());
-    expect(labels).toEqual(["survivors"]);
-    expect(labels).not.toContain("direction");
-    expect(labels).not.toContain("date");
-    expect(labels).not.toContain("long");
-    expect(labels).not.toContain("lat");
+  it("never invents fields beyond survivors", () => {
+    const fields = mapMarchTooltipFields({ survivors: 20000 });
+    expect(fields.map((f) => f.label)).toEqual(["Survivors"]);
   });
 });
 

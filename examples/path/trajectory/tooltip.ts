@@ -1,10 +1,9 @@
 /**
  * Field lists for Minard Inspect custom tooltips.
  *
- * Default tooltips dump every mapped aesthetic (direction, long, lat, empty
- * date). The figurative map only needs survivors; the cold strip only needs
- * temperature + date. Empty dates are omitted so blank Minard readings never
- * show a ghost Date row.
+ * Default tooltips dump every mapped aesthetic. The figurative map only needs
+ * survivors; the cold strip only needs temperature + date. Empty dates are
+ * omitted so blank Minard readings never show a ghost Date row.
  *
  * Map and strip are independent series (9 cold readings vs many path vertices
  * in HistData). Tooltips do not invent a join or drive linked selection.
@@ -15,9 +14,6 @@ export type TooltipField = { readonly label: string; readonly value: string };
 /** Narrow row shape used by map-march custom content. */
 export type MarchTooltipRow = {
   readonly survivors?: unknown;
-  readonly direction?: unknown;
-  readonly long?: unknown;
-  readonly lat?: unknown;
 };
 
 /** Narrow row shape used by cold-strip custom content. */
