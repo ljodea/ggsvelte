@@ -22013,7 +22013,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Minard's march on Moscow",
     summary:
-      "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
+      "The full 1869 flow map with the cold strip linked by station: select a retreat temperature reading on either chart and the same station highlights on the other. Band width is surviving strength after Minard.",
     href: "/examples/path/trajectory",
     keywords: [
       "Minard's march on Moscow",
@@ -22024,6 +22024,9 @@ export const DOCS_SEARCH_INDEX = [
       "annotation",
       "text",
       "data-order",
+      "interaction",
+      "linked-views",
+      "inspect",
     ],
     exact: ["Minard's march on Moscow"],
   },

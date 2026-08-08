@@ -13279,7 +13279,7 @@ export const DOCS_ROUTES = [
     path: "/examples/path/trajectory",
     title: "Minard's march on Moscow — ggsvelte gallery",
     description:
-      "The full 1869 flow map: band width is the army's surviving strength over the rivers it crossed, with the towns Minard named and the cold he plotted beneath the retreat.",
+      "The full 1869 flow map with the cold strip linked by station: select a retreat temperature reading on either chart and the same station highlights on the other. Band width is surviving strength after Minard.",
     canonicalPath: "/examples/path/trajectory",
     kind: "page",
     index: true,
