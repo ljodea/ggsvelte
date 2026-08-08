@@ -101,11 +101,9 @@ describe("example interaction API (v0.20)", () => {
    * identity is enough for GuideLegend focus). README snippets are also gated
    * by scripts/readme-showcase.test.ts; this covers the corpus itself.
    *
-   * Allowlist: path/trajectory is a dual-panel Minard teaching surface — the
-   * cold strip exists to date the retreat, so linked station keys belong there.
+   * Minard's path/trajectory is inspect-only figurative map art: dual-tool
+   * linked select chrome does not belong there (see minard-rectify tests).
    */
-  const LINKED_VIEW_ALLOWLIST = new Set(["path/trajectory"]);
-
   it("keeps createPlotInteraction out of non-interaction gallery examples", () => {
     const offenders = files
       .map((path) => ({
@@ -113,7 +111,6 @@ describe("example interaction API (v0.20)", () => {
         source: readFileSync(path, "utf8"),
       }))
       .filter(({ id }) => !id.startsWith("interaction/"))
-      .filter(({ id }) => !LINKED_VIEW_ALLOWLIST.has(id))
       .filter(
         ({ source }) =>
           source.includes("createPlotInteraction") ||
@@ -123,10 +120,6 @@ describe("example interaction API (v0.20)", () => {
       .map(({ id }) => id);
 
     expect(offenders).toEqual([]);
-  });
-
-  it("path/trajectory is the only non-interaction linked-view allowlist entry", () => {
-    expect([...LINKED_VIEW_ALLOWLIST]).toEqual(["path/trajectory"]);
   });
 
   /**

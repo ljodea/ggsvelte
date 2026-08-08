@@ -16,8 +16,9 @@
  * Minard recorded; the fifth reading has none in the source and is blank.
  *
  * Cold stations: `buildColdStations` joins each temperature reading to the
- * nearest Column-1 retreat vertex by longitude, producing `minardColdStations`
- * with a shared `stationKey` for linked map/strip selection.
+ * nearest Column-1 retreat vertex by longitude; `attachColdDatesToTroops`
+ * stamps those dates onto the march path so Inspect pins can show Minard's
+ * date on cold-aligned retreat vertices.
  *
  * Rivers: the Niemen, Vilija, Berezina, Western Dvina, Dnieper and Moskva,
  * simplified to ~55 points each from OpenStreetMap relations (Niemen,
@@ -120,10 +121,10 @@ export const minardCold: { long: number; temp: number; date: string }[] = [
 ];
 
 /**
- * One cold reading joined to the nearest Column-1 retreat vertex so the map
- * and temperature strip share a durable `stationKey` for linked selection.
- * Minard aligned the cold strip under the retreat by longitude; troop longs
- * do not always match exactly (e.g. Nov 09 at 33.2° sits nearest 33.3°).
+ * One cold reading joined to the nearest Column-1 retreat vertex by longitude.
+ * Minard aligned the cold strip under the retreat; troop longs do not always
+ * match exactly (e.g. Nov 09 at 33.2° sits nearest 33.3°). Used to stamp dates
+ * onto the march path for Inspect pins.
  */
 export type MinardColdStation = {
   stationKey: string;
@@ -147,7 +148,7 @@ type TroopVertex = {
 /**
  * Join each cold reading to the nearest Column-1 retreat vertex by longitude.
  * Advance and side columns are ignored: the temperature series is retreat-only.
- * stationKey is String(cold.long) so map and strip share durable identity.
+ * stationKey is String(cold.long) for a stable cold-reading id in the join.
  */
 export function buildColdStations(
   cold: readonly ColdReading[],
@@ -185,8 +186,9 @@ export const minardColdStations: MinardColdStation[] = buildColdStations(minardC
 
 /**
  * Troop vertex with optional cold-station fields for map Inspect tooltips.
- * `date` / `stationKey` are set only on the Column-1 retreat vertex nearest
- * each cold reading; other vertices keep empty strings.
+ * `date` is set only on the Column-1 retreat vertex nearest each cold reading;
+ * other vertices keep empty strings (blank date rows may still appear in the
+ * default pin — mapped fields always paint).
  */
 export type MinardTroopWithCold = TroopVertex & {
   date: string;
