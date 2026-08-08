@@ -194,7 +194,8 @@ export function renderAxisTitles(scene: Scene): string {
     // Mirror x-axis title placement: offset left of the panel grid past the
     // y tick-label band (default 32; scene may raise titleOffset for wide labels).
     // Hardcoding SVG x=12 left the title behind when the left margin grew (#1570).
-    const yTitleX = gridLeft - (scene.axes.y.titleOffset ?? 32);
+    // Clamp at 0 so a large offset cannot push the title off the left edge.
+    const yTitleX = Math.max(0, gridLeft - (scene.axes.y.titleOffset ?? 32));
     parts.push(
       `<text class="gg-axis-title" transform="translate(${px(yTitleX)},${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(scene.axes.y.titleSize ?? scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
     );

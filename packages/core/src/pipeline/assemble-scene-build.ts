@@ -109,6 +109,7 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     vAxisTextSize: vGuide.theme?.labelSize ?? axisTextSize,
     tickChromePx,
     yTickChromePx,
+    yLabelsVisible: vGuide.showLabels,
     degraded,
     ...(hMinorBreaks !== undefined && { hMinorBreaks }),
     ...(vMinorBreaks !== undefined && { vMinorBreaks }),

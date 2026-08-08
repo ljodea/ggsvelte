@@ -115,6 +115,11 @@ export function assembleScenePanels(input: {
   tickChromePx?: number;
   /** Tick chrome left of the y axis (theme tickLength + label gap); renderer-matched. */
   yTickChromePx?: number;
+  /**
+   * Whether y tick labels will be drawn (guide + theme). When false, skip y
+   * titleOffset from label widths so hidden strings cannot inflate the offset.
+   */
+  yLabelsVisible?: boolean;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
   degraded?: boolean;
@@ -243,20 +248,26 @@ export function assembleScenePanels(input: {
   };
 
   // Wide y tick labels need the y-axis title pushed left of the label band so
-  // gridLeft - titleOffset clears them (mirrors x band-titleOffset; #1570).
+  // gridLeft - titleOffset clears them (mirrors x band-titleOffset max-across
+  // panels; #1570). Measure every panel that draws a y axis — free_y facets can
+  // share one left margin while tick strings differ per row.
   const yTicks = firstY?.axisY ?? [];
+  const yLabelsVisible = input.yLabelsVisible !== false;
   let yLabelBandPx = 0;
-  if (vTitle !== "" && yTicks.length > 0) {
+  if (vTitle !== "" && yLabelsVisible) {
     const fontSize = input.vAxisTextSize ?? input.axisTextSize;
-    for (const tick of yTicks) {
-      if (tick.label === "" || tick.showLabel === false) continue;
-      const size = tick.labelSize ?? fontSize;
-      if (tick.lines !== undefined && tick.lines.length > 0) {
-        for (const line of tick.lines) {
-          yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(line, size));
+    for (const panel of scenePanels) {
+      if (panel.axisY === null) continue;
+      for (const tick of panel.axisY) {
+        if (tick.label === "" || tick.showLabel === false) continue;
+        const size = tick.labelSize ?? fontSize;
+        if (tick.lines !== undefined && tick.lines.length > 0) {
+          for (const line of tick.lines) {
+            yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(line, size));
+          }
+        } else {
+          yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(tick.label, size));
         }
-      } else {
-        yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(tick.label, size));
       }
     }
   }

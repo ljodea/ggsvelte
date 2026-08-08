@@ -113,4 +113,29 @@ describe("y-axis title placement (#1570)", () => {
     expect(titleX).toBeLessThan(panelX);
     expect(titleX).toBeGreaterThanOrEqual(0);
   });
+
+  it("does not inflate titleOffset when y tick labels are hidden", () => {
+    const rows = Array.from({ length: 10 }, (_, i) => ({
+      x: i,
+      y: (i + 1) * 1_000_000,
+    }));
+    const spec: SpecInput = {
+      data: { values: rows },
+      layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+      labs: { y: "Population" },
+      theme: "classic",
+      guides: { y: { type: "axis", showLabels: false } },
+    };
+    const svg = renderToSVGString(spec, { width: 640, height: 400 });
+    const panelX = Number(svg.match(/class="gg-panel"[^>]*transform="translate\(([\d.]+)/)?.[1]);
+    const titleX = yTitleTranslateX(svg);
+    // Labels hidden → default 32 (or clamp), not the wide-label band.
+    expect(panelX - titleX).toBeLessThanOrEqual(32);
+    expect(titleX).toBeGreaterThanOrEqual(0);
+  });
+
+  it("clamps a synthetic titleOffset that would go past the left edge", () => {
+    const html = renderAxisTitles(sceneWithYTitle(40, 80));
+    expect(yTitleTranslateX(html)).toBe(0);
+  });
 });
