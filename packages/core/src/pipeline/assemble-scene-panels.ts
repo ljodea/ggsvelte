@@ -113,6 +113,13 @@ export function assembleScenePanels(input: {
   vAxisTextSize?: number;
   /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
   tickChromePx?: number;
+  /** Tick chrome left of the y axis (theme tickLength + label gap); renderer-matched. */
+  yTickChromePx?: number;
+  /**
+   * Whether y tick labels will be drawn (guide + theme). When false, skip y
+   * titleOffset from label widths so hidden strings cannot inflate the offset.
+   */
+  yLabelsVisible?: boolean;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
   degraded?: boolean;
@@ -219,7 +226,10 @@ export function assembleScenePanels(input: {
   // Tick chrome from the active theme (renderer-matched), not a fixed default, so
   // a custom longer-tick theme still pushes the x title below the label band.
   const tickChromePx = input.tickChromePx ?? 9; // tickLength(6) + gap(3) defaults
+  const yTickChromePx = input.yTickChromePx ?? tickChromePx;
   const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
+  // Renderer default title offset (x and y) when scene leaves titleOffset unset.
+  const DEFAULT_TITLE_OFFSET_PX = 32;
   const bandTitleOffset = placements.reduce((max, placement) => {
     const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
     if (
@@ -236,7 +246,33 @@ export function assembleScenePanels(input: {
     title: hTitle,
     ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
   };
-  const yAxis: SceneAxis = { ticks: firstY?.axisY ?? [], title: vTitle };
+
+  // Wide y tick labels need the y-axis title pushed left of the label band so
+  // gridLeft - titleOffset clears them (mirrors x band-titleOffset max-across
+  // panels; #1570). Measure every panel that draws a y axis — free_y facets can
+  // share one left margin while tick strings differ per row.
+  const yTicks = firstY?.axisY ?? [];
+  const yLabelsVisible = input.yLabelsVisible !== false;
+  let yLabelBandPx = 0;
+  if (vTitle !== "" && yLabelsVisible) {
+    const fontSize = input.vAxisTextSize ?? input.axisTextSize;
+    const yAxisTicks = scenePanels.flatMap((panel) => panel.axisY ?? []);
+    for (const tick of yAxisTicks) {
+      if (tick.label === "" || tick.showLabel === false) continue;
+      const size = tick.labelSize ?? fontSize;
+      const fragments =
+        tick.lines !== undefined && tick.lines.length > 0 ? tick.lines : [tick.label];
+      for (const fragment of fragments) {
+        yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(fragment, size));
+      }
+    }
+  }
+  const yTitleClearance = yLabelBandPx > 0 ? yTickChromePx + yLabelBandPx + TITLE_GAP_PX : 0;
+  const yAxis: SceneAxis = {
+    ticks: yTicks,
+    title: vTitle,
+    ...(yTitleClearance > DEFAULT_TITLE_OFFSET_PX && { titleOffset: yTitleClearance }),
+  };
 
   return { scenePanels, xAxis, yAxis };
 }

@@ -402,7 +402,7 @@
   {#if drawChrome && scene.axes.y.title !== ""}
     <text
       class="gg-axis-title"
-      transform={`translate(12,${(gridBounds.top + gridBounds.bottom) / 2}) rotate(-90)`}
+      transform={`translate(${Math.max((scene.axes.y.titleSize ?? scene.theme.axisTitleSize) / 2, gridBounds.left - (scene.axes.y.titleOffset ?? 32))},${(gridBounds.top + gridBounds.bottom) / 2}) rotate(-90)`}
       text-anchor="middle"
       fill={ink}
       font-size={scene.axes.y.titleSize ?? scene.theme.axisTitleSize}
