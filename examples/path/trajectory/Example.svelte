@@ -65,8 +65,8 @@
       return;
     }
     if (
-      mapRoot.getAttribute("data-gg-ready") !== "true" ||
-      coldRoot.getAttribute("data-gg-ready") !== "true"
+      mapRoot.dataset["ggReady"] !== "true" ||
+      coldRoot.dataset["ggReady"] !== "true"
     ) {
       return;
     }
