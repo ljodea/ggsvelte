@@ -11,7 +11,7 @@
  * merge path in prepareLegendInputs can supply it. Area/bar/line geoms stay
  * on square/line defaults (not shape-capable).
  */
-import { POINT_SHAPE_NAMES, STYLE_AESTHETIC_GEOMS } from "@ggsvelte/spec";
+import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
 import type { DiscreteLegendInput } from "../legend.js";
 import type { PointShape } from "../scales/style.js";
@@ -22,7 +22,20 @@ import type { LayerBinding } from "./types.js";
 type LegendKeyStyle = ReturnType<NonNullable<DiscreteLegendInput["keyOf"]>>;
 
 const POINT_SHAPE_SET = new Set<string>(POINT_SHAPE_NAMES);
-const SHAPE_GEOMS = new Set<string>(STYLE_AESTHETIC_GEOMS.shape);
+/**
+ * Geoms that always emit point marks (PointsBatch). Not the same as
+ * STYLE_AESTHETIC_GEOMS.shape, which lists geoms that *accept* a shape aesthetic
+ * (includes `sf` for points only, and `blank` which draws nothing). Choropleth
+ * sf / map layers must keep square paint keys.
+ */
+const POINT_MARK_GEOMS = new Set<string>([
+  "point",
+  "jitter",
+  "count",
+  "dotplot",
+  "qq",
+  "pointrange",
+]);
 
 function isPaintScale(scale: string): scale is "color" | "fill" {
   return scale === "color" || scale === "fill";
@@ -66,7 +79,7 @@ function layerContributesPaintValue(
  * shape scale can own the key.
  */
 function layerConstantShape(binding: LayerBinding): PointShape | undefined {
-  if (!SHAPE_GEOMS.has(binding.layer.geom)) return undefined;
+  if (!POINT_MARK_GEOMS.has(binding.layer.geom)) return undefined;
   if (binding.shape.field !== null || binding.shape.statColumn !== null) return undefined;
   if (typeof binding.shape.constant === "string" && POINT_SHAPE_SET.has(binding.shape.constant)) {
     return binding.shape.constant as PointShape;
