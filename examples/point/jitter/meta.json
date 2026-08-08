@@ -1,6 +1,6 @@
 {
   "title": "Calories by restaurant, with jitter",
   "description": "Fast-food menu calories by restaurant. Position jitter spreads marks that would otherwise stack on the same category.",
-  "tags": ["point", "jitter", "position", "scatter", "categorical"],
+  "tags": ["point", "jitter", "position", "scatter", "categorical", "color"],
   "docsSection": "Points & scatter"
 }

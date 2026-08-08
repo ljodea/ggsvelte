@@ -252,7 +252,7 @@ export const GALLERY_PREVIEWS = [
     id: "jitter/basic",
     filename: "jitter-basic-light.png",
     path: "/previews/jitter-basic-light.png",
-    sha256: "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4",
+    sha256: "0b1310f46783225a2d08bff4795320e6c1a1827390167cb21b4aaa180c58b990",
   },
   {
     id: "jitter/spread",
@@ -360,7 +360,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",
-    sha256: "4edccb3b7800a01511a62482d02e5f5263a73b72ed33be62d6ea45d079e1a192",
+    sha256: "476c3ed904bc93c3714023c95fa2c965deb7418ec594e737e473a1fdc66a4fed",
   },
   {
     id: "point/layer-data-bands",
