@@ -78,7 +78,7 @@ describe("meta validation", () => {
     expect(src).toContain("fullWidth: true");
   });
 
-  test("rejects incomplete interaction guidance and unsafe reference links", () => {
+  test("accepts layout-only journey and rejects empty modality strings / unsafe links", () => {
     const base = {
       title: "T",
       description: "D",
@@ -86,10 +86,14 @@ describe("meta validation", () => {
       docsSection: "S",
     };
     expect(
-      validateMeta({ ...base, journey: { pointer: "P", keyboard: "K", touch: "T" } }, "x/y").join(
-        "\n",
-      ),
-    ).toContain("references");
+      validateMeta({ ...base, journey: { svelteFirst: true, fullWidth: true } }, "x/y"),
+    ).toEqual([]);
+    expect(
+      validateMeta(
+        { ...base, journey: { pointer: " ", svelteFirst: true, fullWidth: true } },
+        "x/y",
+      ).join("\n"),
+    ).toContain("journey.pointer");
     expect(
       validateMeta(
         {

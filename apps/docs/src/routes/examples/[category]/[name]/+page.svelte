@@ -45,22 +45,28 @@
     {/if}
   </header>
 
-  {#if data.entry.journey}
+  {#if data.entry.journey?.pointer || data.entry.journey?.keyboard || data.entry.journey?.touch}
     <section class="example-prose try-it" aria-labelledby="try-it-heading">
       <h2 id="try-it-heading">Interaction</h2>
       <dl>
-        <div>
-          <dt>Pointer</dt>
-          <dd>{data.entry.journey.pointer}</dd>
-        </div>
-        <div>
-          <dt>Keyboard</dt>
-          <dd>{data.entry.journey.keyboard}</dd>
-        </div>
-        <div>
-          <dt>Touch</dt>
-          <dd>{data.entry.journey.touch}</dd>
-        </div>
+        {#if data.entry.journey.pointer}
+          <div>
+            <dt>Pointer</dt>
+            <dd>{data.entry.journey.pointer}</dd>
+          </div>
+        {/if}
+        {#if data.entry.journey.keyboard}
+          <div>
+            <dt>Keyboard</dt>
+            <dd>{data.entry.journey.keyboard}</dd>
+          </div>
+        {/if}
+        {#if data.entry.journey.touch}
+          <div>
+            <dt>Touch</dt>
+            <dd>{data.entry.journey.touch}</dd>
+          </div>
+        {/if}
       </dl>
     </section>
   {/if}
@@ -120,7 +126,7 @@
         <dd><p class="tags">{data.entry.tags.join(" · ")}</p></dd>
       </div>
     </dl>
-    {#if data.entry.journey}
+    {#if data.entry.journey?.references && data.entry.journey.references.length > 0}
       <nav class="references" aria-label="Related interaction reference">
         <span>Reference:</span>
         {#each data.entry.journey.references as reference, index (reference.href)}

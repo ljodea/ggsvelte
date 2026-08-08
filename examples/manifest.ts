@@ -11,10 +11,10 @@ export interface ExampleReference {
 }
 
 export interface ExampleJourney {
-  readonly pointer: string;
-  readonly keyboard: string;
-  readonly touch: string;
-  readonly references: readonly ExampleReference[];
+  readonly pointer?: string;
+  readonly keyboard?: string;
+  readonly touch?: string;
+  readonly references?: readonly ExampleReference[];
   readonly svelteFirst: boolean;
   readonly fullWidth: boolean;
 }
@@ -639,19 +639,13 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     id: "path/trajectory",
     category: "path",
     name: "trajectory",
-    title: "Minard's march on Moscow",
-    description: "The full 1869 flow map with the cold strip under the retreat. Band width is surviving strength after Minard. Pin the march for survivors; pin a cold reading for temperature and Minard's date. Map and strip share longitude; they are independent series (nine cold readings, many path vertices).",
+    title: "Napoleon's march on Moscow, by Minard",
+    description: "Path map of army strength with a temperature strip.",
     tags: ["path", "map", "linewidth", "annotation", "text", "data-order", "inspect"],
     docsSection: "Maps & polygons",
     vrHeight: 740,
     vrWidth: 960,
     journey: {
-      pointer: "Hover or pin the march band for survivors. Pin a cold reading below for temperature and date. The strip sits under the retreat by shared longitude; path bends and thermometer marks are separate series.",
-      keyboard: "Tab either plot, arrow the path or cold readings, and pin as usual for Inspect charts.",
-      touch: "Tap the march band or a cold reading to pin.",
-      references: [
-        { label: "Interaction guide", href: "/guide/interactions" },
-      ],
       svelteFirst: true,
       fullWidth: true,
     },
