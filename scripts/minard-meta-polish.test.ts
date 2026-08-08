@@ -34,6 +34,16 @@ describe("path/trajectory meta polish", () => {
 describe("path/trajectory cold subtitle", () => {
   it("tells readers the cold strip drives the map selection", () => {
     const source = readFileSync(EXAMPLE, "utf8");
-    expect(source).toMatch(/Click a reading to select the same station on the march map/);
+    expect(source).toMatch(/Select a reading to highlight the same station on the march map/);
+  });
+
+  it("defaults both plots to the point-select tool so click selects, not pins", () => {
+    const source = readFileSync(EXAMPLE, "utf8");
+    const plots = source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [];
+    expect(plots.length).toBe(2);
+    for (const plot of plots) {
+      expect(plot).toMatch(/tool=["']point["']/);
+      expect(plot).toMatch(/select=\{\{\s*type:\s*["']point["']/);
+    }
   });
 });

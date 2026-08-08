@@ -640,14 +640,14 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "path",
     name: "trajectory",
     title: "Minard's march on Moscow",
-    description: "The full 1869 flow map with the cold strip linked by station: pin a retreat date on either chart and the same station is selected on the other. Band width is surviving strength after Minard.",
+    description: "The full 1869 flow map with the cold strip linked by station: select a retreat temperature reading on either chart and the same station highlights on the other. Band width is surviving strength after Minard.",
     tags: ["path", "map", "linewidth", "annotation", "text", "data-order", "interaction", "linked-views", "inspect"],
     docsSection: "Maps & polygons",
     vrHeight: 740,
     vrWidth: 960,
     journey: {
-      pointer: "Pin a cold station on the map or click a reading on the temperature strip — shared stationKey selection links both panels. Path pins still show survivors and direction.",
-      keyboard: "Tab into either plot, arrow to a cold station, and press Enter or Space to select. The other chart shows the same station key.",
+      pointer: "With Select point active (the default here), click a cold station on the map or a temperature reading on the strip — the other chart selects the same station. Use Inspect from the tool rail for tooltips and pin.",
+      keyboard: "Tab into either plot, arrow to a cold station, and press Enter or Space to select it. The other chart shows the same station.",
       touch: "Tap a cold station on the map or strip; selection rings update on both charts.",
       references: [
         { label: "Interaction guide and controller reference", href: "/guide/interactions" },

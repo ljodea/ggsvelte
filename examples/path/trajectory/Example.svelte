@@ -35,6 +35,7 @@
     width={960}
     height={520}
     select={{ type: "point" }}
+    tool="point"
     {interaction}
     interactionScope={scope}
   >
@@ -111,6 +112,7 @@
     width={960}
     height={190}
     select={{ type: "point" }}
+    tool="point"
     {interaction}
     interactionScope={scope}
   >
@@ -119,7 +121,7 @@
     <ScaleXContinuous limits={[23.5, 38.2]} />
     <Labs
       title="The cold on the road back"
-      subtitle="Click a reading to select the same station on the march map"
+      subtitle="Select a reading to highlight the same station on the march map"
       x="Longitude east"
       y="°Réaumur"
     />
