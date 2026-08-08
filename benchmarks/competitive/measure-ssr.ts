@@ -31,17 +31,18 @@ const outRoot = path.join(root, "results", "ssr");
 if (existsSync(outRoot)) rmSync(outRoot, { recursive: true });
 mkdirSync(outRoot, { recursive: true });
 
-type SsrLibId = "ggsvelte" | "svelteplot" | "layercake";
+type SsrLibId = "ggsvelte" | "svelteplot" | "layercake" | "unovis";
 type SsrScenario = "scatter-color" | "line-multiseries";
 
 const LIBS: {
   id: SsrLibId;
   label: string;
   note: string;
-  /** SveltePlot renders mark layers from client-side $effect plot state, so
-   * its server render is documentedly an empty shell: record ssrCapable:false
-   * instead of failing. Any OTHER lib rendering an empty shell still fails
-   * loudly — an unexpected regression must not become a silent "win". */
+  /** SveltePlot / Unovis paint marks from client-side lifecycle ($effect /
+   * onMount), so the server render is documentedly an empty shell: record
+   * ssrCapable:false instead of failing. Any OTHER lib rendering an empty
+   * shell still fails loudly — an unexpected regression must not become a
+   * silent "win". */
   expectEmptyShell?: boolean;
 }[] = [
   {
@@ -59,6 +60,12 @@ const LIBS: {
     id: "layercake",
     label: "LayerCake (SSR)",
     note: "svelte/server render() of components/layercake-ssr (browser fixtures + documented ssr prop)",
+  },
+  {
+    id: "unovis",
+    label: "Unovis (SSR)",
+    note: "svelte/server render() of components/unovis fixtures; marks paint in onMount (client-only)",
+    expectEmptyShell: true,
   },
 ];
 

@@ -765,7 +765,8 @@
 
 .benchmarks table {
   width: 100%;
-  min-width: 34rem;
+  /* Four peer columns (ggsvelte + SveltePlot + LayerCake + Unovis). */
+  min-width: 40rem;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.88rem;
@@ -776,7 +777,7 @@
 }
 
 .benchmarks .bench-col-lib {
-  width: 16%;
+  width: 14%;
 }
 
 .benchmarks th,

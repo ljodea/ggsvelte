@@ -92,12 +92,13 @@ const server = await createServer({
   optimizeDeps: {
     // Svelte component libs must share one svelte runtime with the fixture
     // components (context + flushSync break across duplicated runtimes).
-    exclude: ["svelte", "svelteplot", "layercake"],
+    exclude: ["svelte", "svelteplot", "layercake", "@unovis/svelte"],
     include: [
       "@ggsvelte/core",
       "@ggsvelte/core/render",
       "@ggsvelte/core/dom",
       "@ggsvelte/spec/portable",
+      "@unovis/ts",
       "d3-scale",
       "d3-selection",
       "d3-array",

@@ -16,6 +16,8 @@
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
+    "@unovis/svelte": "1.6.7",
+    "@unovis/ts": "1.6.7",
     "chart.js": "^4.5.1",
     "d3-array": "^3.2.4",
     "d3-axis": "^3.0.0",

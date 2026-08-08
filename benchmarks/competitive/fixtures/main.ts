@@ -26,6 +26,7 @@ import { mountGgsvelteCanvas } from "../adapters/ggsvelte-canvas";
 import { mountGgsvelteSvg } from "../adapters/ggsvelte-svg";
 import { mountLayerCake, mountLayerCakeCanvas } from "../adapters/layercake";
 import { mountSveltePlot } from "../adapters/svelteplot";
+import { mountUnovis } from "../adapters/unovis";
 import { mountUplot } from "../adapters/uplot";
 import {
   CASES,
@@ -171,6 +172,10 @@ function mountSync(
     }
     case "layercake-canvas": {
       const r = mountLayerCakeCanvas(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "unovis": {
+      const r = mountUnovis(scenario, data, root);
       return { markHint: r.markHint, handle: r.handle };
     }
     default:
