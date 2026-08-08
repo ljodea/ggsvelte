@@ -250,14 +250,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     // labels, and a domain strip for later epoch names — not a second reverse.
     // Dotted chartlines hang off the two outer breaks so each labeled date has
     // a line a reader can use, matching the reference chart.
-    fragment: `<ThemeTufte />
-<ScaleYMonthDay
-  reverse
-  breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
-  dateLabels="%b %e"
-  domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
-/>
-<GeomRule yintercept="${SAKURA_Y_BREAKS[0]}" linewidth={0.75}
+    // Fragment order matches ggplot2 thinking order (marks → scales → theme),
+    // same as foldSakura grammar emission — not the polish-first reading order.
+    fragment: `<GeomRule yintercept="${SAKURA_Y_BREAKS[0]}" linewidth={0.75}
   aes={{ color: { value: "#b7c1cd" }, linetype: { value: "dotted" } }}
   inspect={false} />
 <GeomRule yintercept="${SAKURA_Y_BREAKS[2]}" linewidth={0.75}
@@ -267,7 +262,14 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ color: { value: "#4a5568" } }} />
 <GeomLine stat="summary_rolling" fun="median" window={${SAKURA_TREND_WINDOW}}
   curve="linear" linewidth={1.8}
-  aes={{ color: { value: "#262626" } }} />`,
+  aes={{ color: { value: "#262626" } }} />
+<ScaleYMonthDay
+  reverse
+  breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
+  dateLabels="%b %e"
+  domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
+/>
+<ThemeTufte />`,
     spec: {
       theme: "tufte",
       scales: {

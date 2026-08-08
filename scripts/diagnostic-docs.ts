@@ -80,8 +80,8 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     {
       language: "svelte",
       code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }}>
-  <Inspect mode="exact" />
   <GeomCol />
+  <Inspect mode="exact" />
 </GGPlot>`,
     },
   ],
@@ -90,8 +90,8 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     {
       language: "svelte",
       code: `<GGPlot data={rows} aes={{ x: "run", y: "value" }}>
-  <Inspect mode="exact" />
   <GeomViolin />
+  <Inspect mode="exact" />
 </GGPlot>`,
     },
   ],
@@ -100,9 +100,9 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     {
       language: "svelte",
       code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }}>
-  <Inspect mode="exact" />
   <GeomCol />
   <GeomText aes={{ label: "label" }} dy={-8} />
+  <Inspect mode="exact" />
 </GGPlot>`,
     },
   ],
@@ -111,8 +111,8 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     {
       language: "svelte",
       code: `<GGPlot data={rows} aes={{ x: "x", y: "y" }}>
-  <Inspect mode="xy" />
   <GeomPoint />
+  <Inspect mode="xy" />
 </GGPlot>`,
     },
   ],
