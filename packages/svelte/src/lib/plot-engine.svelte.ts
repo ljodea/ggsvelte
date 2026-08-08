@@ -473,6 +473,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
 
   // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
   // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
+  // Mode x/xy still fire under coord_flip (#1409): the band-axis guide remains.
   const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
     const mode = interactionConfig().inspect?.mode;
     if (mode === undefined) return [];

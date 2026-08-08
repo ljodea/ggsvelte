@@ -297,6 +297,29 @@ describe("runCLI", () => {
     expect(lines.some((l) => l["code"] === "INTERACTION_INSPECT_X_ON_COL")).toBe(false);
   });
 
+  it("still emits X_ON_COL for --inspect x under coord flip (#1409 band guide remains)", async () => {
+    // PortableSpec coord is the object form; bare "flip" is a host-prop shorthand.
+    const flippedCol = {
+      data: {
+        values: [
+          { category: "a", amount: 3 },
+          { category: "b", amount: 5 },
+        ],
+      },
+      aes: { x: { field: "category" }, y: { field: "amount" } },
+      layers: [{ geom: "col" }],
+      coord: { type: "flip" },
+    };
+    const { io, err } = makeIO(JSON.stringify(flippedCol));
+    expect(await runCLI(["--inspect", "x"], io)).toBe(0);
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    expect(
+      lines.some(
+        (l) => l["source"] === "interaction" && l["code"] === "INTERACTION_INSPECT_X_ON_COL",
+      ),
+    ).toBe(true);
+  });
+
   it("exit 2 for an unknown --inspect mode", async () => {
     const { io, err } = makeIO(JSON.stringify(SPEC));
     expect(await runCLI(["--inspect", "nearest"], io)).toBe(2);
