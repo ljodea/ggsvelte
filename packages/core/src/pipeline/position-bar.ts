@@ -59,7 +59,11 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     if (frame.binding.yTransform === undefined) {
       const heights = new Float64Array(frame.n);
       for (let i = 0; i < frame.n; i++) {
-        heights[i] = signedStackSegmentHeight(ymin[i]!, ymax[i]!);
+        // positionStack coerces non-finite y to zero-height; keep NaN so
+        // tooltips do not present missing measures as hard zeros.
+        heights[i] = Number.isFinite(y[i]!)
+          ? signedStackSegmentHeight(ymin[i]!, ymax[i]!)
+          : Number.NaN;
       }
       frame.yNumeric = heights;
     }
