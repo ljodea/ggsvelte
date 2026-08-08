@@ -15,7 +15,7 @@ import GGPlot from "../../src/lib/GGPlot.svelte";
 import InspectGeomAdvisoriesFixture from "../fixtures/InspectGeomAdvisoriesFixture.svelte";
 import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 import { render } from "../helpers/render.js";
-import { collect, settled } from "./diagnostic-harness.js";
+import { collect, settled } from "../helpers/diagnostic-harness.js";
 
 const rows = [
   { id: "a", x: 1, y: 10, label: "10" },

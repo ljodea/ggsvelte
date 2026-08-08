@@ -52,7 +52,9 @@
     scaleLocalGuideTitle,
     useLegend = false,
     useBareLegend = false,
+    useSecondLegend = false,
     legendOrder = "sorted",
+    secondLegendOrder = "stable-domain",
     guideOrder,
     useSpec = false,
     captureRegistry,
@@ -83,7 +85,10 @@
     scaleLocalGuideTitle?: string;
     useLegend?: boolean;
     useBareLegend?: boolean;
+    /** Second <Legend> for DUPLICATE_MERGE_KEY delivery pins (#1408). */
+    useSecondLegend?: boolean;
     legendOrder?: LegendSpec["order"];
+    secondLegendOrder?: LegendSpec["order"];
     guideOrder?: number;
     useSpec?: boolean;
     captureRegistry?: (registry: LayerRegistry) => void;
@@ -148,6 +153,9 @@
     {/if}
     {#if useLegend}
       <Legend order={legendOrder} />
+    {/if}
+    {#if useSecondLegend}
+      <Legend order={secondLegendOrder} />
     {/if}
     {#if useBareLegend}
       <Legend order={undefined} />
