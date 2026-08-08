@@ -13,6 +13,6 @@
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "score" }}>
-  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
   <GeomPoint />
+  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
 </GGPlot>

@@ -22,17 +22,6 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeHrbr />
-  <ScaleXDiscrete
-    domain={["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"]}
-  />
-  <Labs
-    title="Mean and standard error by group"
-    subtitle="Extra sleep under a control and three hypnotics, with bars for the SE of each mean"
-    x="Treatment"
-    y="Extra sleep (hours)"
-  />
   <GeomPoint
     position="jitter"
     positionParams={{ width: 0.12, height: 0, seed: 7 }}
@@ -41,4 +30,15 @@
     inspect={false}
   />
   <GeomErrorbar stat="summary" width={0.35} linewidth={1.5} />
+  <ScaleXDiscrete
+    domain={["Control", "L-hyoscyamine", "L-hyoscine", "DL-hyoscine"]}
+  />
+  <ThemeHrbr />
+  <Labs
+    title="Mean and standard error by group"
+    subtitle="Extra sleep under a control and three hypnotics, with bars for the SE of each mean"
+    x="Treatment"
+    y="Extra sleep (hours)"
+  />
+  <Inspect mode="exact" pin />
 </GGPlot>

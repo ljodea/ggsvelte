@@ -9,6 +9,6 @@
 
 <!-- After 0.21: identity on Inspect (or select / createPlotInteraction). -->
 <GGPlot data={rows} aes={{ x: "year", y: "temp" }}>
-  <Inspect identity="country" />
   <GeomPoint />
+  <Inspect identity="country" />
 </GGPlot>

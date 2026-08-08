@@ -19,8 +19,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeLight />
+  <GeomCol alpha={0.9} />
   <FacetWrap
     field={{
       field: "sample",
@@ -31,6 +30,7 @@
     strip={{ position: "left" }}
   />
   <ScaleFillDiscrete domain={[...SAMPLES]} scheme="flexoki" />
+  <ThemeLight />
   <GuideNone channel="fill" />
   <Labs
     title="Facets with ordered side strips"
@@ -38,5 +38,5 @@
     x="Cells in a square"
     y="Squares"
   />
-  <GeomCol alpha={0.9} />
+  <Inspect mode="exact" pin />
 </GGPlot>

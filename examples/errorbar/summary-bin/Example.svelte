@@ -22,14 +22,6 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
-  <Labs
-    title="Mean and standard error in each x class"
-    subtitle="Mean child height ± one standard error in each one-inch class of mid-parent height"
-    x="Mid-parent height (inches)"
-    y="Child height (inches)"
-  />
   <GeomPoint alpha={0.15} size={2.4} inspect={false} />
   <GeomErrorbar
     stat="summary_bin"
@@ -39,4 +31,12 @@
     linewidth={1.4}
   />
   <GeomLine stat="summary_bin" binwidth={1} boundary={0} linewidth={1.6} />
+  <ThemeClassic />
+  <Labs
+    title="Mean and standard error in each x class"
+    subtitle="Mean child height ± one standard error in each one-inch class of mid-parent height"
+    x="Mid-parent height (inches)"
+    y="Child height (inches)"
+  />
+  <Inspect mode="exact" pin />
 </GGPlot>

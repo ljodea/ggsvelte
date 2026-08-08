@@ -18,15 +18,15 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeFivethirtyeight />
+  <GeomCol width={0.7} />
+  <GeomText aes={{ label: "label" }} dy={-8} />
   <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
+  <ThemeFivethirtyeight />
   <Labs
     title="Columns with the rate printed on each bar"
     subtitle="Paralytic polio per 100,000 children in each arm of the trial"
     x="Group"
     y="Cases per 100,000"
   />
-  <GeomCol width={0.7} />
-  <GeomText aes={{ label: "label" }} dy={-8} />
+  <Inspect mode="exact" pin />
 </GGPlot>

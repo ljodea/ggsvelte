@@ -15,7 +15,7 @@
 </script>
 
 <GGPlot data={deadlyQuarrels} aes={{ x: "magnitude" }} width={640} height={400}>
-  <Inspect mode="x" pin />
+  <GeomLine stat="ecdf" curve="step-hv" linewidth={1.8} pad={true} />
   <ThemeClassic />
   <Labs
     title="Empirical distribution of event sizes"
@@ -23,5 +23,5 @@
     x="Magnitude (log10 killed)"
     y="Share of quarrels at or below"
   />
-  <GeomLine stat="ecdf" curve="step-hv" linewidth={1.8} pad={true} />
+  <Inspect mode="x" pin />
 </GGPlot>

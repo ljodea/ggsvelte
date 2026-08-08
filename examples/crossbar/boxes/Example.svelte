@@ -18,16 +18,6 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeMinimal />
-  <ScaleXDiscrete domain={["A", "B", "C"]} />
-  <ScaleYContinuous limits={[0, 12]} />
-  <Labs
-    title="Interval boxes with mid line"
-    subtitle="Three identity boxes from ymin to ymax with a horizontal line at y"
-    x="Group"
-    y="Value"
-  />
   <GeomCrossbar
     width={0.55}
     linewidth={1.8}
@@ -37,4 +27,14 @@
       fill: { value: "#cbd5e1" },
     }}
   />
+  <ScaleXDiscrete domain={["A", "B", "C"]} />
+  <ScaleYContinuous limits={[0, 12]} />
+  <ThemeMinimal />
+  <Labs
+    title="Interval boxes with mid line"
+    subtitle="Three identity boxes from ymin to ymax with a horizontal line at y"
+    x="Group"
+    y="Value"
+  />
+  <Inspect mode="exact" pin />
 </GGPlot>

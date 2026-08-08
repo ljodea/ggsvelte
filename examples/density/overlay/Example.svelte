@@ -17,12 +17,12 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
-  <ThemeMinimal />
+  <GeomDensity alpha={0.45} />
   <ScaleFillManual
     domain={["Daughters", "Sons"]}
     values={["#8b7ec8", "#3aa99f"]}
   />
+  <ThemeMinimal />
   <Labs
     title="Two densities on one axis"
     subtitle="Heights for sons and daughters; the means separate while the ranges overlap"
@@ -30,5 +30,5 @@
     y="Density"
     fill="Child"
   />
-  <GeomDensity alpha={0.45} />
+  <Inspect mode="x" pin />
 </GGPlot>

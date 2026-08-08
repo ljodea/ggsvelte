@@ -17,14 +17,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
-  <ThemeClassic />
+  <GeomContour bins={10} linewidth={1} />
   <CoordFixed />
+  <ThemeClassic />
   <Labs
     title="Contours of height on a grid"
     subtitle="Elevation bands on Maunga Whau from a regular height matrix"
     x="Metres east"
     y="Metres north"
   />
-  <GeomContour bins={10} linewidth={1} />
+  <Inspect mode="x" pin />
 </GGPlot>

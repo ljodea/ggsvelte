@@ -17,14 +17,6 @@
   width={640}
   height={360}
 >
-  <Inspect mode="x" pin />
-  <Labs
-    title="What a ribbon can be painted with"
-    subtitle="One interval band carrying a gradient fill, a gradient stroke and a glow"
-    x="x"
-    y="value"
-    caption="Within-mark paint (not a data scale); solid fallbacks remain for a11y."
-  />
   <GeomRibbon
     alpha={0.85}
     outline="both"
@@ -56,4 +48,12 @@
     linewidth={1.25}
   />
   <GeomLine aes={{ x: "x", y: "mid" }} linewidth={1.5} />
+  <Labs
+    title="What a ribbon can be painted with"
+    subtitle="One interval band carrying a gradient fill, a gradient stroke and a glow"
+    x="x"
+    y="value"
+    caption="Within-mark paint (not a data scale); solid fallbacks remain for a11y."
+  />
+  <Inspect mode="x" pin />
 </GGPlot>

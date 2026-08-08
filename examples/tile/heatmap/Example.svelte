@@ -26,8 +26,7 @@
   width={1200}
   height={380}
 >
-  <Inspect mode="exact" pin />
-  <ThemeLight grid="none" gridX={false} gridY={false} />
+  <GeomTile />
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />
   <!-- Weeks are numeric but read as a band — one column per week. -->
@@ -37,6 +36,7 @@
     domain={["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"]}
     breaks={["Mon", "Wed", "Fri"]}
   />
+  <ThemeLight grid="none" gridX={false} gridY={false} />
   <GuideColorbar channel="fill" position="bottom" direction="horizontal" />
   <Labs
     title="Cholera in England and Wales, 1849"
@@ -45,5 +45,5 @@
     y=""
     fill="Deaths"
   />
-  <GeomTile />
+  <Inspect mode="exact" pin />
 </GGPlot>

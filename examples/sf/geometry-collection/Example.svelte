@@ -12,13 +12,13 @@
 </script>
 
 <GGPlot data={aboveOneEighty} aes={{ fill: "ground" }} width={640} height={400}>
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
+  <GeomSf alpha={0.85} linewidth={0.9} />
   <CoordFixed />
+  <ThemeClassic />
   <Labs
     title="One feature with two separate polygons"
     subtitle="Land above 180 m as a single collection: the summit ridge and a rise east of it"
     fill=""
   />
-  <GeomSf alpha={0.85} linewidth={0.9} />
+  <Inspect mode="exact" pin />
 </GGPlot>

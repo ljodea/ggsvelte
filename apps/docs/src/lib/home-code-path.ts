@@ -30,11 +30,11 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <GuideLegend channel="color" focus />
-  <Labs x="Flipper length mm" y="Body mass g" color="species" />
   <GeomJitter alpha={0.88} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
+  <GuideLegend channel="color" focus />
+  <Labs x="Flipper length mm" y="Body mass g" color="species" />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>
 `;
 

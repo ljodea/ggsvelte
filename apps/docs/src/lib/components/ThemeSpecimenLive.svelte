@@ -84,12 +84,13 @@
     {height}
     ariaLabel={`${label} theme Playfair wheat and wages`}
   >
-    <Inspect mode="x" />
+    <GeomLine linewidth={2} />
+    <GeomPoint size={2.8} />
+    <Scale value={{ color: colorScale }} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
-    <Scale value={{ color: colorScale }} />
     <Labs
       title="Wheat price and a mechanic's weekly wage"
       subtitle="One quarter of wheat (~8 bushels) vs a week's pay — both in shillings"
@@ -97,8 +98,7 @@
       y="Shillings"
       color="Series"
     />
-    <GeomLine linewidth={2} />
-    <GeomPoint size={2.8} />
+    <Inspect mode="x" />
   </GGPlot>
 {:else if kind === "attendees-dodge"}
   <GGPlot
@@ -107,19 +107,19 @@
     {height}
     ariaLabel={`${label} theme Edgeworth dodged bars`}
   >
-    <Inspect mode="exact" />
+    <GeomBar position="dodge" />
+    <Scale value={{ fill: colorScale }} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
-    <Scale value={{ fill: colorScale }} />
     <Labs
       title="Edgeworth county deaths, 1876–82"
       x="Year"
       y="Deaths per million"
       fill="County"
     />
-    <GeomBar position="dodge" />
+    <Inspect mode="exact" />
   </GGPlot>
 {:else if kind === "generation-area"}
   <GGPlot
@@ -128,22 +128,22 @@
     {height}
     ariaLabel={`${label} theme Nightingale stacked area`}
   >
-    <Inspect mode="x" />
+    <GeomArea alpha={0.9} />
+    <!-- Month observations as ISO dates; ScaleXDate keeps axis/tooltip as calendar
+      units (e.g. Dec 1855), never linear fractional years (1855.9). -->
+    <ScaleXDate labels="%b %Y" />
+    <Scale value={{ fill: colorScale }} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
-    <!-- Month observations as ISO dates; ScaleXDate keeps axis/tooltip as calendar
-         units (e.g. Dec 1855), never linear fractional years (1855.9). -->
-    <ScaleXDate labels="%b %Y" />
-    <Scale value={{ fill: colorScale }} />
     <Labs
       title="Crimean deaths by cause, 1854–56"
       x="Month"
       y="Deaths per 1,000 per year"
       fill="Cause"
     />
-    <GeomArea alpha={0.9} />
+    <Inspect mode="x" />
   </GGPlot>
 {:else if kind === "long-run-line"}
   <GGPlot
@@ -152,13 +152,13 @@
     {height}
     ariaLabel={`${label} theme Bowley exports`}
   >
-    <Inspect mode="x" />
+    <GeomLine linewidth={1.5} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
     <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
-    <GeomLine linewidth={1.5} />
+    <Inspect mode="x" />
   </GGPlot>
 {:else if kind === "penguins-scatter"}
   <GGPlot
@@ -167,19 +167,19 @@
     {height}
     ariaLabel={`${label} theme penguin scatter`}
   >
-    <Inspect mode="xy" />
+    <GeomPoint size={3.5} alpha={0.9} />
+    <Scale value={{ color: colorScale }} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
-    <Scale value={{ color: colorScale }} />
     <Labs
       title="Penguin flipper length and body mass"
       x="Flipper length (mm)"
       y="Body mass (g)"
       color="Species"
     />
-    <GeomPoint size={3.5} alpha={0.9} />
+    <Inspect mode="xy" />
   </GGPlot>
 {:else if kind === "countries-scatter"}
   <GGPlot
@@ -188,25 +188,25 @@
     {height}
     ariaLabel={`${label} theme cholera density scatter`}
   >
-    <Inspect mode="xy" identity="country" />
-    {#if legendFocus}
-      <GuideLegend channel="color" focus />
-    {/if}
-    <Theme {name} {...themeRoles} />
+    <GeomPoint size={3.5} />
+    <GeomSmooth method="lm" se={false} />
     <Scale
       value={{
         ...scaleXLog10({ labels: "~s" }),
         color: colorScale,
       }}
     />
+    <Theme {name} {...themeRoles} />
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Labs
       title="Cholera death rate vs density, 1849"
       x="People per acre (log scale)"
       y="Death rate per 10,000"
       color="Water supply"
     />
-    <GeomPoint size={3.5} />
-    <GeomSmooth method="lm" se={false} />
+    <Inspect mode="xy" identity="country" />
   </GGPlot>
 {:else if kind === "revenue-cols"}
   <GGPlot
@@ -215,18 +215,18 @@
     {height}
     ariaLabel={`${label} theme Salk trial columns`}
   >
-    <Inspect mode="exact" />
+    <GeomCol width={0.7} />
+    <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
     <Labs
       title="Salk trial paralytic polio rates"
       x="Group"
       y="Cases per 100,000"
     />
-    <GeomCol width={0.7} />
-    <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+    <Inspect mode="exact" />
   </GGPlot>
 {:else if kind === "soho-choropleth"}
   <GGPlot
@@ -235,20 +235,20 @@
     {height}
     ariaLabel={`${label} theme Soho cholera choropleth`}
   >
-    <Inspect mode="exact" pin identity="pump" />
-    <Theme {name} {...themeRoles} />
-    <CoordFixed />
-    <ScaleFillContinuous scheme="viridis" />
-    <Labs
-      title="1854 Soho cholera deaths by pump neighbourhood"
-      fill="Deaths"
-    />
     <GeomMap
       map={{ values: sohoPumpNeighbourhoods }}
       mapId="pump"
       linewidth={1.2}
       alpha={0.95}
     />
+    <CoordFixed />
+    <ScaleFillContinuous scheme="viridis" />
+    <Theme {name} {...themeRoles} />
+    <Labs
+      title="1854 Soho cholera deaths by pump neighbourhood"
+      fill="Deaths"
+    />
+    <Inspect mode="exact" pin identity="pump" />
   </GGPlot>
 {:else}
   <GGPlot
@@ -257,18 +257,18 @@
     {height}
     ariaLabel={`${label} theme Langren longitude labels`}
   >
-    <Inspect mode="xy" />
+    <GeomPoint size={3} />
+    <GeomText aes={{ label: "city" }} dy={-9} size={10} />
+    <Scale value={{ x: { labels: ".1f" } }} />
+    <Theme {name} {...themeRoles} />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
-    <Theme {name} {...themeRoles} />
-    <Scale value={{ x: { labels: ".1f" } }} />
     <Labs
       title="Van Langren longitude estimates, 1644"
       x="Toledo–Rome longitude (°)"
       y="Estimate rank"
     />
-    <GeomPoint size={3} />
-    <GeomText aes={{ label: "city" }} dy={-9} size={10} />
+    <Inspect mode="xy" />
   </GGPlot>
 {/if}

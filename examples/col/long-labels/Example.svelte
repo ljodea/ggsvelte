@@ -14,12 +14,12 @@
   width={480}
   height={420}
 >
-  <Inspect mode="exact" pin />
+  <GeomCol />
   <Labs
     title="Long category labels at a narrow width"
     subtitle="The band axis has to wrap and rotate to fit these names at 480px"
     x="Category"
     y="Count"
   />
-  <GeomCol />
+  <Inspect mode="exact" pin />
 </GGPlot>

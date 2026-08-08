@@ -19,21 +19,21 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeMinimal />
-  <CoordFixed />
-  <ScaleXContinuous limits={[-5, 5]} />
-  <ScaleYContinuous limits={[-5, 5]} />
-  <Labs
-    title="Eight rays from one origin"
-    subtitle="One finite segment per angle; radius is length in data units"
-    x="x"
-    y="y"
-  />
   <GeomSpoke
     linewidth={3.2}
     lineend="round"
     alpha={1}
     aes={{ color: { value: "#1a202c" } }}
   />
+  <CoordFixed />
+  <ScaleXContinuous limits={[-5, 5]} />
+  <ScaleYContinuous limits={[-5, 5]} />
+  <ThemeMinimal />
+  <Labs
+    title="Eight rays from one origin"
+    subtitle="One finite segment per angle; radius is length in data units"
+    x="x"
+    y="y"
+  />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

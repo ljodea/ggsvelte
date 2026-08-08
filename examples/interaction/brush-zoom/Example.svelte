@@ -39,10 +39,10 @@
   width="container"
   height={400}
 >
-  <Inspect />
+  <GeomPoint size={2.5} alpha={0.8} />
   <ThemeLight />
   <Labs title="Select an interval or brush to zoom" x="x" y="y" color="Group" />
-  <GeomPoint size={2.5} alpha={0.8} />
+  <Inspect />
 </GGPlot>
 
 <!-- Visual callback evidence only. GGPlot owns the single concise live region. -->

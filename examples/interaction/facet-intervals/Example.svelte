@@ -58,16 +58,16 @@
           : `${event.phase}: ${String(event.keys.length)} rows selected from ${event.panelId}.`;
     }}
   >
-    <Inspect mode="xy" pin maxDistance={24} />
-    <ThemeClean />
+    <GeomPoint size={3.8} />
     <FacetWrap field="island" ncol={3} />
+    <ThemeClean />
     <Labs
       title="Palmer penguins by island"
       subtitle={`${preset} interval semantics`}
       x="Bill length (mm)"
       y="Body mass (g)"
     />
-    <GeomPoint size={3.8} />
+    <Inspect mode="xy" pin maxDistance={24} />
   </GGPlot>
 </div>
 

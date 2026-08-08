@@ -157,9 +157,9 @@ export interface SakuraSourceDelta {
    * These **are** plot layers (`Layer.kind` scale/theme/coord/facet/labs/
    * guides/legend via `createPlotLayer`). They are held apart from
    * {@link children} only because they are **not mark layers**: they never
-   * appear in `childOrder` (geom z-order), and they are emitted ahead of every
-   * geom so a later step adding a geom cannot silently reorder them
-   * (#659 D2 — child layers apply in registration order).
+   * appear in `childOrder` (geom z-order). The lesson emits marks first, then
+   * grammar, then Inspect — ggplot2 thinking order. Registration order still
+   * drives mark z-order and last-wins folds within a grammar family (#659).
    *
    * Do not call them “non-layers.” PortableSpec puts marks in `layers[]` and
    * folds these families into top-level keys; that is serialization, not

@@ -26,7 +26,7 @@
   width="container"
   height={400}
 >
-  <Inspect mode="x" pin maxDistance={24} />
+  <GeomPoint size={4} alpha={0.85} />
   <ThemeLight />
   <Labs
     title="Inspect a shared x value, then pin"
@@ -35,7 +35,7 @@
     y="Body mass (g)"
     color="Species"
   />
-  <GeomPoint size={4} alpha={0.85} />
+  <Inspect mode="x" pin maxDistance={24} />
 </GGPlot>
 
 <!-- Visual callback evidence only. GGPlot owns the single concise live region. -->

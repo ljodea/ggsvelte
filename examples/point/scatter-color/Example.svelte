@@ -18,9 +18,10 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeFew />
+  <GeomPoint size={3} />
   <ScaleColorDiscrete scheme="observable10" />
+  <ThemeFew />
+  <GuideLegend channel="color" focus />
   <Labs
     title="Two measures coloured by region"
     subtitle="Literacy against crime rate; colour marks the region of each department"
@@ -28,6 +29,5 @@
     y="Population per crime against persons"
     color="Region"
   />
-  <GuideLegend channel="color" focus />
-  <GeomPoint size={3} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

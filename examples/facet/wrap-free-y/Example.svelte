@@ -19,8 +19,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
-  <ThemeFivethirtyeight />
+  <GeomLine linewidth={1.6} />
   <FacetWrap
     field={{
       field: "measure",
@@ -35,6 +34,7 @@
     scales="free_y"
   />
   <ScaleXContinuous labels="d" />
+  <ThemeFivethirtyeight />
   <GuideNone channel="color" />
   <Labs
     title="Facets with free y scales"
@@ -42,5 +42,5 @@
     x="Year"
     y=""
   />
-  <GeomLine linewidth={1.6} />
+  <Inspect mode="x" pin />
 </GGPlot>

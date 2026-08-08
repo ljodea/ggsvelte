@@ -768,14 +768,14 @@ The Svelte surface accepts the same JSON and re-exports the same helpers:
 
 \`\`\`svelte fragment
 <GGPlot data={rows} aes={{ x: "latency", y: "requests" }}>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
   <Scale
     value={{
       x: { type: "linear", transform: "log10" },
       y: { type: "linear", transform: "sqrt" },
     }}
   />
-  <GeomPoint />
-  <GeomSmooth method="lm" />
 </GGPlot>
 \`\`\`
 
@@ -840,8 +840,8 @@ Use a named categorical scheme when color identifies groups:
 
 \`\`\`svelte fragment
 <GGPlot data={cars} aes={{ x: "weight", y: "economy", color: "vehicleClass" }}>
-  <Scale value={{ color: { type: "ordinal", scheme: "observable10" } }} />
   <GeomPoint />
+  <Scale value={{ color: { type: "ordinal", scheme: "observable10" } }} />
 </GGPlot>
 \`\`\`
 
@@ -900,13 +900,13 @@ colorsteps guide exposes every boundary, label, swatch, and inclusivity rule:
 
 \`\`\`svelte fragment
 <GGPlot data={rows} aes={{ x: "hour", y: "pm25", color: "pm25" }}>
+  <GeomPoint />
   <Scale
     value={scaleColorBinned({
-      breaks: [0, 12, 35, 55, 100],
-      range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+    breaks: [0, 12, 35, 55, 100],
+    range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
     })}
   />
-  <GeomPoint />
 </GGPlot>
 \`\`\`
 
@@ -1029,8 +1029,8 @@ In Svelte that object is a \`<Guides>\` child:
 
 \`\`\`svelte fragment
 <GGPlot data={rows} aes={{ x: "hour", y: "pm25", color: "pm25" }}>
-  <Guides value={guides} />
   <GeomPoint />
+  <Guides value={guides} />
 </GGPlot>
 \`\`\`
 
@@ -1060,8 +1060,8 @@ trained scales (flip, etc.) without rewriting aesthetic mappings.
 
 \`\`\`svelte fragment
 <GGPlot data={cars} aes={{ x: "weight", y: "economy" }}>
-  <FacetWrap field="vehicleClass" ncol={2} />
   <GeomPoint />
+  <FacetWrap field="vehicleClass" ncol={2} />
 </GGPlot>
 \`\`\`
 
@@ -1112,9 +1112,9 @@ hatch for a coordinate computed elsewhere):
 
 \`\`\`svelte fragment
 <GGPlot data={rows} aes={{ x: "exposure", y: "response" }}>
-  <CoordTransform x="log10" y="sqrt" />
   <GeomPoint />
   <GeomSmooth method="lm" />
+  <CoordTransform x="log10" y="sqrt" />
 </GGPlot>
 \`\`\`
 
@@ -1363,9 +1363,9 @@ axis:
   aes={{ x: "date", y: "value", color: "series" }}
   oninspect={(event) => console.log(event)}
 >
-  <Inspect mode="x" pin maxDistance={24} />
   <GeomLine />
   <GeomPoint />
+  <Inspect mode="x" pin maxDistance={24} />
 </GGPlot>
 \`\`\`
 
@@ -2208,8 +2208,8 @@ rebind across reorder) lives on interaction surfaces:
 
 <!-- Before 0.21: plot-level key. -->
 <GGPlot data={rows} aes={{ x: "year", y: "temp" }} key="country">
-  <Inspect />
   <GeomPoint />
+  <Inspect />
 </GGPlot>
 \`\`\`
 
@@ -2225,8 +2225,8 @@ rebind across reorder) lives on interaction surfaces:
 
 <!-- After 0.21: identity on Inspect (or select / createPlotInteraction). -->
 <GGPlot data={rows} aes={{ x: "year", y: "temp" }}>
-  <Inspect identity="country" />
   <GeomPoint />
+  <Inspect identity="country" />
 </GGPlot>
 \`\`\`
 
@@ -2281,8 +2281,8 @@ guide child that owns the aesthetic:
 
 <!-- After 0.19: focus lives on GuideLegend for that aesthetic. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
-  <GuideLegend channel="color" focus />
   <GeomPoint />
+  <GuideLegend channel="color" focus />
 </GGPlot>
 \`\`\`
 
@@ -2334,8 +2334,8 @@ guide child that owns the aesthetic:
 
 <!-- After 0.19: filter lives on GuideLegend for that aesthetic. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
-  <GuideLegend channel="color" filter />
   <GeomPoint />
+  <GuideLegend channel="color" filter />
 </GGPlot>
 \`\`\`
 
@@ -2464,8 +2464,8 @@ After:
 
 <!-- After 0.11: compose the theme as a declaration-only child layer. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y" }}>
-  <ThemeDark />
   <GeomPoint />
+  <ThemeDark />
 </GGPlot>
 \`\`\`
 
@@ -2535,8 +2535,8 @@ After:
 
 <!-- After 0.11: compose scales as declaration-only child layers. -->
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "c" }}>
-  <ScaleColorDiscrete scheme="colorblind" />
   <GeomPoint />
+  <ScaleColorDiscrete scheme="colorblind" />
 </GGPlot>
 \`\`\`
 
@@ -2761,8 +2761,8 @@ In 0.8, keep the source measure and let the scale interpolate in symbol area:
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", size: "magnitude" }}>
-  <ScaleSizeContinuous range={[2, 9]} />
   <GeomPoint />
+  <ScaleSizeContinuous range={[2, 9]} />
 </GGPlot>
 \`\`\`
 
@@ -2816,8 +2816,8 @@ In 0.8, declare the alternate presentation directly:
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "region" }}>
-  <GuideLegend channel="color" position="bottom" direction="horizontal" />
   <GeomPoint />
+  <GuideLegend channel="color" position="bottom" direction="horizontal" />
 </GGPlot>
 \`\`\`
 
@@ -2874,8 +2874,8 @@ Since 0.9, remove that wrapper workaround and author the coordinate directly:
 </script>
 
 <GGPlot data={circle} aes={{ x: "x", y: "y" }}>
-  <CoordFixed />
   <GeomLine />
+  <CoordFixed />
 </GGPlot>
 \`\`\`
 
@@ -2945,8 +2945,8 @@ In 0.7, opt into clamping when it is the intended encoding:
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "score" }}>
-  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
   <GeomPoint />
+  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
 </GGPlot>
 \`\`\`
 
@@ -3021,14 +3021,14 @@ multiplicative display expansion, including pinned domains.
 </script>
 
 <GGPlot data={rows} aes={{ x: "latency", y: "throughput" }}>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
   <ScaleXLog10
     domain={[1, 1000]}
     oob="censor"
     expand={{ mult: 0, add: 0 }}
     nice={false}
   />
-  <GeomPoint />
-  <GeomSmooth method="lm" />
 </GGPlot>
 \`\`\`
 
@@ -3111,8 +3111,8 @@ queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
   key="id"
   onrender={(next) => (model = next)}
 >
-  <Inspect />
   <GeomPoint />
+  <Inspect />
 </GGPlot>
 
 <button type="button" onclick={() => inspectPlotPixel(100, 100)}>

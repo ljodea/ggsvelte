@@ -16,7 +16,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomJitter width={0.22} height={0} alpha={0.65} />
   <ThemeClean />
   <Labs
     title="Menu calories, spread so items do not stack"
@@ -24,5 +24,5 @@
     x="Restaurant"
     y="Calories"
   />
-  <GeomJitter width={0.22} height={0} alpha={0.65} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

@@ -83,7 +83,7 @@
       height={360}
       ariaLabel="Penguins by flipper length and body mass, colored by species"
     >
-      <Inspect mode="xy" pin maxDistance={24} identity="id" />
+      <GeomPoint size={4} alpha={0.86} />
       <ThemeMinimal />
       <Labs
         title="Select in either view"
@@ -91,7 +91,7 @@
         y="Body mass (g)"
         color="Species"
       />
-      <GeomPoint size={4} alpha={0.86} />
+      <Inspect mode="xy" pin maxDistance={24} identity="id" />
     </GGPlot>
 
     <GGPlot
@@ -105,14 +105,14 @@
       height={360}
       ariaLabel="Penguins by flipper length and body mass in a quieter style"
     >
-      <Inspect mode="xy" pin maxDistance={24} identity="id" />
+      <GeomPoint size={3.2} color="#287271" alpha={0.68} />
       <ThemeMinimal />
       <Labs
         title="The same keys, quieter styling"
         x="Flipper length (mm)"
         y="Body mass (g)"
       />
-      <GeomPoint size={3.2} color="#287271" alpha={0.68} />
+      <Inspect mode="xy" pin maxDistance={24} identity="id" />
     </GGPlot>
   </div>
 

@@ -21,9 +21,10 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeClassic />
+  <GeomPoint size={2.4} alpha={0.35} />
+  <GeomPoint stat="manual" fun="mean" size={6} alpha={0.95} />
   <ScaleColorDiscrete scheme="observable10" />
+  <ThemeClassic />
   <Labs
     title="Raw points with a manual mean per group"
     subtitle="Twenty faint measurements per run; the solid mark is that run's mean"
@@ -31,6 +32,5 @@
     y="Speed of light, km/s less 299,000"
     color="Run"
   />
-  <GeomPoint size={2.4} alpha={0.35} />
-  <GeomPoint stat="manual" fun="mean" size={6} alpha={0.95} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

@@ -11,7 +11,7 @@
 </script>
 
 <GGPlot data={shortSample} aes={{ sample: "value" }} width={640} height={400}>
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomQq size={6} alpha={0.95} aes={{ color: { value: "#1a202c" } }} />
   <ThemeMinimal />
   <Labs
     title="Sparse Q–Q cloud"
@@ -19,5 +19,5 @@
     x="Theoretical quantile"
     y="Sample quantile"
   />
-  <GeomQq size={6} alpha={0.95} aes={{ color: { value: "#1a202c" } }} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

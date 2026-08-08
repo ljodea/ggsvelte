@@ -14,6 +14,6 @@
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", size: "magnitude" }}>
-  <ScaleSizeContinuous range={[2, 9]} />
   <GeomPoint />
+  <ScaleSizeContinuous range={[2, 9]} />
 </GGPlot>

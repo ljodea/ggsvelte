@@ -19,8 +19,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeLight />
+  <GeomBar />
   <ScaleXDiscrete
     domain={["1 and 2", "3", "4", "5", "6", "7", "8", "9", "10"]}
   />
@@ -37,6 +36,8 @@
     ]}
     scheme="flexoki"
   />
+  <ThemeLight />
+  <GuideLegend channel="fill" focus />
   <Labs
     title="Stacked counts inside each bag"
     subtitle="Each bar is one group, split by how far the coins miss standard weight"
@@ -44,6 +45,5 @@
     y="Sovereigns"
     fill="Deviation"
   />
-  <GuideLegend channel="fill" focus />
-  <GeomBar />
+  <Inspect mode="exact" pin />
 </GGPlot>

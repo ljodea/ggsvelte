@@ -6,13 +6,14 @@
   const guideAxisExample = `import { GeomPoint, GGPlot, GuideAxis, Labs } from "@ggsvelte/svelte";
 
 <GGPlot data={rows} aes={{ x: "hour", y: "pm25" }}>
-  <Labs x="Hour of day" y="PM2.5" />
+  <GeomPoint />
   <GuideAxis channel="x" showTicks={false} collision="ellipsis" />
   <GuideAxis channel="y" title="µg/m³" />
-  <GeomPoint />
+  <Labs x="Hour of day" y="PM2.5" />
 </GGPlot>`;
 
   const scaleBreaksExample = `<GGPlot data={rows} aes={{ x: "weight", y: "economy" }}>
+  <GeomPoint />
   <Scale
     value={{
       x: {
@@ -24,10 +25,10 @@
       y: { type: "linear", labels: ".1f" },
     }}
   />
-  <GeomPoint />
 </GGPlot>`;
 
   const bandGuideExample = `<GGPlot data={rows} aes={{ x: "category", y: "count" }}>
+  <GeomCol />
   <Scale
     value={{
       x: {
@@ -36,7 +37,6 @@
       },
     }}
   />
-  <GeomCol />
 </GGPlot>`;
 
   const builderGuidesExample = `import { guideAxis, guideNone } from "@ggsvelte/spec";

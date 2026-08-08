@@ -12,7 +12,12 @@
 </script>
 
 <GGPlot data={michelson} aes={{ x: "velocity" }} width={640} height={400}>
-  <Inspect mode="x" pin />
+  <GeomFreqpoly binwidth={40} linewidth={1.4} />
+  <GeomRule
+    xintercept={734.5}
+    linewidth={1.2}
+    aes={{ color: { value: "#d14d41" } }}
+  />
   <ThemeFivethirtyeight />
   <Labs
     title="Frequency polygon through bin centres"
@@ -20,10 +25,5 @@
     x="Velocity (km/s − 299,000)"
     y="Runs"
   />
-  <GeomFreqpoly binwidth={40} linewidth={1.4} />
-  <GeomRule
-    xintercept={734.5}
-    linewidth={1.2}
-    aes={{ color: { value: "#d14d41" } }}
-  />
+  <Inspect mode="x" pin />
 </GGPlot>

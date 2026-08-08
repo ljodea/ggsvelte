@@ -18,15 +18,15 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeClassic />
+  <GeomSpoke linewidth={1.6} lineend="round" alpha={0.9} />
+  <GeomPoint size={2} alpha={0.7} />
   <CoordFixed />
+  <ThemeClassic />
   <Labs
     title="Direction and length from each point"
     subtitle="Flow off a hillside as angle and radius from each cell"
     x="Metres east"
     y="Metres north"
   />
-  <GeomSpoke linewidth={1.6} lineend="round" alpha={0.9} />
-  <GeomPoint size={2} alpha={0.7} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

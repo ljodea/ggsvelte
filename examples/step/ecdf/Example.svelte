@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
+  <GeomStep direction="hv" linewidth={1.8} />
+  <GeomPoint size={2.6} alpha={0.85} />
   <ThemeClassic />
   <Labs
     title="Step ECDF of paired differences"
@@ -25,6 +26,5 @@
     x="Cross-fertilised height less self-fertilised (inches)"
     y="Share of pairs at or below"
   />
-  <GeomStep direction="hv" linewidth={1.8} />
-  <GeomPoint size={2.6} alpha={0.85} />
+  <Inspect mode="x" pin />
 </GGPlot>

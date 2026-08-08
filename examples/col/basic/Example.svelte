@@ -17,14 +17,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
+  <GeomCol />
   <ScaleXContinuous nice={false} />
+  <ThemeClassic />
   <Labs
     title="Counts across ordered chest sizes"
     subtitle="How many men fell in each chest-measure class"
     x="Chest circumference (inches)"
     y="Soldiers"
   />
-  <GeomCol />
+  <Inspect mode="exact" pin />
 </GGPlot>

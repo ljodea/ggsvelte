@@ -13,15 +13,6 @@
 </script>
 
 <GGPlot width={640} height={400}>
-  <Inspect mode="x" pin />
-  <ThemeClassic />
-  <Labs
-    title="What the wars did to the national debt"
-    subtitle="Playfair's series, 1770 to 1824, with the war years drawn behind it"
-    x="Year"
-    y="Debt (£ millions)"
-    fill=""
-  />
   <GeomRect
     data={warYears}
     aes={{
@@ -43,4 +34,13 @@
     aes={{ x: "year", y: "debt", label: "label" }}
     size={12}
   />
+  <ThemeClassic />
+  <Labs
+    title="What the wars did to the national debt"
+    subtitle="Playfair's series, 1770 to 1824, with the war years drawn behind it"
+    x="Year"
+    y="Debt (£ millions)"
+    fill=""
+  />
+  <Inspect mode="x" pin />
 </GGPlot>

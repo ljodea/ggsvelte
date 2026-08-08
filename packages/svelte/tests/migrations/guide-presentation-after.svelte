@@ -9,6 +9,6 @@
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y", color: "region" }}>
-  <GuideLegend channel="color" position="bottom" direction="horizontal" />
   <GeomPoint />
+  <GuideLegend channel="color" position="bottom" direction="horizontal" />
 </GGPlot>

@@ -17,9 +17,9 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeMinimal />
+  <GeomPoint size={4} />
   <ScaleColorSteps low="#132B43" high="#56B1F7" />
+  <ThemeMinimal />
   <Labs
     title="Cholera fell away with height above the Thames"
     subtitle="38 London districts in 1849, shaded in bands by their poor rate"
@@ -27,5 +27,5 @@
     y="Cholera deaths per 10,000"
     color="Poor rate"
   />
-  <GeomPoint size={4} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

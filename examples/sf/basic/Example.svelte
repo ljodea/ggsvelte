@@ -13,14 +13,14 @@
 </script>
 
 <GGPlot data={heightRings} aes={{ fill: "height" }} width={640} height={400}>
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
+  <GeomSf alpha={0.55} linewidth={0.9} />
   <CoordFixed />
   <ScaleFillContinuous scheme="viridis" />
+  <ThemeClassic />
   <Labs
     title="Simple features as filled polygons"
     subtitle="Elevation bands on a hill drawn from simple-feature rings"
     fill="Metres"
   />
-  <GeomSf alpha={0.55} linewidth={0.9} />
+  <Inspect mode="exact" pin />
 </GGPlot>

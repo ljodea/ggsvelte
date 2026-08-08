@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomPoint alpha={0.3} size={2} />
+  <GeomQuantile linewidth={1.4} />
   <ThemeClassic />
   <Labs
     title="Flavor against aroma in cupping scores"
@@ -25,6 +26,5 @@
     x="Aroma"
     y="Flavor"
   />
-  <GeomPoint alpha={0.3} size={2} />
-  <GeomQuantile linewidth={1.4} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

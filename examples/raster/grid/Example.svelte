@@ -17,9 +17,9 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeFew />
+  <GeomRaster />
   <ScaleFillContinuous scheme="viridis" />
+  <ThemeFew />
   <Labs
     title="Where chocolate reviews cluster"
     subtitle="Count of bars at each cocoa percent and rating. Darker cells hold more reviews"
@@ -27,5 +27,5 @@
     y="Rating (1–4)"
     fill="Bars"
   />
-  <GeomRaster />
+  <Inspect mode="exact" pin />
 </GGPlot>
