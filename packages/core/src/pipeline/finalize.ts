@@ -85,6 +85,11 @@ export function finalize(run: PipelineRunState): RenderModel {
     advisories,
   );
   const layerFields = resolveLayerFields(normalized.layers.length, bindings);
+  // Normalize always fills position; keep a string[] aligned with layer index
+  // so axis-inspect can tell additive (stack/fill) groups from parallel series.
+  const layerPositions = Object.freeze(
+    normalized.layers.map((layer) => layer.position ?? "identity"),
+  );
   const layerScaledConstants = resolveLayerScaledConstants(normalized.layers.length, bindings);
 
   // --- domain snapshots ---
@@ -224,6 +229,7 @@ export function finalize(run: PipelineRunState): RenderModel {
     runId,
     layerBackends,
     layerFields,
+    layerPositions,
     layerScaledConstants,
     baselineDomains,
     effectiveDomains,

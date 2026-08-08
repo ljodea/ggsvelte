@@ -226,10 +226,15 @@
       "sourceSha256": "affb0ea0bbcf343676aa39e8cf64d10c1f377029e412ff14091b97508e089987",
       "pngSha256": "ab6e3889dd38cfe949a124939cb2926fb732bb16033ccd7e8572212018cc6fa6"
     },
+    "line/labor-cost-of-wheat": {
+      "filename": "line-labor-cost-of-wheat-light.png",
+      "sourceSha256": "aa71dc1d49e3e953ea542266c508c63e39ca23e1f289e996a61dd86e39114e2d",
+      "pngSha256": "061ecd7c317e705cf3a8d6833142ceb92856a1c7ee89cf9fbfcad59c47005492"
+    },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "7b328c99ab65b646bf49d2f3000902f42a60ffaf87c8dd9a6c18745dd0ff35c4",
-      "pngSha256": "127a26c44cf0cfe95add36d646eeef57e29e36ae1f98f0e6d3d8018cf2038a13"
+      "sourceSha256": "9512dee2bad0eda427b282556d2ec86d42510e87e65eeda34468aa0421293154",
+      "pngSha256": "5677954e011409163dc8d36a04e739604960a0e4b9faad5743ac434ba6f7e1c6"
     },
     "line/time-axis": {
       "filename": "line-time-axis-light.png",

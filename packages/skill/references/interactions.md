@@ -219,10 +219,13 @@ does not dump every series:
 2. Up to **7 more** members are chosen by **largest absolute value** at that
    axis position (y when grouping by x, x when grouping by y) — not by stacking
    order — so tiny early series cannot crowd out the large contributors.
-3. A **Total** row sums unique numeric contributions in the full group across
-   layers (not just the capped hover window or the focus layer). Multi-layer
-   paints of the same series (line+point) count once; a thin overlay over a
-   stack still includes every distinct series in the total.
+3. A **Total** row appears only when the group includes a **stack** or **fill**
+   layer. It sums unique numeric contributions in the full group across layers
+   (not just the capped hover window or the focus layer). Multi-layer paints of
+   the same series (line+point) count once; a thin overlay over a stack still
+   includes every distinct series in the total. Parallel multi-series lines or
+   points (`position: identity` / dodge) omit Total — their y-values are not
+   parts of a whole.
 4. An overflow line (`+N more · pin to inspect all`) appears when the group is
    larger than eight display members (full-group unique count, all layers).
 

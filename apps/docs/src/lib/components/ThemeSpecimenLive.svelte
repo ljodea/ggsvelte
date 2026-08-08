@@ -91,7 +91,8 @@
     <Theme {name} {...themeRoles} />
     <Scale value={{ color: colorScale }} />
     <Labs
-      title="Playfair wheat price & weekly wage"
+      title="Wheat price and a mechanic's weekly wage"
+      subtitle="One quarter of wheat (~8 bushels) vs a week's pay — both in shillings"
       x="Year"
       y="Shillings"
       color="Series"

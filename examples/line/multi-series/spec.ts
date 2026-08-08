@@ -14,7 +14,7 @@ export default defineExample(
     // volatile price, its ink for the wage. Both clear 3:1 on #d5e4eb, where
     // most palette entries do not.
     .scaleColorManual({
-      domain: ["Wheat price", "Weekly wage"],
+      domain: ["Wheat / quarter", "Wage / week"],
       values: ["#ed111a", "#014d64"],
     })
     .scales({
@@ -22,9 +22,9 @@ export default defineExample(
     })
     .theme("economist")
     .labs({
-      title: "Two series on one panel",
+      title: "Wheat price and a mechanic's weekly wage",
       subtitle:
-        "Wheat price and a mechanic's weekly wage in shillings; the price swings, the wage climbs",
+        "Price of one quarter of wheat (~8 bushels) beside a week's pay — both in shillings",
       x: "Year",
       y: "Shillings",
       color: "Series",

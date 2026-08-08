@@ -61,6 +61,7 @@ export interface AssembleRenderModelInput {
   runId: number;
   layerBackends: LayerBackend[];
   layerFields: MappedField[][];
+  layerPositions: readonly string[];
   layerScaledConstants: ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>>;
   baselineDomains: ScaleDomainSnapshot;
   effectiveDomains: ScaleDomainSnapshot;
@@ -288,6 +289,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     runId: input.runId,
     layerBackends: input.layerBackends,
     layerFields: input.layerFields,
+    layerPositions: input.layerPositions,
     layerScaledConstants: input.layerScaledConstants,
     domains: freezeRenderModelDomains(input.baselineDomains, input.effectiveDomains),
     // Lazy getters (#1421): `candidates` builds the store on first access

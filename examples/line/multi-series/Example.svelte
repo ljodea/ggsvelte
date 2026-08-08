@@ -28,12 +28,12 @@
     nice={false}
   />
   <ScaleColorManual
-    domain={["Wheat price", "Weekly wage"]}
+    domain={["Wheat / quarter", "Wage / week"]}
     values={["#ed111a", "#014d64"]}
   />
   <Labs
-    title="Two series on one panel"
-    subtitle="Wheat price and a mechanic's weekly wage in shillings; the price swings, the wage climbs"
+    title="Wheat price and a mechanic's weekly wage"
+    subtitle="Price of one quarter of wheat (~8 bushels) beside a week's pay — both in shillings"
     x="Year"
     y="Shillings"
     color="Series"

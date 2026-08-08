@@ -71,10 +71,12 @@ export type PlotInspectionChange<Row, Key> =
        * Sum of numeric contributions on the value axis for unique series in
        * the full axis group (y when mode is x, x when mode is y). Used by
        * the default tooltip Total row; independent of the hover member cap
-       * (#1274 / #1389). Multi-layer paints of the same source series
-       * (line+point, col+text) contribute once; distinct series on other
-       * layers (e.g. a trend over a stack) are included. `null` when no
-       * member has a finite numeric contribution.
+       * (#1274 / #1389). Only populated when the group includes a stack/fill
+       * layer — parallel multi-series (identity/dodge lines and points) leave
+       * this `null` so the tooltip does not invent a sum. Multi-layer paints
+       * of the same source series (line+point, col+text) contribute once;
+       * distinct series on other layers (e.g. a trend over a stack) are
+       * included. Also `null` when no member has a finite numeric contribution.
        */
       readonly groupTotal: number | null;
       /**

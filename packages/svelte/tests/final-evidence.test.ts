@@ -75,11 +75,11 @@ describe("final R-1/R0 evidence locks", () => {
     keydown(surface, "Enter");
     await tick();
     expect(live.textContent?.match(/pinned/g)).toHaveLength(1);
-    // Two series members + stack Total row (#1274).
+    // Two series members, no Total: points are identity-positioned, not stacked.
     expect(
       container.querySelectorAll(".gg-tooltip-members > dl:not(.gg-tooltip-total)"),
     ).toHaveLength(2);
-    expect(container.querySelector(".gg-tooltip-total")).not.toBeNull();
+    expect(container.querySelector(".gg-tooltip-total")).toBeNull();
     keydown(surface, "Enter");
     await tick();
     expect(live.textContent?.match(/unpinned/g)).toHaveLength(1);

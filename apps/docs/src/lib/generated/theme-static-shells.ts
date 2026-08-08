@@ -54,7 +54,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-hrbr",
     filename: "theme-hrbr.svg",
     path: "/theme-shells/theme-hrbr.svg",
-    sha256: "74a4709d3d9819659f7e455abc7db0ab5656d8a840f46f446d26084c6601ade1",
+    sha256: "759e84786ce6a40a0f947e7fc74a4d6f2b22be29019fea023a52d4d2db0a1d2f",
   },
   {
     id: "theme-few",
@@ -78,7 +78,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-economist",
     filename: "theme-economist.svg",
     path: "/theme-shells/theme-economist.svg",
-    sha256: "23f0be6b01ed86f38b95e6d020b7542b74dcc6cbc2764a3c80f7fc4e482ad37f",
+    sha256: "7ba64f8d1b4d86ce10a477f273a1f950d432b2a24fb3b9c63ea015d6b26d9f37",
   },
   {
     id: "theme-tufte",
@@ -126,7 +126,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarizeddark",
     filename: "theme-solarizeddark.svg",
     path: "/theme-shells/theme-solarizeddark.svg",
-    sha256: "005bf1ca1fce023f98ad31b405f011f56b048f377ed399896317b0b06fa6dc41",
+    sha256: "bb6e274e391f37c4d7001bdbb62032d70fe67856073f59cab81d33ff3ecdb031",
   },
   {
     id: "theme-economist_white",
@@ -156,7 +156,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-hc",
     filename: "theme-hc.svg",
     path: "/theme-shells/theme-hc.svg",
-    sha256: "4325febf77af438b33779d96d9353ae5d99689b70686ff97a3598e5d8ead19e5",
+    sha256: "f50c81a2ba22bdf1c71193fbe9aa72d74f59fdf22075654bbc6cabc4e2601c35",
   },
   {
     id: "theme-hcdark",
