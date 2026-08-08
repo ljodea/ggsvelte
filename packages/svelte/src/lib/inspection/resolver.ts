@@ -378,6 +378,9 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       });
     }
     const axisValue = mode === "x" ? seed.xValue : seed.yValue;
+    // Same stack/fill gate as groupMagnitudeTotal so oninspect consumers
+    // never see a composition total for identity/dodge seeds.
+    const additive = groupHasAdditivePosition(model, [seed]);
     return Object.freeze({
       type: "inspect",
       phase: "change",
@@ -389,7 +392,7 @@ export function resolveInspection<Row extends Record<string, CellValue>, Key ext
       members: [single] as const,
       axisValue,
       axisLabel: axisLabel(model, mode, axisValue),
-      groupTotal: candidateValueContribution(seed, mode),
+      groupTotal: additive ? candidateValueContribution(seed, mode) : null,
       // Single-member fallback — one series on the seed layer.
       groupMemberCount: 1,
     });
