@@ -269,4 +269,94 @@ describe("createPointerInspectQueue", () => {
     expect(queued[0]?.candidate?.id).toBe(seed.id);
     hitTest.mockRestore();
   });
+
+  it("does not teleport between qq_line endpoints mid-stroke under mode x or auto", () => {
+    // Regression: nearest(mode=x) misses mid-line (anchor maxDistance), then
+    // hitTest returned the path stroke and flipped left/right endpoints.
+    const qqModel = runPipeline(
+      gg(
+        [
+          { value: 1.1 },
+          { value: 2.0 },
+          { value: 2.6 },
+          { value: 3.1 },
+          { value: 3.4 },
+          { value: 3.9 },
+          { value: 4.2 },
+          { value: 4.8 },
+          { value: 5.3 },
+          { value: 5.9 },
+          { value: 6.7 },
+          { value: 8.1 },
+        ],
+        aes({ sample: "value" }),
+      )
+        .geomQqLine({ linewidth: 3.2 })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(qqModel.candidates.size).toBe(2);
+    const left = qqModel.candidates.candidate(0)!;
+    const right = qqModel.candidates.candidate(1)!;
+    const midX = (left.x + right.x) / 2;
+    const midY = (left.y + right.y) / 2;
+
+    for (const mode of ["x", "auto"] as const) {
+      const ids: Array<number | null> = [];
+      for (const point of [
+        { x: midX - 1, y: midY },
+        { x: midX + 1, y: midY },
+        { x: midX, y: midY },
+      ]) {
+        const queued: QueuedInspect[] = [];
+        const queue = createPointerInspectQueue({
+          model: () => qqModel,
+          reducer: () =>
+            makeReducer({
+              frameToken: () => token(20),
+              queuePointer: (action) => {
+                if (action.type === "inspect") queued.push(action);
+              },
+            }),
+          inspectionState: () => "none",
+          setInspection: noopCancel,
+        });
+        queue.schedule({
+          point,
+          source: "pointer",
+          mode,
+          maxDistance: 24,
+        });
+        ids.push(queued[0]?.candidate?.id ?? null);
+      }
+      // Mid-stroke must not hop between the two ends (prefer quiet null).
+      expect(new Set(ids.filter((id) => id !== null)).size).toBeLessThanOrEqual(1);
+      expect(ids.every((id) => id === null)).toBe(true);
+    }
+
+    // Ends still resolve under mode x.
+    for (const seed of [left, right]) {
+      const queued: QueuedInspect[] = [];
+      const queue = createPointerInspectQueue({
+        model: () => qqModel,
+        reducer: () =>
+          makeReducer({
+            frameToken: () => token(21),
+            queuePointer: (action) => {
+              if (action.type === "inspect") queued.push(action);
+            },
+          }),
+        inspectionState: () => "none",
+        setInspection: noopCancel,
+      });
+      queue.schedule({
+        point: { x: seed.x, y: seed.y },
+        source: "pointer",
+        mode: "x",
+        maxDistance: 24,
+      });
+      expect(queued[0]?.candidate?.id).toBe(seed.id);
+    }
+    qqModel.dispose();
+  });
 });

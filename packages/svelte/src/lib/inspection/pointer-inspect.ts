@@ -34,6 +34,33 @@ export type SchedulePointerInspectInput = {
   readonly maxDistance: number;
 };
 
+/**
+ * hitTest resurrection when nearest misses.
+ *
+ * Axis modes (`x` / `y` / `xy`) already applied maxDistance in nearest —
+ * including under coord_flip (dominant axis is screen y when flipped).
+ * hitTest ignores that policy and returns any mark under the pointer; on a
+ * two-vertex path (geom_qq_line) that teleports between endpoints mid-stroke.
+ *
+ * Exact keeps geometric stroke/fill hits. Auto only resurrects marks whose
+ * own autoMode is exact (points); line/area autoMode x/y stay quiet after a
+ * nearest miss — same contract as explicit axis modes, flip-safe without
+ * re-implementing nearest's distance formula here.
+ */
+function hitTestFallback(
+  model: RenderModel,
+  input: SchedulePointerInspectInput,
+): CandidateFacts | null {
+  if (input.mode === "x" || input.mode === "y" || input.mode === "xy") return null;
+  const hit = model.candidates.hitTest(input.point.x, input.point.y);
+  if (hit === null) return null;
+  if (input.mode === "auto") {
+    const resolved = hit.autoMode ?? "exact";
+    if (resolved !== "exact") return null;
+  }
+  return hit;
+}
+
 /** Cancel policy for pending pointer-inspect work. */
 export type CancelPointerInspectPolicy = {
   /** Leave/clear: discard stash. Cancel/down/blur tool paths: preserve. */
@@ -106,7 +133,7 @@ export function createPointerInspectQueue(deps: PointerInspectQueueDeps): Pointe
       match,
       source: input.source,
       epoch: model?.runId ?? 0,
-      fallbackCandidate: () => model?.candidates.hitTest(input.point.x, input.point.y) ?? null,
+      fallbackCandidate: () => (model === null ? null : hitTestFallback(model, input)),
     });
     const reducer = deps.reducer();
     queuedPointerInspection = frame.queued;

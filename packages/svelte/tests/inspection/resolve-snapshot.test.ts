@@ -18,6 +18,57 @@ import {
 } from "../../src/lib/inspection/resolver.js";
 
 describe("inspection snapshot resolve", () => {
+  it("qq_line tooltips expose theoretical + sample quantiles without a null value row", () => {
+    // Regression: only the two reference-line ends are candidates; their
+    // tooltips must not paint the raw sample input column as "–".
+    const data = [
+      { value: 1.1 },
+      { value: 2.0 },
+      { value: 2.6 },
+      { value: 3.1 },
+      { value: 3.4 },
+      { value: 3.9 },
+      { value: 4.2 },
+      { value: 4.8 },
+      { value: 5.3 },
+      { value: 5.9 },
+      { value: 6.7 },
+      { value: 8.1 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ sample: "value" }))
+        .geomQqLine()
+        .labs({ x: "Theoretical quantile", y: "Sample quantile" })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(model.candidates.size).toBe(2);
+    for (let id = 0; id < model.candidates.size; id++) {
+      const seed = model.candidates.candidate(id)!;
+      const inspection = resolveInspection({
+        model,
+        seed,
+        mode: "x",
+        state: "transient",
+        source: "pointer",
+        keyOf: () => null,
+      });
+      expect(typeof inspection.axisValue).toBe("number");
+      expect(Number.isFinite(inspection.axisValue as number)).toBe(true);
+      const xField = inspection.focus.fields.find((f) => f.channel === "x");
+      const yField = inspection.focus.fields.find((f) => f.channel === "y");
+      expect(xField?.field).toBe("theoretical");
+      expect(typeof xField?.value).toBe("number");
+      expect(Number.isFinite(xField?.value as number)).toBe(true);
+      expect(yField?.field).toBe("sample");
+      expect(typeof yField?.value).toBe("number");
+      expect(Number.isFinite(yField?.value as number)).toBe(true);
+      // No dead source-column "value: –" row.
+      expect(inspection.focus.fields.some((f) => f.field === "value")).toBe(false);
+    }
+    model.dispose();
+  });
+
   it("uses one core grouped target for focus, legend order, fields, and lineage", () => {
     const data = [
       { id: "a1", x: 1, y: 3, series: "a" },

@@ -37,6 +37,12 @@ export function resolveLayerFields(
     if (identityLike) {
       push("x", binding.xField);
       push("y", binding.yField);
+    } else if (stat === "qq" || stat === "qq_line") {
+      // aes.sample only — x/y are after_stat theoretical/sample quantiles.
+      // Do not advertise the input sample column: synthesized rows have NO_ROW
+      // and paint "value: –" on tooltips (qq_line inspect regression).
+      push("x", "theoretical", "stat");
+      push("y", "sample", "stat");
     } else {
       // Synthesized stat rows have no source row. Advertise only semantic
       // generated channels that CandidateFacts can resolve truthfully.
@@ -75,9 +81,7 @@ export function resolveLayerFields(
         stat === "contour" ||
         stat === "density_2d" ||
         stat === "density_2d_filled" ||
-        stat === "bin_hex" ||
-        stat === "qq" ||
-        stat === "qq_line"
+        stat === "bin_hex"
       ) {
         push("y", "y", "stat");
       }
@@ -108,7 +112,8 @@ export function resolveLayerFields(
     }
     push("label", binding.labelField);
     push("weight", binding.weightField);
-    push("sample", binding.sampleField);
+    // qq / qq_line: sample is after_stat y (handled above), not the input column.
+    if (stat !== "qq" && stat !== "qq_line") push("sample", binding.sampleField);
     return fields;
   });
 }

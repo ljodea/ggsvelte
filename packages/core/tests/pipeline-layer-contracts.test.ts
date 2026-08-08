@@ -141,6 +141,28 @@ describe("resolveLayerFields", () => {
     expect(fields[0]).toEqual([]);
     expect(fields[1]).toEqual([]);
   });
+
+  it("qq / qq_line advertise theoretical + sample quantiles as stat x/y, not the input sample column", () => {
+    // Regression: qq_line tooltips painted sample→source "value" as null (NO_ROW
+    // synthesized rows) and omitted theoretical because aes.x is unset.
+    const sampleTable = ColumnTable.fromRows([{ value: 1.1 }, { value: 2 }, { value: 3.4 }]);
+    for (const geom of ["qq", "qq_line"] as const) {
+      const binding = bindLayer(
+        { geom, aes: { sample: { field: "value" } }, stat: geom },
+        0,
+        sampleTable,
+        [],
+      );
+      const fields = resolveLayerFields(1, [binding])[0]!;
+      const x = fields.find((f) => f.channel === "x");
+      const y = fields.find((f) => f.channel === "y");
+      expect(x).toEqual({ channel: "x", field: "theoretical", source: "stat" });
+      expect(y).toEqual({ channel: "y", field: "sample", source: "stat" });
+      // Input sample column is not a tooltip reading for after_stat marks.
+      expect(fields.some((f) => f.channel === "sample" && f.source !== "stat")).toBe(false);
+      expect(fields.some((f) => f.field === "value")).toBe(false);
+    }
+  });
 });
 
 describe("resolveLayerScaledConstants", () => {
