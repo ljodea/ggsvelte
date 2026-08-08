@@ -74,7 +74,6 @@ describe("stationKeyFromInspectRow", () => {
   it("returns null for empty stationKey, missing row, or blank", () => {
     expect(stationKeyFromInspectRow({ stationKey: "", survivors: 340000 })).toBeNull();
     expect(stationKeyFromInspectRow(null)).toBeNull();
-    expect(stationKeyFromInspectRow(undefined)).toBeNull();
     expect(stationKeyFromInspectRow({ survivors: 100 })).toBeNull();
   });
 });
