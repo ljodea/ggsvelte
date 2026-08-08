@@ -1,7 +1,7 @@
 /**
- * Slice B: map-panel tooltips must carry Minard's cold date.
- * attachColdDatesToTroops stamps the nearest Column-1 retreat vertex;
- * the live Example maps label:"date" on that path so default Inspect shows it.
+ * Slice B/C: map-panel tooltips carry Minard's cold date on station points.
+ * attachColdDatesToTroops remains available for stamped troop tables; the live
+ * Example maps label:"date" on minardColdStations points only (unique keys).
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -49,21 +49,6 @@ describe("attachColdDatesToTroops", () => {
 describe("path/trajectory Example map date tooltip wiring", () => {
   const source = readFileSync(EXAMPLE, "utf8");
 
-  it("uses the date-stamped troop table on the march path", () => {
-    expect(source).toContain("minardTroopsWithCold");
-    expect(source).toMatch(/data=\{minardTroopsWithCold\}/);
-  });
-
-  it("does not map date on the troop path (avoids empty date rows on Advance pins)", () => {
-    const dataAt = source.indexOf("data={minardTroopsWithCold}");
-    expect(dataAt).toBeGreaterThan(-1);
-    const openAt = source.lastIndexOf("<GeomPath", dataAt);
-    const closeAt = source.indexOf("/>", dataAt);
-    const troopPath = source.slice(openAt, closeAt + 2);
-    expect(troopPath).not.toMatch(/label:\s*["']date["']/);
-    expect(troopPath).not.toContain("inspect={false}");
-  });
-
   it("maps label to date on cold-station points so map pin shows the date", () => {
     expect(source).toContain("minardColdStations");
     const stationPoint = source.match(
@@ -72,5 +57,11 @@ describe("path/trajectory Example map date tooltip wiring", () => {
     expect(stationPoint).toBeDefined();
     expect(stationPoint!).toMatch(/label:\s*["']date["']/);
     expect(stationPoint!).not.toContain("inspect={false}");
+  });
+
+  it("keeps the march path free of stationKey collisions (plain minardTroops)", () => {
+    const mapPlot = (source.match(/<GGPlot[\s\S]*?<\/GGPlot>/g) ?? [])[0] ?? "";
+    expect(mapPlot).toMatch(/data=\{minardTroops\}/);
+    expect(mapPlot).not.toContain("minardTroopsWithCold");
   });
 });
