@@ -21,9 +21,6 @@
   } = $props();
 
   let fieldsetEl = $state<HTMLFieldSetElement | null>(null);
-  /** Bumps on every toggle/reset so deferred DOM applies from a prior click
-   * cannot overwrite a later state (reset after hide-all was the first footgun). */
-  let applyGeneration = 0;
 
   function syncCheckboxDom(): void {
     if (fieldsetEl === null) return;
@@ -38,6 +35,16 @@
     }
   }
 
+  function liveVisible(target: FilterableLegendEntry): boolean | null {
+    const row = entries.find(
+      (candidate) =>
+        candidate.legend.scale === target.legend.scale &&
+        candidate.field === target.field &&
+        encodeKey(candidate.entry.value) === encodeKey(target.entry.value),
+    );
+    return row === undefined ? null : row.visible;
+  }
+
   function onReset(event: MouseEvent): void {
     // Mirror the controller's no-op guard: a reset with no active filters
     // must not move keyboard focus (original resetLegendFilters early-
@@ -46,7 +53,6 @@
     // Capture first checkbox before reset (which may unmount the button).
     // Controller retains zero DOM/querySelector behavior.
     const returnTarget = fieldsetEl?.querySelector<HTMLElement>("input");
-    applyGeneration += 1;
     controller.reset(event);
     queueMicrotask(() => {
       syncCheckboxDom();
@@ -55,18 +61,21 @@
   }
 
   /**
-   * Drive checkbox DOM from controller state — never through Svelte's
-   * checked={} binding. set_checked caches the last write and skips DOM
-   * updates; trusted label clicks then leave input.checked stuck after the
-   * UA mutates the IDL outside the JS setter. We own the property instead.
+   * Force the controlled checkbox after toggle. Keep checked={target.visible}
+   * for SSR/initial markup. Re-assert the property through microtask + rAF +
+   * short timeouts, always re-reading live visibility so a later catalog or
+   * mode reset cannot be overwritten with a stale click-time value. Needed
+   * because Svelte's set_checked caches the last write and skips DOM updates
+   * when the UA mutates the IDL outside the JS setter after the flush.
    */
   function onToggle(target: FilterableLegendEntry, event: MouseEvent): void {
-    const visible = controller.toggle(target, event);
+    controller.toggle(target, event);
     const input = event.currentTarget;
     if (!(input instanceof HTMLInputElement)) return;
-    const generation = (applyGeneration += 1);
     const apply = (): void => {
-      if (generation !== applyGeneration) return;
+      if (!input.isConnected) return;
+      const visible = liveVisible(target);
+      if (visible === null) return;
       input.checked = visible;
     };
     apply();
@@ -94,6 +103,7 @@
       <label>
         <input
           type="checkbox"
+          checked={target.visible}
           aria-label={`Show ${target.entry.label}`}
           onpointerdown={(event) =>
             controller.setPointerType(event.pointerType)}
