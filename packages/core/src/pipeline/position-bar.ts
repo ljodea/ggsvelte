@@ -54,13 +54,15 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     frame.ymax = ymax;
     // Fresh array — yNumeric may alias a table-cached column (identity) or a
     // stat series (forwardMeasureOnce with no transform); never mutate in place.
-    // Segment height matches axis space: share for fill, contribution for stack.
-    // Negative runs stack below 0 (ymax ≤ 0, ymin more negative), so re-sign.
-    const heights = new Float64Array(frame.n);
-    for (let i = 0; i < frame.n; i++) {
-      heights[i] = signedStackSegmentHeight(ymin[i]!, ymax[i]!);
+    // Only rewrite under identity measure transforms: with log/sqrt, ymin/ymax
+    // live in transformed space and heights are not invertible to data values.
+    if (frame.binding.yTransform === undefined) {
+      const heights = new Float64Array(frame.n);
+      for (let i = 0; i < frame.n; i++) {
+        heights[i] = signedStackSegmentHeight(ymin[i]!, ymax[i]!);
+      }
+      frame.yNumeric = heights;
     }
-    frame.yNumeric = heights;
     return true;
   }
   // identity / dodge: bars grow from the shared transformed-origin baseline.

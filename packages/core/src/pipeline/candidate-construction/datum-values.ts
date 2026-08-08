@@ -120,6 +120,9 @@ function stackOrFillSegmentHeight(
   // Partial frames (unit fixtures) may omit binding — treat as non-stack.
   const geom = frame.binding?.layer?.geom;
   if (geom === undefined || !isBarLike(geom)) return undefined;
+  // Transformed measure axes stack in transform space; a height is not
+  // invertible to a data value (log: 10^(a−b) = ratio). Keep prior path.
+  if (frame.binding?.yTransform !== undefined) return undefined;
   const position = frame.binding?.layer?.position ?? "identity";
   if (position !== "stack" && position !== "fill") return undefined;
   const lo = frame.ymin[frameRow];
