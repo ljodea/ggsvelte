@@ -118,11 +118,13 @@ export function enrichPaintLegendKeys(
   }
   if (shapeByKey.size === 0) return input;
 
-  const previousKeyOf = input.keyOf;
+  // Capture as a free function so oxlint unbound-method does not flag the
+  // method reference when we call it from the enriched keyOf.
+  const previousKeyOf = (value: unknown) => input.keyOf?.(value);
   return {
     ...input,
     keyOf(value: unknown): LegendKeyStyle {
-      const key: LegendKeyStyle = { ...previousKeyOf?.(value) };
+      const key: LegendKeyStyle = { ...previousKeyOf(value) };
       // Preserve a shape already supplied by a merged shape scale.
       if (key.shape !== undefined) return key;
       try {

@@ -34,8 +34,14 @@ function normalizeUids(svg: string | undefined): string | undefined {
   return svg?.replaceAll(/c\d+-clip/g, "clip");
 }
 
+/** Mark circles only — colour legends also draw circle keys, so a bare
+ *  `circle` query would count keys as data points. */
+function markCircles(container: HTMLElement): Element[] {
+  return [...container.querySelectorAll(".gg-points circle")];
+}
+
 function circleFills(container: HTMLElement): string[] {
-  return [...container.querySelectorAll("circle")].map((c) => c.getAttribute("fill") ?? "");
+  return markCircles(container).map((c) => c.getAttribute("fill") ?? "");
 }
 
 describe("<GGPlot> props-first", () => {
@@ -47,7 +53,7 @@ describe("<GGPlot> props-first", () => {
     const svg = container.querySelector("svg.gg-plot");
     expect(svg).not.toBeNull();
     expect(svg?.getAttribute("role")).toBe("img");
-    expect(container.querySelectorAll("circle")).toHaveLength(4);
+    expect(markCircles(container)).toHaveLength(4);
     expect(container.querySelectorAll(".gg-axis-x .gg-tick").length).toBeGreaterThan(1);
     const fills = circleFills(container);
     expect(new Set(fills).size).toBe(2); // two series, two colors
@@ -61,9 +67,9 @@ describe("<GGPlot> props-first", () => {
       width: 480,
       height: 320,
     });
-    expect(container.querySelectorAll("circle")).toHaveLength(4);
+    expect(markCircles(container)).toHaveLength(4);
     await rerender({ data: rows.slice(0, 2) });
-    expect(container.querySelectorAll("circle")).toHaveLength(2);
+    expect(markCircles(container)).toHaveLength(2);
   });
 });
 
