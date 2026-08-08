@@ -1,6 +1,5 @@
 /**
- * Gallery meta teaches inspect + cold dates + cross-chart highlight —
- * not Select-point dual-tool chrome.
+ * Gallery meta: dual inspect panels that share longitude, not linked selection.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -17,29 +16,38 @@ describe("path/trajectory meta polish", () => {
     journey?: { pointer?: string; keyboard?: string; touch?: string };
   };
 
-  it("tags the example for inspect + linked-views discovery", () => {
+  it("tags inspect without linked-views (series are independent)", () => {
     expect(meta.tags).toContain("inspect");
     expect(meta.tags).toContain("path");
-    expect(meta.tags).toContain("linked-views");
+    expect(meta.tags).not.toContain("linked-views");
   });
 
-  it("describes the cold strip and linked highlight without Select-point chrome", () => {
-    expect(meta.description.toLowerCase()).toMatch(/cold|date|retreat|minard/);
-    expect(meta.description.toLowerCase()).not.toMatch(/select point/);
+  it("describes the cold strip without cross-chart highlight claims", () => {
+    const blob = [
+      meta.description,
+      meta.journey?.pointer ?? "",
+      meta.journey?.keyboard ?? "",
+      meta.journey?.touch ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+    expect(blob).toMatch(/cold|date|retreat|minard/);
+    expect(blob).not.toMatch(/select point|clear selection/);
+    expect(blob).not.toMatch(/highlight|linked|same station|lights the/);
   });
 
-  it("ships a journey pointer for hover/pin + strip highlight", () => {
+  it("ships a journey pointer for pin/hover on each panel", () => {
     const pointer = meta.journey?.pointer ?? "";
     expect(pointer).toMatch(/pin|hover|inspect|date/i);
-    expect(pointer.toLowerCase()).not.toMatch(/select point|clear selection/);
-    expect(pointer.toLowerCase()).toMatch(/strip|below|other|highlight|same/);
+    expect(pointer.toLowerCase()).not.toMatch(/select point|clear selection|highlight/);
   });
 });
 
 describe("path/trajectory cold subtitle", () => {
-  it("does not teach Select-point linking between strip and map", () => {
+  it("does not teach linking between strip and map", () => {
     const source = readFileSync(EXAMPLE, "utf8");
     expect(source).not.toMatch(/Select a reading to highlight the same station/);
+    expect(source).not.toMatch(/mark the same station|linked station|highlight the same/i);
   });
 
   it("keeps both plots free of forced point-select tool defaults", () => {

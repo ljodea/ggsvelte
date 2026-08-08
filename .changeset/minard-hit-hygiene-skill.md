@@ -6,6 +6,6 @@
 "@ggsvelte/svelte": patch
 ---
 
-Document Minard-class ring-anchor points in multi-layer hit hygiene guidance.
+Teach Minard-class multi-layer hit hygiene without inventing ring-anchor links across series of different cardinality.
 
 Migration: none — skill reference only.

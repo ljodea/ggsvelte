@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
     CoordFixed,
-    createPlotInteraction,
     GeomPath,
     GeomPoint,
     GeomText,
@@ -13,40 +12,16 @@
     ScaleXContinuous,
     ThemeClassic,
   } from "@ggsvelte/svelte";
-  import type { PlotInspection, PlotInspectionChange } from "@ggsvelte/svelte";
+  import type { PlotInspectionChange } from "@ggsvelte/svelte";
 
   import {
     campaignRivers,
     minardCityLabels,
-    minardColdStations,
+    minardCold,
     minardStrengthLabels,
-    minardTroopsWithCold,
+    minardTroops,
   } from "./data.js";
-  import {
-    coldStripTooltipFields,
-    mapMarchTooltipFields,
-    mapRowIdentity,
-    stationKeyFromInspectRow,
-  } from "./tooltip.js";
-
-  // Inspect-driven linked selection (no Select-point tool → no dual-tool chrome).
-  // oninspect publishes stationKey; both plots passively paint selection rings.
-  // Selection is sticky: only update when a cold station is in focus. Inspect
-  // clear / advance vertices must not wipe the ring — otherwise moving to the
-  // other chart to look at the highlight erases it.
-  const interaction = createPlotInteraction<string>();
-  const scope = { keys: "minard-cold-station" } as const;
-
-  function syncStationSelection(
-    event: PlotInspection<Record<string, unknown>, PropertyKey>,
-  ): void {
-    if (event.phase === "clear") return;
-    const key = stationKeyFromInspectRow(
-      event.focus.row as Record<string, unknown> | null,
-    );
-    if (key === null) return;
-    interaction.setSelection([key], { scope, source: "programmatic" });
-  }
+  import { coldStripTooltipFields, mapMarchTooltipFields } from "./tooltip.js";
 </script>
 
 {#snippet mapTooltip(
@@ -55,7 +30,6 @@
   {@const fields = mapMarchTooltipFields(
     (inspection.focus.row ?? {}) as {
       survivors?: unknown;
-      date?: unknown;
     },
   )}
   {#if fields.length > 0}
@@ -92,13 +66,7 @@
 {/snippet}
 
 <div class="minard">
-  <GGPlot
-    width={960}
-    height={520}
-    {interaction}
-    interactionScope={scope}
-    oninspect={syncStationSelection}
-  >
+  <GGPlot width={960} height={520}>
     <GeomPath
       data={campaignRivers}
       aes={{ x: "long", y: "lat", group: "river", color: { value: "#8fa8c0" } }}
@@ -106,9 +74,8 @@
       alpha={0.7}
       inspect={false}
     />
-    <!-- Stamped cold dates/stationKey on retreat vertices for pin + link -->
     <GeomPath
-      data={minardTroopsWithCold}
+      data={minardTroops}
       aes={{
         x: "long",
         y: "lat",
@@ -116,18 +83,6 @@
         color: "direction",
         linewidth: "survivors",
       }}
-    />
-    <!-- Quiet ring anchors only (not a second figurative series). Station keys
-         live here; path vertices keep unique non-link identity. -->
-    <GeomPoint
-      data={minardColdStations}
-      aes={{
-        x: "long",
-        y: "lat",
-        color: { value: "#25221e" },
-      }}
-      size={1.75}
-      alpha={0.4}
     />
     <GeomText
       data={minardCityLabels}
@@ -164,23 +119,10 @@
       color=""
       linewidth="Survivors"
     />
-    <Inspect
-      mode="xy"
-      pin
-      maxDistance={24}
-      identity={mapRowIdentity}
-      content={mapTooltip}
-    />
+    <Inspect mode="xy" pin maxDistance={24} content={mapTooltip} />
   </GGPlot>
 
-  <GGPlot
-    data={minardColdStations}
-    width={960}
-    height={190}
-    {interaction}
-    interactionScope={scope}
-    oninspect={syncStationSelection}
-  >
+  <GGPlot data={minardCold} width={960} height={190}>
     <GeomPath
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
@@ -199,17 +141,11 @@
     <ThemeClassic />
     <Labs
       title="The cold on the road back"
-      subtitle="Temperature on the retreat, degrees Réaumur — pin a reading to mark the same station on the map"
+      subtitle="Temperature on the retreat, degrees Réaumur — dates as Minard marked them"
       x="Longitude east"
       y="°Réaumur"
     />
-    <Inspect
-      mode="xy"
-      pin
-      maxDistance={24}
-      identity="stationKey"
-      content={coldTooltip}
-    />
+    <Inspect mode="xy" pin maxDistance={24} content={coldTooltip} />
   </GGPlot>
 </div>
 
