@@ -373,7 +373,7 @@
     },
     "ribbon/paint": {
       "filename": "ribbon-paint-light.png",
-      "sourceSha256": "159b66375811316387fbc0770e865a81b07e97b0478dd6e47c5b02f80e91375f",
+      "sourceSha256": "af25de2c8d0dc943c5301c3b3602548e0b2f62798ce0f28894f0a95aa99a74bd",
       "pngSha256": "f5039b1f13b2360d1dd0a404ded7c98ab47090e7059b1584b954860830e2f0fe"
     },
     "rug/ticks": {
@@ -458,7 +458,7 @@
     },
     "tile/heatmap": {
       "filename": "tile-heatmap-light.png",
-      "sourceSha256": "fdb6f9850842963e13a9c084c3896030a8d7ce63399bbd6b2eac414e4c452b85",
+      "sourceSha256": "ee5d628a0644dca783a323f28342ce4002d63c42aca1c2f2524e15f40b67a164",
       "pngSha256": "19bc71b1103f298ecdbbc69b1dd1f4bdd791c6e27df82ae6a30d34ba3b26c857"
     },
     "vline/cutoff": {

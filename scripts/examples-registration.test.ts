@@ -1,15 +1,21 @@
 /**
- * Guard (#1420): stat overrides in shipped examples must register their family.
+ * Guard (#1420): shipped examples must register every non-basic stat/geom they
+ * use outside a self-registering <Geom*> shell.
  *
- * GGPlot registers the basic tier (identity + count/sum) at runtime and each
- * generated <Geom*> shell registers only its own geom batch + default stat.
- * An example that passes `stat="<name>"` for a non-basic stat must call the
- * matching register<Family>() function itself, or the chart throws
- * "Stat <name> is not registered in this build" when the live example mounts.
+ * GGPlot registers the basic tier (identity + count/sum, scatter/line/bar/…)
+ * at runtime and each generated <Geom*> shell registers only its own geom
+ * batch + default stat. Two failure modes when that is not enough:
+ *
+ * 1. An example that passes `stat="<name>"` for a non-basic stat must call the
+ *    matching register<Family>() function itself, or the chart throws
+ *    "Stat <name> is not registered in this build" when the live example mounts.
+ * 2. An example that mounts via `{spec}` without a matching <Geom*> child must
+ *    call the matching register for every non-basic geom in sibling `spec.ts`,
+ *    or the chart throws "Geom <name> is not registered in this build".
  *
  * This static lint parses the granular register modules for their
- * stat-name → function-name mapping, scans every examples/* Example.svelte
- * for stat overrides, and requires the matching call in the file source.
+ * name → function-name mapping, scans every examples/* Example.svelte, and
+ * requires the matching call in the file source.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -23,9 +29,13 @@ const ROOT = join(import.meta.dir, "..");
 const EXAMPLES = join(ROOT, "examples");
 const REGISTER_DIR = join(ROOT, "packages/core/src/pipeline");
 
-/** stat name -> register function, parsed from the granular register modules. */
-function statRegisterMap(): Map<string, string> {
-  const map = new Map<string, string>();
+/** Parse every register-*.ts module once: name → registerFn for stats and geoms. */
+function registerMaps(): {
+  stats: Map<string, string>;
+  geoms: Map<string, string>;
+} {
+  const stats = new Map<string, string>();
+  const geoms = new Map<string, string>();
   for (const entry of readdirSync(REGISTER_DIR)) {
     if (!/^register-.+\.ts$/.test(entry)) continue;
     const source = readFileSync(join(REGISTER_DIR, entry), "utf8");
@@ -33,10 +43,24 @@ function statRegisterMap(): Map<string, string> {
     if (fn === undefined) continue;
     for (const match of source.matchAll(/registerStatFrame\("([a-z0-9_]+)"/g)) {
       const statName = match[1];
-      if (statName !== undefined) map.set(statName, fn);
+      if (statName !== undefined) stats.set(statName, fn);
+    }
+    for (const match of source.matchAll(/registerGeomBatch\("([a-z0-9_]+)"/g)) {
+      const geomName = match[1];
+      if (geomName !== undefined) geoms.set(geomName, fn);
     }
   }
-  return map;
+  return { stats, geoms };
+}
+
+/** stat name -> register function, parsed from the granular register modules. */
+function statRegisterMap(): Map<string, string> {
+  return registerMaps().stats;
+}
+
+/** geom name -> register function for specialty geoms outside registerBasic(). */
+function geomRegisterMap(): Map<string, string> {
+  return registerMaps().geoms;
 }
 
 /** Stats every GGPlot app already has: the registerBasic() tier + identity. */
@@ -48,6 +72,42 @@ function basicStats(): Set<string> {
     if (statName !== undefined) stats.add(statName);
   }
   return stats;
+}
+
+/** Geoms every GGPlot app already has via registerBasic(). */
+function basicGeoms(): Set<string> {
+  const source = readFileSync(join(REGISTER_DIR, "geometry-register-basic.ts"), "utf8");
+  const geoms = new Set<string>();
+  for (const match of source.matchAll(/registerGeomBatch\("([a-z0-9_]+)"/g)) {
+    const geomName = match[1];
+    if (geomName !== undefined) geoms.add(geomName);
+  }
+  return geoms;
+}
+
+/** `.geomTile()` / `.geomDensity2dFilled()` → `tile` / `density_2d_filled`. */
+function geomMethodToName(method: string): string {
+  return method
+    .replaceAll(/([a-z])([0-9])/g, "$1_$2")
+    .replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .toLowerCase();
+}
+
+/** Drop JS/HTML comments so comment prose cannot fake a Geom child. */
+function stripComments(source: string): string {
+  return source
+    .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+    .replaceAll(/(^|[^:])\/\/.*$/gm, "$1")
+    .replaceAll(/<!--[\s\S]*?-->/g, "");
+}
+
+/** True when Example.svelte mounts a portable spec without a Geom* child. */
+function isBareSpecExample(source: string): boolean {
+  const code = stripComments(source);
+  const usesSpec = /\{spec\}|\bspec=\{/.test(code);
+  const hasGeomChild = /<Geom[A-Z][A-Za-z0-9]*[\s/>]/.test(code);
+  return usesSpec && !hasGeomChild;
 }
 
 function exampleFiles(): string[] {
@@ -131,5 +191,52 @@ describe("example stat overrides register their family (#1420)", () => {
       }
     }
     expect(violations).toEqual([]);
+  });
+});
+
+describe("bare-spec examples register non-basic geoms (#1420)", () => {
+  it("every non-basic geom in a bare-{spec} Example.svelte has its register call in-file", () => {
+    const registers = geomRegisterMap();
+    const basic = basicGeoms();
+    const violations: string[] = [];
+    for (const file of exampleFiles()) {
+      const source = readFileSync(file, "utf8");
+      if (!isBareSpecExample(source)) continue;
+      const specPath = join(file, "..", "spec.ts");
+      let specSource: string;
+      try {
+        specSource = readFileSync(specPath, "utf8");
+      } catch {
+        violations.push(`${file}: bare {spec} mount but sibling spec.ts is missing`);
+        continue;
+      }
+      const geoms = new Set<string>();
+      for (const match of specSource.matchAll(/\.geom([A-Z][A-Za-z0-9]*)\s*\(/g)) {
+        const method = match[1];
+        if (method === undefined) continue;
+        geoms.add(geomMethodToName(method));
+      }
+      for (const geom of geoms) {
+        if (basic.has(geom)) continue;
+        const fn = registers.get(geom);
+        if (fn === undefined) {
+          violations.push(`${file}: geom "${geom}" has no granular register module`);
+          continue;
+        }
+        if (!source.includes(`${fn}()`) && !source.includes("registerAll()")) {
+          violations.push(
+            `${file}: bare {spec} geom "${geom}" needs ${fn}() — no <Geom*> child self-registers it`,
+          );
+        }
+      }
+    }
+    expect(violations).toEqual([]);
+  });
+
+  it("the geom register map covers specialty families bare-spec examples use", () => {
+    const registers = geomRegisterMap();
+    expect(registers.get("tile")).toBe("registerTile");
+    expect(registers.get("hex")).toBe("registerHex");
+    expect(registers.get("raster")).toBe("registerRaster");
   });
 });
