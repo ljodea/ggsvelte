@@ -11,6 +11,7 @@ import {
   HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   INTERACTION_DIAGNOSTIC_CATALOG,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "../../src/lib/interaction/interaction.js";
@@ -94,6 +95,12 @@ describe("inspectAxisOnBarColDiagnostics", () => {
       "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
       "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+      "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+      "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+      "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+      "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
     ] as const) {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[code].code).toBe(code);
     }
@@ -124,6 +131,34 @@ describe("inspectAxisOnBarColDiagnostics", () => {
         expect(INTERACTION_DIAGNOSTIC_CATALOG[code].message.toLowerCase()).toContain("coord_flip");
       }
     });
+  });
+});
+
+describe("inspectAxisOnDistributionDiagnostics (#1528)", () => {
+  // Full matrix lives in packages/core/tests/inspect-geom-advisories.test.ts.
+  // Host re-export smoke: always-band geoms fire; interval geoms need discreteBandAxis.
+  it("re-exports always-band advisories and gates interval geoms on discreteBandAxis", () => {
+    expect(inspectAxisOnDistributionDiagnostics("x", ["violin"]).map((d) => d.code)).toEqual([
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    ]);
+    expect(inspectAxisOnDistributionDiagnostics("x", ["errorbar"])).toEqual([]);
+    expect(
+      inspectAxisOnDistributionDiagnostics("x", ["errorbar"], { discreteBandAxis: true }).map(
+        (d) => d.code,
+      ),
+    ).toEqual(["INTERACTION_INSPECT_AXIS_ON_ERRORBAR"]);
+  });
+
+  it("covers the concrete gallery bad case: violin + categorical x + mode x", () => {
+    const list = inspectAxisOnDistributionDiagnostics("x", ["violin"]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      severity: "advisory",
+      prop: "inspect.mode",
+      actual: "x",
+    });
+    expect(list[0]?.suggestions.some((s) => s.includes("exact"))).toBe(true);
   });
 });
 

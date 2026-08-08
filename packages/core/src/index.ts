@@ -460,6 +460,7 @@ export {
   INSPECT_GEOM_DIAGNOSTIC_CATALOG,
   INSPECT_INTENT_MODES,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   isInspectIntentMode,
   layerGeomsFromSpecLayers,

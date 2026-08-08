@@ -8,6 +8,7 @@ import {
   HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   INSPECT_GEOM_DIAGNOSTIC_CATALOG,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   isInspectIntentMode,
   layerGeomsFromSpecLayers,
@@ -137,6 +138,86 @@ describe("layerGeomsFromSpecLayers", () => {
   });
 });
 
+describe("inspectAxisOnDistributionDiagnostics (#1528)", () => {
+  const CODE_BY_GEOM = {
+    violin: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    boxplot: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    errorbar: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    linerange: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    pointrange: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    crossbar: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+  } as const;
+
+  it("is empty when inspect is off or mode is auto/exact", () => {
+    expect(inspectAxisOnDistributionDiagnostics(null, ["violin"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("auto", ["violin", "boxplot"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("exact", ["errorbar"])).toEqual([]);
+  });
+
+  it("is empty when mode is an axis guide but no distribution/interval layers exist", () => {
+    expect(inspectAxisOnDistributionDiagnostics("x", ["point", "line"])).toEqual([]);
+    expect(inspectAxisOnDistributionDiagnostics("xy", ["col", "bar"])).toEqual([]);
+  });
+
+  it("always advises violin/boxplot under mode x (no scale flag needed)", () => {
+    for (const geom of ["violin", "boxplot"] as const) {
+      const list = inspectAxisOnDistributionDiagnostics("x", [geom]);
+      expect(list).toHaveLength(1);
+      expect(list[0]).toMatchObject({
+        code: CODE_BY_GEOM[geom],
+        severity: "advisory",
+        prop: "inspect.mode",
+        actual: "x",
+      });
+    }
+  });
+
+  it("skips interval geoms unless discreteBandAxis is true", () => {
+    for (const geom of ["errorbar", "linerange", "pointrange", "crossbar"] as const) {
+      expect(inspectAxisOnDistributionDiagnostics("x", [geom])).toEqual([]);
+    }
+    for (const geom of ["errorbar", "linerange", "pointrange", "crossbar"] as const) {
+      const list = inspectAxisOnDistributionDiagnostics("x", [geom], {
+        discreteBandAxis: true,
+      });
+      expect(list).toHaveLength(1);
+      expect(list[0]).toMatchObject({
+        code: CODE_BY_GEOM[geom],
+        severity: "advisory",
+        actual: "x",
+      });
+    }
+  });
+
+  it("advises for mode y and xy on always-band geoms", () => {
+    expect(inspectAxisOnDistributionDiagnostics("y", ["violin"]).map((d) => d.code)).toEqual([
+      "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    ]);
+    expect(inspectAxisOnDistributionDiagnostics("xy", ["boxplot"])[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+      actual: "xy",
+    });
+  });
+
+  it("covers the concrete gallery bad case: violin + categorical x + mode x", () => {
+    const list = inspectAxisOnDistributionDiagnostics("x", ["violin"]);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+      severity: "advisory",
+      prop: "inspect.mode",
+      actual: "x",
+    });
+    expect(list[0]?.suggestions.some((s) => s.includes("exact"))).toBe(true);
+  });
+
+  it("keeps catalog code equal to its key for AXIS_ON_* entries", () => {
+    for (const code of Object.values(CODE_BY_GEOM)) {
+      expect(INSPECT_GEOM_DIAGNOSTIC_CATALOG[code].code).toBe(code);
+    }
+  });
+});
+
 describe("collectInspectIntentDiagnostics", () => {
   it("emits INTERACTION_INSPECT_X_ON_COL from PortableSpec layers + host intent", () => {
     const list = collectInspectIntentDiagnostics([{ geom: "col" }], "xy");
@@ -148,10 +229,27 @@ describe("collectInspectIntentDiagnostics", () => {
     expect(list.map((d) => d.code)).toEqual(["INTERACTION_INSPECT_X_ON_BAR"]);
   });
 
+  it("emits AXIS_ON_VIOLIN for violin + mode x (#1528)", () => {
+    const list = collectInspectIntentDiagnostics([{ geom: "violin" }], "x");
+    expect(list.map((d) => d.code)).toEqual(["INTERACTION_INSPECT_AXIS_ON_VIOLIN"]);
+  });
+
+  it("does not emit AXIS_ON_ERRORBAR without discreteBandAxis (continuous shared-x is legit)", () => {
+    expect(collectInspectIntentDiagnostics([{ geom: "errorbar" }], "x").map((d) => d.code)).toEqual(
+      [],
+    );
+    expect(
+      collectInspectIntentDiagnostics([{ geom: "errorbar" }], "x", {
+        discreteBandAxis: true,
+      }).map((d) => d.code),
+    ).toEqual(["INTERACTION_INSPECT_AXIS_ON_ERRORBAR"]);
+  });
+
   it("is silent without host intent or for auto/exact", () => {
     expect(collectInspectIntentDiagnostics([{ geom: "col" }], null)).toEqual([]);
     expect(collectInspectIntentDiagnostics([{ geom: "col" }], "auto")).toEqual([]);
     expect(collectInspectIntentDiagnostics([{ geom: "col" }], "exact")).toEqual([]);
+    expect(collectInspectIntentDiagnostics([{ geom: "violin" }], "auto")).toEqual([]);
   });
 });
 

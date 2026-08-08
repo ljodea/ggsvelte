@@ -14,6 +14,7 @@ export {
   discreteColorFillDomainSizes,
   HIGH_CARDINALITY_DISCRETE_THRESHOLD,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
 } from "./inspect-geom-advisories.js";

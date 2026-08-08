@@ -46,7 +46,7 @@
 | `col/value-labels`            | `exact`                                                   | yes | 0                   | pass     |                                                          |
 | `color/binned`                | `xy maxDistance=24`                                       | yes | 0                   | pass     |                                                          |
 | `contour/basic`               | `x`                                                       | yes | 0                   | pass     |                                                          |
-| `crossbar/boxes`              | `x`                                                       | yes | 0                   | pass     | mode=x allowlisted (category-center snap)                |
+| `crossbar/boxes`              | `exact`                                                   | yes | 0                   | fixed    | mode=exact with #1528 axis-guide contract on band geoms  |
 | `curve/connectors`            | `xy maxDistance=24`                                       | yes | 0                   | pass     |                                                          |
 | `density/kde-2d`              | `xy maxDistance=24`                                       | yes | 0                   | pass     |                                                          |
 | `density/kde-2d-filled`       | `xy maxDistance=24`                                       | yes | 0                   | pass     |                                                          |

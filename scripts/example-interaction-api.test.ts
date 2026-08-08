@@ -123,10 +123,9 @@ describe("example interaction API (v0.20)", () => {
    * Discrete / categorical interval and distribution examples must not use
    * freescrolling axis-guide modes (`x` / `xy`). Those modes freescroll across
    * category slots and blank x tooltip rows. Hit the mark geometry with
-   * `mode="exact"` instead (#1529).
+   * `mode="exact"` instead (#1528 library contract; #1529 gallery audit).
    *
    * Continuous shared-x series (lines, areas, densities) keep `mode="x"`.
-   * `crossbar/boxes` is allowlisted: category-center snap makes `x` feel OK.
    */
   const DISCRETE_INTERVAL_EXACT = [
     "boxplot/violin",
@@ -136,6 +135,7 @@ describe("example interaction API (v0.20)", () => {
     "errorbar/summary-bin",
     "pointrange/midpoints",
     "linerange/stems",
+    "crossbar/boxes",
   ] as const;
 
   for (const id of DISCRETE_INTERVAL_EXACT) {

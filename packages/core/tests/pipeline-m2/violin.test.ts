@@ -70,13 +70,14 @@ describe("geom_violin", () => {
     expect(lo).toBeLessThan(hi);
   });
 
-  it("uses x auto hit mode", () => {
+  it("uses exact auto hit mode (#1528)", () => {
     const model = runPipeline(
       gg(rows(), aes({ x: "cat", y: "v" }))
         .geomViolin({ n: 32 })
         .spec(),
       size,
     );
-    expect(model.candidates.candidate(0)?.autoMode).toBe("x");
+    // Discrete-band distribution: freescrolling x guides cut the density body.
+    expect(model.candidates.candidate(0)?.autoMode).toBe("exact");
   });
 });

@@ -52,13 +52,19 @@ export function candidateAutoMode(
     case "smooth":
     case "quantile":
     case "density_2d":
+      return "x";
+    // Distribution / interval geoms almost always sit on a discrete band
+    // axis. Axis-group hover (x/y/xy) freescrolls a guide through the mark
+    // body and leaves blank tooltip rows when the pointer is between band
+    // centers — prefer exact focus on the mark (#1528). Authors who want
+    // axis grouping can still set mode explicitly (and get an advisory).
     case "errorbar":
     case "linerange":
     case "pointrange":
     case "crossbar":
     case "boxplot":
     case "violin":
-      return "x";
+      return "exact";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
     case "spoke":

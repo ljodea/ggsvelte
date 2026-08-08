@@ -347,7 +347,7 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
       const r = mode === "auto" ? Math.max(maxDistance, maxPointReach) : maxPointReach;
       addRect(px - r, py - r, px + r, py + r);
       if (mode === "auto") {
-        // Per-candidate autoMode can still be x/y (e.g. boxplot outliers):
+        // Per-candidate autoMode can still be x/y (line/area/smooth, etc.):
         // include dominant-axis strips so orthogonal distance does not drop them.
         // Filled path reps: filled-only strip trees (not every bar AABB).
         if (flip) {

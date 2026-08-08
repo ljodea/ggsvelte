@@ -4930,6 +4930,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "inspectAxisOnDistributionDiagnostics": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inspectHighCardinalityDiagnostics": {
           "kind": "value",
           "lifecycle": "experimental"

@@ -66,6 +66,7 @@ import {
 import {
   discreteColorFillDomainSizes,
   inspectAxisOnBarColDiagnostics,
+  inspectAxisOnDistributionDiagnostics,
   inspectHighCardinalityDiagnostics,
   layerGeomsFromSpecLayers,
   normalizeInteractionConfig,
@@ -471,16 +472,6 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   );
   deliverAdvisoriesOnce(() => compositionDiagnostics, compositionAdvisoryDedupKey);
 
-  // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
-  // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
-  // Mode x/xy still fire under coord_flip (#1409): the band-axis guide remains.
-  const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
-    const mode = interactionConfig().inspect?.mode;
-    if (mode === undefined) return [];
-    return inspectAxisOnBarColDiagnostics(mode, layerGeomsFromSpecLayers(assembled()?.layers));
-  });
-  deliverAdvisoriesOnce(() => inspectGeomDiagnostics);
-
   // PublicKey → PropertyKey widening lives in widenPlotProps (plot-props.ts).
   // Controllers read host.props handlers directly (already widened).
   // Announcer is declared later; the sink is handler-only (never construction).
@@ -718,6 +709,25 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   $effect(() => {
     for (const diagnostic of chromeState.legendDiagnostics) deliverDiagnostic(diagnostic);
   });
+
+  // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels)
+  // and freescrolling guides through distribution/interval band geoms (#1528).
+  // After runtime so trained scales gate interval-geom advisories (continuous
+  // shared-x line+errorbar with mode="x" stays silent). Mode x/xy still fire
+  // under coord_flip (#1409): the band-axis guide remains.
+  const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
+    const mode = interactionConfig().inspect?.mode;
+    if (mode === undefined) return [];
+    const geoms = layerGeomsFromSpecLayers(assembled()?.layers);
+    const scales = runtime.model?.scales;
+    const discreteBandAxis =
+      scales !== undefined && (scales.x.type === "band" || scales.y.type === "band");
+    return [
+      ...inspectAxisOnBarColDiagnostics(mode, geoms),
+      ...inspectAxisOnDistributionDiagnostics(mode, geoms, { discreteBandAxis }),
+    ];
+  });
+  deliverAdvisoriesOnce(() => inspectGeomDiagnostics);
 
   // High-cardinality discrete color/fill + inspect: default tooltip policy
   // advisory (#1274). Needs trained scales (runtime.model); once-per-channel.

@@ -9,6 +9,7 @@
  * svelte/server render() never executes, so these assertions would be
  * vacuous in the SSR lane.
  */
+import { registerErrorbar, registerViolin } from "@ggsvelte/core";
 import { describe, expect, it } from "vitest";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
@@ -16,6 +17,11 @@ import InspectGeomAdvisoriesFixture from "../fixtures/InspectGeomAdvisoriesFixtu
 import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 import { render } from "../helpers/render.js";
 import { collect, settled } from "../helpers/diagnostic-harness.js";
+
+// Violin / errorbar need their package-level registrars (stat + geom batch);
+// the browser lane setup only runs registerAllGeomBatches / StatFrames.
+registerViolin();
+registerErrorbar();
 
 const rows = [
   { id: "a", x: 1, y: 10, label: "10" },
@@ -268,6 +274,65 @@ describe("high-cardinality discrete color + inspect (#1274)", () => {
     expect(diagnostics.map((d) => d.code)).not.toContain(
       "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
     );
+  });
+});
+
+describe("inspect axis-guide advisories on distribution/interval geoms (#1528)", () => {
+  // Violin/boxplot need continuous y and discrete x; synthetic rows are enough
+  // for the advisory path (it keys on assembled layer geom names only).
+  const distributionRows = [
+    { id: "a", run: "Jun 5", value: 1.2 },
+    { id: "b", run: "Jun 5", value: 1.5 },
+    { id: "c", run: "Jun 7", value: 0.9 },
+    { id: "d", run: "Jun 7", value: 1.1 },
+  ];
+  const distributionAes = { x: "run", y: "value" };
+
+  it("fires AXIS_ON_VIOLIN for explicit mode x on GeomViolin layers", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    render(GGPlot, {
+      data: distributionRows,
+      aes: distributionAes,
+      layers: [{ geom: "violin" as const }],
+      inspect: { mode: "x" as const },
+      ondiagnostic,
+      ...size,
+    });
+    await expect
+      .poll(() => diagnostics.find((d) => d.code === "INTERACTION_INSPECT_AXIS_ON_VIOLIN"))
+      .toMatchObject({ severity: "advisory", prop: "inspect.mode", actual: "x" });
+  });
+
+  it("stays silent when mode is auto (advisory gate; exactness is pure unit-tested)", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    const { container } = render(GGPlot, {
+      data: distributionRows,
+      aes: distributionAes,
+      layers: [{ geom: "violin" as const }],
+      inspect: true,
+      ondiagnostic,
+      ...size,
+    });
+    await settled(container);
+    expect(diagnostics.map((d) => d.code)).not.toContain("INTERACTION_INSPECT_AXIS_ON_VIOLIN");
+  });
+
+  it("fires AXIS_ON_ERRORBAR for mode xy on errorbar layers", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    render(GGPlot, {
+      data: [
+        { id: "a", run: "A", y: 1, ymin: 0.5, ymax: 1.5 },
+        { id: "b", run: "B", y: 2, ymin: 1.5, ymax: 2.5 },
+      ],
+      aes: { x: "run", y: "y", ymin: "ymin", ymax: "ymax" },
+      layers: [{ geom: "errorbar" as const }],
+      inspect: { mode: "xy" as const },
+      ondiagnostic,
+      ...size,
+    });
+    await expect
+      .poll(() => diagnostics.find((d) => d.code === "INTERACTION_INSPECT_AXIS_ON_ERRORBAR"))
+      .toMatchObject({ severity: "advisory", actual: "xy" });
   });
 });
 

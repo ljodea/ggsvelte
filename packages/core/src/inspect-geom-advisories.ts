@@ -2,15 +2,16 @@
  * Inspect-mode × geom advisories: pure collectors shared by the host
  * (plot-engine → ondiagnostic) and the headless CLI (`--inspect MODE`).
  *
- * Vertical axis guides that fight bar/col geometry or bisect on-mark value
- * labels, plus high-cardinality discrete color/fill + inspect (#1274).
+ * Axis guides that fight bar/col geometry or bisect on-mark value labels;
+ * freescrolling guides through distribution/interval geoms on discrete bands
+ * (#1528); plus high-cardinality discrete color/fill + inspect (#1274).
  *
  * Host inspect mode is intentionally not a PortableSpec field. Agents declare
  * the host's intended mode via `ggsvelte-render --inspect <mode>` so the same
  * codes reach the CLI/agent JSONL loop (#1531).
  *
- * Auto/exact modes never fire the bar/col axis-guide codes: auto already picks
- * exact for bar/col (candidateAutoMode).
+ * Auto/exact modes never fire the axis-guide codes: auto already picks exact
+ * for bar/col and for violin/boxplot/interval geoms (candidateAutoMode).
  */
 // @lifecycle experimental
 
@@ -22,6 +23,12 @@ export type InspectGeomAdvisoryCode =
   | "INTERACTION_INSPECT_X_ON_BAR"
   | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
   | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"
+  | "INTERACTION_INSPECT_AXIS_ON_VIOLIN"
+  | "INTERACTION_INSPECT_AXIS_ON_BOXPLOT"
+  | "INTERACTION_INSPECT_AXIS_ON_ERRORBAR"
+  | "INTERACTION_INSPECT_AXIS_ON_LINERANGE"
+  | "INTERACTION_INSPECT_AXIS_ON_POINTRANGE"
+  | "INTERACTION_INSPECT_AXIS_ON_CROSSBAR"
   | "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE";
 
 export interface InspectGeomAdvisory {
@@ -91,6 +98,79 @@ export const INSPECT_GEOM_DIAGNOSTIC_CATALOG: Readonly<
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
   },
+  INTERACTION_INSPECT_AXIS_ON_VIOLIN: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+    message:
+      "inspect.mode draws an axis guide through violin marks; violins sit on a discrete band, so freescrolling x/y/xy guides cut the density body and often leave the band tooltip row blank.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomViolin',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-violin",
+  },
+  INTERACTION_INSPECT_AXIS_ON_BOXPLOT: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+    message:
+      "inspect.mode draws an axis guide through boxplot marks; boxes sit on a discrete band, so freescrolling x/y/xy guides cut the box body and rarely add information.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBoxplot',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-boxplot",
+  },
+  INTERACTION_INSPECT_AXIS_ON_ERRORBAR: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+    message:
+      "inspect.mode draws an axis guide through errorbar marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomErrorbar',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-errorbar",
+  },
+  INTERACTION_INSPECT_AXIS_ON_LINERANGE: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+    message:
+      "inspect.mode draws an axis guide through linerange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomLinerange',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-linerange",
+  },
+  INTERACTION_INSPECT_AXIS_ON_POINTRANGE: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+    message:
+      "inspect.mode draws an axis guide through pointrange marks; interval geoms on a discrete band are better inspected on the mark itself than via a freescrolling guide.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomPointrange',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-pointrange",
+  },
+  INTERACTION_INSPECT_AXIS_ON_CROSSBAR: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+    message:
+      "inspect.mode draws an axis guide through crossbar marks; even when hits pin to a category, freescrolling x/y/xy guides rarely add information beyond exact mark focus.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCrossbar',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-axis-on-crossbar",
+  },
   INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE: {
     severity: "advisory",
     code: "INTERACTION_INSPECT_HIGH_CARDINALITY_DISCRETE",
@@ -121,7 +201,39 @@ export const HIGH_CARDINALITY_DISCRETE_THRESHOLD = 16;
  */
 const X_BAND_GUIDE_MODES = new Set(["x", "xy"]);
 
+/** Modes that freescroll any axis guide (vertical, horizontal, or both). */
+const AXIS_GUIDE_MODES = new Set(["x", "y", "xy"]);
+
 const VALUE_LABEL_GEOMS = new Set(["text", "label", "sf_text", "sf_label"]);
+
+/**
+ * Always-band distribution geoms (discrete category axis by construction).
+ * Freescrolling x/y/xy guides never help; advisories fire without scale info.
+ */
+const ALWAYS_BAND_GEOM_CODES = {
+  violin: "INTERACTION_INSPECT_AXIS_ON_VIOLIN",
+  boxplot: "INTERACTION_INSPECT_AXIS_ON_BOXPLOT",
+} as const satisfies Record<string, InspectGeomAdvisoryCode>;
+
+/**
+ * Interval geoms that are often discrete-band but also appear on continuous
+ * shared-x series (line + errorbar). Advisories only when the caller confirms
+ * a discrete band axis — otherwise continuous mode="x" is a false positive.
+ */
+const INTERVAL_GEOM_CODES = {
+  errorbar: "INTERACTION_INSPECT_AXIS_ON_ERRORBAR",
+  linerange: "INTERACTION_INSPECT_AXIS_ON_LINERANGE",
+  pointrange: "INTERACTION_INSPECT_AXIS_ON_POINTRANGE",
+  crossbar: "INTERACTION_INSPECT_AXIS_ON_CROSSBAR",
+} as const satisfies Record<string, InspectGeomAdvisoryCode>;
+
+export type InspectAxisOnDistributionOptions = {
+  /**
+   * When true, also advise on errorbar / linerange / pointrange / crossbar.
+   * Default false: only violin / boxplot (always discrete-band).
+   */
+  readonly discreteBandAxis?: boolean;
+};
 
 /** Host inspect modes accepted by `ggsvelte-render --inspect`. */
 export const INSPECT_INTENT_MODES = ["auto", "exact", "x", "y", "xy"] as const;
@@ -178,6 +290,44 @@ export function inspectAxisOnBarColDiagnostics(
 }
 
 /**
+ * Advisories when inspect.mode draws a freescrolling axis guide through
+ * violin / boxplot (always) and interval geoms when the band axis is discrete
+ * (#1528). Fires for mode x, y, or xy; auto and exact stay silent.
+ *
+ * Interval geoms (errorbar / linerange / pointrange / crossbar) require
+ * `discreteBandAxis: true` so continuous shared-x series with a legitimate
+ * mode="x" guide do not get a false positive.
+ */
+export function inspectAxisOnDistributionDiagnostics(
+  inspectMode: string | null | undefined,
+  geoms: readonly string[],
+  options?: InspectAxisOnDistributionOptions,
+): InspectGeomAdvisory[] {
+  if (inspectMode === null || inspectMode === undefined || !AXIS_GUIDE_MODES.has(inspectMode)) {
+    return [];
+  }
+
+  const includeInterval = options?.discreteBandAxis === true;
+  const list: InspectGeomAdvisory[] = [];
+  const seen = new Set<string>();
+  for (const geom of geoms) {
+    if (seen.has(geom)) continue;
+    const always = ALWAYS_BAND_GEOM_CODES[geom as keyof typeof ALWAYS_BAND_GEOM_CODES];
+    const interval = includeInterval
+      ? INTERVAL_GEOM_CODES[geom as keyof typeof INTERVAL_GEOM_CODES]
+      : undefined;
+    const code = always ?? interval;
+    if (code === undefined) continue;
+    seen.add(geom);
+    list.push({
+      ...INSPECT_GEOM_DIAGNOSTIC_CATALOG[code],
+      actual: inspectMode,
+    });
+  }
+  return list;
+}
+
+/**
  * Layer geom names from a PortableSpec-like layers array.
  * Alias geoms (`histogram`→`bar`, …) are rewritten to the same canonical names
  * `normalize()` stamps, so CLI host-intent lint matches host ondiagnostic
@@ -206,8 +356,13 @@ export function layerGeomsFromSpecLayers(layers: unknown): readonly string[] {
 export function collectInspectIntentDiagnostics(
   layers: unknown,
   inspectMode: string | null | undefined,
+  options?: InspectAxisOnDistributionOptions,
 ): InspectGeomAdvisory[] {
-  return inspectAxisOnBarColDiagnostics(inspectMode, layerGeomsFromSpecLayers(layers));
+  const geoms = layerGeomsFromSpecLayers(layers);
+  return [
+    ...inspectAxisOnBarColDiagnostics(inspectMode, geoms),
+    ...inspectAxisOnDistributionDiagnostics(inspectMode, geoms, options),
+  ];
 }
 
 /**
