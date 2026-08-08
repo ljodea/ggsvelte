@@ -2,8 +2,11 @@
   /**
    * Object-form theme (light + no grid) lives in spec.ts only — theme-parity
    * requires hand-written plots to stay on string themes or use {spec}.
+   * Spec-driven charts skip the GeomTile shell, so register the tile batch here (#1420).
    */
-  import { GGPlot, Inspect } from "@ggsvelte/svelte";
+  import { GGPlot, Inspect, registerTile } from "@ggsvelte/svelte";
+
+  registerTile();
 
   import spec from "./spec.js";
 </script>
