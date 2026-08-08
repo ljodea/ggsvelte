@@ -36,6 +36,82 @@ Layers are inspectable by default. Set `inspect={false}` on a geom (or
 full-panel rects never become tooltip targets (#1065 / #1068). This is portable
 and unrelated to the host `<Inspect>` capability.
 
+## Choosing inspect mode
+
+`mode` is a **host** option on `<Inspect>` (and the dual-read plot `inspect`
+alias). It is **not** a PortableSpec field. Empty `<Inspect />` defaults to
+`mode="auto"`. Auto is safe for many mark families (bar/col → exact; continuous
+lines → x), but **not** for discrete distribution and interval geoms — product
+auto still resolves those to freescrolling `x` (library fix tracked as #1528).
+Until that ships, pin an explicit mode when geometry needs it.
+
+### Default preference
+
+1. Prefer `mode="auto"` when library auto matches the mark (bar, col, tile, point,
+   continuous line/area/freqpoly). Prefer an explicit mode when you know the
+   geometry better than auto, or when auto is still wrong for the mark (below).
+2. Use `mode="x"` only for continuous shared-x series: time series, multi-series
+   lines/areas/freqpolys at a common continuous x, stacked continuous areas.
+3. Use `mode="y"` only when the shared continuous axis is vertical and grouping
+   by y is the product intent.
+4. Use `mode="xy"` for free 2d hits (scatters, paths, maps, jitter clouds) when
+   nearest-point inspection is better than snapping to one axis.
+5. **Pin `mode="exact"`** on violin, boxplot, and discrete-axis errorbar /
+   pointrange / linerange. Do **not** leave `auto` for those marks while product
+   auto still maps them to freescrolling `x` (#1528).
+
+### Anti-patterns (do not ship these)
+
+| Pattern                                                                                          | Why it is wrong                                                                                    | Use instead                                               |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Violin with `mode="x"` / `"y"` / `"xy"`, or bare `auto`                                          | Categorical run labels get freescrolling axis guides and blank axis tooltip rows; auto still → `x` | Pin `mode="exact"`                                        |
+| Boxplot with `mode="x"` / `"y"` / `"xy"`, or bare `auto`                                         | Same discrete-group problem as violin                                                              | Pin `mode="exact"`                                        |
+| Discrete-axis errorbar / pointrange / linerange with `mode="x"` / `"y"` / `"xy"`, or bare `auto` | Caps and intervals are not continuous shared-x series; auto still → `x`                            | Pin `mode="exact"`                                        |
+| Bar / col with explicit `mode="x"` or `"xy"`                                                     | Vertical guide cuts filled bands; library already advises exact/auto                               | `mode="exact"` or leave `auto` (auto → exact for bar/col) |
+| Copying a gallery family's mode without reading the mark geometry                                | Family-to-mode tables go stale; geometry decides                                                   | Match scale type + mark geometry                          |
+
+Treat **violin, boxplot, and discrete-axis errorbar / pointrange / linerange**
+the same: pin `exact` unless product auto is fixed and this skill is updated in
+lock-step. When in doubt on other geoms, ship `auto`.
+
+## Multi-layer hit hygiene
+
+Every inspectable layer competes for pointer hits. Decorative furniture that
+stays hit-testable steals focus from the data story.
+
+Rules:
+
+1. Mark decorative layers `inspect={false}`: rivers, annotation labels, full-panel
+   rects, value labels that are only visual guides, background rugs, and similar
+   non-primary marks.
+2. For multi-layer maps and stories (**Minard-class** charts), keep **one primary
+   inspectable mark family** on the map panel (troop path only). Furniture stays
+   quiet with `inspect={false}` (rivers, city labels, strength text).
+3. When a summary layer sits on a raw scatter (mean–SE errorbar over points), prefer
+   inspecting the summary and set `inspect={false}` on the background cloud unless
+   both layers are intentional hit targets.
+
+Gallery reference: `examples/path/trajectory` (Minard's 1812 map) keeps rivers and
+city/strength text opted out on the map panel so only the troop path is live; the
+cold panel intentionally keeps both path and point inspectable.
+
+## CLI cannot catch host inspect behaviour
+
+`ggsvelte-render` validates PortableSpec and prints pipeline warnings/advisories
+on stderr. It does **not** validate host Inspect mode, tooltip content, or which
+layers steal hover hits. Layer `"inspect": false` is portable and can appear in
+the JSON loop; **mode is not**. Agents that only re-render SVG never see blank
+x-rows, freescrolling guides, or noisy multi-layer hits.
+
+After changing interaction, verify with a **real hover and pin** (docs site,
+playground, or browser test) — not only `ggsvelte-render` / an SVG dump. Read
+this file before enabling Inspect on any chart.
+
+**Skill packaging decision (#1530):** keep a **single skill** (`@ggsvelte/skill`)
+for both PortableSpec agents and Svelte app agents. Do not split until progressive
+disclosure fails (agents ignore `references/`, or the frontmatter description
+cannot route both audiences).
+
 ## Capability props
 
 | Prop / surface | Input                                                                    | What it enables                                                                                                                                                                                                                                                                                                                                                                            |
