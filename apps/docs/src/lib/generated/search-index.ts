@@ -21476,12 +21476,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:density:kde-2d-filled",
     kind: "example",
-    title: "Cholera deaths as filled density bands",
+    title: "Filled 2D density bands",
     summary:
-      "The same 1854 Soho map, with the density drawn as closed bands rather than lines: the darkest band covers the streets fed by the Broad Street pump.",
+      "Kernel density drawn as shaded rings over 578 point locations. Darker bands sit where the points are densest — here, the streets around one pump on Snow's 1854 Soho map.",
     href: "/examples/density/kde-2d-filled",
     keywords: [
-      "Cholera deaths as filled density bands",
+      "Filled 2D density bands",
       "Statistical summaries",
       "density",
       "density_2d_filled",
@@ -21489,8 +21489,9 @@ export const DOCS_SEARCH_INDEX = [
       "fill",
       "stat",
       "contour",
+      "map",
     ],
-    exact: ["Cholera deaths as filled density bands"],
+    exact: ["Filled 2D density bands"],
   },
   {
     id: "example:density:overlay",
