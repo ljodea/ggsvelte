@@ -20415,16 +20415,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["band-labels-rotated"],
   },
   {
-    id: "heading:guide-advisories:percent-labels-out-of-range",
-    kind: "heading",
-    title: "percent-labels-out-of-range",
-    summary:
-      "percent-labels-out-of-range in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
-    href: "/guide/advisories#percent-labels-out-of-range",
-    keywords: ["Advisories", "Reference"],
-    exact: ["percent-labels-out-of-range"],
-  },
-  {
     id: "page:guide-lifecycle",
     kind: "page",
     title: "Lifecycle & editions",
@@ -21362,18 +21352,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:col:theme-linedraw",
     kind: "example",
-    title: "The same columns under a linedraw theme",
-    summary: "Theme swap on a column chart without changing the data or geometry.",
+    title: "Linedraw theme on chest-size columns",
+    summary:
+      "Linedraw theme on ordered chest counts: hard black axes and grid on white, with no grey chrome.",
     href: "/examples/col/theme-linedraw",
     keywords: [
-      "The same columns under a linedraw theme",
+      "Linedraw theme on chest-size columns",
       "Bars & columns",
       "col",
       "bars",
       "theme",
       "linedraw",
     ],
-    exact: ["The same columns under a linedraw theme"],
+    exact: ["Linedraw theme on chest-size columns"],
   },
   {
     id: "example:col:value-labels",
@@ -21966,7 +21957,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Snow's outbreak by nearest pump",
     summary:
-      "The same thirteen Soho neighbourhoods, shaded by the cholera deaths inside each. One region holds 359 of the 578, and it is the one around Broad Street.",
+      "Thirteen Soho neighbourhoods shaded by cholera deaths inside each. One region holds 359 of the 578, around Broad Street.",
     href: "/examples/map/choropleth",
     keywords: [
       "Snow's outbreak by nearest pump",
@@ -22123,12 +22114,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:jitter",
     kind: "example",
-    title: "The same calories, with position jitter",
+    title: "Calories by restaurant, with jitter",
     summary:
-      "The fast-food calorie scatter again, with jitter on the point position instead of the dedicated jitter geom.",
+      "Fast-food menu calories by restaurant. Position jitter spreads marks that would otherwise stack on the same category.",
     href: "/examples/point/jitter",
     keywords: [
-      "The same calories, with position jitter",
+      "Calories by restaurant, with jitter",
       "Points & scatter",
       "point",
       "jitter",
@@ -22136,7 +22127,7 @@ export const DOCS_SEARCH_INDEX = [
       "scatter",
       "categorical",
     ],
-    exact: ["The same calories, with position jitter"],
+    exact: ["Calories by restaurant, with jitter"],
   },
   {
     id: "example:point:layer-data-bands",
@@ -22504,12 +22495,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:sf:boxed-labels",
     kind: "example",
-    title: "The same names, on paper",
+    title: "Pump names on measured boxes",
     summary:
-      "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
+      "Thirteen Soho neighbourhoods with each pump name on a measured box. The box keeps the name readable over a coloured fill.",
     href: "/examples/sf/boxed-labels",
     keywords: [
-      "The same names, on paper",
+      "Pump names on measured boxes",
       "Maps & spatial",
       "sf",
       "sf_label",
@@ -22519,7 +22510,7 @@ export const DOCS_SEARCH_INDEX = [
       "centroid",
       "map",
     ],
-    exact: ["The same names, on paper"],
+    exact: ["Pump names on measured boxes"],
   },
   {
     id: "example:sf:geometry-collection",

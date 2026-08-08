@@ -1,6 +1,6 @@
 {
-  "title": "The same calories, with position jitter",
-  "description": "The fast-food calorie scatter again, with jitter on the point position instead of the dedicated jitter geom.",
+  "title": "Calories by restaurant, with jitter",
+  "description": "Fast-food menu calories by restaurant. Position jitter spreads marks that would otherwise stack on the same category.",
   "tags": ["point", "jitter", "position", "scatter", "categorical"],
   "docsSection": "Points & scatter"
 }

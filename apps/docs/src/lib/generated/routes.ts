@@ -12353,11 +12353,6 @@ export const DOCS_ROUTES = [
         title: "band-labels-rotated",
         level: 3,
       },
-      {
-        id: "percent-labels-out-of-range",
-        title: "percent-labels-out-of-range",
-        level: 3,
-      },
     ],
   },
   {
@@ -12880,8 +12875,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/theme-linedraw",
-    title: "The same columns under a linedraw theme — ggsvelte gallery",
-    description: "Theme swap on a column chart without changing the data or geometry.",
+    title: "Linedraw theme on chest-size columns — ggsvelte gallery",
+    description:
+      "Linedraw theme on ordered chest counts: hard black axes and grid on white, with no grey chrome.",
     canonicalPath: "/examples/col/theme-linedraw",
     kind: "page",
     index: true,
@@ -13250,7 +13246,7 @@ export const DOCS_ROUTES = [
     path: "/examples/map/choropleth",
     title: "Snow's outbreak by nearest pump — ggsvelte gallery",
     description:
-      "The same thirteen Soho neighbourhoods, shaded by the cholera deaths inside each. One region holds 359 of the 578, and it is the one around Broad Street.",
+      "Thirteen Soho neighbourhoods shaded by cholera deaths inside each. One region holds 359 of the 578, around Broad Street.",
     canonicalPath: "/examples/map/choropleth",
     kind: "page",
     index: true,
@@ -13341,9 +13337,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/jitter",
-    title: "The same calories, with position jitter — ggsvelte gallery",
+    title: "Calories by restaurant, with jitter — ggsvelte gallery",
     description:
-      "The fast-food calorie scatter again, with jitter on the point position instead of the dedicated jitter geom.",
+      "Fast-food menu calories by restaurant. Position jitter spreads marks that would otherwise stack on the same category.",
     canonicalPath: "/examples/point/jitter",
     kind: "page",
     index: true,
@@ -13586,9 +13582,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/boxed-labels",
-    title: "The same names, on paper — ggsvelte gallery",
+    title: "Pump names on measured boxes — ggsvelte gallery",
     description:
-      "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
+      "Thirteen Soho neighbourhoods with each pump name on a measured box. The box keeps the name readable over a coloured fill.",
     canonicalPath: "/examples/sf/boxed-labels",
     kind: "page",
     index: true,

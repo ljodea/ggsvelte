@@ -73,8 +73,8 @@
     },
     "col/theme-linedraw": {
       "filename": "col-theme-linedraw-light.png",
-      "sourceSha256": "056f3dadcd27d24f26a1d9a5519a4034367abca030edcab1d561fd2544ecf96d",
-      "pngSha256": "ce38e03f29b19f23ff11d03d3600239abdb32149ff1b50378e7faf4f8e60c593"
+      "sourceSha256": "125acc5ca3c6cffef1ed20ed8b55dd676786e9839eb040ae6da6fdf8331dbe09",
+      "pngSha256": "5cd18b346db3dcbf288db1dcf388a31a13a4a1542b3d42a5a5dc609ec2460a10"
     },
     "col/value-labels": {
       "filename": "col-value-labels-light.png",
@@ -193,8 +193,8 @@
     },
     "interaction/linked-views": {
       "filename": "interaction-linked-views-light.png",
-      "sourceSha256": "0413712296ff74cb323403e1abf880289d1424dbdd2250bacab59b8a6223921b",
-      "pngSha256": "1fa4a7616a152c455ad5e4048e28ffb71ccc2aa355dd41f5d7c4818e790e2d85"
+      "sourceSha256": "9692ef1a526cf3c2e6d93c1934deb75fc522ef1f7616a2d6e87701a574244caa",
+      "pngSha256": "9ef9520899329952c1bb774c462e8eed8cf8b9824064fe5c74b8ec663446b5a6"
     },
     "interaction/tooltip": {
       "filename": "interaction-tooltip-light.png",
@@ -248,7 +248,7 @@
     },
     "map/choropleth": {
       "filename": "map-choropleth-light.png",
-      "sourceSha256": "48666b189438f82241c7664ddb792f5340aac67fa5bf7cdb3cea68969fc9f42f",
+      "sourceSha256": "47efc4d5e5cd9d552b4074c743b2cbd6fdc0de2dbfb61f3a434b761b4ff81d8a",
       "pngSha256": "8c9462f51fc60c56c2cddcf33fa3d1df3175afc4efb395943d9d7ce24674cded"
     },
     "path/connect-hv": {
@@ -293,8 +293,8 @@
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
-      "sourceSha256": "7adcd17c60e85a6b934d250a49dec4ac865e27548f2307ec8f0bb21a597773b5",
-      "pngSha256": "c7b3ca2dd472c53f53ab8903f31c5db2361e667932f62034516a236b9ad05992"
+      "sourceSha256": "04d7e9b7214b876ef317b72e59a316bc42b58e42a13b0ca659c0dda0e748015b",
+      "pngSha256": "4edccb3b7800a01511a62482d02e5f5263a73b72ed33be62d6ea45d079e1a192"
     },
     "point/layer-data-bands": {
       "filename": "point-layer-data-bands-light.png",
@@ -408,8 +408,8 @@
     },
     "sf/boxed-labels": {
       "filename": "sf-boxed-labels-light.png",
-      "sourceSha256": "7c34b98d2c495985f979497a41c6bde260828d72be8886bf97305fda6e1bf20f",
-      "pngSha256": "97219b225c360dffd66ed50e0fd16ef8b079137637091e7ad8fbd4c0919be306"
+      "sourceSha256": "9b6552b9eb38038534490f296037f8e3b07bcf54310695248ab3e73b18ed8455",
+      "pngSha256": "46800bc9517e983bf92f1a3de20f4f0de1bf63aa813b5bbd5823ec2ce5ec7147"
     },
     "sf/geometry-collection": {
       "filename": "sf-geometry-collection-light.png",

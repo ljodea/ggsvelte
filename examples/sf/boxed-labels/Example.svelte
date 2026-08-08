@@ -25,8 +25,8 @@
   <ThemeClassic />
   <GuideNone channel="fill" />
   <Labs
-    title="The same names, on paper"
-    subtitle="Each pump name sits on a measured box so the map stays readable"
+    title="Pump names on measured boxes"
+    subtitle="Each label sits on a padded box so it stays readable over a busy fill"
   />
   <Inspect mode="exact" pin />
 </GGPlot>

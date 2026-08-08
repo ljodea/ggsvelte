@@ -1,6 +1,6 @@
 {
-  "title": "The same names, on paper",
-  "description": "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
+  "title": "Pump names on measured boxes",
+  "description": "Thirteen Soho neighbourhoods with each pump name on a measured box. The box keeps the name readable over a coloured fill.",
   "tags": ["sf", "sf_label", "label", "box", "geojson", "centroid", "map"],
   "docsSection": "Maps & spatial"
 }

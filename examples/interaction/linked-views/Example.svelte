@@ -108,7 +108,7 @@
       <GeomPoint size={3.2} color="#287271" alpha={0.68} />
       <ThemeMinimal />
       <Labs
-        title="The same keys, quieter styling"
+        title="Minimal theme, linked selection"
         x="Flipper length (mm)"
         y="Body mass (g)"
       />
