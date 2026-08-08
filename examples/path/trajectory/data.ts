@@ -144,14 +144,10 @@ type TroopVertex = {
   leg: string;
 };
 
-/** Durable identity for a cold station — cold longitude, not the troop long. */
-export function coldStationKey(long: number): string {
-  return String(long);
-}
-
 /**
  * Join each cold reading to the nearest Column-1 retreat vertex by longitude.
  * Advance and side columns are ignored: the temperature series is retreat-only.
+ * stationKey is String(cold.long) so map and strip share durable identity.
  */
 export function buildColdStations(
   cold: readonly ColdReading[],
@@ -173,7 +169,8 @@ export function buildColdStations(
       }
     }
     return {
-      stationKey: coldStationKey(reading.long),
+      // Cold longitude, not the troop long — identity for linked selection.
+      stationKey: String(reading.long),
       long: reading.long,
       lat: nearest.lat,
       temp: reading.temp,
