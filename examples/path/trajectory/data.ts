@@ -14,12 +14,9 @@
  * Temperature: HistData::Minard.temp; the nine readings beneath the retreat,
  * in degrees Reaumur (-30 Reaumur is about -37.5 Celsius). `date` is the day
  * Minard recorded; the fifth reading has none in the source and is blank.
- *
- * Cold stations: `buildColdStations` joins each temperature reading to the
- * nearest Column-1 retreat vertex by longitude; `attachColdDatesToTroops`
- * stamps those dates and stationKeys onto the march path so Inspect can show
- * Minard's date and drive linked selection on the cold strip (custom tooltip
- * content — not the default kitchen-sink field dump).
+ * Nine cold points vs many path vertices is Minard's layout — not a missing
+ * join. The gallery keeps map and strip as independent Inspect panels that
+ * share longitude only by axis limits (no linked selection).
  *
  * Rivers: the Niemen, Vilija, Berezina, Western Dvina, Dnieper and Moskva,
  * simplified to ~55 points each from OpenStreetMap relations (Niemen,
@@ -120,124 +117,6 @@ export const minardCold: { long: number; temp: number; date: string }[] = [
   { long: 26.7, temp: -30, date: "Dec 06" },
   { long: 25.3, temp: -26, date: "Dec 07" },
 ];
-
-/**
- * One cold reading joined to the nearest Column-1 retreat vertex by longitude.
- * Minard aligned the cold strip under the retreat; troop longs do not always
- * match exactly (e.g. Nov 09 at 33.2° sits nearest 33.3°). Used to stamp dates
- * onto the march path for Inspect pins.
- */
-export type MinardColdStation = {
-  stationKey: string;
-  long: number;
-  lat: number;
-  temp: number;
-  date: string;
-  survivors: number;
-  direction: string;
-};
-
-type ColdReading = { long: number; temp: number; date: string };
-type TroopVertex = {
-  long: number;
-  lat: number;
-  survivors: number;
-  direction: string;
-  leg: string;
-};
-
-/**
- * Join each cold reading to the nearest Column-1 retreat vertex by longitude.
- * Advance and side columns are ignored: the temperature series is retreat-only.
- * stationKey is String(cold.long) for a stable cold-reading id in the join.
- */
-export function buildColdStations(
-  cold: readonly ColdReading[],
-  troops: readonly TroopVertex[],
-): MinardColdStation[] {
-  const retreat = troops.filter((t) => t.leg === "Column 1 Retreat");
-  return cold.map((reading) => {
-    let nearest = retreat[0];
-    if (nearest === undefined) {
-      throw new Error("buildColdStations requires at least one Column 1 Retreat vertex");
-    }
-    let best = Math.abs(nearest.long - reading.long);
-    for (let i = 1; i < retreat.length; i++) {
-      const candidate = retreat[i]!;
-      const dist = Math.abs(candidate.long - reading.long);
-      if (dist < best) {
-        best = dist;
-        nearest = candidate;
-      }
-    }
-    return {
-      // Cold longitude, not the troop long — identity for linked selection.
-      stationKey: String(reading.long),
-      long: reading.long,
-      lat: nearest.lat,
-      temp: reading.temp,
-      date: reading.date,
-      survivors: nearest.survivors,
-      direction: nearest.direction,
-    };
-  });
-}
-
-export const minardColdStations: MinardColdStation[] = buildColdStations(minardCold, minardTroops);
-
-/**
- * Troop vertex with optional cold-station fields for map Inspect tooltips.
- * `date` is set only on the Column-1 retreat vertex nearest each cold reading;
- * other vertices keep empty strings (blank date rows may still appear in the
- * default pin — mapped fields always paint).
- */
-export type MinardTroopWithCold = TroopVertex & {
-  date: string;
-  stationKey: string;
-};
-
-/**
- * Stamp each cold station onto its nearest Column-1 retreat troop vertex so
- * mapping `label: "date"` on the march path puts Minard's date in the default
- * tooltip when that vertex is pinned.
- */
-export function attachColdDatesToTroops(
-  troops: readonly TroopVertex[],
-  stations: readonly MinardColdStation[],
-): MinardTroopWithCold[] {
-  const retreat = troops
-    .map((troop, index) => ({ troop, index }))
-    .filter(({ troop }) => troop.leg === "Column 1 Retreat");
-  const stamped = new Map<number, MinardColdStation>();
-  for (const station of stations) {
-    let bestIndex = retreat[0]?.index;
-    let bestDist = Number.POSITIVE_INFINITY;
-    if (bestIndex === undefined) {
-      throw new Error("attachColdDatesToTroops requires at least one Column 1 Retreat vertex");
-    }
-    for (const { troop, index } of retreat) {
-      const dist = Math.abs(troop.long - station.long);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIndex = index;
-      }
-    }
-    stamped.set(bestIndex, station);
-  }
-  return troops.map((troop, index) => {
-    const station = stamped.get(index);
-    return {
-      ...troop,
-      date: station?.date ?? "",
-      stationKey: station?.stationKey ?? "",
-    };
-  });
-}
-
-export const minardTroopsWithCold: MinardTroopWithCold[] = attachColdDatesToTroops(
-  minardTroops,
-  minardColdStations,
-);
 
 // Town-name nudges in degrees, so labels clear the bands the way Minard
 // placed them: Kowno left of the crossing, the Vilna-loop names off the ink.

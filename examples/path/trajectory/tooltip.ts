@@ -1,10 +1,12 @@
 /**
  * Field lists for Minard Inspect custom tooltips.
  *
- * Default tooltips dump every mapped aesthetic (direction, long, lat, empty
- * date). The figurative map only needs survivors + cold date; the strip only
- * needs temperature + date. Empty dates are omitted so advance vertices never
- * show a ghost Date row.
+ * Default tooltips dump every mapped aesthetic. The figurative map only needs
+ * survivors; the cold strip only needs temperature + date. Empty dates are
+ * omitted so blank Minard readings never show a ghost Date row.
+ *
+ * Map and strip are independent series (9 cold readings vs many path vertices
+ * in HistData). Tooltips do not invent a join or drive linked selection.
  */
 
 export type TooltipField = { readonly label: string; readonly value: string };
@@ -12,10 +14,6 @@ export type TooltipField = { readonly label: string; readonly value: string };
 /** Narrow row shape used by map-march custom content. */
 export type MarchTooltipRow = {
   readonly survivors?: unknown;
-  readonly date?: unknown;
-  readonly direction?: unknown;
-  readonly long?: unknown;
-  readonly lat?: unknown;
 };
 
 /** Narrow row shape used by cold-strip custom content. */
@@ -26,8 +24,8 @@ export type ColdTooltipRow = {
 };
 
 /**
- * Map pin fields: Survivors always (when numeric); Date only when non-empty.
- * Direction and coordinates are already visible via color / crosshair.
+ * Map pin fields: Survivors only. Direction and coordinates are already
+ * visible via color / band width / crosshair. Cold dates live on the strip.
  */
 export function mapMarchTooltipFields(row: MarchTooltipRow): TooltipField[] {
   const fields: TooltipField[] = [];
@@ -36,9 +34,6 @@ export function mapMarchTooltipFields(row: MarchTooltipRow): TooltipField[] {
       label: "Survivors",
       value: Math.round(row.survivors).toLocaleString("en-US"),
     });
-  }
-  if (typeof row.date === "string" && row.date.trim() !== "") {
-    fields.push({ label: "Date", value: row.date });
   }
   return fields;
 }
@@ -58,31 +53,4 @@ export function coldStripTooltipFields(row: ColdTooltipRow): TooltipField[] {
     fields.push({ label: "Date", value: row.date });
   }
   return fields;
-}
-
-/**
- * Station key for inspect-driven linked selection. Empty string / missing → null
- * so advance vertices clear the shared selection instead of publishing "".
- */
-export function stationKeyFromInspectRow(
-  row: Record<string, unknown> | null | undefined,
-): string | null {
-  if (row === null || row === undefined) return null;
-  const key = row["stationKey"];
-  if (typeof key === "string" && key !== "") return key;
-  return null;
-}
-
-/**
- * Plot-level identity for the march map: cold-station points own `stationKey`
- * (they carry `temp`). Troop path vertices get unique non-link keys so they
- * never collide with stations (INTERACTION_DUPLICATE_KEY).
- */
-export function mapRowIdentity(row: Record<string, unknown>): PropertyKey {
-  const temp = row["temp"];
-  const stationKey = row["stationKey"];
-  if (typeof temp === "number" && typeof stationKey === "string" && stationKey !== "") {
-    return stationKey;
-  }
-  return `troop:${String(row["leg"])}:${String(row["long"])}:${String(row["lat"])}:${String(row["survivors"])}`;
 }

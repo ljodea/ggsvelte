@@ -96,19 +96,17 @@ Rules:
    non-primary marks.
 2. For multi-layer maps and stories (**Minard-class** charts), keep **one primary
    story family** on the map panel (troop path). Furniture stays quiet with
-   `inspect={false}` (rivers, city labels, strength text). A **small linked
-   ring-anchor** layer may stay hit-testable when selection rings must paint
-   candidates (candidates exclude `inspect={false}`); keep it quiet (low alpha /
-   small size) so it does not steal the story from the path.
+   `inspect={false}` (rivers, city labels, strength text). Do not invent a second
+   hit series just to drive cross-chart selection when the underlying tables are
+   different cardinalities (Minard's nine cold readings vs many path vertices).
 3. When a summary layer sits on a raw scatter (mean–SE errorbar over points), prefer
    inspecting the summary and set `inspect={false}` on the background cloud unless
    both layers are intentional hit targets.
 
 Gallery reference: `examples/path/trajectory` (Minard's 1812 map) opts rivers and
-city/strength text out of hits; the troop path is the primary story mark. Quiet
-cold-station points stay hit-testable as ring anchors for inspect-driven link to
-the cold strip (not a second figurative series). The cold panel keeps path and
-point inspectable.
+city/strength text out of hits; the troop path is the primary story mark on the
+map. The cold strip is a separate panel with its own path and points — shared
+longitude only, not linked selection between series that do not share row identity.
 
 ## CLI cannot catch host inspect behaviour
 

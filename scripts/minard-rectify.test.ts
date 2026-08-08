@@ -1,5 +1,5 @@
 /**
- * Minard: no dual-tool rail; clean custom tooltips; inspect-driven link.
+ * Minard: no dual-tool rail; clean custom tooltips; no false map↔strip link.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -34,29 +34,32 @@ describe("path/trajectory no dual-tool rail", () => {
     expect(source).toContain("coldStripTooltipFields");
   });
 
-  it("stamps cold dates on the troop path for oninspect / tooltip rows", () => {
+  it("uses plain troop path (no cold-station stamp for linking)", () => {
     const mapPlot = plots[0] ?? "";
-    expect(mapPlot).toContain("minardTroopsWithCold");
+    expect(mapPlot).toContain("minardTroops");
+    expect(mapPlot).not.toContain("minardTroopsWithCold");
+    expect(mapPlot).not.toContain("createPlotInteraction");
   });
 
-  it("does not force Select-point copy in the cold subtitle", () => {
+  it("does not force Select-point or same-station highlight copy in the cold subtitle", () => {
     expect(source).not.toMatch(/Select a reading to highlight the same station/);
+    expect(source).not.toMatch(/mark the same station/i);
   });
 });
 
-describe("path/trajectory meta after inspect-link fix", () => {
+describe("path/trajectory meta after drop false link", () => {
   const meta = JSON.parse(readFileSync(META, "utf8")) as {
     description: string;
     tags: string[];
     journey?: { pointer?: string; keyboard?: string; touch?: string };
   };
 
-  it("tags inspect and linked-views without promising Select-point chrome", () => {
+  it("tags inspect without linked-views", () => {
     expect(meta.tags).toContain("inspect");
-    expect(meta.tags).toContain("linked-views");
+    expect(meta.tags).not.toContain("linked-views");
   });
 
-  it("describes survivors, dates, and cross-chart highlight without tool rail language", () => {
+  it("describes survivors and cold dates without cross-chart highlight language", () => {
     const blob = [
       meta.description,
       meta.journey?.pointer ?? "",
@@ -68,6 +71,6 @@ describe("path/trajectory meta after inspect-link fix", () => {
     expect(blob).not.toMatch(/select point|clear selection|tool rail/);
     expect(blob).toMatch(/pin|hover/);
     expect(blob).toMatch(/date|cold|survivors/);
-    expect(blob).toMatch(/strip|below|other|highlight|same|lights/);
+    expect(blob).not.toMatch(/highlight|same station|lights the|linked/);
   });
 });
