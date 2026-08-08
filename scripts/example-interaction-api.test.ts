@@ -101,9 +101,11 @@ describe("example interaction API (v0.20)", () => {
    * identity is enough for GuideLegend focus). README snippets are also gated
    * by scripts/readme-showcase.test.ts; this covers the corpus itself.
    *
-   * Minard's path/trajectory is inspect-only figurative map art: dual-tool
-   * linked select chrome does not belong there (see minard-rectify tests).
+   * Minard's path/trajectory is the one figurative exception: inspect-driven
+   * linked selection (no Select-point dual-tool rail) needs a shared controller.
    */
+  const LINKED_VIEW_ALLOWLIST = new Set(["path/trajectory"]);
+
   it("keeps createPlotInteraction out of non-interaction gallery examples", () => {
     const offenders = files
       .map((path) => ({
@@ -111,6 +113,7 @@ describe("example interaction API (v0.20)", () => {
         source: readFileSync(path, "utf8"),
       }))
       .filter(({ id }) => !id.startsWith("interaction/"))
+      .filter(({ id }) => !LINKED_VIEW_ALLOWLIST.has(id))
       .filter(
         ({ source }) =>
           source.includes("createPlotInteraction") ||

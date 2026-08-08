@@ -95,15 +95,20 @@ Rules:
    rects, value labels that are only visual guides, background rugs, and similar
    non-primary marks.
 2. For multi-layer maps and stories (**Minard-class** charts), keep **one primary
-   inspectable mark family** on the map panel (troop path only). Furniture stays
-   quiet with `inspect={false}` (rivers, city labels, strength text).
+   story family** on the map panel (troop path). Furniture stays quiet with
+   `inspect={false}` (rivers, city labels, strength text). A **small linked
+   ring-anchor** layer may stay hit-testable when selection rings must paint
+   candidates (candidates exclude `inspect={false}`); keep it quiet (low alpha /
+   small size) so it does not steal the story from the path.
 3. When a summary layer sits on a raw scatter (mean–SE errorbar over points), prefer
    inspecting the summary and set `inspect={false}` on the background cloud unless
    both layers are intentional hit targets.
 
-Gallery reference: `examples/path/trajectory` (Minard's 1812 map) keeps rivers and
-city/strength text opted out on the map panel so only the troop path is live; the
-cold panel intentionally keeps both path and point inspectable.
+Gallery reference: `examples/path/trajectory` (Minard's 1812 map) opts rivers and
+city/strength text out of hits; the troop path is the primary story mark. Quiet
+cold-station points stay hit-testable as ring anchors for inspect-driven link to
+the cold strip (not a second figurative series). The cold panel keeps path and
+point inspectable.
 
 ## CLI cannot catch host inspect behaviour
 
