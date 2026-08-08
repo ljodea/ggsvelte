@@ -1,5 +1,16 @@
 # @ggsvelte/cli
 
+## 0.34.2
+
+### Patch Changes
+
+- b1e675b: Drop Minard ring-anchor / false linked-selection guidance; teach independent dual panels when series cardinalities differ.
+
+  Migration: none — skill reference only.
+
+- Updated dependencies [b1e675b]
+  - @ggsvelte/core@0.34.2
+
 ## 0.34.1
 
 ### Patch Changes
