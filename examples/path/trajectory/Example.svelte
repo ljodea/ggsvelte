@@ -107,13 +107,23 @@
 
       // Sample cold left/right chrome once per container width, while the strip
       // is still full-bleed — never after our pin reflow (that caused right-edge
-      // width oscillation).
+      // width oscillation). Measure against the <svg>, not .gg-plot-root: after
+      // unpin the root is already 100% wide while the SVG may still hold the
+      // previous scene width until GGPlot's own ResizeObserver rAF commits.
       if (frozenColdLeftMargin === null || frozenColdRightMargin === null) {
+        const coldSvg = coldRoot.querySelector("svg");
+        if (coldSvg === null) return;
         const coldPanelBox = coldPanel.getBoundingClientRect();
+        const coldSvgBox = coldSvg.getBoundingClientRect();
         const coldRootBox = coldRoot.getBoundingClientRect();
-        if (coldPanelBox.width < 8) return;
-        frozenColdLeftMargin = coldPanelBox.left - coldRootBox.left;
-        frozenColdRightMargin = coldRootBox.right - coldPanelBox.right;
+        if (coldPanelBox.width < 8 || coldSvgBox.width < 8) return;
+        // Wait until the plot has remeasured to the host (full-bleed after unpin).
+        if (Math.abs(coldSvgBox.width - coldRootBox.width) > 2) {
+          reschedule();
+          return;
+        }
+        frozenColdLeftMargin = coldPanelBox.left - coldSvgBox.left;
+        frozenColdRightMargin = coldSvgBox.right - coldPanelBox.right;
       }
 
       const nextWidth = Math.round(
