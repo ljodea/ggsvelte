@@ -35,6 +35,7 @@
     width={960}
     height={520}
     select={{ type: "point" }}
+    tool="point"
     {interaction}
     interactionScope={scope}
   >
@@ -111,13 +112,19 @@
     width={960}
     height={190}
     select={{ type: "point" }}
+    tool="point"
     {interaction}
     interactionScope={scope}
   >
     <Inspect mode="xy" pin maxDistance={24} identity="stationKey" />
     <ThemeClassic />
     <ScaleXContinuous limits={[23.5, 38.2]} />
-    <Labs title="The cold on the road back" x="Longitude east" y="°Réaumur" />
+    <Labs
+      title="The cold on the road back"
+      subtitle="Select a reading to highlight the same station on the march map"
+      x="Longitude east"
+      y="°Réaumur"
+    />
     <GeomPath
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
