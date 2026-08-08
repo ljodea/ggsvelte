@@ -1,20 +1,29 @@
 /**
- * Total tonnage of each squadron of the Spanish Armada of 1588, by squadron, from the muster drawn up for the
- * Duke of Medina Sidonia before the fleet sailed.
+ * Men aboard each squadron of the Spanish Armada of 1588, from the muster
+ * drawn up for the Duke of Medina Sidonia before the fleet sailed.
  *
  * Transcribed from HistData::Armada (see NOTICE); 10 squadrons. Squadron names
  * are given in their common English forms - HistData carries the abbreviated
  * and partly garbled forms of the original manifest ("Vizca", "Uantiscas").
+ *
+ * Plot men (soldiers + sailors), not tons. HistData records tons = 0 for the
+ * two oared squadrons (Naples galleasses and Portuguese galleys) — tonnage was
+ * left blank in the 1588 pamphlet for those vessel types, not because the
+ * squadrons were empty. Both still have four ships and a non-zero complement;
+ * charting the zeros looked like missing data.
+ *
+ * Rows are pre-sorted ascending so CoordFlip reads smallest-to-largest
+ * bottom-up.
  */
-export const armadaTonnage = [
-  { squadron: "Naples", tons: 0 },
-  { squadron: "Galleys", tons: 0 },
-  { squadron: "Pataches", tons: 1221 },
-  { squadron: "Biscay", tons: 6567 },
-  { squadron: "Guipúzcoa", tons: 6991 },
-  { squadron: "Levant", tons: 7705 },
-  { squadron: "Portugal", tons: 7737 },
-  { squadron: "Castile", tons: 8714 },
-  { squadron: "Andalusia", tons: 8762 },
-  { squadron: "Hulks", tons: 10271 },
+export const armadaMen = [
+  { squadron: "Galleys", men: 362 },
+  { squadron: "Pataches", men: 1093 },
+  { squadron: "Naples", men: 1341 },
+  { squadron: "Guipúzcoa", men: 2608 },
+  { squadron: "Biscay", men: 2800 },
+  { squadron: "Andalusia", men: 3105 },
+  { squadron: "Levant", men: 3523 },
+  { squadron: "Hulks", men: 3729 },
+  { squadron: "Castile", men: 4171 },
+  { squadron: "Portugal", men: 4623 },
 ] as const;

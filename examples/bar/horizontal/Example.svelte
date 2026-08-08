@@ -8,12 +8,12 @@
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
 
-  import { armadaTonnage } from "./data.js";
+  import { armadaMen } from "./data.js";
 </script>
 
 <GGPlot
-  data={armadaTonnage}
-  aes={{ x: "squadron", y: "tons" }}
+  data={armadaMen}
+  aes={{ x: "squadron", y: "men" }}
   width={640}
   height={400}
 >
@@ -24,7 +24,7 @@
     title="Category totals, flipped so labels read across"
     subtitle="Ordered smallest to largest so the flip reads bottom-up"
     x="Squadron"
-    y="Tons"
+    y="Men"
   />
   <Inspect mode="exact" pin />
 </GGPlot>
