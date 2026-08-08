@@ -45,6 +45,62 @@ describe("responsive guide planning", () => {
     expect(legends[0]?.entries.every((entry) => entry.shape !== undefined)).toBe(true);
   });
 
+  it("puts the layer's constant point shape on color legend keys", () => {
+    // Color scale alone used to draw filled squares for every key. A point
+    // layer with shape:"cross" must show crosses so colorblind readers can
+    // match legend to marks.
+    const legends = discrete(
+      720,
+      gg(rows, aes({ x: "x", y: "y", color: "region" })).geomPoint({ shape: "cross" }),
+    );
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.map((entry) => entry.shape)).toEqual(["cross", "cross"]);
+    const svg = renderToSVGString(
+      gg(rows, aes({ x: "x", y: "y", color: "region" }))
+        .geomPoint({ shape: "cross" })
+        .spec(),
+      { width: 720, height: 360 },
+    );
+    expect(svg).toContain("gg-shape-cross");
+    expect(svg).not.toContain("gg-legend-swatch");
+  });
+
+  it("uses per-layer shapes when scaled color constants share one color scale", () => {
+    // Snow cholera pattern: deaths = grey circles, pumps = red crosses.
+    const legends = discrete(
+      720,
+      gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))
+        .geomPoint({
+          aes: aes({ color: { value: "Deaths", scale: true } }),
+          size: 1.6,
+        })
+        .geomPoint({
+          data: [{ x: 2, y: 2 }],
+          aes: aes({ x: "x", y: "y", color: { value: "Pumps", scale: true } }),
+          size: 4,
+          shape: "cross",
+        })
+        .scales({
+          color: {
+            type: "manual",
+            domain: ["Deaths", "Pumps"],
+            range: ["#1e293b", "#b91c1c"],
+          },
+        }),
+    );
+    expect(legends).toHaveLength(1);
+    const byValue = Object.fromEntries(
+      legends[0]!.entries.map((entry) => [String(entry.value), entry.shape]),
+    );
+    expect(byValue).toEqual({ Deaths: "circle", Pumps: "cross" });
+  });
+
+  it("keeps fill legend keys as squares for non-point geoms", () => {
+    const legends = discrete(720, gg(rows, aes({ x: "region", y: "y", fill: "region" })).geomCol());
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.every((entry) => entry.shape === undefined)).toBe(true);
+  });
+
   it("keeps swapped per-layer aesthetic sources in separate guides", () => {
     const swappedRows = [
       { x: 1, y: 1, a: "North", b: "North" },

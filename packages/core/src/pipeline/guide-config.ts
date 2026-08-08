@@ -6,6 +6,7 @@ import type { DiscreteLegendInput, LegendInput, ResolvedLegendAppearance } from 
 import { encodeKey } from "../scales/state.js";
 import type { ThemeTokens } from "../theme.js";
 
+import { enrichPaintLegendKeys } from "./guide-paint-keys.js";
 import { PipelineError, type LayerBinding } from "./types.js";
 
 type GuideAesthetic = "x" | "y" | "color" | "fill" | StyleAesthetic;
@@ -259,13 +260,20 @@ export function prepareLegendInputs(input: {
       aesthetics: Object.freeze([item.input.scale]),
       appearance,
     } as LegendInput;
+    // Point-family layers carry shape as a mark constant (param or default
+    // circle). Fold those into color/fill keys so the legend matches the plot
+    // (cross vs point), not anonymous colored squares.
+    const withMarkKeys =
+      decorated.kind === "discrete" && isPaintLegend(decorated)
+        ? enrichPaintLegendKeys(decorated, input.bindings)
+        : decorated;
     prepared.push({
-      input: decorated,
+      input: withMarkKeys,
       plan: item.plan,
       identity:
-        decorated.kind === "discrete"
+        withMarkKeys.kind === "discrete"
           ? mergeIdentity(
-              decorated,
+              withMarkKeys,
               item.plan,
               sourceIdentity(aesthetic, input.bindings),
               appearance,
