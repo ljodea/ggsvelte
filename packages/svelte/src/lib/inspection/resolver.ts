@@ -306,14 +306,20 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
     return firstLineageRow[fieldName] ?? null;
   };
   const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => {
+    // after_stat channels never live on the source table under their generated
+    // names (bindot keeps real source rowIndex for color/lineage while x/y are
+    // bin center + stackpos — #803). Prefer CandidateFacts position values;
+    // do not look up "x"/"stackpos" on the observation row.
+    if (field.source === "stat") {
+      const fromCandidate = candidateValue(field.channel);
+      if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
+      return { ...field, value: null };
+    }
     if (row !== null) {
       return { ...field, value: row[field.field] ?? null };
     }
     const fromCandidate = candidateValue(field.channel);
     if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
-    // Stat outputs are not source-table columns; a same-named source column
-    // would print an unrelated value.
-    if (field.source === "stat") return { ...field, value: null };
     return { ...field, value: lineageFieldValue(field.channel, field.field) };
   });
   return Object.freeze({
