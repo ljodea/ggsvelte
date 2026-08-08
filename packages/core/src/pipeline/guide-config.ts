@@ -6,6 +6,7 @@ import type { DiscreteLegendInput, LegendInput, ResolvedLegendAppearance } from 
 import { encodeKey } from "../scales/state.js";
 import type { ThemeTokens } from "../theme.js";
 
+import { enrichPaintLegendKeys } from "./guide-paint-keys.js";
 import { PipelineError, type LayerBinding } from "./types.js";
 
 type GuideAesthetic = "x" | "y" | "color" | "fill" | StyleAesthetic;
@@ -207,6 +208,17 @@ function mergeDiscrete(group: readonly DiscreteLegendInput[]): DiscreteLegendInp
     keyOf(value: unknown): LegendKeyStyle {
       const key: LegendKeyStyle = {};
       for (const input of group) Object.assign(key, input.keyOf?.(value));
+      // Paint enrichment may stamp shape:"circle" onto colour keys. When the
+      // same domain also carries linetype (line+point dual layers), keep the
+      // dash pattern unless a shape scale is in the merge group — otherwise
+      // renderers prefer shape and hide the stroke key entirely.
+      if (
+        key.shape !== undefined &&
+        (key.linetype !== undefined || key.linewidth !== undefined) &&
+        !group.some((input) => input.scale === "shape")
+      ) {
+        delete key.shape;
+      }
       return key;
     },
   };
@@ -259,13 +271,20 @@ export function prepareLegendInputs(input: {
       aesthetics: Object.freeze([item.input.scale]),
       appearance,
     } as LegendInput;
+    // Point-family layers carry shape as a mark constant (param or default
+    // circle). Fold those into color/fill keys so the legend matches the plot
+    // (cross vs point), not anonymous colored squares.
+    const withMarkKeys =
+      decorated.kind === "discrete" && isPaintLegend(decorated)
+        ? enrichPaintLegendKeys(decorated, input.bindings)
+        : decorated;
     prepared.push({
-      input: decorated,
+      input: withMarkKeys,
       plan: item.plan,
       identity:
-        decorated.kind === "discrete"
+        withMarkKeys.kind === "discrete"
           ? mergeIdentity(
-              decorated,
+              withMarkKeys,
               item.plan,
               sourceIdentity(aesthetic, input.bindings),
               appearance,

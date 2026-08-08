@@ -110,10 +110,10 @@ describe("brush-to-zoom", () => {
       ...size,
     });
     const before = model!;
+    // Mark circles only — colour legends also draw circle keys.
+    const markCircles = () => [...container.querySelectorAll(".gg-points circle")];
     const fillsByClass = () => {
-      const fills = [...container.querySelectorAll("circle")].map(
-        (c) => c.getAttribute("fill") ?? "",
-      );
+      const fills = markCircles().map((c) => c.getAttribute("fill") ?? "");
       return fills;
     };
     const initialFills = fillsByClass();
@@ -143,7 +143,7 @@ describe("brush-to-zoom", () => {
     expect(afterX[0]).toBeGreaterThan(beforeX[0]);
     // Scale limits now censor before stats, so out-of-domain points are
     // removed rather than retained at clipped negative pixels.
-    expect(container.querySelectorAll("circle").length).toBeLessThan(initialFills.length);
+    expect(markCircles().length).toBeLessThan(initialFills.length);
     // Every surviving series keeps its existing assignment (prevScales flows
     // through the natural-baseline and effective runs).
     const initialFillSet = new Set(initialFills);
@@ -151,9 +151,7 @@ describe("brush-to-zoom", () => {
 
     // Double-click resets the zoom.
     capture.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-    await until(() =>
-      [...container.querySelectorAll("circle")].every((c) => Number(c.getAttribute("cx")) >= 0),
-    );
+    await until(() => markCircles().every((c) => Number(c.getAttribute("cx")) >= 0));
     expect(fillsByClass()).toEqual(initialFills);
   });
 });

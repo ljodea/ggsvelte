@@ -12,7 +12,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-default",
     filename: "theme-default.svg",
     path: "/theme-shells/theme-default.svg",
-    sha256: "0ebe2f09dc7896da8c262c2cd8a25dd8d813a087a6a198d0216eec3b97b4f72d",
+    sha256: "2349874096c7d94376ef530ad9c96619e662f347bb4afacd5890cb663a861045",
   },
   {
     id: "theme-light",
@@ -36,25 +36,25 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-ggplot2",
     filename: "theme-ggplot2.svg",
     path: "/theme-shells/theme-ggplot2.svg",
-    sha256: "61e43b0f1b920abb1a137a9300ca7f8ed9a34374ab056d11ffd4235357c94e96",
+    sha256: "9f64d5f016115360884e2cbbb82f4c45ae1bb7bd227bd67b32cf7b58f6795fd1",
   },
   {
     id: "theme-classic",
     filename: "theme-classic.svg",
     path: "/theme-shells/theme-classic.svg",
-    sha256: "5ece0a1b88e522095cd76df07c85b62ad1fb2eb746822ddea71bc301ace9aec5",
+    sha256: "061fe60e9ffed4f2f5ce51b1a42388d5d80260a3e718f5077bed1d453e9813ce",
   },
   {
     id: "theme-bw",
     filename: "theme-bw.svg",
     path: "/theme-shells/theme-bw.svg",
-    sha256: "81d3164206c94a1c94b46d6b9e00b204951cdc588c59a823fc2980933292e979",
+    sha256: "80b6e3cbf161e640449babc791239c67442c6a2902078d0b0053e1f93ecd311a",
   },
   {
     id: "theme-hrbr",
     filename: "theme-hrbr.svg",
     path: "/theme-shells/theme-hrbr.svg",
-    sha256: "759e84786ce6a40a0f947e7fc74a4d6f2b22be29019fea023a52d4d2db0a1d2f",
+    sha256: "203b385dde225bf5ddb8a47b474f1a6355675582ca5e1d9a233ccd4fc7b0a55c",
   },
   {
     id: "theme-few",
@@ -78,7 +78,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-economist",
     filename: "theme-economist.svg",
     path: "/theme-shells/theme-economist.svg",
-    sha256: "7ba64f8d1b4d86ce10a477f273a1f950d432b2a24fb3b9c63ea015d6b26d9f37",
+    sha256: "1f40284dbca78b21bda00d5908edab0c3a33f4e6e96968d5b91d3117cdad602c",
   },
   {
     id: "theme-tufte",
@@ -90,7 +90,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-linedraw",
     filename: "theme-linedraw.svg",
     path: "/theme-shells/theme-linedraw.svg",
-    sha256: "ed73b1f6bdc1d3afc9ecf3521645c3b6ce614b57206a0f77be6540dc4734d822",
+    sha256: "ba9b5835bd21f989026bdf567a4c9b7b2f77c2f214c2ef535e0d72777f494041",
   },
   {
     id: "theme-void",
@@ -108,7 +108,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-stata",
     filename: "theme-stata.svg",
     path: "/theme-shells/theme-stata.svg",
-    sha256: "5f802b7a9524331086ad7b90ea3c0804b1094b13497656731dbef76c5cd13757",
+    sha256: "a1fcead8e13d208453010ee6e8dccc8ca19cabff17da2c8cee24ce8acf4fc56e",
   },
   {
     id: "theme-stata_s1color",
@@ -126,7 +126,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarizeddark",
     filename: "theme-solarizeddark.svg",
     path: "/theme-shells/theme-solarizeddark.svg",
-    sha256: "bb6e274e391f37c4d7001bdbb62032d70fe67856073f59cab81d33ff3ecdb031",
+    sha256: "fae2a3efb0554760f207755fb2a418c541fad68533ef0761a62bab58f9826b77",
   },
   {
     id: "theme-economist_white",
@@ -138,7 +138,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarized_2",
     filename: "theme-solarized_2.svg",
     path: "/theme-shells/theme-solarized_2.svg",
-    sha256: "bdb08e81d575d9e1de5fe110f5b7913de9dd9886921927368f13b1edb629950a",
+    sha256: "3399104a9e2ac79382a4a38697442faaebb67f57658e52a097ddf66983712f5b",
   },
   {
     id: "theme-solarized_2dark",
@@ -156,7 +156,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-hc",
     filename: "theme-hc.svg",
     path: "/theme-shells/theme-hc.svg",
-    sha256: "f50c81a2ba22bdf1c71193fbe9aa72d74f59fdf22075654bbc6cabc4e2601c35",
+    sha256: "b361c74cd13f8bb38fca34d850c737fd3080bdc25798504e0e7e494af7ce7f1a",
   },
   {
     id: "theme-hcdark",
@@ -168,7 +168,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-pander",
     filename: "theme-pander.svg",
     path: "/theme-shells/theme-pander.svg",
-    sha256: "960d53b7005a2e932653231359f2e9de4d7f4f2ca5534406cd914e70dfa1769d",
+    sha256: "2c23a1a016d9e31c728d087f7d644d90e5167b9975950bdd062ff3371f4e384f",
   },
   {
     id: "theme-base",
@@ -180,7 +180,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-igray",
     filename: "theme-igray.svg",
     path: "/theme-shells/theme-igray.svg",
-    sha256: "83945d336704a658301723fc67c44d47f23de1cf7483d0d85efefe63df95861c",
+    sha256: "1e2e8bc21882016ee9b89302d322b65359a68f5c1f8a5bebebe5f1adaa9e25f3",
   },
   {
     id: "theme-map",
@@ -216,7 +216,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-lab-default",
     filename: "theme-lab-default.svg",
     path: "/theme-shells/theme-lab-default.svg",
-    sha256: "1b5c638f42df941d6cab20c2ac6f5562a6d01751f9fabeec1a362c9ee74c0d97",
+    sha256: "f61fecac59a68e2abfd335ac5f6ec298682003b226354500e4d884bfd105fb5d",
   },
   {
     id: "palette-observable10",
