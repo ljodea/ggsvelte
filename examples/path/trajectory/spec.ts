@@ -7,15 +7,21 @@ import {
 } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { campaignRivers, minardCityLabels, minardStrengthLabels, minardTroops } from "./data.js";
+import {
+  campaignRivers,
+  minardCityLabels,
+  minardStrengthLabels,
+  minardTroopsWithCold,
+} from "./data.js";
 
 export default defineExample(
   // Minard's flow map: band width carries surviving strength, so linewidth is
   // a mapped aesthetic here, and geom_path keeps row order within each leg -
-  // the retreat walks back over the longitudes of the advance. The svelte
-  // example stacks the temperature strip from Minard's original beneath this
-  // map; a single PortableSpec describes the map panel.
-  gg(minardTroops, aes({ x: "long", y: "lat" }))
+  // the retreat walks back over the longitudes of the advance. Cold dates are
+  // stamped onto retreat vertices (minardTroopsWithCold) so Inspect pins match
+  // the Svelte example. The Svelte surface also stacks the temperature strip
+  // beneath this map; a single PortableSpec describes the map panel only.
+  gg(minardTroopsWithCold, aes({ x: "long", y: "lat" }))
     .geomPath({
       data: campaignRivers,
       aes: aes({ group: "river", color: { value: "#8fa8c0" } }),
@@ -28,6 +34,7 @@ export default defineExample(
         group: "leg",
         color: "direction",
         linewidth: "survivors",
+        label: "date",
       }),
     })
     .geomText({

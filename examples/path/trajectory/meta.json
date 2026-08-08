@@ -1,32 +1,18 @@
 {
   "title": "Minard's march on Moscow",
-  "description": "The full 1869 flow map with the cold strip linked by station: select a retreat temperature reading on either chart and the same station highlights on the other. Band width is surviving strength after Minard.",
-  "tags": [
-    "path",
-    "map",
-    "linewidth",
-    "annotation",
-    "text",
-    "data-order",
-    "interaction",
-    "linked-views",
-    "inspect"
-  ],
+  "description": "The full 1869 flow map with the cold strip under the retreat. Band width is surviving strength after Minard. Hover or pin the march band for survivors and, on cold-aligned retreat points, Minard's date.",
+  "tags": ["path", "map", "linewidth", "annotation", "text", "data-order", "inspect"],
   "docsSection": "Maps & polygons",
   "vrWidth": 960,
   "vrHeight": 740,
   "journey": {
-    "pointer": "With Select point active (the default here), click a cold station on the map or a temperature reading on the strip — the other chart selects the same station. Use Inspect from the tool rail for tooltips and pin.",
-    "keyboard": "Tab into either plot, arrow to a cold station, and press Enter or Space to select it. The other chart shows the same station.",
-    "touch": "Tap a cold station on the map or strip; selection rings update on both charts.",
+    "pointer": "Hover the march band or a cold reading to pin survivors, temperature, and — on cold-aligned retreat points — Minard's date. The strip shares the map's longitude so the cold sits under the retreat.",
+    "keyboard": "Tab into either plot, arrow along the path or cold readings, and pin as usual for Inspect charts.",
+    "touch": "Tap the march band or a cold reading to pin.",
     "references": [
       {
-        "label": "Interaction guide and controller reference",
+        "label": "Interaction guide",
         "href": "/guide/interactions"
-      },
-      {
-        "label": "Linked views example",
-        "href": "/examples/interaction/linked-views"
       }
     ],
     "svelteFirst": true,

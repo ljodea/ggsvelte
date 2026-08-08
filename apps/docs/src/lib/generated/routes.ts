@@ -13279,7 +13279,7 @@ export const DOCS_ROUTES = [
     path: "/examples/path/trajectory",
     title: "Minard's march on Moscow — ggsvelte gallery",
     description:
-      "The full 1869 flow map with the cold strip linked by station: select a retreat temperature reading on either chart and the same station highlights on the other. Band width is surviving strength after Minard.",
+      "The full 1869 flow map with the cold strip under the retreat. Band width is surviving strength after Minard. Hover or pin the march band for survivors and, on cold-aligned retreat points, Minard's date.",
     canonicalPath: "/examples/path/trajectory",
     kind: "page",
     index: true,

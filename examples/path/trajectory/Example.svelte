@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
     CoordFixed,
-    createPlotInteraction,
     GeomPath,
     GeomPoint,
     GeomText,
@@ -17,29 +16,15 @@
   import {
     campaignRivers,
     minardCityLabels,
-    minardColdStations,
+    minardCold,
     minardStrengthLabels,
-    minardTroops,
+    minardTroopsWithCold,
   } from "./data.js";
-
-  // Shared keys: cold strip and map station points both use stationKey so a
-  // click on Nov 09 selects the same retreat station on the march map.
-  // Only one inspectable layer per plot may own those keys (engine: unique
-  // PropertyKey per plot). Path uses plain troops without stationKey.
-  const interaction = createPlotInteraction<string>();
-  const scope = { keys: "minard-cold-station" } as const;
 </script>
 
 <div class="minard">
-  <GGPlot
-    width={960}
-    height={520}
-    select={{ type: "point" }}
-    tool="point"
-    {interaction}
-    interactionScope={scope}
-  >
-    <Inspect mode="xy" pin maxDistance={24} identity="stationKey" />
+  <GGPlot width={960} height={520}>
+    <Inspect mode="xy" pin maxDistance={24} />
     <ThemeClassic />
     <!-- lon/lat degrees are not the same length on the ground at 55°N -->
     <CoordFixed ratio={1.6} />
@@ -69,27 +54,17 @@
       alpha={0.7}
       inspect={false}
     />
-    <!-- Plain troops: no stationKey so path inspect stays free of key collisions -->
+    <!-- Stamped cold dates on retreat vertices so the pin can show Minard's date -->
     <GeomPath
-      data={minardTroops}
+      data={minardTroopsWithCold}
       aes={{
         x: "long",
         y: "lat",
         group: "leg",
         color: "direction",
         linewidth: "survivors",
-      }}
-    />
-    <!-- Sole map owner of stationKey: pin targets with date + linked selection -->
-    <GeomPoint
-      data={minardColdStations}
-      aes={{
-        x: "long",
-        y: "lat",
-        color: "direction",
         label: "date",
       }}
-      size={2.5}
     />
     <GeomText
       data={minardCityLabels}
@@ -106,34 +81,28 @@
     />
   </GGPlot>
 
-  <!-- Plot-level data so path + point share one row namespace for stationKey -->
-  <GGPlot
-    data={minardColdStations}
-    width={960}
-    height={190}
-    select={{ type: "point" }}
-    tool="point"
-    {interaction}
-    interactionScope={scope}
-  >
-    <Inspect mode="xy" pin maxDistance={24} identity="stationKey" />
+  <GGPlot width={960} height={190}>
+    <Inspect mode="xy" pin maxDistance={24} />
     <ThemeClassic />
     <ScaleXContinuous limits={[23.5, 38.2]} />
     <Labs
       title="The cold on the road back"
-      subtitle="Select a reading to highlight the same station on the march map"
+      subtitle="Temperature on the retreat, degrees Réaumur — dates as Minard marked them"
       x="Longitude east"
       y="°Réaumur"
     />
     <GeomPath
+      data={minardCold}
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
       linewidth={1.5}
     />
     <GeomPoint
+      data={minardCold}
       aes={{ x: "long", y: "temp", color: { value: "#374151" }, label: "date" }}
       size={2.5}
     />
     <GeomText
+      data={minardCold}
       aes={{ x: "long", y: "temp", label: "date", color: { value: "#374151" } }}
       size={10}
       dy={-11}
