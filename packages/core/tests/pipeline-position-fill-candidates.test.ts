@@ -129,6 +129,23 @@ describe("percent labels out-of-range advisory", () => {
     expect(model.advisories.some((a) => a.code === "percent-labels-out-of-range")).toBe(true);
   });
 
+  it("also fires for trimmed percent formats (~%) that numberFormatter accepts", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: "a", y: 40 },
+          { x: "b", y: 80 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomCol()
+        .scales({ y: { labels: ".1~%" } })
+        .spec(),
+      size,
+    );
+    expect(model.advisories.some((a) => a.code === "percent-labels-out-of-range")).toBe(true);
+  });
+
   it("stays quiet for position fill with percent labels (domain ≈ [0,1])", () => {
     const model = runPipeline(
       gg([...naples], aes({ x: "squadron", fill: "role", weight: "men" }))

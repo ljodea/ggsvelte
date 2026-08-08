@@ -18,9 +18,9 @@ import { pushContinuousTrainingWarnings } from "./scale-axis-train-continuous-wa
 
 /**
  * Documented numeric percent formats from `numberFormatter` (not strftime
- * tokens like `%Y`). Matches `%`, `.0%`, `.1%`, `,.0%`.
+ * tokens like `%Y`). Matches `%`, `.0%`, `.1%`, `,.0%`, `~%`, `.1~%`.
  */
-const NUMERIC_PERCENT_LABELS = /^(?:,)?(?:\.\d+)?%$/;
+const NUMERIC_PERCENT_LABELS = /^(?:,)?(?:\.\d+)?~?%$/;
 
 /**
  * Percent formats (`".0%"`, `"%"`) multiply by 100. Domains far outside
