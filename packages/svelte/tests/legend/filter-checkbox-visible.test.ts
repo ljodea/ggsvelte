@@ -26,7 +26,7 @@ describe("legend-filter checkbox visible state", () => {
     await until(
       () =>
         container.querySelector("button[aria-label='Reset legend filters']") !== null &&
-        debt.checked === false,
+        !debt.checked,
     );
 
     expect(debt.checked).toBe(false);
@@ -43,7 +43,7 @@ describe("legend-filter checkbox visible state", () => {
     await until(
       () =>
         container.querySelector("button[aria-label='Reset legend filters']") !== null &&
-        debt.checked === false,
+        !debt.checked,
     );
 
     // Simulate the production race: UA sets checked back to true after
@@ -51,13 +51,17 @@ describe("legend-filter checkbox visible state", () => {
     // double-rAF (and entry $effect) must win.
     debt.checked = true;
     await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
     });
     // Click again is not required — force another controller-driven apply by
     // toggling a different series (entries re-derive; $effect re-syncs all).
     const revenue = container.querySelector<HTMLInputElement>("input[aria-label='Show Revenue']")!;
     revenue.click();
-    await until(() => debt.checked === false && revenue.checked === false);
+    await until(() => !debt.checked && !revenue.checked);
 
     expect(debt.checked).toBe(false);
     expect(revenue.checked).toBe(false);
