@@ -1,5 +1,11 @@
 # @ggsvelte/spec
 
+## 0.34.3
+
+### Patch Changes
+
+- df6cb6a: Fix position-fill tooltips that printed absurd percentages (e.g. "87300%") by publishing post-position proportions as candidate y values, and emit a `percent-labels-out-of-range` advisory when scale labels are percent formats on non-proportion domains.
+
 ## 0.34.2
 
 ### Patch Changes
