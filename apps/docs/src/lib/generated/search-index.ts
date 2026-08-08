@@ -21133,8 +21133,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:area:stacked",
     kind: "example",
     title: "Stacked deaths by cause over time",
-    summary:
-      "Stacked areas for parts of a whole that change over time. Disease and combat share the same scale.",
+    summary: "Stacked areas for parts of a whole that change over time.",
     href: "/examples/area/stacked",
     keywords: [
       "Stacked deaths by cause over time",

@@ -21,10 +21,7 @@
 >
   <GeomArea alpha={0.9} />
   <ScaleXDate labels="%b %Y" />
-  <ScaleFillDiscrete
-    domain={["Disease", "Wounds", "Other"]}
-    scheme="fivethirtyeight"
-  />
+  <ScaleFillDiscrete domain={["Disease", "Wounds", "Other"]} scheme="stata" />
   <ThemeEconomist />
   <GuideLegend channel="fill" focus />
   <Labs

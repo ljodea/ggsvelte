@@ -9,7 +9,7 @@ export default defineExample(
     // Domain is fixed so cause-to-colour never depends on row order.
     .scaleFillDiscrete({
       domain: ["Disease", "Wounds", "Other"],
-      scheme: "fivethirtyeight",
+      scheme: "stata",
     })
     .scales({ x: { labels: "%b %Y" } })
     .theme("economist")

@@ -12743,8 +12743,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/area/stacked",
     title: "Stacked deaths by cause over time — ggsvelte gallery",
-    description:
-      "Stacked areas for parts of a whole that change over time. Disease and combat share the same scale.",
+    description: "Stacked areas for parts of a whole that change over time.",
     canonicalPath: "/examples/area/stacked",
     kind: "page",
     index: true,

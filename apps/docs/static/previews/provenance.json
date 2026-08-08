@@ -8,8 +8,8 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "b11c540e8ca86474efd7c266c78b23aa7731dc0ab2c1977371ea15dd6d700ea5",
-      "pngSha256": "06a30017ef7479bffee67b6d483ba59d36aac7ff8303aac3d0ff74ba1030934a"
+      "sourceSha256": "930207fb45dabd4cb2d2261a4784cf4653ba56e06c9a9a8ec93a2af1ff24eb21",
+      "pngSha256": "8996a42c4eeb4ef07c4c480784102c6d078470890c14107992085367285f64a3"
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",

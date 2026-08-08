@@ -18,7 +18,7 @@ export const GALLERY_PREVIEWS = [
     id: "area/stacked",
     filename: "area-stacked-light.png",
     path: "/previews/area-stacked-light.png",
-    sha256: "06a30017ef7479bffee67b6d483ba59d36aac7ff8303aac3d0ff74ba1030934a",
+    sha256: "8996a42c4eeb4ef07c4c480784102c6d078470890c14107992085367285f64a3",
   },
   {
     id: "bar/dodged",
