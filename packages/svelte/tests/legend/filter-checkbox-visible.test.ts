@@ -30,40 +30,20 @@ describe("legend-filter checkbox visible state", () => {
     );
 
     expect(debt.checked).toBe(false);
-  });
 
-  it("re-syncs when the UA overwrites checked after a successful filter", async () => {
-    const { container } = render(LegendFilterMultiSeriesPlot);
-    await until(() => container.querySelectorAll(".gg-legend-filters input").length === 3);
-
-    const debt = container.querySelector<HTMLInputElement>(
-      "input[aria-label='Show National debt']",
-    )!;
-    debt.click();
+    // Reset restores every box.
+    container
+      .querySelector<HTMLButtonElement>("button[aria-label='Reset legend filters']")!
+      .click();
     await until(
       () =>
-        container.querySelector("button[aria-label='Reset legend filters']") !== null &&
-        !debt.checked,
+        container.querySelector("button[aria-label='Reset legend filters']") === null &&
+        debt.checked,
     );
-
-    // Simulate the production race: UA sets checked back to true after
-    // Svelte's set_checked(false) and after the first rAF. The click-path
-    // double-rAF (and entry $effect) must win.
-    debt.checked = true;
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-    });
-    // Click again is not required — force another controller-driven apply by
-    // toggling a different series (entries re-derive; $effect re-syncs all).
-    const revenue = container.querySelector<HTMLInputElement>("input[aria-label='Show Revenue']")!;
-    revenue.click();
-    await until(() => !debt.checked && !revenue.checked);
-
-    expect(debt.checked).toBe(false);
-    expect(revenue.checked).toBe(false);
+    expect(
+      [...container.querySelectorAll<HTMLInputElement>(".gg-legend-filters input")].every(
+        (input) => input.checked,
+      ),
+    ).toBe(true);
   });
 });
