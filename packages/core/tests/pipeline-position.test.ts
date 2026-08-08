@@ -69,6 +69,30 @@ describe("applyPosition — stack/fill/dodge on bars", () => {
     }
   });
 
+  it("preserves non-finite pre-position y as NaN after stack rewrite (not 0)", () => {
+    const table = ColumnTable.fromRows([
+      { g: "a", cls: "x", y: 5 },
+      { g: "a", cls: "y", y: Number.NaN },
+    ]);
+    const binding = bindLayer(
+      {
+        geom: "col",
+        aes: { x: { field: "g" }, y: { field: "y" }, fill: { field: "cls" } },
+        position: "stack",
+      },
+      0,
+      table,
+      [],
+    );
+    const frame = buildFrame(binding, table, [], []);
+    // Force a non-finite measure so positionStack zero-heights it; rewrite
+    // must not publish a hard 0 for tooltips.
+    frame.yNumeric![1] = Number.NaN;
+    applyPosition(frame, [], table);
+    expect(Number.isNaN(frame.yNumeric![1])).toBe(true);
+    expect(frame.yNumeric![0]).toBeCloseTo(5, 8);
+  });
+
   it("dodges boxplots into per-slot indices", () => {
     const table = ColumnTable.fromRows([
       { g: "a", cls: "x", y: 1 },

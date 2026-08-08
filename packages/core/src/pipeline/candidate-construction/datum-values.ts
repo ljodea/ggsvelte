@@ -1,4 +1,6 @@
 import type { CellValue } from "../../table.js";
+import { signedStackSegmentHeight } from "../position-bar.js";
+import { isBarLike } from "../scale-axis-train.js";
 import type { LayerFrame, ResolvedColorScale } from "../types.js";
 
 /**
@@ -82,18 +84,50 @@ export function resolveCandidateLogicalValues(input: {
         : sourceValue(xField)
       : (frame?.box?.outlierX[primitiveIndex] ?? null);
 
+  // Stack/fill rewrite ymin/ymax (and yNumeric after position-bar). Prefer the
+  // post-position segment height so identity cols and stat bars both report the
+  // drawn share/contribution — not the pre-position source column.
+  const stackHeight = stackOrFillSegmentHeight(frame, frameRow);
+
   const yValue = annotationRule
     ? annotationY
     : outlierSourceRow === null
-      ? sourceRow === null
-        ? (frame?.yValues?.[frameRow] ??
-          semanticFrameNumber(
-            frame,
-            "y",
-            frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
-          ))
-        : sourceValue(yField)
+      ? stackHeight === undefined
+        ? sourceRow === null
+          ? (frame?.yValues?.[frameRow] ??
+            semanticFrameNumber(
+              frame,
+              "y",
+              frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
+            ))
+          : sourceValue(yField)
+        : semanticFrameNumber(frame, "y", stackHeight)
       : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);
 
   return { xValue, yValue };
+}
+
+/**
+ * Post-position segment height for bar-like stack/fill, or undefined when the
+ * layer is not a bar/col/area under stack/fill (so smooth/errorbar ymin/ymax
+ * bands are never mistaken for stack heights).
+ */
+function stackOrFillSegmentHeight(
+  frame: LayerFrame | undefined,
+  frameRow: number,
+): number | undefined {
+  if (frame === undefined || frame.ymin === null || frame.ymax === null) return undefined;
+  // Partial frames (unit fixtures) may omit binding — treat as non-stack.
+  const geom = frame.binding?.layer?.geom;
+  if (geom === undefined || !isBarLike(geom)) return undefined;
+  // Transformed measure axes stack in transform space; a height is not
+  // invertible to a data value (log: 10^(a−b) = ratio). Keep prior path.
+  if (frame.binding?.yTransform !== undefined) return undefined;
+  const position = frame.binding?.layer?.position ?? "identity";
+  if (position !== "stack" && position !== "fill") return undefined;
+  const lo = frame.ymin[frameRow];
+  const hi = frame.ymax[frameRow];
+  if (lo === undefined || hi === undefined) return undefined;
+  const signed = signedStackSegmentHeight(lo, hi);
+  return Number.isFinite(signed) ? signed : undefined;
 }

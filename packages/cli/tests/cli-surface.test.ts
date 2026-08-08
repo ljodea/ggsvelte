@@ -59,4 +59,32 @@ describe("@ggsvelte/cli surface (src/index.ts)", () => {
     expect(out).toEqual(["0.0.0-test\n"]);
     expect(err).toEqual([]);
   });
+
+  it("emits percent-labels-out-of-range when labels are % on count-scale data", async () => {
+    // Counts (40, 80) with ".0%" would print 4000%/8000% — CLI must disclose.
+    const percentSpec = {
+      data: {
+        values: [
+          { x: "a", y: 40 },
+          { x: "b", y: 80 },
+        ],
+      },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "col" }],
+      scales: { y: { labels: ".0%" } },
+    };
+    const { io, err } = makeIO(JSON.stringify(percentSpec));
+    const code = await runCLI([], io);
+    expect(code).toBe(0);
+    const advisories = err
+      .map((line) => {
+        try {
+          return JSON.parse(line) as { kind?: string; code?: string };
+        } catch {
+          return null;
+        }
+      })
+      .filter((row) => row !== null && row.kind === "advisory");
+    expect(advisories.some((row) => row!.code === "percent-labels-out-of-range")).toBe(true);
+  });
 });

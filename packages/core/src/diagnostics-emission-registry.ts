@@ -121,6 +121,7 @@ export const ADVISORY_EMISSION_REGISTRY = {
   "temporal-inference-invalid": { channel: "advisory" },
   "band-labels-wrapped": { channel: "advisory" },
   "band-labels-rotated": { channel: "advisory" },
+  "percent-labels-out-of-range": { channel: "advisory" },
 } as const satisfies Record<AdvisoryCode, EmissionRegistryEntry>;
 
 /**

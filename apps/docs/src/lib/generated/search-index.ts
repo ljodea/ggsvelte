@@ -20415,6 +20415,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["band-labels-rotated"],
   },
   {
+    id: "heading:guide-advisories:percent-labels-out-of-range",
+    kind: "heading",
+    title: "percent-labels-out-of-range",
+    summary:
+      "percent-labels-out-of-range in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#percent-labels-out-of-range",
+    keywords: ["Advisories", "Reference"],
+    exact: ["percent-labels-out-of-range"],
+  },
+  {
     id: "page:guide-lifecycle",
     kind: "page",
     title: "Lifecycle & editions",
