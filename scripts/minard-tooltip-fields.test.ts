@@ -33,14 +33,14 @@ describe("mapMarchTooltipFields", () => {
 
 describe("coldStripTooltipFields", () => {
   it("shows temperature and date when date is present", () => {
-    expect(coldStripTooltipFields({ temp: -21, date: "Nov 14", long: 32 })).toEqual([
+    expect(coldStripTooltipFields({ temp: -21, date: "Nov 14" })).toEqual([
       { label: "Temperature", value: "−21 °Réaumur" },
       { label: "Date", value: "Nov 14" },
     ]);
   });
 
   it("omits the date row when Minard left the reading blank", () => {
-    expect(coldStripTooltipFields({ temp: -11, date: "", long: 29.2 })).toEqual([
+    expect(coldStripTooltipFields({ temp: -11, date: "" })).toEqual([
       { label: "Temperature", value: "−11 °Réaumur" },
     ]);
   });

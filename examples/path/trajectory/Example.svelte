@@ -22,16 +22,11 @@
     minardTroops,
   } from "./data.js";
   import { coldStripTooltipFields, mapMarchTooltipFields } from "./tooltip.js";
+
+  type Inspection = PlotInspectionChange<Record<string, unknown>, PropertyKey>;
 </script>
 
-{#snippet mapTooltip(
-  inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
-)}
-  {@const fields = mapMarchTooltipFields(
-    (inspection.focus.row ?? {}) as {
-      survivors?: unknown;
-    },
-  )}
+{#snippet tip(fields: { label: string; value: string }[])}
   {#if fields.length > 0}
     <dl class="minard-tip">
       {#each fields as field (field.label)}
@@ -44,25 +39,12 @@
   {/if}
 {/snippet}
 
-{#snippet coldTooltip(
-  inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
-)}
-  {@const fields = coldStripTooltipFields(
-    (inspection.focus.row ?? {}) as {
-      temp?: unknown;
-      date?: unknown;
-    },
-  )}
-  {#if fields.length > 0}
-    <dl class="minard-tip">
-      {#each fields as field (field.label)}
-        <div>
-          <dt>{field.label}</dt>
-          <dd>{field.value}</dd>
-        </div>
-      {/each}
-    </dl>
-  {/if}
+{#snippet mapTooltip(inspection: Inspection)}
+  {@render tip(mapMarchTooltipFields(inspection.focus.row ?? {}))}
+{/snippet}
+
+{#snippet coldTooltip(inspection: Inspection)}
+  {@render tip(coldStripTooltipFields(inspection.focus.row ?? {}))}
 {/snippet}
 
 <div class="minard">

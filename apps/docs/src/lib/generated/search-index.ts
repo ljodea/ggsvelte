@@ -22012,12 +22012,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:path:trajectory",
     kind: "example",
-    title: "Minard's march on Moscow",
-    summary:
-      "The full 1869 flow map with the cold strip under the retreat. Band width is surviving strength after Minard. Pin the march for survivors; pin a cold reading for temperature and Minard's date. Map and strip share longitude; they are independent series (nine cold readings, many path vertices).",
+    title: "Napoleon's march on Moscow, by Minard",
+    summary: "Path map of army strength with a temperature strip.",
     href: "/examples/path/trajectory",
     keywords: [
-      "Minard's march on Moscow",
+      "Napoleon's march on Moscow, by Minard",
       "Maps & polygons",
       "path",
       "map",
@@ -22027,7 +22026,7 @@ export const DOCS_SEARCH_INDEX = [
       "data-order",
       "inspect",
     ],
-    exact: ["Minard's march on Moscow"],
+    exact: ["Napoleon's march on Moscow, by Minard"],
   },
   {
     id: "example:point:abline-identity",

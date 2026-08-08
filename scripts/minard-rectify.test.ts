@@ -59,18 +59,10 @@ describe("path/trajectory meta after drop false link", () => {
     expect(meta.tags).not.toContain("linked-views");
   });
 
-  it("describes survivors and cold dates without cross-chart highlight language", () => {
-    const blob = [
-      meta.description,
-      meta.journey?.pointer ?? "",
-      meta.journey?.keyboard ?? "",
-      meta.journey?.touch ?? "",
-    ]
-      .join(" ")
-      .toLowerCase();
+  it("describes the march without cross-chart highlight language", () => {
+    const blob = meta.description.toLowerCase();
     expect(blob).not.toMatch(/select point|clear selection|tool rail/);
-    expect(blob).toMatch(/pin|hover/);
-    expect(blob).toMatch(/date|cold|survivors/);
+    expect(blob).toMatch(/cold|retreat|men|path/);
     expect(blob).not.toMatch(/highlight|same station|lights the|linked/);
   });
 });

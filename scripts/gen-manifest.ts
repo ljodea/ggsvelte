@@ -40,10 +40,11 @@ export interface ExampleReference {
 }
 
 export interface ExampleJourney {
-  pointer: string;
-  keyboard: string;
-  touch: string;
-  references: readonly ExampleReference[];
+  /** Optional modality copy; omit all three to hide the Interaction section. */
+  pointer?: string;
+  keyboard?: string;
+  touch?: string;
+  references?: readonly ExampleReference[];
   svelteFirst: boolean;
   fullWidth: boolean;
 }
@@ -101,8 +102,9 @@ function validateJourney(journey: unknown, id: string): string[] {
     }
   }
   for (const key of ["pointer", "keyboard", "touch"] as const) {
+    if (j[key] === undefined) continue;
     if (typeof j[key] !== "string" || j[key].trim() === "") {
-      problems.push(`${id}: meta.json "journey.${key}" must be a non-empty string`);
+      problems.push(`${id}: meta.json "journey.${key}" must be a non-empty string when set`);
     }
   }
   for (const key of ["svelteFirst", "fullWidth"] as const) {
@@ -111,8 +113,9 @@ function validateJourney(journey: unknown, id: string): string[] {
     }
   }
   const references = j["references"];
+  if (references === undefined) return problems;
   if (!Array.isArray(references) || references.length === 0) {
-    problems.push(`${id}: meta.json "journey.references" must be a non-empty array`);
+    problems.push(`${id}: meta.json "journey.references" must be a non-empty array when set`);
     return problems;
   }
   for (const [index, reference] of references.entries()) {
@@ -241,15 +244,25 @@ export function buildManifestSource(examples: readonly DiscoveredExample[]): str
           ? []
           : [
               `    journey: {`,
-              `      pointer: ${JSON.stringify(ex.journey.pointer)},`,
-              `      keyboard: ${JSON.stringify(ex.journey.keyboard)},`,
-              `      touch: ${JSON.stringify(ex.journey.touch)},`,
-              `      references: [`,
-              ...ex.journey.references.map(
-                (reference) =>
-                  `        { label: ${JSON.stringify(reference.label)}, href: ${JSON.stringify(reference.href)} },`,
-              ),
-              `      ],`,
+              ...(ex.journey.pointer === undefined
+                ? []
+                : [`      pointer: ${JSON.stringify(ex.journey.pointer)},`]),
+              ...(ex.journey.keyboard === undefined
+                ? []
+                : [`      keyboard: ${JSON.stringify(ex.journey.keyboard)},`]),
+              ...(ex.journey.touch === undefined
+                ? []
+                : [`      touch: ${JSON.stringify(ex.journey.touch)},`]),
+              ...(ex.journey.references === undefined
+                ? []
+                : [
+                    `      references: [`,
+                    ...ex.journey.references.map(
+                      (reference) =>
+                        `        { label: ${JSON.stringify(reference.label)}, href: ${JSON.stringify(reference.href)} },`,
+                    ),
+                    `      ],`,
+                  ]),
               `      svelteFirst: ${String(ex.journey.svelteFirst)},`,
               `      fullWidth: ${String(ex.journey.fullWidth)},`,
               `    },`,
@@ -272,10 +285,10 @@ export interface ExampleReference {
 }
 
 export interface ExampleJourney {
-  readonly pointer: string;
-  readonly keyboard: string;
-  readonly touch: string;
-  readonly references: readonly ExampleReference[];
+  readonly pointer?: string;
+  readonly keyboard?: string;
+  readonly touch?: string;
+  readonly references?: readonly ExampleReference[];
   readonly svelteFirst: boolean;
   readonly fullWidth: boolean;
 }

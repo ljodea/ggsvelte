@@ -22,24 +22,17 @@ describe("path/trajectory meta polish", () => {
     expect(meta.tags).not.toContain("linked-views");
   });
 
-  it("describes the cold strip without cross-chart highlight claims", () => {
-    const blob = [
-      meta.description,
-      meta.journey?.pointer ?? "",
-      meta.journey?.keyboard ?? "",
-      meta.journey?.touch ?? "",
-    ]
-      .join(" ")
-      .toLowerCase();
-    expect(blob).toMatch(/cold|date|retreat|minard/);
+  it("describes the chart without cross-chart highlight claims", () => {
+    const blob = meta.description.toLowerCase();
+    expect(blob).toMatch(/path|strength|temperature/);
     expect(blob).not.toMatch(/select point|clear selection/);
     expect(blob).not.toMatch(/highlight|linked|same station|lights the/);
   });
 
-  it("ships a journey pointer for pin/hover on each panel", () => {
-    const pointer = meta.journey?.pointer ?? "";
-    expect(pointer).toMatch(/pin|hover|inspect|date/i);
-    expect(pointer.toLowerCase()).not.toMatch(/select point|clear selection|highlight/);
+  it("ships no Interaction modality copy (layout-only journey)", () => {
+    expect(meta.journey?.pointer).toBeUndefined();
+    expect(meta.journey?.keyboard).toBeUndefined();
+    expect(meta.journey?.touch).toBeUndefined();
   });
 });
 
