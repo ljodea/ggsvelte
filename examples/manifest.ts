@@ -55,7 +55,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "area",
     name: "stacked",
     title: "Stacked deaths by cause over time",
-    description: "Stacked areas for parts of a whole that change over time. Disease and combat share the same scale.",
+    description: "Stacked areas for parts of a whole that change over time.",
     tags: ["area", "stack", "fill", "legend", "theme", "palette"],
     docsSection: "Areas",
     hasData: true,

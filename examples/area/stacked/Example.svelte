@@ -5,7 +5,7 @@
     GuideLegend,
     Inspect,
     Labs,
-    ScaleFillManual,
+    ScaleFillDiscrete,
     ScaleXDate,
     ThemeEconomist,
   } from "@ggsvelte/svelte";
@@ -21,9 +21,9 @@
 >
   <GeomArea alpha={0.9} />
   <ScaleXDate labels="%b %Y" />
-  <ScaleFillManual
+  <ScaleFillDiscrete
     domain={["Disease", "Wounds", "Other"]}
-    values={["#d14d41", "#014d64", "#4385be"]}
+    scheme="fivethirtyeight"
   />
   <ThemeEconomist />
   <GuideLegend channel="fill" focus />
