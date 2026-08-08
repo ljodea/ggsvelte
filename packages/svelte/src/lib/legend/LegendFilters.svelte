@@ -21,6 +21,22 @@
   } = $props();
 
   let fieldsetEl = $state<HTMLFieldSetElement | null>(null);
+  /** Bumps on every toggle/reset so deferred DOM applies from a prior click
+   * cannot overwrite a later state (reset after hide-all was the first footgun). */
+  let applyGeneration = 0;
+
+  function syncCheckboxDom(): void {
+    if (fieldsetEl === null) return;
+    const inputs = fieldsetEl.querySelectorAll<HTMLInputElement>(
+      "input[type='checkbox']",
+    );
+    for (let index = 0; index < entries.length; index++) {
+      const input = inputs[index];
+      const row = entries[index];
+      if (input === undefined || row === undefined) continue;
+      input.checked = row.visible;
+    }
+  }
 
   function onReset(event: MouseEvent): void {
     // Mirror the controller's no-op guard: a reset with no active filters
@@ -30,9 +46,45 @@
     // Capture first checkbox before reset (which may unmount the button).
     // Controller retains zero DOM/querySelector behavior.
     const returnTarget = fieldsetEl?.querySelector<HTMLElement>("input");
+    applyGeneration += 1;
     controller.reset(event);
-    queueMicrotask(() => returnTarget?.focus());
+    queueMicrotask(() => {
+      syncCheckboxDom();
+      returnTarget?.focus();
+    });
   }
+
+  /**
+   * Drive checkbox DOM from controller state — never through Svelte's
+   * checked={} binding. set_checked caches the last write and skips DOM
+   * updates; trusted label clicks then leave input.checked stuck after the
+   * UA mutates the IDL outside the JS setter. We own the property instead.
+   */
+  function onToggle(target: FilterableLegendEntry, event: MouseEvent): void {
+    const visible = controller.toggle(target, event);
+    const input = event.currentTarget;
+    if (!(input instanceof HTMLInputElement)) return;
+    const generation = (applyGeneration += 1);
+    const apply = (): void => {
+      if (generation !== applyGeneration) return;
+      input.checked = visible;
+    };
+    apply();
+    queueMicrotask(apply);
+    requestAnimationFrame(() => {
+      apply();
+      requestAnimationFrame(apply);
+    });
+    setTimeout(apply, 0);
+    setTimeout(apply, 32);
+  }
+
+  // Align DOM whenever entries re-derive (reset, catalog, mode).
+  $effect(() => {
+    void entries;
+    void controller.hasActiveFilters;
+    syncCheckboxDom();
+  });
 </script>
 
 {#if entries.length > 0}
@@ -42,12 +94,11 @@
       <label>
         <input
           type="checkbox"
-          checked={target.visible}
           aria-label={`Show ${target.entry.label}`}
           onpointerdown={(event) =>
             controller.setPointerType(event.pointerType)}
           onpointercancel={() => controller.setPointerType(null)}
-          onclick={(event) => controller.toggle(target, event)}
+          onclick={(event) => onToggle(target, event)}
         />
         <span>{target.entry.label}</span>
       </label>
