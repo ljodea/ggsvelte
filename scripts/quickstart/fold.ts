@@ -52,18 +52,18 @@ const BASE_COMPONENTS = [
 ] as const;
 
 /**
- * Emission order for the grammar children, outermost concern first: how the
- * chart looks, then how values map to the page, then what it is called. None
- * of these can override another, so this is readability only.
+ * Emission order for the grammar children after mark layers (ggplot2 thinking
+ * order): scales / theme / guides / labs, then host-only Inspect last. None of
+ * these can override a different family, so this is readability only.
  */
 const GRAMMAR_ORDER = [
-  "inspect",
   "theme",
   "scaleY",
   "scaleX",
   "scaleFill",
   "guides",
   "labs",
+  "inspect",
 ] as const;
 
 /** Layers that only make sense when the chart is wide enough to place text. */
@@ -170,7 +170,7 @@ ${script}
 <GGPlot
 ${[...attrs.values()].join("\n")}
 >
-${[...GRAMMAR_ORDER.filter((name) => grammar[name] !== undefined).map((name) => grammar[name]!), ...childOrder.map((name) => children[name]!)].join("\n")}
+${[...childOrder.map((name) => children[name]!), ...GRAMMAR_ORDER.filter((name) => grammar[name] !== undefined).map((name) => grammar[name]!)].join("\n")}
 </GGPlot>`;
 
   return {

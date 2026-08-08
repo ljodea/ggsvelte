@@ -6,10 +6,10 @@
   const guideAxisExample = `import { GeomPoint, GGPlot, GuideAxis, Labs } from "@ggsvelte/svelte";
 
 <GGPlot data={rows} aes={{ x: "hour", y: "pm25" }}>
-  <Labs x="Hour of day" y="PM2.5" />
+  <GeomPoint />
   <GuideAxis channel="x" showTicks={false} collision="ellipsis" />
   <GuideAxis channel="y" title="µg/m³" />
-  <GeomPoint />
+  <Labs x="Hour of day" y="PM2.5" />
 </GGPlot>`;
 
   const scaleBreaksExample = `<GGPlot data={rows} aes={{ x: "weight", y: "economy" }}>

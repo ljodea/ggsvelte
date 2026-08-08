@@ -19,8 +19,8 @@ charts omit custom identity. Prefer `identity` on `<Inspect>`, object-form
 </script>
 
 <GGPlot data={rows} aes={{ x: "x", y: "y" }}>
-  <Inspect mode="xy" />
   <GeomPoint />
+  <Inspect mode="xy" />
 </GGPlot>
 ```
 

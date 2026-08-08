@@ -14,20 +14,6 @@
 </script>
 
 <GGPlot data={reigns} width={640} height={400}>
-  <Inspect mode="x" pin />
-  <ThemeEconomist />
-  <ScaleXContinuous labels="d" />
-  <ScaleFillManual
-    domain={["Monarchy", "Commonwealth"]}
-    values={["#9ec3d6", "#e8a87c"]}
-  />
-  <Labs
-    title="Background rectangles for eras"
-    subtitle="Wheat prices with a band for each reign that covered those years"
-    x="Year"
-    y="Shillings per quarter"
-    fill=""
-  />
   <GeomRect
     aes={{
       xmin: "start",
@@ -45,4 +31,18 @@
     aes={{ x: "year", y: "shillings", color: { value: "#1a1a1a" } }}
     linewidth={2}
   />
+  <ScaleXContinuous labels="d" />
+  <ScaleFillManual
+    domain={["Monarchy", "Commonwealth"]}
+    values={["#9ec3d6", "#e8a87c"]}
+  />
+  <ThemeEconomist />
+  <Labs
+    title="Background rectangles for eras"
+    subtitle="Wheat prices with a band for each reign that covered those years"
+    x="Year"
+    y="Shillings per quarter"
+    fill=""
+  />
+  <Inspect mode="x" pin />
 </GGPlot>

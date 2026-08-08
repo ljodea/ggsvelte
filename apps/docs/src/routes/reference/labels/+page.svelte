@@ -6,9 +6,9 @@
   const geomTextExample = `import { GeomPoint, GeomText, GGPlot, Labs } from "@ggsvelte/svelte";
 
 <GGPlot data={cities} aes={{ x: "lon", y: "lat", label: "name" }}>
-  <Labs title="City labels" x="Longitude" y="Latitude" />
   <GeomPoint />
   <GeomText dy={-8} size={11} />
+  <Labs title="City labels" x="Longitude" y="Latitude" />
 </GGPlot>`;
 
   const geomLabelExample = `<GGPlot data={cities} aes={{ x: "lon", y: "lat", label: "name" }}>

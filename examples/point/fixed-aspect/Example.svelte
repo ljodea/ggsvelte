@@ -16,7 +16,7 @@
   width="container"
   height={440}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomPoint size={3} />
   <CoordFixed />
   <Labs
     title="Equal data units on both axes"
@@ -24,5 +24,5 @@
     x="x"
     y="y"
   />
-  <GeomPoint size={3} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

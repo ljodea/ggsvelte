@@ -47,12 +47,12 @@
       height={310}
       onlegendfocus={describe}
     >
-      <Inspect mode="xy" pin maxDistance={24} />
-      <GuideLegend channel="color" focus />
-      <ThemeFew />
-      <ScaleXContinuous labels="d" />
-      <Labs title="SVG points" x="Year" y="Index units" color="Series" />
       <GeomPoint size={4} />
+      <ScaleXContinuous labels="d" />
+      <ThemeFew />
+      <GuideLegend channel="color" focus />
+      <Labs title="SVG points" x="Year" y="Index units" color="Series" />
+      <Inspect mode="xy" pin maxDistance={24} />
     </GGPlot>
     <GGPlot
       data={rows}
@@ -63,12 +63,12 @@
       height={310}
       onlegendfocus={describe}
     >
-      <Inspect mode="xy" pin maxDistance={24} />
-      <GuideLegend channel="color" focus />
-      <ThemeFew />
-      <ScaleXContinuous labels="d" />
-      <Labs title="Canvas points" x="Year" y="Index units" color="Series" />
       <GeomPoint size={4} render="canvas" />
+      <ScaleXContinuous labels="d" />
+      <ThemeFew />
+      <GuideLegend channel="color" focus />
+      <Labs title="Canvas points" x="Year" y="Index units" color="Series" />
+      <Inspect mode="xy" pin maxDistance={24} />
     </GGPlot>
     <GGPlot
       data={rows}
@@ -79,13 +79,13 @@
       height={310}
       onlegendfocus={describe}
     >
-      <Inspect mode="xy" pin maxDistance={24} />
-      <GuideLegend channel="color" focus />
-      <ThemeFew />
-      <ScaleXContinuous labels="d" />
-      <Labs title="SVG lines" x="Year" y="Index units" color="Series" />
       <GeomLine linewidth={2} />
       <GeomPoint />
+      <ScaleXContinuous labels="d" />
+      <ThemeFew />
+      <GuideLegend channel="color" focus />
+      <Labs title="SVG lines" x="Year" y="Index units" color="Series" />
+      <Inspect mode="xy" pin maxDistance={24} />
     </GGPlot>
   </div>
   <div class="summary gg-demo-chrome">

@@ -18,19 +18,19 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeMinimal />
+  <GeomErrorbar
+    width={0.55}
+    linewidth={2.6}
+    aes={{ color: { value: "#1a202c" } }}
+  />
   <ScaleXDiscrete domain={["A", "B", "C"]} />
   <ScaleYContinuous limits={[0, 12]} />
+  <ThemeMinimal />
   <Labs
     title="Capped error bars"
     subtitle="Three identity intervals with end caps at ymin and ymax"
     x="Group"
     y="Value"
   />
-  <GeomErrorbar
-    width={0.55}
-    linewidth={2.6}
-    aes={{ color: { value: "#1a202c" } }}
-  />
+  <Inspect mode="exact" pin />
 </GGPlot>

@@ -16,7 +16,7 @@
   width="container"
   height={400}
 >
-  <Inspect mode="x" pin />
+  <GeomLine linewidth={1.5} />
   <ThemeFivethirtyeight />
   <Labs
     title="Years inferred from raw four-digit strings"
@@ -24,5 +24,5 @@
     x="Year"
     y="£ millions"
   />
-  <GeomLine linewidth={1.5} />
+  <Inspect mode="x" pin />
 </GGPlot>

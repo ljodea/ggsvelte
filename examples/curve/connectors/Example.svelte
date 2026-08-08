@@ -18,12 +18,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeClassic />
+  <GeomCurve linewidth={2} lineend="round" curvature={0.4} alpha={0.9} />
+  <GeomPoint size={2.5} alpha={0.6} />
+  <GeomPoint aes={{ x: "pair", y: "cross" }} size={3.2} />
   <ScaleColorManual
     domain={["Cross-fertilised taller", "Self-fertilised taller"]}
     values={["#3a7d44", "#bc5215"]}
   />
+  <ThemeClassic />
   <Labs
     title="Paired points joined by a curve"
     subtitle="Each curve runs from the self-fertilised plant to its cross-fertilised pair"
@@ -31,7 +33,5 @@
     y="Final height (inches)"
     color=""
   />
-  <GeomCurve linewidth={2} lineend="round" curvature={0.4} alpha={0.9} />
-  <GeomPoint size={2.5} alpha={0.6} />
-  <GeomPoint aes={{ x: "pair", y: "cross" }} size={3.2} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

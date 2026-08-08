@@ -16,7 +16,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
+  <GeomCount alpha={0.7} />
   <ThemeClassic />
   <Labs
     title="Overlapping points sized by how many share a cell"
@@ -25,5 +25,5 @@
     y="Child height (inches)"
     size="Children"
   />
-  <GeomCount alpha={0.7} />
+  <Inspect mode="exact" pin />
 </GGPlot>

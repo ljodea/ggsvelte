@@ -15,17 +15,6 @@
 </script>
 
 <GGPlot data={choleraDeaths} aes={{ x: "x", y: "y" }} width={640} height={400}>
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeClassic />
-  <CoordFixed />
-  <ScaleXContinuous breaks={[8, 10, 12, 14, 16, 18]} />
-  <ScaleYContinuous breaks={[6, 8, 10, 12, 14, 16, 18]} />
-  <Labs
-    title="Snow's cholera deaths close on one pump"
-    subtitle="578 deaths in Soho, September 1854; red crosses are the 13 public pumps"
-    x="Map east"
-    y="Map north"
-  />
   <GeomPoint alpha={0.45} size={1.8} />
   <GeomDensity2d
     bins={6}
@@ -39,4 +28,15 @@
     size={4}
     shape="cross"
   />
+  <CoordFixed />
+  <ScaleXContinuous breaks={[8, 10, 12, 14, 16, 18]} />
+  <ScaleYContinuous breaks={[6, 8, 10, 12, 14, 16, 18]} />
+  <ThemeClassic />
+  <Labs
+    title="Snow's cholera deaths close on one pump"
+    subtitle="578 deaths in Soho, September 1854; red crosses are the 13 public pumps"
+    x="Map east"
+    y="Map north"
+  />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

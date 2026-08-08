@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomSmooth method="loess" span={0.75} />
+  <GeomPoint alpha={0.25} size={2} />
   <ThemeTufte />
   <Labs
     title="Cocoa percent against bar rating"
@@ -25,6 +26,5 @@
     x="Cocoa (%)"
     y="Rating (1–4)"
   />
-  <GeomSmooth method="loess" span={0.75} />
-  <GeomPoint alpha={0.25} size={2} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

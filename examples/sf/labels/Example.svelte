@@ -19,14 +19,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
+  <GeomSf alpha={0.35} linewidth={0.8} />
+  <GeomSfText size={11} />
   <CoordFixed />
+  <ThemeClassic />
   <GuideNone channel="fill" />
   <Labs
     title="Every pump in Snow's Soho, named"
     subtitle="Plain labels at the centre of the area each pump served"
   />
-  <GeomSf alpha={0.35} linewidth={0.8} />
-  <GeomSfText size={11} />
+  <Inspect mode="exact" pin />
 </GGPlot>

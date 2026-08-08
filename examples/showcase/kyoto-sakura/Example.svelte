@@ -73,21 +73,6 @@
   width={768}
   height={420}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeTufte />
-  <ScaleXContinuous labels="d" domain={[800, 2030]} />
-  <ScaleYMonthDay
-    reverse
-    breaks={["04-05", "04-15", "04-25"]}
-    dateLabels="%b %e"
-    domain={["05-10", "03-10"]}
-  />
-  <ScaleFillManual
-    domain={["Medieval warm period", "Little Ice Age", "Industrial era"]}
-    values={["#f5edc4", "#dce8f2", "#f3dcda"]}
-  />
-  <GuideNone channel="fill" />
-  <Labs x="Year" y="Bloom date (earlier ↑)" />
   <GeomRect
     data={epochs}
     aes={{
@@ -194,4 +179,19 @@
     anchor="end"
     dx={-4}
   />
+  <ScaleXContinuous labels="d" domain={[800, 2030]} />
+  <ScaleYMonthDay
+    reverse
+    breaks={["04-05", "04-15", "04-25"]}
+    dateLabels="%b %e"
+    domain={["05-10", "03-10"]}
+  />
+  <ScaleFillManual
+    domain={["Medieval warm period", "Little Ice Age", "Industrial era"]}
+    values={["#f5edc4", "#dce8f2", "#f3dcda"]}
+  />
+  <ThemeTufte />
+  <GuideNone channel="fill" />
+  <Labs x="Year" y="Bloom date (earlier ↑)" />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

@@ -30,8 +30,8 @@
     ["</", "script>"].join(""),
     "",
     '<GGPlot data={rows} aes={{ x: "x", y: "y", color: "species" }}>',
-    '  <ScaleColorDiscrete scheme="observable10" />',
     "  <GeomPoint />",
+    '  <ScaleColorDiscrete scheme="observable10" />',
     "</GGPlot>",
   ].join("\n");
 

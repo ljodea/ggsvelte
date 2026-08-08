@@ -102,25 +102,28 @@ only on the geoms in `STYLE_AESTHETIC_GEOMS`.
 </script>
 
 <GGPlot data={cars} aes={{ x: "displ", y: "hwy", color: "class" }} height={400}>
-  <ThemeMinimal />
+  <GeomSmooth method="loess" se={false} />
+  <GeomPoint size={3} alpha={0.85} />
   <ScaleColorDiscrete scheme="observable10" />
+  <ThemeMinimal />
   <Labs
     title="Bigger engines, thirstier cars"
     x="Displacement (l)"
     y="Highway mpg"
     color="Class"
   />
-  <GeomSmooth method="loess" se={false} />
-  <GeomPoint size={3} alpha={0.85} />
 </GGPlot>
 ```
 
-Convention: theme → scales → guides → labs → mark layers. Grammar **layers**
-(theme/scale/coord/facet/guides/labs/legend) render no markup and register
-declaratively as non-mark `Layer` kinds; mark-layer registration order is
-z-order (points above smooth here). Every geom takes aesthetics through one
-`aes` object prop (bare-string shorthand allowed) and constant style params as
-direct props (`size={3}`); structural props are `data`, `stat`, `position`,
+Convention (ggplot2 thinking order): mark layers first, then scales / coords /
+facets, then theme / guides / labs, then host-only `<Inspect>` last. Grammar
+**layers** (theme/scale/coord/facet/guides/labs/legend) render no markup and
+register declaratively as non-mark `Layer` kinds; mark-layer registration
+order is z-order (points above smooth here). Interleave does not change the
+assembled PortableSpec beyond mark z-order and last-wins folds within a
+family. Every geom takes aesthetics through one `aes` object prop
+(bare-string shorthand allowed) and constant style params as direct props
+(`size={3}`); structural props are `data`, `stat`, `position`,
 `positionParams`, `render`.
 
 `<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `width`
@@ -296,8 +299,8 @@ The same charts as Svelte children, twice over:
 
 ```svelte fragment
 <GGPlot data={measurements} aes={{ x: "value" }}>
-  <FacetWrap field="site" ncol={2} />
   <GeomHistogram bins={20} />
+  <FacetWrap field="site" ncol={2} />
 </GGPlot>
 ```
 

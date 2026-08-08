@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} identity="patient" />
+  <GeomAbline slope={1} intercept={0} linewidth={1.2} />
+  <GeomPoint size={3.5} />
   <ThemeDark />
   <Labs
     title="Points against the identity line"
@@ -25,6 +26,5 @@
     x="Extra sleep on L-hyoscyamine (hours)"
     y="Extra sleep on L-hyoscine (hours)"
   />
-  <GeomAbline slope={1} intercept={0} linewidth={1.2} />
-  <GeomPoint size={3.5} />
+  <Inspect mode="xy" pin maxDistance={24} identity="patient" />
 </GGPlot>

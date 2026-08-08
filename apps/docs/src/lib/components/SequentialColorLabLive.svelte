@@ -28,7 +28,7 @@
   {height}
   ariaLabel={`${label} sequential color example`}
 >
-  <Inspect mode="xy" />
+  <GeomRaster />
   <Scale value={{ fill: scale }} />
   <Theme name="light" />
   <Labs
@@ -37,5 +37,5 @@
     y="Height index"
     fill="Men"
   />
-  <GeomRaster />
+  <Inspect mode="xy" />
 </GGPlot>

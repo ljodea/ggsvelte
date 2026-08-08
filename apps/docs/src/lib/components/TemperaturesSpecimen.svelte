@@ -39,19 +39,19 @@
 </script>
 
 <GGPlot data={temperaturesKeyed} aes={chart.aes} {height} {ariaLabel}>
-  <Inspect mode="x" />
+  <GeomLine linewidth={chart.geomLine.linewidth} />
+  <GeomPoint size={chart.geomPoint.size} />
+  <ScaleXContinuous breaks={[...chart.monthBreaks]} />
+  <ScaleColorDiscrete {scheme} />
+  <Theme name={theme} {...themeRoles} />
   {#if legendFocus}
     <GuideLegend channel="color" focus />
   {/if}
-  <Theme name={theme} {...themeRoles} />
-  <ScaleXContinuous breaks={[...chart.monthBreaks]} />
-  <ScaleColorDiscrete {scheme} />
   <Labs
     title={chart.labs.title}
     x={chart.labs.x}
     y={chart.labs.y}
     color={chart.labs.color}
   />
-  <GeomLine linewidth={chart.geomLine.linewidth} />
-  <GeomPoint size={chart.geomPoint.size} />
+  <Inspect mode="x" />
 </GGPlot>

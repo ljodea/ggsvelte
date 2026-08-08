@@ -17,9 +17,9 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeMinimal />
+  <GeomBin2d bins={16} />
   <ScaleFillContinuous scheme="viridis" />
+  <ThemeMinimal />
   <Labs
     title="Two-dimensional bins for a dense cloud"
     subtitle="Waiting time against eruption length for Old Faithful"
@@ -27,5 +27,5 @@
     y="Wait for the next eruption (minutes)"
     fill="Eruptions"
   />
-  <GeomBin2d bins={16} />
+  <Inspect mode="exact" pin />
 </GGPlot>

@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
+  <GeomLine linewidth={1.5} />
+  <GeomPoint size={2.4} alpha={0.8} />
   <ThemeVoid />
   <Labs
     title="A sparkline without axes or grid"
@@ -25,6 +26,5 @@
     x=""
     y=""
   />
-  <GeomLine linewidth={1.5} />
-  <GeomPoint size={2.4} alpha={0.8} />
+  <Inspect mode="x" pin />
 </GGPlot>

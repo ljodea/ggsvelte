@@ -17,7 +17,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomPoint size={3.5} alpha={0.9} />
+  <GeomBlank data={waterDensity} aes={{ x: "trial", y: "density" }} />
   <ThemeClassic />
   <Labs
     title="Expanded domain with no marks"
@@ -25,6 +26,5 @@
     x="Determination"
     y="Density of the earth, water = 1"
   />
-  <GeomPoint size={3.5} alpha={0.9} />
-  <GeomBlank data={waterDensity} aes={{ x: "trial", y: "density" }} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

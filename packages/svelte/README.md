@@ -35,6 +35,8 @@ Compose with declaration-only children (theme, scales, labs, geoms). Do not put
 </script>
 
 <GGPlot data={kyotoSakura} aes={{ x: "year", y: "bloomDoy" }}>
+  <GeomSmooth method="loess" se={false} />
+  <GeomPoint size={2} alpha={0.7} />
   <ThemeMinimal />
   <Labs
     title="Kyoto cherry blossom full-bloom dates, 812–2026"
@@ -42,14 +44,13 @@ Compose with declaration-only children (theme, scales, labs, geoms). Do not put
     x="Year"
     y="Day of year"
   />
-  <GeomSmooth method="loess" se={false} />
-  <GeomPoint size={2} alpha={0.7} />
 </GGPlot>
 ```
 
-Convention: theme → scales → guides → labs → mark layers. Dense points may
-render on canvas; axes, legends, text, and accessible descriptions stay in the
-DOM. Prefer `<Inspect />` and `<GuideLegend channel focus>` /
+Convention (ggplot2 thinking order): mark layers first, then scales / coords /
+facets, then theme / guides / labs, then host-only `<Inspect>` last. Dense
+points may render on canvas; axes, legends, text, and accessible descriptions
+stay in the DOM. Prefer `<Inspect />` and `<GuideLegend channel focus>` /
 `<GuideLegend channel filter>` for interaction — not plot-level `inspect`,
 `legendFocus`, or `legendFilter`.
 

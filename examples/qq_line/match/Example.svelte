@@ -11,7 +11,7 @@
 </script>
 
 <GGPlot data={shortSample} aes={{ sample: "value" }} width={640} height={400}>
-  <Inspect mode="x" pin />
+  <GeomQqLine linewidth={3.2} alpha={1} aes={{ color: { value: "#1a202c" } }} />
   <ThemeMinimal />
   <Labs
     title="Q–Q reference line"
@@ -19,5 +19,5 @@
     x="Theoretical quantile"
     y="Sample quantile"
   />
-  <GeomQqLine linewidth={3.2} alpha={1} aes={{ color: { value: "#1a202c" } }} />
+  <Inspect mode="x" pin />
 </GGPlot>

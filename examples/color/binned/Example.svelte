@@ -18,12 +18,12 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeBw />
+  <GeomPoint size={5} />
   <ScaleColorBinned
     breaks={[0, 5, 20, 60, 130]}
     range={["#d3d3d0", "#8ba89c", "#4f8a6e", "#1e5c43"]}
   />
+  <ThemeBw />
   <GuideColorsteps channel="color" position="bottom" direction="horizontal" />
   <Labs
     title="How many items you can tell apart at once"
@@ -32,5 +32,5 @@
     y="Beans estimated"
     color="Trials"
   />
-  <GeomPoint size={5} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

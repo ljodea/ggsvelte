@@ -19,16 +19,6 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
-  <CoordFixed />
-  <GuideNone channel="fill" />
-  <Labs
-    title="Which pump was nearest"
-    subtitle="Soho split into the thirteen areas closest to each public pump, 1854"
-    x="Map east"
-    y="Map north"
-  />
   <GeomPolygon alpha={0.55} linewidth={1.2} />
   <GeomPoint
     data={waterPumps}
@@ -36,4 +26,14 @@
     size={3.6}
     shape="cross"
   />
+  <CoordFixed />
+  <ThemeClassic />
+  <GuideNone channel="fill" />
+  <Labs
+    title="Which pump was nearest"
+    subtitle="Soho split into the thirteen areas closest to each public pump, 1854"
+    x="Map east"
+    y="Map north"
+  />
+  <Inspect mode="exact" pin />
 </GGPlot>

@@ -20,7 +20,7 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomPoint stat="unique" size={3} alpha={0.8} />
   <ThemeClassic />
   <Labs
     title="Collapse duplicate coordinates to unique marks"
@@ -28,5 +28,5 @@
     x="Year the quarrel began"
     y="Magnitude (log10 killed)"
   />
-  <GeomPoint stat="unique" size={3} alpha={0.8} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

@@ -17,14 +17,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeLinedraw />
+  <GeomCol />
   <ScaleXContinuous nice={false} />
+  <ThemeLinedraw />
   <Labs
     title="The same columns under a linedraw theme"
     subtitle="Same chest counts with hard black lines and no grey fill"
     x="Chest circumference (inches)"
     y="Soldiers"
   />
-  <GeomCol />
+  <Inspect mode="exact" pin />
 </GGPlot>

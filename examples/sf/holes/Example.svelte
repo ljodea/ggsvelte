@@ -12,13 +12,13 @@
 </script>
 
 <GGPlot data={slopeBands} aes={{ fill: "band" }} width={640} height={400}>
-  <Inspect mode="exact" pin />
-  <ThemeClassic />
+  <GeomSf alpha={0.75} linewidth={0.9} />
   <CoordFixed />
+  <ThemeClassic />
   <Labs
     title="Polygons with holes"
     subtitle="Two elevation bands where the higher ring is a hole in the lower"
     fill="Height band"
   />
-  <GeomSf alpha={0.75} linewidth={0.9} />
+  <Inspect mode="exact" pin />
 </GGPlot>

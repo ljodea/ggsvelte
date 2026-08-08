@@ -22,9 +22,10 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeClassic />
+  <GeomPoint alpha={0.6} size={2.4} />
+  <GeomPath stat="ellipse" level={0.95} segments={51} linewidth={1.5} />
   <ScaleColorDiscrete scheme="observable10" />
+  <ThemeClassic />
   <Labs
     title="Confidence ellipses around groups"
     subtitle="95% bivariate normal rings for three species in bill and flipper length"
@@ -32,6 +33,5 @@
     y="Flipper length (mm)"
     color="Species"
   />
-  <GeomPoint alpha={0.6} size={2.4} />
-  <GeomPath stat="ellipse" level={0.95} segments={51} linewidth={1.5} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

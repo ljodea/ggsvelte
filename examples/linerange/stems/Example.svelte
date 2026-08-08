@@ -18,15 +18,15 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeMinimal />
+  <GeomLinerange linewidth={3.2} aes={{ color: { value: "#1a202c" } }} />
   <ScaleXDiscrete domain={["A", "B", "C"]} />
   <ScaleYContinuous limits={[0, 12]} />
+  <ThemeMinimal />
   <Labs
     title="Bare vertical stems"
     subtitle="Three identity intervals from ymin to ymax without end caps"
     x="Group"
     y="Value"
   />
-  <GeomLinerange linewidth={3.2} aes={{ color: { value: "#1a202c" } }} />
+  <Inspect mode="exact" pin />
 </GGPlot>

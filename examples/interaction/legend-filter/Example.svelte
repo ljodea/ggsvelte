@@ -31,9 +31,11 @@
           : `${String(event.clause.values.length)} ${event.clause.values.length === 1 ? "series is" : "series are"} hidden; the legend keeps every series available.`;
     }}
   >
-    <Inspect mode="x" pin />
-    <ThemeFivethirtyeight />
+    <GeomLine linewidth={2.2} />
+    <GeomPoint size={3.2} />
     <ScaleXContinuous labels="d" />
+    <ThemeFivethirtyeight />
+    <GuideLegend channel="color" filter />
     <Labs
       title="Filter series from the legend"
       subtitle="Debt, revenue, and expenditure; restored groups keep their original colour"
@@ -41,9 +43,7 @@
       y="Playfair's index units"
       color="Series"
     />
-    <GuideLegend channel="color" filter />
-    <GeomLine linewidth={2.2} />
-    <GeomPoint size={3.2} />
+    <Inspect mode="x" pin />
   </GGPlot>
   <p class="note gg-demo-chrome">
     <strong>Why this is filtering:</strong> statistics, facets, and domains see

@@ -6,14 +6,14 @@
   const svelteExample = `import { GeomCol, GGPlot, Labs } from "@ggsvelte/svelte";
 
 <GGPlot data={rows} aes={{ x: "quarter", y: "sales" }}>
-  <Labs
-    title="Quarterly sales"
-    subtitle="FY25"
-    caption="Source: internal ledger"
-    x="Quarter"
-    y="Sales (M USD)"
-  />
   <GeomCol />
+  <Labs
+      title="Quarterly sales"
+      subtitle="FY25"
+      caption="Source: internal ledger"
+      x="Quarter"
+      y="Sales (M USD)"
+    />
 </GGPlot>`;
 
   const jsonExample = `{
@@ -30,10 +30,10 @@
 }`;
 
   const mergeExample = `<GGPlot data={rows} aes={{ x: "quarter", y: "sales", color: "region" }}>
-  <Labs title="Sales" x="Quarter" />
-  <!-- keyed merge: color joins; a second title would win and warn -->
-  <Labs color="Region" caption="Internal" />
   <GeomCol />
+  <Labs title="Sales" x="Quarter" />
+  <Labs color="Region" caption="Internal" />
+  <!-- keyed merge: color joins; a second title would win and warn -->
 </GGPlot>`;
 </script>
 

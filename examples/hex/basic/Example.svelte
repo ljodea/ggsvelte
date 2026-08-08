@@ -17,9 +17,9 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeMinimal />
+  <GeomHex bins={18} />
   <ScaleFillContinuous scheme="viridis" />
+  <ThemeMinimal />
   <Labs
     title="Hex bins for a dense cloud"
     subtitle="A thousand earthquakes by location off Fiji"
@@ -27,5 +27,5 @@
     y="Latitude (°)"
     fill="Events"
   />
-  <GeomHex bins={18} />
+  <Inspect mode="exact" pin />
 </GGPlot>

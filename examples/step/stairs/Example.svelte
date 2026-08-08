@@ -13,19 +13,19 @@
 </script>
 
 <GGPlot data={stairVertices} aes={{ x: "x", y: "y" }} width={640} height={400}>
-  <Inspect mode="x" pin />
-  <ThemeMinimal />
+  <GeomStep
+    direction="hv"
+    linewidth={3.4}
+    aes={{ color: { value: "#1a202c" } }}
+  />
   <ScaleXContinuous limits={[0.5, 5.5]} />
   <ScaleYContinuous limits={[0, 6]} />
+  <ThemeMinimal />
   <Labs
     title="Thick staircase"
     subtitle="Five vertices joined horizontal-then-vertical"
     x="x"
     y="y"
   />
-  <GeomStep
-    direction="hv"
-    linewidth={3.4}
-    aes={{ color: { value: "#1a202c" } }}
-  />
+  <Inspect mode="x" pin />
 </GGPlot>

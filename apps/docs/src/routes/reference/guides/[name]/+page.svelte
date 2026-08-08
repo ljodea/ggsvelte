@@ -35,7 +35,10 @@
   );
 
   const svelteSnippet = $derived(
-    `import { GGPlot, GeomPoint, ${entry.component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "displ", y: "hwy", color: "class" }}>\n  <GeomPoint />\n  <${entry.component} ${shellAttrs} />\n</GGPlot>`,
+    `import { GGPlot, GeomPoint, ${entry.component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "displ", y: "hwy", color: "class" }}>
+  <GeomPoint />
+  <${entry.component} ${shellAttrs} />
+</GGPlot>`,
   );
 
   const helperArgs = $derived(

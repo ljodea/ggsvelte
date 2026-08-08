@@ -16,7 +16,11 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomPoint
+    position="jitter"
+    positionParams={{ width: 0.22, height: 0 }}
+    alpha={0.65}
+  />
   <ThemeClean />
   <Labs
     title="The same calories, with position jitter"
@@ -24,9 +28,5 @@
     x="Restaurant"
     y="Calories"
   />
-  <GeomPoint
-    position="jitter"
-    positionParams={{ width: 0.22, height: 0 }}
-    alpha={0.65}
-  />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

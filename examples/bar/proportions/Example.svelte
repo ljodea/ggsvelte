@@ -18,13 +18,13 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeFivethirtyeight />
+  <GeomBar position="fill" />
   <ScaleYContinuous labels=".0%" />
   <ScaleFillManual
     domain={["Soldiers", "Sailors"]}
     values={["#c14a3d", "#3c6e8f"]}
   />
+  <ThemeFivethirtyeight />
   <Labs
     title="Parts of a whole within each group"
     subtitle="Share of soldiers and sailors in each squadron"
@@ -32,5 +32,5 @@
     y="Share of complement"
     fill="Role"
   />
-  <GeomBar position="fill" />
+  <Inspect mode="exact" pin />
 </GGPlot>

@@ -138,9 +138,9 @@
 } from "@ggsvelte/svelte";
 
 <GGPlot data={rows} aes={{ x: "year", y: "value", color: "temp" }}>
+  <GeomPoint />
   <ScaleXContinuous labels="d" />
   <ScaleColorContinuous scheme="viridis" />
-  <GeomPoint />
 </GGPlot>`}</code
     ></pre>
 </main>

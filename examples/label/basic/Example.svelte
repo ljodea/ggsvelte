@@ -19,16 +19,6 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeMinimal />
-  <ScaleXContinuous limits={[18, 30]} />
-  <ScaleYContinuous limits={[0.2, 3.8]} />
-  <Labs
-    title="Boxed labels"
-    subtitle="Same three names, each in a rounded box"
-    x="Estimated longitude (°)"
-    y="Order"
-  />
   <GeomPoint size={4} alpha={0.5} aes={{ color: { value: "#4a5568" } }} />
   <GeomLabel
     aes={{
@@ -43,4 +33,14 @@
     radius={6}
     linewidth={2.2}
   />
+  <ScaleXContinuous limits={[18, 30]} />
+  <ScaleYContinuous limits={[0.2, 3.8]} />
+  <ThemeMinimal />
+  <Labs
+    title="Boxed labels"
+    subtitle="Same three names, each in a rounded box"
+    x="Estimated longitude (°)"
+    y="Order"
+  />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

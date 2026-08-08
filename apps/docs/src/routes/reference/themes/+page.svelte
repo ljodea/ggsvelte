@@ -20,8 +20,8 @@
     ["</", "script>"].join(""),
     "",
     '<GGPlot data={rows} aes={{ x: "x", y: "y" }}>',
-    '  <ThemeDark ink="#f5f5f5" tooltipPaper="#1a1a1a" tooltipInk="#f5f5f5" />',
     "  <GeomPoint />",
+    '  <ThemeDark ink="#f5f5f5" tooltipPaper="#1a1a1a" tooltipInk="#f5f5f5" />',
     "</GGPlot>",
   ].join("\n");
 

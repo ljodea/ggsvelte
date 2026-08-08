@@ -34,7 +34,10 @@
   );
 
   const svelteSnippet = $derived(
-    `import { GGPlot, ${geom}, ${entry.component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} ${plotAes}>\n  <${entry.component} />\n  <${geom} />\n</GGPlot>`,
+    `import { GGPlot, ${geom}, ${entry.component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} ${plotAes}>
+  <${entry.component} />
+  <${geom} />
+</GGPlot>`,
   );
 
   const jsonSnippet = $derived.by(() => {

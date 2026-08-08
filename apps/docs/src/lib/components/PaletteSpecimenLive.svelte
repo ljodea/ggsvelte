@@ -40,13 +40,13 @@
   {height}
   ariaLabel={`${label} palette on ${paperTheme} paper`}
 >
-  <Inspect mode="exact" />
-  <Theme name={paperTheme} />
-  <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
-  <Guides value={{ fill: { type: "none" } }} />
-  <Labs title={chart.title} x={chart.x} y={chart.y} />
+  <GeomCol width={0.75} />
   {#if chart.flip}
     <CoordFlip />
   {/if}
-  <GeomCol width={0.75} />
+  <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
+  <Theme name={paperTheme} />
+  <Guides value={{ fill: { type: "none" } }} />
+  <Labs title={chart.title} x={chart.x} y={chart.y} />
+  <Inspect mode="exact" />
 </GGPlot>

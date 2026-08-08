@@ -24,29 +24,6 @@
 
 <div class="minard">
   <GGPlot width={960} height={520}>
-    <Inspect mode="xy" pin maxDistance={24} />
-    <ThemeClassic />
-    <!-- lon/lat degrees are not the same length on the ground at 55°N -->
-    <CoordFixed ratio={1.6} />
-    <ScaleXContinuous limits={[23.5, 38.2]} />
-    <!-- legends below the panel so both plots keep the same full-width x axis -->
-    <ScaleColorManual
-      domain={["Advance", "Retreat"]}
-      values={["#d3a05e", "#25221e"]}
-      guide={{ type: "legend", position: "bottom" }}
-    />
-    <ScaleLinewidthContinuous
-      range={[1, 18]}
-      guide={{ type: "legend", position: "bottom" }}
-    />
-    <Labs
-      title="The Grande Armée's march to Moscow and back, 1812–13"
-      subtitle="Band width is the number of men still with the column — after Minard's 1869 figurative map"
-      x=""
-      y=""
-      color=""
-      linewidth="Survivors"
-    />
     <GeomPath
       data={campaignRivers}
       aes={{ x: "long", y: "lat", group: "river", color: { value: "#8fa8c0" } }}
@@ -79,18 +56,32 @@
       size={9}
       inspect={false}
     />
+    <!-- lon/lat degrees are not the same length on the ground at 55°N -->
+    <CoordFixed ratio={1.6} />
+    <ScaleXContinuous limits={[23.5, 38.2]} />
+    <!-- legends below the panel so both plots keep the same full-width x axis -->
+    <ScaleColorManual
+      domain={["Advance", "Retreat"]}
+      values={["#d3a05e", "#25221e"]}
+      guide={{ type: "legend", position: "bottom" }}
+    />
+    <ScaleLinewidthContinuous
+      range={[1, 18]}
+      guide={{ type: "legend", position: "bottom" }}
+    />
+    <ThemeClassic />
+    <Labs
+      title="The Grande Armée's march to Moscow and back, 1812–13"
+      subtitle="Band width is the number of men still with the column — after Minard's 1869 figurative map"
+      x=""
+      y=""
+      color=""
+      linewidth="Survivors"
+    />
+    <Inspect mode="xy" pin maxDistance={24} />
   </GGPlot>
 
   <GGPlot width={960} height={190}>
-    <Inspect mode="xy" pin maxDistance={24} />
-    <ThemeClassic />
-    <ScaleXContinuous limits={[23.5, 38.2]} />
-    <Labs
-      title="The cold on the road back"
-      subtitle="Temperature on the retreat, degrees Réaumur — dates as Minard marked them"
-      x="Longitude east"
-      y="°Réaumur"
-    />
     <GeomPath
       data={minardCold}
       aes={{ x: "long", y: "temp", color: { value: "#6b7280" } }}
@@ -108,6 +99,15 @@
       dy={-11}
       inspect={false}
     />
+    <ScaleXContinuous limits={[23.5, 38.2]} />
+    <ThemeClassic />
+    <Labs
+      title="The cold on the road back"
+      subtitle="Temperature on the retreat, degrees Réaumur — dates as Minard marked them"
+      x="Longitude east"
+      y="°Réaumur"
+    />
+    <Inspect mode="xy" pin maxDistance={24} />
   </GGPlot>
 </div>
 

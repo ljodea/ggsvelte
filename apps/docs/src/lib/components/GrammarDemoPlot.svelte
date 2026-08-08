@@ -42,10 +42,10 @@
   }}
   ariaLabel="Penguin body mass increases with flipper length, grouped by species"
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <Theme name={chartTheme} />
-  <Labs x="Flipper length mm" y="Body mass g" color="species" />
-  <GuideLegend channel="color" focus />
   <GeomJitter alpha={0.88} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
+  <Theme name={chartTheme} />
+  <GuideLegend channel="color" focus />
+  <Labs x="Flipper length mm" y="Body mass g" color="species" />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

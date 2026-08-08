@@ -17,9 +17,9 @@
   width={640}
   height={400}
 >
-  <Inspect mode="xy" pin maxDistance={24} />
-  <ThemeMinimal />
+  <GeomPoint size={5} />
   <ScaleColorHue />
+  <ThemeMinimal />
   <Labs
     title="Scatter coloured by discrete group"
     subtitle="Ten squadrons by ships and men aboard; each squadron gets its own hue"
@@ -27,5 +27,5 @@
     y="Soldiers and sailors"
     color="Squadron"
   />
-  <GeomPoint size={5} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

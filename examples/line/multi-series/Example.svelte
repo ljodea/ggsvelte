@@ -20,8 +20,8 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
-  <ThemeEconomist />
+  <GeomLine linewidth={2} />
+  <GeomPoint size={1.6} />
   <ScaleXContinuous
     breaks={[1600, 1650, 1700, 1750, 1800]}
     labels="d"
@@ -31,6 +31,8 @@
     domain={["Wheat / quarter", "Wage / week"]}
     values={["#ed111a", "#014d64"]}
   />
+  <ThemeEconomist />
+  <GuideLegend channel="color" focus />
   <Labs
     title="Wheat price and a mechanic's weekly wage"
     subtitle="Price of one quarter of wheat (~8 bushels) beside a week's pay — both in shillings"
@@ -38,7 +40,5 @@
     y="Shillings"
     color="Series"
   />
-  <GuideLegend channel="color" focus />
-  <GeomLine linewidth={2} />
-  <GeomPoint size={1.6} />
+  <Inspect mode="x" pin />
 </GGPlot>

@@ -143,8 +143,8 @@ Positive data only; the transform runs before stats. Authored `"type": "log"` ca
 
 ```svelte fragment
 <GGPlot data={rows} aes={{ x: "density", y: "rate" }}>
-  <ScaleXLog10 />
   <GeomPoint />
+  <ScaleXLog10 />
 </GGPlot>
 ```
 
@@ -224,8 +224,8 @@ One tile per (x, y) pair; a sequential fill scale carries the value.
 
 ```svelte fragment
 <GGPlot data={rows} aes={{ x: "day", y: "hour", fill: "n" }}>
-  <ScaleFillContinuous scheme="viridis" />
   <GeomTile />
+  <ScaleFillContinuous scheme="viridis" />
 </GGPlot>
 ```
 
@@ -362,8 +362,8 @@ Map the category to x and the value to y as usual, then flip — long labels get
 
 ```svelte fragment
 <GGPlot data={rows} aes={{ x: "g", y: "v" }}>
-  <CoordFlip />
   <GeomBoxplot />
+  <CoordFlip />
 </GGPlot>
 ```
 

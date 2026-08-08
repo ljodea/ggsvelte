@@ -18,9 +18,10 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeFew />
+  <GeomBar position="dodge" />
   <ScaleFillDiscrete scheme="observable10" />
+  <ThemeFew />
+  <GuideLegend channel="fill" focus />
   <Labs
     title="US beer production by package type"
     subtitle="Millions of barrels each year as bottles and cans, kegs, or on-premises pours"
@@ -28,6 +29,5 @@
     y="Millions of barrels"
     fill="Package"
   />
-  <GuideLegend channel="fill" focus />
-  <GeomBar position="dodge" />
+  <Inspect mode="exact" pin />
 </GGPlot>

@@ -12,7 +12,8 @@
 </script>
 
 <GGPlot data={michelson} aes={{ sample: "velocity" }} width={640} height={400}>
-  <Inspect mode="xy" pin maxDistance={24} />
+  <GeomQq size={2.5} alpha={0.85} />
+  <GeomQqLine linewidth={1.2} alpha={0.7} />
   <ThemeClassic />
   <Labs
     title="Sample quantiles against the normal"
@@ -20,6 +21,5 @@
     x="Normal quantile"
     y="Speed of light, km/s less 299,000"
   />
-  <GeomQq size={2.5} alpha={0.85} />
-  <GeomQqLine linewidth={1.2} alpha={0.7} />
+  <Inspect mode="xy" pin maxDistance={24} />
 </GGPlot>

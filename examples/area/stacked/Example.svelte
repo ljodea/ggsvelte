@@ -19,13 +19,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="x" pin />
-  <ThemeEconomist />
+  <GeomArea alpha={0.9} />
   <ScaleXDate labels="%b %Y" />
   <ScaleFillManual
     domain={["Disease", "Wounds", "Other"]}
     values={["#d14d41", "#014d64", "#4385be"]}
   />
+  <ThemeEconomist />
+  <GuideLegend channel="fill" focus />
   <Labs
     title="Stacked deaths by cause over time"
     subtitle="Monthly rates split so each band is one cause of death"
@@ -33,6 +34,5 @@
     y="Deaths per 1,000 per year"
     fill="Cause"
   />
-  <GuideLegend channel="fill" focus />
-  <GeomArea alpha={0.9} />
+  <Inspect mode="x" pin />
 </GGPlot>

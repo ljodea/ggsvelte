@@ -17,14 +17,14 @@
   width={640}
   height={400}
 >
-  <Inspect mode="exact" pin />
-  <ThemeFivethirtyeight />
+  <GeomCol />
   <CoordFlip />
+  <ThemeFivethirtyeight />
   <Labs
     title="Category totals, flipped so labels read across"
     subtitle="Ordered smallest to largest so the flip reads bottom-up"
     x="Squadron"
     y="Tons"
   />
-  <GeomCol />
+  <Inspect mode="exact" pin />
 </GGPlot>
