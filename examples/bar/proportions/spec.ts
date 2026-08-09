@@ -6,9 +6,9 @@ import { armadaCrews } from "./data.js";
 export default defineExample(
   gg(armadaCrews, aes({ x: "squadron", fill: "role", weight: "men" }))
     .geomBar({ position: "fill" })
-    .scaleFillManual({
+    .scaleFillDiscrete({
       domain: ["Soldiers", "Sailors"],
-      values: ["#c14a3d", "#3c6e8f"],
+      scheme: "fivethirtyeight",
     })
     .scales({ y: { labels: ".0%" } })
     .theme("fivethirtyeight")

@@ -5,7 +5,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleColorManual,
+    ScaleColorDiscrete,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
@@ -21,9 +21,9 @@
   <GeomCurve linewidth={2} lineend="round" curvature={0.4} alpha={0.9} />
   <GeomPoint size={2.5} alpha={0.6} />
   <GeomPoint aes={{ x: "pair", y: "cross" }} size={3.2} />
-  <ScaleColorManual
+  <ScaleColorDiscrete
     domain={["Cross-fertilised taller", "Self-fertilised taller"]}
-    values={["#3a7d44", "#bc5215"]}
+    scheme="wsj_red_green"
   />
   <ThemeClassic />
   <Labs

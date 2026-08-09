@@ -4,7 +4,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleFillManual,
+    ScaleFillDiscrete,
     ScaleYContinuous,
     ThemeFivethirtyeight,
   } from "@ggsvelte/svelte";
@@ -20,9 +20,9 @@
 >
   <GeomBar position="fill" />
   <ScaleYContinuous labels=".0%" />
-  <ScaleFillManual
+  <ScaleFillDiscrete
     domain={["Soldiers", "Sailors"]}
-    values={["#c14a3d", "#3c6e8f"]}
+    scheme="fivethirtyeight"
   />
   <ThemeFivethirtyeight />
   <Labs

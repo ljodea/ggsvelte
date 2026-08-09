@@ -7,11 +7,10 @@ export default defineExample(
   gg(londonCholera, aes({ x: "density", y: "deathRate", color: "water" }))
     .geomPoint({ size: 3.5 })
     .scales(scaleXLog10({ labels: "~s" }))
-    // Three keys picked against the economist theme's #d5e4eb paper, where most
-    // palette entries fall below 3:1 contrast.
-    .scaleColorManual({
+    // Domain fixed so company-to-colour never depends on row order; 3-stop palette for three keys.
+    .scaleColorDiscrete({
       domain: ["Battersea", "New River", "Kew"],
-      values: ["#d14d41", "#014d64", "#4385be"],
+      scheme: "fivethirtyeight",
     })
     .theme("economist")
     .labs({

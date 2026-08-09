@@ -36,7 +36,7 @@ export const GALLERY_PREVIEWS = [
     id: "bar/proportions",
     filename: "bar-proportions-light.png",
     path: "/previews/bar-proportions-light.png",
-    sha256: "cb978daa83b902869fa69acb9452738170cdb2423ca813fc8c4674fde55d1e92",
+    sha256: "a51b0dbd56dcb6469e6ba93449dc36a47754551782cfdd89b20e1960c7fb1649",
   },
   {
     id: "bar/stacked",
@@ -72,7 +72,7 @@ export const GALLERY_PREVIEWS = [
     id: "boxplot/violin",
     filename: "boxplot-violin-light.png",
     path: "/previews/boxplot-violin-light.png",
-    sha256: "f46358a2ce5822905cd7bb481003aa139b8ba06f80ca2d1e98294c7c7bc47823",
+    sha256: "bd838793502613d7c6b1649d4c313f74b6f3ebaa14a79832a36bbb345d279413",
   },
   {
     id: "col/basic",
@@ -126,7 +126,7 @@ export const GALLERY_PREVIEWS = [
     id: "curve/connectors",
     filename: "curve-connectors-light.png",
     path: "/previews/curve-connectors-light.png",
-    sha256: "389e9053daf7e9bcf20c2621ccced16ff95c3e05eb4a989140e115edbea27575",
+    sha256: "95ba91e2d11a127b53c99e72f6838a0ca8f5280414df7991e7d70bb82f1fffdf",
   },
   {
     id: "density/kde-2d",
@@ -138,13 +138,13 @@ export const GALLERY_PREVIEWS = [
     id: "density/kde-2d-filled",
     filename: "density-kde-2d-filled-light.png",
     path: "/previews/density-kde-2d-filled-light.png",
-    sha256: "e273c259af6c409f1aa3d492d1241e09eb28c9146bd761879f5a9e9e27d7c0df",
+    sha256: "3c4eea4bb9800695a6603623c475676ce7cd69614a8ee9841e2f109573255981",
   },
   {
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
-    sha256: "f5f31b518c2f8a332765bf959e3493d53aebe36bba3ccc8bb9809ccc133a6a7b",
+    sha256: "d7869c4771ca95b058a7adf54ab3052c20969a76e1f4f185ce7deafca243040e",
   },
   {
     id: "dotplot/histodot",
@@ -288,7 +288,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/multi-series",
     filename: "line-multi-series-light.png",
     path: "/previews/line-multi-series-light.png",
-    sha256: "5677954e011409163dc8d36a04e739604960a0e4b9faad5743ac434ba6f7e1c6",
+    sha256: "69f803f6edc59912fb96f2dd04cfb0e16ab9e2b3da7bf44e26d631780653f9b5",
   },
   {
     id: "line/time-axis",
@@ -372,7 +372,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/log-scale",
     filename: "point-log-scale-light.png",
     path: "/previews/point-log-scale-light.png",
-    sha256: "446b067575fb43c0a7121c8ea752406bb41c8d48f179126ae7e6242f7d3286c6",
+    sha256: "47ae42002c7187967bd2ecbcb81997d6290c0a874f3c7ba1e1fa7e424056e7fd",
   },
   {
     id: "point/quantile-lines",
@@ -450,7 +450,7 @@ export const GALLERY_PREVIEWS = [
     id: "rect/regions",
     filename: "rect-regions-light.png",
     path: "/previews/rect-regions-light.png",
-    sha256: "67aed3be7beec368c57d64d72194647c45fffa5579ce7986755cec27c0b2600d",
+    sha256: "553d2419da30e0ae6385c1a028658ebeb8a84dca25622345ac352b0616c634dc",
   },
   {
     id: "ribbon/bounds",
@@ -486,7 +486,7 @@ export const GALLERY_PREVIEWS = [
     id: "segment/annotations",
     filename: "segment-annotations-light.png",
     path: "/previews/segment-annotations-light.png",
-    sha256: "bc35f2e25fc571845b32547ccde5e07d7c62fa5c541bc13fe41b605d36bfeac3",
+    sha256: "4a72879829c29f0cebc32522b87a2b7bae690651631f7cfda9e4576fa5d601e2",
   },
   {
     id: "sf/basic",

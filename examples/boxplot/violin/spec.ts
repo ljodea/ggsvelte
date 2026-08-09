@@ -7,9 +7,9 @@ export default defineExample(
   // Mirrored y-density polygons per experimental run (ggplot2 geom_violin).
   gg(michelsonRuns, aes({ x: "run", y: "velocity", fill: "run" }))
     .geomViolin({ scale: "width", trim: true, alpha: 0.75, linewidth: 0.6 })
-    .scaleFillManual({
+    .scaleFillDiscrete({
       domain: ["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"],
-      values: ["#4c78a8", "#f58518", "#e45756", "#72b7b2", "#54a24b"],
+      scheme: "few",
     })
     .scales({ x: { domain: ["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"] } })
     .theme("few")

@@ -5,7 +5,7 @@
     GuideLegend,
     Inspect,
     Labs,
-    ScaleColorManual,
+    ScaleColorDiscrete,
     ScaleXLog10,
     ThemeEconomist,
   } from "@ggsvelte/svelte";
@@ -21,9 +21,9 @@
 >
   <GeomPoint size={3.5} />
   <ScaleXLog10 labels="~s" />
-  <ScaleColorManual
+  <ScaleColorDiscrete
     domain={["Battersea", "New River", "Kew"]}
-    values={["#d14d41", "#014d64", "#4385be"]}
+    scheme="fivethirtyeight"
   />
   <ThemeEconomist />
   <GuideLegend channel="color" focus />

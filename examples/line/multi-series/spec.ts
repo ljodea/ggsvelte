@@ -10,12 +10,10 @@ export default defineExample(
     // is for, and match how Playfair plotted the observations themselves —
     // at 53 readings per series they read as data marks, not clutter.
     .geomPoint({ size: 1.6 })
-    // Two series on the economist's tinted paper: its own red accent for the
-    // volatile price, its ink for the wage. Both clear 3:1 on #d5e4eb, where
-    // most palette entries do not.
-    .scaleColorManual({
+    // Domain fixed so series-to-colour never depends on row order; 4-stop palette for two series.
+    .scaleColorDiscrete({
       domain: ["Wheat / quarter", "Wage / week"],
-      values: ["#ed111a", "#014d64"],
+      scheme: "wsj_rgby",
     })
     .scales({
       x: { breaks: [1600, 1650, 1700, 1750, 1800], labels: "d", nice: false },

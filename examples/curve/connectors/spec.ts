@@ -11,9 +11,9 @@ export default defineExample(
     .geomCurve({ linewidth: 2, lineend: "round", curvature: 0.4, alpha: 0.9 })
     .geomPoint({ size: 2.5, alpha: 0.6 })
     .geomPoint({ aes: { x: "pair", y: "cross" }, size: 3.2 })
-    .scaleColorManual({
+    .scaleColorDiscrete({
       domain: ["Cross-fertilised taller", "Self-fertilised taller"],
-      values: ["#3a7d44", "#bc5215"],
+      scheme: "wsj_red_green",
     })
     .theme("classic")
     .labs({

@@ -4,7 +4,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleFillManual,
+    ScaleFillDiscrete,
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
@@ -18,10 +18,7 @@
   height={400}
 >
   <GeomDensity alpha={0.45} />
-  <ScaleFillManual
-    domain={["Daughters", "Sons"]}
-    values={["#8b7ec8", "#3aa99f"]}
-  />
+  <ScaleFillDiscrete domain={["Daughters", "Sons"]} scheme="canva" />
   <ThemeMinimal />
   <Labs
     title="Two densities on one axis"

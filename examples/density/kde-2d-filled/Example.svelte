@@ -6,7 +6,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleColorManual,
+    ScaleColorDiscrete,
     ThemeMap,
   } from "@ggsvelte/svelte";
 
@@ -26,10 +26,7 @@
     size={4}
     shape="cross"
   />
-  <ScaleColorManual
-    domain={["Deaths", "Pumps"]}
-    values={["#1e293b", "#b91c1c"]}
-  />
+  <ScaleColorDiscrete domain={["Deaths", "Pumps"]} scheme="wsj_dem_rep" />
   <CoordFixed />
   <ThemeMap />
   <Labs

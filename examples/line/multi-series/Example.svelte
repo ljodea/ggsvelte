@@ -6,7 +6,7 @@
     GuideLegend,
     Inspect,
     Labs,
-    ScaleColorManual,
+    ScaleColorDiscrete,
     ScaleXContinuous,
     ThemeEconomist,
   } from "@ggsvelte/svelte";
@@ -27,9 +27,9 @@
     labels="d"
     nice={false}
   />
-  <ScaleColorManual
+  <ScaleColorDiscrete
     domain={["Wheat / quarter", "Wage / week"]}
-    values={["#ed111a", "#014d64"]}
+    scheme="wsj_rgby"
   />
   <ThemeEconomist />
   <GuideLegend channel="color" focus />
