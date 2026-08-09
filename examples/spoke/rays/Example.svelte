@@ -31,7 +31,7 @@
   <ThemeMinimal />
   <Labs
     title="Eight rays from one origin"
-    subtitle="One finite segment per angle; radius is length in data units"
+    subtitle="Radius is length in data units"
     x="x"
     y="y"
   />

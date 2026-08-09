@@ -31,7 +31,7 @@
   <ThemeMap />
   <Labs
     title="Filled density bands over points"
-    subtitle="Darker rings mark denser streets; the peak sits on Broad Street"
+    subtitle="Cholera deaths in Soho, 1854"
     x=""
     y=""
     fill="Density"

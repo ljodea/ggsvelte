@@ -66,7 +66,7 @@ export const GALLERY_PREVIEWS = [
     id: "boxplot/by-category",
     filename: "boxplot-by-category-light.png",
     path: "/previews/boxplot-by-category-light.png",
-    sha256: "2ea691d1e47b78191c4afdf04e1dff453811e44503fc2cf71564d6eccac4db8a",
+    sha256: "f24173e639596ea619c2910536ad2f8f5c85816e43a2273f67bd199721d7eab6",
   },
   {
     id: "boxplot/violin",
@@ -132,25 +132,25 @@ export const GALLERY_PREVIEWS = [
     id: "density/kde-2d",
     filename: "density-kde-2d-light.png",
     path: "/previews/density-kde-2d-light.png",
-    sha256: "ee5081de8d6e959b7ab747a4b49615668af08c0511d11dfcd5eab780c351b8d3",
+    sha256: "9e214b6e24a7d59c6af54eab513ae8c49a2f98743198e73fd0a8ed69f8bcd6eb",
   },
   {
     id: "density/kde-2d-filled",
     filename: "density-kde-2d-filled-light.png",
     path: "/previews/density-kde-2d-filled-light.png",
-    sha256: "3c4eea4bb9800695a6603623c475676ce7cd69614a8ee9841e2f109573255981",
+    sha256: "c88309cadaf0b35291fa69c6c94d26f60b6d5120f073474ee4bdd2fb767abc9e",
   },
   {
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
-    sha256: "b7c8c3cbc7ce22722d4f6c1a57f0a7f9a651cd2918d9f1daaa49489a2a0dff1c",
+    sha256: "1471f3083fde3946ecfdce78c019e679ba74975ea5a3e5659656f4c9c8979ac1",
   },
   {
     id: "dotplot/histodot",
     filename: "dotplot-histodot-light.png",
     path: "/previews/dotplot-histodot-light.png",
-    sha256: "636553aae59e2c7d06c43b7d5b078d620061732d8c71560ab6ff5ba957adee07",
+    sha256: "c372ce14a9162872a13428f3181f7018eb040c029d48faef3c86d2f7b0aa27a0",
   },
   {
     id: "errorbar/caps",
@@ -204,7 +204,7 @@ export const GALLERY_PREVIEWS = [
     id: "histogram/basic",
     filename: "histogram-basic-light.png",
     path: "/previews/histogram-basic-light.png",
-    sha256: "ccf9704a7925a48c48dfa5477163496cc00c08bf90ca5c4367d07e0ec014488f",
+    sha256: "a929cb7c86c30aa3fc0244249b9cf852906b10a775f42f672f36d14bc6e2fb1e",
   },
   {
     id: "hline/threshold",
@@ -216,7 +216,7 @@ export const GALLERY_PREVIEWS = [
     id: "interaction/brush-zoom",
     filename: "interaction-brush-zoom-light.png",
     path: "/previews/interaction-brush-zoom-light.png",
-    sha256: "c67519fc5c67b6224798f46e6b6e130a4f6d7cedb6fefd812606f02d6daa8743",
+    sha256: "fa653237dc4f9be254249071746c2839f88f66990f049ef07e6b7bf12a560f54",
   },
   {
     id: "interaction/facet-intervals",
@@ -246,7 +246,7 @@ export const GALLERY_PREVIEWS = [
     id: "interaction/tooltip",
     filename: "interaction-tooltip-light.png",
     path: "/previews/interaction-tooltip-light.png",
-    sha256: "f9b45994446101f5e782f2009d5511b3e87a571226b9416327959fd8c0f69830",
+    sha256: "93e714203e26634a7e08d268d5f59229d0244492896906febf2923f1e21332bf",
   },
   {
     id: "jitter/basic",
@@ -258,7 +258,7 @@ export const GALLERY_PREVIEWS = [
     id: "jitter/spread",
     filename: "jitter-spread-light.png",
     path: "/previews/jitter-spread-light.png",
-    sha256: "a086801456fb5fc9265185807d9b43954e940d83a1c77b43fb77906a5fc873ba",
+    sha256: "c6d56e459d9c2087d271950145146dc2510e1bdcd6a6ef42595d1a5727a71912",
   },
   {
     id: "label/basic",
@@ -282,7 +282,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/labor-cost-of-wheat",
     filename: "line-labor-cost-of-wheat-light.png",
     path: "/previews/line-labor-cost-of-wheat-light.png",
-    sha256: "061ecd7c317e705cf3a8d6833142ceb92856a1c7ee89cf9fbfcad59c47005492",
+    sha256: "febf8b4d324a2c314af09c587a30b27bd69855fd144733fb9794cf6a4a5fef89",
   },
   {
     id: "line/multi-series",
@@ -336,7 +336,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/count",
     filename: "point-count-light.png",
     path: "/previews/point-count-light.png",
-    sha256: "886f24fe7124ebd54eb230a68a16dcd518128886e8b14547d4108aadd76a9288",
+    sha256: "18ad9e577ad4b62d41f7849c8f03cdcf40d45a5262314256cd0cabed38f6394e",
   },
   {
     id: "point/fixed-aspect",
@@ -348,13 +348,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/gradient-continuous",
     filename: "point-gradient-continuous-light.png",
     path: "/previews/point-gradient-continuous-light.png",
-    sha256: "155efe2d514543ab7b1824f76ce024efdcd45d68e3905c258cf5cbcfc4f55c1c",
+    sha256: "12bcdfa014cc038162f41301f54ef29be350054e1a81842c153fa25cce270b5c",
   },
   {
     id: "point/hue-discrete",
     filename: "point-hue-discrete-light.png",
     path: "/previews/point-hue-discrete-light.png",
-    sha256: "030b0961d1c40f8233655951c03c00960a42d6f862d75b384b5676914fd59b1b",
+    sha256: "1c0fac36e5105c7747737f6369951a2695eabd4f63a8485bd01f81be9d6ac0cb",
   },
   {
     id: "point/jitter",
@@ -384,13 +384,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/scatter-color",
     filename: "point-scatter-color-light.png",
     path: "/previews/point-scatter-color-light.png",
-    sha256: "668bb0efa136faddb762254da43cc9c465125b275a479415b6109c0ba3c85a49",
+    sha256: "384a6410c356ab9d81416317a76767f0d92c4d9a1fa9f4c7009e57a7d3a85f5d",
   },
   {
     id: "point/stat-manual-mean",
     filename: "point-stat-manual-mean-light.png",
     path: "/previews/point-stat-manual-mean-light.png",
-    sha256: "e6819a2e8fc6b4bf60309a6c7f4a319a9a0e4d811723ec74577977a76954fec1",
+    sha256: "74ff1b23cc745dde4f4c127c0007cbc24f579a5f3fe939fe48f6d54dca8dfff5",
   },
   {
     id: "point/stat-unique",
@@ -474,7 +474,7 @@ export const GALLERY_PREVIEWS = [
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",
-    sha256: "e453f7d4fcfa0d5ad058801724b2ab1b14b18c524c7d841c4233c0e1ecdfe877",
+    sha256: "baa8ce34c0048c4f5c6308c13a77c194529dfa51d9c525bbb415a5df982249ce",
   },
   {
     id: "rule/data-driven",
@@ -534,7 +534,7 @@ export const GALLERY_PREVIEWS = [
     id: "spoke/rays",
     filename: "spoke-rays-light.png",
     path: "/previews/spoke-rays-light.png",
-    sha256: "05d1b2fcbf20b9142942076cb506c7aeab5e7d85b28c8dd43ea804a6a6f9bc20",
+    sha256: "62c993b9778a4f4eb0923b71cbfac6876fbc139ad3a23a187931502600fe23f0",
   },
   {
     id: "spoke/vector-field",
@@ -546,7 +546,7 @@ export const GALLERY_PREVIEWS = [
     id: "step/ecdf",
     filename: "step-ecdf-light.png",
     path: "/previews/step-ecdf-light.png",
-    sha256: "e367484343e16a997395078070dd2efb461845f97883d3f0e9aa47d8d1543be2",
+    sha256: "ab88729ea2e8d9570632a27104b0c6cb92de97edb4108e68ae524d2228257277",
   },
   {
     id: "step/stairs",
@@ -564,12 +564,12 @@ export const GALLERY_PREVIEWS = [
     id: "tile/heatmap",
     filename: "tile-heatmap-light.png",
     path: "/previews/tile-heatmap-light.png",
-    sha256: "19bc71b1103f298ecdbbc69b1dd1f4bdd791c6e27df82ae6a30d34ba3b26c857",
+    sha256: "1269d10cff7ff630c20d4e9c559cd34022c25ef7569e7dd5cd3425ba8cf5fa0a",
   },
   {
     id: "vline/cutoff",
     filename: "vline-cutoff-light.png",
     path: "/previews/vline-cutoff-light.png",
-    sha256: "2e4519fa5a70c7efe10e08e05df8265c4cc10abd6ea1f663d27413b554c1466a",
+    sha256: "e2ab484f57c334113eaf2920a173763dae230f810fb445ad61bf8bbaade9adc9",
   },
 ] as const satisfies readonly GalleryPreview[];

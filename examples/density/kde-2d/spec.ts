@@ -32,7 +32,7 @@ export default defineExample(
     .theme("map")
     .labs({
       title: "Density isolines over points",
-      subtitle: "Rings tighten on denser streets; the peak sits on Broad Street",
+      subtitle: "Cholera deaths in Soho, 1854",
       // theme_map blanks tick labels; empty x/y suppress the field-name fallbacks.
       x: "",
       y: "",

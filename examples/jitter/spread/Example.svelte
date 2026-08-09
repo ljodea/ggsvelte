@@ -31,7 +31,7 @@
   <ThemeMinimal />
   <Labs
     title="Jittered points by group"
-    subtitle="Twelve large points; width jitter spreads stacks that share a category"
+    subtitle="Sideways jitter unstacks points"
     x="Group"
     y="Value"
   />

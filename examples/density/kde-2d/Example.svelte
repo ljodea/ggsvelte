@@ -31,7 +31,7 @@
   <ThemeMap />
   <Labs
     title="Density isolines over points"
-    subtitle="Rings tighten on denser streets; the peak sits on Broad Street"
+    subtitle="Cholera deaths in Soho, 1854"
     x=""
     y=""
     color=""

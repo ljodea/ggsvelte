@@ -9,8 +9,7 @@ export default defineExample(
     .theme("light")
     .labs({
       title: "Inspect a shared x value, then pin",
-      subtitle:
-        "333 Palmer Archipelago penguins; flipper length is measured to the millimetre, so many birds share one",
+      subtitle: "333 penguins. Many share a flipper length",
       x: "Flipper length (mm)",
       y: "Body mass (g)",
       color: "Species",

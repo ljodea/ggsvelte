@@ -26,7 +26,7 @@ export default defineExample(
     .theme("map")
     .labs({
       title: "Filled density bands over points",
-      subtitle: "Darker rings mark denser streets; the peak sits on Broad Street",
+      subtitle: "Cholera deaths in Soho, 1854",
       // theme_map blanks tick labels; empty x/y suppress the field-name fallbacks.
       x: "",
       y: "",

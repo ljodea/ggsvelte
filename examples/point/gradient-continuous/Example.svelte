@@ -24,7 +24,7 @@
   <ThemeMinimal />
   <Labs
     title="Many years folded onto one seasonal axis"
-    subtitle="Monthly counts stacked by year; the colour ramp is what separates the years"
+    subtitle="Colour tracks year"
     x="Month"
     y="Women on the register"
     color="Year"

@@ -27,7 +27,7 @@
   <ThemeClassic />
   <Labs
     title="Raw points with a manual mean per group"
-    subtitle="Twenty faint measurements per run; the solid mark is that run's mean"
+    subtitle="Twenty readings per run"
     x="Measurement, 1 to 100"
     y="Speed of light, km/s less 299,000"
     color="Run"

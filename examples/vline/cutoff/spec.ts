@@ -17,8 +17,7 @@ export default defineExample(
     .theme("minimal")
     .labs({
       title: "One vertical cutoff",
-      subtitle:
-        "Determinations in reported order; the rule marks the trial after which the wire changed",
+      subtitle: "Wire changed after this trial",
       x: "Determination",
       y: "Density of the earth (water = 1)",
     })
