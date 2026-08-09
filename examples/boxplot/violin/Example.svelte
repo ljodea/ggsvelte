@@ -4,7 +4,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleFillManual,
+    ScaleFillDiscrete,
     ScaleXDiscrete,
     ThemeFew,
   } from "@ggsvelte/svelte";
@@ -20,9 +20,9 @@
 >
   <GeomViolin scale="width" trim={true} alpha={0.75} linewidth={0.6} />
   <ScaleXDiscrete domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]} />
-  <ScaleFillManual
+  <ScaleFillDiscrete
     domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]}
-    values={["#4c78a8", "#f58518", "#e45756", "#72b7b2", "#54a24b"]}
+    scheme="few"
   />
   <ThemeFew />
   <Labs

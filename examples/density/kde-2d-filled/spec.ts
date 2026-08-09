@@ -17,9 +17,10 @@ export default defineExample(
       size: 4,
       shape: "cross",
     })
-    .scaleColorManual({
+    // Domain fixed so Deaths/Pumps never flip with layer order; palette, not hex.
+    .scaleColorDiscrete({
       domain: ["Deaths", "Pumps"],
-      values: ["#1e293b", "#b91c1c"],
+      scheme: "observable10",
     })
     .coordFixed()
     .theme("map")

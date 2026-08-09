@@ -26,7 +26,10 @@ export default defineExample(
       aes: aes({ x: "year", y: "shillings", color: { value: "#1a1a1a" } }),
       linewidth: 2,
     })
-    .scaleFillManual({ domain: ["Monarchy", "Commonwealth"], values: ["#9ec3d6", "#e8a87c"] })
+    .scaleFillDiscrete({
+      domain: ["Monarchy", "Commonwealth"],
+      scheme: "economist",
+    })
     .scales({ x: { labels: "d" } })
     .theme("economist")
     .labs({

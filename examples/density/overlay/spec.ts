@@ -6,9 +6,9 @@ import { galtonChildren } from "./data.js";
 export default defineExample(
   gg(galtonChildren, aes({ x: "height", fill: "gender" }))
     .geomDensity({ alpha: 0.45 })
-    .scaleFillManual({
+    .scaleFillDiscrete({
       domain: ["Daughters", "Sons"],
-      values: ["#8b7ec8", "#3aa99f"],
+      scheme: "flexoki",
     })
     .theme("minimal")
     .labs({

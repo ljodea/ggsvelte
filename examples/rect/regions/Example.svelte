@@ -5,7 +5,7 @@
     GGPlot,
     Inspect,
     Labs,
-    ScaleFillManual,
+    ScaleFillDiscrete,
     ScaleXContinuous,
     ThemeEconomist,
   } from "@ggsvelte/svelte";
@@ -32,10 +32,7 @@
     linewidth={2}
   />
   <ScaleXContinuous labels="d" />
-  <ScaleFillManual
-    domain={["Monarchy", "Commonwealth"]}
-    values={["#9ec3d6", "#e8a87c"]}
-  />
+  <ScaleFillDiscrete domain={["Monarchy", "Commonwealth"]} scheme="economist" />
   <ThemeEconomist />
   <Labs
     title="Background rectangles for eras"
