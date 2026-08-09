@@ -18,7 +18,7 @@
   height={400}
 >
   <GeomDensity alpha={0.45} />
-  <ScaleFillDiscrete domain={["Daughters", "Sons"]} scheme="canva" />
+  <ScaleFillDiscrete domain={["Daughters", "Sons"]} scheme="wsj_red_green" />
   <ThemeMinimal />
   <Labs
     title="Two densities on one axis"

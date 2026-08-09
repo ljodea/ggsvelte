@@ -144,7 +144,7 @@ export const GALLERY_PREVIEWS = [
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
-    sha256: "d7869c4771ca95b058a7adf54ab3052c20969a76e1f4f185ce7deafca243040e",
+    sha256: "b7c8c3cbc7ce22722d4f6c1a57f0a7f9a651cd2918d9f1daaa49489a2a0dff1c",
   },
   {
     id: "dotplot/histodot",
@@ -450,7 +450,7 @@ export const GALLERY_PREVIEWS = [
     id: "rect/regions",
     filename: "rect-regions-light.png",
     path: "/previews/rect-regions-light.png",
-    sha256: "553d2419da30e0ae6385c1a028658ebeb8a84dca25622345ac352b0616c634dc",
+    sha256: "c9601e76a6dcc0ae45efce667b183dfb9fea9865e519ff5221638d87c70c5aa3",
   },
   {
     id: "ribbon/bounds",

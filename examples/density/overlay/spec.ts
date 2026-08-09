@@ -8,7 +8,7 @@ export default defineExample(
     .geomDensity({ alpha: 0.45 })
     .scaleFillDiscrete({
       domain: ["Daughters", "Sons"],
-      scheme: "canva",
+      scheme: "wsj_red_green",
     })
     .theme("minimal")
     .labs({
