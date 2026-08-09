@@ -113,8 +113,8 @@
     },
     "density/overlay": {
       "filename": "density-overlay-light.png",
-      "sourceSha256": "0baf96993115cf4e714ce95c01620732f3b1c80c273cc57a520addfe88384c9a",
-      "pngSha256": "d7869c4771ca95b058a7adf54ab3052c20969a76e1f4f185ce7deafca243040e"
+      "sourceSha256": "f317a8362e450110a73e071bbd8c58000b7b25d7407036e54f6885788f1b65b6",
+      "pngSha256": "b7c8c3cbc7ce22722d4f6c1a57f0a7f9a651cd2918d9f1daaa49489a2a0dff1c"
     },
     "dotplot/histodot": {
       "filename": "dotplot-histodot-light.png",
@@ -368,8 +368,8 @@
     },
     "rect/regions": {
       "filename": "rect-regions-light.png",
-      "sourceSha256": "f5de3d7e165c344e10d0eb01c6536b735e6e2db0c6e84388d6a21692e4638981",
-      "pngSha256": "553d2419da30e0ae6385c1a028658ebeb8a84dca25622345ac352b0616c634dc"
+      "sourceSha256": "519ee35760d3cf305b3b2cba60e95cfd4a900f6f345a763c88aba09ea92e1cc3",
+      "pngSha256": "c9601e76a6dcc0ae45efce667b183dfb9fea9865e519ff5221638d87c70c5aa3"
     },
     "ribbon/bounds": {
       "filename": "ribbon-bounds-light.png",
