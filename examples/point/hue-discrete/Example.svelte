@@ -22,7 +22,7 @@
   <ThemeMinimal />
   <Labs
     title="Scatter coloured by discrete group"
-    subtitle="Ten squadrons by ships and men aboard; each squadron gets its own hue"
+    subtitle="Ten squadrons by ships and men"
     x="Ships"
     y="Soldiers and sailors"
     color="Squadron"

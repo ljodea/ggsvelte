@@ -12,7 +12,7 @@ export default defineExample(
     .theme("classic")
     .labs({
       title: "Overlapping points sized by how many share a cell",
-      subtitle: "Heights rounded to the inch; each mark grows with the number of families on it",
+      subtitle: "Heights to the nearest inch",
       x: "Mid-parent height (inches)",
       y: "Child height (inches)",
       size: "Children",

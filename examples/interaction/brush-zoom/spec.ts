@@ -9,7 +9,7 @@ export default defineExample(
     .theme("light")
     .labs({
       title: "Select an interval or brush to zoom",
-      subtitle: "333 Palmer penguins; brush a rectangle to select, or zoom into the crowded middle",
+      subtitle: "333 Palmer penguins",
       x: "Bill length (mm)",
       y: "Body mass (g)",
       color: "Species",

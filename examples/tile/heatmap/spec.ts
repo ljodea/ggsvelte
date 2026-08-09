@@ -27,8 +27,7 @@ export default defineExample(
     })
     .labs({
       title: "Cholera in England and Wales, 1849",
-      subtitle:
-        "Registered deaths every day of the year; 53,293 in all, peaking at 1,121 on 6 September",
+      subtitle: "53,293 deaths. Peak 1,121 on 6 September",
       x: "Week of 1849",
       y: "",
       fill: "Deaths",

@@ -22,7 +22,7 @@
   <ThemeClassic />
   <Labs
     title="Step ECDF of paired differences"
-    subtitle="How much taller the cross-fertilised plant grew; two pairs go the other way"
+    subtitle="Cross-fertilised height minus self-fertilised"
     x="Cross-fertilised height less self-fertilised (inches)"
     y="Share of pairs at or below"
   />

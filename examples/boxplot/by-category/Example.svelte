@@ -22,7 +22,7 @@
   <ThemeFew />
   <Labs
     title="Boxplots for five runs of the same experiment"
-    subtitle="Twenty measurements per run; the boxes show the runs disagree more than readings within a run"
+    subtitle="Runs differ more than readings within a run"
     x="Run"
     y="Velocity (km/s − 299,000)"
   />

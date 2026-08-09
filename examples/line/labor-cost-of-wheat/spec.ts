@@ -13,7 +13,7 @@ export default defineExample(
     .theme("economist")
     .labs({
       title: "Weeks of work for a quarter of wheat",
-      subtitle: "Wheat price ÷ weekly wage of a good mechanic; a quarter is ~8 bushels of grain",
+      subtitle: "Wheat price ÷ weekly mechanic wage (~8 bushels)",
       x: "Year",
       y: "Weeks of work",
     })

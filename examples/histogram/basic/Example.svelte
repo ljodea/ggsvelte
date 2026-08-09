@@ -21,7 +21,7 @@
   <ThemeFivethirtyeight />
   <Labs
     title="Histogram of a hundred experimental runs"
-    subtitle="Speed of light in km/s less 299,000; the modern value sits off the centre"
+    subtitle="Speed of light, km/s less 299,000"
     x="Velocity (km/s − 299,000)"
     y="Runs"
   />

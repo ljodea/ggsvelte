@@ -31,7 +31,7 @@
   <ThemeMinimal />
   <Labs
     title="A crosshair of two fixed intercepts"
-    subtitle="Vertical rule where the apparatus changed; horizontal rule at the modern value"
+    subtitle="Apparatus change (vertical) and modern value (horizontal)"
     x="Determination"
     y="Density of the earth (water = 1)"
   />

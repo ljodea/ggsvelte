@@ -13,7 +13,7 @@ export default defineExample(
     .theme("minimal")
     .labs({
       title: "Two densities on one axis",
-      subtitle: "Heights for sons and daughters; the means separate while the ranges overlap",
+      subtitle: "Son and daughter heights",
       x: "Height (inches)",
       y: "Density",
       fill: "Child",

@@ -10,7 +10,7 @@ export default defineExample(
     .theme("classic")
     .labs({
       title: "One dot per measurement, stacked in bins",
-      subtitle: "Twenty-nine runs of a torsion balance; the modern density sits at 5.517",
+      subtitle: "29 Cavendish density readings (modern 5.517)",
       x: "Density of the earth, water = 1",
       y: "Runs",
     })
