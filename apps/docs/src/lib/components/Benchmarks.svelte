@@ -33,10 +33,10 @@
   const kb = (value: number): string => `${String(Math.round(value))} KB`;
 
   /*
-   * Column order matches cold-mount chart rank (ggsvelte → LayerCake →
-   * Unovis → SveltePlot). Bun's homepage table leads with its flaw before
-   * the wins; same here: bundle size and pre-1.0 up top. Claims verified
-   * against layercake@10 / @unovis/svelte@1.6 / svelteplot@0.14 sources.
+   * Column order: ggsvelte → SveltePlot → Unovis → LayerCake. Bun's
+   * homepage table leads with its flaw before the wins; same here: bundle
+   * size and pre-1.0 up top. Claims verified against svelteplot@0.14 /
+   * @unovis/svelte@1.6 / layercake@10 sources.
    */
   const rows: readonly Row[] = [
     {
@@ -131,9 +131,9 @@
         <tr>
           <th scope="col">Capability</th>
           <th scope="col">ggsvelte</th>
-          <th scope="col">LayerCake</th>
-          <th scope="col">Unovis</th>
           <th scope="col">SveltePlot</th>
+          <th scope="col">Unovis</th>
+          <th scope="col">LayerCake</th>
         </tr>
       </thead>
       <tbody>
@@ -143,7 +143,7 @@
               {row.feature}
               {#if row.desc !== undefined}<small>{row.desc}</small>{/if}
             </th>
-            {#each [row.gg, row.lc, row.uv, row.sp] as cell, i (i)}
+            {#each [row.gg, row.sp, row.uv, row.lc] as cell, i (i)}
               <td>
                 <span class={`mark mark--${cell.mark}`} aria-hidden="true"
                   >{GLYPH[cell.mark]}</span

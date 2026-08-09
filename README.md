@@ -55,18 +55,18 @@ and Windows.
 
 ## Why ggsvelte?
 
-| Capability                                 | ggsvelte   | LayerCake            | Unovis                 | SveltePlot           |
+| Capability                                 | ggsvelte   | SveltePlot           | Unovis                 | LayerCake            |
 | ------------------------------------------ | ---------- | -------------------- | ---------------------- | -------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 141 KB  | ✅ 41 KB             | ✅ 80 KB               | ✅ 109 KB            |
-| **API stability**                          | ⚠️ v0.34.4 | ✅ v10               | ✅ v1.6                | ⚠️ v0.14             |
-| **Headless server-side SVG** (no DOM)      | ✅         | ⚠️ opt-in `ssr` flag | ❌ client `onMount`    | ❌ empty shell       |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 141 KB  | ✅ 109 KB            | ✅ 80 KB               | ✅ 41 KB             |
+| **API stability**                          | ⚠️ v0.34.4 | ⚠️ v0.14             | ✅ v1.6                | ✅ v10               |
+| **Headless server-side SVG** (no DOM)      | ✅         | ❌ empty shell       | ❌ client `onMount`    | ⚠️ opt-in `ssr` flag |
 | **Portable JSON spec + schema**            | ✅         | ❌                   | ❌                     | ❌                   |
 | **CLI validator + renderer**               | ✅         | ❌                   | ❌                     | ❌                   |
 | **Agent skill**                            | ✅         | ❌                   | ❌                     | ❌                   |
-| **Automatic temporal detection**           | ✅         | ❌                   | ❌                     | ⚠️ Date objects only |
-| **Built-in interactions**                  | ✅         | ❌                   | ⚠️ tooltip + crosshair | ⚠️ tooltip + brush   |
+| **Automatic temporal detection**           | ✅         | ⚠️ Date objects only | ❌                     | ❌                   |
+| **Built-in interactions**                  | ✅         | ⚠️ tooltip + brush   | ⚠️ tooltip + crosshair | ❌                   |
 | **ggplot2 API**                            | ✅         | ❌                   | ❌                     | ❌                   |
-| **Scale, axis & coord control**            | ✅         | ⚠️ d3 scales         | ✅                     | ✅                   |
+| **Scale, axis & coord control**            | ✅         | ✅                   | ✅                     | ⚠️ d3 scales         |
 
 ## Reference
 
