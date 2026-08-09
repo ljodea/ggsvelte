@@ -26,7 +26,7 @@
     size={4}
     shape="cross"
   />
-  <ScaleColorDiscrete domain={["Deaths", "Pumps"]} scheme="observable10" />
+  <ScaleColorDiscrete domain={["Deaths", "Pumps"]} scheme="wsj_dem_rep" />
   <CoordFixed />
   <ThemeMap />
   <Labs

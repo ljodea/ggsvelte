@@ -7,10 +7,10 @@ export default defineExample(
   gg(londonCholera, aes({ x: "density", y: "deathRate", color: "water" }))
     .geomPoint({ size: 3.5 })
     .scales(scaleXLog10({ labels: "~s" }))
-    // Domain fixed so company-to-colour never depends on row order; theme palette.
+    // Domain fixed so company-to-colour never depends on row order; 3-stop palette for three keys.
     .scaleColorDiscrete({
       domain: ["Battersea", "New River", "Kew"],
-      scheme: "economist",
+      scheme: "fivethirtyeight",
     })
     .theme("economist")
     .labs({

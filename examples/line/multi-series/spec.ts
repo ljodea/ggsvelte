@@ -10,10 +10,10 @@ export default defineExample(
     // is for, and match how Playfair plotted the observations themselves —
     // at 53 readings per series they read as data marks, not clutter.
     .geomPoint({ size: 1.6 })
-    // Domain fixed so series-to-colour never depends on row order; theme palette.
+    // Domain fixed so series-to-colour never depends on row order; 4-stop palette for two series.
     .scaleColorDiscrete({
       domain: ["Wheat / quarter", "Wage / week"],
-      scheme: "economist",
+      scheme: "wsj_rgby",
     })
     .scales({
       x: { breaks: [1600, 1650, 1700, 1750, 1800], labels: "d", nice: false },

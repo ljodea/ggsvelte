@@ -23,7 +23,7 @@
   <ScaleXLog10 labels="~s" />
   <ScaleColorDiscrete
     domain={["Battersea", "New River", "Kew"]}
-    scheme="economist"
+    scheme="fivethirtyeight"
   />
   <ThemeEconomist />
   <GuideLegend channel="color" focus />

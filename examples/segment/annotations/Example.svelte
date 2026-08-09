@@ -23,7 +23,7 @@
   <GeomPoint aes={{ x: "pair", y: "cross" }} size={3.2} />
   <ScaleColorDiscrete
     domain={["Cross-fertilised taller", "Self-fertilised taller"]}
-    scheme="observable10"
+    scheme="wsj_red_green"
   />
   <ThemeClassic />
   <Labs

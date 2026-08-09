@@ -8,7 +8,7 @@ export default defineExample(
     .geomDensity({ alpha: 0.45 })
     .scaleFillDiscrete({
       domain: ["Daughters", "Sons"],
-      scheme: "flexoki",
+      scheme: "canva",
     })
     .theme("minimal")
     .labs({

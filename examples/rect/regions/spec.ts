@@ -28,7 +28,7 @@ export default defineExample(
     })
     .scaleFillDiscrete({
       domain: ["Monarchy", "Commonwealth"],
-      scheme: "economist",
+      scheme: "canva",
     })
     .scales({ x: { labels: "d" } })
     .theme("economist")

@@ -98,8 +98,8 @@
     },
     "curve/connectors": {
       "filename": "curve-connectors-light.png",
-      "sourceSha256": "e6d045da3990a574d66283b516368ce0331e58250b0c2dd52ef53429942f40ac",
-      "pngSha256": "2109ba2e009af698af83b8e14e28f83544d91537254d5e6e7939810ba1c800b6"
+      "sourceSha256": "ef82030660c2c8d631fa3f6d62501aa81a32c8a7f10f11491723fc050ad4e2e0",
+      "pngSha256": "95ba91e2d11a127b53c99e72f6838a0ca8f5280414df7991e7d70bb82f1fffdf"
     },
     "density/kde-2d": {
       "filename": "density-kde-2d-light.png",
@@ -108,13 +108,13 @@
     },
     "density/kde-2d-filled": {
       "filename": "density-kde-2d-filled-light.png",
-      "sourceSha256": "91e81cb07b8b3e2a46f8deb3169f295abf8b5244fb2a04715c141077cee95dee",
-      "pngSha256": "0dd51448786753559161efbac3f5dcdb04ab8ebaa1788cbbbc24206ff4d8f0ef"
+      "sourceSha256": "3d9ebdd208ea4b7a56e2d14372276305a3910720335adb7a556459d971c87d33",
+      "pngSha256": "3c4eea4bb9800695a6603623c475676ce7cd69614a8ee9841e2f109573255981"
     },
     "density/overlay": {
       "filename": "density-overlay-light.png",
-      "sourceSha256": "f79ef4143cb45c50ea7de660da8eddbd90d2499508e624dbf3ea48294b559dfc",
-      "pngSha256": "cab0cf00ff6ce8278c49586881bf9d09334cbdabb8bb1bfeaae53287a34ef50b"
+      "sourceSha256": "0baf96993115cf4e714ce95c01620732f3b1c80c273cc57a520addfe88384c9a",
+      "pngSha256": "d7869c4771ca95b058a7adf54ab3052c20969a76e1f4f185ce7deafca243040e"
     },
     "dotplot/histodot": {
       "filename": "dotplot-histodot-light.png",
@@ -233,8 +233,8 @@
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "e5b14bd5a3193a10bc0cdb49adb92a5509380966d739100249fb90f724e91cd4",
-      "pngSha256": "2568210cc7c850b52e52a2e1d38c0f547a5aaf7d791950aeaee21149fa397590"
+      "sourceSha256": "5297871c8104e1ed03d45c7c0d4ed6010b2f5b744c45d703b0a8dfacda01bc8d",
+      "pngSha256": "69f803f6edc59912fb96f2dd04cfb0e16ab9e2b3da7bf44e26d631780653f9b5"
     },
     "line/time-axis": {
       "filename": "line-time-axis-light.png",
@@ -303,8 +303,8 @@
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
-      "sourceSha256": "bb3fbd555e2518cffc4af748f022049c0c3181816f70e3e6cee09ce45070134e",
-      "pngSha256": "9a2a7278cc96aa85ad0b0827acc0b593d72ab5a1eede6824ae63f6d99ecc978b"
+      "sourceSha256": "a1914bd8676830816ed3bbe6a33365e9197b88ab6805e94b8a1dbbca3c4eff4c",
+      "pngSha256": "47ae42002c7187967bd2ecbcb81997d6290c0a874f3c7ba1e1fa7e424056e7fd"
     },
     "point/quantile-lines": {
       "filename": "point-quantile-lines-light.png",
@@ -368,8 +368,8 @@
     },
     "rect/regions": {
       "filename": "rect-regions-light.png",
-      "sourceSha256": "7649a7e7a728450a18f9db55f4f3d5d3d28f0a33ebcab5f30dd416b72c088f7b",
-      "pngSha256": "73d85a0e2a4f60ddba77c9c6816c3f2607cfc6f9393952f560fe4c78db016532"
+      "sourceSha256": "f5de3d7e165c344e10d0eb01c6536b735e6e2db0c6e84388d6a21692e4638981",
+      "pngSha256": "553d2419da30e0ae6385c1a028658ebeb8a84dca25622345ac352b0616c634dc"
     },
     "ribbon/bounds": {
       "filename": "ribbon-bounds-light.png",
@@ -398,8 +398,8 @@
     },
     "segment/annotations": {
       "filename": "segment-annotations-light.png",
-      "sourceSha256": "0d0a39ba72228802e4ffef7964be3cc9807e058104c53a3fc2b14d01cd61e3c2",
-      "pngSha256": "811eca79393d7430167fd31e90f549bcb42e20ce8b7b55dd622ddf37f46e5a3b"
+      "sourceSha256": "5782166a6240a6fd0abbe556ffdc3021267bb2079baf426845bde197aa4ded5b",
+      "pngSha256": "4a72879829c29f0cebc32522b87a2b7bae690651631f7cfda9e4576fa5d601e2"
     },
     "sf/basic": {
       "filename": "sf-basic-light.png",

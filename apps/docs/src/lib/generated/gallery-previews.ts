@@ -126,7 +126,7 @@ export const GALLERY_PREVIEWS = [
     id: "curve/connectors",
     filename: "curve-connectors-light.png",
     path: "/previews/curve-connectors-light.png",
-    sha256: "2109ba2e009af698af83b8e14e28f83544d91537254d5e6e7939810ba1c800b6",
+    sha256: "95ba91e2d11a127b53c99e72f6838a0ca8f5280414df7991e7d70bb82f1fffdf",
   },
   {
     id: "density/kde-2d",
@@ -138,13 +138,13 @@ export const GALLERY_PREVIEWS = [
     id: "density/kde-2d-filled",
     filename: "density-kde-2d-filled-light.png",
     path: "/previews/density-kde-2d-filled-light.png",
-    sha256: "0dd51448786753559161efbac3f5dcdb04ab8ebaa1788cbbbc24206ff4d8f0ef",
+    sha256: "3c4eea4bb9800695a6603623c475676ce7cd69614a8ee9841e2f109573255981",
   },
   {
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
-    sha256: "cab0cf00ff6ce8278c49586881bf9d09334cbdabb8bb1bfeaae53287a34ef50b",
+    sha256: "d7869c4771ca95b058a7adf54ab3052c20969a76e1f4f185ce7deafca243040e",
   },
   {
     id: "dotplot/histodot",
@@ -288,7 +288,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/multi-series",
     filename: "line-multi-series-light.png",
     path: "/previews/line-multi-series-light.png",
-    sha256: "2568210cc7c850b52e52a2e1d38c0f547a5aaf7d791950aeaee21149fa397590",
+    sha256: "69f803f6edc59912fb96f2dd04cfb0e16ab9e2b3da7bf44e26d631780653f9b5",
   },
   {
     id: "line/time-axis",
@@ -372,7 +372,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/log-scale",
     filename: "point-log-scale-light.png",
     path: "/previews/point-log-scale-light.png",
-    sha256: "9a2a7278cc96aa85ad0b0827acc0b593d72ab5a1eede6824ae63f6d99ecc978b",
+    sha256: "47ae42002c7187967bd2ecbcb81997d6290c0a874f3c7ba1e1fa7e424056e7fd",
   },
   {
     id: "point/quantile-lines",
@@ -450,7 +450,7 @@ export const GALLERY_PREVIEWS = [
     id: "rect/regions",
     filename: "rect-regions-light.png",
     path: "/previews/rect-regions-light.png",
-    sha256: "73d85a0e2a4f60ddba77c9c6816c3f2607cfc6f9393952f560fe4c78db016532",
+    sha256: "553d2419da30e0ae6385c1a028658ebeb8a84dca25622345ac352b0616c634dc",
   },
   {
     id: "ribbon/bounds",
@@ -486,7 +486,7 @@ export const GALLERY_PREVIEWS = [
     id: "segment/annotations",
     filename: "segment-annotations-light.png",
     path: "/previews/segment-annotations-light.png",
-    sha256: "811eca79393d7430167fd31e90f549bcb42e20ce8b7b55dd622ddf37f46e5a3b",
+    sha256: "4a72879829c29f0cebc32522b87a2b7bae690651631f7cfda9e4576fa5d601e2",
   },
   {
     id: "sf/basic",

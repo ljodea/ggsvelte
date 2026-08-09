@@ -29,7 +29,7 @@
   />
   <ScaleColorDiscrete
     domain={["Wheat / quarter", "Wage / week"]}
-    scheme="economist"
+    scheme="wsj_rgby"
   />
   <ThemeEconomist />
   <GuideLegend channel="color" focus />

@@ -32,7 +32,7 @@
     linewidth={2}
   />
   <ScaleXContinuous labels="d" />
-  <ScaleFillDiscrete domain={["Monarchy", "Commonwealth"]} scheme="economist" />
+  <ScaleFillDiscrete domain={["Monarchy", "Commonwealth"]} scheme="canva" />
   <ThemeEconomist />
   <Labs
     title="Background rectangles for eras"

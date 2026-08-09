@@ -20,7 +20,7 @@ export default defineExample(
     // Domain fixed so Deaths/Pumps never flip with layer order; palette, not hex.
     .scaleColorDiscrete({
       domain: ["Deaths", "Pumps"],
-      scheme: "observable10",
+      scheme: "wsj_dem_rep",
     })
     .coordFixed()
     .theme("map")
