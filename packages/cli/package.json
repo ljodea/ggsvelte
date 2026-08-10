@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/cli",
-  "version": "0.34.4",
+  "version": "0.35.0",
   "description": "ggsvelte-render: validate and render ggsvelte plot specs (JSON) to SVG from the command line — the feedback loop for agents that author specs in sandboxes.",
   "keywords": [
     "agents",
@@ -45,7 +45,7 @@
     "provenance": true
   },
   "dependencies": {
-    "@ggsvelte/core": "^0.34.4"
+    "@ggsvelte/core": "^0.35.0"
   },
   "engines": {
     "node": ">=22"
