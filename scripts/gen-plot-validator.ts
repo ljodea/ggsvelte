@@ -39,7 +39,7 @@ const REL = "packages/spec/src/generated/plot-spec-validator.ts";
  */
 function stabilizeCodeIdentifiers(source: string): string {
   const renumber = new Map<string, string>();
-  return source.replace(/\bvar_\d+\b/g, (match) => {
+  return source.replaceAll(/\bvar_\d+\b/g, (match) => {
     let next = renumber.get(match);
     if (next === undefined) {
       next = `var_${renumber.size}`;
