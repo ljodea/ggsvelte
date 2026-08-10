@@ -186,3 +186,19 @@ Google's turbo colormap used when authors select scheme/option "turbo".
 
 The stops are a clean-room hex sample of the published map for portable
 scheme lookup — not a copy of ggplot2 R sources.
+
+Crameri Scientific colour maps (bundled continuous scheme stops)
+----------------------------------------------------------------
+packages/core/src/scales/crameri-ramps.ts samples 11 evenly spaced #rrggbb
+stops from each continuous map in Scientific Colour Maps v8.0.1 (sequential,
+diverging, and multi-sequential). Cyclic (*O) and categorical (*S) maps are
+not bundled.
+
+  Copyright (c) 2023 Fabio Crameri
+  License: MIT
+  https://www.fabiocrameri.ch/colourmaps/
+  https://doi.org/10.5281/zenodo.1243862
+
+  Crameri, F. (2018). Scientific colour maps. Zenodo.
+  Crameri, F. (2018), Geodynamic diagnostics, scientific visualisation and
+  StagLab 3.0, Geosci. Model Dev., 11, 2541–2562.

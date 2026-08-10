@@ -6352,6 +6352,146 @@
                 {
                   "type": "string",
                   "const": "tableau_div_temperature"
+                },
+                {
+                  "type": "string",
+                  "const": "acton"
+                },
+                {
+                  "type": "string",
+                  "const": "bamako"
+                },
+                {
+                  "type": "string",
+                  "const": "batlow"
+                },
+                {
+                  "type": "string",
+                  "const": "batlowW"
+                },
+                {
+                  "type": "string",
+                  "const": "batlowK"
+                },
+                {
+                  "type": "string",
+                  "const": "bilbao"
+                },
+                {
+                  "type": "string",
+                  "const": "buda"
+                },
+                {
+                  "type": "string",
+                  "const": "davos"
+                },
+                {
+                  "type": "string",
+                  "const": "devon"
+                },
+                {
+                  "type": "string",
+                  "const": "glasgow"
+                },
+                {
+                  "type": "string",
+                  "const": "grayC"
+                },
+                {
+                  "type": "string",
+                  "const": "hawaii"
+                },
+                {
+                  "type": "string",
+                  "const": "imola"
+                },
+                {
+                  "type": "string",
+                  "const": "lajolla"
+                },
+                {
+                  "type": "string",
+                  "const": "lapaz"
+                },
+                {
+                  "type": "string",
+                  "const": "lipari"
+                },
+                {
+                  "type": "string",
+                  "const": "navia"
+                },
+                {
+                  "type": "string",
+                  "const": "naviaW"
+                },
+                {
+                  "type": "string",
+                  "const": "nuuk"
+                },
+                {
+                  "type": "string",
+                  "const": "oslo"
+                },
+                {
+                  "type": "string",
+                  "const": "tokyo"
+                },
+                {
+                  "type": "string",
+                  "const": "turku"
+                },
+                {
+                  "type": "string",
+                  "const": "bam"
+                },
+                {
+                  "type": "string",
+                  "const": "berlin"
+                },
+                {
+                  "type": "string",
+                  "const": "broc"
+                },
+                {
+                  "type": "string",
+                  "const": "cork"
+                },
+                {
+                  "type": "string",
+                  "const": "lisbon"
+                },
+                {
+                  "type": "string",
+                  "const": "managua"
+                },
+                {
+                  "type": "string",
+                  "const": "roma"
+                },
+                {
+                  "type": "string",
+                  "const": "tofino"
+                },
+                {
+                  "type": "string",
+                  "const": "vanimo"
+                },
+                {
+                  "type": "string",
+                  "const": "vik"
+                },
+                {
+                  "type": "string",
+                  "const": "bukavu"
+                },
+                {
+                  "type": "string",
+                  "const": "fes"
+                },
+                {
+                  "type": "string",
+                  "const": "oleron"
                 }
               ],
               "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"colorblind\", \"hue\", and ColorBrewer qualitative (Dark2); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."

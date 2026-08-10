@@ -53,6 +53,44 @@ const COLORBREWER_SEQUENTIAL = new Set([
   "PuOr",
 ]);
 
+const CRAMERI_SEQUENTIAL = new Set([
+  "acton",
+  "bamako",
+  "batlow",
+  "batlowW",
+  "batlowK",
+  "bilbao",
+  "buda",
+  "davos",
+  "devon",
+  "glasgow",
+  "grayC",
+  "hawaii",
+  "imola",
+  "lajolla",
+  "lapaz",
+  "lipari",
+  "navia",
+  "naviaW",
+  "nuuk",
+  "oslo",
+  "tokyo",
+  "turku",
+  "bam",
+  "berlin",
+  "broc",
+  "cork",
+  "lisbon",
+  "managua",
+  "roma",
+  "tofino",
+  "vanimo",
+  "vik",
+  "bukavu",
+  "fes",
+  "oleron",
+]);
+
 function categoricalHelpers(name: string): readonly string[] {
   if (name === "hue") {
     return ["ScaleColorHue", "ScaleFillHue", ...DISCRETE_HELPERS];
@@ -107,6 +145,9 @@ function sequentialNotes(name: string): string | undefined {
   }
   if (name.startsWith("tableau_seq_") || name.startsWith("tableau_div_")) {
     return "Tableau gradient ramp (ggthemes tableau_gradient_pal set).";
+  }
+  if (CRAMERI_SEQUENTIAL.has(name)) {
+    return "Crameri Scientific colour map (v8.0.1) — continuous, CVD-friendly.";
   }
   return undefined;
 }

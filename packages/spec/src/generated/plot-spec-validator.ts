@@ -266,7 +266,7 @@ const check_1 = (value) =>
       value.datasets !== null &&
       !Array.isArray(value.datasets) &&
       Object.entries(value.datasets).every(
-        ([var_6, var_7], _) => !External[3].test(var_6) || check_8(var_7),
+        ([var_2, var_3], _) => !External[3].test(var_2) || check_8(var_3),
       ))) &&
   (!("aes" in value) || check_11(value.aes)) &&
   Array.isArray(value.layers) &&
@@ -302,7 +302,7 @@ const check_3 = (value) =>
       element !== null &&
       !Array.isArray(element) &&
       Object.getOwnPropertyNames(element).every(
-        (var_2, var_3) => External[1].test(var_2) || check_4(element[var_2]),
+        (var_4, var_5) => External[1].test(var_4) || check_4(element[var_4]),
       ) &&
       true,
   );
@@ -325,9 +325,9 @@ const check_5 = (value) =>
   value.columns !== null &&
   !Array.isArray(value.columns) &&
   Object.entries(value.columns).every(
-    ([var_4, var_5], _) =>
-      !External[2].test(var_4) ||
-      (Array.isArray(var_5) && var_5.every((element, index) => check_6(element))),
+    ([var_6, var_7], _) =>
+      !External[2].test(var_6) ||
+      (Array.isArray(var_7) && var_7.every((element, index) => check_6(element))),
   );
 
 // @ts-ignore
@@ -6205,7 +6205,42 @@ const check_369 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "tableau_div_red_blue_white") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_div_red_black_white") ||
     (typeof value.scheme === "string" && value.scheme === "tableau_div_orange_blue_light") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_temperature")) &&
+    (typeof value.scheme === "string" && value.scheme === "tableau_div_temperature") ||
+    (typeof value.scheme === "string" && value.scheme === "acton") ||
+    (typeof value.scheme === "string" && value.scheme === "bamako") ||
+    (typeof value.scheme === "string" && value.scheme === "batlow") ||
+    (typeof value.scheme === "string" && value.scheme === "batlowW") ||
+    (typeof value.scheme === "string" && value.scheme === "batlowK") ||
+    (typeof value.scheme === "string" && value.scheme === "bilbao") ||
+    (typeof value.scheme === "string" && value.scheme === "buda") ||
+    (typeof value.scheme === "string" && value.scheme === "davos") ||
+    (typeof value.scheme === "string" && value.scheme === "devon") ||
+    (typeof value.scheme === "string" && value.scheme === "glasgow") ||
+    (typeof value.scheme === "string" && value.scheme === "grayC") ||
+    (typeof value.scheme === "string" && value.scheme === "hawaii") ||
+    (typeof value.scheme === "string" && value.scheme === "imola") ||
+    (typeof value.scheme === "string" && value.scheme === "lajolla") ||
+    (typeof value.scheme === "string" && value.scheme === "lapaz") ||
+    (typeof value.scheme === "string" && value.scheme === "lipari") ||
+    (typeof value.scheme === "string" && value.scheme === "navia") ||
+    (typeof value.scheme === "string" && value.scheme === "naviaW") ||
+    (typeof value.scheme === "string" && value.scheme === "nuuk") ||
+    (typeof value.scheme === "string" && value.scheme === "oslo") ||
+    (typeof value.scheme === "string" && value.scheme === "tokyo") ||
+    (typeof value.scheme === "string" && value.scheme === "turku") ||
+    (typeof value.scheme === "string" && value.scheme === "bam") ||
+    (typeof value.scheme === "string" && value.scheme === "berlin") ||
+    (typeof value.scheme === "string" && value.scheme === "broc") ||
+    (typeof value.scheme === "string" && value.scheme === "cork") ||
+    (typeof value.scheme === "string" && value.scheme === "lisbon") ||
+    (typeof value.scheme === "string" && value.scheme === "managua") ||
+    (typeof value.scheme === "string" && value.scheme === "roma") ||
+    (typeof value.scheme === "string" && value.scheme === "tofino") ||
+    (typeof value.scheme === "string" && value.scheme === "vanimo") ||
+    (typeof value.scheme === "string" && value.scheme === "vik") ||
+    (typeof value.scheme === "string" && value.scheme === "bukavu") ||
+    (typeof value.scheme === "string" && value.scheme === "fes") ||
+    (typeof value.scheme === "string" && value.scheme === "oleron")) &&
   (!("reverse" in value) || typeof value.reverse === "boolean") &&
   (!("oob" in value) ||
     (typeof value.oob === "string" && value.oob === "censor") ||

@@ -61,9 +61,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
 
 /**
  * Named sequential color schemes known to this schema version.
- * Viridis family maps (matplotlib/CC0 samples + Google turbo) plus the
- * ColorBrewer sequential and diverging ramps (#825); used by continuous/binned
- * color scales and by scale_*_viridis_* discrete sampling.
+ * Viridis family maps (matplotlib/CC0 samples + Google turbo), ColorBrewer
+ * sequential/diverging ramps (#825), Tableau gradient ramps (#1159), and
+ * Crameri Scientific colour maps v8.0.1 continuous suite; used by
+ * continuous/binned color scales and by discrete even-sampling of continuous
+ * ramps (viridis_d parity for viridis family + Crameri).
  */
 export const SEQUENTIAL_SCHEME_NAMES = [
   "viridis",
@@ -119,6 +121,42 @@ export const SEQUENTIAL_SCHEME_NAMES = [
   "tableau_div_red_black_white",
   "tableau_div_orange_blue_light",
   "tableau_div_temperature",
+  // Crameri Scientific colour maps v8.0.1 continuous suite (seq / div / multi-seq)
+  "acton",
+  "bamako",
+  "batlow",
+  "batlowW",
+  "batlowK",
+  "bilbao",
+  "buda",
+  "davos",
+  "devon",
+  "glasgow",
+  "grayC",
+  "hawaii",
+  "imola",
+  "lajolla",
+  "lapaz",
+  "lipari",
+  "navia",
+  "naviaW",
+  "nuuk",
+  "oslo",
+  "tokyo",
+  "turku",
+  "bam",
+  "berlin",
+  "broc",
+  "cork",
+  "lisbon",
+  "managua",
+  "roma",
+  "tofino",
+  "vanimo",
+  "vik",
+  "bukavu",
+  "fes",
+  "oleron",
 ] as const;
 
 export const COLOR_SCHEME_NAMES = [
