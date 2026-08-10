@@ -48,7 +48,7 @@ export const BENCHMARK_CHART_CARDS = [
     subtitle: "Cold-mount milliseconds · lower is better",
     path: "/benchmarks/bench-scatter-100k-mount.svg",
     darkPath: "/benchmarks/bench-scatter-100k-mount-dark-site.svg",
-    sha256: "c124b31325c66d313dd1d529ae5dad89921cee3a60028623f1005e3217b02ea6",
+    sha256: "a7631622afcaf560a75f220f45cbd61e18caa6cab38e0fbc6c61e95cd68a4351",
     alt: "Bar chart of cold-mount time for a 100,000-point colored scatter: ggsvelte SVG 616.6 ms, ggsvelte canvas 247.9 ms, LayerCake 2,799 ms, LayerCake canvas 171.2 ms, Unovis 5,732 ms, SveltePlot 39,636 ms. Lower is better.",
     width: 560,
     height: 380,

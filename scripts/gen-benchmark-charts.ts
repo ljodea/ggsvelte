@@ -225,22 +225,20 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     ] as const;
 
   /**
-   * Six form-factor rows: both ggsvelte paths first (faster first), then the
-   * four peer rows sorted by cold-mount (honest ranking among peers).
+   * Six form-factor rows ordered by cold-mount rank (fastest top). ggsvelte
+   * bars stay shaded via kind; they do not jump the queue when a peer wins.
    */
-  const formBars = (c: FormFactorCell): readonly BenchmarkBar[] => {
-    const ggRows: BenchmarkBar[] = [
-      { lib: "ggsvelte SVG", value: c.ggSvg, kind: "ggsvelte", label: msLabel(c.ggSvg) },
-      { lib: "ggsvelte canvas", value: c.ggCanvas, kind: "ggsvelte", label: msLabel(c.ggCanvas) },
-    ].toSorted((a, b) => a.value - b.value);
-    const peerRows: BenchmarkBar[] = [
-      { lib: "LayerCake", value: c.lcSvg, kind: "peer", label: msLabel(c.lcSvg) },
-      { lib: "LayerCake canvas", value: c.lcCanvas, kind: "peer", label: msLabel(c.lcCanvas) },
-      { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
-      { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
-    ].toSorted((a, b) => a.value - b.value);
-    return [...ggRows, ...peerRows];
-  };
+  const formBars = (c: FormFactorCell): readonly BenchmarkBar[] =>
+    (
+      [
+        { lib: "ggsvelte SVG", value: c.ggSvg, kind: "ggsvelte", label: msLabel(c.ggSvg) },
+        { lib: "ggsvelte canvas", value: c.ggCanvas, kind: "ggsvelte", label: msLabel(c.ggCanvas) },
+        { lib: "LayerCake", value: c.lcSvg, kind: "peer", label: msLabel(c.lcSvg) },
+        { lib: "LayerCake canvas", value: c.lcCanvas, kind: "peer", label: msLabel(c.lcCanvas) },
+        { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
+        { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
+      ] as const satisfies readonly BenchmarkBar[]
+    ).toSorted((a, b) => a.value - b.value);
 
   const aria = (what: string, c: PeerCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(c.gg)}, ` +
