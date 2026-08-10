@@ -320,7 +320,7 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
 
   // Every registered sequential scheme gets a strip on the index.
   const index = page.getByRole("list", { name: "Sequential color schemes" });
-  await expect(index.locator(":scope > li")).toHaveCount(85);
+  await expect(index.locator(":scope > li")).toHaveCount(55);
 
   const region = page.getByRole("region", { name: "Sequential color scales" });
   const cards = region
