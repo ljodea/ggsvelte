@@ -3,7 +3,9 @@
  * Kept free of Playwright and free of generator side-effects so the docs app
  * can import this at prerender time via `docs-seo.ts`.
  */
-import { EXAMPLES } from "../examples/manifest.ts";
+// Extensionless import: this module is pulled into apps/docs via $scripts/docs-seo
+// and svelte-check does not allow `.ts` extensions (unlike scripts/tsconfig).
+import { EXAMPLES } from "../examples/manifest";
 
 /** Cache-busting path: bump the version segment when the card content changes. */
 export const OG_HOME_FILENAME = "home-v1.png";

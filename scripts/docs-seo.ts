@@ -1,7 +1,7 @@
 import sveltePackage from "../packages/svelte/package.json";
 
 import { buildDocsCrumbs } from "./docs-breadcrumbs";
-import { socialImageForRoute } from "./docs-seo-image.ts";
+import { socialImageForRoute } from "./docs-seo-image";
 
 const REPOSITORY_URL = "https://github.com/ljodea/ggsvelte";
 

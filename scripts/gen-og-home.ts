@@ -24,7 +24,7 @@ import {
   OG_HOME_PATH,
   OG_HOME_WIDTH,
   readPngSize,
-} from "./docs-seo-image.ts";
+} from "./docs-seo-image";
 
 const ROOT = resolve(import.meta.dir, "..");
 const OUT_FILE = join(ROOT, "apps", "docs", "static", "og", OG_HOME_FILENAME);
