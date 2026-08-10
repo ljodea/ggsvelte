@@ -4,11 +4,13 @@
  * from benchmarks/competitive/results/*.json via scripts/gen-benchmark-charts.ts;
  * never hand-edit the rendered SVGs.
  *
- * Claim discipline: a chart exists only for a benchmark where ggsvelte beats
- * ALL direct Svelte peers (SveltePlot, LayerCake, Unovis). Cells we lose stay
- * in the results JSON and off the homepage. Conventions follow bun.sh: the
- * subject bar is shaded in the brand accent, peer bars stay grey, value
- * labels sit at bar ends, and time benchmarks ("faster") use horizontal bars.
+ * Claim discipline (enforced in scripts/gen-benchmark-charts.ts): classic
+ * four-bar charts require ggsvelte-svg to beat LayerCake SVG, SveltePlot, and
+ * Unovis. Six-bar form-factor charts (100k) shade every ggsvelte path and still
+ * require the SVG path to beat those three SVG peers; LayerCake canvas may
+ * win a cell and is shown for honesty. Conventions follow bun.sh: subject
+ * bars use the brand accent, peer bars stay grey, value labels sit at bar
+ * ends, and time benchmarks ("faster") use horizontal bars.
  */
 import { registerAll, renderToSVGString } from "@ggsvelte/core";
 

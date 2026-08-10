@@ -1,10 +1,9 @@
 <script lang="ts">
   /**
-   * Hero benchmark charts: bun-style compact tabs, one tab per scenario the
-   * competitive harness shows ggsvelte winning (claim discipline enforced by
-   * scripts/gen-benchmark-charts.ts). Styles live in styles/shell.css next to
-   * the rest of the benchmark chrome (external stylesheet ↔ CSP, see the
-   * .benchmarks comment there).
+   * Hero benchmark charts: bun-style compact tabs, one tab per scenario
+   * (claim discipline enforced by scripts/gen-benchmark-charts.ts). Styles
+   * live in styles/shell.css next to the rest of the benchmark chrome
+   * (external stylesheet ↔ CSP, see the .benchmarks comment there).
    */
   import { base } from "$app/paths";
 

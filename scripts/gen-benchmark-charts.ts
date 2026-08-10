@@ -2,10 +2,10 @@
  * Emit bun-style benchmark-vs-peers charts for the docs homepage and README.
  *
  * Data source of truth: benchmarks/competitive/results/*.json (run
- * `bun run measure:browser && bun run measure:bundles` there first). Charts
- * are drawn with ggsvelte itself (headless renderToSVGString) — see
- * apps/docs/src/lib/benchmarks/charts.ts for the claim discipline: only
- * benchmarks where ggsvelte beats ALL direct Svelte peers get a chart.
+ * `bun run measure:browser && bun run measure:bundles` there first; for 100k
+ * form-factor cards also `bun run measure-100k-peers.ts`). Charts are drawn
+ * with ggsvelte itself (headless renderToSVGString) — see
+ * apps/docs/src/lib/benchmarks/charts.ts for the claim discipline.
  *
  *   bun scripts/gen-benchmark-charts.ts
  *   bun scripts/gen-benchmark-charts.ts --check
@@ -25,6 +25,7 @@ import { join, resolve } from "node:path";
 import {
   benchmarkChartDarkSiteSvg,
   benchmarkChartSvg,
+  type BenchmarkBar,
   type BenchmarkChartInput,
 } from "../apps/docs/src/lib/benchmarks/charts.js";
 import { formatGeneratedSource } from "./artifact.ts";
@@ -36,7 +37,9 @@ const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "benchm
 
 const CHART_WIDTH = 560;
 /** Extra vertical room for labs title + subtitle bands (22 + 16 px) and 4 peer bars. */
-const CHART_HEIGHT = 290;
+const CHART_HEIGHT_4 = 290;
+/** Same title chrome + six form-factor rows (ggsvelte SVG/canvas + peers). */
+const CHART_HEIGHT_6 = 380;
 
 interface BrowserResults {
   readonly generatedAt: string;
@@ -62,7 +65,8 @@ function readJson(name: string): unknown {
   if (!existsSync(path)) {
     throw new Error(
       `${name} is missing. Run the competitive benchmarks first:\n` +
-        "  cd benchmarks/competitive && bun run measure:browser && bun run measure:bundles",
+        "  cd benchmarks/competitive && bun run measure:browser && bun run measure:bundles\n" +
+        "  cd benchmarks/competitive && bun run measure-100k-peers.ts   # 100k form-factor cards",
     );
   }
   return JSON.parse(readFileSync(path, "utf8"));
@@ -72,7 +76,8 @@ function readJson(name: string): unknown {
 function resultsAvailable(): boolean {
   return (
     existsSync(join(COMPETITIVE, "results", "browser.json")) &&
-    existsSync(join(COMPETITIVE, "results", "bundles.json"))
+    existsSync(join(COMPETITIVE, "results", "bundles.json")) &&
+    existsSync(join(COMPETITIVE, "results", "browser-100k-peers.json"))
   );
 }
 
@@ -81,7 +86,7 @@ function mountMs(browser: BrowserResults, lib: string, caseId: string): number {
   const cell = browser.results.find((r) => r.lib === lib && r.caseId === caseId && r.ok);
   if (cell?.mountMedianMs === undefined) {
     throw new Error(
-      `browser results missing ${lib}/${caseId}. Re-run: cd benchmarks/competitive && bun run measure:browser`,
+      `browser results missing ${lib}/${caseId}. Re-run the competitive browser measure for this case.`,
     );
   }
   return cell.mountMedianMs;
@@ -128,18 +133,68 @@ interface ChartCard {
   readonly tab: string;
   readonly title: string;
   readonly subtitle: string;
+  readonly width: number;
+  readonly height: number;
   readonly chart: BenchmarkChartInput;
 }
 
+/** SVG-peer cold-mount cell (ggsvelte-svg vs LayerCake/SveltePlot/Unovis SVG). */
 type PeerCell = { gg: number; lc: number; sp: number; uv: number };
 
-function buildCards(browser: BrowserResults): readonly ChartCard[] {
+/**
+ * Form-factor cold-mount cell: both ggsvelte paths + LayerCake SVG/canvas +
+ * SveltePlot + Unovis. Used for 100k-scale homepage tabs.
+ */
+type FormFactorCell = {
+  ggSvg: number;
+  ggCanvas: number;
+  lcSvg: number;
+  lcCanvas: number;
+  sp: number;
+  uv: number;
+};
+
+function assertSvgPeerWin(name: string, c: PeerCell): void {
+  if (!(c.gg < c.lc && c.gg < c.sp && c.gg < c.uv)) {
+    throw new Error(
+      `${name}: ggsvelte (${String(c.gg)} ms) no longer beats all Svelte peers ` +
+        `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
+        "Drop the chart from buildCards() — the homepage only claims benchmarks ggsvelte wins.",
+    );
+  }
+}
+
+/**
+ * Multi-form 100k charts show canvas LayerCake for honesty (it can beat
+ * ggsvelte on some cells). Claim discipline: ggsvelte SVG must still beat the
+ * three SVG peers (LayerCake SVG, SveltePlot, Unovis).
+ */
+function assertFormFactorSvgWin(name: string, c: FormFactorCell): void {
+  if (!(c.ggSvg < c.lcSvg && c.ggSvg < c.sp && c.ggSvg < c.uv)) {
+    throw new Error(
+      `${name}: ggsvelte SVG (${String(c.ggSvg)} ms) no longer beats SVG peers ` +
+        `(LayerCake ${String(c.lcSvg)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
+        "Drop the chart from buildCards().",
+    );
+  }
+}
+
+function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonly ChartCard[] {
   /** Cold-mount cell for the homepage Svelte-peer set at one case. */
   const cell = (caseId: string): PeerCell => ({
     gg: mountMs(browser, "ggsvelte-svg", caseId),
     lc: mountMs(browser, "layercake", caseId),
     sp: mountMs(browser, "svelteplot", caseId),
     uv: mountMs(browser, "unovis", caseId),
+  });
+
+  const formCell = (caseId: string): FormFactorCell => ({
+    ggSvg: mountMs(peers100k, "ggsvelte-svg", caseId),
+    ggCanvas: mountMs(peers100k, "ggsvelte-canvas", caseId),
+    lcSvg: mountMs(peers100k, "layercake", caseId),
+    lcCanvas: mountMs(peers100k, "layercake-canvas", caseId),
+    sp: mountMs(peers100k, "svelteplot", caseId),
+    uv: mountMs(peers100k, "unovis", caseId),
   });
 
   const cells = {
@@ -150,22 +205,18 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     bars50x4: cell("bars-stacked-50x4"),
   };
 
-  // Claim discipline: refuse to publish a chart ggsvelte does not win.
-  for (const [name, c] of Object.entries(cells)) {
-    if (!(c.gg < c.lc && c.gg < c.sp && c.gg < c.uv)) {
-      throw new Error(
-        `${name}: ggsvelte (${String(c.gg)} ms) no longer beats all Svelte peers ` +
-          `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
-          "Drop the chart from buildCards() — the homepage only claims benchmarks ggsvelte wins.",
-      );
-    }
-  }
+  const formCells = {
+    scatter100k: formCell("scatter-color-100k"),
+    line10x10k: formCell("line-10x10k"),
+  };
+
+  for (const [name, c] of Object.entries(cells)) assertSvgPeerWin(name, c);
+  for (const [name, c] of Object.entries(formCells)) assertFormFactorSvgWin(name, c);
 
   const subtitle = "Cold-mount milliseconds · lower is better";
-  // Display order top→bottom tracks cold-mount rank: ggsvelte, LayerCake,
-  // Unovis, SveltePlot. charts.ts reverses for the coord-flip band domain
-  // so the first entry paints on top.
-  const bars = (c: PeerCell) =>
+  // Display order top→bottom: ggsvelte first, then peers by cold-mount rank.
+  // charts.ts reverses for the coord-flip band domain so the first entry paints on top.
+  const bars = (c: PeerCell): readonly BenchmarkBar[] =>
     [
       { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
       { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
@@ -173,9 +224,33 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
       { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
     ] as const;
 
+  /**
+   * Six form-factor rows: both ggsvelte paths first (faster first), then the
+   * four peer rows sorted by cold-mount (honest ranking among peers).
+   */
+  const formBars = (c: FormFactorCell): readonly BenchmarkBar[] => {
+    const ggRows: BenchmarkBar[] = [
+      { lib: "ggsvelte SVG", value: c.ggSvg, kind: "ggsvelte", label: msLabel(c.ggSvg) },
+      { lib: "ggsvelte canvas", value: c.ggCanvas, kind: "ggsvelte", label: msLabel(c.ggCanvas) },
+    ].toSorted((a, b) => a.value - b.value);
+    const peerRows: BenchmarkBar[] = [
+      { lib: "LayerCake", value: c.lcSvg, kind: "peer", label: msLabel(c.lcSvg) },
+      { lib: "LayerCake canvas", value: c.lcCanvas, kind: "peer", label: msLabel(c.lcCanvas) },
+      { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
+      { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
+    ].toSorted((a, b) => a.value - b.value);
+    return [...ggRows, ...peerRows];
+  };
+
   const aria = (what: string, c: PeerCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(c.gg)}, ` +
     `LayerCake ${msLabel(c.lc)}, Unovis ${msLabel(c.uv)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
+
+  const formAria = (what: string, c: FormFactorCell) =>
+    `Bar chart of cold-mount time for ${what}: ggsvelte SVG ${msLabel(c.ggSvg)}, ` +
+    `ggsvelte canvas ${msLabel(c.ggCanvas)}, LayerCake ${msLabel(c.lcSvg)}, ` +
+    `LayerCake canvas ${msLabel(c.lcCanvas)}, Unovis ${msLabel(c.uv)}, ` +
+    `SveltePlot ${msLabel(c.sp)}. Lower is better.`;
 
   const card = (
     id: string,
@@ -188,6 +263,8 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     tab,
     title,
     subtitle,
+    width: CHART_WIDTH,
+    height: CHART_HEIGHT_4,
     chart: {
       id,
       bars: bars(c),
@@ -197,7 +274,29 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
     },
   });
 
-  // Tab order: the realistic 1k dashboard case leads; 10k and beyond follow.
+  const formCard = (
+    id: string,
+    tab: string,
+    title: string,
+    ariaWhat: string,
+    c: FormFactorCell,
+  ): ChartCard => ({
+    id,
+    tab,
+    title,
+    subtitle,
+    width: CHART_WIDTH,
+    height: CHART_HEIGHT_6,
+    chart: {
+      id,
+      bars: formBars(c),
+      title,
+      subtitle,
+      ariaLabel: formAria(ariaWhat, c),
+    },
+  });
+
+  // Tab order: 1k → 10k → 100k scatter, then line (3×10k + 10×10k), area, bars.
   return [
     card(
       "scatter-1k-mount",
@@ -213,12 +312,26 @@ function buildCards(browser: BrowserResults): readonly ChartCard[] {
       "a 10,000-point colored scatter",
       cells.scatter10k,
     ),
+    formCard(
+      "scatter-100k-mount",
+      "Scatter 100k",
+      "100,000-point colored scatter",
+      "a 100,000-point colored scatter",
+      formCells.scatter100k,
+    ),
     card(
       "line-mount",
       "Line",
       "3 × 10,000-point line chart",
       "a 3-series by 10,000-point line chart",
       cells.line3x10k,
+    ),
+    formCard(
+      "line-100k-mount",
+      "Line 100k",
+      "10 × 10,000-point line chart",
+      "a 10-series by 10,000-point line chart",
+      formCells.line10x10k,
     ),
     card(
       "area-mount",
@@ -268,13 +381,13 @@ function projectionSource(
     darkPath: ${JSON.stringify(`/benchmarks/${dark.filename}`)},
     sha256: ${JSON.stringify(sha256(light.body))},
     alt: ${JSON.stringify(card.chart.ariaLabel)},
-    width: ${String(CHART_WIDTH)},
-    height: ${String(CHART_HEIGHT)},
+    width: ${String(card.width)},
+    height: ${String(card.height)},
   }`;
     })
     .join(",\n");
   const raw = `// Generated by bun scripts/gen-benchmark-charts.ts — do not edit.
-// Numbers: benchmarks/competitive/results/*.json (browser run ${generatedAt}).
+// Numbers: benchmarks/competitive/results/*.json (browser ${generatedAt}).
 
 export interface BenchmarkChartCard {
   readonly id: string;
@@ -306,10 +419,11 @@ export const BENCHMARK_BUNDLE_KB = ${JSON.stringify(bundles)} as const;
 
 function build() {
   const browser = readJson("browser.json") as BrowserResults;
+  const peers100k = readJson("browser-100k-peers.json") as BrowserResults;
   const bundles = readJson("bundles.json") as BundleResults;
-  const cards = buildCards(browser);
+  const cards = buildCards(browser, peers100k);
   const files: ShellFile[] = cards.flatMap((card) => {
-    const light = benchmarkChartSvg(card.chart, { width: CHART_WIDTH, height: CHART_HEIGHT });
+    const light = benchmarkChartSvg(card.chart, { width: card.width, height: card.height });
     return [
       { filename: `bench-${card.id}.svg`, body: light },
       { filename: `bench-${card.id}-dark-site.svg`, body: benchmarkChartDarkSiteSvg(light) },
@@ -331,7 +445,9 @@ function build() {
     layercakeKb: bundleGzipKb(bundles, "layercake", "scatter-color"),
     unovisKb: bundleGzipKb(bundles, "unovis", "scatter-color"),
   };
-  return { files, cards, versions, bundleKb, generatedAt: browser.generatedAt };
+  // Stamp both sources so --check staleness covers 100k re-measures.
+  const generatedAt = `${browser.generatedAt}; 100k peers ${peers100k.generatedAt}`;
+  return { files, cards, versions, bundleKb, generatedAt };
 }
 
 async function check(): Promise<void> {

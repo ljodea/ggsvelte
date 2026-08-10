@@ -6,6 +6,7 @@
     "measure:bundles": "bun run measure-bundles.ts",
     "measure:browser": "bun run measure-browser.ts",
     "measure:browser:full": "COMPETITIVE_FULL=1 bun run measure-browser.ts",
+    "measure:browser:100k-peers": "bun run measure-100k-peers.ts",
     "measure:bundles:full": "COMPETITIVE_FULL=1 bun run measure-bundles.ts",
     "measure:ssr": "bun run measure-ssr.ts",
     "measure": "bun run measure:bundles && bun run measure:browser",
