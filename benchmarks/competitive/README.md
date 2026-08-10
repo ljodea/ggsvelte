@@ -41,12 +41,18 @@ Results: `results/bundles.json`, `results/browser.json`.
 
 ## Docs homepage charts
 
-The docs homepage and repo README chart only the cells where ggsvelte beats
-**all** direct Svelte peers (LayerCake, SveltePlot, Unovis — claim discipline
-is enforced in `scripts/gen-benchmark-charts.ts`, which refuses to emit a
-losing chart). After re-measuring, regenerate from the repo root:
+The docs homepage and repo README chart cells under claim discipline in
+`scripts/gen-benchmark-charts.ts` (refuses to emit a chart when ggsvelte SVG
+no longer beats LayerCake SVG, SveltePlot, and Unovis). Four-bar tabs use the
+default `measure:browser` matrix; the Scatter 100k / Line 100k tabs use both
+form factors (ggsvelte SVG + canvas, LayerCake SVG + canvas, SveltePlot,
+Unovis) from `measure-100k-peers.ts`. After re-measuring, regenerate from the
+repo root:
 
 ```sh
+bun run measure:browser                     # default matrix → results/browser.json
+bun run measure:browser:100k-peers          # 100k form-factor → results/browser-100k-peers.json
+# from repo root:
 bun scripts/gen-benchmark-charts.ts         # rewrites apps/docs/static/benchmarks/*.svg
 bun scripts/gen-benchmark-charts.ts --check # docs CI freshness gate
 ```

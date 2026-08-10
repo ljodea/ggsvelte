@@ -15,7 +15,11 @@ graphics, inspired by ggplot2.
 
 ![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 57.6 ms, LayerCake 214.2 ms, Unovis 577.2 ms, SveltePlot 4,385 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
 
+![Bar chart of cold-mount time for a 100,000-point colored scatter: ggsvelte SVG 616.6 ms, ggsvelte canvas 247.9 ms, LayerCake 2,799 ms, LayerCake canvas 171.2 ms, Unovis 5,732 ms, SveltePlot 39,636 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-100k-mount.svg)
+
 ![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 21.9 ms, LayerCake 36.6 ms, Unovis 173.1 ms, SveltePlot 1,133 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
+
+![Bar chart of cold-mount time for a 10-series by 10,000-point line chart: ggsvelte SVG 78 ms, ggsvelte canvas 118.7 ms, LayerCake 146.4 ms, LayerCake canvas 131.2 ms, Unovis 593.8 ms, SveltePlot 3,960 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-100k-mount.svg)
 
 ![Bar chart of cold-mount time for a 3-series by 1,000-point area chart: ggsvelte 4.6 ms, LayerCake 5.6 ms, Unovis 67.1 ms, SveltePlot 188.7 ms. Lower is better.](apps/docs/static/benchmarks/bench-area-mount.svg)
 
