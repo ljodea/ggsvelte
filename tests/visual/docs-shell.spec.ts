@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { OG_HOME_PATH } from "../../scripts/docs-seo-image.ts";
+
 const GUIDE_ROUTE = "/guide/getting-started";
 
 async function expectNoHorizontalOverflow(page: import("@playwright/test").Page): Promise<void> {
@@ -258,7 +260,7 @@ test("public metadata exposes social cards and truthful route-local structured d
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    `${canonicalBase}/previews/interaction-tooltip-light.png`,
+    `${canonicalBase}${OG_HOME_PATH}`,
   );
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
