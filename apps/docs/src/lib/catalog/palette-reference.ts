@@ -143,9 +143,6 @@ function sequentialNotes(name: string): string | undefined {
   if (COLORBREWER_SEQUENTIAL.has(name)) {
     return `ColorBrewer ramp — Distiller (continuous), Fermenter (binned), or scheme on continuous.`;
   }
-  if (name.startsWith("tableau_seq_") || name.startsWith("tableau_div_")) {
-    return "Tableau gradient ramp (ggthemes tableau_gradient_pal set).";
-  }
   if (CRAMERI_SEQUENTIAL.has(name)) {
     return "Crameri Scientific colour map (v8.0.1) — continuous, CVD-friendly.";
   }

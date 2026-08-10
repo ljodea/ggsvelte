@@ -35,7 +35,7 @@ describe("sequentialSwatchFor", () => {
   it("returns ramps across all three resolution sources", () => {
     expect(sequentialSwatchFor("viridis")?.[0]).toBe("#440154");
     expect(sequentialSwatchFor("Blues")).not.toBeNull();
-    expect(sequentialSwatchFor("tableau_seq_blue")).not.toBeNull();
+    expect(sequentialSwatchFor("batlow")).not.toBeNull();
   });
 
   it("returns null for unknown schemes", () => {

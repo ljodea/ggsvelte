@@ -199,95 +199,65 @@ scales (discrete sampling along the ramp — what `scale_*_viridis_d` does).
 restarts the palette and emits the bounded `palette-exhausted` warning once;
 `error` throws the `palette-exhausted` pipeline error instead.
 
-### Sequential schemes (85)
+### Sequential schemes (55)
 
-| Scheme                          | Description                                                 |
-| ------------------------------- | ----------------------------------------------------------- |
-| viridis                         | Default sequential: perceptually uniform purple→yellow      |
-| magma                           | Perceptually uniform black→red→pale yellow                  |
-| plasma                          | Perceptually uniform blue→magenta→yellow                    |
-| inferno                         | Perceptually uniform black→orange→yellow                    |
-| cividis                         | Colorblind-optimized blue→yellow                            |
-| turbo                           | Google turbo rainbow (high contrast, not uniform)           |
-| Blues                           | ColorBrewer single-hue light→dark blue                      |
-| Greens                          | ColorBrewer single-hue light→dark green                     |
-| Reds                            | ColorBrewer single-hue light→dark red                       |
-| Oranges                         | ColorBrewer single-hue light→dark orange                    |
-| Purples                         | ColorBrewer single-hue light→dark purple                    |
-| Greys                           | ColorBrewer single-hue light→dark grey                      |
-| YlOrRd                          | ColorBrewer multi-hue yellow→orange→red                     |
-| YlGnBu                          | ColorBrewer multi-hue yellow→green→blue                     |
-| BuPu                            | ColorBrewer multi-hue blue→purple                           |
-| RdYlBu                          | ColorBrewer diverging red→yellow→blue                       |
-| RdBu                            | ColorBrewer diverging red→white→blue                        |
-| BrBG                            | ColorBrewer diverging brown→teal                            |
-| Spectral                        | ColorBrewer diverging rainbow                               |
-| PuOr                            | ColorBrewer diverging purple→orange                         |
-| `tableau_seq_blue_green`        | ggthemes Tableau Blue-Green sequential ramp (7 stops)       |
-| `tableau_seq_blue_light`        | ggthemes Tableau Blue Light sequential ramp (7 stops)       |
-| `tableau_seq_orange_light`      | ggthemes Tableau Orange Light sequential ramp (7 stops)     |
-| `tableau_seq_blue`              | ggthemes Tableau Blue sequential ramp (20 stops)            |
-| `tableau_seq_orange`            | ggthemes Tableau Orange sequential ramp (20 stops)          |
-| `tableau_seq_green`             | ggthemes Tableau Green sequential ramp (20 stops)           |
-| `tableau_seq_red`               | ggthemes Tableau Red sequential ramp (20 stops)             |
-| `tableau_seq_purple`            | ggthemes Tableau Purple sequential ramp (20 stops)          |
-| `tableau_seq_brown`             | ggthemes Tableau Brown sequential ramp (20 stops)           |
-| `tableau_seq_gray`              | ggthemes Tableau Gray sequential ramp (20 stops)            |
-| `tableau_seq_gray_warm`         | ggthemes Tableau Gray Warm sequential ramp (20 stops)       |
-| `tableau_seq_blue_teal`         | ggthemes Tableau Blue-Teal sequential ramp (20 stops)       |
-| `tableau_seq_orange_gold`       | ggthemes Tableau Orange-Gold sequential ramp (20 stops)     |
-| `tableau_seq_green_gold`        | ggthemes Tableau Green-Gold sequential ramp (20 stops)      |
-| `tableau_seq_red_gold`          | ggthemes Tableau Red-Gold sequential ramp (21 stops)        |
-| `tableau_div_orange_blue`       | ggthemes Tableau Orange-Blue diverging ramp (7 stops)       |
-| `tableau_div_red_green`         | ggthemes Tableau Red-Green diverging ramp (7 stops)         |
-| `tableau_div_green_blue`        | ggthemes Tableau Green-Blue diverging ramp (7 stops)        |
-| `tableau_div_red_blue`          | ggthemes Tableau Red-Blue diverging ramp (7 stops)          |
-| `tableau_div_red_black`         | ggthemes Tableau Red-Black diverging ramp (7 stops)         |
-| `tableau_div_gold_purple`       | ggthemes Tableau Gold-Purple diverging ramp (7 stops)       |
-| `tableau_div_red_green_gold`    | ggthemes Tableau Red-Green-Gold diverging ramp (7 stops)    |
-| `tableau_div_sunset_sunrise`    | ggthemes Tableau Sunset-Sunrise diverging ramp (7 stops)    |
-| `tableau_div_orange_blue_white` | ggthemes Tableau Orange-Blue-White diverging ramp (7 stops) |
-| `tableau_div_red_green_white`   | ggthemes Tableau Red-Green-White diverging ramp (7 stops)   |
-| `tableau_div_green_blue_white`  | ggthemes Tableau Green-Blue-White diverging ramp (7 stops)  |
-| `tableau_div_red_blue_white`    | ggthemes Tableau Red-Blue-White diverging ramp (7 stops)    |
-| `tableau_div_red_black_white`   | ggthemes Tableau Red-Black-White diverging ramp (7 stops)   |
-| `tableau_div_orange_blue_light` | ggthemes Tableau Orange-Blue Light diverging ramp (7 stops) |
-| `tableau_div_temperature`       | ggthemes Tableau Temperature diverging ramp (7 stops)       |
-| acton                           | Crameri sequential (scientific, CVD-friendly)               |
-| bamako                          | Crameri sequential (scientific, CVD-friendly)               |
-| batlow                          | Crameri sequential flagship (#UseBatlow)                    |
-| batlowW                         | Crameri sequential batlow light end                         |
-| batlowK                         | Crameri sequential batlow dark end                          |
-| bilbao                          | Crameri sequential (scientific, CVD-friendly)               |
-| buda                            | Crameri sequential (scientific, CVD-friendly)               |
-| davos                           | Crameri sequential (scientific, CVD-friendly)               |
-| devon                           | Crameri sequential (scientific, CVD-friendly)               |
-| glasgow                         | Crameri sequential (scientific, CVD-friendly)               |
-| grayC                           | Crameri sequential greyscale                                |
-| hawaii                          | Crameri sequential (scientific, CVD-friendly)               |
-| imola                           | Crameri sequential (scientific, CVD-friendly)               |
-| lajolla                         | Crameri sequential (scientific, CVD-friendly)               |
-| lapaz                           | Crameri sequential (scientific, CVD-friendly)               |
-| lipari                          | Crameri sequential (scientific, CVD-friendly)               |
-| navia                           | Crameri sequential (scientific, CVD-friendly)               |
-| naviaW                          | Crameri sequential navia light end                          |
-| nuuk                            | Crameri sequential (scientific, CVD-friendly)               |
-| oslo                            | Crameri sequential (scientific, CVD-friendly)               |
-| tokyo                           | Crameri sequential (scientific, CVD-friendly)               |
-| turku                           | Crameri sequential (scientific, CVD-friendly)               |
-| bam                             | Crameri diverging (scientific, CVD-friendly)                |
-| berlin                          | Crameri diverging (scientific, CVD-friendly)                |
-| broc                            | Crameri diverging (scientific, CVD-friendly)                |
-| cork                            | Crameri diverging (scientific, CVD-friendly)                |
-| lisbon                          | Crameri diverging (scientific, CVD-friendly)                |
-| managua                         | Crameri diverging (scientific, CVD-friendly)                |
-| roma                            | Crameri diverging (scientific, CVD-friendly)                |
-| tofino                          | Crameri diverging (scientific, CVD-friendly)                |
-| vanimo                          | Crameri diverging (scientific, CVD-friendly)                |
-| vik                             | Crameri diverging (scientific, CVD-friendly)                |
-| bukavu                          | Crameri multi-sequential (scientific, CVD-friendly)         |
-| fes                             | Crameri multi-sequential (scientific, CVD-friendly)         |
-| oleron                          | Crameri multi-sequential (scientific, CVD-friendly)         |
+| Scheme   | Description                                            |
+| -------- | ------------------------------------------------------ |
+| viridis  | Default sequential: perceptually uniform purple→yellow |
+| magma    | Perceptually uniform black→red→pale yellow             |
+| plasma   | Perceptually uniform blue→magenta→yellow               |
+| inferno  | Perceptually uniform black→orange→yellow               |
+| cividis  | Colorblind-optimized blue→yellow                       |
+| turbo    | Google turbo rainbow (high contrast, not uniform)      |
+| Blues    | ColorBrewer single-hue light→dark blue                 |
+| Greens   | ColorBrewer single-hue light→dark green                |
+| Reds     | ColorBrewer single-hue light→dark red                  |
+| Oranges  | ColorBrewer single-hue light→dark orange               |
+| Purples  | ColorBrewer single-hue light→dark purple               |
+| Greys    | ColorBrewer single-hue light→dark grey                 |
+| YlOrRd   | ColorBrewer multi-hue yellow→orange→red                |
+| YlGnBu   | ColorBrewer multi-hue yellow→green→blue                |
+| BuPu     | ColorBrewer multi-hue blue→purple                      |
+| RdYlBu   | ColorBrewer diverging red→yellow→blue                  |
+| RdBu     | ColorBrewer diverging red→white→blue                   |
+| BrBG     | ColorBrewer diverging brown→teal                       |
+| Spectral | ColorBrewer diverging rainbow                          |
+| PuOr     | ColorBrewer diverging purple→orange                    |
+| acton    | Crameri sequential (scientific, CVD-friendly)          |
+| bamako   | Crameri sequential (scientific, CVD-friendly)          |
+| batlow   | Crameri sequential flagship (#UseBatlow)               |
+| batlowW  | Crameri sequential batlow light end                    |
+| batlowK  | Crameri sequential batlow dark end                     |
+| bilbao   | Crameri sequential (scientific, CVD-friendly)          |
+| buda     | Crameri sequential (scientific, CVD-friendly)          |
+| davos    | Crameri sequential (scientific, CVD-friendly)          |
+| devon    | Crameri sequential (scientific, CVD-friendly)          |
+| glasgow  | Crameri sequential (scientific, CVD-friendly)          |
+| grayC    | Crameri sequential greyscale                           |
+| hawaii   | Crameri sequential (scientific, CVD-friendly)          |
+| imola    | Crameri sequential (scientific, CVD-friendly)          |
+| lajolla  | Crameri sequential (scientific, CVD-friendly)          |
+| lapaz    | Crameri sequential (scientific, CVD-friendly)          |
+| lipari   | Crameri sequential (scientific, CVD-friendly)          |
+| navia    | Crameri sequential (scientific, CVD-friendly)          |
+| naviaW   | Crameri sequential navia light end                     |
+| nuuk     | Crameri sequential (scientific, CVD-friendly)          |
+| oslo     | Crameri sequential (scientific, CVD-friendly)          |
+| tokyo    | Crameri sequential (scientific, CVD-friendly)          |
+| turku    | Crameri sequential (scientific, CVD-friendly)          |
+| bam      | Crameri diverging (scientific, CVD-friendly)           |
+| berlin   | Crameri diverging (scientific, CVD-friendly)           |
+| broc     | Crameri diverging (scientific, CVD-friendly)           |
+| cork     | Crameri diverging (scientific, CVD-friendly)           |
+| lisbon   | Crameri diverging (scientific, CVD-friendly)           |
+| managua  | Crameri diverging (scientific, CVD-friendly)           |
+| roma     | Crameri diverging (scientific, CVD-friendly)           |
+| tofino   | Crameri diverging (scientific, CVD-friendly)           |
+| vanimo   | Crameri diverging (scientific, CVD-friendly)           |
+| vik      | Crameri diverging (scientific, CVD-friendly)           |
+| bukavu   | Crameri multi-sequential (scientific, CVD-friendly)    |
+| fes      | Crameri multi-sequential (scientific, CVD-friendly)    |
+| oleron   | Crameri multi-sequential (scientific, CVD-friendly)    |
 
 ### Finite symbol sets (default assignment order)
 

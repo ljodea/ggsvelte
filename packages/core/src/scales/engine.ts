@@ -13,7 +13,6 @@ import { colorBrewerStops } from "./colorbrewer-palettes.js";
 import { crameriRampStops } from "./crameri-ramps.js";
 import { normalizeColor } from "./normalize-color.js";
 import { sequentialSchemeRamp } from "./sequential-schemes.js";
-import { tableauRampStops } from "./tableau-ramps.js";
 import { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
 
 /** Default NA / unknown color when authors omit either side. */
@@ -66,8 +65,8 @@ export function resolveOrdinalPipelineRange(
 
 /**
  * Continuous ramps that even-sample for discrete ordinal use (viridis_d
- * parity): viridis family + Crameri scientific maps. ColorBrewer and Tableau
- * stay discrete-table fallthrough (max-n / YAML stops), not even-sampled.
+ * parity): viridis family + Crameri scientific maps. ColorBrewer stays
+ * discrete-table fallthrough (max-n stops), not even-sampled.
  */
 export function continuousSchemeRamp(name: string | undefined): readonly string[] | undefined {
   if (name === undefined) return undefined;
@@ -92,9 +91,6 @@ export function resolveOrdinalPaletteStops(
     // ColorBrewer sequential/diverging may also be used ordinally (brewer type=seq).
     const brewer = colorBrewerStops(input.scheme);
     if (brewer !== undefined) return brewer;
-    // Tableau gradient ramps likewise (#1159).
-    const tableau = tableauRampStops(input.scheme);
-    if (tableau !== undefined) return tableau;
   }
   return CATEGORICAL_PALETTE_10;
 }
@@ -109,12 +105,10 @@ export function resolveSequentialPipelineRange(
   editionRamp: readonly string[],
 ): readonly string[] | undefined {
   const edition = editionRamp === VIRIDIS_RAMP_10 ? undefined : editionRamp;
-  // main's named continuous schemes first (viridis family + Crameri); ColorBrewer
-  // palette names fall through to the brewer tables (#825), Tableau gradient
-  // ramp names to the tableau tables (#1159).
+  // Named continuous schemes first (viridis family + Crameri); ColorBrewer
+  // palette names fall through to the brewer tables (#825).
   const namedSchemeRamp =
     continuousSchemeRamp(config?.scheme) ??
-    (config?.scheme === undefined ? undefined : colorBrewerStops(config.scheme)) ??
-    (config?.scheme === undefined ? undefined : tableauRampStops(config.scheme));
+    (config?.scheme === undefined ? undefined : colorBrewerStops(config.scheme));
   return config?.range ?? namedSchemeRamp ?? edition;
 }
