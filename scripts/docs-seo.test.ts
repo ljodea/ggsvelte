@@ -5,6 +5,13 @@ import { join } from "node:path";
 import sveltePackage from "../packages/svelte/package.json";
 import { createDocsRouteInventory } from "./docs-route-inventory.ts";
 import {
+  OG_HOME_ALT,
+  OG_HOME_FILENAME,
+  OG_HOME_HEIGHT,
+  OG_HOME_PATH,
+  OG_HOME_WIDTH,
+} from "./docs-seo-image.ts";
+import {
   buildSeoDocument,
   renderStructuredDataScript,
   serializeStructuredData,
@@ -21,23 +28,15 @@ describe("generated docs SEO", () => {
         "Layered grammar of graphics for Svelte: ggplot2-style aes, geoms, stats, and themes, with PortableSpec JSON and hybrid SVG/canvas rendering.",
       canonical: "https://ggsvelte.sh/",
       image: {
-        url: "https://ggsvelte.sh/previews/interaction-tooltip-light.png",
-        width: 640,
-        height: 740,
-        alt: "An interactive ggsvelte scatter plot with a pinned data inspection.",
+        url: `https://ggsvelte.sh${OG_HOME_PATH}`,
+        width: OG_HOME_WIDTH,
+        height: OG_HOME_HEIGHT,
+        alt: OG_HOME_ALT,
       },
       twitterCard: "summary_large_image",
     });
     const socialImage = readFileSync(
-      join(
-        import.meta.dir,
-        "..",
-        "apps",
-        "docs",
-        "static",
-        "previews",
-        "interaction-tooltip-light.png",
-      ),
+      join(import.meta.dir, "..", "apps", "docs", "static", "og", OG_HOME_FILENAME),
     );
     expect([socialImage.readUInt32BE(16), socialImage.readUInt32BE(20)]).toEqual([
       seo.image.width,
@@ -64,6 +63,35 @@ describe("generated docs SEO", () => {
         version: sveltePackage.version,
       },
     ]);
+  });
+
+  it("uses each gallery example's preview as its social card image", () => {
+    const routes = createDocsRouteInventory();
+    const tooltip = routes.find((route) => route.path === "/examples/interaction/tooltip")!;
+    const seo = buildSeoDocument(tooltip, "https://ggsvelte.sh");
+
+    expect(seo.image.url).toBe("https://ggsvelte.sh/previews/interaction-tooltip-light.png");
+    expect(seo.image.alt).toBe("Inspect and pin data");
+    // interaction/tooltip declares vrHeight: 740 in the example manifest.
+    expect(seo.image.width).toBe(640);
+    expect(seo.image.height).toBe(740);
+  });
+
+  it("resolves legacy example aliases to the canonical gallery preview", () => {
+    const alias = createDocsRouteInventory().find(
+      (route) => route.path === "/examples/interactions/inspection",
+    )!;
+    const seo = buildSeoDocument(alias, "https://ggsvelte.sh");
+    expect(alias.canonicalPath).toBe("/examples/interaction/tooltip");
+    expect(seo.image.url).toBe("https://ggsvelte.sh/previews/interaction-tooltip-light.png");
+  });
+
+  it("falls back to the home social card for non-example routes", () => {
+    const docs = createDocsRouteInventory().find((route) => route.path === "/docs")!;
+    const seo = buildSeoDocument(docs, "https://ggsvelte.sh");
+    expect(seo.image.url).toBe(`https://ggsvelte.sh${OG_HOME_PATH}`);
+    expect(seo.image.width).toBe(OG_HOME_WIDTH);
+    expect(seo.image.height).toBe(OG_HOME_HEIGHT);
   });
 
   it("serializes structured data without allowing script termination", () => {

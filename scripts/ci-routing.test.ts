@@ -255,6 +255,9 @@ describe("planJobs", () => {
       "scripts/llms-diagnostic-docs.ts",
       "scripts/llms-lifecycle-docs.ts",
       "scripts/docs-seo.ts",
+      "scripts/docs-seo-image.ts",
+      "scripts/docs-seo.test.ts",
+      "scripts/gen-og-home.ts",
       "scripts/gen-docs-search.ts",
       "scripts/cli-docs.ts",
       "scripts/guide-code-contract.ts",
@@ -630,6 +633,9 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("scripts/llms-diagnostic-docs.ts");
       expect(inputs, execution).toContain("scripts/llms-lifecycle-docs.ts");
       expect(inputs, execution).toContain("scripts/docs-seo.ts");
+      expect(inputs, execution).toContain("scripts/docs-seo-image.ts");
+      expect(inputs, execution).toContain("scripts/docs-seo.test.ts");
+      expect(inputs, execution).toContain("scripts/gen-og-home.ts");
       expect(inputs, execution).toContain("scripts/quickstart.ts");
       expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
       expect(inputs, execution).toContain("scripts/highlight-code.ts");
@@ -637,6 +643,7 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
         "scripts/gen-lesson-charts.ts",
         "scripts/gen-theme-static-shells.ts",
         "scripts/docs-csp.ts",
+        "scripts/docs-seo-image.ts",
       ]) {
         expect(listJobContentPaths(execution, [file]), `${execution}:${file}`).toContain(file);
       }
@@ -1182,6 +1189,9 @@ describe("component_journeys content inputs cover llms modules", () => {
       "scripts/gen-docs-search.ts",
       "scripts/gen-gallery-previews.ts",
       "scripts/docs-seo.ts",
+      "scripts/docs-seo-image.ts",
+      "scripts/docs-seo.test.ts",
+      "scripts/gen-og-home.ts",
       "scripts/deployment-artifact.ts",
       "scripts/cli-docs.ts",
     ]) {

@@ -1,9 +1,9 @@
 import sveltePackage from "../packages/svelte/package.json";
 
 import { buildDocsCrumbs } from "./docs-breadcrumbs";
+import { socialImageForRoute } from "./docs-seo-image";
 
 const REPOSITORY_URL = "https://github.com/ljodea/ggsvelte";
-const SOCIAL_IMAGE_PATH = "/previews/interaction-tooltip-light.png";
 
 export interface SeoRoute {
   path: string;
@@ -99,15 +99,16 @@ export function buildSeoDocument(route: SeoRoute, canonicalBase: string): SeoDoc
     }
   }
 
+  const social = socialImageForRoute(route);
   return {
     title: route.title,
     description: route.description,
     canonical,
     image: {
-      url: absoluteUrl(canonicalBase, SOCIAL_IMAGE_PATH),
-      width: 640,
-      height: 740,
-      alt: "An interactive ggsvelte scatter plot with a pinned data inspection.",
+      url: absoluteUrl(canonicalBase, social.path),
+      width: social.width,
+      height: social.height,
+      alt: social.alt,
     },
     twitterCard: "summary_large_image",
     structuredData,

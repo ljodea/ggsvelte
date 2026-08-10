@@ -7,6 +7,7 @@ import type { DocsBuildConfig } from "../apps/docs/build-mode.ts";
 import sveltePackage from "../packages/svelte/package.json";
 import { validateDocsBuildMetadata } from "./check-docs-metadata.ts";
 import type { DocsRouteRecord } from "./docs-route-inventory.ts";
+import { OG_HOME_ALT, OG_HOME_HEIGHT, OG_HOME_PATH, OG_HOME_WIDTH } from "./docs-seo-image.ts";
 
 const roots: string[] = [];
 afterEach(() => {
@@ -85,15 +86,15 @@ function socialHead(structured = true): string {
     '<meta property="og:title" content="Home — ggsvelte"/>',
     '<meta property="og:description" content="A distinct description."/>',
     '<meta property="og:url" content="https://ggsvelte.sh/"/>',
-    '<meta property="og:image" content="https://ggsvelte.sh/previews/interaction-tooltip-light.png"/>',
-    '<meta property="og:image:width" content="640"/>',
-    '<meta property="og:image:height" content="740"/>',
-    '<meta property="og:image:alt" content="An interactive ggsvelte scatter plot with a pinned data inspection."/>',
+    `<meta property="og:image" content="https://ggsvelte.sh${OG_HOME_PATH}"/>`,
+    `<meta property="og:image:width" content="${String(OG_HOME_WIDTH)}"/>`,
+    `<meta property="og:image:height" content="${String(OG_HOME_HEIGHT)}"/>`,
+    `<meta property="og:image:alt" content="${OG_HOME_ALT.replaceAll('"', "&quot;")}"/>`,
     '<meta name="twitter:card" content="summary_large_image"/>',
     '<meta name="twitter:title" content="Home — ggsvelte"/>',
     '<meta name="twitter:description" content="A distinct description."/>',
-    '<meta name="twitter:image" content="https://ggsvelte.sh/previews/interaction-tooltip-light.png"/>',
-    '<meta name="twitter:image:alt" content="An interactive ggsvelte scatter plot with a pinned data inspection."/>',
+    `<meta name="twitter:image" content="https://ggsvelte.sh${OG_HOME_PATH}"/>`,
+    `<meta name="twitter:image:alt" content="${OG_HOME_ALT.replaceAll('"', "&quot;")}"/>`,
     structured ? `<script type="application/ld+json">${data}</script>` : "",
   ].join("");
 }
