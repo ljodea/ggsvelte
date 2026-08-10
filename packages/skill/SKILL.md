@@ -191,9 +191,10 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 76 named schemes — 26 categorical (`observable10`, `colorblind`,
-  `Dark2`…) and 50 sequential/diverging (`viridis`, `magma`,
-  `Blues`, `RdBu`, Tableau gradient ramps…). Size/linewidth/alpha and shape/linetype have their own
+  `identity`. 111 named schemes — 26 categorical (`observable10`, `colorblind`,
+  `Dark2`…) and 85 sequential/diverging (`viridis`, `magma`,
+  `Blues`, `RdBu`, Tableau gradient ramps, Crameri Scientific maps like
+  `batlow`…). Size/linewidth/alpha and shape/linetype have their own
   scale families.
 - Three equivalent skins:
   JSON `"scales": {"x": {"type": "linear", "transform": "log10"}}` ≡ helper

@@ -199,7 +199,7 @@ scales (discrete sampling along the ramp — what `scale_*_viridis_d` does).
 restarts the palette and emits the bounded `palette-exhausted` warning once;
 `error` throws the `palette-exhausted` pipeline error instead.
 
-### Sequential schemes (50)
+### Sequential schemes (85)
 
 | Scheme                          | Description                                                 |
 | ------------------------------- | ----------------------------------------------------------- |
@@ -253,6 +253,41 @@ restarts the palette and emits the bounded `palette-exhausted` warning once;
 | `tableau_div_red_black_white`   | ggthemes Tableau Red-Black-White diverging ramp (7 stops)   |
 | `tableau_div_orange_blue_light` | ggthemes Tableau Orange-Blue Light diverging ramp (7 stops) |
 | `tableau_div_temperature`       | ggthemes Tableau Temperature diverging ramp (7 stops)       |
+| acton                           | Crameri sequential (scientific, CVD-friendly)               |
+| bamako                          | Crameri sequential (scientific, CVD-friendly)               |
+| batlow                          | Crameri sequential flagship (#UseBatlow)                    |
+| batlowW                         | Crameri sequential batlow light end                         |
+| batlowK                         | Crameri sequential batlow dark end                          |
+| bilbao                          | Crameri sequential (scientific, CVD-friendly)               |
+| buda                            | Crameri sequential (scientific, CVD-friendly)               |
+| davos                           | Crameri sequential (scientific, CVD-friendly)               |
+| devon                           | Crameri sequential (scientific, CVD-friendly)               |
+| glasgow                         | Crameri sequential (scientific, CVD-friendly)               |
+| grayC                           | Crameri sequential greyscale                                |
+| hawaii                          | Crameri sequential (scientific, CVD-friendly)               |
+| imola                           | Crameri sequential (scientific, CVD-friendly)               |
+| lajolla                         | Crameri sequential (scientific, CVD-friendly)               |
+| lapaz                           | Crameri sequential (scientific, CVD-friendly)               |
+| lipari                          | Crameri sequential (scientific, CVD-friendly)               |
+| navia                           | Crameri sequential (scientific, CVD-friendly)               |
+| naviaW                          | Crameri sequential navia light end                          |
+| nuuk                            | Crameri sequential (scientific, CVD-friendly)               |
+| oslo                            | Crameri sequential (scientific, CVD-friendly)               |
+| tokyo                           | Crameri sequential (scientific, CVD-friendly)               |
+| turku                           | Crameri sequential (scientific, CVD-friendly)               |
+| bam                             | Crameri diverging (scientific, CVD-friendly)                |
+| berlin                          | Crameri diverging (scientific, CVD-friendly)                |
+| broc                            | Crameri diverging (scientific, CVD-friendly)                |
+| cork                            | Crameri diverging (scientific, CVD-friendly)                |
+| lisbon                          | Crameri diverging (scientific, CVD-friendly)                |
+| managua                         | Crameri diverging (scientific, CVD-friendly)                |
+| roma                            | Crameri diverging (scientific, CVD-friendly)                |
+| tofino                          | Crameri diverging (scientific, CVD-friendly)                |
+| vanimo                          | Crameri diverging (scientific, CVD-friendly)                |
+| vik                             | Crameri diverging (scientific, CVD-friendly)                |
+| bukavu                          | Crameri multi-sequential (scientific, CVD-friendly)         |
+| fes                             | Crameri multi-sequential (scientific, CVD-friendly)         |
+| oleron                          | Crameri multi-sequential (scientific, CVD-friendly)         |
 
 ### Finite symbol sets (default assignment order)
 

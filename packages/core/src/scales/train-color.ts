@@ -5,14 +5,13 @@
  * spec surface through trainDiscrete: explicit domain = pinned mode
  * (suspends stored assignments), domainMode, scheme/range, onExhaust.
  *
- * Sequential-family schemes (viridis/magma/…) sample k evenly spaced colors
- * across the ramp for the trained domain size (#828 scale_*_viridis_d),
- * matching the ggplot2 discrete-viridis contract rather than taking the first
- * k dark stops of a 10-stop table.
+ * Continuous-family schemes (viridis/magma/… and Crameri scientific maps)
+ * sample k evenly spaced colors across the ramp for the trained domain size
+ * (#828 scale_*_viridis_d), matching the ggplot2 discrete-viridis contract
+ * rather than taking the first k dark stops of a fixed table.
  */
 import { rampColor } from "./color.js";
-import { resolveOrdinalPaletteStops } from "./engine.js";
-import { sequentialSchemeRamp } from "./sequential-schemes.js";
+import { continuousSchemeRamp, resolveOrdinalPaletteStops } from "./engine.js";
 import type { ScaleState, TrainResult } from "./state.js";
 import { trainDiscrete } from "./state.js";
 import type { ColorScale } from "./train-types.js";
@@ -39,7 +38,7 @@ export function trainColor(
   config: OrdinalColorConfig = {},
 ): ColorScale {
   const sequentialRamp =
-    config.range === undefined ? sequentialSchemeRamp(config.scheme) : undefined;
+    config.range === undefined ? continuousSchemeRamp(config.scheme) : undefined;
   const baseRange = resolveOrdinalPaletteStops({
     ...(config.range !== undefined && { range: config.range }),
     ...(config.scheme !== undefined && { scheme: config.scheme }),

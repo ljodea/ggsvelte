@@ -11,6 +11,7 @@
  *   against the registry, so drift fails CI.
  */
 import { colorBrewerStops } from "../../../../../packages/core/src/scales/colorbrewer-palettes.js";
+import { crameriRampStops } from "../../../../../packages/core/src/scales/crameri-ramps.js";
 import { sequentialSchemeRamp } from "../../../../../packages/core/src/scales/sequential-schemes.js";
 import { tableauRampStops } from "../../../../../packages/core/src/scales/tableau-ramps.js";
 
@@ -66,6 +67,41 @@ const SEQUENTIAL_SCHEME_NAME_LIST = [
   "tableau_div_red_black_white",
   "tableau_div_orange_blue_light",
   "tableau_div_temperature",
+  "acton",
+  "bamako",
+  "batlow",
+  "batlowW",
+  "batlowK",
+  "bilbao",
+  "buda",
+  "davos",
+  "devon",
+  "glasgow",
+  "grayC",
+  "hawaii",
+  "imola",
+  "lajolla",
+  "lapaz",
+  "lipari",
+  "navia",
+  "naviaW",
+  "nuuk",
+  "oslo",
+  "tokyo",
+  "turku",
+  "bam",
+  "berlin",
+  "broc",
+  "cork",
+  "lisbon",
+  "managua",
+  "roma",
+  "tofino",
+  "vanimo",
+  "vik",
+  "bukavu",
+  "fes",
+  "oleron",
 ] as const;
 
 export interface SequentialRampRow {
@@ -75,7 +111,10 @@ export interface SequentialRampRow {
 
 /** Same resolution chain as the core scale engine (engine.ts). */
 const rampStops = (name: string): readonly string[] | undefined =>
-  sequentialSchemeRamp(name) ?? colorBrewerStops(name) ?? tableauRampStops(name);
+  sequentialSchemeRamp(name) ??
+  colorBrewerStops(name) ??
+  tableauRampStops(name) ??
+  crameriRampStops(name);
 
 export const SEQUENTIAL_RAMP_ROWS: readonly SequentialRampRow[] = SEQUENTIAL_SCHEME_NAME_LIST.map(
   (name) => {

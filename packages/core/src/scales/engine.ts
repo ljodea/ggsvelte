@@ -10,6 +10,7 @@
  */
 import { CATEGORICAL_PALETTE_10, CATEGORICAL_SCHEMES } from "./categorical-palettes.js";
 import { colorBrewerStops } from "./colorbrewer-palettes.js";
+import { crameriRampStops } from "./crameri-ramps.js";
 import { normalizeColor } from "./normalize-color.js";
 import { sequentialSchemeRamp } from "./sequential-schemes.js";
 import { tableauRampStops } from "./tableau-ramps.js";
@@ -63,6 +64,16 @@ export function resolveOrdinalPipelineRange(
   return config?.range ?? (scheme === undefined ? edition : undefined);
 }
 
+/**
+ * Continuous ramps that even-sample for discrete ordinal use (viridis_d
+ * parity): viridis family + Crameri scientific maps. ColorBrewer and Tableau
+ * stay discrete-table fallthrough (max-n / YAML stops), not even-sampled.
+ */
+export function continuousSchemeRamp(name: string | undefined): readonly string[] | undefined {
+  if (name === undefined) return undefined;
+  return sequentialSchemeRamp(name) ?? crameriRampStops(name);
+}
+
 /** Trainer-facing ordinal stops: explicit range > named scheme > built-in. */
 export function resolveOrdinalPaletteStops(
   input: {
@@ -71,9 +82,9 @@ export function resolveOrdinalPaletteStops(
   } = {},
 ): readonly string[] {
   if (input.range !== undefined) return input.range;
-  // Sequential-family schemes are sampled to domain size in trainColor; the
+  // Continuous-family schemes are sampled to domain size in trainColor; the
   // raw ramp is only a fallback placeholder for fingerprinting.
-  const sequential = sequentialSchemeRamp(input.scheme);
+  const sequential = continuousSchemeRamp(input.scheme);
   if (sequential !== undefined) return sequential;
   if (input.scheme !== undefined) {
     const named = CATEGORICAL_SCHEMES[input.scheme as keyof typeof CATEGORICAL_SCHEMES];
@@ -98,11 +109,11 @@ export function resolveSequentialPipelineRange(
   editionRamp: readonly string[],
 ): readonly string[] | undefined {
   const edition = editionRamp === VIRIDIS_RAMP_10 ? undefined : editionRamp;
-  // main's named sequential schemes first (viridis and friends); ColorBrewer
+  // main's named continuous schemes first (viridis family + Crameri); ColorBrewer
   // palette names fall through to the brewer tables (#825), Tableau gradient
   // ramp names to the tableau tables (#1159).
   const namedSchemeRamp =
-    sequentialSchemeRamp(config?.scheme) ??
+    continuousSchemeRamp(config?.scheme) ??
     (config?.scheme === undefined ? undefined : colorBrewerStops(config.scheme)) ??
     (config?.scheme === undefined ? undefined : tableauRampStops(config.scheme));
   return config?.range ?? namedSchemeRamp ?? edition;
