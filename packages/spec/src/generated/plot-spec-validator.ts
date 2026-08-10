@@ -266,7 +266,7 @@ const check_2e887d21691806b7 = (value) =>
       value.datasets !== null &&
       !Array.isArray(value.datasets) &&
       Object.entries(value.datasets).every(
-        ([var_6, var_7], _) => !External[3].test(var_6) || check_2c320221671b3fe6(var_7),
+        ([var_2, var_3], _) => !External[3].test(var_2) || check_2c320221671b3fe6(var_3),
       ))) &&
   (!("aes" in value) || check_2c1e1e21670ac670(value.aes)) &&
   Array.isArray(value.layers) &&
@@ -305,7 +305,7 @@ const check_2be0722166d5f40e = (value) =>
       element !== null &&
       !Array.isArray(element) &&
       Object.getOwnPropertyNames(element).every(
-        (var_2, var_3) => External[1].test(var_2) || check_2b8f6221669181b6(element[var_2]),
+        (var_4, var_5) => External[1].test(var_4) || check_2b8f6221669181b6(element[var_4]),
       ) &&
       true,
   );
@@ -328,9 +328,9 @@ const check_2b814a2166851b92 = (value) =>
   value.columns !== null &&
   !Array.isArray(value.columns) &&
   Object.entries(value.columns).every(
-    ([var_4, var_5], _) =>
-      !External[2].test(var_4) ||
-      (Array.isArray(var_5) && var_5.every((element, index) => check_2baa122166a7c17e(element))),
+    ([var_6, var_7], _) =>
+      !External[2].test(var_6) ||
+      (Array.isArray(var_7) && var_7.every((element, index) => check_2baa122166a7c17e(element))),
   );
 
 // @ts-ignore
