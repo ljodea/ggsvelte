@@ -6176,36 +6176,6 @@ const check_369 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "BrBG") ||
     (typeof value.scheme === "string" && value.scheme === "Spectral") ||
     (typeof value.scheme === "string" && value.scheme === "PuOr") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_blue_green") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_blue_light") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_orange_light") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_blue") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_orange") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_green") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_red") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_purple") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_brown") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_gray") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_gray_warm") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_blue_teal") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_orange_gold") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_green_gold") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_seq_red_gold") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_orange_blue") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_green") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_green_blue") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_blue") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_black") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_gold_purple") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_green_gold") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_sunset_sunrise") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_orange_blue_white") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_green_white") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_green_blue_white") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_blue_white") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_red_black_white") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_orange_blue_light") ||
-    (typeof value.scheme === "string" && value.scheme === "tableau_div_temperature") ||
     (typeof value.scheme === "string" && value.scheme === "acton") ||
     (typeof value.scheme === "string" && value.scheme === "bamako") ||
     (typeof value.scheme === "string" && value.scheme === "batlow") ||

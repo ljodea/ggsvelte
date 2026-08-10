@@ -76,7 +76,7 @@ describe("docs chart stack isolation (PR1)", () => {
     // Data/palette carve-outs must match the thin modules, not the whole package.
     expect(vite).toMatch(/data[\\/]|[\\/]data[\\/]|svelte[\\/]data/);
     expect(vite).toMatch(
-      /categorical-palettes\|colorbrewer-palettes\|viridis-ramp\|sequential-schemes\|tableau-ramps\|crameri-ramps/,
+      /categorical-palettes\|colorbrewer-palettes\|viridis-ramp\|sequential-schemes\|crameri-ramps/,
     );
   });
 

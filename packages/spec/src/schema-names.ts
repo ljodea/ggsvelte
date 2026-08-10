@@ -62,10 +62,10 @@ export const CATEGORICAL_SCHEME_NAMES = [
 /**
  * Named sequential color schemes known to this schema version.
  * Viridis family maps (matplotlib/CC0 samples + Google turbo), ColorBrewer
- * sequential/diverging ramps (#825), Tableau gradient ramps (#1159), and
- * Crameri Scientific colour maps v8.0.1 continuous suite; used by
- * continuous/binned color scales and by discrete even-sampling of continuous
- * ramps (viridis_d parity for viridis family + Crameri).
+ * sequential/diverging ramps (#825), and Crameri Scientific colour maps
+ * v8.0.1 continuous suite; used by continuous/binned color scales and by
+ * discrete even-sampling of continuous ramps (viridis_d parity for viridis
+ * family + Crameri).
  */
 export const SEQUENTIAL_SCHEME_NAMES = [
   "viridis",
@@ -89,38 +89,6 @@ export const SEQUENTIAL_SCHEME_NAMES = [
   "BrBG",
   "Spectral",
   "PuOr",
-  // ggthemes tableau_gradient_pal ordered-sequential ramps (#1159)
-  "tableau_seq_blue_green",
-  "tableau_seq_blue_light",
-  "tableau_seq_orange_light",
-  "tableau_seq_blue",
-  "tableau_seq_orange",
-  "tableau_seq_green",
-  "tableau_seq_red",
-  "tableau_seq_purple",
-  "tableau_seq_brown",
-  "tableau_seq_gray",
-  "tableau_seq_gray_warm",
-  "tableau_seq_blue_teal",
-  "tableau_seq_orange_gold",
-  "tableau_seq_green_gold",
-  "tableau_seq_red_gold",
-  // ggthemes tableau_gradient_pal ordered-diverging ramps (#1159)
-  "tableau_div_orange_blue",
-  "tableau_div_red_green",
-  "tableau_div_green_blue",
-  "tableau_div_red_blue",
-  "tableau_div_red_black",
-  "tableau_div_gold_purple",
-  "tableau_div_red_green_gold",
-  "tableau_div_sunset_sunrise",
-  "tableau_div_orange_blue_white",
-  "tableau_div_red_green_white",
-  "tableau_div_green_blue_white",
-  "tableau_div_red_blue_white",
-  "tableau_div_red_black_white",
-  "tableau_div_orange_blue_light",
-  "tableau_div_temperature",
   // Crameri Scientific colour maps v8.0.1 continuous suite (seq / div / multi-seq)
   "acton",
   "bamako",

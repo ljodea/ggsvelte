@@ -44,7 +44,7 @@ export default defineConfig({
             // Pure palette / ramp tables — not pipeline, render, or scales engine.
             {
               name: "ggsvelte-palette-tables",
-              test: /[\\/](?:categorical-palettes|colorbrewer-palettes|viridis-ramp|sequential-schemes|tableau-ramps|crameri-ramps)\.[cm]?[jt]s$/,
+              test: /[\\/](?:categorical-palettes|colorbrewer-palettes|viridis-ramp|sequential-schemes|crameri-ramps)\.[cm]?[jt]s$/,
               priority: 40,
             },
             {

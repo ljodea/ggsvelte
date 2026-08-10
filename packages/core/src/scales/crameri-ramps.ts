@@ -12,7 +12,7 @@
  *
  * Pure data — resolution falls through here from
  * `resolveSequentialPipelineRange` / `resolveOrdinalPaletteStops` after the
- * viridis-family, ColorBrewer, and Tableau tables. Named tables stay
+ * viridis-family and ColorBrewer tables. Named tables stay
  * module-private (knip): public consumers resolve via {@link crameriRampStops}.
  */
 
