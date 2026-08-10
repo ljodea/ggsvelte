@@ -14,7 +14,7 @@
         "@types/bun": "^1.3.14",
         "@types/node": "^26.1.2",
         "actionlint": "2.0.6",
-        "axe-core": "^4.11.1",
+        "axe-core": "^4.13.0",
         "highlight.js": "^11.11.1",
         "knip": "6.30.0",
         "markdownlint-cli2": "0.23.2",
@@ -105,7 +105,7 @@
     },
     "packages/cli": {
       "name": "@ggsvelte/cli",
-      "version": "0.34.1",
+      "version": "0.35.0",
       "bin": {
         "ggsvelte-render": "bin/ggsvelte-render.js",
       },
@@ -115,9 +115,9 @@
     },
     "packages/core": {
       "name": "@ggsvelte/core",
-      "version": "0.34.1",
+      "version": "0.35.0",
       "dependencies": {
-        "@ggsvelte/spec": "^0.34.1",
+        "@ggsvelte/spec": "^0.35.0",
       },
       "devDependencies": {
         "typescript": "^6.0.3",
@@ -125,11 +125,11 @@
     },
     "packages/skill": {
       "name": "@ggsvelte/skill",
-      "version": "0.34.1",
+      "version": "0.35.0",
     },
     "packages/spec": {
       "name": "@ggsvelte/spec",
-      "version": "0.34.1",
+      "version": "0.35.0",
       "dependencies": {
         "@js-temporal/polyfill": "^0.5.1",
         "typebox": "^1.3.8",
@@ -141,13 +141,13 @@
     },
     "packages/svelte": {
       "name": "@ggsvelte/svelte",
-      "version": "0.34.1",
+      "version": "0.35.0",
       "bin": {
         "ggsvelte-codemod": "bin/ggsvelte-codemod.js",
       },
       "dependencies": {
-        "@ggsvelte/core": "^0.34.1",
-        "@ggsvelte/spec": "^0.34.1",
+        "@ggsvelte/core": "^0.35.0",
+        "@ggsvelte/spec": "^0.35.0",
       },
       "devDependencies": {
         "@sveltejs/package": "^2.5.8",
@@ -904,7 +904,7 @@
 
     "ast-v8-to-istanbul": ["ast-v8-to-istanbul@1.0.5", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.31", "estree-walker": "^3.0.3", "js-tokens": "^10.0.0" } }, "sha512-UPAgKJFSEGMWSDr3LX4tqnAb4f7KGT8O40Tyx8wbYmmZ/yn58lNCm8h3svs3eXgiGd5AXxz8NDOvXWvicq+rJA=="],
 
-    "axe-core": ["axe-core@4.12.1", "", {}, "sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA=="],
+    "axe-core": ["axe-core@4.13.0", "", {}, "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A=="],
 
     "axobject-query": ["axobject-query@4.1.0", "", {}, "sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ=="],
 
