@@ -72,15 +72,11 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
   "apps/docs/src/lib/catalog/gallery.ts",
   "apps/docs/src/lib/catalog/themes.ts",
   "apps/docs/src/lib/guide.ts",
-  "apps/docs/src/lib/components/GettingStartedGuide.svelte",
-  "apps/docs/src/lib/components/LessonFinishedChart.svelte",
   "apps/docs/src/lib/generated/search-index.ts",
   "apps/docs/src/lib/generated/routes.ts",
   // Split from routes.ts: sidebar labels only (no pixels).
   "apps/docs/src/lib/generated/guide-navigation.ts",
   "apps/docs/src/lib/generated/gallery-previews.ts",
-  // Inventory projection only; static SVGs under apps/docs/static/lesson stay fail-closed.
-  "apps/docs/src/lib/generated/lesson-charts.ts",
 ];
 
 /**
@@ -168,9 +164,6 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/check-docs-metadata.test.ts",
     "scripts/check-pages-links.ts",
     "scripts/check-pages-links.test.ts",
-    // #784: build/check run gen-lesson-charts --check; build runs docs-csp after vite.
-    "scripts/gen-lesson-charts.ts",
-    "scripts/gen-lesson-charts.test.ts",
     // Homepage benchmark charts (build/check run gen-benchmark-charts --check).
     "scripts/gen-benchmark-charts.ts",
     // Themes/palettes shell externalization (HTML shrink).

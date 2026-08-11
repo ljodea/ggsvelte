@@ -331,7 +331,6 @@ describe("docs generator freshness gates stay individually invokable", () => {
     const required = [
       "gen-docs-routes.ts --check",
       "gen-docs-search.ts --check",
-      "gen-lesson-charts.ts --check",
       "gen-gallery-previews.ts --check",
       "gen-og-home.ts --check",
     ];

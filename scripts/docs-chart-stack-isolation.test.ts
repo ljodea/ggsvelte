@@ -30,18 +30,14 @@ describe("docs chart stack isolation (PR1)", () => {
     }
   });
 
-  it("does not put GettingStartedGuide on the shared markdown guide module", () => {
+  it("keeps every guide chapter on the shared markdown guide module", () => {
     const markdownGuide = read("routes/guide/[slug]/+page.svelte");
-    expect(markdownGuide).not.toContain("GettingStartedGuide");
     expect(markdownGuide).toContain("attachGuideCodeCopy");
+    expect(markdownGuide).toContain("{@html data.html}");
 
-    const lesson = read("routes/guide/getting-started/+page.svelte");
-    expect(lesson).toContain("GettingStartedGuide");
-  });
-
-  it("excludes getting-started from the dynamic guide [slug] entries", () => {
     const server = read("routes/guide/[slug]/+page.server.ts");
-    expect(server).toContain('p.slug !== "getting-started"');
+    expect(server).toContain("GUIDE_PAGES.map");
+    expect(server).not.toContain('p.slug !== "getting-started"');
   });
 
   it("isolates @ggsvelte packages via vite/rolldown codeSplitting groups", () => {
@@ -66,7 +62,7 @@ describe("docs chart stack isolation (PR1)", () => {
   it("splits pure data out of the chart mega-chunks (priority > package groups)", () => {
     // Named package groups put every matching module into one shared chunk. A
     // one-line import of palette colors or kyotoSakura then modulepreloads the
-    // full ~1MB chart stack on /themes, /palettes, and getting-started.
+    // full ~1MB chart stack on /themes and /palettes.
     // Higher-priority groups must carve pure data out of those mega-chunks.
     const vite = readFileSync(path.join(root, "apps/docs/vite.config.ts"), "utf8");
     expect(vite).toContain("ggsvelte-data");
@@ -94,16 +90,6 @@ describe("docs chart stack isolation (PR1)", () => {
       expect(source, rel).not.toMatch(/import\s+[^;]*\s+from\s*["']@ggsvelte\/svelte["']/);
       expect(source, rel).not.toMatch(/import\s+[^;]*\s+from\s*["']@ggsvelte\/core["']/);
     }
-  });
-
-  it("loads the lesson chart package only via dynamic import (not static main)", () => {
-    const lesson = read("lib/components/LessonFinishedChart.svelte");
-    // Dynamic path is required so the page can paint without chart JS.
-    expect(lesson).toMatch(/import\s*\(\s*["']@ggsvelte\/svelte["']\s*\)/);
-    // No static value import of the main entry (type-only import type is OK).
-    expect(lesson).not.toMatch(
-      /(?:^|\n)\s*import\s+(?!type\b)[^;]*\s+from\s*["']@ggsvelte\/svelte["']/,
-    );
   });
 
   it("keeps the docs palette catalog free of chart package value imports", () => {

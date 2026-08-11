@@ -171,9 +171,7 @@ describe("guide sections cover their catalogs", () => {
     expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bheight=/);
   });
 
-  it("is written for agents, not mirrored from the human walkthrough", () => {
-    // The agent doc leads with the contract and the correction loop, and it
-    // keeps the headless path (its audience is CI and code, not a reader).
+  it("leads with install, PortableSpec, and the validate loop", () => {
     const order = ["## Install", "## The PortableSpec contract", "## The validate loop"];
     let previous = -1;
     for (const heading of order) {
@@ -183,18 +181,8 @@ describe("guide sections cover their catalogs", () => {
     }
     expect(GETTING_STARTED_MD).toContain("renderToSVGString");
     expect(GETTING_STARTED_MD).toContain("ggsvelte-render");
-    expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
 
-    // And it does NOT restate the human page's visual narrative.
-    for (const humanNarrative of [
-      "You have a chart",
-      "one change at a time",
-      "Choose another surface",
-      "Separate the signal",
-      "Pick a minimal theme",
-    ]) {
-      expect(GETTING_STARTED_MD).not.toContain(humanNarrative);
-    }
+    // Progressive walkthrough step titles stay out of the published guide.
     for (const step of SAKURA_STEPS) {
       expect(GETTING_STARTED_MD).not.toContain(step.title);
     }

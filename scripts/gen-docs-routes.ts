@@ -11,7 +11,6 @@ import {
 } from "./docs-route-inventory.ts";
 import { lifecycleArtifact } from "./gen-lifecycle.ts";
 import { extractMarkdownHeadings, guidePages, type LifecycleDoc } from "./gen-llms.ts";
-import { GETTING_STARTED_PAGE_HEADINGS } from "./quickstart.ts";
 
 const GENERATED_DIR = join(import.meta.dir, "..", "apps", "docs", "src", "lib", "generated");
 const ROUTES_OUTPUT_PATH = join(GENERATED_DIR, "routes.ts");
@@ -23,12 +22,6 @@ function withGuideHeadings(inventory: readonly DocsRouteRecord[]): DocsRouteReco
   );
   return inventory.map((route) => {
     if (!route.path.startsWith("/guide/")) return route;
-    // The human getting-started page is a component, not guide markdown: the
-    // markdown at that slug is the agent doc served from /llms.txt. Its
-    // on-this-page nav comes from the lesson catalog instead.
-    if (route.path === "/guide/getting-started") {
-      return { ...route, headings: GETTING_STARTED_PAGE_HEADINGS.map((h) => ({ ...h })) };
-    }
     const page = pages.get(route.path.slice("/guide/".length));
     if (page === undefined) throw new Error(`No guide prose for route ${route.path}.`);
     const headings: RouteHeading[] = extractMarkdownHeadings(page.markdown)

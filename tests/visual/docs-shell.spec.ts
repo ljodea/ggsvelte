@@ -32,14 +32,12 @@ for (const route of [
   });
 }
 
-test("getting started presents the complete file, then the agent surface", async ({ page }) => {
+test("getting started presents install, a complete file, then PortableSpec", async ({ page }) => {
   await page.goto(GUIDE_ROUTE);
   const article = page.locator("article.guide");
   const text = (await article.textContent()) ?? "";
 
-  // The reader gets a complete, runnable file before anything is decomposed,
-  // and the agent surface comes after the chart is finished — not before it.
-  const order = ["Start with a basic plot", "Add layers", "The finished file", "Agent JSON spec"];
+  const order = ["Install", "A complete Svelte file", "The PortableSpec contract"];
   let previous = -1;
   for (const heading of order) {
     const at = text.indexOf(heading);
@@ -47,21 +45,19 @@ test("getting started presents the complete file, then the agent surface", async
     previous = at;
   }
 
-  const firstFile = article.locator(".lesson-source--file code").first();
-  await expect(firstFile).toContainText("GeomPoint");
-  await expect(firstFile).toContainText("GGPlot");
-  await expect(firstFile).toContainText("ScaleXContinuous");
-  await expect(firstFile).toContainText('from "@ggsvelte/svelte/data"');
-  // ariaLabel is production polish — not on the basic-plot starter file.
-  await expect(firstFile).not.toContainText("ariaLabel=");
+  const completeFile = article
+    .locator(".guide-code-copy code")
+    .filter({ hasText: "GeomPoint" })
+    .first();
+  await expect(completeFile).toContainText("GGPlot");
+  await expect(completeFile).toContainText('from "@ggsvelte/svelte/data"');
   // Width follows the container and height defaults; neither belongs in the
   // file a reader copies.
-  await expect(firstFile).not.toContainText("width=");
-  await expect(firstFile).not.toContainText("height=");
+  await expect(completeFile).not.toContainText("width=");
+  await expect(completeFile).not.toContainText("height=");
 
-  // The agent section shows the spec form, not a second walkthrough.
   await expect(
-    article.locator(".copy-code code").filter({ hasText: '"geom": "point"' }),
+    article.locator(".guide-code-copy code").filter({ hasText: '"geom": "point"' }),
   ).toBeVisible();
 });
 
@@ -134,8 +130,6 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
-  // getting-started deferred its live GGPlot (#972) so mobile chrome is tappable
-  // in ~1s locally; this journey can stay on the primary guide again.
   await page.setViewportSize({ width: 375, height: 760 });
   await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
 
@@ -166,10 +160,7 @@ test("mobile header and docs navigation are explicit, reachable controls", async
   await expectNoHorizontalOverflow(page);
 });
 
-test("getting-started mobile chrome is tappable before the live chart hydrates", async ({
-  page,
-}) => {
-  // Budget guard for #972: cold mobile must not wait on the 838-point GGPlot.
+test("getting-started mobile chrome is tappable on cold load", async ({ page }) => {
   test.setTimeout(30_000);
   const started = Date.now();
   await page.setViewportSize({ width: 375, height: 760 });
@@ -177,10 +168,7 @@ test("getting-started mobile chrome is tappable before the live chart hydrates",
   await expect(page.getByRole("button", { name: "Open site menu" })).toBeVisible({
     timeout: 10_000,
   });
-  expect(
-    Date.now() - started,
-    "Open site menu should be tappable well under the old ~17s hydrate stall",
-  ).toBeLessThan(8_000);
+  expect(Date.now() - started, "Open site menu should be tappable quickly").toBeLessThan(8_000);
 });
 
 test("code tabs implement automatic arrow, Home, and End activation with roving tabindex", async ({
