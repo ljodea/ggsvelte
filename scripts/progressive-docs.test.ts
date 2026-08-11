@@ -63,13 +63,14 @@ describe("progressive Docs journey", () => {
   it("derives getting-started headings from guide markdown, not the lesson fold", () => {
     const route = DOCS_ROUTES.find((entry) => entry.path === "/guide/getting-started");
     const headings = route?.headings ?? [];
-    const byId = new Map(headings.map((h) => [h.id, h.title]));
-    expect(byId.get("install")).toBe("Install");
-    expect(byId.get("a-complete-svelte-file")).toBe("A complete Svelte file");
-    expect(byId.get("the-portablespec-contract")).toBe("The PortableSpec contract");
+    const ids = new Set(headings.map((h) => h.id as string));
+    const titles = new Map(headings.map((h) => [h.id as string, h.title]));
+    expect(titles.get("install")).toBe("Install");
+    expect(titles.get("a-complete-svelte-file")).toBe("A complete Svelte file");
+    expect(titles.get("the-portablespec-contract")).toBe("The PortableSpec contract");
     // Progressive walkthrough step titles must not leak into the guide page.
     for (const step of SAKURA_STEPS) {
-      expect(byId.has(step.id)).toBe(false);
+      expect(ids.has(step.id)).toBe(false);
     }
   });
 
