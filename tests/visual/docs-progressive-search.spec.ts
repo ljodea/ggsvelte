@@ -81,12 +81,10 @@ test("prerendered Docs and getting-started remain useful without JavaScript", as
   );
   await page.goto("/guide/getting-started?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Getting started");
-  await expect(page.locator(".guide-code-copy code").first()).toContainText(
-    "bun add @ggsvelte/svelte",
+  await expect(page.locator("pre code").first()).toContainText("bun add @ggsvelte/svelte");
+  await expect(page.locator("pre code").filter({ hasText: "kyotoSakura" }).first()).toContainText(
+    'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
-  await expect(
-    page.locator(".guide-code-copy code").filter({ hasText: "kyotoSakura" }).first(),
-  ).toContainText('import { kyotoSakura } from "@ggsvelte/svelte/data"');
   await context.close();
 });
 
@@ -235,6 +233,6 @@ test("mobile getting-started guide remains contained", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/guide/getting-started?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Getting started");
-  await expect(page.locator(".guide-code-copy").first()).toBeVisible();
+  await expect(page.locator("pre code").first()).toBeVisible();
   await expectNoDocumentOverflow(page);
 });
