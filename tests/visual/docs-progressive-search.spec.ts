@@ -1,104 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-import { LESSON_CHART_WIDTH } from "../../scripts/gen-lesson-charts.ts";
-
 async function expectNoDocumentOverflow(page: import("@playwright/test").Page): Promise<void> {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
 }
 
-test("Getting Started renders the packed file and the built-up chart", async ({ page }) => {
+test("Getting started is a markdown guide with install and a complete file", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
 
-  const guide = page.locator("article.getting-started-guide");
+  const guide = page.locator("article.guide.prose");
   await expect(guide.getByRole("heading", { level: 1 })).toHaveText("Getting started");
-
-  // The first render is the honest starting chart: every observation, no
-  // styling. It is a build-time render, so it is an image, not a live plot.
-  const firstChart = guide.locator(".lesson-block img.lesson-chart");
-  await expect(firstChart).toBeVisible();
-  await expect(firstChart).toHaveJSProperty("naturalWidth", LESSON_CHART_WIDTH);
-
-  await expect(guide.locator(".lesson-source--file code").first()).toContainText(
+  await expect(guide.getByRole("heading", { level: 2, name: "Install" })).toBeVisible();
+  await expect(
+    guide.getByRole("heading", { level: 2, name: "A complete Svelte file" }),
+  ).toBeVisible();
+  await expect(guide.locator("pre code").first()).toContainText("bun add @ggsvelte/svelte");
+  await expect(guide.locator("pre code").filter({ hasText: "kyotoSakura" }).first()).toContainText(
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
   await expectNoDocumentOverflow(page);
-});
-
-test("each step shows its own delta and the finished chart is live", async ({ page }) => {
-  await page.goto("/guide/getting-started?theme=light");
-  const steps = page.locator(".progressive-step");
-  await expect(steps).toHaveCount(4);
-  await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
-    "Pick a minimal theme and add a rolling median line",
-    "Add epochs",
-    "Annotate record years",
-    "Make it interactive",
-  ]);
-
-  // Intermediate steps are build-time SVGs; Make it interactive is the one live
-  // plot (intent-gated, #972). Before engage, every step is an img.
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
-  await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
-  const finishedChart = page.locator(".finished-chart");
-  await finishedChart.scrollIntoViewIfNeeded();
-  await finishedChart.getByRole("button", { name: "Load interactive chart" }).click();
-  const finished = finishedChart.locator(".gg-plot-root");
-  await expect(finished).toHaveAttribute("data-gg-ready", "true", {
-    timeout: 45_000,
-  });
-  await expect(page.locator(".gg-plot-root")).toHaveCount(1);
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(3);
-  await expectNoDocumentOverflow(page);
-});
-
-test("the finished chart answers keyboard inspection", async ({ page }) => {
-  await page.goto("/guide/getting-started?theme=light");
-  const finishedChart = page.locator(".finished-chart");
-  await finishedChart.scrollIntoViewIfNeeded();
-  await finishedChart.getByRole("button", { name: "Load interactive chart" }).click();
-  const capture = finishedChart.locator(".gg-capture");
-  await expect(capture).toBeVisible({ timeout: 45_000 });
-  await capture.focus();
-  await capture.press("ArrowRight");
-  await expect(page.locator(".finished-chart .gg-tooltip")).toBeVisible();
-});
-
-/*
- * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
- * chart adapts on its own. The epoch bands are the one mark carried by fill
- * alone, so under a requested palette they drop and the names drawn above
- * them do the work instead. Asserted through `emulateMedia`:
- * `forcedColors` is not a Playwright test option, so `test.use` would be
- * dropped by the runner and this would silently measure a normal page
- * (issue #718 — see playwright.config.ts).
- */
-test("the finished chart drops its band fills and names the epochs in forced colors", async ({
-  page,
-}) => {
-  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
-  await page.goto("/guide/getting-started?theme=light");
-  const finished = page.locator(".finished-chart");
-  await finished.scrollIntoViewIfNeeded();
-  await finished.getByRole("button", { name: "Load interactive chart" }).click();
-  await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
-    timeout: 45_000,
-  });
-  expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
-
-  const fills = await finished
-    .locator(".gg-marks rect")
-    .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
-  expect(fills.length).toBeGreaterThan(0);
-  expect(new Set(fills)).toEqual(new Set(["none"]));
-  // Epoch names are drawn in the panel, above the bands they name. That is
-  // what carries the epochs once the fills drop; there is no legend to read.
-  await expect(finished.locator(".gg-legend")).toHaveCount(0);
-  const marks = finished.locator(".gg-marks");
-  await expect(marks).toContainText("Medieval warm period");
-  await expect(marks).toContainText("Little Ice Age");
-  await expect(marks).toContainText("Industrial era");
 });
 
 test("Docs landing and sidebar expose the full path without duplicate Reference", async ({
@@ -149,7 +70,9 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Reference");
 });
 
-test("prerendered Docs and lesson source remain useful without JavaScript", async ({ browser }) => {
+test("prerendered Docs and getting-started remain useful without JavaScript", async ({
+  browser,
+}) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("/docs?theme=light");
@@ -157,19 +80,11 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     "Getting started",
   );
   await page.goto("/guide/getting-started?theme=light");
-  await expect(page.locator(".lesson-source--file code").first()).toContainText(
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Getting started");
+  await expect(page.locator("pre code").first()).toContainText("bun add @ggsvelte/svelte");
+  await expect(page.locator("pre code").filter({ hasText: "kyotoSakura" }).first()).toContainText(
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
-  // Every chart is a build-time SVG without JS: first render + four steps
-  // (Make it interactive keeps its static fallback until hydrate near-viewport, #972).
-  await expect(page.locator(".lesson-block img.lesson-chart")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(5);
-  await expect(
-    page.getByRole("heading", {
-      level: 3,
-      name: "Pick a minimal theme and add a rolling median line",
-    }),
-  ).toBeVisible();
   await context.close();
 });
 
@@ -314,22 +229,10 @@ test("global search is reachable from compact chrome and survives 200 percent zo
   await expectNoDocumentOverflow(page);
 });
 
-test("mobile lesson stacks code above chart and remains contained", async ({ page }) => {
+test("mobile getting-started guide remains contained", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/guide/getting-started?theme=light");
-
-  // Side-by-side is banned: code always above the chart, on every viewport.
-  const order = await page
-    .locator(".lesson-block > *")
-    .evaluateAll((children) =>
-      children.map(
-        (child) => `${child.tagName.toLowerCase()}.${child.getAttribute("class") ?? ""}`,
-      ),
-    );
-  expect(order[0]).toContain("copy-code");
-  expect(order[1]).toContain("img.lesson-chart");
-  await expect(page.getByRole("tablist", { name: "First chart surfaces" })).toHaveCount(0);
-  await expect(page.locator(".lesson-block .copy-code")).toBeVisible();
-  await expect(page.locator(".lesson-block img.lesson-chart")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Getting started");
+  await expect(page.locator("pre code").first()).toBeVisible();
   await expectNoDocumentOverflow(page);
 });

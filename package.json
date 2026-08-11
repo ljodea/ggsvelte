@@ -23,8 +23,6 @@
     "docs:routes:check": "bun scripts/gen-docs-routes.ts --check",
     "docs:search:gen": "bun scripts/gen-docs-search.ts",
     "docs:search:check": "bun scripts/gen-docs-search.ts --check",
-    "lesson:charts:gen": "bun scripts/gen-lesson-charts.ts",
-    "lesson:charts:check": "bun scripts/gen-lesson-charts.ts --check",
     "gallery:previews:gen": "bun scripts/gen-gallery-previews.ts",
     "gallery:previews:check": "bun scripts/gen-gallery-previews.ts --check",
     "gallery:previews:capture": "bun scripts/capture-gallery-lights.ts",

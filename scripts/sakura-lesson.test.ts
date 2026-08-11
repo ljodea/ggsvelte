@@ -16,11 +16,6 @@ import { describe, expect, it } from "bun:test";
 
 import { kyotoSakura } from "../packages/svelte/src/lib/data/index.ts";
 import {
-  measureSakuraFinishedSize,
-  SAKURA_HEIGHT_PROBE_WIDTHS,
-  SAKURA_PANEL_ASPECT,
-} from "./gen-lesson-charts.ts";
-import {
   finishedPortableSpecNamed,
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
@@ -37,6 +32,41 @@ import {
 
 const rows = kyotoSakura.map((row) => ({ ...row }));
 const finished = foldSakura(SAKURA_STEPS.length, rows);
+
+/** Target width:height of the finished fold's *data panel*, not the outer SVG. */
+const SAKURA_PANEL_ASPECT = 2.5;
+const CHROME_PROBE_HEIGHT = 600;
+const SAKURA_HEIGHT_PROBE_WIDTHS = [360, 480, 560, 660, 768, 800, 1000] as const;
+
+function measureSakuraFinishedSize(width: number): {
+  width: number;
+  height: number;
+  panelWidth: number;
+  panelHeight: number;
+} {
+  const model = runPipeline(finished.spec, { width, height: CHROME_PROBE_HEIGHT });
+  const panel = model.scene.panels[0];
+  if (panel === undefined) {
+    throw new Error(`measureSakuraFinishedSize(${String(width)}): no panel`);
+  }
+  const chromeTop = panel.y;
+  const chromeBottom = CHROME_PROBE_HEIGHT - panel.y - panel.height;
+  const chromeSide = width - panel.width;
+  const panelWidth = Math.max(width - chromeSide, 1);
+  const panelHeight = panelWidth / SAKURA_PANEL_ASPECT;
+  const height = Math.round(chromeTop + panelHeight + chromeBottom);
+  const check = runPipeline(finished.spec, { width, height });
+  const checked = check.scene.panels[0];
+  if (checked === undefined) {
+    throw new Error(`measureSakuraFinishedSize(${String(width)}): re-probe has no panel`);
+  }
+  return {
+    width,
+    height,
+    panelWidth: checked.width,
+    panelHeight: checked.height,
+  };
+}
 
 /** Count point and path vertices that fall inside a text-glyph bounding box. */
 function countHitsInBox(
@@ -145,7 +175,7 @@ describe("the sakura lesson folds to renderable specs", () => {
   });
 
   it("drops record callouts when annotations are disabled", () => {
-    // GettingStartedGuide uses this below ~560px so hand-placed text does not
+    // Narrow hosts drop callouts so hand-placed text does not
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
@@ -350,7 +380,7 @@ describe("the sakura lesson folds to renderable specs", () => {
   });
 
   it("authors step fragments in ggplot2 thinking order", () => {
-    // GettingStartedGuide prints step.fragment verbatim — foldSakura only
+    // Guide/llms surfaces print step.fragment verbatim — foldSakura only
     // reorders the finished file. Theme/scale-before-mark fragments are a
     // silent docs regression (caught on #1555 leftovers).
     const tagRe = /<(Theme\w+|Inspect|Geom\w+|Scale\w+|Coord\w+|Facet\w+|Guide\w+|Labs)\b/g;
@@ -601,7 +631,7 @@ describe("gate G8 — annotations that do not fight the chart", () => {
     expect(rule).toBeDefined();
     expect(rule?.params?.["linewidth"]).toBeGreaterThanOrEqual(1);
     // Caption/title/subtitle would squash the data panel; citation lives on
-    // the page footnote instead (GettingStartedGuide).
+    // a host footnote instead of layer text.
     expect(spec.labs?.caption).toBeUndefined();
     expect(spec.labs?.title).toBeUndefined();
     expect(spec.labs?.subtitle).toBeUndefined();
@@ -747,7 +777,7 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
     const label = annotations ? "wide (with callouts)" : "narrow (annotations dropped)";
 
     it(`keeps decorative layers out of candidates on the ${label} finished chart`, () => {
-      // GettingStartedGuide folds with { annotations: !narrowChart }; layer
+      // Narrow hosts fold with { annotations: false }; layer
       // indexes differ (7 vs 5), so both variants must pass.
       const folded = foldSakura(SAKURA_STEPS.length, rows, { annotations });
       const model = runPipeline(folded.spec, size);

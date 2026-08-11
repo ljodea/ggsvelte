@@ -145,11 +145,7 @@ describe("classifyChangedPaths", () => {
     for (const file of [
       "apps/docs/src/lib/catalog/guide.ts",
       "apps/docs/src/lib/guide.ts",
-      "apps/docs/src/lib/components/GettingStartedGuide.svelte",
-      "apps/docs/src/lib/components/LessonFinishedChart.svelte",
       "apps/docs/src/lib/catalog/docs-tasks.ts",
-      // Sibling generated inventory modules are content-only (#784 lesson-charts).
-      "apps/docs/src/lib/generated/lesson-charts.ts",
       "apps/docs/src/lib/generated/routes.ts",
       "apps/docs/src/lib/generated/guide-navigation.ts",
       "apps/docs/src/lib/generated/search-index.ts",
@@ -161,8 +157,8 @@ describe("classifyChangedPaths", () => {
     }
   });
 
-  test("lesson-charts projection schedules docs site without VR", () => {
-    const path = "apps/docs/src/lib/generated/lesson-charts.ts";
+  test("guide-navigation projection schedules docs site without VR", () => {
+    const path = "apps/docs/src/lib/generated/guide-navigation.ts";
     const plan = planJobs(classifyChangedPaths([path]));
     expect(plan.docs_site).toBe(true);
     expect(plan.svelte_check).toBe(true);
@@ -235,8 +231,7 @@ describe("planJobs", () => {
     for (const path of [
       "scripts/llms-guide-content.ts",
       "apps/docs/src/lib/catalog/guide.ts",
-      "apps/docs/src/lib/components/GettingStartedGuide.svelte",
-      "apps/docs/src/lib/components/LessonFinishedChart.svelte",
+      "apps/docs/src/lib/generated/routes.ts",
     ]) {
       const plan = planJobs(classifyChangedPaths([path]));
       expect(plan.unit, path).toBe(true);
@@ -581,9 +576,7 @@ describe("planJobs", () => {
       "scripts/docs-route-inventory-reference.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
-      // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
-      "scripts/gen-lesson-charts.ts",
-      "scripts/gen-lesson-charts.test.ts",
+      // package.json build/check invoke generators; build invokes docs-csp.
       "scripts/gen-theme-static-shells.ts",
       "scripts/docs-html-shell-external.test.ts",
       "scripts/docs-csp.ts",
@@ -626,7 +619,6 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).not.toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
-      expect(inputs, execution).toContain("scripts/gen-lesson-charts.ts");
       expect(inputs, execution).toContain("scripts/gen-theme-static-shells.ts");
       expect(inputs, execution).toContain("scripts/docs-csp.ts");
       expect(inputs, execution).toContain("scripts/gen-llms.ts");
@@ -640,7 +632,6 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
       expect(inputs, execution).toContain("scripts/highlight-code.ts");
       for (const file of [
-        "scripts/gen-lesson-charts.ts",
         "scripts/gen-theme-static-shells.ts",
         "scripts/docs-csp.ts",
         "scripts/docs-seo-image.ts",
@@ -648,12 +639,6 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
         expect(listJobContentPaths(execution, [file]), `${execution}:${file}`).toContain(file);
       }
     }
-  });
-
-  test("component_journeys hashes gen-lesson-charts (lesson img counts on getting-started)", () => {
-    const file = "scripts/gen-lesson-charts.ts";
-    expect(JOB_CONTENT_INPUTS.component_journeys).toContain(file);
-    expect(listJobContentPaths("component_journeys", [file])).toContain(file);
   });
 
   test("quickstart modules invalidate docs, journeys, and consumer content hashes", () => {
@@ -697,7 +682,7 @@ describe("docs surface membership gates (#784)", () => {
     };
     const invoked = docsPackageInvokedScripts(pkg.scripts);
     // Sanity: build/check must surface at least the known generators.
-    expect(invoked).toContain("scripts/gen-lesson-charts.ts");
+    expect(invoked).toContain("scripts/gen-docs-routes.ts");
     expect(invoked).toContain("scripts/docs-csp.ts");
     expect(invoked.length).toBeGreaterThan(4);
 
@@ -738,7 +723,6 @@ describe("docs surface membership gates (#784)", () => {
     expect(imported).toContain("scripts/gen-llms.ts");
     expect(imported).toContain("scripts/docs-seo.ts");
     expect(imported).toContain("scripts/cli-docs.ts");
-    expect(imported).toContain("scripts/quickstart.ts");
 
     for (const path of [...imported].toSorted()) {
       const onDocsLane = LANE_PATTERNS.docs.some((pattern) => matchPathPattern(pattern, path));

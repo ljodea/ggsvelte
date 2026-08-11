@@ -25,10 +25,6 @@ aesthetic mapping + one or more layers, and every plot normalizes to a
 PortableSpec: strict JSON, no functions, no closures. That JSON is the surface
 to generate, validate, and correct against.
 
-This page is written for code that emits specs. The human walkthrough — the
-same grammar, built up one element at a time on a real dataset — is at
-/guide/getting-started.
-
 ## Install
 
 \`\`\`sh complete

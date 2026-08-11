@@ -66,23 +66,9 @@ describe("docs chart intent-gated load", () => {
     expect(sequential).not.toContain("observeNearViewport");
   });
 
-  it("loads example and lesson live charts only after user intent", () => {
+  it("loads example live charts only after user intent", () => {
     const frame = read("lib/components/ExampleLiveFrame.svelte");
     expect(frame).toContain("observeUserIntent");
     expect(frame).not.toContain("observeNearViewport");
-
-    const lesson = read("lib/components/LessonFinishedChart.svelte");
-    expect(lesson).toContain("observeUserIntent");
-    expect(lesson).not.toContain("observeNearViewport");
-  });
-
-  it("restores keyboard focus into the lesson plot after upgrade (#1362)", () => {
-    const lesson = read("lib/components/LessonFinishedChart.svelte");
-    expect(lesson).toContain("restoreKeyboardFocus");
-    expect(lesson).toContain("focusAfterUpgrade");
-    expect(lesson).toContain(".gg-capture");
-    expect(lesson).toContain("gg-plot-root");
-    expect(lesson).toContain("onfocusout");
-    expect(lesson).toMatch(/\.focus\(/);
   });
 });

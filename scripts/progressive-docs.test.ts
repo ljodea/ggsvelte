@@ -60,28 +60,27 @@ describe("progressive Docs journey", () => {
     }
   });
 
-  it("keeps every lesson anchor and title aligned with generated route headings", () => {
-    const stepIds: ReadonlySet<string> = new Set(SAKURA_STEPS.map((step) => step.id));
+  it("derives getting-started headings from guide markdown, not the lesson fold", () => {
     const route = DOCS_ROUTES.find((entry) => entry.path === "/guide/getting-started");
-    // Widened off the generated literal union — see getting-started-headings.
-    const stepHeadings: { id: string; title: string }[] | undefined = route?.headings
-      ?.filter((heading) => stepIds.has(heading.id))
-      .map(({ id, title }) => ({ id, title }));
-    expect(stepHeadings).toEqual(SAKURA_STEPS.map(({ id, title }) => ({ id, title })));
+    const headings = route?.headings ?? [];
+    const ids = new Set(headings.map((h) => h.id as string));
+    const titles = new Map(headings.map((h) => [h.id as string, h.title]));
+    expect(titles.get("install")).toBe("Install");
+    expect(titles.get("a-complete-svelte-file")).toBe("A complete Svelte file");
+    expect(titles.get("the-portablespec-contract")).toBe("The PortableSpec contract");
+    // Progressive walkthrough step titles must not leak into the guide page.
+    for (const step of SAKURA_STEPS) {
+      expect(ids.has(step.id)).toBe(false);
+    }
   });
 
-  it("keeps the human lesson out of the agent surface", () => {
-    // D6: /llms.txt is the agent path and no longer mirrors the walkthrough.
-    // The shared facts (install, complete file, spec, headless) still come
-    // from one catalog — asserted above — but the narrative does not.
+  it("keeps progressive lesson step titles out of the published getting-started prose", () => {
     for (const step of SAKURA_STEPS) {
       expect(GETTING_STARTED_MD).not.toContain(`### ${step.title}`);
-      // Empty outcomes are intentional (no marketing prose on the human page).
       if (step.outcome !== "") {
         expect(GETTING_STARTED_MD).not.toContain(step.outcome);
       }
     }
-    expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
   });
 });
 

@@ -1,9 +1,5 @@
 <script lang="ts">
-  /**
-   * Markdown guide chapters only. Getting started lives at
-   * `guide/getting-started/` so this client module stays free of the lesson
-   * chart dependency graph.
-   */
+  /** Markdown guide chapters from the shared catalog (same prose as /llms surfaces). */
   import { attachGuideCodeCopy } from "$lib/guide-code-copy";
   import type { PageProps } from "./$types";
 

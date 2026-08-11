@@ -44,8 +44,7 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   "scripts/gallery-preview-provenance.test.ts",
   "scripts/check-docs-metadata.ts",
   "scripts/check-pages-links.ts",
-  // #784: build/check --check gen-lesson-charts; build runs docs-csp after vite.
-  "scripts/gen-lesson-charts.ts",
+  // build/check --check generators; build runs docs-csp after vite.
   "scripts/gen-benchmark-charts.ts",
   "scripts/gen-theme-static-shells.ts",
   "scripts/docs-csp.ts",
@@ -258,8 +257,6 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "scripts/gen-gallery-previews.test.ts",
     "scripts/gallery-preview-provenance.ts",
     "scripts/gallery-preview-provenance.test.ts",
-    // Journeys assert lesson-chart img counts on /guide/getting-started (#784).
-    "scripts/gen-lesson-charts.ts",
     "scripts/gen-benchmark-charts.ts",
     "scripts/gen-theme-static-shells.ts",
     "scripts/cloudflare-pages-config.test.ts",

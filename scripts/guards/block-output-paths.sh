@@ -29,7 +29,7 @@ while IFS= read -r path; do
       break
       ;;
     # Fail-closed render-ish apps/docs: exclude known content-only catalogs.
-    apps/docs/src/lib/catalog/* | apps/docs/src/lib/guide.ts | apps/docs/src/lib/components/GettingStartedGuide.svelte | apps/docs/src/lib/generated/*)
+    apps/docs/src/lib/catalog/* | apps/docs/src/lib/guide.ts | apps/docs/src/lib/generated/*)
       continue
       ;;
     apps/docs/*)

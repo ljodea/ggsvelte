@@ -2,8 +2,7 @@
  * Fire `onNear` once when `target` is near the viewport, then disconnect.
  *
  * Used to defer heavy live charts (theme/palette specimens) so first paint
- * and above-the-fold work stay cheap (#1037). Mirrors the getting-started
- * near-viewport load pattern (#972): no idle-load, only intersection.
+ * and above-the-fold work stay cheap (#1037). No idle-load, only intersection.
  *
  * When `IntersectionObserver` is missing, fires immediately so SSR/test
  * environments without IO still mount content.

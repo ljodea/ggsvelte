@@ -39,7 +39,6 @@ describe("decideChangesetComment", () => {
     const decision = decideChangesetComment(
       [
         ".changeset/kyoto-annotation-polish.md",
-        "apps/docs/src/lib/generated/lesson-charts.ts",
         "scripts/quickstart/steps.ts",
         "tests/visual/docs-progressive-search.spec.ts",
       ],
