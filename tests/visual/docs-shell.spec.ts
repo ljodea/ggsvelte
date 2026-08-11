@@ -45,10 +45,7 @@ test("getting started presents install, a complete file, then PortableSpec", asy
     previous = at;
   }
 
-  const completeFile = article
-    .locator(".guide-code-copy code")
-    .filter({ hasText: "GeomPoint" })
-    .first();
+  const completeFile = article.locator("pre code").filter({ hasText: "GeomPoint" }).first();
   await expect(completeFile).toContainText("GGPlot");
   await expect(completeFile).toContainText('from "@ggsvelte/svelte/data"');
   // Width follows the container and height defaults; neither belongs in the
@@ -56,9 +53,7 @@ test("getting started presents install, a complete file, then PortableSpec", asy
   await expect(completeFile).not.toContainText("width=");
   await expect(completeFile).not.toContainText("height=");
 
-  await expect(
-    article.locator(".guide-code-copy code").filter({ hasText: '"geom": "point"' }),
-  ).toBeVisible();
+  await expect(article.locator("pre code").filter({ hasText: '"geom": "point"' })).toBeVisible();
 });
 
 test("errors deep links expose source-qualified recovery and copy safe recipes", async ({

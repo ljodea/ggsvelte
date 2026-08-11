@@ -15,12 +15,10 @@ test("Getting started is a markdown guide with install and a complete file", asy
   await expect(
     guide.getByRole("heading", { level: 2, name: "A complete Svelte file" }),
   ).toBeVisible();
-  await expect(guide.locator(".guide-code-copy code").first()).toContainText(
-    "bun add @ggsvelte/svelte",
+  await expect(guide.locator("pre code").first()).toContainText("bun add @ggsvelte/svelte");
+  await expect(guide.locator("pre code").filter({ hasText: "kyotoSakura" }).first()).toContainText(
+    'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
-  await expect(
-    guide.locator(".guide-code-copy code").filter({ hasText: "kyotoSakura" }).first(),
-  ).toContainText('import { kyotoSakura } from "@ggsvelte/svelte/data"');
   await expectNoDocumentOverflow(page);
 });
 
