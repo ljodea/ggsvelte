@@ -29,6 +29,13 @@ export { installCandidates } from "./install-candidates.js";
 
 // Per-family registration: granular opt-in for spec-driven apps, and the
 // mechanism <Geom*> components use to self-register (#1422-generated shells).
+export { registerBasicAreas } from "./pipeline/register-basic-areas.js";
+export { registerBasicBars } from "./pipeline/register-basic-bars.js";
+export { registerBasicGlyphs } from "./pipeline/register-basic-glyphs.js";
+export { registerBasicLines } from "./pipeline/register-basic-lines.js";
+export { registerBasicPoints } from "./pipeline/register-basic-points.js";
+export { registerBasicRects } from "./pipeline/register-basic-rects.js";
+export { registerBasicSegments } from "./pipeline/register-basic-segments.js";
 export { registerAbline } from "./pipeline/register-abline.js";
 export { registerAlign } from "./pipeline/register-align.js";
 export { registerBin } from "./pipeline/register-bin.js";

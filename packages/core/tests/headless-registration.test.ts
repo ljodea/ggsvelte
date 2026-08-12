@@ -1,0 +1,63 @@
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+
+import { describe, expect, it } from "bun:test";
+
+describe("granular headless registration", () => {
+  it("registers point without pulling in line until requested", () => {
+    const coreRoot = path.resolve(import.meta.dir, "..");
+    const script = `
+      import { renderToSVGString } from ${JSON.stringify(path.join(coreRoot, "src", "headless-entry.ts"))};
+      import { registerBasicLines, registerBasicPoints } from ${JSON.stringify(path.join(coreRoot, "src", "headless-register-entry.ts"))};
+      import { aes, gg } from "@ggsvelte/spec/portable";
+      const rows = [{ x: 1, y: 2 }, { x: 2, y: 3 }];
+      const render = (kind) => {
+        const plot = gg(rows, aes({ x: "x", y: "y" }));
+        return renderToSVGString(kind === "point" ? plot.geomPoint() : plot.geomLine(), { width: 200, height: 120 });
+      };
+      const attempt = (kind) => {
+        try { render(kind); return "rendered"; }
+        catch (error) { return String(error instanceof Error ? error.message : error); }
+      };
+      const out = { pointFresh: attempt("point"), lineFresh: attempt("line") };
+      registerBasicPoints();
+      out.pointAfterPoint = attempt("point");
+      out.lineAfterPoint = attempt("line");
+      registerBasicLines();
+      out.lineAfterLine = attempt("line");
+      console.log(JSON.stringify(out));
+    `;
+    const proc = spawnSync(process.execPath, ["-e", script], {
+      cwd: coreRoot,
+      encoding: "utf8",
+    });
+    expect(proc.status).toBe(0);
+    const out = JSON.parse(proc.stdout.trim().split("\n").at(-1) ?? "{}") as Record<string, string>;
+    expect(out.pointFresh).toContain("not registered");
+    expect(out.lineFresh).toContain("not registered");
+    expect(out.pointAfterPoint).toBe("rendered");
+    expect(out.lineAfterPoint).toContain("not registered");
+    expect(out.lineAfterLine).toBe("rendered");
+  });
+
+  it("registers the default count stat with the bar family", () => {
+    const coreRoot = path.resolve(import.meta.dir, "..");
+    const script = `
+      import { renderToSVGString } from ${JSON.stringify(path.join(coreRoot, "src", "headless-entry.ts"))};
+      import { registerBasicBars } from ${JSON.stringify(path.join(coreRoot, "src", "headless-register-entry.ts"))};
+      import { aes, gg } from "@ggsvelte/spec/portable";
+      registerBasicBars();
+      const svg = renderToSVGString(
+        gg([{ x: "a" }, { x: "a" }, { x: "b" }], aes({ x: "x" })).geomBar(),
+        { width: 200, height: 120 },
+      );
+      console.log(svg.includes("gg-rects") ? "rendered" : "missing");
+    `;
+    const proc = spawnSync(process.execPath, ["-e", script], {
+      cwd: coreRoot,
+      encoding: "utf8",
+    });
+    expect(proc.status).toBe(0);
+    expect(proc.stdout.trim().split("\n").at(-1)).toBe("rendered");
+  });
+});

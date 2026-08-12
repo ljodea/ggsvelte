@@ -8,7 +8,7 @@
  * draw (same data path product code uses for live updates).
  */
 import { cssColorResolver, drawStratum, sizeCanvasForDpr } from "@ggsvelte/core/dom";
-import { planStrata, runPipeline } from "@ggsvelte/core/render";
+import { planStrata, runPipeline } from "@ggsvelte/core/headless";
 import { aes, gg } from "@ggsvelte/spec/portable";
 
 import {

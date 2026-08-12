@@ -19,6 +19,13 @@
  * input. Switching cells or calling mount()/replace() destroys the live
  * update handle first.
  */
+import {
+  registerBasicAreas,
+  registerBasicBars,
+  registerBasicLines,
+  registerBasicPoints,
+} from "@ggsvelte/core/headless/register";
+
 import { mountChartJs } from "../adapters/chartjs";
 import { mountD3 } from "../adapters/d3";
 import { mountEcharts } from "../adapters/echarts";
@@ -41,6 +48,11 @@ import {
 } from "../scenarios";
 
 type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+
+registerBasicPoints();
+registerBasicLines();
+registerBasicAreas();
+registerBasicBars();
 
 type MountHandle = {
   destroy: () => void;

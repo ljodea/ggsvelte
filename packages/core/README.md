@@ -42,6 +42,15 @@ const model = runPipeline(spec, { width: 640, height: 400 });
 // model.advisories, model.warnings, model.candidates
 ```
 
+For the smallest point-only headless bundle, opt into one geom family:
+
+```ts
+import { renderToSVGString } from "@ggsvelte/core/headless";
+import { registerBasicPoints } from "@ggsvelte/core/headless/register";
+
+registerBasicPoints();
+```
+
 Bare PortableSpec JSON works the same way — channel mappings use
 `{ field: "col" }`, not bare strings:
 
@@ -69,12 +78,14 @@ const svg = renderToSVGString(
 
 ## Entries
 
-| Import                    | Use                                          |
-| ------------------------- | -------------------------------------------- |
-| `@ggsvelte/core`          | Full grammar + temporal + SVG string         |
-| `@ggsvelte/core/render`   | Lean identity-chart surface (no heavy stats) |
-| `@ggsvelte/core/dom`      | Browser canvas draw + hit index              |
-| `@ggsvelte/core/temporal` | Temporal polyfill entry                      |
+| Import                             | Use                                                 |
+| ---------------------------------- | --------------------------------------------------- |
+| `@ggsvelte/core`                   | Full grammar + temporal + SVG string                |
+| `@ggsvelte/core/render`            | Lean identity-chart surface (auto-registers basics) |
+| `@ggsvelte/core/headless`          | Side-effect-free headless pipeline and SVG renderer |
+| `@ggsvelte/core/headless/register` | Tree-shakeable basic geom/stat family registration  |
+| `@ggsvelte/core/dom`               | Browser canvas draw + hit index                     |
+| `@ggsvelte/core/temporal`          | Temporal polyfill entry                             |
 
 CLI without installing this package as a library:
 [`ggsvelte-render`](https://www.npmjs.com/package/@ggsvelte/cli) (same pipeline,

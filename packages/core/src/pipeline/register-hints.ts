@@ -6,14 +6,15 @@
  *
  * Coverage mirrors the register-*.ts family modules one-for-one; the drift
  * guards in tests/register-hints.test.ts fail if a family module lands
- * without a matching hint entry. Basic-tier names (count/sum stats; point,
- * line, bar, … geoms) intentionally have NO entry — their fix is
- * registerBasic(), which the error message already names on the fallback
- * path.
+ * without a matching hint entry. Basic-tier names point at their granular
+ * headless registration family while the fallback still names
+ * registerBasic()/registerAll().
  */
 
 /** Specialty stat name → family register function (from @ggsvelte/core or @ggsvelte/svelte). */
 export const STAT_REGISTER_HINTS: Readonly<Record<string, string>> = {
+  count: "registerBasicPoints",
+  sum: "registerBasicBars",
   align: "registerAlign",
   bin: "registerBin",
   bin_2d: "registerBin2d",
@@ -44,6 +45,22 @@ export const STAT_REGISTER_HINTS: Readonly<Record<string, string>> = {
 
 /** Specialty geom name → family register function (from @ggsvelte/core or @ggsvelte/svelte). */
 export const GEOM_REGISTER_HINTS: Readonly<Record<string, string>> = {
+  area: "registerBasicAreas",
+  bar: "registerBasicBars",
+  blank: "registerBasicRects",
+  col: "registerBasicBars",
+  count: "registerBasicPoints",
+  density: "registerBasicAreas",
+  label: "registerBasicGlyphs",
+  line: "registerBasicLines",
+  path: "registerBasicLines",
+  point: "registerBasicPoints",
+  rect: "registerBasicRects",
+  ribbon: "registerBasicAreas",
+  rule: "registerBasicSegments",
+  segment: "registerBasicSegments",
+  step: "registerBasicLines",
+  text: "registerBasicGlyphs",
   abline: "registerAbline",
   bin_2d: "registerBin2d",
   boxplot: "registerBoxplot",
@@ -80,4 +97,8 @@ export function statRegisterHint(stat: string): string | undefined {
 
 export function geomRegisterHint(geom: string): string | undefined {
   return GEOM_REGISTER_HINTS[geom];
+}
+
+export function isBasicRegisterHint(family: string): boolean {
+  return family.startsWith("registerBasic");
 }
