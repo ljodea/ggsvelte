@@ -1,5 +1,17 @@
 # @ggsvelte/core
 
+## 0.37.0
+
+### Minor Changes
+
+- 8cf6e4e: Add side-effect-free headless rendering and tree-shakeable basic geom registration subpaths.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- @ggsvelte/spec@0.37.0
+
 ## 0.36.0
 
 ### Minor Changes
