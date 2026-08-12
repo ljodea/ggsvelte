@@ -12406,8 +12406,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-381",
-        title: "experimental (381)",
+        id: "experimental-388",
+        title: "experimental (388)",
         level: 3,
       },
       {
@@ -12426,6 +12426,26 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ggsvelte-core-headless",
+        title: "@ggsvelte/core (./headless)",
+        level: 2,
+      },
+      {
+        id: "experimental-41",
+        title: "experimental (41)",
+        level: 3,
+      },
+      {
+        id: "ggsvelte-core-headless-register",
+        title: "@ggsvelte/core (./headless/register)",
+        level: 2,
+      },
+      {
+        id: "experimental-9",
+        title: "experimental (9)",
+        level: 3,
+      },
+      {
         id: "ggsvelte-core-temporal",
         title: "@ggsvelte/core (./temporal)",
         level: 2,
@@ -12441,7 +12461,7 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-9",
+        id: "experimental-9-2",
         title: "experimental (9)",
         level: 3,
       },
