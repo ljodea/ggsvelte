@@ -61,7 +61,7 @@ bun scripts/gen-benchmark-charts.ts --check # docs CI freshness gate
 
 1. **Apples and oranges by design.** uPlot is a lean canvas time-series painter with almost no grammar. ggsvelte runs a ggplot-like pipeline (scales, stats hooks, guides, candidates). Beating uPlot on raw line paint is a long game; the matrix shows the gap honestly.
 2. **ggsvelte-canvas harness draws mark strata only** (no axis/legend SVG chrome). That isolates mark cost; production `GGPlot` still composites SVG chrome.
-3. **ggsvelte-svg** is `renderToSVGString` innerHTML — full chart including axes.
+3. **ggsvelte-svg** is `renderToSVGString` innerHTML — full chart including axes. The adapter uses direct `SpecInput` objects rather than fluent builder sugar so bundle cells measure the renderer graph, not an optional authoring API; output-equivalence tests lock the same normalized chart.
 4. **`replace` is a full remount**, not in-place `setData`. The browser harness therefore **does not re-sample** replace (it mirrors mount stats) until a real in-place update metric lands (LightningChart's streaming score).
 5. **`area-multiseries` is overlaid (identity), not stacked.** ggsvelte `geomArea` defaults to `stack`; adapters pass `position: "identity"` so ggsvelte matches D3/Chart.js/ECharts/uPlot overlays. `bars-stacked` remains the stack fairness cell.
 6. **No interaction (mousemove) or max-capacity sweep yet.** uPlot's table and LC's capacity/stream metrics are the next expansion targets.

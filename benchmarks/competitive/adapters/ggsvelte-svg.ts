@@ -2,7 +2,7 @@
  * Lean SVG-only ggsvelte mounts (keeps @ggsvelte/core/dom and planStrata out of the graph).
  */
 import { renderToSVGString } from "@ggsvelte/core/headless";
-import { aes, gg } from "@ggsvelte/spec/portable";
+import type { SpecInput } from "@ggsvelte/spec/portable";
 
 import {
   PLOT_HEIGHT,
@@ -22,29 +22,40 @@ export type MountHandle = {
 
 export type MountResult = { markHint: number; handle: MountHandle };
 
-function scatterSpec(data: ScatterColumns) {
-  return gg(data, aes({ x: "x", y: "y", color: "cls" }))
-    .geomPoint({ size: 1.5, alpha: 0.7 })
-    .toPortable();
+// These deterministic fixtures contain plain number/string columns and never
+// mutate input after mount, so direct SpecInput avoids optional builder sugar
+// without changing Date conversion or defensive-copy semantics relevant here.
+function scatterSpec(data: ScatterColumns): SpecInput {
+  return {
+    data: { columns: data },
+    aes: { x: "x", y: "y", color: "cls" },
+    layers: [{ geom: "point", params: { size: 1.5, alpha: 0.7 } }],
+  };
 }
 
-function lineSpec(data: SeriesColumns) {
-  return gg(data, aes({ x: "x", y: "y", color: "series", group: "series" }))
-    .geomLine()
-    .toPortable();
+function lineSpec(data: SeriesColumns): SpecInput {
+  return {
+    data: { columns: data },
+    aes: { x: "x", y: "y", color: "series", group: "series" },
+    layers: [{ geom: "line" }],
+  };
 }
 
-function areaSpec(data: SeriesColumns) {
+function areaSpec(data: SeriesColumns): SpecInput {
   // Identity (not stack): competitors overlay series; default geomArea is stack.
-  return gg(data, aes({ x: "x", y: "y", fill: "series", group: "series" }))
-    .geomArea({ position: "identity" })
-    .toPortable();
+  return {
+    data: { columns: data },
+    aes: { x: "x", y: "y", fill: "series", group: "series" },
+    layers: [{ geom: "area", position: "identity" }],
+  };
 }
 
-function barsSpec(data: BarsColumns) {
-  return gg(data, aes({ x: "category", y: "value", fill: "stack" }))
-    .geomCol()
-    .toPortable();
+function barsSpec(data: BarsColumns): SpecInput {
+  return {
+    data: { columns: data },
+    aes: { x: "category", y: "value", fill: "stack" },
+    layers: [{ geom: "col" }],
+  };
 }
 
 export function mountGgsvelteSvg(

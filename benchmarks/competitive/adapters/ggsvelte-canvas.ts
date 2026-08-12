@@ -9,7 +9,7 @@
  */
 import { cssColorResolver, drawStratum, sizeCanvasForDpr } from "@ggsvelte/core/dom";
 import { planStrata, runPipeline } from "@ggsvelte/core/headless";
-import { aes, gg } from "@ggsvelte/spec/portable";
+import type { SpecInput } from "@ggsvelte/spec/portable";
 
 import {
   PLOT_HEIGHT,
@@ -35,29 +35,35 @@ const DATA_NAME = "main";
  * draw marks only). Keep axis guides on so the panel size stays near the
  * LayerCake padding box — disabling axes expands the canvas and slowed paint.
  * Guide form must be `{ type: "none" }` (string `"none"` is not normalized). */
-function scatterPortable() {
-  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", color: "cls" }))
-    .geomPoint({ size: 1.5, alpha: 0.7, render: "canvas" })
-    .theme("void")
-    .guides({ color: { type: "none" } })
-    .toPortable();
+function scatterPortable(): SpecInput {
+  return {
+    data: { name: DATA_NAME },
+    aes: { x: "x", y: "y", color: "cls" },
+    layers: [{ geom: "point", render: "canvas", params: { size: 1.5, alpha: 0.7 } }],
+    theme: "void",
+    guides: { color: { type: "none" } },
+  };
 }
 
-function linePortable() {
-  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", color: "series", group: "series" }))
-    .geomLine({ render: "canvas" })
-    .theme("void")
-    .guides({ color: { type: "none" } })
-    .toPortable();
+function linePortable(): SpecInput {
+  return {
+    data: { name: DATA_NAME },
+    aes: { x: "x", y: "y", color: "series", group: "series" },
+    layers: [{ geom: "line", render: "canvas" }],
+    theme: "void",
+    guides: { color: { type: "none" } },
+  };
 }
 
-function areaPortable() {
+function areaPortable(): SpecInput {
   // Identity (not stack): competitors overlay series; default geomArea is stack.
-  return gg({ name: DATA_NAME }, aes({ x: "x", y: "y", fill: "series", group: "series" }))
-    .geomArea({ position: "identity", render: "canvas" })
-    .theme("void")
-    .guides({ fill: { type: "none" } })
-    .toPortable();
+  return {
+    data: { name: DATA_NAME },
+    aes: { x: "x", y: "y", fill: "series", group: "series" },
+    layers: [{ geom: "area", position: "identity", render: "canvas" }],
+    theme: "void",
+    guides: { fill: { type: "none" } },
+  };
 }
 
 function portableFor(scenario: ScenarioId) {

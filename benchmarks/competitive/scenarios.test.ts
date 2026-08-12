@@ -98,8 +98,8 @@ describe("competitive scenario catalog", () => {
     // Competitors draw overlaid areas; geomArea defaults to stack.
     const svg = readFileSync(new URL("./adapters/ggsvelte-svg.ts", import.meta.url), "utf8");
     const canvas = readFileSync(new URL("./adapters/ggsvelte-canvas.ts", import.meta.url), "utf8");
-    expect(svg).toMatch(/geomArea\(\s*\{\s*position:\s*["']identity["']/);
-    expect(canvas).toMatch(/geomArea\(\s*\{[^}]*position:\s*["']identity["']/s);
+    expect(svg).toMatch(/geom:\s*["']area["'],\s*position:\s*["']identity["']/);
+    expect(canvas).toMatch(/geom:\s*["']area["'],\s*position:\s*["']identity["']/);
   });
 
   test("SSR bench entries exist for ggsvelte + Svelte peers (server-render matrix cannot collapse)", () => {
