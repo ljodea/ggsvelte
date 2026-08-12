@@ -16,6 +16,7 @@ const root = import.meta.dir;
 const LEAN_BANNED = /candidate-store|candidate-hit-|build-candidates|candidate-construction/;
 const SCATTER_BANNED =
   /geometry-(?:paths-line|paths-area|ribbon|rects|edge-rects|segments|segment-finite|glyphs)/;
+const AUTHORING_BANNED = /(?:portable-)?builder(?:-|\.)/;
 
 async function buildEntry(entryName: string): Promise<{ moduleIds: string[]; rawBytes: number }> {
   const outDir = path.join(root, "results", "bundles", `_lean-candidates-test-${entryName}`);
@@ -65,15 +66,17 @@ function expectCandidateFree(
 describe("lean competitive SVG graph", () => {
   it("excludes the candidate-store graph after minify", async () => {
     const built = await buildEntry("ggsvelte-svg__scatter-color.ts");
-    expectCandidateFree(built, 525_000);
+    expectCandidateFree(built, 500_000);
     expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => AUTHORING_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });
 
 describe("lean competitive canvas graph", () => {
   it("excludes the candidate-store graph after minify", async () => {
     const built = await buildEntry("ggsvelte-canvas__scatter-color.ts");
-    expectCandidateFree(built, 500_000);
+    expectCandidateFree(built, 475_000);
     expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => AUTHORING_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });
