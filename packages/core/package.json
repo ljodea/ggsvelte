@@ -41,6 +41,14 @@
       "types": "./dist/render-entry.d.ts",
       "default": "./dist/render-entry.js"
     },
+    "./headless": {
+      "types": "./dist/headless-entry.d.ts",
+      "default": "./dist/headless-entry.js"
+    },
+    "./headless/register": {
+      "types": "./dist/headless-register-entry.d.ts",
+      "default": "./dist/headless-register-entry.js"
+    },
     "./temporal": {
       "types": "./dist/temporal-entry.d.ts",
       "default": "./dist/temporal-entry.js"

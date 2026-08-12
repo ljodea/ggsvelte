@@ -36,6 +36,12 @@ export const SURFACES: readonly { pkg: string; entry: string; file: string }[] =
   { pkg: "@ggsvelte/spec", entry: "./portable", file: "packages/spec/src/portable-entry.ts" },
   { pkg: "@ggsvelte/core", entry: ".", file: "packages/core/src/index.ts" },
   { pkg: "@ggsvelte/core", entry: "./render", file: "packages/core/src/render-entry.ts" },
+  { pkg: "@ggsvelte/core", entry: "./headless", file: "packages/core/src/headless-entry.ts" },
+  {
+    pkg: "@ggsvelte/core",
+    entry: "./headless/register",
+    file: "packages/core/src/headless-register-entry.ts",
+  },
   { pkg: "@ggsvelte/core", entry: "./temporal", file: "packages/core/src/temporal-entry.ts" },
   { pkg: "@ggsvelte/core", entry: "./dom", file: "packages/core/src/dom/index.ts" },
   { pkg: "@ggsvelte/svelte", entry: ".", file: "packages/svelte/src/lib/index.ts" },

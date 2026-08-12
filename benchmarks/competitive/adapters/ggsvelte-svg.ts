@@ -1,7 +1,7 @@
 /**
  * Lean SVG-only ggsvelte mounts (keeps @ggsvelte/core/dom and planStrata out of the graph).
  */
-import { renderToSVGString } from "@ggsvelte/core/render";
+import { renderToSVGString } from "@ggsvelte/core/headless";
 import { aes, gg } from "@ggsvelte/spec/portable";
 
 import {

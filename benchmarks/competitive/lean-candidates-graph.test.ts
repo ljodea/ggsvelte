@@ -14,6 +14,8 @@ import { build } from "vite";
 const root = import.meta.dir;
 
 const LEAN_BANNED = /candidate-store|candidate-hit-|build-candidates|candidate-construction/;
+const SCATTER_BANNED =
+  /geometry-(?:paths-line|paths-area|ribbon|rects|edge-rects|segments|segment-finite|glyphs)/;
 
 async function buildEntry(entryName: string): Promise<{ moduleIds: string[]; rawBytes: number }> {
   const outDir = path.join(root, "results", "bundles", `_lean-candidates-test-${entryName}`);
@@ -54,22 +56,24 @@ function expectCandidateFree(
   maxRawBytes: number,
 ): void {
   expect(moduleIds.filter((id) => LEAN_BANNED.test(id))).toEqual([]);
-  // Post-#1421 lean graphs measured ~542KB (svg) / ~514KB (canvas) raw; the
-  // candidate-store graph was ~95KB raw on top of that. Crameri continuous
-  // tables (~11KB source) land in the scale engine fallthrough, so budgets
-  // sit a little above those earlier floors.
+  // Granular headless registration keeps scatter entries free of unrelated
+  // basic geom renderers while the candidate-store graph stays full-entry-only.
   expect(rawBytes).toBeGreaterThan(50_000);
   expect(rawBytes).toBeLessThan(maxRawBytes);
 }
 
 describe("lean competitive SVG graph", () => {
   it("excludes the candidate-store graph after minify", async () => {
-    expectCandidateFree(await buildEntry("ggsvelte-svg__scatter-color.ts"), 590_000);
+    const built = await buildEntry("ggsvelte-svg__scatter-color.ts");
+    expectCandidateFree(built, 525_000);
+    expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });
 
 describe("lean competitive canvas graph", () => {
   it("excludes the candidate-store graph after minify", async () => {
-    expectCandidateFree(await buildEntry("ggsvelte-canvas__scatter-color.ts"), 560_000);
+    const built = await buildEntry("ggsvelte-canvas__scatter-color.ts");
+    expectCandidateFree(built, 500_000);
+    expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });

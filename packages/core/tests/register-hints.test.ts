@@ -43,11 +43,11 @@ describe("register hints: lookup", () => {
     expect(geomRegisterHint("smooth")).toBe("registerSmooth");
   });
 
-  it("returns undefined for basic-tier names (registerBasic is the fix)", () => {
-    expect(statRegisterHint("count")).toBeUndefined();
-    expect(statRegisterHint("sum")).toBeUndefined();
-    expect(geomRegisterHint("bar")).toBeUndefined();
-    expect(geomRegisterHint("point")).toBeUndefined();
+  it("maps basic-tier names to granular headless families", () => {
+    expect(statRegisterHint("count")).toBe("registerBasicPoints");
+    expect(statRegisterHint("sum")).toBe("registerBasicBars");
+    expect(geomRegisterHint("bar")).toBe("registerBasicBars");
+    expect(geomRegisterHint("point")).toBe("registerBasicPoints");
   });
 });
 
@@ -141,10 +141,10 @@ describe("register hints: error messages (fresh process)", () => {
     expect(out.polygonGeom).toContain("registerPolygon()");
     expect(out.polygonGeom).not.toContain("registerBasic()");
 
-    // Basic tier: registerBasic remains the named fix.
+    // Basic tier: name the granular headless family.
     expect(out.colGeom).toContain("not registered in this build");
-    expect(out.colGeom).toContain("registerBasic()");
+    expect(out.colGeom).toContain("registerBasicBars()");
     expect(out.countStat).toContain("not registered in this build");
-    expect(out.countStat).toContain("registerBasic()");
+    expect(out.countStat).toContain("registerBasicPoints()");
   }, 60_000);
 });

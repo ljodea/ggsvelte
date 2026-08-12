@@ -5098,6 +5098,34 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerBasicAreas": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicBars": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicGlyphs": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicLines": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicPoints": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicRects": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicSegments": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerBin": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5550,6 +5578,220 @@
           "lifecycle": "experimental"
         },
         "sceneToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
+      "package": "@ggsvelte/core",
+      "entry": "./headless",
+      "source": "packages/core/src/headless-entry.ts",
+      "exports": {
+        "Advisory": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisValueFormatter": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CANVAS_AUTO_THRESHOLD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeometryBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GlyphsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LayerBackend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MappedField": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NamedData": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PathsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PipelineError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PipelineWarning": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RectsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RenderModel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RenderSVGOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedColorScale": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RunOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnosticFix": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDomainSnapshot": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Scene": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneAxis": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneDiscreteLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneLegendEntry": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScenePanel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneRampLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneStepsLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneTick": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SegmentsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Stratum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TrainedScales": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "batchMarkCount": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "countMarks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "pathData": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "planStrata": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "renderToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "runPipeline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneLabel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
+      "package": "@ggsvelte/core",
+      "entry": "./headless/register",
+      "source": "packages/core/src/headless-register-entry.ts",
+      "exports": {
+        "registerBasicAreas": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicBars": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicGlyphs": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicLines": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicPoints": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicRects": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBasicSegments": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerGeomBatch": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerStatFrame": {
           "kind": "value",
           "lifecycle": "experimental"
         }
