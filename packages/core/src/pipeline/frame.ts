@@ -15,6 +15,36 @@ import { buildNonIdentityFrame } from "./frame-stats.js";
 
 export { deriveLayerGroups } from "./frame-helpers.js";
 
+/** Identity scatter never buckets by group at draw/position time. */
+function layerDefersGroups(binding: LayerBinding): boolean {
+  if ((binding.layer.stat ?? "identity") !== "identity") return false;
+  if ((binding.layer.position ?? "identity") !== "identity") return false;
+  return binding.layer.geom === "point";
+}
+
+function attachDeferredGroups(
+  frame: LayerFrame,
+  binding: LayerBinding,
+  table: ColumnTable,
+): LayerFrame {
+  let resolved: number[] | undefined;
+  const read = (): number[] => {
+    resolved ??= deriveLayerGroups(binding, table);
+    return resolved;
+  };
+  Object.defineProperty(frame, "groups", {
+    configurable: true,
+    enumerable: true,
+    get: read,
+  });
+  Object.defineProperty(frame, "inputGroups", {
+    configurable: true,
+    enumerable: true,
+    get: read,
+  });
+  return frame;
+}
+
 export function buildFrame(
   binding: LayerBinding,
   table: ColumnTable,
@@ -30,6 +60,12 @@ export function buildFrame(
   // source memberships for a layer with no source rows.
   if (binding.ruleForm === "annotation" || binding.layer.geom === "abline") {
     return buildAnnotationFrame(binding, table);
+  }
+
+  if (layerDefersGroups(binding)) {
+    const frame = buildIdentityFrame(binding, table, []);
+    expandEdgeFrame(frame, warnings);
+    return attachDeferredGroups(frame, binding, table);
   }
 
   // Derive once per frame; identity index + bin lineage consume frame.inputGroups.
