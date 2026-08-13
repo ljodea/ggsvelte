@@ -26,12 +26,12 @@
  */
 import type { GGBuilder, SpecInput } from "@ggsvelte/spec";
 
-import type { RenderModel, RunOptions } from "./pipeline/public-api.js";
+import type { RunOptions } from "./pipeline/public-api.js";
 import { PipelineError } from "./pipeline/public-api.js";
-// Import runPipeline without the full pipeline barrel (which registers every
-// geom/stat). Entry points that need the full grammar import `./pipeline.js`
-// or `./index.js` first; `@ggsvelte/core/render` registers basic geoms only.
-import { runPipeline } from "./pipeline/run-pipeline.js";
+// Import the scene-only runner without the full pipeline barrel (which
+// registers every geom/stat). The SVG renderer does not build RenderModel-only
+// interaction, domain snapshot, viewport, or lifecycle contracts.
+import { runScene } from "./pipeline/run-scene.js";
 import { countMarks } from "./render-svg-marks.js";
 import { sceneToSVGString } from "./render-svg-scene.js";
 
@@ -64,12 +64,12 @@ function isBuilder(spec: SpecInput | GGBuilder): spec is GGBuilder {
 export function renderToSVGString(spec: SpecInput | GGBuilder, options: RenderSVGOptions): string {
   const resolved: SpecInput = isBuilder(spec) ? spec.spec() : spec;
   const { maxMarks, height, paintMode, ...run } = options;
-  const model: RenderModel = runPipeline(resolved, {
+  const scene = runScene(resolved, {
     ...run,
     height: height ?? resolved.height ?? DEFAULT_HEIGHT,
   });
   const limit = maxMarks ?? DEFAULT_MAX_MARKS;
-  const marks = countMarks(model.scene);
+  const marks = countMarks(scene);
   if (marks > limit) {
     throw new PipelineError(
       "max-marks-exceeded",
@@ -79,7 +79,7 @@ export function renderToSVGString(spec: SpecInput | GGBuilder, options: RenderSV
     );
   }
   try {
-    return sceneToSVGString(model.scene, { paintMode: paintMode ?? "full" });
+    return sceneToSVGString(scene, { paintMode: paintMode ?? "full" });
   } catch (error) {
     // Failure policy: renderer errors are structured, never blank output.
     throw new PipelineError(
