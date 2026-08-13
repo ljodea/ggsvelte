@@ -1,5 +1,36 @@
 # @ggsvelte/core
 
+## 0.37.1
+
+### Patch Changes
+
+- 0de1c9c: # Draw constant-size canvas circles without per-point style objects
+
+  Migration: none — internal. Same `moveTo` + `arc` + batched fill commands.
+
+  The competitive colored scatter path allocated a geometry object per point via `resolvePointMark`. Filled circles of one size now write the path commands directly.
+
+- f390b78: Cut high-volume categorical Canvas scatter paint time by rasterizing oversized circle batches through a cached scratch canvas.
+- 9ca1d4e: # Defer identity-scatter grouping until inspect
+
+  Migration: none — internal. Same group ids when inspect or the identity index reads them. Lines, stats, and dodge/stack still group during bind.
+
+  Identity `geom_point` never buckets by group to draw. `buildFrame` no longer interns discrete color into a per-row id vector on that path. The first read of `groups` / `inputGroups` derives the same first-seen ids as before.
+
+- 0d5b6f7: Skip RenderModel-only contract assembly when rendering a plot to an SVG string.
+- 7a5b1a8: # Pack continuous scatter points in one pass
+
+  Migration: none — internal. Same pixels, dropped rows, and source row indexes. Band scales and positional offsets still use the two-pass collector.
+
+  Continuous identity scatter no longer allocates intermediate normalized x/y buffers. Normalize, drop non-finite positions, and write pixel coords in one loop — the same shape as the multi-series line hot path.
+
+- d22be72: # Store categorical point colors as palette indexes
+
+  Migration: none — internal. Same resolved fills. Continuous high-cardinality ramps still emit a string per mark.
+
+  Categorical identity scatter no longer allocates a hex string per point. The batch keeps a short palette and a `Uint8Array` of indexes. Canvas fills once per palette entry.
+  - @ggsvelte/spec@0.37.1
+
 ## 0.37.0
 
 ### Minor Changes
