@@ -53,6 +53,9 @@ const RUN = { width: 400, height: 300 } as const;
 
 function pointColors(model: ReturnType<typeof runPipeline>): string[] {
   const batch = model.scene.batches.find((b) => b.kind === "points") as PointsBatch;
+  if (batch.colorPalette !== undefined && batch.colorIndexes !== undefined) {
+    return [...batch.colorIndexes].map((id) => batch.colorPalette![id]!);
+  }
   return batch.colors ?? (batch.fill === null ? [] : [batch.fill]);
 }
 

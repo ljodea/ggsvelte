@@ -176,6 +176,24 @@ export function markLinetype(
   return linetypeAt(batch, index);
 }
 
+/** Resolve one point mark's fill from palette indexes, string[], or constant. */
+export function pointFillAt(batch: PointsBatch, index: number, themeInk: string): string {
+  const palette = batch.colorPalette;
+  const indexes = batch.colorIndexes;
+  if (palette !== undefined && indexes !== undefined) {
+    return palette[indexes[index]!] ?? batch.fill ?? themeInk;
+  }
+  return batch.colors?.[index] ?? batch.fill ?? themeInk;
+}
+
+/** Expand per-mark fills (palette indexes or string[]). */
+export function pointFills(batch: PointsBatch, themeInk = ""): string[] {
+  const n = batch.rowIndex.length;
+  const out: string[] = [];
+  for (let i = 0; i < n; i++) out.push(pointFillAt(batch, i, themeInk));
+  return out;
+}
+
 /** Resolve one point mark's fill/shape/alpha for any serializer. */
 export function resolvePointMark(
   batch: PointsBatch,
@@ -186,7 +204,7 @@ export function resolvePointMark(
   const shape =
     batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[index]!]!;
   return {
-    fill: batch.colors?.[index] ?? batch.fill ?? themeInk,
+    fill: pointFillAt(batch, index, themeInk),
     alpha: batch.alphas?.[index] ?? 1,
     size,
     shape,

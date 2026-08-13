@@ -10,6 +10,7 @@ import type { Frame } from "./geometry-shared.js";
 import {
   indexedStyleVector,
   constantStyle,
+  mappedPaintIndexVector,
   mappedPaintVector,
   numericStyleVector,
   type ResolvedStyleScales,
@@ -137,7 +138,15 @@ export function pointsBatch(
   }
   if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
   if (paintScale !== null && (paintValues !== null || paintChannel.scaledConstant !== null)) {
-    batch.colors = mappedPaintVector(frame, paintKey, paintScale, collectedKeptRows);
+    const indexed = mappedPaintIndexVector(frame, paintKey, paintScale, collectedKeptRows);
+    if (indexed === null) {
+      batch.colors = mappedPaintVector(frame, paintKey, paintScale, collectedKeptRows);
+    } else if (indexed.palette.length === 1) {
+      batch.fill = indexed.palette[0]!;
+    } else {
+      batch.colorPalette = indexed.palette;
+      batch.colorIndexes = indexed.indexes;
+    }
   }
   return batch;
 }
