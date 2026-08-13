@@ -45,3 +45,51 @@ export function packPointPixels(
   }
   return { positions, rowIndex };
 }
+
+export interface PackedPointPositions {
+  positions: Float32Array;
+  rowIndex: Uint32Array;
+  keptRows: Uint32Array;
+  kept: number;
+}
+
+/**
+ * Continuous scatter: one normalize+pixel pass (no intermediate xs/ys
+ * buffers). Returns null when band scales or positional offsets require
+ * {@link collectPointPositions} + {@link packPointPixels}.
+ */
+export function packContinuousPointsOnePass(
+  frame: LayerFrame,
+  fx: Frame,
+): PackedPointPositions | null {
+  if (fx.xScale.type === "band" || fx.yScale.type === "band") return null;
+  if (frame.offsetX !== null || frame.offsetY !== null) return null;
+  const xNum = frame.xNumeric;
+  const yNum = frame.yNumeric;
+  if (xNum === null || yNum === null) return null;
+
+  const { n } = frame;
+  const xScale = fx.xScale;
+  const yScale = fx.yScale;
+  const iw = fx.innerWidth;
+  const ih = fx.innerHeight;
+  const sourceRows = frame.rowIndex;
+  const positions = new Float32Array(n * 2);
+  const rowIndex = new Uint32Array(n);
+  const keptRows = new Uint32Array(n);
+  let kept = 0;
+  for (let row = 0; row < n; row++) {
+    const xv = xNum[row]!;
+    const yv = yNum[row]!;
+    if (!Number.isFinite(xv) || !Number.isFinite(yv)) continue;
+    const tx = xScale.normalizeTransformed(xv);
+    const ty = yScale.normalizeTransformed(yv);
+    if (Number.isNaN(tx) || Number.isNaN(ty)) continue;
+    positions[kept * 2] = tx * iw;
+    positions[kept * 2 + 1] = ih - ty * ih;
+    rowIndex[kept] = sourceRows[row]!;
+    keptRows[kept] = row;
+    kept++;
+  }
+  return { positions, rowIndex, keptRows, kept };
+}

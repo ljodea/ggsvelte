@@ -15,7 +15,11 @@ import {
   type ResolvedStyleScales,
 } from "./geometry-style.js";
 import { DEFAULT_POINT_SIZE, removedWarning } from "./geometry-shared.js";
-import { collectPointPositions, packPointPixels } from "./geometry-points-collect.js";
+import {
+  collectPointPositions,
+  packContinuousPointsOnePass,
+  packPointPixels,
+} from "./geometry-points-collect.js";
 
 /** Diameter ≈ binwidth in x data units × dotsize, converted to px radius. */
 function dotplotRadiusPx(
@@ -54,11 +58,25 @@ export function pointsBatch(
   fill: ResolvedColorScale | null = null,
 ): PointsBatch | null {
   const { binding, n } = frame;
-  const collected = collectPointPositions(frame, fx);
-  removedWarning(n - collected.kept, binding.index, warnings);
-  if (collected.kept === 0) return null;
+  let packed = packContinuousPointsOnePass(frame, fx);
+  if (packed === null) {
+    const collected = collectPointPositions(frame, fx);
+    packed = {
+      ...packPointPixels(collected, frame, fx),
+      keptRows: collected.keptRows,
+      kept: collected.kept,
+    };
+  }
+  removedWarning(n - packed.kept, binding.index, warnings);
+  if (packed.kept === 0) return null;
 
-  const { positions, rowIndex } = packPointPixels(collected, frame, fx);
+  const kept = packed.kept;
+  const positions =
+    kept === packed.positions.length / 2 ? packed.positions : packed.positions.slice(0, kept * 2);
+  const rowIndex =
+    kept === packed.rowIndex.length ? packed.rowIndex : packed.rowIndex.slice(0, kept);
+  const collectedKeptRows =
+    kept === packed.keptRows.length ? packed.keptRows : packed.keptRows.subarray(0, kept);
   // point / count / qq / dotplot / geom_sf point family share this builder.
   // SfParams has size/alpha (not shape); DotplotParams adds binwidth/dotsize.
   const geom = binding.layer.geom;
@@ -107,9 +125,9 @@ export function pointsBatch(
       typeof literalShape === "string" ? (literalShape as PointShape) : (paramShape ?? "circle"),
     fill: paintChannel.constant,
   };
-  const sizes = numericStyleVector(frame, "size", collected.keptRows, styles);
-  const alphas = numericStyleVector(frame, "alpha", collected.keptRows, styles);
-  const shapeIndexes = indexedStyleVector(frame, "shape", collected.keptRows, styles, (value) =>
+  const sizes = numericStyleVector(frame, "size", collectedKeptRows, styles);
+  const alphas = numericStyleVector(frame, "alpha", collectedKeptRows, styles);
+  const shapeIndexes = indexedStyleVector(frame, "shape", collectedKeptRows, styles, (value) =>
     pointShapeIndex(value as PointShape),
   );
   if (sizes !== undefined) batch.sizes = sizes;
@@ -119,7 +137,7 @@ export function pointsBatch(
   }
   if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
   if (paintScale !== null && (paintValues !== null || paintChannel.scaledConstant !== null)) {
-    batch.colors = mappedPaintVector(frame, paintKey, paintScale, collected.keptRows);
+    batch.colors = mappedPaintVector(frame, paintKey, paintScale, collectedKeptRows);
   }
   return batch;
 }
