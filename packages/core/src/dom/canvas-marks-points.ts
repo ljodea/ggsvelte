@@ -40,6 +40,36 @@ function tracePoint(ctx: CanvasRenderingContext2D, batch: PointsBatch, j: number
   traceGeometry(ctx, style.geometry);
 }
 
+/** Filled circle: same commands as `pointShapeGeometry("circle")` without the object. */
+function traceFilledCircle(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  ctx.moveTo(x + r, y);
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+}
+
+function traceFilledCircles(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  indexes: ArrayLike<number> | null,
+): void {
+  const r = batch.size;
+  const positions = batch.positions;
+  if (indexes === null) {
+    const n = batch.rowIndex.length;
+    for (let j = 0; j < n; j++) {
+      traceFilledCircle(ctx, positions[j * 2]!, positions[j * 2 + 1]!, r);
+    }
+    return;
+  }
+  for (let i = 0; i < indexes.length; i++) {
+    const j = indexes[i]!;
+    traceFilledCircle(ctx, positions[j * 2]!, positions[j * 2 + 1]!, r);
+  }
+}
+
+function isFilledCircleBatch(batch: PointsBatch): boolean {
+  return batch.shape === "circle";
+}
+
 export function drawPoints(
   ctx: CanvasRenderingContext2D,
   batch: PointsBatch,
@@ -81,7 +111,8 @@ export function drawPoints(
     // canvas worth it at high counts).
     ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
     ctx.beginPath();
-    for (let j = 0; j < n; j++) tracePoint(ctx, batch, j);
+    if (isFilledCircleBatch(batch)) traceFilledCircles(ctx, batch, null);
+    else for (let j = 0; j < n; j++) tracePoint(ctx, batch, j);
     ctx.fill();
     return;
   }
@@ -106,16 +137,19 @@ export function drawPoints(
     list.push(j);
   }
   if (!highCardinality) {
+    const circles = isFilledCircleBatch(batch);
     for (const color of uniqueColors) {
       const list = indicesByColor.get(color)!;
       ctx.fillStyle = resolve(color);
       ctx.beginPath();
-      for (const j of list) tracePoint(ctx, batch, j);
+      if (circles) traceFilledCircles(ctx, batch, list);
+      else for (const j of list) tracePoint(ctx, batch, j);
       ctx.fill();
     }
     return;
   }
   // High-cardinality: batch consecutive same-color runs.
+  const circles = isFilledCircleBatch(batch);
   let runStart = 0;
   while (runStart < n) {
     const color = batch.colors[runStart] ?? batch.fill ?? themeInk;
@@ -123,7 +157,13 @@ export function drawPoints(
     while (runEnd < n && (batch.colors[runEnd] ?? batch.fill ?? themeInk) === color) runEnd++;
     ctx.fillStyle = resolve(color);
     ctx.beginPath();
-    for (let j = runStart; j < runEnd; j++) tracePoint(ctx, batch, j);
+    if (circles) {
+      for (let j = runStart; j < runEnd; j++) {
+        traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
+      }
+    } else {
+      for (let j = runStart; j < runEnd; j++) tracePoint(ctx, batch, j);
+    }
     ctx.fill();
     runStart = runEnd;
   }
@@ -171,9 +211,14 @@ export function drawPointsSubset(
     ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
     ctx.beginPath();
     let traced = false;
+    const circles = isFilledCircleBatch(batch);
     for (let j = 0; j < n; j++) {
       if (!includes(j)) continue;
-      tracePoint(ctx, batch, j);
+      if (circles) {
+        traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
+      } else {
+        tracePoint(ctx, batch, j);
+      }
       traced = true;
     }
     if (traced) ctx.fill();
@@ -205,12 +250,14 @@ export function drawPointsSubset(
     if (includes(j)) list.push(j);
   }
   if (!highCardinality) {
+    const circles = isFilledCircleBatch(batch);
     for (const color of uniqueColors) {
       const list = indicesByColor.get(color)!;
       if (list.length === 0) continue;
       ctx.fillStyle = resolve(color);
       ctx.beginPath();
-      for (const j of list) tracePoint(ctx, batch, j);
+      if (circles) traceFilledCircles(ctx, batch, list);
+      else for (const j of list) tracePoint(ctx, batch, j);
       ctx.fill();
     }
     return;
@@ -223,9 +270,14 @@ export function drawPointsSubset(
     ctx.fillStyle = resolve(color);
     ctx.beginPath();
     let traced = false;
+    const circles = isFilledCircleBatch(batch);
     for (let j = runStart; j < runEnd; j++) {
       if (!includes(j)) continue;
-      tracePoint(ctx, batch, j);
+      if (circles) {
+        traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
+      } else {
+        tracePoint(ctx, batch, j);
+      }
       traced = true;
     }
     if (traced) ctx.fill();

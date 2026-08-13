@@ -121,6 +121,33 @@ describe("canvas mapped style vectors", () => {
     expect(calls.filter(({ name }) => name === "arc")).toHaveLength(n);
   });
 
+  it("traces constant-size circles with moveTo(x+r,y) + arc, no per-point style objects", () => {
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: Float32Array.from([10, 20, 30, 40]),
+      rowIndex: Uint32Array.from([0, 1]),
+      size: 1.5,
+      alpha: 1,
+      shape: "circle",
+      fill: "red",
+    };
+    const { ctx, calls } = styleContext();
+    drawBatch(ctx, batch, theme, resolve);
+    const moves = calls.filter(({ name }) => name === "moveTo");
+    const arcs = calls.filter(({ name }) => name === "arc");
+    expect(moves.map(({ args }) => args.slice(0, 2))).toEqual([
+      [11.5, 20],
+      [31.5, 40],
+    ]);
+    expect(arcs.map(({ args }) => args.slice(0, 3))).toEqual([
+      [10, 20, 1.5],
+      [30, 40, 1.5],
+    ]);
+    expect(calls.filter(({ name }) => name === "fill")).toHaveLength(1);
+  });
+
   it("applies adjacent path width/alpha/dash styles without reordering and resets dash", () => {
     const batch: PathsBatch = {
       kind: "paths",
