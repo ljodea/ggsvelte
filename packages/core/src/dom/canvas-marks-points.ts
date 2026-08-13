@@ -70,6 +70,105 @@ function isFilledCircleBatch(batch: PointsBatch): boolean {
   return batch.shape === "circle";
 }
 
+/** Chromium's fill cost rises sharply beyond this many circle subpaths. */
+const MAX_CIRCLES_PER_PATH = 2_048;
+const OPAQUE_HEX_COLOR = /^#[\da-f]{3}(?:[\da-f]{3})?$/i;
+
+type ScratchCanvas = {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+};
+
+const scratchByTarget = new WeakMap<CanvasRenderingContext2D, ScratchCanvas>();
+
+function scratchCanvasFor(ctx: CanvasRenderingContext2D): ScratchCanvas | null {
+  if (typeof ctx.getTransform !== "function" || typeof ctx.drawImage !== "function") return null;
+  const target = ctx.canvas;
+  const ownerDocument = target.ownerDocument;
+  if (ownerDocument === null || ownerDocument === undefined) return null;
+  let scratch = scratchByTarget.get(ctx);
+  if (scratch === undefined) {
+    const canvas = ownerDocument.createElement("canvas");
+    const scratchCtx = canvas.getContext("2d");
+    if (scratchCtx === null) return null;
+    scratch = { canvas, ctx: scratchCtx };
+    scratchByTarget.set(ctx, scratch);
+  }
+  if (scratch.canvas.width !== target.width) scratch.canvas.width = target.width;
+  if (scratch.canvas.height !== target.height) scratch.canvas.height = target.height;
+  return scratch;
+}
+
+function resolvedOpaquePalette(
+  palette: readonly string[],
+  buckets: readonly number[][],
+  resolve: ColorResolver,
+): (string | undefined)[] | null {
+  const resolved = Array.from<string | undefined>({ length: palette.length });
+  for (let p = 0; p < palette.length; p++) {
+    if (buckets[p]!.length === 0) continue;
+    const color = resolve(palette[p]!);
+    // Per-circle scratch fills preserve one-path alpha semantics only when
+    // the source color itself is opaque. Keep the giant path for every other
+    // CSS color form rather than guessing at embedded alpha.
+    if (!OPAQUE_HEX_COLOR.test(color)) return null;
+    resolved[p] = color;
+  }
+  return resolved;
+}
+
+/**
+ * Paint each opaque palette color onto a cleared scratch bitmap, then apply
+ * the batch alpha once when compositing that color onto the target. This
+ * preserves the giant path's same-color overlap semantics without asking
+ * Chromium to rasterize tens of thousands of circle subpaths at once.
+ */
+function drawIndexedCirclesViaScratch(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  buckets: readonly number[][],
+  resolvedPalette: readonly (string | undefined)[],
+  scratch: ScratchCanvas,
+): void {
+  const targetTransform = ctx.getTransform();
+  const positions = batch.positions;
+  const r = batch.size;
+  const scratchCtx = scratch.ctx;
+  for (let p = 0; p < buckets.length; p++) {
+    const list = buckets[p]!;
+    const color = resolvedPalette[p];
+    if (list.length === 0 || color === undefined) continue;
+    scratchCtx.setTransform(1, 0, 0, 1, 0, 0);
+    scratchCtx.clearRect(0, 0, scratch.canvas.width, scratch.canvas.height);
+    scratchCtx.setTransform(
+      targetTransform.a,
+      targetTransform.b,
+      targetTransform.c,
+      targetTransform.d,
+      targetTransform.e,
+      targetTransform.f,
+    );
+    scratchCtx.globalAlpha = 1;
+    scratchCtx.globalCompositeOperation = "source-over";
+    scratchCtx.fillStyle = color;
+    for (const j of list) {
+      scratchCtx.beginPath();
+      scratchCtx.arc(positions[j * 2]!, positions[j * 2 + 1]!, r, 0, Math.PI * 2);
+      scratchCtx.fill();
+    }
+    // The scratch bitmap is already in device pixels. Reset only the target
+    // transform for drawImage; the target's device-space panel clip survives.
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(scratch.canvas, 0, 0);
+    ctx.restore();
+  }
+  // Retain the element/context but release its full backing bitmap between
+  // draws. High-DPR charts can otherwise pin tens of MB per target canvas.
+  scratch.canvas.width = 0;
+  scratch.canvas.height = 0;
+}
+
 /** One fill per palette entry. `include` is null for the full batch. */
 function drawIndexedColorPoints(
   ctx: CanvasRenderingContext2D,
@@ -81,12 +180,23 @@ function drawIndexedColorPoints(
   const indexes = batch.colorIndexes!;
   const n = batch.rowIndex.length;
   const buckets: number[][] = Array.from({ length: palette.length }, () => []);
+  let largestBucket = 0;
   for (let j = 0; j < n; j++) {
     if (include !== null && !include(j)) continue;
     const id = indexes[j]!;
-    (buckets[id] ??= []).push(j);
+    const bucket = (buckets[id] ??= []);
+    bucket.push(j);
+    if (bucket.length > largestBucket) largestBucket = bucket.length;
   }
   const circles = isFilledCircleBatch(batch);
+  if (circles && largestBucket > MAX_CIRCLES_PER_PATH) {
+    const resolvedPalette = resolvedOpaquePalette(palette, buckets, resolve);
+    const scratch = resolvedPalette === null ? null : scratchCanvasFor(ctx);
+    if (resolvedPalette !== null && scratch !== null) {
+      drawIndexedCirclesViaScratch(ctx, batch, buckets, resolvedPalette, scratch);
+      return;
+    }
+  }
   for (let p = 0; p < palette.length; p++) {
     const list = buckets[p]!;
     if (list.length === 0) continue;
