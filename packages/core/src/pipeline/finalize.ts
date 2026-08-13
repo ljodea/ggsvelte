@@ -12,7 +12,9 @@ import { getCandidateRuntime, RELEASED_CANDIDATE_STORE } from "../candidate-runt
 import type { CandidateBuildInput, LazyInteraction } from "../candidate-runtime.js";
 import type { CandidateStore } from "../candidate-store.js";
 import { buildPanelCoordProjector, scalesForCoordExpand } from "../coord-projector.js";
+import type { PanelCoordProjector } from "../coord-projector.js";
 import { LineageStore } from "../identity.js";
+import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
@@ -20,6 +22,7 @@ import { computeBaselineDomains, computeEffectiveDomains } from "./compute-domai
 import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import { finalizeGeometryAndScene } from "./finalize-geometry-scene.js";
 import { finalizePanelLayoutPass } from "./finalize-layout-pass.js";
+import type { PanelLayoutResult } from "./panel-layout.js";
 import { resolveLayerBackends } from "./layer-backends.js";
 import { resolveLayerFields, resolveLayerScaledConstants } from "./layer-fields.js";
 import type { PreparedPanels } from "./prepare-panels.js";
@@ -39,14 +42,15 @@ export interface PipelineRunState {
   readonly advisories: Advisory[];
 }
 
-/**
- * Layout → geometry → scene → render model. Owns the two-pass layout call,
- * contract resolution, candidate construction and model assembly.
- */
-export function finalize(run: PipelineRunState): RenderModel {
-  const { runId, normalized, options, theme, flip, prepared, trained, warnings, advisories } = run;
+export interface FinalizedScene {
+  readonly scene: Scene;
+  readonly panelLayout: PanelLayoutResult;
+  readonly coordProjectors: readonly PanelCoordProjector[];
+}
 
-  // --- layout + geometry + scene (real work in dedicated modules) ---
+/** Layout → geometry → scene, without RenderModel-only contracts. */
+export function finalizeScene(run: PipelineRunState): FinalizedScene {
+  const { normalized, options, theme, flip, prepared, trained, warnings } = run;
   const panelLayout = finalizePanelLayoutPass({
     normalized,
     options,
@@ -74,6 +78,16 @@ export function finalize(run: PipelineRunState): RenderModel {
     coordProjectors,
     warnings,
   });
+  return { scene, panelLayout, coordProjectors };
+}
+
+/**
+ * Layout → geometry → scene → render model. Owns the two-pass layout call,
+ * contract resolution, candidate construction and model assembly.
+ */
+export function finalize(run: PipelineRunState): RenderModel {
+  const { runId, normalized, options, flip, prepared, trained, warnings, advisories } = run;
+  const { scene, panelLayout, coordProjectors } = finalizeScene(run);
 
   // --- layer contracts ---
   const { bindings } = prepared;
