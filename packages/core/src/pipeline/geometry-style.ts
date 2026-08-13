@@ -159,6 +159,94 @@ export function mappedPaintVector(
   );
 }
 
+/** Palette + per-row indexes when cardinality fits a Uint8. Null if not. */
+export interface IndexedPaint {
+  readonly palette: string[];
+  readonly indexes: Uint8Array;
+}
+
+const MAX_INDEXED_PALETTE = 256;
+
+function indexUniqueThenFanOut(
+  rows: ArrayLike<number>,
+  valueAt: (row: number) => unknown,
+  mapOne: (value: unknown) => string,
+): IndexedPaint | null {
+  const n = rows.length;
+  if (n === 0) return { palette: [], indexes: new Uint8Array(0) };
+
+  const first = valueAt(rows[0]!);
+  let allSame = true;
+  for (let i = 1; i < n; i++) {
+    if (!Object.is(valueAt(rows[i]!), first)) {
+      allSame = false;
+      break;
+    }
+  }
+  if (allSame) {
+    return { palette: [mapOne(first)], indexes: new Uint8Array(n) };
+  }
+
+  const probe = Math.min(n, UNIQUE_PROBE);
+  const probeSeen = new Set<unknown>();
+  let probeUniques = 0;
+  for (let i = 0; i < probe; i++) {
+    const value = valueAt(rows[i]!);
+    if (typeof value === "object" && value !== null) {
+      probeUniques++;
+      continue;
+    }
+    if (!probeSeen.has(value)) {
+      probeSeen.add(value);
+      probeUniques++;
+    }
+  }
+  // Small columns: 3/4 uniques is still a 3-color palette. Only skip when
+  // the probe is full-length and nearly every sample is distinct.
+  if (n >= UNIQUE_PROBE && probeUniques >= probe * HIGH_CARDINALITY_RATIO) return null;
+
+  const palette: string[] = [];
+  const indexOf = new Map<unknown, number>();
+  const indexes = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const value = valueAt(rows[i]!);
+    if (typeof value === "object" && value !== null) return null;
+    let id = indexOf.get(value);
+    if (id === undefined && !indexOf.has(value)) {
+      if (palette.length >= MAX_INDEXED_PALETTE) return null;
+      id = palette.length;
+      indexOf.set(value, id);
+      palette.push(mapOne(value));
+    }
+    indexes[i] = id!;
+  }
+  return { palette, indexes };
+}
+
+/**
+ * Same colors as {@link mappedPaintVector}, packed as palette + indexes
+ * when the column is low-cardinality (categorical scatter). High-cardinality
+ * continuous ramps return null so the caller keeps the string[] path.
+ */
+export function mappedPaintIndexVector(
+  frame: LayerFrame,
+  channel: PaintChannel,
+  scale: ResolvedColorScale,
+  rows: ArrayLike<number>,
+): IndexedPaint | null {
+  const binding = frame.binding[channel];
+  const values = paintValues(frame, channel);
+  if (values === null) {
+    const color = colorOf(scale, binding.scaledConstant);
+    return { palette: [color], indexes: new Uint8Array(rows.length) };
+  }
+  return indexUniqueThenFanOut(
+    rows,
+    (row) => values[row]!,
+    (value) => colorOf(scale, value as CellValue),
+  );
+}
+
 /**
  * Per-subpath / per-row paint vector. Honour mapped field values ·
  * scaledConstant · literal constant. `rows` is required: style vectors index

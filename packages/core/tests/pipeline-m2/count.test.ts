@@ -51,7 +51,7 @@ describe("geom_count / stat_sum", () => {
     );
     const batch = model.scene.batches[0] as PointsBatch;
     expect(batch.positions.length / 2).toBe(4);
-    expect(new Set(batch.colors ?? []).size).toBe(2);
+    expect(new Set(batch.colorPalette ?? batch.colors ?? []).size).toBe(2);
   });
 
   it("point + stat sum is equivalent mark count", () => {

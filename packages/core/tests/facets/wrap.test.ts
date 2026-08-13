@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
+import { pointFills } from "../../src/mark-style.ts";
 import { PipelineError, runPipeline } from "../../src/pipeline.ts";
 import type { PointsBatch, RectsBatch } from "../../src/scene.ts";
 import { STRIP_BAND } from "../../src/scene.ts";
@@ -88,7 +89,7 @@ describe("facet wrap — panel grid", () => {
     expect(model.scene.legends).toHaveLength(1);
     const points = model.scene.batches.filter((b): b is PointsBatch => b.kind === "points");
     // Row order within each panel is u, v — colors match across panels.
-    const colorPairs = points.map((b) => b.colors!.join("|"));
+    const colorPairs = points.map((b) => pointFills(b).join("|"));
     expect(new Set(colorPairs).size).toBe(1);
   });
 

@@ -7,6 +7,7 @@ import { describe, expect, it } from "bun:test";
 
 import {
   constantStyle,
+  mappedPaintIndexVector,
   mappedPaintVector,
   paintVector,
 } from "../../src/pipeline/geometry-style.ts";
@@ -151,6 +152,41 @@ describe("mappedPaintVector", () => {
     expect(painted[0]).toBe("#000000");
     expect(painted[255]).toBe("#ffffff");
     expect(colorOfCalls).toBe(600);
+  });
+});
+
+describe("mappedPaintIndexVector", () => {
+  it("packs low-cardinality colors as a palette plus per-row indexes", () => {
+    const frame = makeFrame({ colorValues: ["a", "b", "a", "c", "b"] });
+    const packed = mappedPaintIndexVector(frame, "color", stubScale(), [0, 1, 2, 3, 4]);
+    expect(packed).not.toBeNull();
+    expect(packed!.palette).toEqual(["#ff0000", "#00ff00", "#0000ff"]);
+    expect([...packed!.indexes]).toEqual([0, 1, 0, 2, 1]);
+  });
+
+  it("expands to the same colors as mappedPaintVector", () => {
+    const frame = makeFrame({ colorValues: ["a", "b", "c", "a"] });
+    const scale = stubScale();
+    const rows = [0, 1, 2, 3];
+    const packed = mappedPaintIndexVector(frame, "color", scale, rows);
+    const strings = mappedPaintVector(frame, "color", scale, rows);
+    expect(packed).not.toBeNull();
+    expect([...packed!.indexes].map((id) => packed!.palette[id])).toEqual(strings);
+  });
+
+  it("returns null for high-cardinality continuous columns", () => {
+    const values = Array.from({ length: 600 }, (_, i) => i);
+    const frame = makeFrame({ colorValues: values });
+    const rows = Array.from({ length: 600 }, (_, i) => i);
+    const scale = fromPartial<ResolvedColorScale>({
+      kind: "sequential",
+      scale: {
+        colorOf: (value: unknown) => `#${String(value)}`,
+        naValue: DEFAULT_MISSING_COLOR,
+        unknownValue: DEFAULT_MISSING_COLOR,
+      },
+    });
+    expect(mappedPaintIndexVector(frame, "color", scale, rows)).toBeNull();
   });
 });
 

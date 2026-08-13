@@ -121,6 +121,34 @@ describe("canvas mapped style vectors", () => {
     expect(calls.filter(({ name }) => name === "arc")).toHaveLength(n);
   });
 
+  it("buckets palette-index colors into one fill per palette entry", () => {
+    const n = 10;
+    const positions = new Float32Array(n * 2);
+    const indexes = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      positions[i * 2] = i;
+      positions[i * 2 + 1] = i;
+      indexes[i] = i % 5;
+    }
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions,
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 0.7,
+      shape: "circle",
+      fill: null,
+      colorPalette: ["c0", "c1", "c2", "c3", "c4"],
+      colorIndexes: indexes,
+    };
+    const { ctx, calls } = styleContext();
+    drawBatch(ctx, batch, theme, resolve);
+    expect(calls.filter(({ name }) => name === "fill")).toHaveLength(5);
+    expect(calls.filter(({ name }) => name === "arc")).toHaveLength(n);
+  });
+
   it("traces constant-size circles with moveTo(x+r,y) + arc, no per-point style objects", () => {
     const batch: PointsBatch = {
       kind: "points",

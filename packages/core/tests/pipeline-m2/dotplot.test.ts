@@ -84,7 +84,7 @@ describe("dotplot geom (histodot bindot)", () => {
     );
     const batch = model.scene.batches[0] as PointsBatch;
     expect(batch.kind).toBe("points");
-    const colors = batch.colors;
+    const colors = batch.colorPalette ?? batch.colors;
     expect(colors).toBeDefined();
     expect(new Set(colors).size).toBe(2);
   });
@@ -99,7 +99,7 @@ describe("dotplot geom (histodot bindot)", () => {
     );
     const batch = model.scene.batches[0] as PointsBatch;
     expect(batch.kind).toBe("points");
-    const colors = batch.colors;
+    const colors = batch.colorPalette ?? batch.colors;
     expect(colors).toBeDefined();
     expect(new Set(colors).size).toBe(2);
   });
@@ -115,9 +115,9 @@ describe("dotplot geom (histodot bindot)", () => {
       size,
     );
     const batch = model.scene.batches[0] as PointsBatch;
-    expect(batch.colors).toBeDefined();
+    expect(batch.colorPalette ?? batch.colors).toBeDefined();
     // fill has 2 levels; color is constant — paint must follow fill.
-    expect(new Set(batch.colors).size).toBe(2);
+    expect(new Set(batch.colorPalette ?? batch.colors).size).toBe(2);
   });
 
   it("exposes per-dot xValue/yValue for inspect tooltips (hybrid source row + after_stat)", () => {

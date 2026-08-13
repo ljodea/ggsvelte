@@ -45,10 +45,14 @@ export interface PointsBatch {
   shape: PointShape;
   /** Canonical POINT_SHAPE_NAMES indexes when aes.shape is mapped. */
   shapeIndexes?: Uint8Array;
-  /** Constant color, or null when `colors` carries per-mark values. */
+  /** Constant color, or null when `colors` / palette indexes carry per-mark values. */
   fill: string | null;
-  /** Per-mark resolved colors (when the color channel is data-mapped). */
+  /** Per-mark resolved colors (high-cardinality / continuous ramps). */
   colors?: string[];
+  /** Unique resolved colors when the mapped channel is low-cardinality. */
+  colorPalette?: string[];
+  /** Palette index per mark; paired with `colorPalette`. */
+  colorIndexes?: Uint8Array;
 }
 
 export interface PathsBatch {

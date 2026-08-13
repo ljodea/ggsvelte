@@ -2,6 +2,7 @@ import { fromAny } from "@total-typescript/shoehorn";
 
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import { pointFills } from "../../src/mark-style.ts";
 import { runPipeline } from "../../src/pipeline.js";
 
 export const size = { width: 640, height: 400 };
@@ -24,8 +25,11 @@ export function pointSpec(
 
 export function pointColors(model: ReturnType<typeof runPipeline>): string[] {
   const points = model.scene.batches.find((batch) => batch.kind === "points");
-  if (points?.kind !== "points" || points.colors === undefined) {
+  if (
+    points?.kind !== "points" ||
+    (points.colors === undefined && points.colorPalette === undefined)
+  ) {
     throw new Error("expected mapped point colors");
   }
-  return points.colors;
+  return pointFills(points);
 }

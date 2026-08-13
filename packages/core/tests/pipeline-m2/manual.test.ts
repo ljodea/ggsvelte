@@ -24,8 +24,8 @@ describe("stat manual (#814)", () => {
     const batch = model.scene.batches[0] as PointsBatch;
     expect(batch.kind).toBe("points");
     expect(batch.positions.length / 2).toBe(2);
-    expect(batch.colors).toBeDefined();
-    expect(new Set(batch.colors).size).toBe(2);
+    expect(batch.colorPalette ?? batch.colors).toBeDefined();
+    expect(new Set(batch.colorPalette ?? batch.colors).size).toBe(2);
   });
 
   it("first keeps one source row per group", () => {

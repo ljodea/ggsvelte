@@ -70,6 +70,34 @@ function isFilledCircleBatch(batch: PointsBatch): boolean {
   return batch.shape === "circle";
 }
 
+/** One fill per palette entry. `include` is null for the full batch. */
+function drawIndexedColorPoints(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  resolve: ColorResolver,
+  include: ((index: number) => boolean) | null,
+): void {
+  const palette = batch.colorPalette!;
+  const indexes = batch.colorIndexes!;
+  const n = batch.rowIndex.length;
+  const buckets: number[][] = Array.from({ length: palette.length }, () => []);
+  for (let j = 0; j < n; j++) {
+    if (include !== null && !include(j)) continue;
+    const id = indexes[j]!;
+    (buckets[id] ??= []).push(j);
+  }
+  const circles = isFilledCircleBatch(batch);
+  for (let p = 0; p < palette.length; p++) {
+    const list = buckets[p]!;
+    if (list.length === 0) continue;
+    ctx.fillStyle = resolve(palette[p]!);
+    ctx.beginPath();
+    if (circles) traceFilledCircles(ctx, batch, list);
+    else for (const j of list) tracePoint(ctx, batch, j);
+    ctx.fill();
+  }
+}
+
 export function drawPoints(
   ctx: CanvasRenderingContext2D,
   batch: PointsBatch,
@@ -104,6 +132,10 @@ export function drawPoints(
       }
     }
     ctx.globalAlpha = baseAlpha;
+    return;
+  }
+  if (batch.colorIndexes !== undefined && batch.colorPalette !== undefined) {
+    drawIndexedColorPoints(ctx, batch, resolve, null);
     return;
   }
   if (batch.colors === undefined) {
@@ -205,6 +237,10 @@ export function drawPointsSubset(
       }
     }
     ctx.globalAlpha = baseAlpha;
+    return;
+  }
+  if (batch.colorIndexes !== undefined && batch.colorPalette !== undefined) {
+    drawIndexedColorPoints(ctx, batch, resolve, includes);
     return;
   }
   if (batch.colors === undefined) {

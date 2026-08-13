@@ -5,6 +5,7 @@
 import { renderPrimitiveCount } from "./candidate-geometry.js";
 import { type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
 import {
+  pointFillAt,
   pointShapeGeometry,
   pointShapePathD,
   resolveGlyphMark,
@@ -108,7 +109,7 @@ function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
     const size = batch.sizes?.[j] ?? batch.size;
     const shape =
       batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
-    const fill = batch.colors?.[j] ?? batch.fill ?? themeInk;
+    const fill = pointFillAt(batch, j, themeInk);
     const opacity = batch.alphas === undefined ? "" : alphaAttr(batch.alphas?.[j] ?? 1);
     const x = positions[j * 2]!;
     const y = positions[j * 2 + 1]!;
