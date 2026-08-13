@@ -20,11 +20,13 @@ function styleContext() {
   const methods = new Set([
     "arc",
     "beginPath",
+    "clearRect",
     "closePath",
     "fill",
     "lineTo",
     "moveTo",
     "rect",
+    "setTransform",
     "stroke",
   ]);
   const ctx = new Proxy(state, {
@@ -60,6 +62,44 @@ function styleContext() {
     },
   }) as unknown as CanvasRenderingContext2D;
   return { ctx, calls, state, dash: () => dash };
+}
+
+function styleContextsWithScratch(transform?: {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+}) {
+  const resolvedTransform = transform ?? { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+  const scratch = styleContext();
+  const target = styleContext();
+  const targetRecord = target.ctx as unknown as Record<string, unknown>;
+  targetRecord["canvas"] = {
+    width: 800,
+    height: 500,
+    ownerDocument: {
+      createElement: () => ({
+        width: 0,
+        height: 0,
+        getContext: () => scratch.ctx,
+      }),
+    },
+  };
+  targetRecord["getTransform"] = () => resolvedTransform;
+  targetRecord["save"] = () => {};
+  targetRecord["restore"] = () => {};
+  targetRecord["drawImage"] = () => {
+    target.calls.push({
+      name: "drawImage",
+      alpha: target.state.globalAlpha,
+      width: target.state.lineWidth,
+      dash: target.dash(),
+      args: [],
+    });
+  };
+  return { scratch, target };
 }
 
 const theme = fromPartial<ThemeTokens>({ ink: "black", accent: "blue" });
@@ -147,6 +187,131 @@ describe("canvas mapped style vectors", () => {
     drawBatch(ctx, batch, theme, resolve);
     expect(calls.filter(({ name }) => name === "fill")).toHaveLength(5);
     expect(calls.filter(({ name }) => name === "arc")).toHaveLength(n);
+  });
+
+  it("composites oversized indexed-circle batches by palette without changing alpha order", () => {
+    const colors = ["#000001", "#000002", "#000003", "#000004", "#000005"];
+    const perColor = 2_049;
+    const n = colors.length * perColor;
+    const positions = new Float32Array(n * 2);
+    const indexes = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      positions[i * 2] = i % 800;
+      positions[i * 2 + 1] = i % 500;
+      indexes[i] = i % colors.length;
+    }
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions,
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 0.7,
+      shape: "circle",
+      fill: null,
+      colorPalette: colors,
+      colorIndexes: indexes,
+    };
+    const { scratch, target } = styleContextsWithScratch({
+      a: 1,
+      b: 0,
+      c: 0,
+      d: 1,
+      e: 12,
+      f: 34,
+    });
+    const resolved: string[] = [];
+    drawBatch(target.ctx, batch, theme, (color) => {
+      resolved.push(color);
+      return color;
+    });
+
+    const composites = target.calls.filter(({ name }) => name === "drawImage");
+    expect(composites).toHaveLength(colors.length);
+    expect(composites.map(({ alpha }) => alpha)).toEqual(colors.map(() => 0.8 * 0.7));
+    expect(target.calls.filter(({ name }) => name === "fill")).toHaveLength(0);
+    expect(scratch.calls.filter(({ name }) => name === "clearRect")).toHaveLength(colors.length);
+    expect(scratch.calls.filter(({ name }) => name === "arc")).toHaveLength(n);
+    expect(scratch.calls.filter(({ name }) => name === "fill")).toHaveLength(n);
+    expect(resolved.slice(1)).toEqual(colors);
+    expect(target.state.globalAlpha).toBe(0.8);
+  });
+
+  it("uses one compositing strategy when only one indexed palette bucket is oversized", () => {
+    const n = 2_050;
+    const indexes = new Uint8Array(n);
+    indexes[n - 1] = 1;
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(n * 2),
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 0.7,
+      shape: "circle",
+      fill: null,
+      colorPalette: ["#000001", "#000002"],
+      colorIndexes: indexes,
+    };
+    const { scratch, target } = styleContextsWithScratch();
+
+    drawBatch(target.ctx, batch, theme, resolve);
+
+    expect(target.calls.filter(({ name }) => name === "drawImage")).toHaveLength(2);
+    expect(scratch.calls.filter(({ name }) => name === "fill")).toHaveLength(n);
+  });
+
+  it("falls back without crashing when the target canvas has no ownerDocument", () => {
+    const n = 2_049;
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(n * 2),
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 1,
+      shape: "circle",
+      fill: null,
+      colorPalette: ["#000001"],
+      colorIndexes: new Uint8Array(n),
+    };
+    const target = styleContext();
+    const targetRecord = target.ctx as unknown as Record<string, unknown>;
+    targetRecord["canvas"] = { width: 800, height: 500 };
+    targetRecord["getTransform"] = () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 });
+    targetRecord["drawImage"] = () => {};
+
+    expect(() => {
+      drawBatch(target.ctx, batch, theme, resolve);
+    }).not.toThrow();
+    expect(target.calls.filter(({ name }) => name === "fill")).toHaveLength(1);
+  });
+
+  it("keeps the giant path for oversized palette colors with embedded alpha", () => {
+    const n = 2_049;
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(n * 2),
+      rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
+      size: 1.5,
+      alpha: 0.7,
+      shape: "circle",
+      fill: null,
+      colorPalette: ["#00000080"],
+      colorIndexes: new Uint8Array(n),
+    };
+    const { target } = styleContextsWithScratch();
+
+    drawBatch(target.ctx, batch, theme, resolve);
+
+    expect(target.calls.filter(({ name }) => name === "drawImage")).toHaveLength(0);
+    expect(target.calls.filter(({ name }) => name === "fill")).toHaveLength(1);
+    expect(target.calls.filter(({ name }) => name === "arc")).toHaveLength(n);
   });
 
   it("traces constant-size circles with moveTo(x+r,y) + arc, no per-point style objects", () => {
