@@ -11,19 +11,19 @@ graphics, inspired by ggplot2.
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started)
 
-![Bar chart of cold-mount time for a 1,000-point colored scatter: ggsvelte 9.4 ms, LayerCake 22.1 ms, Unovis 92.2 ms, SveltePlot 311.3 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-1k-mount.svg)
+![Bar chart of cold-mount time for a 1,000-point colored scatter: ggsvelte 9.8 ms, LayerCake 21.8 ms, Unovis 100.9 ms, SveltePlot 320.9 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-1k-mount.svg)
 
-![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 57.6 ms, LayerCake 214.2 ms, Unovis 577.2 ms, SveltePlot 4,385 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
+![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 58.2 ms, LayerCake 212.9 ms, Unovis 568.6 ms, SveltePlot 4,218 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
 
-![Bar chart of cold-mount time for a 100,000-point colored scatter: ggsvelte SVG 616.6 ms, ggsvelte canvas 247.9 ms, LayerCake 2,799 ms, LayerCake canvas 171.2 ms, Unovis 5,732 ms, SveltePlot 39,636 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-100k-mount.svg)
+![Bar chart of cold-mount time for a 100,000-point colored scatter: ggsvelte SVG 640.4 ms, ggsvelte canvas 133.2 ms, LayerCake 2,805 ms, LayerCake canvas 172.1 ms, Unovis 5,539 ms, SveltePlot 38,135 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-100k-mount.svg)
 
-![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 21.9 ms, LayerCake 36.6 ms, Unovis 173.1 ms, SveltePlot 1,133 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
+![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 23.3 ms, LayerCake 33.6 ms, Unovis 181.1 ms, SveltePlot 1,161 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
 
-![Bar chart of cold-mount time for a 10-series by 10,000-point line chart: ggsvelte SVG 78 ms, ggsvelte canvas 118.7 ms, LayerCake 146.4 ms, LayerCake canvas 131.2 ms, Unovis 593.8 ms, SveltePlot 3,960 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-100k-mount.svg)
+![Bar chart of cold-mount time for a 10-series by 10,000-point line chart: ggsvelte SVG 73.2 ms, ggsvelte canvas 116.6 ms, LayerCake 133.9 ms, LayerCake canvas 107.9 ms, Unovis 297.5 ms, SveltePlot 3,886 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-100k-mount.svg)
 
-![Bar chart of cold-mount time for a 3-series by 1,000-point area chart: ggsvelte 4.6 ms, LayerCake 5.6 ms, Unovis 67.1 ms, SveltePlot 188.7 ms. Lower is better.](apps/docs/static/benchmarks/bench-area-mount.svg)
+![Bar chart of cold-mount time for a 3-series by 1,000-point area chart: ggsvelte 4.8 ms, LayerCake 5.4 ms, Unovis 72.5 ms, SveltePlot 187.3 ms. Lower is better.](apps/docs/static/benchmarks/bench-area-mount.svg)
 
-![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 4.6 ms, LayerCake 5.2 ms, Unovis 28.9 ms, SveltePlot 62.7 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
+![Bar chart of cold-mount time for a stacked bar chart of 50 categories by 4 stacks: ggsvelte 4.1 ms, LayerCake 5.4 ms, Unovis 28.1 ms, SveltePlot 59.5 ms. Lower is better.](apps/docs/static/benchmarks/bench-bars-mount.svg)
 
 ## Install
 
@@ -61,7 +61,7 @@ and Windows.
 
 | Capability                                 | ggsvelte   | SveltePlot           | Unovis                 | LayerCake            |
 | ------------------------------------------ | ---------- | -------------------- | ---------------------- | -------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 127 KB  | ✅ 109 KB            | ✅ 80 KB               | ✅ 41 KB             |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 122 KB  | ✅ 109 KB            | ✅ 80 KB               | ✅ 41 KB             |
 | **API stability**                          | ⚠️ v0.37.0 | ⚠️ v0.14             | ✅ v1.6                | ✅ v10               |
 | **Headless server-side SVG** (no DOM)      | ✅         | ❌ empty shell       | ❌ client `onMount`    | ⚠️ opt-in `ssr` flag |
 | **Portable JSON spec + schema**            | ✅         | ❌                   | ❌                     | ❌                   |
