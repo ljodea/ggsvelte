@@ -24,7 +24,7 @@ function continuousFrame(n: number, opts?: { nanAt?: number; offsetX?: boolean }
     yNumeric,
     xValues: null,
     yValues: null,
-    offsetX: opts?.offsetX ? new Float64Array(n) : null,
+    offsetX: opts?.offsetX === true ? new Float64Array(n) : null,
     offsetY: null,
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i + 10),
   });
