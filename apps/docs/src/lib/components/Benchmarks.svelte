@@ -47,7 +47,7 @@
       ts: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.tanstackKb) },
       lc: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.layercakeKb) },
       uv: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.unovisKb) },
-      sp: { mark: "yes", note: kb(BENCHMARK_BUNDLE_KB.svelteplotKb) },
+      sp: { mark: "partial", note: kb(BENCHMARK_BUNDLE_KB.svelteplotKb) },
     },
     {
       feature: "API stability",
