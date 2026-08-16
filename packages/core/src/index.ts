@@ -419,13 +419,8 @@ export { planStrata } from "./strata.js";
 export type { Stratum } from "./strata.js";
 
 // SVG renderer (pure)
-export {
-  countMarks,
-  pathData,
-  renderToSVGString, // @lifecycle stable-intent
-  sceneLabel,
-  sceneToSVGString,
-} from "./render-svg.js";
+export { countMarks, pathData, sceneLabel, sceneToSVGString } from "./render-svg.js";
+export { renderToSVGString } from "./render-svg-full.js"; // @lifecycle stable-intent
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 

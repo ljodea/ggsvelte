@@ -5,9 +5,9 @@ import type { ThemeName } from "@ggsvelte/spec";
 
 import { LEGACY_BASE_FOUNDATION, themed, type ThemeTokens } from "./theme-construct.js";
 
-export const THEME_DEFAULT = themed({});
+const THEME_DEFAULT = themed({});
 
-export const THEME_VOID = themed({
+const THEME_VOID = themed({
   paper: "none",
   panel: "none",
   grid: "none",
@@ -24,7 +24,7 @@ export const THEME_VOID = themed({
   tickLength: 0,
 });
 
-export const THEME_DEFAULT_LEGACY = themed(LEGACY_BASE_FOUNDATION);
+const THEME_DEFAULT_LEGACY = themed(LEGACY_BASE_FOUNDATION);
 
 /** Edition-2 lean table: unnamed + void. Missing names throw at resolve time. */
 export const SLIM_THEMES: Readonly<Partial<Record<ThemeName, ThemeTokens>>> = Object.freeze({

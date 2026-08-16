@@ -12,7 +12,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 
 const goldenPath = join(import.meta.dirname, "fixtures/render-svg-golden.svg");
 

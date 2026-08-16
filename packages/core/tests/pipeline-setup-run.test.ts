@@ -6,6 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
+import { EDITION_DEFAULTS } from "../src/editions.ts";
 import { setupPipelineRun } from "../src/pipeline/setup-run.ts";
 import { runPipeline } from "../src/pipeline.ts";
 import type { PipelineWarning } from "../src/pipeline/types.ts";
@@ -17,7 +18,7 @@ describe("setupPipelineRun", () => {
       gg([{ x: 1, y: 2 }], aes({ x: "x", y: "y" }))
         .geomPoint()
         .spec(),
-      undefined,
+      EDITION_DEFAULTS,
       warnings,
     );
     expect(setup.normalized.layers).toHaveLength(1);
@@ -32,7 +33,7 @@ describe("setupPipelineRun", () => {
         .geomPoint()
         .coord({ type: "flip" })
         .spec(),
-      undefined,
+      EDITION_DEFAULTS,
       [],
     );
     expect(setup.flip).toBe(true);

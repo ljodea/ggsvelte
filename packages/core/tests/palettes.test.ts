@@ -3,7 +3,7 @@ import { describe, expect, it } from "bun:test";
 import { aes, gg, SpecValidationError, type PortableSpec } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 import {
   CANVA_PALETTE,
   CATEGORICAL_PALETTE_10,

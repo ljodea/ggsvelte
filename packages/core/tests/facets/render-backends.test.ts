@@ -4,7 +4,7 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { runPipeline } from "../../src/pipeline.ts";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import { size } from "./fixtures.ts";
 
 describe("render backends (auto threshold, hints, a11y)", () => {

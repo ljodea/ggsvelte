@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 import type { SpecInput } from "@ggsvelte/spec";
 
 const rows = [

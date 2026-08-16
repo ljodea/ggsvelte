@@ -6,7 +6,7 @@
  */
 import type { ThemeName } from "@ggsvelte/spec";
 
-export type { ThemeTokens, TooltipRoleOverrides } from "./theme-construct.js";
+export type { ThemeTokens } from "./theme-construct.js";
 export { themed } from "./theme-construct.js";
 import { LEGACY_BASE_FOUNDATION, themed, type ThemeTokens } from "./theme-construct.js";
 

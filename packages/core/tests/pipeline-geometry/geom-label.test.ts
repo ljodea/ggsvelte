@@ -7,7 +7,7 @@ import { aes, gg, validate } from "@ggsvelte/spec";
 import { createHitGeometry } from "../../src/candidate-hit-geometry.ts";
 import { buildCandidateStoreIndexes } from "../../src/candidate-store-indexes.ts";
 import { runPipeline } from "../../src/pipeline.ts";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import type { GlyphsBatch, Scene } from "../../src/scene.ts";
 import { fromPartial } from "@total-typescript/shoehorn";
 

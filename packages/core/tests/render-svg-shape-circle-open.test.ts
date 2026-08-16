@@ -6,7 +6,7 @@ import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 
 import { pointShapeGeometry } from "../src/mark-style.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 
 describe("point shape circle-open", () => {
   it("resolves to a stroked circle geometry with no fill", () => {

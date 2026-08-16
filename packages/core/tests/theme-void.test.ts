@@ -8,7 +8,7 @@ import { aes, gg, THEME_NAMES } from "@ggsvelte/spec";
 import { describe, expect, it } from "bun:test";
 
 import { runPipeline } from "../src/pipeline.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 import { BUILTIN_THEMES, resolveTheme } from "../src/theme.ts";
 
 const size = { width: 480, height: 320 };

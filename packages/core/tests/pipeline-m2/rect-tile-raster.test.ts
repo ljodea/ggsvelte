@@ -4,7 +4,7 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { PipelineError, runPipeline } from "../../src/pipeline.ts";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import type { RectsBatch } from "../../src/scene.ts";
 import { size } from "./fixtures.ts";
 
