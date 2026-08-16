@@ -1,7 +1,6 @@
 import { resolveNumericStyleScale } from "./scale-style-numeric.js";
 import { registerStyleScaleResolver } from "./scale-style-registry.js";
 import type { NumericStyleAesthetic } from "./scale-style-types.js";
-import type { NumericStyleConfig } from "./scale-style-values.js";
 
 let registered = false;
 
@@ -19,7 +18,7 @@ export function registerNumericStyle(): void {
       ...(input.nonInteractiveValues !== undefined && {
         nonInteractiveValues: input.nonInteractiveValues,
       }),
-      config: input.config as NumericStyleConfig | undefined,
+      config: input.config,
       prevState: input.prevState,
       title: input.title,
       warnings: input.warnings,
