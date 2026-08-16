@@ -1,5 +1,17 @@
 # @ggsvelte/spec
 
+## 0.38.0
+
+### Minor Changes
+
+- eded7a2: Export `temporalGuideTypeMismatchError` so render and validate share one temporal-guide type check.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- b3280eb: Reject temporal break and label options on an explicit band scale during render, matching validate().
+
 ## 0.37.1
 
 ## 0.37.0
