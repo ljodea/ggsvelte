@@ -236,3 +236,27 @@ test("mobile getting-started guide remains contained", async ({ page }) => {
   await expect(page.locator("pre code").first()).toBeVisible();
   await expectNoDocumentOverflow(page);
 });
+
+test("click-opened search uses modal motion when reduced motion is off", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/docs?theme=light");
+  await page.getByRole("button", { name: "Search documentation" }).first().click();
+  const dialog = page.locator("dialog.site-search");
+  await expect(dialog).toBeVisible();
+  const wide = await dialog.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { property: style.transitionProperty, transform: style.transform };
+  });
+  expect(wide.property).toMatch(/opacity/);
+  expect(wide.property).toMatch(/transform/);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.getByRole("button", { name: "Search documentation" }).first().click();
+  await expect(dialog).toBeVisible();
+  const narrow = await dialog.evaluate((el) => getComputedStyle(el).transitionProperty);
+  expect(narrow).toMatch(/opacity/);
+  expect(narrow.split(",").some((part) => part.trim() === "transform")).toBe(false);
+});

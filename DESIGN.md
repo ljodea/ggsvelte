@@ -250,11 +250,13 @@ pill shapes.
   never depends on motion.
 - The documentation shell may use short, functional motion only (not continuous loops):
   edge-docked drawer enter/exit (`transform` + backdrop opacity), origin-aware popover
-  open (opacity + light scale from the trigger), press scale on controls (`scale(0.97)`),
-  and opacity icon crossfades. Shared tokens live under `:root` in
-  `apps/docs/src/styles/tokens.css` (`--ease-out`, `--ease-drawer`, duration tokens).
-  Under `prefers-reduced-motion: reduce` (and VR / visual-test), durations collapse —
-  including `::backdrop`, which is not matched by `*`. Meaning never depends on motion.
+  open (opacity + light scale from the trigger), click-opened search dialog (opacity +
+  `scale(0.97)` from center on wide viewports; opacity only on the full-viewport dialog),
+  press scale on controls (`scale(0.97)`), and opacity icon crossfades. Shared tokens live
+  under `:root` in `apps/docs/src/styles/tokens.css` (`--ease-out`, `--ease-drawer`,
+  duration tokens). Under `prefers-reduced-motion: reduce` (and VR / visual-test),
+  durations collapse — including `::backdrop`, which is not matched by `*`. Meaning never
+  depends on motion.
 
 ## Rejected patterns
 
@@ -282,6 +284,7 @@ release evidence, not optional decoration.
 
 | Date       | Decision                                                | Rationale                                                                                                      |
 | ---------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 2026-08-16 | Allow click-opened search dialog motion                 | Centered scale on wide viewports; opacity only when the dialog is full-viewport; no keyboard toggle            |
 | 2026-08-06 | Allow restrained functional docs-shell motion only      | Spatial drawers, press feedback, and opacity state crossfades; chart marks stay motion-free                    |
 | 2026-07-14 | Establish quiet editorial data graphics as the system   | Matches the audited ggplot2/hrbrthemes/ggthemes references and makes good defaults the product advantage       |
 | 2026-07-14 | Keep `theme.ts` as executable token truth               | Prevents prose from becoming a parallel styling implementation                                                 |
