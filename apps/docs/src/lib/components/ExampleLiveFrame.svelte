@@ -56,10 +56,20 @@
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
   let liveReady = $state(false);
+  let shellVisible = $state(true);
   /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
   let restoreKeyboardFocus = $state(false);
   let loadStarted = false;
   let cancelled = false;
+
+  function hideShellIfReady(): void {
+    if (liveReady) shellVisible = false;
+  }
+
+  function onPreviewTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName !== "opacity") return;
+    hideShellIfReady();
+  }
 
   function startLoad(): void {
     if (loadStarted || Live !== null) return;
@@ -173,6 +183,17 @@
     };
   });
 
+  $effect(() => {
+    if (!liveReady) {
+      shellVisible = true;
+      return;
+    }
+    const fallback = window.setTimeout(hideShellIfReady, 250);
+    return () => {
+      window.clearTimeout(fallback);
+    };
+  });
+
   // After keyboard-triggered upgrade, move focus into the plot so Tab order
   // does not jump to <body> when the load button unmounts (#1362).
   // Retry after READY_FALLBACK_MS reveals before the plot has a focus target.
@@ -212,17 +233,21 @@
   onfocusout={onShellFocusOut}
   style={frameStyle}
 >
-  {#if !liveReady}
+  {#if shellVisible}
     <img
       class="example-preview"
       class:under-live={Live !== null}
+      class:fade-out={liveReady}
       src={`${base}${previewPath}`}
       alt={title}
       {width}
       {height}
       decoding="async"
       fetchpriority="high"
+      ontransitionend={onPreviewTransitionEnd}
     />
+  {/if}
+  {#if !liveReady}
     <!-- Stay mounted and focusable while the import resolves (no disabled blur). -->
     <button
       type="button"
@@ -269,6 +294,11 @@
     width: 100%;
     height: auto;
     background: #fff;
+    transition: opacity var(--duration-popover) var(--ease-out);
+  }
+
+  .example-preview.fade-out {
+    opacity: 0;
   }
 
   .example-preview.under-live {

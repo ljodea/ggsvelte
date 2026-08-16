@@ -252,7 +252,8 @@ pill shapes.
   edge-docked drawer enter/exit (`transform` + backdrop opacity), origin-aware popover
   open (opacity + light scale from the trigger), click-opened search dialog (opacity +
   `scale(0.97)` from center on wide viewports; opacity only on the full-viewport dialog),
-  press scale on controls (`scale(0.97)`), and opacity icon crossfades. Shared tokens live
+  press scale on controls (`scale(0.97)`), outgoing static chart-shell fade (live
+  plots snap in; marks do not fade), and opacity icon crossfades. Shared tokens live
   under `:root` in `apps/docs/src/styles/tokens.css` (`--ease-out`, `--ease-drawer`,
   duration tokens). Under `prefers-reduced-motion: reduce` (and VR / visual-test),
   durations collapse — including `::backdrop`, which is not matched by `*`. Meaning never
