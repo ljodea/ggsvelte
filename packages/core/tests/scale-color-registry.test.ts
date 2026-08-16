@@ -1,0 +1,93 @@
+/**
+ * Color-kind registration: unused resolvers stay off the headless graph.
+ *
+ * Seam A (in-process) cannot assert a missing sequential resolver because
+ * bunfig preload calls registerAll(). Seam B uses a fresh process.
+ */
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+
+import { describe, expect, it } from "bun:test";
+
+import { getColorScaleResolver } from "../src/pipeline/scale-color-registry.ts";
+import { registerAll, registerBasic } from "../src/register.ts";
+import { registerOrdinalColor } from "../src/pipeline/register-color-ordinal.ts";
+import { registerSequentialColor } from "../src/pipeline/register-color-sequential.ts";
+
+describe("color-kind registration (Seam A)", () => {
+  it("registerAll and registerBasic install every color kind", () => {
+    registerBasic();
+    registerAll();
+    for (const kind of ["ordinal", "sequential", "binned", "manual", "identity"] as const) {
+      expect(getColorScaleResolver(kind), kind).toBeDefined();
+    }
+    expect(() => {
+      registerOrdinalColor();
+      registerSequentialColor();
+    }).not.toThrow();
+  });
+});
+
+describe("color-kind registration (Seam B)", () => {
+  it("unregistered sequential throws; registerSequentialColor unlocks it", () => {
+    const coreRoot = path.resolve(import.meta.dir, "..");
+    const script = `
+      import { renderToSVGString } from ${JSON.stringify(path.join(coreRoot, "src", "headless-entry.ts"))};
+      import { registerBasicPoints } from ${JSON.stringify(path.join(coreRoot, "src", "headless-register-entry.ts"))};
+      import { registerOrdinalColor } from ${JSON.stringify(path.join(coreRoot, "src", "pipeline", "register-color-ordinal.ts"))};
+      import { registerSequentialColor } from ${JSON.stringify(path.join(coreRoot, "src", "pipeline", "register-color-sequential.ts"))};
+      import { aes, gg } from "@ggsvelte/spec/portable";
+
+      const discrete = [
+        { x: 1, y: 2, g: "a" },
+        { x: 2, y: 3, g: "b" },
+      ];
+      const continuous = [
+        { x: 1, y: 2, z: 0.1 },
+        { x: 2, y: 3, z: 0.9 },
+      ];
+      const attempt = (fn) => {
+        try {
+          fn();
+          return "rendered";
+        } catch (error) {
+          return String(error instanceof Error ? error.message : error);
+        }
+      };
+      const renderDiscrete = () =>
+        renderToSVGString(gg(discrete, aes({ x: "x", y: "y", color: "g" })).geomPoint(), {
+          width: 200,
+          height: 120,
+        });
+      const renderSequential = () =>
+        renderToSVGString(gg(continuous, aes({ x: "x", y: "y", color: "z" })).geomPoint(), {
+          width: 200,
+          height: 120,
+        });
+
+      registerBasicPoints();
+      const out = {
+        sequentialFresh: attempt(renderSequential),
+        discreteFresh: attempt(renderDiscrete),
+      };
+      registerOrdinalColor();
+      out.discreteAfterOrdinal = attempt(renderDiscrete);
+      out.sequentialAfterOrdinal = attempt(renderSequential);
+      registerSequentialColor();
+      out.sequentialAfterSequential = attempt(renderSequential);
+      console.log(JSON.stringify(out));
+    `;
+    const proc = spawnSync(process.execPath, ["-e", script], {
+      cwd: coreRoot,
+      encoding: "utf8",
+    });
+    expect(proc.status).toBe(0, proc.stderr || proc.stdout);
+    const out = JSON.parse(proc.stdout.trim().split("\n").at(-1) ?? "{}") as Record<string, string>;
+    expect(out.sequentialFresh).toContain("not registered");
+    expect(out.sequentialFresh).toContain("registerSequentialColor");
+    expect(out.discreteFresh).toContain("not registered");
+    expect(out.discreteAfterOrdinal).toBe("rendered");
+    expect(out.sequentialAfterOrdinal).toContain("not registered");
+    expect(out.sequentialAfterSequential).toBe("rendered");
+  }, 60_000);
+});

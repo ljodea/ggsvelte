@@ -5,6 +5,7 @@ import {
   registerBasicBars,
   registerBasicLines,
   registerBasicPoints,
+  registerOrdinalColor,
 } from "@ggsvelte/core/headless/register";
 import {
   bundleAreaCanvas,
@@ -32,6 +33,7 @@ beforeAll(() => {
   registerBasicLines();
   registerBasicAreas();
   registerBasicBars();
+  registerOrdinalColor();
 });
 
 const options = { width: PLOT_WIDTH, height: PLOT_HEIGHT };

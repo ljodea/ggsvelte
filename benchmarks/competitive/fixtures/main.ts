@@ -24,6 +24,7 @@ import {
   registerBasicBars,
   registerBasicLines,
   registerBasicPoints,
+  registerOrdinalColor,
 } from "@ggsvelte/core/headless/register";
 
 import { mountChartJs } from "../adapters/chartjs";
@@ -55,6 +56,7 @@ registerBasicPoints();
 registerBasicLines();
 registerBasicAreas();
 registerBasicBars();
+registerOrdinalColor();
 
 type MountHandle = {
   destroy: () => void;
