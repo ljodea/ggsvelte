@@ -162,10 +162,7 @@
     color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     cursor: pointer;
     font: 600 0.82rem/1 var(--body-font);
-    transition:
-      background-color 120ms ease,
-      color 120ms ease,
-      transform var(--duration-press) var(--ease-out);
+    transition: transform var(--duration-press) var(--ease-out);
   }
 
   /* 36px visual height, 44px hit height (DESIGN.md hit-region floor). */
