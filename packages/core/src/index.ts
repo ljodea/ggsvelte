@@ -29,6 +29,12 @@ export { installCandidates } from "./install-candidates.js";
 
 // Per-family registration: granular opt-in for spec-driven apps, and the
 // mechanism <Geom*> components use to self-register (#1422-generated shells).
+export { registerAllColorKinds } from "./pipeline/register-color-all.js";
+export { registerBinnedColor } from "./pipeline/register-color-binned.js";
+export { registerIdentityColor } from "./pipeline/register-color-identity.js";
+export { registerManualColor } from "./pipeline/register-color-manual.js";
+export { registerOrdinalColor } from "./pipeline/register-color-ordinal.js";
+export { registerSequentialColor } from "./pipeline/register-color-sequential.js";
 export { registerBasicAreas } from "./pipeline/register-basic-areas.js";
 export { registerBasicBars } from "./pipeline/register-basic-bars.js";
 export { registerBasicGlyphs } from "./pipeline/register-basic-glyphs.js";

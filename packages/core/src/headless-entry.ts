@@ -2,9 +2,9 @@
 /**
  * Side-effect-free headless pipeline and pure renderers.
  *
- * Unlike `@ggsvelte/core/render`, this entry registers no geom or stat
- * families. Import the required `registerBasic*` functions from
- * `@ggsvelte/core/headless/register` before running a spec.
+ * Unlike `@ggsvelte/core/render`, this entry registers no geom, stat, or
+ * color-kind families. Import the required `registerBasic*` / `register*Color`
+ * functions from `@ggsvelte/core/headless/register` before running a spec.
  */
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
 export { runPipeline } from "./pipeline/run-pipeline.js";

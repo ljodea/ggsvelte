@@ -19,7 +19,7 @@ import { render } from "../helpers/render.js";
 import { collect, settled } from "../helpers/diagnostic-harness.js";
 
 // Violin / errorbar need their package-level registrars (stat + geom batch);
-// the browser lane setup only runs registerAllGeomBatches / StatFrames.
+// the browser lane setup registers geoms, stats, and color kinds only.
 registerViolin();
 registerErrorbar();
 

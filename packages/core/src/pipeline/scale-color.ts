@@ -13,15 +13,36 @@ import {
   collectColorChannelValues,
   countNullColorChannelValues,
 } from "./scale-color-collect.js";
-import { resolveBinnedColorScale } from "./scale-color-binned.js";
-import { resolveIdentityColorScale } from "./scale-color-identity.js";
-import { resolveManualColorScale } from "./scale-color-manual.js";
-import { resolveOrdinalColorScale } from "./scale-color-ordinal.js";
-import { resolveSequentialColorScale } from "./scale-color-sequential.js";
+import {
+  getColorScaleResolver,
+  type ColorScaleKind,
+  type ColorScaleResolveInput,
+} from "./scale-color-registry.js";
 import type { ColorResolution } from "./scale-color-types.js";
+import { PipelineError } from "./types.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export type { ColorResolution } from "./scale-color-types.js";
+
+const COLOR_KIND_REGISTER: Record<ColorScaleKind, string> = {
+  ordinal: "registerOrdinalColor",
+  sequential: "registerSequentialColor",
+  binned: "registerBinnedColor",
+  manual: "registerManualColor",
+  identity: "registerIdentityColor",
+};
+
+function resolveRegistered(type: ColorScaleKind, input: ColorScaleResolveInput): ColorResolution {
+  const resolve = getColorScaleResolver(type);
+  if (resolve === undefined) {
+    throw new PipelineError(
+      "unsupported-param",
+      `/scales/${input.name}`,
+      `Color scale type "${type}" is not registered in this build. Call ${COLOR_KIND_REGISTER[type]}() from @ggsvelte/core/headless/register once at startup, or registerBasic() from @ggsvelte/core.`,
+    );
+  }
+  return resolve(input);
+}
 
 export function resolveColorScale(
   name: "color" | "fill",
@@ -56,67 +77,30 @@ export function resolveColorScale(
     });
   }
 
+  const catalogValues = catalog.catalogValues;
+  const shared = {
+    name,
+    catalogValues,
+    anyDiscreteField,
+    config,
+    prevState,
+    legendTitle,
+    warnings,
+    advisories,
+    editionDefaults,
+  };
+
   // Ordinal: train on the unfiltered source catalog when available.
   if (type === "ordinal") {
-    let domainValues = catalog.catalogValues;
+    let domainValues = catalogValues;
     if (domainValues.length === 0) {
       // No source field (stat-only color): fall back to frame values.
       domainValues = collectColorChannelValues(name, frames, table).values;
     }
-    return resolveOrdinalColorScale({
-      name,
-      values: domainValues.filter((value) => value !== null),
-      config,
-      prevState,
-      legendTitle,
-      warnings,
-      advisories,
-      editionDefaults,
-    });
+    return resolveRegistered("ordinal", { ...shared, values: domainValues });
   }
 
   // Sequential / binned / manual / identity still need the per-row values.
   const values = collectColorChannelValues(name, frames, table).values;
-
-  if (type === "sequential") {
-    return resolveSequentialColorScale({
-      name,
-      values,
-      anyDiscreteField,
-      config,
-      legendTitle,
-      warnings,
-      advisories,
-      editionDefaults,
-    });
-  }
-
-  if (type === "binned") {
-    return resolveBinnedColorScale({
-      name,
-      values,
-      config: config ?? { type: "binned" },
-      legendTitle,
-      warnings,
-      editionDefaults,
-    });
-  }
-  if (type === "manual") {
-    return resolveManualColorScale({
-      name,
-      values: catalog.catalogValues.length > 0 ? catalog.catalogValues : values,
-      observedValues: values,
-      config: config ?? { type: "manual", range: [] },
-      legendTitle,
-      warnings,
-    });
-  }
-  // identity
-  return resolveIdentityColorScale({
-    name,
-    values,
-    config: config ?? { type: "identity" },
-    legendTitle,
-    warnings,
-  });
+  return resolveRegistered(type, { ...shared, values });
 }

@@ -5090,6 +5090,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerAllColorKinds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerAllGeomBatches": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5135,6 +5139,10 @@
           "lifecycle": "experimental"
         },
         "registerBin2d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerBinnedColor": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5194,6 +5202,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerIdentityColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerLinerange": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5202,7 +5214,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerManualColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerMap": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerOrdinalColor": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5231,6 +5251,10 @@
           "lifecycle": "experimental"
         },
         "registerRug": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSequentialColor": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5791,7 +5815,27 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerBinnedColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerGeomBatch": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerIdentityColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerManualColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerOrdinalColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerSequentialColor": {
           "kind": "value",
           "lifecycle": "experimental"
         },
