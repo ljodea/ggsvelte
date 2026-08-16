@@ -486,6 +486,20 @@
     position: relative;
   }
 
+  /*
+   * Keep the card painted on close. Chromium/WebKit interpolate
+   * content-visibility with allow-discrete; Firefox still snap-closes.
+   */
+  .docs-mobile-tools details::details-content {
+    content-visibility: hidden;
+    transition: content-visibility var(--duration-popover-exit) allow-discrete;
+  }
+
+  .docs-mobile-tools details[open]::details-content {
+    content-visibility: visible;
+    transition: content-visibility var(--duration-popover) allow-discrete;
+  }
+
   .docs-mobile-tools details .on-this-page {
     position: absolute;
     right: 0;
@@ -498,6 +512,7 @@
     background: var(--paper);
     box-shadow: 0 8px 24px color-mix(in srgb, #000 12%, transparent);
     transform-origin: top right;
+    pointer-events: none;
     opacity: 0;
     transform: scale(0.97);
     transition:
@@ -506,6 +521,7 @@
   }
 
   .docs-mobile-tools details[open] .on-this-page {
+    pointer-events: auto;
     opacity: 1;
     transform: scale(1);
     transition:
