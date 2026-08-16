@@ -44,7 +44,8 @@ describe("tooltip first-appear and last-leave motion", () => {
 
     pointerMoveAt(capture, first.x, first.y);
     await until(() => container.querySelector(".gg-tooltip") !== null);
-    expect(container.querySelector(".gg-tooltip")?.dataset.ggTooltipMotion).toBe("enter");
+    const firstTooltip = container.querySelector<HTMLElement>(".gg-tooltip");
+    expect(firstTooltip?.dataset.ggTooltipMotion).toBe("enter");
     expect(container.querySelector(".gg-tooltip-ghost")).toBeNull();
 
     const emptyX = panel.x + 8;
@@ -55,7 +56,8 @@ describe("tooltip first-appear and last-leave motion", () => {
 
     pointerMoveAt(capture, second.x, second.y);
     await until(() => container.querySelector(".gg-tooltip") !== null);
-    expect(container.querySelector(".gg-tooltip")?.dataset.ggTooltipMotion).toBeUndefined();
+    const secondTooltip = container.querySelector<HTMLElement>(".gg-tooltip");
+    expect(secondTooltip?.dataset.ggTooltipMotion).toBeUndefined();
 
     capture.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
     await until(
