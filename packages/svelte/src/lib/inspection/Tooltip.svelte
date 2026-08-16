@@ -24,8 +24,10 @@
     onclose,
     onenter,
     onleave,
+    onexited,
     id,
     docked = false,
+    motion = "none",
     labs = null,
     fontSizePx = 12.5,
     /** Whether inspect pinning is enabled (drives instructional footers). */
@@ -51,8 +53,10 @@
     onclose?: (source: "pointer" | "keyboard") => void;
     onenter?: () => void;
     onleave?: () => void;
+    onexited?: () => void;
     id?: string;
     docked?: boolean;
+    motion?: "enter" | "none" | "exit";
     /** Plot labs used for default tooltip field labels (#752). */
     labs?: TooltipFieldLabs | null;
     /**
@@ -167,29 +171,46 @@
   const showStackTotal = $derived(
     stackTotal !== null && displayMembers.length > 1,
   );
+
+  const departing = $derived(motion === "exit");
+  const liveInteractive = $derived(
+    !departing && interactive && inspection.state === "pinned",
+  );
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
   bind:this={tooltipElement}
-  {id}
-  class="gg-tooltip"
-  class:gg-tooltip-interactive={interactive}
-  class:gg-tooltip-pinned={inspection.state === "pinned"}
+  id={departing ? undefined : id}
+  class={departing ? "gg-tooltip-ghost" : "gg-tooltip"}
+  class:gg-tooltip-interactive={!departing && interactive}
+  class:gg-tooltip-pinned={!departing && inspection.state === "pinned"}
   class:gg-tooltip-docked={docked}
+  data-gg-tooltip-motion={motion === "enter" ? "enter" : undefined}
   {style}
-  role={interactive && inspection.state === "pinned" ? "dialog" : "tooltip"}
-  tabindex={interactive && inspection.state === "pinned" ? -1 : undefined}
-  aria-label={interactive && inspection.state === "pinned"
-    ? "Data inspection"
-    : undefined}
-  onpointerenter={onenter}
-  onpointerleave={onleave}
-  onkeydown={(event) => {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      onclose?.("keyboard");
-    }
+  role={liveInteractive ? "dialog" : departing ? undefined : "tooltip"}
+  tabindex={liveInteractive ? -1 : undefined}
+  aria-label={liveInteractive ? "Data inspection" : undefined}
+  aria-hidden={departing ? true : undefined}
+  inert={departing ? true : undefined}
+  onpointerenter={departing ? undefined : onenter}
+  onpointerleave={departing ? undefined : onleave}
+  onkeydown={departing
+    ? undefined
+    : (event) => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          onclose?.("keyboard");
+        }
+      }}
+  ontransitionend={(event) => {
+    if (
+      motion !== "exit" ||
+      event.target !== event.currentTarget ||
+      event.propertyName !== "opacity"
+    )
+      return;
+    onexited?.();
   }}
 >
   {#if content !== undefined}
@@ -233,13 +254,14 @@
       <p class="gg-tooltip-hint">Click to pin</p>
     {/if}
   {/if}
-  {#if inspection.state === "pinned" && interactive}
+  {#if liveInteractive}
     <button type="button" onclick={() => onclose?.("pointer")}>Close</button>
   {/if}
 </div>
 
 <style>
-  .gg-tooltip {
+  .gg-tooltip,
+  .gg-tooltip-ghost {
     position: absolute;
     pointer-events: none;
     z-index: auto;
@@ -279,6 +301,22 @@
     overflow-wrap: anywhere;
     box-shadow: var(--gg-tooltip-shadow, none);
     user-select: text;
+  }
+
+  .gg-tooltip[data-gg-tooltip-motion="enter"],
+  .gg-tooltip-ghost {
+    transition: opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .gg-tooltip[data-gg-tooltip-motion="enter"] {
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  .gg-tooltip-ghost {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .gg-tooltip-docked {
@@ -361,7 +399,8 @@
   }
 
   @media (forced-colors: active) {
-    .gg-tooltip {
+    .gg-tooltip,
+    .gg-tooltip-ghost {
       border-color: CanvasText;
       background: Canvas;
       color: CanvasText;
