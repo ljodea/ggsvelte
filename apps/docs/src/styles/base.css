@@ -361,4 +361,10 @@ pre {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+
+  /* ::details-content is also not matched by * */
+  *::details-content {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
