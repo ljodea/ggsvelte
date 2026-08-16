@@ -10,6 +10,7 @@
     PresentationAnchor,
     PresentationChrome,
   } from "../selection/selection.js";
+  import { inspectGuideAxes } from "../inspection/inspect-guide-axes.js";
   import {
     crosshairGapForBox,
     gappedCrosshairSegmentsWithObstacles,
@@ -122,6 +123,11 @@
         )
       : [],
   );
+  const guideAxes = $derived(
+    inspection === null
+      ? { vertical: false, horizontal: false }
+      : inspectGuideAxes(inspection.mode, coordFlipped),
+  );
 </script>
 
 <svg
@@ -132,7 +138,7 @@
   aria-hidden="true"
 >
   {#if interactive && inspection !== null}
-    {#if inspection.mode === "xy" || (inspection.mode === "x" && !coordFlipped) || (inspection.mode === "y" && coordFlipped)}
+    {#if guideAxes.vertical}
       {#if inspectionPanel}
         {#each verticalCrosshair as segment, i (`v-${i}`)}
           <line
@@ -153,7 +159,7 @@
         {/if}
       {/if}
     {/if}
-    {#if inspection.mode === "xy" || (inspection.mode === "y" && !coordFlipped) || (inspection.mode === "x" && coordFlipped)}
+    {#if guideAxes.horizontal}
       {#if inspectionPanel}
         {#each horizontalCrosshair as segment, i (`h-${i}`)}
           <line
