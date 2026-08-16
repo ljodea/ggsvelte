@@ -9,6 +9,7 @@
 
   import { Tabs } from "bits-ui";
 
+  import { benchmarkChartSrc } from "$lib/benchmarks/asset-url";
   import { BENCHMARK_CHART_CARDS } from "$lib/generated/benchmark-charts";
 
   const cards = BENCHMARK_CHART_CARDS;
@@ -30,7 +31,7 @@
         <div class="bench-tabs-chart">
           <img
             class="bench-chart-img bench-chart--light"
-            src={`${base}${card.path}`}
+            src={`${base}${benchmarkChartSrc(card.path, card.sha256)}`}
             alt={card.alt}
             width={card.width}
             height={card.height}
@@ -38,7 +39,7 @@
           />
           <img
             class="bench-chart-img bench-chart--dark"
-            src={`${base}${card.darkPath}`}
+            src={`${base}${benchmarkChartSrc(card.darkPath, card.sha256)}`}
             alt={card.alt}
             width={card.width}
             height={card.height}

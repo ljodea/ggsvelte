@@ -28,6 +28,10 @@ test("homepage first viewport leads with title, bench tabs, then featured exampl
   await expect(page.getByRole("tab", { name: "Scatter", exact: true })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Scatter 10k" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Scatter 100k" })).toHaveCount(0);
+  await expect(page.locator(".bench-chart--light").first()).toHaveAttribute(
+    "src",
+    /\/benchmarks\/bench-area-mount\.svg\?v=[0-9a-f]{64}$/,
+  );
   await expect(page.getByRole("button", { name: "Copy install" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Examples", level: 2 })).toHaveCount(0);

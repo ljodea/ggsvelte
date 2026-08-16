@@ -217,15 +217,18 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
 
   const subtitle = "Cold-mount milliseconds · lower is better";
   const formSubtitle = "Cold-mount milliseconds · lower is better · SveltePlot omitted";
-  // Any array order is fine: benchmarkChartSpec ranks bars by value.
+  // Sort by mount time so first-seen data order matches the pinned band
+  // domain. The spec still owns display rank (domain + reverse).
   const bars = (c: PeerCell): readonly BenchmarkBar[] =>
-    [
-      { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
-      { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
-      { lib: "TanStack", value: c.ts, kind: "peer", label: msLabel(c.ts) },
-      { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
-      { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
-    ] as const;
+    (
+      [
+        { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
+        { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
+        { lib: "TanStack", value: c.ts, kind: "peer", label: msLabel(c.ts) },
+        { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
+        { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
+      ] as const satisfies readonly BenchmarkBar[]
+    ).toSorted((a, b) => a.value - b.value || a.lib.localeCompare(b.lib));
 
   /**
    * Six form-factor rows ordered by cold-mount rank (fastest top). ggsvelte
