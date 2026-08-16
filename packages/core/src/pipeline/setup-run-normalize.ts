@@ -63,6 +63,7 @@ function preflightTemporalLabels(spec: PortableSpec): void {
 }
 
 export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): NormalizedSpec {
+  const authoredScales = spec.scales as Record<string, unknown> | undefined;
   const normalized = normalize(spec);
   // Preserve the stable pipeline diagnostic before the portable schema rejects
   // the same closed-token violation as a generic shape error.
@@ -72,13 +73,19 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Normal
   assertStructuralGate(normalized);
 
   const temporalScaleErrors: SpecError[] = [];
-  for (const axis of ["x", "y"] as const) {
-    const mismatch = temporalGuideTypeMismatchError(
-      normalized.scales as Record<string, unknown> | undefined,
-      axis,
-    );
-    if (mismatch !== null) temporalScaleErrors.push(mismatch);
-  }
+  const seen = new Set<string>();
+  const collect = (scales: Record<string, unknown> | undefined) => {
+    for (const axis of ["x", "y"] as const) {
+      const mismatch = temporalGuideTypeMismatchError(scales, axis);
+      if (mismatch === null || seen.has(mismatch.path)) continue;
+      seen.add(mismatch.path);
+      temporalScaleErrors.push(mismatch);
+    }
+  };
+  // After normalize first so log→linear reports the canonical type. Then the
+  // authored spec, because normalize strips temporal options from band scales.
+  collect(normalized.scales as Record<string, unknown> | undefined);
+  collect(authoredScales);
   if (temporalScaleErrors.length > 0) throw new SpecValidationError(temporalScaleErrors);
 
   for (const axis of ["x", "y"] as const) {

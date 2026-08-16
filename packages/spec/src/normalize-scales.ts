@@ -46,9 +46,20 @@ function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
 
 function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
   if (scale.type === "band") {
-    // Keep contradictory temporal guide options so the TypeBox-free render
-    // gate can reject them the same way validate() does (band + dateLabels).
-    return { ...scale };
+    const {
+      temporalKind: _,
+      parse: __,
+      parseFailure: ___,
+      timezone: ____,
+      disambiguation: _____,
+      dateBreaks: ______,
+      dateMinorBreaks: _______,
+      dateLabels: ________,
+      locale: _________,
+      weekStart: __________,
+      ...band
+    } = scale;
+    return band;
   }
   // Canonical log10: an authored `type: "log"` (base-10) IS the linear family
   // with the log10 transform. A conflicting explicit transform (identity/sqrt)
