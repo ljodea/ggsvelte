@@ -21,6 +21,7 @@ import type { Scene } from "../scene.js";
 import type { CellValue, ColumnTable } from "../table.js";
 import type { SourceRegistry } from "./source-registry.js";
 import { createIdentityCandidateDatumResolver } from "./candidate-construction/datum.js";
+import { stackOrFillInspectY } from "./candidate-construction/datum-values.js";
 import { createLazyIdentityIndex } from "./candidate-construction/identity-index.js";
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
@@ -135,16 +136,64 @@ function createRawResolverState(
   return { stateFor, constantsFor, colorOrdinal, fillOrdinal };
 }
 
+function sourceBackedRewritesInspectY(
+  frame: FinalizedLayerFrame | undefined,
+  batchKind: Scene["batches"][number]["kind"] | undefined,
+): boolean {
+  if (frame === undefined || batchKind === "paths") return false;
+  const geom = frame.binding.layer.geom;
+  if (geom !== "bar" && geom !== "col") return false;
+  const position = frame.binding.layer.position ?? "identity";
+  return (position === "stack" || position === "fill") && frame.binding.yTransform === undefined;
+}
+
+function frameRowForSourceRow(
+  frame: FinalizedLayerFrame,
+  sourceRow: number | null,
+  primitiveIndex: number,
+): number {
+  const fallback = Math.min(primitiveIndex, Math.max(0, frame.n - 1));
+  if (sourceRow === null) return fallback;
+  // Dense path: primitive still indexes the same frame row.
+  if (frame.rowIndex[fallback] === sourceRow) return fallback;
+  // Compacted rects (dropped earlier slots): recover the original frame row.
+  const idx = frame.rowIndex.indexOf(sourceRow);
+  return idx >= 0 ? idx : fallback;
+}
+
+function sourceBackedInspectY(
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[],
+  scene: Scene,
+  facts: {
+    panelIndex: number;
+    layerIndex: number;
+    batchIndex: number;
+    primitiveIndex: number;
+    sourceRow: number | null;
+  },
+  fallback: CellValue,
+): CellValue {
+  const batch = scene.batches[facts.batchIndex];
+  const frame = panelFrames[facts.panelIndex]?.[facts.layerIndex];
+  if (frame === undefined || !sourceBackedRewritesInspectY(frame, batch?.kind)) return fallback;
+  return stackOrFillInspectY(
+    frame,
+    frameRowForSourceRow(frame, facts.sourceRow, facts.primitiveIndex),
+    fallback,
+  );
+}
+
 function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
   sources: SourceRegistry,
   color: ResolvedColorScale | null,
   fill: ResolvedColorScale | null,
   lineage: LineageStore<number>,
-  shared?: ReturnType<typeof createRawResolverState>,
+  shared: ReturnType<typeof createRawResolverState>,
+  scene: Scene,
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[],
 ): (facts: CandidateBuildFacts) => CandidateDatum {
-  const { stateFor, constantsFor, colorOrdinal, fillOrdinal } =
-    shared ?? createRawResolverState(bindings, color, fill);
+  const { stateFor, constantsFor, colorOrdinal, fillOrdinal } = shared;
   return (facts) => {
     const binding = bindings[facts.layerIndex];
     const sourceRow = facts.rowIndex;
@@ -179,7 +228,18 @@ function createRawCandidateDatumResolver(
     const autoMode = candidateAutoMode(binding, facts.primitiveIndex);
     return {
       xValue: read(state.x),
-      yValue: read(state.y),
+      yValue: sourceBackedInspectY(
+        panelFrames,
+        scene,
+        {
+          panelIndex: facts.panelIndex,
+          layerIndex: facts.layerIndex,
+          batchIndex: facts.batchIndex,
+          primitiveIndex: facts.primitiveIndex,
+          sourceRow: facts.rowIndex,
+        },
+        read(state.y),
+      ),
       sizeValue: readStyle(state.size),
       linewidthValue: readStyle(state.linewidth),
       alphaValue: readStyle(state.alpha),
@@ -294,8 +354,9 @@ function createRawCandidateDatumColumnsResolver(input: {
   fill: ResolvedColorScale | null;
   lineage: LineageStore<number>;
   shared: ReturnType<typeof createRawResolverState>;
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
 }): (facts: CandidateBatchFacts) => CandidateDatumColumns | null {
-  const { scene, bindings, sources, lineage, shared } = input;
+  const { scene, bindings, sources, lineage, shared, panelFrames } = input;
   const { stateFor, constantsFor, colorOrdinal, fillOrdinal } = shared;
 
   const contiguousColumns = (
@@ -340,9 +401,34 @@ function createRawCandidateDatumColumnsResolver(input: {
     const lineageCol = new Uint32Array(count);
     for (let i = 0; i < count; i++) lineageCol[i] = lineage.internSingleton(facts.rowIds[i]!);
 
+    const sourceY = state.y === null ? null : slice(state.y);
+    const rewriteY = sourceBackedRewritesInspectY(
+      panelFrames[facts.panelIndex]?.[facts.layerIndex],
+      scene.batches[facts.batchIndex]?.kind,
+    );
+    let yValue: CandidateDatumColumns["yValue"] = sourceY;
+    if (rewriteY && sourceY !== null) {
+      const rewritten = Array.from<CellValue>({ length: count });
+      for (let i = 0; i < count; i++) {
+        rewritten[i] = sourceBackedInspectY(
+          panelFrames,
+          scene,
+          {
+            panelIndex: facts.panelIndex,
+            layerIndex: facts.layerIndex,
+            batchIndex: facts.batchIndex,
+            primitiveIndex: facts.semanticIds[i]!,
+            sourceRow: facts.rowIds[i] === NO_ROW ? null : facts.rowIds[i]!,
+          },
+          sourceY[i] ?? null,
+        );
+      }
+      yValue = rewritten;
+    }
+
     return {
       xValue: state.x === null ? null : slice(state.x),
-      yValue: state.y === null ? null : slice(state.y),
+      yValue,
       sizeValue: styleColumn(state.size, slice),
       linewidthValue: styleColumn(state.linewidth, slice),
       alphaValue: styleColumn(state.alpha, slice),
@@ -399,7 +485,18 @@ function createRawCandidateDatumColumnsResolver(input: {
       const readStyle = (style: StyleRead): CellValue =>
         style.column === null ? style.constant : localRow < 0 ? null : style.column[localRow]!;
       xValues[i] = read(state.x);
-      yValues[i] = read(state.y);
+      yValues[i] = sourceBackedInspectY(
+        panelFrames,
+        scene,
+        {
+          panelIndex: facts.panelIndex,
+          layerIndex: facts.layerIndex,
+          batchIndex: facts.batchIndex,
+          primitiveIndex: facts.semanticIds[i]!,
+          sourceRow: rowId === NO_ROW ? null : rowId,
+        },
+        read(state.y),
+      );
       styleScratch.size[i] = readStyle(state.size) ?? null;
       styleScratch.linewidth[i] = readStyle(state.linewidth) ?? null;
       styleScratch.alpha[i] = readStyle(state.alpha) ?? null;
@@ -496,18 +593,28 @@ function buildSourceBackedCandidates(input: {
   runId: number;
   flip: boolean;
   bindings: readonly LayerBinding[];
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   sources: SourceRegistry;
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
   lineage: LineageStore<number>;
 }): CandidateStore {
-  const { scene, runId, flip, bindings, sources, color, fill, lineage } = input;
+  const { scene, runId, flip, bindings, panelFrames, sources, color, fill, lineage } = input;
   const shared = createRawResolverState(bindings, color, fill);
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
     uninspectableLayers: uninspectableLayers(bindings),
-    datum: createRawCandidateDatumResolver(bindings, sources, color, fill, lineage, shared),
+    datum: createRawCandidateDatumResolver(
+      bindings,
+      sources,
+      color,
+      fill,
+      lineage,
+      shared,
+      scene,
+      panelFrames,
+    ),
     datumColumns: createRawCandidateDatumColumnsResolver({
       scene,
       bindings,
@@ -516,6 +623,7 @@ function buildSourceBackedCandidates(input: {
       fill,
       lineage,
       shared,
+      panelFrames,
     }),
   });
 }

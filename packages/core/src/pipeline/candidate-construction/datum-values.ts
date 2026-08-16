@@ -98,22 +98,31 @@ export function resolveCandidateLogicalValues(input: {
         : sourceValue(xField)
       : (frame?.box?.outlierX[primitiveIndex] ?? null);
 
-  // Stack/fill rewrite ymin/ymax (and yNumeric after position-bar). Prefer the
-  // post-position segment height so identity cols and stat bars both report the
-  // drawn share/contribution — not the pre-position source column.
-  const stackHeight = stackOrFillSegmentHeight(frame, frameRow);
+  const fallbackY =
+    sourceRow === null || yField === undefined
+      ? frameLogicalY(frame, frameRow)
+      : sourceValue(yField);
 
   const yValue = annotationRule
     ? annotationY
     : outlierSourceRow === null
-      ? stackHeight === undefined
-        ? sourceRow === null || yField === undefined
-          ? frameLogicalY(frame, frameRow)
-          : sourceValue(yField)
-        : semanticFrameNumber(frame, "y", stackHeight)
+      ? stackOrFillInspectY(frame, frameRow, fallbackY)
       : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);
 
   return { xValue, yValue };
+}
+
+/**
+ * Inspect y after stack/fill: post-position height when the layer is a
+ * bar-like stack/fill without a y transform; otherwise `fallback`.
+ */
+export function stackOrFillInspectY(
+  frame: LayerFrame | undefined,
+  frameRow: number,
+  fallback: CellValue,
+): CellValue {
+  const stackHeight = stackOrFillSegmentHeight(frame, frameRow);
+  return stackHeight === undefined ? fallback : semanticFrameNumber(frame, "y", stackHeight);
 }
 
 /**
