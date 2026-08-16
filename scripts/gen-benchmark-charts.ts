@@ -38,8 +38,8 @@ const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "benchm
 const CHART_WIDTH = 560;
 /** Extra vertical room for labs title + subtitle bands (22 + 16 px) and 5 peer bars. */
 const CHART_HEIGHT_5 = 335;
-/** Same title chrome + seven form-factor rows (ggsvelte SVG/canvas + peers). */
-const CHART_HEIGHT_7 = 425;
+/** Same title chrome + six form-factor rows (ggsvelte SVG/canvas + peers; no SveltePlot). */
+const CHART_HEIGHT_6 = 380;
 
 interface BrowserResults {
   readonly generatedAt: string;
@@ -143,14 +143,15 @@ type PeerCell = { gg: number; lc: number; sp: number; uv: number; ts: number };
 
 /**
  * Form-factor cold-mount cell: both ggsvelte paths + LayerCake SVG/canvas +
- * SveltePlot + Unovis + TanStack Svelte. Used for 100k-scale homepage tabs.
+ * Unovis + TanStack Svelte. Used for 100k-scale homepage tabs. SveltePlot is
+ * measured in the 100k harness but omitted from these charts — its mount time
+ * stretches the axis so the other bars collapse.
  */
 type FormFactorCell = {
   ggSvg: number;
   ggCanvas: number;
   lcSvg: number;
   lcCanvas: number;
-  sp: number;
   uv: number;
   ts: number;
 };
@@ -168,13 +169,13 @@ function assertSvgPeerWin(name: string, c: PeerCell): void {
 /**
  * Multi-form 100k charts show canvas LayerCake for honesty (it can beat
  * ggsvelte on some cells). Claim discipline: ggsvelte SVG must still beat the
- * SVG peers (LayerCake SVG, SveltePlot, Unovis, TanStack Svelte).
+ * SVG peers drawn on the chart (LayerCake SVG, Unovis, TanStack Svelte).
  */
 function assertFormFactorSvgWin(name: string, c: FormFactorCell): void {
-  if (!(c.ggSvg < c.lcSvg && c.ggSvg < c.sp && c.ggSvg < c.uv && c.ggSvg < c.ts)) {
+  if (!(c.ggSvg < c.lcSvg && c.ggSvg < c.uv && c.ggSvg < c.ts)) {
     throw new Error(
       `${name}: ggsvelte SVG (${String(c.ggSvg)} ms) no longer beats SVG peers ` +
-        `(LayerCake ${String(c.lcSvg)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms, TanStack ${String(c.ts)} ms). ` +
+        `(LayerCake ${String(c.lcSvg)} ms, Unovis ${String(c.uv)} ms, TanStack ${String(c.ts)} ms). ` +
         "Drop the chart from buildCards().",
     );
   }
@@ -195,7 +196,6 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     ggCanvas: mountMs(peers100k, "ggsvelte-canvas", caseId),
     lcSvg: mountMs(peers100k, "layercake", caseId),
     lcCanvas: mountMs(peers100k, "layercake-canvas", caseId),
-    sp: mountMs(peers100k, "svelteplot", caseId),
     uv: mountMs(peers100k, "unovis", caseId),
     ts: mountMs(peers100k, "tanstack-svelte", caseId),
   });
@@ -217,6 +217,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
   for (const [name, c] of Object.entries(formCells)) assertFormFactorSvgWin(name, c);
 
   const subtitle = "Cold-mount milliseconds · lower is better";
+  const formSubtitle = "Cold-mount milliseconds · lower is better · SveltePlot omitted";
   // Display order top→bottom: ggsvelte first, then peers by cold-mount rank.
   // charts.ts reverses for the coord-flip band domain so the first entry paints on top.
   const bars = (c: PeerCell): readonly BenchmarkBar[] =>
@@ -231,6 +232,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
   /**
    * Six form-factor rows ordered by cold-mount rank (fastest top). ggsvelte
    * bars stay shaded via kind; they do not jump the queue when a peer wins.
+   * SveltePlot is omitted so a 25–60s bar does not flatten the rest.
    */
   const formBars = (c: FormFactorCell): readonly BenchmarkBar[] =>
     (
@@ -241,7 +243,6 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
         { lib: "LayerCake canvas", value: c.lcCanvas, kind: "peer", label: msLabel(c.lcCanvas) },
         { lib: "TanStack", value: c.ts, kind: "peer", label: msLabel(c.ts) },
         { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
-        { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
       ] as const satisfies readonly BenchmarkBar[]
     ).toSorted((a, b) => a.value - b.value);
 
@@ -252,8 +253,8 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
   const formAria = (what: string, c: FormFactorCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte SVG ${msLabel(c.ggSvg)}, ` +
     `ggsvelte canvas ${msLabel(c.ggCanvas)}, LayerCake ${msLabel(c.lcSvg)}, ` +
-    `LayerCake canvas ${msLabel(c.lcCanvas)}, TanStack ${msLabel(c.ts)}, Unovis ${msLabel(c.uv)}, ` +
-    `SveltePlot ${msLabel(c.sp)}. Lower is better.`;
+    `LayerCake canvas ${msLabel(c.lcCanvas)}, TanStack ${msLabel(c.ts)}, Unovis ${msLabel(c.uv)}. ` +
+    `Lower is better. SveltePlot is omitted because it is too slow for this scale.`;
 
   const card = (
     id: string,
@@ -287,14 +288,14 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     id,
     tab,
     title,
-    subtitle,
+    subtitle: formSubtitle,
     width: CHART_WIDTH,
-    height: CHART_HEIGHT_7,
+    height: CHART_HEIGHT_6,
     chart: {
       id,
       bars: formBars(c),
       title,
-      subtitle,
+      subtitle: formSubtitle,
       ariaLabel: formAria(ariaWhat, c),
     },
   });

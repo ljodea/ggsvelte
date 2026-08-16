@@ -6,12 +6,13 @@
  *
  * Claim discipline (enforced in scripts/gen-benchmark-charts.ts): classic
  * five-bar charts require ggsvelte-svg to beat LayerCake SVG, SveltePlot,
- * Unovis, and TanStack Charts Svelte. Seven-bar form-factor charts (100k)
- * shade every ggsvelte path and still require the SVG path to beat those SVG
- * peers; LayerCake canvas may win a cell and is shown for honesty. Conventions
- * follow bun.sh: subject bars use the brand accent, peer bars stay grey,
- * value labels sit at bar ends, and time benchmarks ("faster") use horizontal
- * bars.
+ * Unovis, and TanStack Charts Svelte. Six-bar form-factor charts (100k)
+ * shade every ggsvelte path and still require the SVG path to beat LayerCake
+ * SVG, Unovis, and TanStack Charts Svelte. SveltePlot is omitted from those
+ * charts because its mount time stretches the axis. LayerCake canvas may win
+ * a cell and is shown for honesty. Conventions follow bun.sh: subject bars
+ * use the brand accent, peer bars stay grey, value labels sit at bar ends,
+ * and time benchmarks ("faster") use horizontal bars.
  */
 import { registerAll, renderToSVGString } from "@ggsvelte/core";
 

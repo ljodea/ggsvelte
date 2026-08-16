@@ -46,7 +46,9 @@ The docs homepage and repo README chart cells under claim discipline in
 no longer beats LayerCake SVG, SveltePlot, Unovis, and TanStack Charts Svelte).
 Five-bar tabs use the default `measure:browser` matrix; the Scatter 100k /
 Line 100k tabs use both form factors (ggsvelte SVG + canvas, LayerCake SVG +
-canvas, SveltePlot, Unovis, TanStack Svelte) from `measure-100k-peers.ts`. After
+canvas, Unovis, TanStack Svelte) from `measure-100k-peers.ts`. SveltePlot is
+still measured in that harness, but the 100k charts omit it — its mount time
+stretches the axis so the other bars collapse. After
 re-measuring, regenerate from the
 repo root:
 
