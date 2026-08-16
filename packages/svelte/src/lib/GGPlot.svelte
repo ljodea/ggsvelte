@@ -39,7 +39,16 @@
   import type { CellValue } from "@ggsvelte/core";
   import { sceneLabel } from "@ggsvelte/core";
 
-  import type { ZoomDomains } from "./interaction/interaction.js";
+  import type {
+    PlotInspectionChange,
+    ZoomDomains,
+  } from "./interaction/interaction.js";
+  import {
+    TOOLTIP_MOTION_MS,
+    prefersReducedMotion,
+    resolveTooltipDismissReason,
+    resolveTooltipMotion,
+  } from "./inspection/tooltip-motion.js";
   import { provideRegistry } from "./geoms/registry.svelte.js";
   import { shouldRenderInteractionLiveRegion } from "./legend/surface.js";
   import { resolveInteractionLiveText } from "./assembly/labels.js";
@@ -101,6 +110,88 @@
     chromeState,
     announcer,
   } = engine;
+
+  const tooltipSession = { active: false };
+  let pointerOnCapture = false;
+  let pendingExplicitClose = false;
+  let lastLiveInspection: PlotInspectionChange<
+    Record<string, CellValue>,
+    PropertyKey
+  > | null = null;
+  let ghostInspection = $state<PlotInspectionChange<
+    Record<string, CellValue>,
+    PropertyKey
+  > | null>(null);
+  const ghostEpoch = { n: 0 };
+  let ghostTimer: ReturnType<typeof setTimeout> | undefined;
+  let hadLiveInspection = false;
+  let tooltipSyncFrame = 0;
+
+  function chartReducedMotion(): boolean {
+    if (typeof matchMedia !== "function") return false;
+    return prefersReducedMotion(matchMedia("(prefers-reduced-motion: reduce)"));
+  }
+
+  function clearTooltipGhost(generation: number): void {
+    if (generation !== ghostEpoch.n) return;
+    ghostInspection = null;
+    if (ghostTimer !== undefined) {
+      clearTimeout(ghostTimer);
+      ghostTimer = undefined;
+    }
+  }
+
+  function startTooltipGhost(
+    snapshot: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
+  ): void {
+    ghostEpoch.n += 1;
+    const generation = ghostEpoch.n;
+    ghostInspection = snapshot;
+    if (ghostTimer !== undefined) clearTimeout(ghostTimer);
+    ghostTimer = setTimeout(
+      () => clearTooltipGhost(generation),
+      TOOLTIP_MOTION_MS + 50,
+    );
+  }
+
+  function queueTooltipSync(): void {
+    if (tooltipSyncFrame !== 0) return;
+    tooltipSyncFrame = requestAnimationFrame(() => {
+      tooltipSyncFrame = 0;
+      syncTooltipPresence();
+    });
+  }
+
+  function syncTooltipPresence(): void {
+    const current = inspectionState.inspection;
+    const present = current !== null;
+    if (current !== null) lastLiveInspection = current;
+    if (present === hadLiveInspection) return;
+    hadLiveInspection = present;
+    if (present) {
+      const next = resolveTooltipMotion({
+        reason: "hit",
+        sessionActive: tooltipSession.active,
+        reducedMotion: chartReducedMotion(),
+      });
+      tooltipSession.active = next.sessionActive;
+      clearTooltipGhost(ghostEpoch.n);
+      return;
+    }
+    const reason = resolveTooltipDismissReason({
+      explicitClose: pendingExplicitClose,
+      pointerOnCapture,
+    });
+    pendingExplicitClose = false;
+    const next = resolveTooltipMotion({
+      reason,
+      sessionActive: tooltipSession.active,
+      reducedMotion: chartReducedMotion(),
+    });
+    tooltipSession.active = next.sessionActive;
+    if (next.phase === "exit" && lastLiveInspection !== null)
+      startTooltipGhost(lastLiveInspection);
+  }
 
   /**
    * Clear committed grow-mode scale state and any brush zoom so the next
@@ -258,16 +349,48 @@
         })}
         onFocus={() => {
           if (inspectionState.inspection === null) inspectionState.navigate(1);
+          queueTooltipSync();
         }}
-        onBlur={surfaceState.onSurfaceBlur}
-        onPointerMove={surfaceState.onPointerMove}
-        onPointerLeave={surfaceState.onPointerLeave}
-        onPointerDown={surfaceState.onPointerDown}
-        onPointerUp={surfaceState.onPointerUp}
-        onPointerCancel={surfaceState.onPointerCancel}
-        onLostPointerCapture={surfaceState.onLostPointerCapture}
-        onClick={surfaceState.onCaptureClick}
-        onKeyDown={surfaceState.onSurfaceKeyDown}
+        onBlur={(event) => {
+          pendingExplicitClose = true;
+          surfaceState.onSurfaceBlur(event);
+          queueTooltipSync();
+        }}
+        onPointerMove={(event) => {
+          pointerOnCapture = true;
+          surfaceState.onPointerMove(event);
+          queueTooltipSync();
+        }}
+        onPointerLeave={() => {
+          pointerOnCapture = false;
+          surfaceState.onPointerLeave();
+          queueMicrotask(queueTooltipSync);
+        }}
+        onPointerDown={(event) => {
+          surfaceState.onPointerDown(event);
+          queueTooltipSync();
+        }}
+        onPointerUp={(event) => {
+          surfaceState.onPointerUp(event);
+          queueTooltipSync();
+        }}
+        onPointerCancel={() => {
+          surfaceState.onPointerCancel();
+          queueTooltipSync();
+        }}
+        onLostPointerCapture={() => {
+          surfaceState.onLostPointerCapture();
+          queueTooltipSync();
+        }}
+        onClick={(event) => {
+          surfaceState.onCaptureClick(event);
+          queueTooltipSync();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") pendingExplicitClose = true;
+          surfaceState.onSurfaceKeyDown(event);
+          queueTooltipSync();
+        }}
         onDblClick={zoomState.onDblClick}
       />
       {#if inspectionState.inspection !== null}
@@ -290,6 +413,9 @@
             inspectionState: currentInspection.state,
             widthPx: runtime.resolvedWidth,
           })}
+          motion={!tooltipSession.active && !chartReducedMotion()
+            ? "enter"
+            : "none"}
           labs={engine.assembled?.labs ?? null}
           fontSizePx={currentModel.scene.theme.fontSize}
           pin={engine.interactionConfig.inspect?.pin ?? true}
@@ -300,8 +426,39 @@
             engine.tooltipHovered = false;
             if (inspectionState.inspection?.state !== "pinned")
               inspectionState.setInspection(null, "pointer");
+            queueTooltipSync();
           }}
-          onclose={(source) => inspectionState.closeInspection(source, true)}
+          onclose={(source) => {
+            pendingExplicitClose = true;
+            inspectionState.closeInspection(source, true);
+            queueTooltipSync();
+          }}
+        />
+      {/if}
+      {#if ghostInspection !== null}
+        {@const ghostSize = tooltipViewportSize({
+          sceneWidth: currentModel.scene.width,
+          sceneHeight: currentModel.scene.height,
+          clientWidth: root?.clientWidth,
+          clientHeight: root?.clientHeight,
+        })}
+        {@const ghostGenerationAtMount = ghostEpoch.n}
+        <Tooltip
+          inspection={ghostInspection}
+          width={ghostSize.width}
+          height={ghostSize.height}
+          content={engine.interactionConfig.inspect?.content}
+          docked={isTooltipDocked({
+            inspectionState: ghostInspection.state,
+            widthPx: runtime.resolvedWidth,
+          })}
+          motion="exit"
+          labs={engine.assembled?.labs ?? null}
+          fontSizePx={currentModel.scene.theme.fontSize}
+          pin={engine.interactionConfig.inspect?.pin ?? true}
+          tooltipBorder={currentModel.scene.theme.tooltipBorder}
+          axisFormatters={currentModel.axisFormatters}
+          onexited={() => clearTooltipGhost(ghostGenerationAtMount)}
         />
       {/if}
     {/if}
