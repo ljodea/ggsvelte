@@ -6,8 +6,8 @@ import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "
 import { areaOutlineActive, linetypeDash, markLinetype, resolvePathMark } from "../mark-style.js";
 import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
 import type { Linetype } from "../scales/style.js";
-import type { ThemeTokens } from "../theme.js";
-import { themeVar } from "../theme.js";
+import type { ThemeTokens } from "../theme-construct.js";
+import { themeVar } from "../theme-resolve.js";
 import { stepCorners } from "../path-step.js";
 import { ringCuts } from "../ring-cuts.js";
 import type { ColorResolver } from "./canvas-dom.js";

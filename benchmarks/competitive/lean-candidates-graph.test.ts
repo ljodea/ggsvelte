@@ -17,6 +17,7 @@ const LEAN_BANNED = /candidate-store|candidate-hit-|build-candidates|candidate-c
 const SCATTER_BANNED =
   /geometry-(?:paths-line|paths-area|ribbon|rects|edge-rects|segments|segment-finite|glyphs)/;
 const AUTHORING_BANNED = /(?:portable-)?builder(?:-|\.)/;
+const THEME_CATALOG_BANNED = /theme-builtins/;
 
 async function buildEntry(entryName: string): Promise<{ moduleIds: string[]; rawBytes: number }> {
   const outDir = path.join(root, "results", "bundles", `_lean-candidates-test-${entryName}`);
@@ -69,6 +70,7 @@ describe("lean competitive SVG graph", () => {
     expectCandidateFree(built, 500_000);
     expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => AUTHORING_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => THEME_CATALOG_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });
 
@@ -78,5 +80,6 @@ describe("lean competitive canvas graph", () => {
     expectCandidateFree(built, 475_000);
     expect(built.moduleIds.filter((id) => SCATTER_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => AUTHORING_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => THEME_CATALOG_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });

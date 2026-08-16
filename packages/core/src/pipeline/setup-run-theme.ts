@@ -3,9 +3,9 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { EditionDefaults } from "../editions.js";
-import type { ThemeTokens } from "../theme.js";
-import { resolveTheme, UnknownThemeError } from "../theme.js";
+import type { EditionDefaults } from "../editions-resolve.js";
+import type { ThemeTokens } from "../theme-construct.js";
+import { resolveTheme, UnknownThemeError } from "../theme-resolve.js";
 
 import { PipelineError } from "./types.js";
 

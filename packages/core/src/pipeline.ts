@@ -48,4 +48,4 @@ export { PipelineError, batchMarkCount } from "./pipeline/public-api.js";
 // registration. bunfig.toml preload keeps unit tests on the full grammar.
 // Interaction candidates install via installCandidates() (#1421).
 
-export { runPipeline } from "./pipeline/run-pipeline.js";
+export { runPipeline } from "./pipeline/run-pipeline-full.js";

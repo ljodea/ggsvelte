@@ -20,7 +20,7 @@ registerBasicStatFrames();
 registerBasicGeomBatches();
 
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
-export { runPipeline } from "./pipeline/run-pipeline.js";
+export { runPipeline } from "./pipeline/run-pipeline-full.js";
 export type {
   Advisory,
   AxisValueFormatter,

@@ -7,8 +7,8 @@
  */
 import { resolveRectMark } from "../mark-style.js";
 import type { RectsBatch } from "../scene.js";
-import type { ThemeTokens } from "../theme.js";
-import { themeVar } from "../theme.js";
+import type { ThemeTokens } from "../theme-construct.js";
+import { themeVar } from "../theme-resolve.js";
 import type { ColorResolver } from "./canvas-dom.js";
 
 function applyResolvedDash(ctx: CanvasRenderingContext2D, dash: readonly number[]): void {
