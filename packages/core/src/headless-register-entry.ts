@@ -12,6 +12,8 @@ export { registerIdentityColor } from "./pipeline/register-color-identity.js";
 export { registerManualColor } from "./pipeline/register-color-manual.js";
 export { registerOrdinalColor } from "./pipeline/register-color-ordinal.js";
 export { registerSequentialColor } from "./pipeline/register-color-sequential.js";
+export { registerContinuousLegend } from "./legend-register-continuous.js";
+export { registerDiscreteLegend } from "./legend-register-discrete.js";
 export { registerBandGuide } from "./layout/register-band-guide.js";
 export { registerGeomBatch } from "./pipeline/geometry-registry.js";
 export { registerStatFrame } from "./pipeline/frame-stats-registry.js";

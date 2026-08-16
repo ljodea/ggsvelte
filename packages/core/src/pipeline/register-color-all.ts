@@ -1,3 +1,5 @@
+import { registerContinuousLegend } from "../legend-register-continuous.js";
+import { registerDiscreteLegend } from "../legend-register-discrete.js";
 import { resolveBinnedColorScale } from "./scale-color-binned.js";
 import { resolveIdentityColorScale } from "./scale-color-identity.js";
 import { resolveManualColorScale } from "./scale-color-manual.js";
@@ -16,6 +18,8 @@ let registered = false;
 export function registerAllColorKinds(): void {
   if (registered) return;
   registered = true;
+  registerDiscreteLegend();
+  registerContinuousLegend();
   registerColorScaleResolver("ordinal", (input) => {
     const domainValues = input.catalogValues.length > 0 ? input.catalogValues : input.values;
     return resolveOrdinalColorScale({

@@ -29,6 +29,8 @@ export { installCandidates } from "./install-candidates.js";
 
 // Per-family registration: granular opt-in for spec-driven apps, and the
 // mechanism <Geom*> components use to self-register (#1422-generated shells).
+export { registerContinuousLegend } from "./legend-register-continuous.js";
+export { registerDiscreteLegend } from "./legend-register-discrete.js";
 export { registerBandGuide } from "./layout/register-band-guide.js";
 export { registerAllColorKinds } from "./pipeline/register-color-all.js";
 export { registerBinnedColor } from "./pipeline/register-color-binned.js";

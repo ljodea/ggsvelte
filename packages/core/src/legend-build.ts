@@ -9,8 +9,7 @@
  */
 import type { TextMeasurer } from "./layout/measure.js";
 import type { SceneLegend } from "./scene.js";
-import { buildRamp, buildSteps } from "./legend-build-continuous.js";
-import { buildDiscrete } from "./legend-build-discrete.js";
+import { getContinuousLegendBuilders, getDiscreteLegendBuilder } from "./legend-build-registry.js";
 import type { LegendInput, LegendOrder } from "./legend-build-types.js";
 
 export type {
@@ -32,7 +31,21 @@ export function buildForPosition(
   maxWidth: number,
   position: "right" | "bottom",
 ): SceneLegend {
-  if (input.kind === "discrete") return buildDiscrete(input, order, measurer, maxWidth, position);
-  if (input.kind === "steps") return buildSteps(input, measurer, maxWidth, position);
-  return buildRamp(input, measurer, maxWidth, position);
+  if (input.kind === "discrete") {
+    const build = getDiscreteLegendBuilder();
+    if (build === undefined) {
+      throw new Error(
+        `Discrete legend is not registered in this build. Call registerDiscreteLegend() or registerOrdinalColor() from @ggsvelte/core/headless/register, or registerBasic() from @ggsvelte/core.`,
+      );
+    }
+    return build(input, order, measurer, maxWidth, position);
+  }
+  const builders = getContinuousLegendBuilders();
+  if (builders === undefined) {
+    throw new Error(
+      `Continuous legend is not registered in this build. Call registerContinuousLegend() or registerSequentialColor() from @ggsvelte/core/headless/register, or registerBasic() from @ggsvelte/core.`,
+    );
+  }
+  if (input.kind === "steps") return builders.steps(input, measurer, maxWidth, position);
+  return builders.ramp(input, measurer, maxWidth, position);
 }

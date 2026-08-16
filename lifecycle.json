@@ -5158,6 +5158,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerContinuousLegend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerContour": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5179,6 +5183,10 @@
           "lifecycle": "experimental"
         },
         "registerDensity2dFilled": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDiscreteLegend": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5824,6 +5832,14 @@
           "lifecycle": "experimental"
         },
         "registerBinnedColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerContinuousLegend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerDiscreteLegend": {
           "kind": "value",
           "lifecycle": "experimental"
         },
