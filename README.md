@@ -55,18 +55,18 @@ and Windows.
 
 ## Why ggsvelte?
 
-| Capability                                 | ggsvelte   | TanStack | SveltePlot           | Unovis                 | LayerCake            |
-| ------------------------------------------ | ---------- | -------- | -------------------- | ---------------------- | -------------------- |
-| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 108 KB  | ✅ 57 KB | ⚠️ 109 KB            | ✅ 80 KB               | ✅ 41 KB             |
-| **API stability**                          | ⚠️ v0.38.1 | ⚠️ v0.14 | ⚠️ v0.14             | ✅ v1.6                | ✅ v10               |
-| **Headless server-side SVG** (no DOM)      | ✅         | ✅       | ❌ empty shell       | ❌ client `onMount`    | ⚠️ opt-in `ssr` flag |
-| **Portable JSON spec + schema**            | ✅         | ❌       | ❌                   | ❌                     | ❌                   |
-| **CLI validator + renderer**               | ✅         | ❌       | ❌                   | ❌                     | ❌                   |
-| **Agent skill**                            | ✅         | ✅       | ❌                   | ❌                     | ❌                   |
-| **Automatic temporal detection**           | ✅         | ❌       | ⚠️ Date objects only | ❌                     | ❌                   |
-| **Built-in interactions**                  | ✅         | ✅       | ⚠️ tooltip + brush   | ⚠️ tooltip + crosshair | ❌                   |
-| **ggplot2 API**                            | ✅         | ❌       | ❌                   | ❌                     | ❌                   |
-| **Scale, axis & coord control**            | ✅         | ✅       | ✅                   | ✅                     | ⚠️ d3 scales         |
+| Capability                                 | ggsvelte   | TanStack | SveltePlot | Unovis   | LayerCake |
+| ------------------------------------------ | ---------- | -------- | ---------- | -------- | --------- |
+| **Bundle size** (min+gzip, 1k scatter app) | ⚠️ 108 KB  | ✅ 57 KB | ⚠️ 109 KB  | ✅ 80 KB | ✅ 41 KB  |
+| **API stability**                          | ⚠️ v0.38.1 | ⚠️ v0.14 | ⚠️ v0.14   | ✅ v1.6  | ✅ v10    |
+| **Headless server-side SVG** (no DOM)      | ✅         | ✅       | ❌         | ❌       | ⚠️ opt-in |
+| **Portable JSON spec + schema**            | ✅         | ❌       | ❌         | ❌       | ❌        |
+| **CLI validator + renderer**               | ✅         | ❌       | ❌         | ❌       | ❌        |
+| **Agent skill**                            | ✅         | ✅       | ❌         | ❌       | ❌        |
+| **Automatic temporal detection**           | ✅         | ❌       | ⚠️ Some    | ❌       | ❌        |
+| **Built-in interactions**                  | ✅         | ✅       | ⚠️ Some    | ⚠️ Some  | ❌        |
+| **ggplot2 API**                            | ✅         | ❌       | ❌         | ❌       | ❌        |
+| **Scale, axis & coord control**            | ✅         | ✅       | ✅         | ✅       | ⚠️ d3     |
 
 ## Reference
 
