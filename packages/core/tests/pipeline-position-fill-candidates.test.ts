@@ -55,6 +55,52 @@ describe("position fill — candidate y matches axis space", () => {
     expect(model.axisFormatters.y(soldiers.yValue)).not.toContain("873");
   });
 
+  it("publishes the same fill shares for identity-stat cols (source-backed)", () => {
+    // geomCol + mapped y keeps stat identity, so construction is source-backed.
+    // Inspect y must still be the post-position share, not the source column.
+    const model = runPipeline(
+      gg(
+        naples.map((row) => ({ squadron: row.squadron, role: row.role, men: row.men })),
+        aes({ x: "squadron", y: "men", fill: "role" }),
+      )
+        .geomCol({ position: "fill" })
+        .scales({ y: { labels: ".0%" } })
+        .spec(),
+      size,
+    );
+
+    const candidates = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    ).filter((c) => c !== null);
+
+    expect(candidates.length).toBe(2);
+    const yValues = candidates.map((c) => c.yValue as number).toSorted((a, b) => a - b);
+    expect(yValues[0]).toBeCloseTo(468 / (873 + 468), 8);
+    expect(yValues[1]).toBeCloseTo(873 / (873 + 468), 8);
+    expect(model.axisFormatters.y(yValues[1])).toBe("65%");
+    expect(model.axisFormatters.y(yValues[0])).toBe("35%");
+  });
+
+  it("publishes stack segment heights for identity-stat cols (source-backed)", () => {
+    const model = runPipeline(
+      gg(
+        naples.map((row) => ({ squadron: row.squadron, role: row.role, men: row.men })),
+        aes({ x: "squadron", y: "men", fill: "role" }),
+      )
+        .geomCol({ position: "stack" })
+        .spec(),
+      size,
+    );
+    const yValues = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    )
+      .filter((c) => c !== null)
+      .map((c) => c.yValue as number)
+      .toSorted((a, b) => a - b);
+    expect(yValues[0]).toBeCloseTo(468, 8);
+    expect(yValues[1]).toBeCloseTo(873, 8);
+  });
+
   it("keeps stack candidate y as the segment height (raw contribution)", () => {
     const model = runPipeline(
       gg([...naples], aes({ x: "squadron", fill: "role", weight: "men" }))

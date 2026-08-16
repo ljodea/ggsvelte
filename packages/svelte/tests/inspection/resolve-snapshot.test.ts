@@ -739,9 +739,14 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
     }
     expect(filledInspection.mode).toBe("x");
     if (filledInspection.mode === "x" || filledInspection.mode === "y") {
-      // Fill still contributes source y magnitudes for the stack Total.
-      expect(filledInspection.groupTotal).toBe(15);
+      // Fill inspect y is the post-position share; Total sums those shares.
+      expect(filledInspection.groupTotal).toBeCloseTo(1, 8);
       expect(filledInspection.groupMemberCount).toBe(5);
+      const fillYs = filledInspection.members
+        .map((m) => Number(m.fields.find((f) => f.channel === "y")?.value))
+        .toSorted((a, b) => a - b);
+      expect(fillYs[0]).toBeCloseTo(1 / 15, 8);
+      expect(fillYs[4]).toBeCloseTo(5 / 15, 8);
     }
     expect(dodgedInspection.mode).toBe("x");
     if (dodgedInspection.mode === "x" || dodgedInspection.mode === "y") {

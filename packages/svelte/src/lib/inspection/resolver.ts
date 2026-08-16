@@ -315,6 +315,14 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
       if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
       return { ...field, value: null };
     }
+    // Stack/fill publish the post-position measure on the candidate. The source
+    // row still holds the pre-position column (counts / raw y), so identity
+    // cols would otherwise show 873 while Total sums shares.
+    const position = model.layerPositions?.[candidate.layerIndex];
+    if ((position === "stack" || position === "fill") && field.channel === "y") {
+      const fromCandidate = candidateValue(field.channel);
+      if (fromCandidate !== undefined) return { ...field, value: fromCandidate };
+    }
     if (row !== null) {
       return { ...field, value: row[field.field] ?? null };
     }
