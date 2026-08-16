@@ -219,10 +219,56 @@
     background: var(--paper);
     color: var(--ink);
     box-shadow: 0 18px 60px color-mix(in srgb, #000 24%, transparent);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.97);
+    transform-origin: center;
+    transition:
+      opacity var(--duration-modal-exit) var(--ease-out),
+      transform var(--duration-modal-exit) var(--ease-out),
+      overlay var(--duration-modal-exit) allow-discrete,
+      display var(--duration-modal-exit) allow-discrete;
+  }
+
+  .site-search[open] {
+    pointer-events: auto;
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--duration-modal-enter) var(--ease-out),
+      transform var(--duration-modal-enter) var(--ease-out),
+      overlay var(--duration-modal-enter) allow-discrete,
+      display var(--duration-modal-enter) allow-discrete;
+  }
+
+  @starting-style {
+    .site-search[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
   }
 
   .site-search::backdrop {
     background: color-mix(in srgb, #000 45%, transparent);
+    opacity: 0;
+    transition:
+      opacity var(--duration-modal-exit) var(--ease-out),
+      overlay var(--duration-modal-exit) allow-discrete,
+      display var(--duration-modal-exit) allow-discrete;
+  }
+
+  .site-search[open]::backdrop {
+    opacity: 1;
+    transition:
+      opacity var(--duration-backdrop) var(--ease-out),
+      overlay var(--duration-modal-enter) allow-discrete,
+      display var(--duration-modal-enter) allow-discrete;
+  }
+
+  @starting-style {
+    .site-search[open]::backdrop {
+      opacity: 0;
+    }
   }
 
   .site-search__panel {
@@ -366,6 +412,26 @@
       margin: 0;
       border: 0;
       border-radius: 0;
+      transform: none;
+      transition:
+        opacity var(--duration-modal-exit) var(--ease-out),
+        overlay var(--duration-modal-exit) allow-discrete,
+        display var(--duration-modal-exit) allow-discrete;
+    }
+
+    .site-search[open] {
+      transform: none;
+      transition:
+        opacity var(--duration-modal-enter) var(--ease-out),
+        overlay var(--duration-modal-enter) allow-discrete,
+        display var(--duration-modal-enter) allow-discrete;
+    }
+
+    @starting-style {
+      .site-search[open] {
+        opacity: 0;
+        transform: none;
+      }
     }
 
     .site-search__panel {

@@ -70,6 +70,8 @@
   --duration-drawer-exit: 220ms;
   --duration-backdrop: 250ms;
   --duration-icon: 140ms;
+  --duration-modal-enter: 200ms;
+  --duration-modal-exit: 150ms;
   color-scheme: light;
 }
 
