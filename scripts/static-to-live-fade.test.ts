@@ -25,6 +25,7 @@ describe("static-to-live shell fade", () => {
       /\.example-preview[^{]*\{[^}]*opacity\s+var\(--duration-popover\)\s+var\(--ease-out\)/s,
     );
     expect(css).toMatch(/\.example-preview\.fade-out[^{]*\{[^}]*opacity:\s*0/s);
+    expect(css).toMatch(/\.example-preview\.fade-out[^{]*\{[^}]*pointer-events:\s*none/s);
     expect(css).not.toMatch(/\.live-host[^{]*\{[^}]*transition/s);
   });
 

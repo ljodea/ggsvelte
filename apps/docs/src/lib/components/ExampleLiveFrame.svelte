@@ -299,6 +299,7 @@
 
   .example-preview.fade-out {
     opacity: 0;
+    pointer-events: none;
   }
 
   .example-preview.under-live {
