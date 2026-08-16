@@ -319,6 +319,59 @@ describe("createPointerInspectQueue", () => {
     barModel.dispose();
   });
 
+  it("does not teleport between qq_line endpoints mid-stroke under coord_flip auto", () => {
+    const qqModel = runPipeline(
+      gg(
+        [
+          { value: 1.1 },
+          { value: 2.0 },
+          { value: 2.6 },
+          { value: 3.1 },
+          { value: 3.4 },
+          { value: 3.9 },
+          { value: 4.2 },
+          { value: 4.8 },
+          { value: 5.3 },
+          { value: 5.9 },
+          { value: 6.7 },
+          { value: 8.1 },
+        ],
+        aes({ sample: "value" }),
+      )
+        .geomQqLine({ linewidth: 3.2 })
+        .coordFlip()
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(qqModel.candidates.size).toBe(2);
+    const left = qqModel.candidates.candidate(0)!;
+    const right = qqModel.candidates.candidate(1)!;
+    const midX = (left.x + right.x) / 2;
+    const midY = (left.y + right.y) / 2;
+    const queued: QueuedInspect[] = [];
+    const queue = createPointerInspectQueue({
+      model: () => qqModel,
+      reducer: () =>
+        makeReducer({
+          frameToken: () => token(21),
+          queuePointer: (action) => {
+            if (action.type === "inspect") queued.push(action);
+          },
+        }),
+      inspectionState: () => "none",
+      setInspection: noopCancel,
+    });
+    queue.schedule({
+      point: { x: midX, y: midY },
+      source: "pointer",
+      mode: "auto",
+      maxDistance: 24,
+    });
+    // Flip must not invent a second hit authority: mid-stroke stays quiet.
+    expect(queued[0]?.candidate ?? null).toBeNull();
+    qqModel.dispose();
+  });
+
   it("does not teleport between qq_line endpoints mid-stroke under mode x or auto", () => {
     // Regression: nearest(mode=x) misses mid-line (anchor maxDistance), then
     // hitTest returned the path stroke and flipped left/right endpoints.

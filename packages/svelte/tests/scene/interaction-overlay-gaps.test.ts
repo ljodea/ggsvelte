@@ -21,17 +21,21 @@ function emptyDatum(anchor: { x: number; y: number }) {
   };
 }
 
-function xyInspection(focus: { x: number; y: number }) {
+function modeInspection(mode: "exact" | "x" | "y" | "xy", focus: { x: number; y: number }) {
   return {
     type: "inspect" as const,
     phase: "change" as const,
     state: "transient" as const,
     source: "keyboard" as const,
     panelId: "p0",
-    mode: "xy" as const,
+    mode,
     focus: emptyDatum(focus),
     members: [emptyDatum(focus)] as const,
   };
+}
+
+function xyInspection(focus: { x: number; y: number }) {
+  return modeInspection("xy", focus);
 }
 
 describe("InteractionOverlay crosshair glyph gaps (#1207)", () => {
@@ -156,5 +160,45 @@ describe("InteractionOverlay glyph box chrome", () => {
     expect(Number(selectedBox?.getAttribute("width"))).toBe(selected.width);
     expect(Number(emphasizedBox?.getAttribute("x"))).toBeCloseTo(expectedEmphasized.x, 5);
     expect(Number(emphasizedBox?.getAttribute("width"))).toBe(emphasized.width);
+  });
+});
+
+describe("InteractionOverlay inspect guide axes", () => {
+  const panel = { x: 40, y: 20, width: 200, height: 160 };
+  const focus = { x: 120, y: 100 };
+
+  function countGuides(mode: "exact" | "x" | "y" | "xy", coordFlipped: boolean) {
+    const { container } = render(InteractionOverlay, {
+      width: 280,
+      height: 220,
+      interactive: true,
+      inspection: modeInspection(mode, focus),
+      inspectionPanel: panel,
+      coordFlipped,
+      hoverChrome: "none",
+    });
+    const lines = [...container.querySelectorAll<SVGLineElement>(".gg-crosshair")];
+    const vertical = lines.filter(
+      (line) => Number(line.getAttribute("x1")) === Number(line.getAttribute("x2")),
+    ).length;
+    const horizontal = lines.filter(
+      (line) => Number(line.getAttribute("y1")) === Number(line.getAttribute("y2")),
+    ).length;
+    return { vertical, horizontal };
+  }
+
+  it("paints no guides for exact, both for xy, and swaps x/y under flip", () => {
+    expect(countGuides("exact", false)).toEqual({ vertical: 0, horizontal: 0 });
+    expect(countGuides("exact", true)).toEqual({ vertical: 0, horizontal: 0 });
+    expect(countGuides("xy", false).vertical).toBeGreaterThan(0);
+    expect(countGuides("xy", false).horizontal).toBeGreaterThan(0);
+    expect(countGuides("x", false).vertical).toBeGreaterThan(0);
+    expect(countGuides("x", false).horizontal).toBe(0);
+    expect(countGuides("x", true).vertical).toBe(0);
+    expect(countGuides("x", true).horizontal).toBeGreaterThan(0);
+    expect(countGuides("y", false).vertical).toBe(0);
+    expect(countGuides("y", false).horizontal).toBeGreaterThan(0);
+    expect(countGuides("y", true).vertical).toBeGreaterThan(0);
+    expect(countGuides("y", true).horizontal).toBe(0);
   });
 });
