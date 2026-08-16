@@ -1,3 +1,4 @@
+import { registerDiscreteLegend } from "../legend-register-discrete.js";
 import { resolveIdentityColorScale } from "./scale-color-identity.js";
 import { registerColorScaleResolver } from "./scale-color-registry.js";
 
@@ -7,6 +8,7 @@ let registered = false;
 export function registerIdentityColor(): void {
   if (registered) return;
   registered = true;
+  registerDiscreteLegend();
   registerColorScaleResolver("identity", (input) =>
     resolveIdentityColorScale({
       name: input.name,

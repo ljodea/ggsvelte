@@ -1,3 +1,4 @@
+import { registerContinuousLegend } from "../legend-register-continuous.js";
 import { resolveBinnedColorScale } from "./scale-color-binned.js";
 import { registerColorScaleResolver } from "./scale-color-registry.js";
 
@@ -7,6 +8,7 @@ let registered = false;
 export function registerBinnedColor(): void {
   if (registered) return;
   registered = true;
+  registerContinuousLegend();
   registerColorScaleResolver("binned", (input) =>
     resolveBinnedColorScale({
       name: input.name,

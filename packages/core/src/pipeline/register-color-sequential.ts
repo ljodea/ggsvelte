@@ -1,3 +1,4 @@
+import { registerContinuousLegend } from "../legend-register-continuous.js";
 import { resolveSequentialColorScale } from "./scale-color-sequential.js";
 import { registerColorScaleResolver } from "./scale-color-registry.js";
 
@@ -7,6 +8,7 @@ let registered = false;
 export function registerSequentialColor(): void {
   if (registered) return;
   registered = true;
+  registerContinuousLegend();
   registerColorScaleResolver("sequential", (input) =>
     resolveSequentialColorScale({
       name: input.name,

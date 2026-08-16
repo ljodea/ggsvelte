@@ -1,3 +1,4 @@
+import { registerDiscreteLegend } from "../legend-register-discrete.js";
 import { resolveOrdinalColorScale } from "./scale-color-ordinal.js";
 import { registerColorScaleResolver } from "./scale-color-registry.js";
 
@@ -7,6 +8,7 @@ let registered = false;
 export function registerOrdinalColor(): void {
   if (registered) return;
   registered = true;
+  registerDiscreteLegend();
   registerColorScaleResolver("ordinal", (input) => {
     const domainValues = input.catalogValues.length > 0 ? input.catalogValues : input.values;
     return resolveOrdinalColorScale({

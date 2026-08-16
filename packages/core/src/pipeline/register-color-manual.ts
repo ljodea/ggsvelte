@@ -1,3 +1,4 @@
+import { registerDiscreteLegend } from "../legend-register-discrete.js";
 import { resolveManualColorScale } from "./scale-color-manual.js";
 import { registerColorScaleResolver } from "./scale-color-registry.js";
 
@@ -7,6 +8,7 @@ let registered = false;
 export function registerManualColor(): void {
   if (registered) return;
   registered = true;
+  registerDiscreteLegend();
   registerColorScaleResolver("manual", (input) =>
     resolveManualColorScale({
       name: input.name,
