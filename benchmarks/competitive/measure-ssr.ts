@@ -31,7 +31,7 @@ const outRoot = path.join(root, "results", "ssr");
 if (existsSync(outRoot)) rmSync(outRoot, { recursive: true });
 mkdirSync(outRoot, { recursive: true });
 
-type SsrLibId = "ggsvelte" | "svelteplot" | "layercake" | "unovis";
+type SsrLibId = "ggsvelte" | "svelteplot" | "layercake" | "unovis" | "tanstack-svelte";
 type SsrScenario = "scatter-color" | "line-multiseries";
 
 const LIBS: {
@@ -66,6 +66,11 @@ const LIBS: {
     label: "Unovis (SSR)",
     note: "svelte/server render() of components/unovis fixtures; marks paint in onMount (client-only)",
     expectEmptyShell: true,
+  },
+  {
+    id: "tanstack-svelte",
+    label: "TanStack Charts (Svelte SSR)",
+    note: "svelte/server render() of components/tanstack-svelte fixtures (documented complete SVG SSR)",
   },
 ];
 

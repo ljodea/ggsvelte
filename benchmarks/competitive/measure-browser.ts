@@ -15,6 +15,7 @@ import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { createServer } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import react from "@vitejs/plugin-react";
 
 import { CASES, casesForRun, LIBS, libSupports, type LibMeta } from "./scenarios";
 
@@ -84,10 +85,10 @@ const server = await createServer({
   configFile: false,
   root: path.join(root, "fixtures"),
   server: { host: "127.0.0.1", port: 5199, strictPort: true },
-  plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
+  plugins: [react(), svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
   resolve: {
     conditions: ["svelte", "browser", "import", "module", "default"],
-    dedupe: ["svelte"],
+    dedupe: ["svelte", "react", "react-dom"],
   },
   optimizeDeps: {
     // Svelte component libs must share one svelte runtime with the fixture
@@ -110,6 +111,11 @@ const server = await createServer({
       "echarts/charts",
       "echarts/components",
       "echarts/renderers",
+      "react",
+      "react/jsx-runtime",
+      "react-dom",
+      "react-dom/client",
+      "@tanstack/charts/react",
     ],
   },
 });

@@ -1,7 +1,8 @@
 /**
  * One-shot high-N peer comparison (not the CI harness).
  *
- * Measures ggsvelte vs SveltePlot / LayerCake / Unovis on 100k-scale cases with:
+ * Measures ggsvelte vs SveltePlot / LayerCake / Unovis / TanStack Charts Svelte
+ * on 100k-scale cases with:
  * - fewer samples (1 warmup + 5 samples) so wall time stays practical
  * - per-evaluate timeout so a hung/OOM peer fails the cell instead of wedging the run
  *
@@ -14,6 +15,7 @@ import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { createServer } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import react from "@vitejs/plugin-react";
 
 import { CASES, LIBS, libSupports, type LibMeta } from "./scenarios";
 
@@ -29,6 +31,7 @@ const LIB_IDS = [
   "layercake-canvas",
   "svelteplot",
   "unovis",
+  "tanstack-svelte",
 ] as const;
 
 const CASE_IDS = ["scatter-color-100k", "line-10x10k"] as const;
@@ -95,10 +98,10 @@ const server = await createServer({
   configFile: false,
   root: path.join(root, "fixtures"),
   server: { host: "127.0.0.1", port: 5201, strictPort: true },
-  plugins: [svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
+  plugins: [react(), svelte({ compilerOptions: { css: "injected" }, emitCss: false })],
   resolve: {
     conditions: ["svelte", "browser", "import", "module", "default"],
-    dedupe: ["svelte"],
+    dedupe: ["svelte", "react", "react-dom"],
   },
   optimizeDeps: {
     exclude: ["svelte", "svelteplot", "layercake", "@unovis/svelte"],
@@ -113,6 +116,11 @@ const server = await createServer({
       "d3-array",
       "d3-axis",
       "d3-shape",
+      "react",
+      "react/jsx-runtime",
+      "react-dom",
+      "react-dom/client",
+      "@tanstack/charts/react",
     ],
   },
 });

@@ -5,7 +5,7 @@
  * framed for the standard 1200×630 social card crop used by WhatsApp, Slack,
  * iMessage, Discord, Facebook, LinkedIn, and X.
  *
- *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v1.png
+ *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v2.png
  *   bun scripts/gen-og-home.ts --check  # assert committed PNG dimensions + IHDR
  *
  * Bump OG_HOME_FILENAME in docs-seo-image.ts (home-v2.png …) when iterating the

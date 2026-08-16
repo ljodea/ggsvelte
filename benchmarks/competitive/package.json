@@ -17,6 +17,7 @@
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
+    "@tanstack/charts": "^0.14.0",
     "@unovis/svelte": "1.6.7",
     "@unovis/ts": "1.6.7",
     "chart.js": "^4.5.1",
@@ -27,12 +28,17 @@
     "d3-shape": "^3.2.0",
     "echarts": "^6.0.0",
     "layercake": "^10.0.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "svelte": "^5.56.7",
     "svelteplot": "^0.14.2",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "playwright": "1.61.1",
     "vite": "^8.2.0"
   }

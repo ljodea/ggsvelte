@@ -8,13 +8,13 @@
 import { EXAMPLES } from "../examples/manifest";
 
 /** Cache-busting path: bump the version segment when the card content changes. */
-export const OG_HOME_FILENAME = "home-v1.png";
+export const OG_HOME_FILENAME = "home-v2.png";
 export const OG_HOME_PATH = `/og/${OG_HOME_FILENAME}`;
 export const OG_HOME_WIDTH = 1200;
 export const OG_HOME_HEIGHT = 630;
 /** Stable alt — no volatile bench timings (those live in the PNG pixels). */
 export const OG_HOME_ALT =
-  "ggsvelte homepage: fast, agent-native grammar of graphics with a cold-mount scatter benchmark against LayerCake, Unovis, and SveltePlot.";
+  "ggsvelte homepage: fast, agent-native grammar of graphics with a cold-mount scatter benchmark against LayerCake, TanStack Charts, Unovis, and SveltePlot.";
 
 export const DEFAULT_SOCIAL = {
   path: OG_HOME_PATH,

@@ -236,6 +236,8 @@ export type LibId =
   | "layercake"
   | "layercake-canvas"
   | "unovis"
+  | "tanstack-svelte"
+  | "tanstack-react"
   | "ggsvelte-ggplot"
   | "ggsvelte-full";
 
@@ -365,6 +367,24 @@ export const LIBS: readonly LibMeta[] = [
     bundle: true,
     scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
     note: "Svelte peer (@unovis/svelte + @unovis/ts) — VisXYContainer + VisScatter/VisLine/VisArea/VisStackedBar + VisAxis",
+  },
+  {
+    id: "tanstack-svelte",
+    label: "TanStack Charts (Svelte)",
+    form: "svg",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Svelte peer — defineChart + <Chart> from @tanstack/charts/svelte (dot / lineY / areaY / stacked barY)",
+  },
+  {
+    id: "tanstack-react",
+    label: "TanStack Charts (React)",
+    form: "svg",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Generalist — same defineChart grammar through @tanstack/charts/react (default SVG Chart)",
   },
 ] as const;
 

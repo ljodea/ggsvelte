@@ -7,6 +7,7 @@
  */
 import { build } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import react from "@vitejs/plugin-react";
 import { gzipSync } from "node:zlib";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -84,13 +85,16 @@ for (const job of uniqueJobs) {
     await build({
       configFile: false,
       logLevel: "error",
-      plugins:
-        job.lib.id === "svelteplot" ||
+      plugins: [
+        ...(job.lib.id === "tanstack-react" ? [react()] : []),
+        ...(job.lib.id === "svelteplot" ||
         job.lib.id === "layercake" ||
         job.lib.id === "unovis" ||
+        job.lib.id === "tanstack-svelte" ||
         job.lib.id === "ggsvelte-ggplot"
           ? [svelte({ compilerOptions: { css: "injected" }, emitCss: false })]
-          : [],
+          : []),
+      ],
       build: {
         lib: {
           entry,
