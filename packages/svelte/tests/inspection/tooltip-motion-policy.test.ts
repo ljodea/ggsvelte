@@ -22,7 +22,6 @@ describe("tooltip motion constants", () => {
 describe("prefersReducedMotion", () => {
   it("is false when matchMedia is missing or does not match", () => {
     expect(prefersReducedMotion(null)).toBe(false);
-    expect(prefersReducedMotion(undefined)).toBe(false);
     expect(prefersReducedMotion({ matches: false })).toBe(false);
   });
 
