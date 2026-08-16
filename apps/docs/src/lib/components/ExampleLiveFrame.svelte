@@ -294,6 +294,11 @@
     font: inherit;
     font-size: 0.85rem;
     cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+
+  .load-interactive:active:not([aria-disabled="true"]) {
+    transform: scale(0.97);
   }
 
   .load-interactive:focus-visible {

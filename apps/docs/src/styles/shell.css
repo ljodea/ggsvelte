@@ -89,6 +89,28 @@
   cursor: pointer;
 }
 
+.search-trigger,
+.appearance,
+.menu-trigger,
+.mobile-search-trigger,
+.site-menu__heading button,
+.chapter-dialog__heading button,
+.docs-mobile-tools > button,
+.docs-mobile-tools summary {
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.search-trigger:active,
+.appearance:active,
+.menu-trigger:active,
+.mobile-search-trigger:active,
+.site-menu__heading button:active,
+.chapter-dialog__heading button:active,
+.docs-mobile-tools > button:active,
+.docs-mobile-tools summary:active {
+  transform: scale(0.97);
+}
+
 .github-link {
   justify-content: center;
   width: 44px;

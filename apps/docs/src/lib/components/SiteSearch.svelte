@@ -258,6 +258,11 @@
     color: var(--muted);
     cursor: pointer;
     font-weight: 600;
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+
+  header button:active {
+    transform: scale(0.97);
   }
 
   label {
