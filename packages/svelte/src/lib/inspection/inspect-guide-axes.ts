@@ -23,5 +23,9 @@ export function inspectGuideAxes(mode: ResolvedInspectMode, flipped: boolean): I
       return flipped
         ? { vertical: true, horizontal: false }
         : { vertical: false, horizontal: true };
+    default: {
+      const unexpected: never = mode;
+      throw new TypeError(`unexpected inspect mode ${String(unexpected)}`);
+    }
   }
 }
