@@ -13,7 +13,7 @@
  *      peers, paired by render form factor (scenarios.ts LIBS[].form):
  *      ggsvelte-svg vs SVG peers (layercake, svelteplot), ggsvelte-canvas
  *      vs canvas peers (layercake-canvas). General-purpose reference bars
- *      (d3/uplot/chartjs/echarts) are reported but NEVER gated. Same-run
+ *      (d3/uplot/chartjs/echarts/tanstack-react) are reported but NEVER gated. Same-run
  *      same-runner comparison, so no headroom factor. A peer cell that
  *      errored outright FAILS the gate — we want to know when a fixture
  *      breaks.
@@ -67,7 +67,7 @@ interface BudgetsFile {
 
 /** General-purpose reference bars, NOT Svelte peers: useful context in the
  * report, but the win this gate locks is against the Svelte ecosystem peers. */
-const REFERENCE_LIBS = new Set(["d3", "uplot", "chartjs", "echarts"]);
+const REFERENCE_LIBS = new Set(["d3", "uplot", "chartjs", "echarts", "tanstack-react"]);
 
 const isGgsvelte = (lib: string) => lib.startsWith("ggsvelte");
 const isPeer = (lib: string) => !isGgsvelte(lib) && !REFERENCE_LIBS.has(lib);

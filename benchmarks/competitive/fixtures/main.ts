@@ -33,6 +33,8 @@ import { mountGgsvelteCanvas } from "../adapters/ggsvelte-canvas";
 import { mountGgsvelteSvg } from "../adapters/ggsvelte-svg";
 import { mountLayerCake, mountLayerCakeCanvas } from "../adapters/layercake";
 import { mountSveltePlot } from "../adapters/svelteplot";
+import { mountTanstackReact } from "../adapters/tanstack-react";
+import { mountTanstackSvelte } from "../adapters/tanstack-svelte";
 import { mountUnovis } from "../adapters/unovis";
 import { mountUplot } from "../adapters/uplot";
 import {
@@ -188,6 +190,14 @@ function mountSync(
     }
     case "unovis": {
       const r = mountUnovis(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "tanstack-svelte": {
+      const r = mountTanstackSvelte(scenario, data, root);
+      return { markHint: r.markHint, handle: r.handle };
+    }
+    case "tanstack-react": {
+      const r = mountTanstackReact(scenario, data, root);
       return { markHint: r.markHint, handle: r.handle };
     }
     default:

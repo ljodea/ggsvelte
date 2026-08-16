@@ -40,6 +40,7 @@ describe("competitive scenario catalog", () => {
     expect(ids.has("uplot")).toBe(true);
     expect(ids.has("chartjs")).toBe(true);
     expect(ids.has("echarts")).toBe(true);
+    expect(ids.has("tanstack-react")).toBe(true);
     expect(ids.has("d3")).toBe(true);
     expect(ids.has("ggsvelte-svg")).toBe(true);
     expect(ids.has("ggsvelte-canvas")).toBe(true);
@@ -50,6 +51,7 @@ describe("competitive scenario catalog", () => {
     expect(ids.has("svelteplot")).toBe(true);
     expect(ids.has("layercake")).toBe(true);
     expect(ids.has("unovis")).toBe(true);
+    expect(ids.has("tanstack-svelte")).toBe(true);
   });
 
   test("data generators are deterministic and sized correctly", () => {
@@ -103,7 +105,7 @@ describe("competitive scenario catalog", () => {
   });
 
   test("SSR bench entries exist for ggsvelte + Svelte peers (server-render matrix cannot collapse)", () => {
-    for (const lib of ["ggsvelte", "svelteplot", "layercake", "unovis"]) {
+    for (const lib of ["ggsvelte", "svelteplot", "layercake", "unovis", "tanstack-svelte"]) {
       for (const scenario of ["scatter-color", "line-multiseries"]) {
         expect(existsSync(new URL(`./entries/ssr__${lib}__${scenario}.ts`, import.meta.url))).toBe(
           true,
