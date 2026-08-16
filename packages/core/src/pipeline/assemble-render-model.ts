@@ -2,7 +2,7 @@
  * Assemble the public RenderModel (scene, scales, contracts, dispose/row).
  */
 import type { PanelCoordProjector } from "../coord-projector.js";
-import type { BandLabelMode } from "../layout/band-guide.js";
+import type { BandLabelMode } from "../layout/band-guide-types.js";
 import type { GuideDegradedCode } from "../layout/guide-degraded-codes.js";
 import type { TickFormatter } from "../layout/layout.js";
 import type { GuidePlan } from "../layout/temporal-guide.js";

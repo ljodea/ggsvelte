@@ -88,6 +88,8 @@ describe("register hints: error messages (fresh process)", () => {
     const coreRoot = path.resolve(import.meta.dir, "..");
     const script = `
       import { renderToSVGString } from ${JSON.stringify(path.join(coreRoot, "src", "index.ts"))};
+      import { registerBandGuide } from ${JSON.stringify(path.join(coreRoot, "src", "layout", "register-band-guide.ts"))};
+      registerBandGuide();
 
       const rows = [
         { x: 1, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 15 }, { x: 4, y: 25 }, { x: 5, y: 22 },
