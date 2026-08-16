@@ -84,7 +84,7 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Normal
   };
   // After normalize first so log→linear reports the canonical type. Then the
   // authored spec, because normalize strips temporal options from band scales.
-  collect(normalized.scales as Record<string, unknown> | undefined);
+  collect(normalized.scales);
   collect(authoredScales);
   if (temporalScaleErrors.length > 0) throw new SpecValidationError(temporalScaleErrors);
 
