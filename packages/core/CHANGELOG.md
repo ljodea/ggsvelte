@@ -1,5 +1,16 @@
 # @ggsvelte/core
 
+## 0.38.1
+
+### Patch Changes
+
+- 8e99a6f: Headless charts now register the categorical axis planner only when they need a band axis. `@ggsvelte/core/render` and `registerBasic()` still install it.
+- fa8f552: Headless charts now register color scale kinds the same way they register geoms. `@ggsvelte/core/render` and `registerBasic()` still install every kind.
+- f6cc615: Headless charts now register continuous legend builders only with sequential or binned color. `@ggsvelte/core/render` and `registerBasic()` still install them.
+- fa38a7e: Headless `runPipeline` now ships only the `default` and `void` theme tables. Named themes still resolve from `@ggsvelte/core` and `@ggsvelte/core/render` with no new caller argument.
+- 7d2320b: Headless charts now register size/shape style scale families only when they map those aesthetics. `@ggsvelte/core/render` and `registerBasic()` still install both families.
+  - @ggsvelte/spec@0.38.1
+
 ## 0.38.0
 
 ### Minor Changes
