@@ -1,14 +1,14 @@
 /**
  * Render the site-wide Open Graph / Twitter large-image card for ggsvelte.sh.
  *
- * Layout mirrors the homepage hero (headline + Scatter 1k cold-mount bench),
+ * Layout mirrors the homepage hero (headline + Area cold-mount bench),
  * framed for the standard 1200×630 social card crop used by WhatsApp, Slack,
  * iMessage, Discord, Facebook, LinkedIn, and X.
  *
- *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v2.png
+ *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v3.png
  *   bun scripts/gen-og-home.ts --check  # assert committed PNG dimensions + IHDR
  *
- * Bump OG_HOME_FILENAME in docs-seo-image.ts (home-v2.png …) when iterating the
+ * Bump OG_HOME_FILENAME in docs-seo-image.ts (home-v3.png …) when iterating the
  * design so scrapers cannot serve a stale cached card after deploy.
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -28,7 +28,7 @@ import {
 
 const ROOT = resolve(import.meta.dir, "..");
 const OUT_FILE = join(ROOT, "apps", "docs", "static", "og", OG_HOME_FILENAME);
-const BENCH_SVG = join(ROOT, "apps", "docs", "static", "benchmarks", "bench-scatter-1k-mount.svg");
+const BENCH_SVG = join(ROOT, "apps", "docs", "static", "benchmarks", "bench-area-mount.svg");
 
 function cardHtml(benchSvg: string): string {
   // Inline the live homepage bench SVG so the card stays self-contained and
@@ -132,11 +132,12 @@ function cardHtml(benchSvg: string): string {
     </div>
     <div class="visual">
       <div class="tabs" aria-hidden="true">
-        <span class="active">Scatter 1k</span>
-        <span>Scatter 10k</span>
-        <span>Line</span>
-        <span>Area</span>
+        <span class="active">Area</span>
         <span>Bars</span>
+        <span>Line</span>
+        <span>Line 100k</span>
+        <span>Scatter</span>
+        <span>Scatter 10k</span>
       </div>
       <div class="panel">
         <div class="chart">${benchSvg}</div>

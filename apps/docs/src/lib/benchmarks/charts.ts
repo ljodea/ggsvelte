@@ -6,13 +6,15 @@
  *
  * Claim discipline (enforced in scripts/gen-benchmark-charts.ts): classic
  * five-bar charts require ggsvelte-svg to beat LayerCake SVG, SveltePlot,
- * Unovis, and TanStack Charts Svelte. Six-bar form-factor charts (100k)
- * shade every ggsvelte path and still require the SVG path to beat LayerCake
- * SVG, Unovis, and TanStack Charts Svelte. SveltePlot is omitted from those
- * charts because its mount time stretches the axis. LayerCake canvas may win
- * a cell and is shown for honesty. Conventions follow bun.sh: subject bars
- * use the brand accent, peer bars stay grey, value labels sit at bar ends,
- * and time benchmarks ("faster") use horizontal bars.
+ * Unovis, and TanStack Charts Svelte. The Line 100k form-factor chart shades
+ * every ggsvelte path and still requires the SVG path to beat LayerCake SVG,
+ * Unovis, and TanStack Charts Svelte. SveltePlot is omitted from that chart
+ * because its mount time stretches the axis. LayerCake canvas may win a cell
+ * and is shown for honesty. Bar rank is always mount time (fastest on top);
+ * `benchmarkChartSpec` sets the band domain from `value`, so a hand-ordered
+ * input cannot invert LayerCake and TanStack. Conventions follow bun.sh:
+ * subject bars use the brand accent, peer bars stay grey, value labels sit
+ * at bar ends, and time benchmarks ("faster") use horizontal bars.
  */
 import { registerAll, renderToSVGString } from "@ggsvelte/core";
 
@@ -77,7 +79,7 @@ export interface BenchmarkBar {
 
 export interface BenchmarkChartInput {
   readonly id: string;
-  /** Bars in display order top→bottom — subject first, then peers by rank. */
+  /** Bars in any order — the band domain is derived from `value`. */
   readonly bars: readonly BenchmarkBar[];
   /** Plot title drawn above the panel (self-describes README <img> embeds). */
   readonly title: string;
@@ -85,6 +87,13 @@ export interface BenchmarkChartInput {
   readonly subtitle: string;
   /** Accessible summary baked into the SVG aria-label and <title>. */
   readonly ariaLabel: string;
+}
+
+/** Library names in ascending mount time. Ties break on the library name. */
+function libsByAscendingValue(bars: readonly BenchmarkBar[]): readonly string[] {
+  return bars
+    .toSorted((a, b) => a.value - b.value || a.lib.localeCompare(b.lib))
+    .map((bar) => bar.lib);
 }
 
 /**
@@ -111,9 +120,9 @@ export function benchmarkChartSpec(input: BenchmarkChartInput): PortableSpec {
       },
     ],
     scales: {
-      // Under coord flip, band categories paint bottom-to-top — reverse the
-      // logical order so the subject bar lands on top (bun's position).
-      x: { type: "band", domain: input.bars.toReversed().map((bar) => bar.lib) },
+      // Domain is ascending mount time. Coord flip paints the first band at
+      // the bottom, so reverse puts the fastest bar on top.
+      x: { type: "band", domain: libsByAscendingValue(input.bars), reverse: true },
       // Headroom past the longest bar so bar-end value labels never clip.
       y: { expand: { mult: 0.16, add: 0 } },
       fill: {

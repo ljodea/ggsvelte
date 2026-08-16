@@ -2,8 +2,8 @@
  * Emit bun-style benchmark-vs-peers charts for the docs homepage and README.
  *
  * Data source of truth: benchmarks/competitive/results/*.json (run
- * `bun run measure:browser && bun run measure:bundles` there first; for 100k
- * form-factor cards also `bun run measure-100k-peers.ts`). Charts are drawn
+ * `bun run measure:browser && bun run measure:bundles` there first; for the
+ * Line 100k form-factor card also `bun run measure-100k-peers.ts`). Charts are drawn
  * with ggsvelte itself (headless renderToSVGString) — see
  * apps/docs/src/lib/benchmarks/charts.ts for the claim discipline.
  *
@@ -143,8 +143,8 @@ type PeerCell = { gg: number; lc: number; sp: number; uv: number; ts: number };
 
 /**
  * Form-factor cold-mount cell: both ggsvelte paths + LayerCake SVG/canvas +
- * Unovis + TanStack Svelte. Used for 100k-scale homepage tabs. SveltePlot is
- * measured in the 100k harness but omitted from these charts — its mount time
+ * Unovis + TanStack Svelte. Used for the Line 100k homepage tab. SveltePlot is
+ * measured in the 100k harness but omitted from that chart — its mount time
  * stretches the axis so the other bars collapse.
  */
 type FormFactorCell = {
@@ -209,7 +209,6 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
   };
 
   const formCells = {
-    scatter100k: formCell("scatter-color-100k"),
     line10x10k: formCell("line-10x10k"),
   };
 
@@ -218,8 +217,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
 
   const subtitle = "Cold-mount milliseconds · lower is better";
   const formSubtitle = "Cold-mount milliseconds · lower is better · SveltePlot omitted";
-  // Display order top→bottom: ggsvelte first, then peers by cold-mount rank.
-  // charts.ts reverses for the coord-flip band domain so the first entry paints on top.
+  // Any array order is fine: benchmarkChartSpec ranks bars by value.
   const bars = (c: PeerCell): readonly BenchmarkBar[] =>
     [
       { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
@@ -300,28 +298,21 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     },
   });
 
-  // Tab order: 1k → 10k → 100k scatter, then line (3×10k + 10×10k), area, bars.
+  // Tab order: Area, Bars, Line, Line 100k, Scatter, Scatter 10k.
   return [
     card(
-      "scatter-1k-mount",
-      "Scatter 1k",
-      "1,000-point colored scatter",
-      "a 1,000-point colored scatter",
-      cells.scatter1k,
+      "area-mount",
+      "Area",
+      "3 × 1,000-point area chart",
+      "a 3-series by 1,000-point area chart",
+      cells.area3x1k,
     ),
     card(
-      "scatter-mount",
-      "Scatter 10k",
-      "10,000-point colored scatter",
-      "a 10,000-point colored scatter",
-      cells.scatter10k,
-    ),
-    formCard(
-      "scatter-100k-mount",
-      "Scatter 100k",
-      "100,000-point colored scatter",
-      "a 100,000-point colored scatter",
-      formCells.scatter100k,
+      "bars-mount",
+      "Bars",
+      "50 categories × 4 stacks",
+      "a stacked bar chart of 50 categories by 4 stacks",
+      cells.bars50x4,
     ),
     card(
       "line-mount",
@@ -338,18 +329,18 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
       formCells.line10x10k,
     ),
     card(
-      "area-mount",
-      "Area",
-      "3 × 1,000-point area chart",
-      "a 3-series by 1,000-point area chart",
-      cells.area3x1k,
+      "scatter-1k-mount",
+      "Scatter",
+      "1,000-point colored scatter",
+      "a 1,000-point colored scatter",
+      cells.scatter1k,
     ),
     card(
-      "bars-mount",
-      "Bars",
-      "50 categories × 4 stacks",
-      "a stacked bar chart of 50 categories by 4 stacks",
-      cells.bars50x4,
+      "scatter-mount",
+      "Scatter 10k",
+      "10,000-point colored scatter",
+      "a 10,000-point colored scatter",
+      cells.scatter10k,
     ),
   ];
 }
