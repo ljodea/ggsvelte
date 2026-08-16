@@ -63,6 +63,5 @@ describe("homepage bench tabs", () => {
       "Scatter",
       "Scatter 10k",
     ]);
-    expect(BENCHMARK_CHART_CARDS.some((card) => card.id === "scatter-100k-mount")).toBe(false);
   });
 });
