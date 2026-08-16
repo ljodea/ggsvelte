@@ -101,7 +101,7 @@ export const BENCHMARK_VERSIONS = {
 
 /** Min+gzip KB of the 1,000-point colored-scatter app bundle. */
 export const BENCHMARK_BUNDLE_KB = {
-  ggsvelteKb: 122,
+  ggsvelteKb: 107.6,
   svelteplotKb: 108.7,
   layercakeKb: 40.8,
   unovisKb: 80.3,
