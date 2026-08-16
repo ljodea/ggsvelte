@@ -5102,6 +5102,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerAllStyleKinds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerBandGuide": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5206,6 +5210,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerFiniteStyle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerFunction": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5231,6 +5239,10 @@
           "lifecycle": "experimental"
         },
         "registerMap": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerNumericStyle": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5843,6 +5855,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerFiniteStyle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerGeomBatch": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5852,6 +5868,10 @@
           "lifecycle": "experimental"
         },
         "registerManualColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerNumericStyle": {
           "kind": "value",
           "lifecycle": "experimental"
         },

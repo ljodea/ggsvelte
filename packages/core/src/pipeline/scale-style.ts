@@ -5,9 +5,13 @@ import type { ScaleState } from "../scales/state.js";
 import type { ColumnTable } from "../table.js";
 
 import { collectStyleValues } from "./scale-style-collect.js";
-import { resolveFiniteStyleScale } from "./scale-style-finite.js";
-import { resolveNumericStyleScale } from "./scale-style-numeric.js";
-import type { FiniteStyleConfig, StyleResolution } from "./scale-style-types.js";
+import {
+  getStyleScaleResolver,
+  type StyleScaleFamily,
+  type StyleScaleResolveInput,
+} from "./scale-style-registry.js";
+import type { StyleResolution } from "./scale-style-types.js";
+import { PipelineError } from "./types.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export function resolveStyleScale(input: {
@@ -44,31 +48,30 @@ export function resolveStyleScale(input: {
       message: `${String(missingCount)} ${aesthetic} value(s) use the NA style.`,
     });
   }
-  if (aesthetic === "shape" || aesthetic === "linetype") {
-    return resolveFiniteStyleScale({
-      aesthetic,
-      values: collected.values,
-      catalog: collected.catalog,
-      anyDiscrete: collected.anyDiscrete,
-      anyIndexable: collected.anyIndexable,
-      nonInteractiveValues: collected.nonInteractiveValues,
-      // Narrow PortableSpec's union scale entry to the finite (shape/linetype) config.
-      config: config as FiniteStyleConfig | undefined,
-      prevState,
-      title,
-      warnings,
-    });
+  const family: StyleScaleFamily =
+    aesthetic === "shape" || aesthetic === "linetype" ? "finite" : "numeric";
+  const resolve = getStyleScaleResolver(family);
+  if (resolve === undefined) {
+    const register = family === "finite" ? "registerFiniteStyle" : "registerNumericStyle";
+    throw new PipelineError(
+      "unsupported-param",
+      `/scales/${aesthetic}`,
+      `Style scale family "${family}" is not registered in this build. Call ${register}() from @ggsvelte/core/headless/register once at startup, or registerBasic() from @ggsvelte/core.`,
+    );
   }
-  return resolveNumericStyleScale({
+  const resolved: StyleScaleResolveInput = {
     aesthetic,
     values: collected.values,
     catalog: collected.catalog,
     anyDiscrete: collected.anyDiscrete,
     anyIndexable: collected.anyIndexable,
-    nonInteractiveValues: collected.nonInteractiveValues,
+    ...(collected.nonInteractiveValues !== undefined && {
+      nonInteractiveValues: collected.nonInteractiveValues,
+    }),
     config,
     prevState,
     title,
     warnings,
-  });
+  };
+  return resolve(resolved);
 }
