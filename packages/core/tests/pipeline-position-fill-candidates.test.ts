@@ -81,6 +81,34 @@ describe("position fill — candidate y matches axis space", () => {
     expect(model.axisFormatters.y(yValues[0])).toBe("35%");
   });
 
+  it("maps compacted fill rects back to the original frame row", () => {
+    // First x is outside the trained domain → no rect. Remaining candidates
+    // must still read their own post-position shares, not the dropped slot.
+    const model = runPipeline(
+      gg(
+        [
+          { squadron: "Ghost", role: "Ghost", men: 1000 },
+          { squadron: "Naples", role: "Soldiers", men: 2 },
+          { squadron: "Naples", role: "Sailors", men: 8 },
+        ],
+        aes({ x: "squadron", y: "men", fill: "role" }),
+      )
+        .geomCol({ position: "fill" })
+        .scales({ x: { domain: ["Naples"] } })
+        .spec(),
+      size,
+    );
+    const yValues = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    )
+      .filter((c) => c !== null)
+      .map((c) => c.yValue as number)
+      .toSorted((a, b) => a - b);
+    expect(yValues).toHaveLength(2);
+    expect(yValues[0]).toBeCloseTo(2 / 10, 8);
+    expect(yValues[1]).toBeCloseTo(8 / 10, 8);
+  });
+
   it("publishes stack segment heights for identity-stat cols (source-backed)", () => {
     const model = runPipeline(
       gg(
