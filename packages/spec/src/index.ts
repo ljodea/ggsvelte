@@ -913,6 +913,7 @@ export { validate } from "./validate.js";
 export type { ValidateResult } from "./validate.js";
 /** TypeBox-free structural gate used by the render pipeline. */
 export { assertStructuralGate, structuralGateErrors } from "./structural-gate.js";
+export { temporalGuideTypeMismatchError } from "./validate-data-checks-position.js";
 export { LINT_CATALOG, lintSpec } from "./lint.js";
 export type { LintAdvisoryCode, LintCatalogEntry, SpecAdvisory } from "./lint.js";
 export { ERROR_CATALOG } from "./errors.js";

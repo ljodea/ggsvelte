@@ -164,7 +164,7 @@ describe("temporal pipeline: guides", () => {
   });
 
   it("rejects temporal guides on explicitly non-time runtime scales", () => {
-    for (const type of ["linear", "log"] as const) {
+    for (const type of ["linear", "log", "band"] as const) {
       let thrown: unknown;
       try {
         runPipeline(

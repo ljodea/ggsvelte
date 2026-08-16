@@ -11,6 +11,7 @@ import {
   assertStructuralGate,
   normalize,
   SpecValidationError,
+  temporalGuideTypeMismatchError,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
 } from "@ggsvelte/spec";
@@ -70,27 +71,13 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Normal
   // Color scheme / binned-style / guide / coord-facet gates without TypeBox.
   assertStructuralGate(normalized);
 
-  const scaleTypeMismatchCode: SpecError["code"] = "scale-type-mismatch";
   const temporalScaleErrors: SpecError[] = [];
   for (const axis of ["x", "y"] as const) {
-    const config = normalized.scales?.[axis];
-    const hasTemporalGuideOption =
-      config?.dateBreaks !== undefined ||
-      config?.dateMinorBreaks !== undefined ||
-      config?.dateLabels !== undefined ||
-      config?.locale !== undefined ||
-      config?.weekStart !== undefined;
-    if (hasTemporalGuideOption && (config?.type === "linear" || config?.type === "log")) {
-      temporalScaleErrors.push({
-        code: scaleTypeMismatchCode,
-        path: `/scales/${axis}`,
-        message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
-        fix: {
-          description:
-            'Use type "time", a date/datetime scale helper, or remove the temporal option.',
-        },
-      });
-    }
+    const mismatch = temporalGuideTypeMismatchError(
+      normalized.scales as Record<string, unknown> | undefined,
+      axis,
+    );
+    if (mismatch !== null) temporalScaleErrors.push(mismatch);
   }
   if (temporalScaleErrors.length > 0) throw new SpecValidationError(temporalScaleErrors);
 
