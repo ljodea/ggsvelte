@@ -42,7 +42,7 @@ function parseReadmeTable(markdown: string): {
       .map((col) => col.trim());
     const feature = (cols[0] ?? "").replaceAll("*", "");
     const cells = cols.slice(1).map((raw) => {
-      const mark = raw.startsWith("✅") ? "✅" : raw.startsWith("⚠️") ? "⚠️" : "❌";
+      const mark: Mark = raw.startsWith("✅") ? "✅" : raw.startsWith("⚠️") ? "⚠️" : "❌";
       return { mark, note: raw.slice(mark.length).trim() };
     });
     return { feature, cells };
