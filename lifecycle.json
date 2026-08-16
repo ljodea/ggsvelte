@@ -5280,7 +5280,7 @@
         },
         "renderToSVGString": {
           "kind": "value",
-          "lifecycle": "stable-intent"
+          "lifecycle": "experimental"
         },
         "resolveEditionDefaults": {
           "kind": "value",
