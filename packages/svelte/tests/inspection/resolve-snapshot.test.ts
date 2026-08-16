@@ -742,9 +742,16 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
       // Fill inspect y is the post-position share; Total sums those shares.
       expect(filledInspection.groupTotal).toBeCloseTo(1, 8);
       expect(filledInspection.groupMemberCount).toBe(5);
-      const fillYs = filledInspection.members
-        .map((m) => Number(m.fields.find((f) => f.channel === "y")?.value))
-        .toSorted((a, b) => a - b);
+      const fillYs: number[] = [];
+      for (const member of filledInspection.members) {
+        const yField = member.fields.find((field) => field.channel === "y");
+        const value = yField?.value;
+        if (typeof value !== "number") {
+          throw new Error("expected numeric fill inspect y");
+        }
+        fillYs.push(value);
+      }
+      fillYs.sort((a, b) => a - b);
       expect(fillYs[0]).toBeCloseTo(1 / 15, 8);
       expect(fillYs[4]).toBeCloseTo(5 / 15, 8);
     }
