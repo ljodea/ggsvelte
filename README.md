@@ -17,8 +17,6 @@ graphics, inspired by ggplot2.
 
 ![Bar chart of cold-mount time for a 3-series by 10,000-point line chart: ggsvelte 54.8 ms, LayerCake 63.2 ms, TanStack 223.7 ms, Unovis 205.3 ms, SveltePlot 2,101 ms. Lower is better.](apps/docs/static/benchmarks/bench-line-mount.svg)
 
-![Bar chart of cold-mount time for a 10-series by 10,000-point line chart: ggsvelte SVG 114.8 ms, ggsvelte canvas 167.8 ms, LayerCake 458 ms, LayerCake canvas 186.2 ms, TanStack 1,025 ms, Unovis 1,588 ms. Lower is better. SveltePlot is omitted because it is too slow for this scale.](apps/docs/static/benchmarks/bench-line-100k-mount.svg)
-
 ![Bar chart of cold-mount time for a 1,000-point colored scatter: ggsvelte 15.8 ms, LayerCake 54.7 ms, TanStack 51.2 ms, Unovis 173.7 ms, SveltePlot 647.6 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-1k-mount.svg)
 
 ![Bar chart of cold-mount time for a 10,000-point colored scatter: ggsvelte 138.9 ms, LayerCake 383.5 ms, TanStack 387.7 ms, Unovis 1,083 ms, SveltePlot 9,032 ms. Lower is better.](apps/docs/static/benchmarks/bench-scatter-mount.svg)
