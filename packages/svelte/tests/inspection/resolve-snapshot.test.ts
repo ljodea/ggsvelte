@@ -747,7 +747,7 @@ describe("selectTransientMembers top-k by value (#1274)", () => {
         const yField = member.fields.find((field) => field.channel === "y");
         const value = yField?.value;
         if (typeof value !== "number") {
-          throw new Error("expected numeric fill inspect y");
+          throw new TypeError("expected numeric fill inspect y");
         }
         fillYs.push(value);
       }
