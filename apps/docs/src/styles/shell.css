@@ -793,7 +793,7 @@
  * circles like bun's green/amber/red dots. */
 .bench-table-wrap {
   display: block;
-  max-width: 44rem;
+  max-width: 56rem;
   margin-inline: auto;
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -803,8 +803,8 @@
 
 .benchmarks table {
   width: 100%;
-  /* Four peer columns (ggsvelte + SveltePlot + LayerCake + Unovis). */
-  min-width: 40rem;
+  /* Five lib columns (ggsvelte + TanStack + SveltePlot + Unovis + LayerCake). */
+  min-width: 44rem;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.88rem;
@@ -820,7 +820,7 @@
 
 .benchmarks th,
 .benchmarks td {
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.7rem;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
@@ -835,6 +835,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .benchmarks thead th:not(:first-child),

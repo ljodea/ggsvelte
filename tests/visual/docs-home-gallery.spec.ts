@@ -35,6 +35,14 @@ test("homepage first viewport leads with title, bench tabs, then featured exampl
   await expect(page.getByRole("button", { name: "Copy install" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Examples", level: 2 })).toHaveCount(0);
+  await expect(page.locator(".benchmarks thead th")).toHaveText([
+    "Capability",
+    "ggsvelte",
+    "TanStack",
+    "SveltePlot",
+    "Unovis",
+    "LayerCake",
+  ]);
   await expect(page.locator(".home-featured ol li")).toHaveCount(6);
   await expect(page.locator(".home-featured header a")).toHaveText("Gallery");
   await expectNoOverflow(page);
