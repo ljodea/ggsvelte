@@ -5102,6 +5102,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerBandGuide": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerBasic": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5787,6 +5791,10 @@
       "entry": "./headless/register",
       "source": "packages/core/src/headless-register-entry.ts",
       "exports": {
+        "registerBandGuide": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerBasicAreas": {
           "kind": "value",
           "lifecycle": "experimental"

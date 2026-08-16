@@ -24,6 +24,7 @@ import {
   registerBasicBars,
   registerBasicLines,
   registerBasicPoints,
+  registerBandGuide,
   registerOrdinalColor,
 } from "@ggsvelte/core/headless/register";
 
@@ -57,6 +58,7 @@ registerBasicLines();
 registerBasicAreas();
 registerBasicBars();
 registerOrdinalColor();
+registerBandGuide();
 
 type MountHandle = {
   destroy: () => void;

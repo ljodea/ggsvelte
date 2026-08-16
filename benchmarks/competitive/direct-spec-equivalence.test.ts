@@ -5,6 +5,7 @@ import {
   registerBasicBars,
   registerBasicLines,
   registerBasicPoints,
+  registerBandGuide,
   registerOrdinalColor,
 } from "@ggsvelte/core/headless/register";
 import {
@@ -34,6 +35,7 @@ beforeAll(() => {
   registerBasicAreas();
   registerBasicBars();
   registerOrdinalColor();
+  registerBandGuide();
 });
 
 const options = { width: PLOT_WIDTH, height: PLOT_HEIGHT };

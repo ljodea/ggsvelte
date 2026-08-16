@@ -5,7 +5,8 @@
 import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
-import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
+import { getBandAxisPlanner } from "./band-guide-registry.js";
+import type { BandAxisPlan, BandGuideConfig } from "./band-guide-types.js";
 import { getTemporalRuntime } from "../temporal-runtime.js";
 import type { TextMeasurer } from "./measure.js";
 import { truncateToFit } from "./truncate.js";
@@ -153,6 +154,16 @@ function bandGuideConfig(value: unknown): BandGuideConfig | undefined {
   return value;
 }
 
+function requireBandAxisPlanner(): NonNullable<ReturnType<typeof getBandAxisPlanner>> {
+  const plan = getBandAxisPlanner();
+  if (plan === undefined) {
+    throw new Error(
+      `Band axis guide is not registered in this build. Call registerBandGuide() from @ggsvelte/core/headless/register once at startup, or registerBasic() from @ggsvelte/core.`,
+    );
+  }
+  return plan;
+}
+
 function ellipsizeBandPlan(
   plan: BandAxisPlan,
   categoryCount: number,
@@ -230,7 +241,7 @@ export function deriveTicks(
     // mode:off must apply before the horizontal-only measured branch so vertical
     // band axes (native Y, or x after coord_flip) also hide labels.
     if (domain.band !== undefined && guide?.mode === "off") {
-      const plan = planBandAxis({
+      const plan = requireBandAxisPlanner()({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
         categoryCount: domain.categories.length,
@@ -285,7 +296,7 @@ export function deriveTicks(
         context.bandCollision === "ellipsis" || context.bandCollision === "preserve"
           ? { ...guide, mode: "single" as const }
           : guide;
-      const planned = planBandAxis({
+      const planned = requireBandAxisPlanner()({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
         categoryCount: domain.categories.length,

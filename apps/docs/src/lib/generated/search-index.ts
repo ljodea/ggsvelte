@@ -20494,14 +20494,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-394",
+    id: "heading:guide-lifecycle:experimental-395",
     kind: "heading",
-    title: "experimental (394)",
+    title: "experimental (395)",
     summary:
-      "experimental (394) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-394",
+      "experimental (395) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-395",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (394)"],
+    exact: ["experimental (395)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -20564,14 +20564,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core (./headless/register)"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-14",
+    id: "heading:guide-lifecycle:experimental-15",
     kind: "heading",
-    title: "experimental (14)",
+    title: "experimental (15)",
     summary:
-      "experimental (14) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-14",
+      "experimental (15) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-15",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (14)"],
+    exact: ["experimental (15)"],
   },
   {
     id: "heading:guide-lifecycle:ggsvelte-core-temporal",
@@ -34150,6 +34150,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["registerAllStatFrames"],
   },
   {
+    id: "api:ggsvelte-core:registerBandGuide",
+    kind: "api",
+    title: "registerBandGuide",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["registerBandGuide"],
+  },
+  {
     id: "api:ggsvelte-core:registerBasic",
     kind: "api",
     title: "registerBasic",
@@ -35642,6 +35651,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core-headless",
     keywords: ["@ggsvelte/core", "./headless", "value", "experimental"],
     exact: ["sceneToSVGString"],
+  },
+  {
+    id: "api:ggsvelte-core-headless-register:registerBandGuide",
+    kind: "api",
+    title: "registerBandGuide",
+    summary: "@ggsvelte/core ./headless/register · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core-headless-register",
+    keywords: ["@ggsvelte/core", "./headless/register", "value", "experimental"],
+    exact: ["registerBandGuide"],
   },
   {
     id: "api:ggsvelte-core-headless-register:registerBasicAreas",

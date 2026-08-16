@@ -16,10 +16,12 @@
 import { registerBasicStatFrames } from "./pipeline/frame-stats-register-basic.js";
 import { registerBasicGeomBatches } from "./pipeline/geometry-register-basic.js";
 import { registerAllColorKinds } from "./pipeline/register-color-all.js";
+import { registerBandGuide } from "./layout/register-band-guide.js";
 
 registerBasicStatFrames();
 registerBasicGeomBatches();
 registerAllColorKinds();
+registerBandGuide();
 
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
 export { runPipeline } from "./pipeline/run-pipeline-full.js";

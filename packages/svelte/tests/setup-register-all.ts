@@ -24,9 +24,11 @@ import {
   registerAllColorKinds,
   registerAllGeomBatches,
   registerAllStatFrames,
+  registerBandGuide,
 } from "@ggsvelte/core";
 
 registerAllStatFrames();
 registerAllGeomBatches();
 registerAllColorKinds();
+registerBandGuide();
 installCandidates();
