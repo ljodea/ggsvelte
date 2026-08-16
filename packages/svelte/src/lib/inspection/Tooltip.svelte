@@ -317,6 +317,9 @@
   .gg-tooltip-ghost {
     opacity: 0;
     pointer-events: none;
+    @starting-style {
+      opacity: 1;
+    }
   }
 
   .gg-tooltip-docked {

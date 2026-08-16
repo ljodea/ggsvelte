@@ -29,6 +29,7 @@ describe("tooltip motion CSS", () => {
     expect(css).toContain(".gg-tooltip-ghost");
     expect(css).toContain(`opacity ${duration} ${TOOLTIP_EASE}`);
     expect(css).toMatch(/data-gg-tooltip-motion=["']enter["']/);
+    expect(css).toMatch(/\.gg-tooltip-ghost[^{]*\{[^}]*@starting-style\s*\{\s*opacity:\s*1/s);
   });
 
   it("does not tween left, top, or scale", () => {

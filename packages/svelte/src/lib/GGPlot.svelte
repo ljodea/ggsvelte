@@ -352,6 +352,7 @@
           queueTooltipSync();
         }}
         onBlur={(event) => {
+          pendingExplicitClose = true;
           surfaceState.onSurfaceBlur(event);
           queueTooltipSync();
         }}
@@ -386,6 +387,7 @@
           queueTooltipSync();
         }}
         onKeyDown={(event) => {
+          if (event.key === "Escape") pendingExplicitClose = true;
           surfaceState.onSurfaceKeyDown(event);
           queueTooltipSync();
         }}
@@ -445,6 +447,7 @@
           inspection={ghostInspection}
           width={ghostSize.width}
           height={ghostSize.height}
+          content={engine.interactionConfig.inspect?.content}
           docked={isTooltipDocked({
             inspectionState: ghostInspection.state,
             widthPx: runtime.resolvedWidth,
