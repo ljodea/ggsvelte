@@ -126,6 +126,22 @@ describe("live comparison tables match the published lockstep version", () => {
     expect(syncBenchmarkGgsvelteVersion(proj, version)).toBe(proj);
     expect(proj).toContain(`ggsvelte: "${version}"`);
   });
+
+  it("README bundle-size cell matches the rounded docs projection", () => {
+    const readme = readFileSync(join(ROOT, "README.md"), "utf8");
+    const proj = readFileSync(
+      join(ROOT, "apps/docs/src/lib/generated/benchmark-charts.ts"),
+      "utf8",
+    );
+    const match = /ggsvelteKb:\s*([0-9]+(?:\.[0-9]+)?)/.exec(proj);
+    expect(match).not.toBeNull();
+    const rounded = Math.round(Number(match![1]));
+    expect(readme).toMatch(
+      new RegExp(
+        String.raw`\|\s*\*\*Bundle size\*\* \(min\+gzip, 1k scatter app\)\s*\|\s*⚠️ ${String(rounded)} KB\s*\|`,
+      ),
+    );
+  });
 });
 
 describe("release wiring auto-bumps comparison tables on Version Packages", () => {
