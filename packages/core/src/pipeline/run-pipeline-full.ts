@@ -1,10 +1,11 @@
 /**
- * Core runPipeline orchestration: prepare shared state, then build the full
- * RenderModel contract.
+ * runPipeline that injects the full named-theme catalog.
+ * Does not import the slim table (that would keep the catalog-free table
+ * on the GGPlot / @ggsvelte/core graph).
  */
-import type { SpecInput, PortableSpec } from "@ggsvelte/spec";
+import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
 
-import { EDITION_DEFAULTS_SLIM } from "../editions-slim.js";
+import { EDITION_DEFAULTS } from "../editions.js";
 import { perfMark, perfMeasure } from "../perf.js";
 
 import { finalize } from "./finalize.js";
@@ -16,7 +17,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   const model = finalize(
     preparePipelineRun(spec, {
       ...options,
-      editions: options.editions ?? EDITION_DEFAULTS_SLIM,
+      editions: options.editions ?? EDITION_DEFAULTS,
     }),
   );
   perfMark("ggsvelte:pipeline:end");

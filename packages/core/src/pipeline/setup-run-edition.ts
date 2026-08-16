@@ -3,8 +3,8 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { EditionDefaults } from "../editions.js";
-import { resolveEditionDefaults } from "../editions.js";
+import type { EditionDefaults } from "../editions-resolve.js";
+import { resolveEditionDefaults } from "../editions-resolve.js";
 
 import type { PipelineWarning, RunOptions } from "./types.js";
 
@@ -13,6 +13,9 @@ export function resolvePipelineEditionDefaults(
   editions: RunOptions["editions"],
   warnings: PipelineWarning[],
 ): EditionDefaults {
+  if (editions === undefined) {
+    throw new Error("resolvePipelineEditionDefaults: editions table is required");
+  }
   const editionResolution = resolveEditionDefaults(edition, editions);
   if (editionResolution.unknownRequested !== null) {
     warnings.push({

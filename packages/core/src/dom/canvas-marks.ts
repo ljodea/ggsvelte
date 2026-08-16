@@ -8,7 +8,7 @@
  * helpers in canvas-marks-mask.ts. Thin orchestrator over those drawers for dispatch + public API.
  */
 import type { GeometryBatch } from "../scene.js";
-import type { ThemeTokens } from "../theme.js";
+import type { ThemeTokens } from "../theme-construct.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
 import { applyDash, drawPaths, drawPathsSubset } from "./canvas-marks-paths.js";

@@ -342,7 +342,7 @@ export type {
 
 // Pipeline
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
-export { runPipeline } from "./pipeline/run-pipeline.js";
+export { runPipeline } from "./pipeline/run-pipeline-full.js";
 export type {
   Advisory,
   AxisValueFormatter,
@@ -419,13 +419,10 @@ export { planStrata } from "./strata.js";
 export type { Stratum } from "./strata.js";
 
 // SVG renderer (pure)
+export { countMarks, pathData, sceneLabel, sceneToSVGString } from "./render-svg.js";
 export {
-  countMarks,
-  pathData,
   renderToSVGString, // @lifecycle stable-intent
-  sceneLabel,
-  sceneToSVGString,
-} from "./render-svg.js";
+} from "./render-svg-full.js";
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 

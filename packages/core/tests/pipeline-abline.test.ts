@@ -5,7 +5,7 @@ import { aes, gg } from "@ggsvelte/spec";
 import { describe, expect, it } from "bun:test";
 
 import { runPipeline } from "../src/pipeline.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 
 const size = { width: 400, height: 300 };
 const rows = [

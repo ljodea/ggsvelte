@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import { scatter, size } from "./fixtures.ts";
 
 describe("renderToSVGString — M2 geoms", () => {

@@ -4,8 +4,9 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import type { SpecInput } from "@ggsvelte/spec";
+import { EDITION_DEFAULTS } from "../../src/editions.ts";
 import { PipelineError, runPipeline } from "../../src/pipeline.ts";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import type { GlyphsBatch, PathsBatch, RectsBatch, SegmentsBatch } from "../../src/scene.ts";
 import { salesRows, size } from "./fixtures.ts";
 
@@ -303,8 +304,8 @@ describe("determinism across the new geoms", () => {
       .labs({ title: "Sales" })
       .theme("light")
       .spec();
-    const a = renderToSVGString(spec, size);
-    const b = renderToSVGString(spec, size);
+    const a = renderToSVGString(spec, { ...size, editions: EDITION_DEFAULTS });
+    const b = renderToSVGString(spec, { ...size, editions: EDITION_DEFAULTS });
     expect(a).toBe(b);
     expect(a).toContain("gg-rects");
     expect(a).toContain("gg-segments");

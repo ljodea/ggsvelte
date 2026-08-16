@@ -17,7 +17,9 @@ import type { Advisory, PipelineWarning, RunOptions } from "../src/pipeline/type
 import { buildPanelCoordProjector } from "../src/coord-projector.ts";
 import { runPipeline } from "../src/pipeline.ts";
 
-const size: RunOptions = { width: 640, height: 400 };
+import { EDITION_DEFAULTS } from "../src/editions.ts";
+
+const size: RunOptions = { width: 640, height: 400, editions: EDITION_DEFAULTS };
 
 function buildRunState(
   spec: ReturnType<ReturnType<typeof gg>["spec"]>,

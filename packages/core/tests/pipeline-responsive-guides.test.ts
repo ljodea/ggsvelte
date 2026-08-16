@@ -16,7 +16,7 @@ import {
 } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.js";
-import { renderToSVGString } from "../src/render-svg.js";
+import { renderToSVGString } from "../src/render-svg-full.js";
 import type { SceneDiscreteLegend } from "../src/scene.js";
 
 const rows = [

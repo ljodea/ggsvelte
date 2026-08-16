@@ -6,7 +6,7 @@ import { describe, expect, it } from "bun:test";
 import { aes, fillPaintLinear, gg, glow, strokePaintLinear } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 import type { PathsBatch, SegmentsBatch } from "../src/scene.ts";
 import { paintResourceId } from "../src/mark-paint.ts";
 

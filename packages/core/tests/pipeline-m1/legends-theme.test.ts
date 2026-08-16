@@ -4,8 +4,9 @@
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
+import { EDITION_DEFAULTS } from "../../src/editions.ts";
 import { runPipeline } from "../../src/pipeline.ts";
-import { renderToSVGString } from "../../src/render-svg.ts";
+import { renderToSVGString } from "../../src/render-svg-full.ts";
 import type { SceneDiscreteLegend } from "../../src/scene.ts";
 import { salesRows, size } from "./fixtures.ts";
 
@@ -82,7 +83,7 @@ describe("theme wiring", () => {
         .geomCol()
         .theme("dark")
         .spec(),
-      size,
+      { ...size, editions: EDITION_DEFAULTS },
     );
     expect(svg).toContain('class="gg-paper"');
     expect(svg).toContain("var(--gg-paper, #16181d)");

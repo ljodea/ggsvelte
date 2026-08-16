@@ -23,7 +23,7 @@ import {
 } from "../../src/candidate-runtime.js";
 import { installCandidates } from "../../src/install-candidates.js";
 import { runPipeline } from "../../src/pipeline/run-pipeline.js";
-import { renderToSVGString } from "../../src/render-svg.js";
+import { renderToSVGString } from "../../src/render-svg-full.js";
 
 const spec = gg({ x: [1, 2, 3, 4], y: [4, 3, 5, 2] }, aes({ x: "x", y: "y" }))
   .geomPoint()

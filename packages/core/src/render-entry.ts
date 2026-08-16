@@ -20,7 +20,7 @@ registerBasicStatFrames();
 registerBasicGeomBatches();
 
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
-export { runPipeline } from "./pipeline/run-pipeline.js";
+export { runPipeline } from "./pipeline/run-pipeline-full.js";
 export type {
   Advisory,
   AxisValueFormatter,
@@ -38,13 +38,8 @@ export type {
   TrainedScales,
 } from "./pipeline/public-api.js";
 
-export {
-  countMarks,
-  pathData,
-  renderToSVGString,
-  sceneLabel,
-  sceneToSVGString,
-} from "./render-svg.js";
+export { countMarks, pathData, sceneLabel, sceneToSVGString } from "./render-svg.js";
+export { renderToSVGString } from "./render-svg-full.js";
 export type { RenderSVGOptions } from "./render-svg.js";
 
 // Strata planning is pure (no DOM, no temporal install) — lean canvas charts

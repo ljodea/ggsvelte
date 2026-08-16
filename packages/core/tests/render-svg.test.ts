@@ -9,7 +9,7 @@ import { describe, expect, it } from "bun:test";
 import { aes, gg, normalize } from "@ggsvelte/spec";
 
 import { PipelineError } from "../src/pipeline.ts";
-import { renderToSVGString } from "../src/render-svg.ts";
+import { renderToSVGString } from "../src/render-svg-full.ts";
 import { resolveTheme } from "../src/theme.ts";
 import type { GeometryBatch, Scene, ScenePanel } from "../src/scene.ts";
 
