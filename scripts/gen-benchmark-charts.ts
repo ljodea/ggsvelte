@@ -36,10 +36,10 @@ const OUTPUT_DIR = join(ROOT, "apps", "docs", "static", "benchmarks");
 const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "benchmark-charts.ts");
 
 const CHART_WIDTH = 560;
-/** Extra vertical room for labs title + subtitle bands (22 + 16 px) and 4 peer bars. */
-const CHART_HEIGHT_4 = 290;
-/** Same title chrome + six form-factor rows (ggsvelte SVG/canvas + peers). */
-const CHART_HEIGHT_6 = 380;
+/** Extra vertical room for labs title + subtitle bands (22 + 16 px) and 5 peer bars. */
+const CHART_HEIGHT_5 = 335;
+/** Same title chrome + seven form-factor rows (ggsvelte SVG/canvas + peers). */
+const CHART_HEIGHT_7 = 425;
 
 interface BrowserResults {
   readonly generatedAt: string;
@@ -138,12 +138,12 @@ interface ChartCard {
   readonly chart: BenchmarkChartInput;
 }
 
-/** SVG-peer cold-mount cell (ggsvelte-svg vs LayerCake/SveltePlot/Unovis SVG). */
-type PeerCell = { gg: number; lc: number; sp: number; uv: number };
+/** SVG-peer cold-mount cell (ggsvelte-svg vs LayerCake/SveltePlot/Unovis/TanStack SVG). */
+type PeerCell = { gg: number; lc: number; sp: number; uv: number; ts: number };
 
 /**
  * Form-factor cold-mount cell: both ggsvelte paths + LayerCake SVG/canvas +
- * SveltePlot + Unovis. Used for 100k-scale homepage tabs.
+ * SveltePlot + Unovis + TanStack Svelte. Used for 100k-scale homepage tabs.
  */
 type FormFactorCell = {
   ggSvg: number;
@@ -152,13 +152,14 @@ type FormFactorCell = {
   lcCanvas: number;
   sp: number;
   uv: number;
+  ts: number;
 };
 
 function assertSvgPeerWin(name: string, c: PeerCell): void {
-  if (!(c.gg < c.lc && c.gg < c.sp && c.gg < c.uv)) {
+  if (!(c.gg < c.lc && c.gg < c.sp && c.gg < c.uv && c.gg < c.ts)) {
     throw new Error(
       `${name}: ggsvelte (${String(c.gg)} ms) no longer beats all Svelte peers ` +
-        `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
+        `(LayerCake ${String(c.lc)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms, TanStack ${String(c.ts)} ms). ` +
         "Drop the chart from buildCards() — the homepage only claims benchmarks ggsvelte wins.",
     );
   }
@@ -167,13 +168,13 @@ function assertSvgPeerWin(name: string, c: PeerCell): void {
 /**
  * Multi-form 100k charts show canvas LayerCake for honesty (it can beat
  * ggsvelte on some cells). Claim discipline: ggsvelte SVG must still beat the
- * three SVG peers (LayerCake SVG, SveltePlot, Unovis).
+ * SVG peers (LayerCake SVG, SveltePlot, Unovis, TanStack Svelte).
  */
 function assertFormFactorSvgWin(name: string, c: FormFactorCell): void {
-  if (!(c.ggSvg < c.lcSvg && c.ggSvg < c.sp && c.ggSvg < c.uv)) {
+  if (!(c.ggSvg < c.lcSvg && c.ggSvg < c.sp && c.ggSvg < c.uv && c.ggSvg < c.ts)) {
     throw new Error(
       `${name}: ggsvelte SVG (${String(c.ggSvg)} ms) no longer beats SVG peers ` +
-        `(LayerCake ${String(c.lcSvg)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms). ` +
+        `(LayerCake ${String(c.lcSvg)} ms, SveltePlot ${String(c.sp)} ms, Unovis ${String(c.uv)} ms, TanStack ${String(c.ts)} ms). ` +
         "Drop the chart from buildCards().",
     );
   }
@@ -186,6 +187,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     lc: mountMs(browser, "layercake", caseId),
     sp: mountMs(browser, "svelteplot", caseId),
     uv: mountMs(browser, "unovis", caseId),
+    ts: mountMs(browser, "tanstack-svelte", caseId),
   });
 
   const formCell = (caseId: string): FormFactorCell => ({
@@ -195,6 +197,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     lcCanvas: mountMs(peers100k, "layercake-canvas", caseId),
     sp: mountMs(peers100k, "svelteplot", caseId),
     uv: mountMs(peers100k, "unovis", caseId),
+    ts: mountMs(peers100k, "tanstack-svelte", caseId),
   });
 
   const cells = {
@@ -220,6 +223,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     [
       { lib: "ggsvelte", value: c.gg, kind: "ggsvelte", label: msLabel(c.gg) },
       { lib: "LayerCake", value: c.lc, kind: "peer", label: msLabel(c.lc) },
+      { lib: "TanStack", value: c.ts, kind: "peer", label: msLabel(c.ts) },
       { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
       { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
     ] as const;
@@ -235,6 +239,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
         { lib: "ggsvelte canvas", value: c.ggCanvas, kind: "ggsvelte", label: msLabel(c.ggCanvas) },
         { lib: "LayerCake", value: c.lcSvg, kind: "peer", label: msLabel(c.lcSvg) },
         { lib: "LayerCake canvas", value: c.lcCanvas, kind: "peer", label: msLabel(c.lcCanvas) },
+        { lib: "TanStack", value: c.ts, kind: "peer", label: msLabel(c.ts) },
         { lib: "Unovis", value: c.uv, kind: "peer", label: msLabel(c.uv) },
         { lib: "SveltePlot", value: c.sp, kind: "peer", label: msLabel(c.sp) },
       ] as const satisfies readonly BenchmarkBar[]
@@ -242,12 +247,12 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
 
   const aria = (what: string, c: PeerCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte ${msLabel(c.gg)}, ` +
-    `LayerCake ${msLabel(c.lc)}, Unovis ${msLabel(c.uv)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
+    `LayerCake ${msLabel(c.lc)}, TanStack ${msLabel(c.ts)}, Unovis ${msLabel(c.uv)}, SveltePlot ${msLabel(c.sp)}. Lower is better.`;
 
   const formAria = (what: string, c: FormFactorCell) =>
     `Bar chart of cold-mount time for ${what}: ggsvelte SVG ${msLabel(c.ggSvg)}, ` +
     `ggsvelte canvas ${msLabel(c.ggCanvas)}, LayerCake ${msLabel(c.lcSvg)}, ` +
-    `LayerCake canvas ${msLabel(c.lcCanvas)}, Unovis ${msLabel(c.uv)}, ` +
+    `LayerCake canvas ${msLabel(c.lcCanvas)}, TanStack ${msLabel(c.ts)}, Unovis ${msLabel(c.uv)}, ` +
     `SveltePlot ${msLabel(c.sp)}. Lower is better.`;
 
   const card = (
@@ -262,7 +267,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     title,
     subtitle,
     width: CHART_WIDTH,
-    height: CHART_HEIGHT_4,
+    height: CHART_HEIGHT_5,
     chart: {
       id,
       bars: bars(c),
@@ -284,7 +289,7 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     title,
     subtitle,
     width: CHART_WIDTH,
-    height: CHART_HEIGHT_6,
+    height: CHART_HEIGHT_7,
     chart: {
       id,
       bars: formBars(c),
@@ -357,12 +362,19 @@ type ShellFile = { filename: string; body: string };
 function projectionSource(
   files: readonly ShellFile[],
   cards: readonly ChartCard[],
-  versions: { ggsvelte: string; svelteplot: string; layercake: string; unovis: string },
+  versions: {
+    ggsvelte: string;
+    svelteplot: string;
+    layercake: string;
+    unovis: string;
+    tanstack: string;
+  },
   bundles: {
     ggsvelteKb: number;
     svelteplotKb: number;
     layercakeKb: number;
     unovisKb: number;
+    tanstackKb: number;
   },
   generatedAt: string,
 ): Promise<string> {
@@ -436,12 +448,14 @@ function build() {
     svelteplot: installedVersion("svelteplot"),
     layercake: installedVersion("layercake"),
     unovis: installedVersion("@unovis/svelte"),
+    tanstack: installedVersion("@tanstack/charts"),
   };
   const bundleKb = {
     ggsvelteKb: bundleGzipKb(bundles, "ggsvelte-svg", "scatter-color"),
     svelteplotKb: bundleGzipKb(bundles, "svelteplot", "scatter-color"),
     layercakeKb: bundleGzipKb(bundles, "layercake", "scatter-color"),
     unovisKb: bundleGzipKb(bundles, "unovis", "scatter-color"),
+    tanstackKb: bundleGzipKb(bundles, "tanstack-svelte", "scatter-color"),
   };
   // Stamp both sources so --check staleness covers 100k re-measures.
   const generatedAt = `${browser.generatedAt}; 100k peers ${peers100k.generatedAt}`;
