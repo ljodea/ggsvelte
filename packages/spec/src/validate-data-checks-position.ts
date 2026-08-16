@@ -27,6 +27,40 @@ import {
 
 const AXIS_CHANNELS = ["x", "y"] as const;
 
+const NON_TIME_TYPES_WITH_TEMPORAL_GUIDES = new Set(["band", "linear", "log"]);
+
+/**
+ * Temporal break/label options on an explicit non-time scale.
+ * Shared by agent `validate()` and the TypeBox-free render gate.
+ */
+export function temporalGuideTypeMismatchError(
+  scales: Record<string, unknown> | undefined,
+  axis: "x" | "y",
+): SpecError | null {
+  const config = scales?.[axis] as PositionScaleSpec | undefined;
+  const hasGuideTemporalOption =
+    config?.dateBreaks !== undefined ||
+    config?.dateMinorBreaks !== undefined ||
+    config?.dateLabels !== undefined ||
+    config?.locale !== undefined ||
+    config?.weekStart !== undefined;
+  if (
+    !hasGuideTemporalOption ||
+    config?.type === undefined ||
+    !NON_TIME_TYPES_WITH_TEMPORAL_GUIDES.has(config.type)
+  ) {
+    return null;
+  }
+  return {
+    code: "scale-type-mismatch",
+    path: `/scales/${axis}`,
+    message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
+    fix: {
+      description: 'Use type "time", a date/datetime scale helper, or remove the temporal option.',
+    },
+  };
+}
+
 /** True when the axis scale config requests temporal semantics (not band). */
 export function scaleRequestsTime(
   scales: Record<string, unknown> | undefined,
@@ -62,26 +96,10 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
   const invalidTemporalAxes = new Set<"x" | "y">();
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
-    const hasGuideTemporalOption =
-      config?.dateBreaks !== undefined ||
-      config?.dateMinorBreaks !== undefined ||
-      config?.dateLabels !== undefined ||
-      config?.locale !== undefined ||
-      config?.weekStart !== undefined;
-    if (
-      hasGuideTemporalOption &&
-      (config?.type === "band" || config?.type === "linear" || config?.type === "log")
-    ) {
+    const mismatch = temporalGuideTypeMismatchError(scales, axis);
+    if (mismatch !== null) {
       invalidTemporalAxes.add(axis);
-      errors.push({
-        code: "scale-type-mismatch",
-        path: `/scales/${axis}`,
-        message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
-        fix: {
-          description:
-            'Use type "time", a date/datetime scale helper, or remove the temporal option.',
-        },
-      });
+      errors.push(mismatch);
       continue;
     }
     if (config?.type === "band" || !scaleRequestsTime(scales, axis)) continue;

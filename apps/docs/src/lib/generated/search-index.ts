@@ -20444,14 +20444,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-925",
+    id: "heading:guide-lifecycle:experimental-926",
     kind: "heading",
-    title: "experimental (925)",
+    title: "experimental (926)",
     summary:
-      "experimental (925) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-925",
+      "experimental (926) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-926",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (925)"],
+    exact: ["experimental (926)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -30971,6 +30971,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["structuralGateErrors"],
+  },
+  {
+    id: "api:ggsvelte-spec:temporalGuideTypeMismatchError",
+    kind: "api",
+    title: "temporalGuideTypeMismatchError",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["temporalGuideTypeMismatchError"],
   },
   {
     id: "api:ggsvelte-spec:temporalIntervalTicks",

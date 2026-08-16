@@ -11,6 +11,7 @@ import {
   assertStructuralGate,
   normalize,
   SpecValidationError,
+  temporalGuideTypeMismatchError,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
 } from "@ggsvelte/spec";
@@ -62,6 +63,7 @@ function preflightTemporalLabels(spec: PortableSpec): void {
 }
 
 export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): NormalizedSpec {
+  const authoredScales = spec.scales as Record<string, unknown> | undefined;
   const normalized = normalize(spec);
   // Preserve the stable pipeline diagnostic before the portable schema rejects
   // the same closed-token violation as a generic shape error.
@@ -70,28 +72,20 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Normal
   // Color scheme / binned-style / guide / coord-facet gates without TypeBox.
   assertStructuralGate(normalized);
 
-  const scaleTypeMismatchCode: SpecError["code"] = "scale-type-mismatch";
   const temporalScaleErrors: SpecError[] = [];
-  for (const axis of ["x", "y"] as const) {
-    const config = normalized.scales?.[axis];
-    const hasTemporalGuideOption =
-      config?.dateBreaks !== undefined ||
-      config?.dateMinorBreaks !== undefined ||
-      config?.dateLabels !== undefined ||
-      config?.locale !== undefined ||
-      config?.weekStart !== undefined;
-    if (hasTemporalGuideOption && (config?.type === "linear" || config?.type === "log")) {
-      temporalScaleErrors.push({
-        code: scaleTypeMismatchCode,
-        path: `/scales/${axis}`,
-        message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
-        fix: {
-          description:
-            'Use type "time", a date/datetime scale helper, or remove the temporal option.',
-        },
-      });
+  const seen = new Set<string>();
+  const collect = (scales: Record<string, unknown> | undefined) => {
+    for (const axis of ["x", "y"] as const) {
+      const mismatch = temporalGuideTypeMismatchError(scales, axis);
+      if (mismatch === null || seen.has(mismatch.path)) continue;
+      seen.add(mismatch.path);
+      temporalScaleErrors.push(mismatch);
     }
-  }
+  };
+  // After normalize first so log→linear reports the canonical type. Then the
+  // authored spec, because normalize strips temporal options from band scales.
+  collect(normalized.scales);
+  collect(authoredScales);
   if (temporalScaleErrors.length > 0) throw new SpecValidationError(temporalScaleErrors);
 
   for (const axis of ["x", "y"] as const) {
