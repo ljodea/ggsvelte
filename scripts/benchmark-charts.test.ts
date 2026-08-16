@@ -7,15 +7,12 @@ import { describe, expect, it } from "bun:test";
 import { benchmarkChartSpec } from "../apps/docs/src/lib/benchmarks/charts.ts";
 import { BENCHMARK_CHART_CARDS } from "../apps/docs/src/lib/generated/benchmark-charts.ts";
 
-function bandX(spec: ReturnType<typeof benchmarkChartSpec>): {
-  readonly domain?: readonly unknown[];
-  readonly reverse?: boolean;
-} {
+function bandX(spec: ReturnType<typeof benchmarkChartSpec>) {
   const x = spec.scales?.x;
-  if (x === undefined || typeof x !== "object") {
+  if (x === undefined) {
     throw new Error("benchmark spec is missing scales.x");
   }
-  return x as { readonly domain?: readonly unknown[]; readonly reverse?: boolean };
+  return x;
 }
 
 describe("benchmarkChartSpec band order", () => {
