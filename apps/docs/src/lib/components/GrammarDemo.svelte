@@ -27,6 +27,8 @@
     typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
   >(null);
   let loadStarted = $state(false);
+  let liveReady = $state(false);
+  let shellVisible = $state(true);
   /** True when the user tabbed into the shell; hand focus to .gg-capture on ready. */
   let restoreKeyboardFocus = $state(false);
 
@@ -38,8 +40,17 @@
     });
   }
 
+  function hideShellIfReady(): void {
+    if (liveReady) shellVisible = false;
+  }
+
+  function onStaticTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName !== "opacity") return;
+    hideShellIfReady();
+  }
+
   function onShellFocusIn(): void {
-    if (Plot === null) restoreKeyboardFocus = true;
+    if (!liveReady) restoreKeyboardFocus = true;
   }
 
   function onShellFocusOut(event: FocusEvent): void {
@@ -81,10 +92,56 @@
     return observeUserIntent(el, ensureLive);
   });
 
+  const READY_FALLBACK_MS = 10_000;
+  $effect(() => {
+    if (Plot === null || host === null) {
+      liveReady = false;
+      return;
+    }
+    const root = host;
+    const markReady = (): void => {
+      liveReady = true;
+    };
+    const already = root.querySelector('.gg-plot-root[data-gg-ready="true"]');
+    if (already !== null) {
+      markReady();
+      return;
+    }
+    liveReady = false;
+    const observer = new MutationObserver(() => {
+      if (root.querySelector('.gg-plot-root[data-gg-ready="true"]') !== null) {
+        markReady();
+        observer.disconnect();
+      }
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-gg-ready"],
+      subtree: true,
+      childList: true,
+    });
+    const fallback = window.setTimeout(markReady, READY_FALLBACK_MS);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+  });
+
+  $effect(() => {
+    if (!liveReady) {
+      shellVisible = true;
+      return;
+    }
+    const fallback = window.setTimeout(hideShellIfReady, 250);
+    return () => {
+      window.clearTimeout(fallback);
+    };
+  });
+
   // After keyboard-triggered upgrade, move focus into the plot so Tab order
   // does not jump to <body> when the load button unmounts (#1362).
   $effect(() => {
-    if (Plot === null || host === null || !restoreKeyboardFocus) return;
+    if (!liveReady || host === null || !restoreKeyboardFocus) return;
     const root = host;
     const tryFocus = (): boolean => {
       if (!focusAfterUpgrade(root)) return false;
@@ -109,23 +166,31 @@
 
 <div
   class="grammar-output"
+  class:live-ready={liveReady}
   bind:this={host}
   onfocusin={onShellFocusIn}
   onfocusout={onShellFocusOut}
 >
-  {#if Plot !== null}
-    <Plot />
-  {:else}
-    <!--
-      theme.js sets data-theme before paint. Mirror contrastChartTheme():
-      fivethirtyeight on the light site, light chart on dark — no theme flash.
-    -->
-    <div class="grammar-static grammar-static--light-site">
-      {@html staticSvgLightSite}
+  {#if shellVisible}
+    <div
+      class="grammar-static-wrap"
+      class:under-live={liveReady}
+      class:fade-out={liveReady}
+      ontransitionend={onStaticTransitionEnd}
+    >
+      <!--
+        theme.js sets data-theme before paint. Mirror contrastChartTheme():
+        fivethirtyeight on the light site, light chart on dark — no theme flash.
+      -->
+      <div class="grammar-static grammar-static--light-site">
+        {@html staticSvgLightSite}
+      </div>
+      <div class="grammar-static grammar-static--dark-site">
+        {@html staticSvgDarkSite}
+      </div>
     </div>
-    <div class="grammar-static grammar-static--dark-site">
-      {@html staticSvgDarkSite}
-    </div>
+  {/if}
+  {#if !liveReady}
     <!-- Stay mounted and focusable while the import resolves (no disabled blur). -->
     <button
       type="button"
@@ -136,6 +201,11 @@
     >
       {loadStarted ? "Loading…" : "Load interactive chart"}
     </button>
+  {/if}
+  {#if Plot !== null}
+    <div class="grammar-live" class:revealed={liveReady}>
+      <Plot />
+    </div>
   {/if}
 </div>
 
@@ -160,6 +230,22 @@
     height: auto;
   }
 
+  .grammar-static-wrap {
+    transition: opacity var(--duration-popover) var(--ease-out);
+  }
+
+  .grammar-static-wrap.under-live {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .grammar-static-wrap.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .grammar-static--dark-site {
     display: none;
   }
@@ -170,6 +256,19 @@
 
   :global(:root[data-theme="dark"]) .grammar-static--dark-site {
     display: block;
+  }
+
+  .grammar-live:not(.revealed) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grammar-live.revealed {
+    position: relative;
+    opacity: 1;
   }
 
   .load-interactive {
