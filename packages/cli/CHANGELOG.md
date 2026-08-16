@@ -1,5 +1,14 @@
 # @ggsvelte/cli
 
+## 0.38.0
+
+### Patch Changes
+
+- Updated dependencies [fe365d1]
+- Updated dependencies [eded7a2]
+- Updated dependencies [b3280eb]
+  - @ggsvelte/core@0.38.0
+
 ## 0.37.1
 
 ### Patch Changes

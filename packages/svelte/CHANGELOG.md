@@ -1,5 +1,21 @@
 # @ggsvelte/svelte
 
+## 0.38.0
+
+### Patch Changes
+
+- 361725e: Paint inspect crosshairs from one coord-flip remap so x/y guides stay consistent under flip.
+- fe365d1: Identity-stat stacked and filled columns now inspect the post-position height, so fill tooltips show shares and Total sums those shares.
+- c72ab09: Inspection tooltips fade in on first appear and fade out on last leave. Hover follow and misses between marks stay instant.
+
+  Migration: none — internal tooltip chrome
+
+- Updated dependencies [fe365d1]
+- Updated dependencies [eded7a2]
+- Updated dependencies [b3280eb]
+  - @ggsvelte/core@0.38.0
+  - @ggsvelte/spec@0.38.0
+
 ## 0.37.1
 
 ### Patch Changes

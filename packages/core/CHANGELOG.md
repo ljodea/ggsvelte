@@ -1,5 +1,21 @@
 # @ggsvelte/core
 
+## 0.38.0
+
+### Minor Changes
+
+- eded7a2: Export `temporalGuideTypeMismatchError` so render and validate share one temporal-guide type check.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- fe365d1: Identity-stat stacked and filled columns now inspect the post-position height, so fill tooltips show shares and Total sums those shares.
+- b3280eb: Reject temporal break and label options on an explicit band scale during render, matching validate().
+- Updated dependencies [eded7a2]
+- Updated dependencies [b3280eb]
+  - @ggsvelte/spec@0.38.0
+
 ## 0.37.1
 
 ### Patch Changes
