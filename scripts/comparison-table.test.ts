@@ -86,6 +86,37 @@ describe("README Why ggsvelte? table", () => {
     expect(tableCell(table, "ggplot2 API", "TanStack").mark).toBe("❌");
     expect(tableCell(table, "Scale, axis & coord control", "TanStack").mark).toBe("✅");
   });
+
+  it("keeps partial/negative peer notes to a single short word", () => {
+    expect(tableCell(table, "Headless server-side SVG", "SveltePlot")).toEqual({
+      mark: "❌",
+      note: "",
+    });
+    expect(tableCell(table, "Headless server-side SVG", "Unovis")).toEqual({
+      mark: "❌",
+      note: "",
+    });
+    expect(tableCell(table, "Headless server-side SVG", "LayerCake")).toEqual({
+      mark: "⚠️",
+      note: "opt-in",
+    });
+    expect(tableCell(table, "Automatic temporal detection", "SveltePlot")).toEqual({
+      mark: "⚠️",
+      note: "Some",
+    });
+    expect(tableCell(table, "Built-in interactions", "SveltePlot")).toEqual({
+      mark: "⚠️",
+      note: "Some",
+    });
+    expect(tableCell(table, "Built-in interactions", "Unovis")).toEqual({
+      mark: "⚠️",
+      note: "Some",
+    });
+    expect(tableCell(table, "Scale, axis & coord control", "LayerCake")).toEqual({
+      mark: "⚠️",
+      note: "d3",
+    });
+  });
 });
 
 describe("docs homepage comparison table", () => {
@@ -102,5 +133,17 @@ describe("docs homepage comparison table", () => {
   it("uses the generated TanStack version and 1k-scatter bundle", () => {
     expect(source).toContain("BENCHMARK_VERSIONS.tanstack");
     expect(source).toContain("BENCHMARK_BUNDLE_KB.tanstackKb");
+  });
+
+  it("keeps partial/negative peer notes to a single short word", () => {
+    expect(source).not.toContain("empty shell");
+    expect(source).not.toContain("client onMount");
+    expect(source).not.toContain("Date only");
+    expect(source).not.toContain("tooltip + brush");
+    expect(source).not.toContain("tooltip + crosshair");
+    expect(source).not.toContain("d3 scales");
+    expect(source).toContain('note: "opt-in"');
+    expect(source).toContain('note: "Some"');
+    expect(source).toContain('note: "d3"');
   });
 });
