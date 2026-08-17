@@ -287,11 +287,11 @@ function allInvalidSemantic(length: number): { semantic: Float64Array; valid: Ui
  * text). Labels like "s0" / "series-1" are false (letter first after trim).
  */
 function stringLooksNumeric(value: string): boolean {
-  const first = value.charCodeAt(0);
+  const first = value.codePointAt(0);
   // Most nominal labels start with printable ASCII ("s0", "series-1").
   // Decide those without allocating a trimmed copy; keep the full trim path
   // for leading whitespace and non-ASCII input.
-  if (first > 0x20 && first < 0x7f) {
+  if (first !== undefined && first > 0x20 && first < 0x7f) {
     return (first >= 48 && first <= 57) || first === 43 || first === 45 || first === 46;
   }
   const trimmed = value.trim();
