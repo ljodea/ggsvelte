@@ -57,7 +57,12 @@ describe("collectColorCatalogValues string monomorph path", () => {
   it("keeps first-seen order for series labels", async () => {
     const { collectColorCatalogValues } = await import("../src/pipeline/scale-color-collect.ts");
     const table = ColumnTable.fromColumns({
-      series: ["s0", "s1", "s0", "s2", "s1"],
+      series: [
+        ...Array.from({ length: 64 }, () => "s0"),
+        ...Array.from({ length: 64 }, () => "s1"),
+        ...Array.from({ length: 64 }, () => "s0"),
+        ...Array.from({ length: 64 }, () => "s2"),
+      ],
     });
     const bindings = fromAny([
       {
@@ -70,5 +75,73 @@ describe("collectColorCatalogValues string monomorph path", () => {
     expect(catalog.catalogValues).toEqual(["s0", "s1", "s2"]);
     expect(catalog.anyDiscreteField).toBe(true);
     expect(catalog.anyField).toBe(true);
+  });
+
+  it("preserves adjacent signed zero catalog keys", async () => {
+    const { collectColorCatalogValues } = await import("../src/pipeline/scale-color-collect.ts");
+    const table = ColumnTable.fromColumns({
+      series: [0, -0, Number.NaN, Number.NaN],
+    });
+    const bindings = fromAny([
+      {
+        color: { field: "series", scaledConstant: null },
+        fill: { field: null, scaledConstant: null },
+        sourceTable: table,
+      },
+    ]);
+    const catalog = collectColorCatalogValues("color", bindings, table);
+    expect(catalog.catalogValues).toEqual([0, -0, Number.NaN]);
+  });
+
+  it("keeps the baseline path for a misleading duplicate prefix", async () => {
+    const { collectColorCatalogValues } = await import("../src/pipeline/scale-color-collect.ts");
+    const table = ColumnTable.fromColumns({
+      series: ["s0", "s0", ...Array.from({ length: 62 }, (_, index) => `s${index % 3}`)],
+    });
+    const bindings = fromAny([
+      {
+        color: { field: "series", scaledConstant: null },
+        fill: { field: null, scaledConstant: null },
+        sourceTable: table,
+      },
+    ]);
+    expect(collectColorCatalogValues("color", bindings, table).catalogValues).toEqual([
+      "s0",
+      "s1",
+      "s2",
+    ]);
+  });
+
+  it("keeps canonical keys for mixed values inside dense string runs", async () => {
+    const { collectColorCatalogValues } = await import("../src/pipeline/scale-color-collect.ts");
+    const instant = new Date("2024-01-01T00:00:00.000Z");
+    const table = ColumnTable.fromColumns({
+      series: [
+        ...Array.from({ length: 64 }, () => "@series"),
+        0,
+        -0,
+        Number.NaN,
+        Number.NaN,
+        instant,
+        new Date(instant),
+        ...Array.from({ length: 64 }, () => "s1"),
+        ...Array.from({ length: 64 }, () => "@series"),
+      ],
+    });
+    const bindings = fromAny([
+      {
+        color: { field: "series", scaledConstant: null },
+        fill: { field: null, scaledConstant: null },
+        sourceTable: table,
+      },
+    ]);
+    expect(collectColorCatalogValues("color", bindings, table).catalogValues).toEqual([
+      "@series",
+      0,
+      -0,
+      Number.NaN,
+      instant,
+      "s1",
+    ]);
   });
 });

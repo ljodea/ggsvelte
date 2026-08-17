@@ -105,6 +105,87 @@ export interface CollectedColorCatalog {
   anyField: boolean;
 }
 
+function addCatalogValue(
+  catalogValues: CellValue[],
+  catalogKeys: Set<string>,
+  value: CellValue,
+): void {
+  // Monomorphic strings (series labels): Set membership on the string
+  // itself — encodeKey for plain strings is identity, but the call +
+  // startsWith("@") check still costs at 30k cells.
+  if (typeof value === "string" && !value.startsWith("@")) {
+    if (catalogKeys.has(value)) return;
+    catalogKeys.add(value);
+    catalogValues.push(value);
+    return;
+  }
+  const key = encodeKey(value);
+  if (catalogKeys.has(key)) return;
+  catalogKeys.add(key);
+  catalogValues.push(value);
+}
+
+function addCatalogValues(
+  values: readonly CellValue[],
+  catalogValues: CellValue[],
+  catalogKeys: Set<string>,
+): void {
+  // Keep the selected non-run loop self-contained so the JIT can optimize it
+  // independently from the run-aware loop below.
+  for (const value of values) {
+    if (typeof value === "string" && !value.startsWith("@")) {
+      if (catalogKeys.has(value)) continue;
+      catalogKeys.add(value);
+      catalogValues.push(value);
+      continue;
+    }
+    const key = encodeKey(value);
+    if (catalogKeys.has(key)) continue;
+    catalogKeys.add(key);
+    catalogValues.push(value);
+  }
+}
+
+function hasDenseStringRuns(values: readonly CellValue[]): boolean {
+  const sampleCount = 16;
+  const minimumRunMatches = Math.ceil(sampleCount * 0.75);
+  if (values.length <= sampleCount) return false;
+  let runMatches = 0;
+  for (let sample = 0; sample < sampleCount; sample++) {
+    const index = Math.floor((sample * (values.length - 2)) / sampleCount);
+    const value = values[index];
+    if (typeof value === "string" && value === values[index + 1] && value === values[index + 2]) {
+      runMatches++;
+    }
+  }
+  return runMatches >= minimumRunMatches;
+}
+
+function addStringRunCatalogValues(
+  values: readonly CellValue[],
+  catalogValues: CellValue[],
+  catalogKeys: Set<string>,
+): void {
+  let previousString: string | undefined;
+  for (const value of values) {
+    if (typeof value === "string") {
+      if (value === previousString) continue;
+      previousString = value;
+      const key = value.startsWith("@") ? encodeKey(value) : value;
+      if (catalogKeys.has(key)) continue;
+      catalogKeys.add(key);
+      catalogValues.push(value);
+      continue;
+    } else {
+      previousString = undefined;
+    }
+    const key = encodeKey(value);
+    if (catalogKeys.has(key)) continue;
+    catalogKeys.add(key);
+    catalogValues.push(value);
+  }
+}
+
 /**
  * Collect the full source-table value catalog for a color/fill channel so
  * runtime row filters keep categorical assignments stable: the scale trains
@@ -117,21 +198,6 @@ export function collectColorCatalogValues(
 ): CollectedColorCatalog {
   const catalogValues: CellValue[] = [];
   const catalogKeys = new Set<string>();
-  const addCatalogValue = (value: CellValue): void => {
-    // Monomorphic strings (series labels): Set membership on the string
-    // itself — encodeKey for plain strings is identity, but the call +
-    // startsWith("@") check still costs at 30k cells.
-    if (typeof value === "string" && !value.startsWith("@")) {
-      if (catalogKeys.has(value)) return;
-      catalogKeys.add(value);
-      catalogValues.push(value);
-      return;
-    }
-    const key = encodeKey(value);
-    if (catalogKeys.has(key)) return;
-    catalogKeys.add(key);
-    catalogValues.push(value);
-  };
   let anyDiscreteField = false;
   let anyField = false;
   for (const binding of bindings) {
@@ -141,12 +207,20 @@ export function collectColorCatalogValues(
     if (channel.field !== null && table.has(channel.field)) {
       anyField = true;
       if (table.discreteness(channel.field) === "discrete") anyDiscreteField = true;
-      for (const value of table.column(channel.field)) addCatalogValue(value);
+      const values = table.column(channel.field);
+      // Select the run-aware loop only when evenly spaced samples show that
+      // three-value string runs dominate; interleaved categories retain the
+      // standard catalog loop.
+      if (hasDenseStringRuns(values)) {
+        addStringRunCatalogValues(values, catalogValues, catalogKeys);
+      } else {
+        addCatalogValues(values, catalogValues, catalogKeys);
+      }
     }
     if (channel.scaledConstant !== null) {
       anyDiscreteField = true;
       anyField = true;
-      addCatalogValue(channel.scaledConstant);
+      addCatalogValue(catalogValues, catalogKeys, channel.scaledConstant);
     }
   }
   return { catalogValues, anyDiscreteField, anyField };
