@@ -2,10 +2,10 @@
  * Browser paint competitive bench (Playwright Chromium).
  *
  * Matrix: browser-enabled libs × scenario cases (default subset, or COMPETITIVE_FULL=1).
- * Metrics per cell: cold mount median ms (includes double-rAF) plus IN-PLACE
- * update median ms (same medianMs helper, warmup 2 / samples 11, alternating
- * perturbed data). Each library×case cell gets a fresh page so framework
- * state and page-heap pressure from earlier cells cannot skew later peers.
+ * Metrics per cell: cold mount plus IN-PLACE update medians, each reported as
+ * paint-inclusive total time and synchronous adapter time (warmup 2 / samples
+ * 11, alternating perturbed data). Each library×case cell gets a fresh page so
+ * framework state and page-heap pressure from earlier cells cannot skew peers.
  * replace* columns mirror mount until a distinct remount metric is wanted
  * (full remount is not re-sampled).
  *
@@ -40,9 +40,9 @@ const cases = casesForRun(full).filter((c) => !onlyCases || onlyCases.includes(c
 const browserLibs = LIBS.filter((l) => l.browser && (!onlyLibs || onlyLibs.includes(l.id)));
 
 type BenchApi = {
-  mount: (lib: string, caseId: string) => Promise<{ ms: number; markHint: number }>;
+  mount: (lib: string, caseId: string) => Promise<{ ms: number; syncMs: number; markHint: number }>;
   replace: (lib: string, caseId: string) => Promise<{ ms: number }>;
-  update: (lib: string, caseId: string) => Promise<{ ms: number }>;
+  update: (lib: string, caseId: string) => Promise<{ ms: number; syncMs: number }>;
   endUpdate: () => void;
   list: () => {
     libs: { id: string; browser: boolean }[];
@@ -50,13 +50,10 @@ type BenchApi = {
   };
 };
 
-async function medianMs(
-  fn: () => Promise<number>,
-  { warmup = 2, samples = 11 } = {},
-): Promise<{ median: number; mean: number; p95: number; samples: number[] }> {
-  for (let i = 0; i < warmup; i++) await fn();
-  const times: number[] = [];
-  for (let i = 0; i < samples; i++) times.push(await fn());
+type Timing = { ms: number; syncMs: number };
+type TimingStats = { median: number; mean: number; p95: number; samples: number[] };
+
+function summarize(times: number[]): TimingStats {
   times.sort((a, b) => a - b);
   const median = times[Math.floor(times.length / 2)]!;
   const mean = times.reduce((a, b) => a + b, 0) / times.length;
@@ -67,6 +64,21 @@ async function medianMs(
     p95: +p95.toFixed(3),
     samples: times.map((t) => +t.toFixed(3)),
   };
+}
+
+async function medianTiming(
+  fn: () => Promise<Timing>,
+  { warmup = 2, samples = 11 } = {},
+): Promise<{ total: TimingStats; sync: TimingStats }> {
+  for (let i = 0; i < warmup; i++) await fn();
+  const totalTimes: number[] = [];
+  const syncTimes: number[] = [];
+  for (let i = 0; i < samples; i++) {
+    const timing = await fn();
+    totalTimes.push(timing.ms);
+    syncTimes.push(timing.syncMs);
+  }
+  return { total: summarize(totalTimes), sync: summarize(syncTimes) };
 }
 
 function pairs(): { lib: LibMeta; caseId: string; scenario: string; n: number }[] {
@@ -212,29 +224,29 @@ for (const cell of matrix) {
   const label = `${cell.lib.id} ${cell.caseId}`;
   process.stderr.write(`bench mount ${label}...\n`);
   try {
-    const mountStats = await medianMs(async () => {
-      const r = await page.evaluate(
+    const mountTiming = await medianTiming(() =>
+      page.evaluate(
         async ({ library, caseId }) => {
           const w = window as unknown as { competitiveBench: BenchApi };
           return w.competitiveBench.mount(library, caseId);
         },
         { library: cell.lib.id, caseId: cell.caseId },
-      );
-      return r.ms;
-    });
+      ),
+    );
+    const mountStats = mountTiming.total;
     // replaceLib is a full remount alias of mountLib today — re-running the
     // median loop doubles wall time with no new information (#1357). replace*
     // columns below mirror mount stats; update* is the real second axis.
-    const updateStats = await medianMs(async () => {
-      const r = await page.evaluate(
+    const updateTiming = await medianTiming(() =>
+      page.evaluate(
         async ({ library, caseId }) => {
           const w = window as unknown as { competitiveBench: BenchApi };
           return w.competitiveBench.update(library, caseId);
         },
         { library: cell.lib.id, caseId: cell.caseId },
-      );
-      return r.ms;
-    });
+      ),
+    );
+    const updateStats = updateTiming.total;
     // Teardown the live update handle for this cell (also automatic on the
     // next cell's first update call — belt and braces, no leaks across cells).
     await page.evaluate(() => {
@@ -250,12 +262,21 @@ for (const cell of matrix) {
       mountMedianMs: mountStats.median,
       mountMeanMs: mountStats.mean,
       mountP95Ms: mountStats.p95,
+      mountSyncMedianMs: mountTiming.sync.median,
+      mountSyncMeanMs: mountTiming.sync.mean,
+      mountSyncP95Ms: mountTiming.sync.p95,
       replaceMedianMs: mountStats.median,
       replaceMeanMs: mountStats.mean,
       replaceP95Ms: mountStats.p95,
+      replaceSyncMedianMs: mountTiming.sync.median,
+      replaceSyncMeanMs: mountTiming.sync.mean,
+      replaceSyncP95Ms: mountTiming.sync.p95,
       updateMedianMs: updateStats.median,
       updateMeanMs: updateStats.mean,
       updateP95Ms: updateStats.p95,
+      updateSyncMedianMs: updateTiming.sync.median,
+      updateSyncMeanMs: updateTiming.sync.mean,
+      updateSyncP95Ms: updateTiming.sync.p95,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -273,15 +294,16 @@ for (const cell of matrix) {
   }
 }
 
-console.log("\n=== Competitive browser mount / replace / update (Chromium, median) ===\n");
+console.log("\n=== Competitive browser total / sync timing (Chromium, median) ===\n");
 console.log(
   "lib".padEnd(18),
   "case".padEnd(22),
-  "mount".padStart(10),
-  "replace".padStart(10),
-  "update".padStart(10),
+  "mount total".padStart(12),
+  "mount sync".padStart(12),
+  "update total".padStart(12),
+  "update sync".padStart(12),
 );
-console.log("-".repeat(72));
+console.log("-".repeat(92));
 for (const r of results) {
   if (!r["ok"]) {
     console.log(String(r["lib"]).padEnd(18), String(r["caseId"]).padEnd(22), "FAIL");
@@ -290,9 +312,10 @@ for (const r of results) {
   console.log(
     String(r["lib"]).padEnd(18),
     String(r["caseId"]).padEnd(22),
-    `${r["mountMedianMs"]}ms`.padStart(10),
-    `${r["replaceMedianMs"]}ms`.padStart(10),
-    `${r["updateMedianMs"]}ms`.padStart(10),
+    `${r["mountMedianMs"]}ms`.padStart(12),
+    `${r["mountSyncMedianMs"]}ms`.padStart(12),
+    `${r["updateMedianMs"]}ms`.padStart(12),
+    `${r["updateSyncMedianMs"]}ms`.padStart(12),
   );
 }
 
@@ -300,6 +323,7 @@ const payload = {
   generatedAt: new Date().toISOString(),
   full,
   measuresUpdate: true,
+  measuresSync: true,
   caseCatalog: CASES,
   libs: LIBS,
   results,

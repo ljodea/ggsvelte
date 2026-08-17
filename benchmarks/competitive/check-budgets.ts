@@ -76,10 +76,10 @@ const FORM_BY_LIB = new Map(LIBS.map((l) => [l.id, l.form] as const));
 
 /** Max allowed ggsvelte/peer median ratio in the relative gate. */
 const MAX_RELATIVE_RATIO = 1.0;
-/** Floor-noise tolerance: medians at the ~30ms double-rAF paint floor jitter
- * by a frame fraction run-to-run, so a strict ratio <= 1.0 flakes on cells
- * where both sides sit at the floor. Real wins/losses are >= 1.4x — far
- * outside this band. */
+/** Short-cell tolerance: unthrottled double-rAF totals still include host and
+ * compositor scheduling, so near-equal medians can cross a strict 1.0 ratio.
+ * The paired sync medians attribute that noise but do not replace the total
+ * end-to-end gate; repeat dense contested cells before changing an exemption. */
 const REL_EPS = 0.02;
 const ABS_EPS_MS = 2;
 const withinGate = (ggMs: number, peerMs: number) =>
