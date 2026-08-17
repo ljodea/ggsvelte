@@ -4,6 +4,7 @@
     scaleColorDate,
     type TemporalColorScaleOptions,
   } from "@ggsvelte/spec";
+  import "@ggsvelte/core/temporal";
   import {
     createPlotLayer,
     definedProps,

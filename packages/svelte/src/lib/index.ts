@@ -1009,6 +1009,7 @@ export type {
 // Core surface (pure renderer + pipeline)
 export {
   PipelineError,
+  installTemporal, // @lifecycle experimental
   planStrata,
   registerAbline, // @lifecycle experimental
   registerAlign, // @lifecycle experimental

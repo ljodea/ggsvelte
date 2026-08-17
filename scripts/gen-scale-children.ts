@@ -56,6 +56,9 @@ export function renderShell(spec: ShellSpec): string {
       `  } from "@ggsvelte/spec";`,
     ].join("\n");
   }
+  const temporalImport = spec.optionsType.startsWith("Temporal")
+    ? `  import "@ggsvelte/core/temporal";`
+    : undefined;
   // Long Omit annotations exceed printWidth; wrap the `= $props()` assignment.
   const propsSingle = `  const props: ${spec.optionsType} = $props();`;
   const propsBlock =
@@ -75,6 +78,7 @@ export function renderShell(spec: ShellSpec): string {
     GENERATED_HEADER,
     `<script lang="ts">`,
     importBlock,
+    ...(temporalImport === undefined ? [] : [temporalImport]),
     factoryImport,
     ``,
     propsBlock,

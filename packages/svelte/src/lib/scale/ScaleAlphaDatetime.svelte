@@ -4,6 +4,7 @@
     scaleAlphaDatetime,
     type TemporalNumericStyleScaleOptions,
   } from "@ggsvelte/spec";
+  import "@ggsvelte/core/temporal";
   import {
     createPlotLayer,
     definedProps,

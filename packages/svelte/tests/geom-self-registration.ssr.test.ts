@@ -4,8 +4,8 @@
  * This file lives in the SSR lane on purpose: the browser lane has a
  * lane-wide registerAll() setup (tests/setup-register-all.ts) that would
  * mask the behavior under test. Vitest's per-file isolate gives this file a
- * fresh registry — GGPlot brings only /render basic + Temporal, and the
- * GeomSmooth import alone must register the smooth stat + geom.
+ * fresh registry — GGPlot brings only basic geoms/stats and interaction
+ * candidates, and the GeomSmooth import alone must register its stat + geom.
  *
  * DO NOT add a registerAll() setup to the SSR lane; it would silently mask
  * this seam.

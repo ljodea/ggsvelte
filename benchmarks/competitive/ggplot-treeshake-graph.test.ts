@@ -95,6 +95,8 @@ const SPECIALTY_MODULE_PATTERNS = [
   "stats/contour",
 ];
 
+const TEMPORAL_RUNTIME_PATTERNS = ["@js-temporal/polyfill", "/jsbi/", "install-temporal"];
+
 function included(moduleIds: string[], pattern: string): string[] {
   return moduleIds.filter((id) => id.includes(pattern));
 }
@@ -105,9 +107,12 @@ describe("GGPlot point/line bundle (#1420)", () => {
     for (const pattern of SPECIALTY_MODULE_PATTERNS) {
       expect(included(moduleIds, pattern)).toEqual([]);
     }
-    // Production raw sits near 1270 KB gzip-minified / ~1300 KB this
-    // unminified graph build. Ceiling leaves a little headroom for
-    // register-seam splits that still keep specialty modules out.
+    for (const pattern of TEMPORAL_RUNTIME_PATTERNS) {
+      expect(included(moduleIds, pattern)).toEqual([]);
+    }
+    // Production raw is ~1046 KB after the numeric GGPlot graph stopped
+    // installing the Temporal polyfill. Keep modest headroom without allowing
+    // that dependency back into the default graph.
     expect(rawBytes).toBeLessThan(GGPLOT_SCATTER_MAX_RAW_BYTES);
   }, 120_000);
 });
@@ -120,4 +125,12 @@ describe("GGPlot smooth bundle (positive control)", () => {
   }, 120_000);
 });
 
-const GGPLOT_SCATTER_MAX_RAW_BYTES = 1_350_000;
+describe("GGPlot temporal scale bundle (positive control)", () => {
+  it("installs full Temporal support via <ScaleXDate>", async () => {
+    const { moduleIds } = await buildFixture("ggplot-date");
+    expect(included(moduleIds, "@js-temporal/polyfill").length).toBeGreaterThan(0);
+    expect(included(moduleIds, "install-temporal").length).toBeGreaterThan(0);
+  }, 120_000);
+});
+
+const GGPLOT_SCATTER_MAX_RAW_BYTES = 1_100_000;

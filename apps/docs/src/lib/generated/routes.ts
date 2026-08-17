@@ -12471,8 +12471,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-526",
-        title: "experimental (526)",
+        id: "experimental-527",
+        title: "experimental (527)",
         level: 3,
       },
       {
@@ -12511,6 +12511,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-38-to-0-39",
+        title: "0.38 to 0.39",
+        level: 2,
+      },
+      {
+        id: "explicit-temporal-registration-for-spec-driven-charts",
+        title: "Explicit Temporal registration for spec-driven charts",
+        level: 3,
       },
       {
         id: "0-28-to-0-29",

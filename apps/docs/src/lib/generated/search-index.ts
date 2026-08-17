@@ -20624,14 +20624,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-526",
+    id: "heading:guide-lifecycle:experimental-527",
     kind: "heading",
-    title: "experimental (526)",
+    title: "experimental (527)",
     summary:
-      "experimental (526) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-526",
+      "experimental (527) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-527",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (526)"],
+    exact: ["experimental (527)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-238",
@@ -20681,6 +20681,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#five-minute-path",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Five-minute path"],
+  },
+  {
+    id: "heading:guide-upgrading:0-38-to-0-39",
+    kind: "heading",
+    title: "0.38 to 0.39",
+    summary:
+      "0.38 to 0.39 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-38-to-0-39",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.38 to 0.39"],
+  },
+  {
+    id: "heading:guide-upgrading:explicit-temporal-registration-for-spec-driven-charts",
+    kind: "heading",
+    title: "Explicit Temporal registration for spec-driven charts",
+    summary:
+      "Explicit Temporal registration for spec-driven charts in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#explicit-temporal-registration-for-spec-driven-charts",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Explicit Temporal registration for spec-driven charts"],
   },
   {
     id: "heading:guide-upgrading:0-28-to-0-29",
@@ -40583,6 +40603,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
     exact: ["guides"],
+  },
+  {
+    id: "api:ggsvelte-svelte:installTemporal",
+    kind: "api",
+    title: "installTemporal",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["installTemporal"],
   },
   {
     id: "api:ggsvelte-svelte:isCompositionDiagnostic",

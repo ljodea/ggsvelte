@@ -1967,6 +1967,33 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.38 to 0.39
+
+### Explicit Temporal registration for spec-driven charts
+
+\`GGPlot\` no longer installs \`@js-temporal/polyfill\` when its module loads.
+The numeric scatter fixture drops 59.5 KB gzip as a result.
+
+Temporal scale children such as \`<ScaleXDate>\`, \`<ScaleYDatetime>\`, and
+\`<ScaleColorDate>\` install full Temporal parsing and guide planning, so
+component-composed temporal charts need no source change. ISO strings with no
+explicit temporal options keep the lean UTC inference path.
+
+Charts driven through \`spec\` or \`layers\` have no temporal child to install
+the runtime. Call \`installTemporal()\` once before mounting when those charts
+use an explicit temporal parser, timezone, date interval, or full Temporal
+guide planning. \`registerAll()\` includes the same install.
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, installTemporal } from "@ggsvelte/svelte";
+
+  installTemporal();
+</script>
+
+<GGPlot spec={temporalSpec} />
+\`\`\`
+
 ## 0.28 to 0.29
 
 ### Removed Tableau 10, Summer, Winter, and stone schemes

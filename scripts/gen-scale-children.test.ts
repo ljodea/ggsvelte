@@ -118,6 +118,8 @@ describe("renderShell", () => {
     expect(renderShell(date)).toContain(
       'import { scaleXDate, type TemporalScaleOptions } from "@ggsvelte/spec";',
     );
+    expect(renderShell(date)).toContain('import "@ggsvelte/core/temporal";');
+    expect(src).not.toContain('import "@ggsvelte/core/temporal";');
   });
 
   it("every script line of every generated shell is ≤ printWidth 80", () => {
