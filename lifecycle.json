@@ -5851,6 +5851,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "registerDefaultOrdinalColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "registerDiscreteLegend": {
           "kind": "value",
           "lifecycle": "experimental"

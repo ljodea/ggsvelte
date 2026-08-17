@@ -22,6 +22,8 @@ const COLOR_KIND_BANNED = /scale-color-(?:binned|sequential|manual|identity)\.[c
 const BAND_GUIDE_BANNED = /band-guide\.[cm]?[jt]s$/;
 const CONTINUOUS_LEGEND_BANNED = /legend-build-continuous\.[cm]?[jt]s$/;
 const STYLE_SEQUENTIAL_BANNED = /scale-style-numeric-sequential\.[cm]?[jt]s$/;
+const PALETTE_CATALOG_BANNED =
+  /categorical-palettes|colorbrewer-palettes|crameri-ramps|sequential-schemes|hue-grey-palettes/;
 
 async function buildEntry(entryName: string): Promise<{ moduleIds: string[]; rawBytes: number }> {
   const outDir = path.join(root, "results", "bundles", `_lean-candidates-test-${entryName}`);
@@ -79,6 +81,7 @@ describe("lean competitive SVG graph", () => {
     expect(built.moduleIds.filter((id) => BAND_GUIDE_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => CONTINUOUS_LEGEND_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => STYLE_SEQUENTIAL_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => PALETTE_CATALOG_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });
 
@@ -93,5 +96,6 @@ describe("lean competitive canvas graph", () => {
     expect(built.moduleIds.filter((id) => BAND_GUIDE_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => CONTINUOUS_LEGEND_BANNED.test(id))).toEqual([]);
     expect(built.moduleIds.filter((id) => STYLE_SEQUENTIAL_BANNED.test(id))).toEqual([]);
+    expect(built.moduleIds.filter((id) => PALETTE_CATALOG_BANNED.test(id))).toEqual([]);
   }, 120_000);
 });

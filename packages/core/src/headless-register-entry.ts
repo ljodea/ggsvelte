@@ -10,6 +10,7 @@ export { registerBasicSegments } from "./pipeline/register-basic-segments.js";
 export { registerBinnedColor } from "./pipeline/register-color-binned.js";
 export { registerIdentityColor } from "./pipeline/register-color-identity.js";
 export { registerManualColor } from "./pipeline/register-color-manual.js";
+export { registerDefaultOrdinalColor } from "./pipeline/register-color-ordinal-default.js";
 export { registerOrdinalColor } from "./pipeline/register-color-ordinal.js";
 export { registerSequentialColor } from "./pipeline/register-color-sequential.js";
 export { registerFiniteStyle } from "./pipeline/register-style-finite.js";

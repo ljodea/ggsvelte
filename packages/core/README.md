@@ -51,6 +51,11 @@ import { registerBasicPoints } from "@ggsvelte/core/headless/register";
 registerBasicPoints();
 ```
 
+Mapped colors can stay catalog-free too: call `registerDefaultOrdinalColor()`
+for the built-in palette or an explicit `range`. Call `registerOrdinalColor()`
+instead when the spec selects a named categorical, ColorBrewer, sequential, or
+Crameri scheme.
+
 Bare PortableSpec JSON works the same way — channel mappings use
 `{ field: "col" }`, not bare strings:
 

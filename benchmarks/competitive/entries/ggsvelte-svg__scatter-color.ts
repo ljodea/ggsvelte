@@ -1,9 +1,9 @@
-import { registerBasicPoints, registerOrdinalColor } from "@ggsvelte/core/headless/register";
+import { registerBasicPoints, registerDefaultOrdinalColor } from "@ggsvelte/core/headless/register";
 
 import { bundleScatterSvg } from "../adapters/ggsvelte-svg";
 
 registerBasicPoints();
-registerOrdinalColor();
+registerDefaultOrdinalColor();
 import { makeScatter } from "../scenarios";
 
 export const out = bundleScatterSvg(makeScatter(1000));

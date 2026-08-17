@@ -1,13 +1,13 @@
 import {
   registerBandGuide,
   registerBasicBars,
-  registerOrdinalColor,
+  registerDefaultOrdinalColor,
 } from "@ggsvelte/core/headless/register";
 
 import { bundleBarsSvg } from "../adapters/ggsvelte-svg";
 
 registerBasicBars();
-registerOrdinalColor();
+registerDefaultOrdinalColor();
 registerBandGuide();
 import { makeStackedBars } from "../scenarios";
 

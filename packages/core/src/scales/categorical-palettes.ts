@@ -8,24 +8,9 @@
 import { HUE_PALETTE_10 } from "@ggsvelte/spec";
 
 import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
+import { CATEGORICAL_PALETTE_10 } from "./categorical-palette-default.js";
 
-/**
- * Default categorical palette: 10 colors in the Observable 10 family.
- * The palette is a plain value — its fingerprint (not its identity) keys
- * scale-state invalidation.
- */
-export const CATEGORICAL_PALETTE_10: readonly string[] = [
-  "#4269d0",
-  "#efb118",
-  "#ff725c",
-  "#6cc5b0",
-  "#3ca951",
-  "#ff8ab7",
-  "#a463f2",
-  "#97bbf5",
-  "#9c6b4e",
-  "#9498a0",
-];
+export { CATEGORICAL_PALETTE_10 };
 
 /** hrbrthemes::ipsum_palette, in its published source order. */
 export const IPSUM_PALETTE: readonly string[] = [
