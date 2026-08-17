@@ -20564,14 +20564,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core (./headless/register)"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-19",
+    id: "heading:guide-lifecycle:experimental-20",
     kind: "heading",
-    title: "experimental (19)",
+    title: "experimental (20)",
     summary:
-      "experimental (19) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-19",
+      "experimental (20) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-20",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (19)"],
+    exact: ["experimental (20)"],
   },
   {
     id: "heading:guide-lifecycle:ggsvelte-core-temporal",
@@ -35786,6 +35786,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core-headless-register",
     keywords: ["@ggsvelte/core", "./headless/register", "value", "experimental"],
     exact: ["registerContinuousLegend"],
+  },
+  {
+    id: "api:ggsvelte-core-headless-register:registerDefaultOrdinalColor",
+    kind: "api",
+    title: "registerDefaultOrdinalColor",
+    summary: "@ggsvelte/core ./headless/register · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core-headless-register",
+    keywords: ["@ggsvelte/core", "./headless/register", "value", "experimental"],
+    exact: ["registerDefaultOrdinalColor"],
   },
   {
     id: "api:ggsvelte-core-headless-register:registerDiscreteLegend",
