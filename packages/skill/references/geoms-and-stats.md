@@ -152,18 +152,21 @@ after-stat column, so usually map nothing at all.
 
 Non-default stats go on the layer; their params share the layer's `params` object.
 
-**Component-form registration:** a `<Geom*>` child self-registers only its
-DEFAULT stat. Any `stat="…"` override below needs the matching family
-register call once at app startup, imported from `@ggsvelte/svelte`:
+**Component-form registration:** a `<Geom*>` child self-registers only that
+geom and its DEFAULT stat. Spec-driven surfaces — JSON spec, `layers` prop,
+`runPipeline`, `renderToSVGString` — register nothing per layer: call
+`registerAll()` once instead (or the matching `register<Family>()`). Any
+`stat="…"` override below needs the matching family register call once at
+app startup, imported from `@ggsvelte/svelte`:
 `stat="summary"` → `registerSummary()`, `stat="summary_bin"` →
 `registerSummaryBin()`, `stat="summary_rolling"` → `registerSummaryRolling()`, `stat="ecdf"` → `registerEcdf()`, `stat="manual"` →
 `registerManual()`, `stat="unique"` → `registerUnique()`, `stat="connect"` →
 `registerConnect()`, `stat="align"` → `registerAlign()`, `stat="ellipse"` →
-`registerEllipse()`. (One `registerAll()` covers all of them.) Spec-driven
-surfaces — JSON spec, `layers` prop, `runPipeline`, `renderToSVGString` —
-register nothing per layer: call `registerAll()` once instead. Missing
+`registerEllipse()`. (One `registerAll()` covers all of them.) Missing
 registration fails loudly: 'Stat "…" is not registered in this build.',
-naming the fix.
+naming the fix. Lean headless geom families
+(`registerBasicPoints()`, `registerBasicLines()`, …) live on
+`@ggsvelte/core/headless/register`. Full inventory: SKILL.md Registration.
 
 ```json fragment
 {

@@ -83,7 +83,21 @@ single-entry manual guides need `force: true` to appear. When `type` is
 omitted, a named `scheme` selects its family (categorical → ordinal,
 sequential name → sequential).
 
+**Headless color registration:** `@ggsvelte/core/render` and `registerBasic()`
+install every color kind. Lean `@ggsvelte/core/headless` does not. Call
+`registerDefaultOrdinalColor()` for the built-in palette or an explicit
+`range`; call `registerOrdinalColor()` when `scheme` names a catalog
+(`observable10`, `viridis`, ColorBrewer, Crameri). Other kinds:
+`registerSequentialColor()`, `registerBinnedColor()`, `registerManualColor()`,
+`registerIdentityColor()`. A named scheme on the default-only register throws
+`not registered in this build`. Full inventory: SKILL.md Registration.
+
 ### Style scales
+
+**Headless style registration:** mapped size / linewidth / alpha need
+`registerNumericStyle()`; mapped shape / linetype need
+`registerFiniteStyle()`. `@ggsvelte/core/render` and `registerBasic()`
+install both. Categorical x/y axes also need `registerBandGuide()`.
 
 - **numeric-style** (size, linewidth, alpha): sequential, ordinal, binned,
   manual, identity — numeric output ranges instead of colors, identity
@@ -272,6 +286,13 @@ restarts the palette and emits the bounded `palette-exhausted` warning once;
 | circle-open      |               |
 
 ## Temporal scales
+
+**Registration:** Temporal scale children (`<ScaleXDate>`, `<ScaleYDatetime>`,
+`<ScaleColorDate>`, …) call `installTemporal()` on import. Spec-driven
+`spec` / `layers` charts have no child: call `installTemporal()` or
+`registerAll()` when they set `type: "time"`, a named parser, timezone, date
+interval, or full Temporal guides. ISO strings with no explicit temporal
+options keep the lean UTC path.
 
 **Auto-inference.** ISO dates and date-times, four-digit-year strings,
 year-months, month-years, and year-quarters infer a time scale after bounded

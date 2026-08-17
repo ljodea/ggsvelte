@@ -225,6 +225,9 @@ describe("skill body uses directives for the validation feedback loop", () => {
   });
 
   it("documents registerAll for headless / spec-driven surfaces", () => {
+    expect(skillMd).toMatch(/## Registration \(call these\)/);
     expect(skillMd).toMatch(/registerAll\(\)/);
+    expect(skillMd).toMatch(/installTemporal\(\)/);
+    expect(skillMd).toMatch(/registerDefaultOrdinalColor\(\)/);
   });
 });

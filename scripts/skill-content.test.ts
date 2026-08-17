@@ -462,3 +462,90 @@ describe("skill teaches inspect mode selection and hit hygiene (#1530)", () => {
     expect(section!).toMatch(/Do not split/);
   });
 });
+
+/**
+ * Opt-in registration footguns. New register* / install* surfaces that
+ * fail at render when omitted must appear in SKILL.md Registration so
+ * agents do not ship "not registered in this build" charts.
+ */
+describe("skill teaches the opt-in registration contract", () => {
+  const skill = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+  const section = skill.match(/## Registration \(call these\)[\s\S]*?(?=\n## )/)?.[0];
+  const scales = readFileSync(join(SKILL_DIR, "references", "scales-and-palettes.md"), "utf8");
+  const themes = readFileSync(join(SKILL_DIR, "references", "themes.md"), "utf8");
+  const geoms = readFileSync(join(SKILL_DIR, "references", "geoms-and-stats.md"), "utf8");
+
+  it("SKILL.md has a Registration section agents see without opening references", () => {
+    expect(section).toBeDefined();
+    expect(section!.length).toBeGreaterThan(400);
+  });
+
+  it("defaults spec-driven surfaces to registerAll() and names the loud failure", () => {
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/registerAll\(\)/);
+    expect(section!).toMatch(/not registered in this build/);
+    expect(section!).toMatch(/ggsvelte-render/);
+    expect(section!).toMatch(/full grammar/);
+  });
+
+  it("names every current opt-in register / install agents can miss", () => {
+    expect(section).toBeDefined();
+    const required = [
+      "registerAll()",
+      "registerBasic()",
+      "registerSummary()",
+      "installTemporal()",
+      "registerDefaultOrdinalColor()",
+      "registerOrdinalColor()",
+      "registerSequentialColor()",
+      "registerBinnedColor()",
+      "registerManualColor()",
+      "registerIdentityColor()",
+      "registerNumericStyle()",
+      "registerFiniteStyle()",
+      "registerBandGuide()",
+      "registerDiscreteLegend()",
+      "registerContinuousLegend()",
+      "registerBasicPoints()",
+      "registerBasicLines()",
+      "registerBasicAreas()",
+      "registerBasicBars()",
+      "installCandidates()",
+      "@ggsvelte/core/headless/register",
+    ];
+    const missing = required.filter((name) => !section!.includes(name));
+    expect(missing).toEqual([]);
+  });
+
+  it("distinguishes default-palette color from named-scheme color", () => {
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/registerDefaultOrdinalColor\(\)[\s\S]*named/i);
+    expect(section!).toMatch(/registerOrdinalColor\(\)/);
+  });
+
+  it("teaches spec-driven Temporal without a scale child", () => {
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/installTemporal\(\)/);
+    expect(section!).toMatch(/no Temporal child|have no Temporal child/);
+    expect(section!).toMatch(/type: "time"/);
+  });
+
+  it("teaches that headless named themes are not a register call", () => {
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/Named themes/);
+    expect(section!).toMatch(/`default` and `void`/);
+    expect(section!).toMatch(/@ggsvelte\/core\/headless/);
+  });
+
+  it("references restate the family that belongs on that page", () => {
+    expect(geoms).toMatch(/registerAll\(\)/);
+    expect(geoms).toMatch(/registerBasicPoints\(\)/);
+    expect(scales).toMatch(/registerDefaultOrdinalColor\(\)/);
+    expect(scales).toMatch(/registerOrdinalColor\(\)/);
+    expect(scales).toMatch(/registerNumericStyle\(\)/);
+    expect(scales).toMatch(/registerBandGuide\(\)/);
+    expect(scales).toMatch(/installTemporal\(\)/);
+    expect(themes).toMatch(/@ggsvelte\/core\/headless/);
+    expect(themes).toMatch(/`default`[\s\S]*`void`|only `default` and `void`/);
+  });
+});

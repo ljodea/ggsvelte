@@ -12,19 +12,67 @@ same grammar — never build SVG or canvas output yourself:
   `<GeomPoint/>`, `<ThemeMinimal/>`, `<ScaleXLog10/>`, `<FacetWrap/>`, `<Labs/>`.
 - **Agents / headless:** emit a JSON `PortableSpec`, check it with
   `validate(spec)`, render with `renderToSVGString(spec, {width, height})`
-  (Node-safe; call `registerAll()` once first — the core barrel is
-  side-effect-free since 0.27), `ggsvelte-render spec.json > out.svg` (CLI),
-  or `<GGPlot spec>` (spec-driven GGPlot also needs one `registerAll()` for
-  specialty geoms/stats). `<Geom*>` children self-register their DEFAULT
-  stat only: a `stat="…"` override on a child additionally needs the
-  matching `register<Family>()` call (from `@ggsvelte/svelte`) — e.g.
-  `<GeomErrorbar stat="summary" />` → `registerSummary()`.
+  (Node-safe). Call `registerAll()` once first unless a Svelte child
+  self-registers the piece — see **Registration** below. Then
+  `ggsvelte-render spec.json > out.svg` (CLI), or `<GGPlot spec>`.
   A third skin, the `gg()` builder, produces the same spec in TypeScript.
   The CLI is part of the install contract for agent-driven chart generation:
   install `@ggsvelte/cli` in every sandbox where an agent authors specs
   (`npm i -g @ggsvelte/cli`). It is the only way the agent sees the
   pipeline's warnings and advisories before a chart ships; a JSON-only
   workflow renders blind. Do not drop it to slim an install.
+
+## Registration (call these)
+
+The `@ggsvelte/core` barrel is side-effect-free. A missing opt-in throws
+`not registered in this build` and names the fix. **Default for agents:**
+call `registerAll()` once at startup for every spec-driven, `layers`,
+`<GGPlot spec>`, `runPipeline`, or `renderToSVGString` path. Do not invent
+a lean register list unless the user asked for a small bundle.
+
+`ggsvelte-render` already registers the full grammar. Svelte **children**
+self-register only the piece they are.
+
+| Surface                                                             | What is already registered                                                                                                    | What you must still call                                                                                                                |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `<Geom*>` child                                                     | that geom + its **default** stat                                                                                              | `register<Family>()` for a `stat="…"` override (from `@ggsvelte/svelte`) — e.g. `<GeomErrorbar stat="summary" />` → `registerSummary()` |
+| `<ScaleXDate>` / `<ScaleYDatetime>` / other Temporal scale children | `installTemporal()`                                                                                                           | nothing                                                                                                                                 |
+| `<GGPlot>` construction                                             | `registerBasic()` + `installCandidates()` (identity geoms/stats, every color/style kind, band-axis planner, host hit-testing) | `registerAll()` for specialty geoms/stats; `installTemporal()` for spec/`layers` temporal charts that have no Temporal child            |
+| `@ggsvelte/core/render` import                                      | same basic tier as `registerBasic()`                                                                                          | specialty families + Temporal                                                                                                           |
+| `@ggsvelte/core/temporal` import                                    | Temporal polyfill + guides                                                                                                    | the rest of the grammar                                                                                                                 |
+| CLI `ggsvelte-render`                                               | full grammar                                                                                                                  | nothing                                                                                                                                 |
+
+**Spec-driven Temporal:** ISO strings with no explicit temporal options keep
+the lean UTC path. Charts driven through `spec` or `layers` have no Temporal
+child. Call `installTemporal()` (from `@ggsvelte/svelte` or `@ggsvelte/core`)
+or `registerAll()` when those charts set `type: "time"`, a named parser,
+timezone, date interval, or full Temporal guide planning.
+
+**Lean headless** (`@ggsvelte/core/headless` + `@ggsvelte/core/headless/register`)
+is opt-in per family. One forgotten call fails at render:
+
+- Geoms: `registerBasicPoints()`, `registerBasicLines()`, `registerBasicAreas()`,
+  `registerBasicBars()`, `registerBasicRects()`, `registerBasicGlyphs()`,
+  `registerBasicSegments()`. Specialty geoms keep `registerSmooth()`,
+  `registerBoxplot()`, … (same names as `@ggsvelte/core`).
+- Color: `registerDefaultOrdinalColor()` for the built-in palette or an
+  explicit `range`. **Named** schemes (`observable10`, `viridis`, ColorBrewer,
+  Crameri, …) need `registerOrdinalColor()`. Other kinds:
+  `registerSequentialColor()`, `registerBinnedColor()`, `registerManualColor()`,
+  `registerIdentityColor()`.
+- Style: `registerNumericStyle()` (size / linewidth / alpha),
+  `registerFiniteStyle()` (shape / linetype).
+- Band axes: `registerBandGuide()` for categorical x/y.
+- Legends: `registerDiscreteLegend()` / `registerContinuousLegend()` (the
+  matching color register also pulls these).
+- Named themes: `@ggsvelte/core/headless` resolves only `default` and `void`.
+  `dark`, `minimal`, and the rest need `@ggsvelte/core` or
+  `@ggsvelte/core/render` — not a `register*()` call.
+
+`registerAll()` covers every stat frame, every geom batch, every color kind
+(with catalogs), every style kind, the band-axis planner, Temporal, and
+interaction candidates. `registerBasic()` covers identity charts only; it
+does not install Temporal or specialty geoms/stats.
 
 ## Mental model
 
@@ -204,7 +252,8 @@ Two rules worth keeping in working memory:
 - Temporal: ISO dates/date-times, four-digit-year strings, year-months, and
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
-  identifiers; never preprocess dates into indexes.
+  identifiers; never preprocess dates into indexes. Spec-driven time scales
+  also need `installTemporal()` or `registerAll()` — see Registration.
 - Themes: 32 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
   `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
   `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `solarized`,
@@ -356,3 +405,5 @@ or linked-view code.
   facets, guides, merge semantics),
   [interactions.md](references/interactions.md) (tooltips, selection, linking),
   [recipes.md](references/recipes.md) (long-tail chart recipes).
+  Registration calls live in this file (Registration); the references
+  restate the family that belongs to that page.
