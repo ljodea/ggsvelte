@@ -1,5 +1,17 @@
 # @ggsvelte/core
 
+## 0.39.0
+
+### Minor Changes
+
+- 799be44: Add `registerDefaultOrdinalColor()` for headless charts that use the built-in categorical palette or an explicit range. This registration keeps named categorical, ColorBrewer, sequential, and Crameri catalogs out of lean bundles; use `registerOrdinalColor()` when a spec selects a named scheme.
+
+  Migration: none — additive.
+
+### Patch Changes
+
+- @ggsvelte/spec@0.39.0
+
 ## 0.38.2
 
 ### Patch Changes
