@@ -58,10 +58,10 @@ describe("collectColorCatalogValues string monomorph path", () => {
     const { collectColorCatalogValues } = await import("../src/pipeline/scale-color-collect.ts");
     const table = ColumnTable.fromColumns({
       series: [
-        ...Array<string>(64).fill("s0"),
-        ...Array<string>(64).fill("s1"),
-        ...Array<string>(64).fill("s0"),
-        ...Array<string>(64).fill("s2"),
+        ...Array.from({ length: 64 }, () => "s0"),
+        ...Array.from({ length: 64 }, () => "s1"),
+        ...Array.from({ length: 64 }, () => "s0"),
+        ...Array.from({ length: 64 }, () => "s2"),
       ],
     });
     const bindings = fromAny([
@@ -117,15 +117,15 @@ describe("collectColorCatalogValues string monomorph path", () => {
     const instant = new Date("2024-01-01T00:00:00.000Z");
     const table = ColumnTable.fromColumns({
       series: [
-        ...Array<string>(64).fill("@series"),
+        ...Array.from({ length: 64 }, () => "@series"),
         0,
         -0,
         Number.NaN,
         Number.NaN,
         instant,
         new Date(instant),
-        ...Array<string>(64).fill("s1"),
-        ...Array<string>(64).fill("@series"),
+        ...Array.from({ length: 64 }, () => "s1"),
+        ...Array.from({ length: 64 }, () => "@series"),
       ],
     });
     const bindings = fromAny([
