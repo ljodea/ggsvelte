@@ -86,10 +86,13 @@ sequential name → sequential).
 **Headless color registration:** `@ggsvelte/core/render` and `registerBasic()`
 install every color kind. Lean `@ggsvelte/core/headless` does not. Call
 `registerDefaultOrdinalColor()` for the built-in palette or an explicit
-`range`; call `registerOrdinalColor()` when `scheme` names a catalog
-(`observable10`, `viridis`, ColorBrewer, Crameri). Other kinds:
-`registerSequentialColor()`, `registerBinnedColor()`, `registerManualColor()`,
-`registerIdentityColor()`. A named scheme on the default-only register throws
+`range`. A named categorical scheme (`observable10`, `Dark2`, …) needs
+`registerOrdinalColor()`. A named sequential or diverging scheme (`viridis`,
+`Blues`, Crameri `batlow`, …) needs `registerSequentialColor()` — a
+sequential name with no `type` infers sequential. Explicit
+`type: "ordinal"` still needs `registerOrdinalColor()`. Other kinds:
+`registerBinnedColor()`, `registerManualColor()`, `registerIdentityColor()`.
+A named scheme on the default-only register throws
 `not registered in this build`. Full inventory: SKILL.md Registration.
 
 ### Style scales

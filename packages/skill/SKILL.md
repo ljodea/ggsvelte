@@ -51,14 +51,32 @@ timezone, date interval, or full Temporal guide planning.
 **Lean headless** (`@ggsvelte/core/headless` + `@ggsvelte/core/headless/register`)
 is opt-in per family. One forgotten call fails at render:
 
-- Geoms: `registerBasicPoints()`, `registerBasicLines()`, `registerBasicAreas()`,
-  `registerBasicBars()`, `registerBasicRects()`, `registerBasicGlyphs()`,
-  `registerBasicSegments()`. Specialty geoms keep `registerSmooth()`,
-  `registerBoxplot()`, … (same names as `@ggsvelte/core`).
+- Basic geoms: `registerBasicPoints()`, `registerBasicLines()`,
+  `registerBasicAreas()`, `registerBasicBars()`, `registerBasicRects()`,
+  `registerBasicGlyphs()`, `registerBasicSegments()`.
+- Specialty geoms/stats (same names from `@ggsvelte/core` /
+  `@ggsvelte/svelte`): `registerAbline()`, `registerAlign()`, `registerBin()`,
+  `registerBin2d()`, `registerBoxplot()`, `registerConnect()`,
+  `registerContour()`, `registerCrossbar()`, `registerCurve()`,
+  `registerDensity()`, `registerDensity2d()`, `registerDensity2dFilled()`,
+  `registerDotplot()`, `registerEcdf()`, `registerEllipse()`,
+  `registerErrorbar()`, `registerFunction()`, `registerHex()`,
+  `registerLinerange()`, `registerManual()`, `registerMap()`,
+  `registerPointrange()`, `registerPolygon()`, `registerQq()`,
+  `registerQqLine()`, `registerQuantile()`, `registerRaster()`,
+  `registerRug()`, `registerSf()`, `registerSfLabel()`, `registerSfText()`,
+  `registerSmooth()`, `registerSpoke()`, `registerSummary()`,
+  `registerSummaryBin()`, `registerSummaryRolling()`, `registerTile()`,
+  `registerUnique()`, `registerViolin()`.
 - Color: `registerDefaultOrdinalColor()` for the built-in palette or an
-  explicit `range`. **Named** schemes (`observable10`, `viridis`, ColorBrewer,
-  Crameri, …) need `registerOrdinalColor()`. Other kinds:
-  `registerSequentialColor()`, `registerBinnedColor()`, `registerManualColor()`,
+  explicit `range`. A named **categorical** scheme (`observable10`,
+  `colorblind`, `Dark2`, …) needs `registerOrdinalColor()`. A named
+  **sequential or diverging** scheme (`viridis`, `magma`, `Blues`, `RdBu`,
+  Crameri `batlow`, …) needs `registerSequentialColor()` — a sequential
+  name with no `type` infers sequential, so `registerOrdinalColor()` is
+  not enough. Explicit `type: "ordinal"` (including discrete sampling of
+  a sequential name) still needs `registerOrdinalColor()`. Other kinds:
+  `registerBinnedColor()`, `registerManualColor()`,
   `registerIdentityColor()`.
 - Style: `registerNumericStyle()` (size / linewidth / alpha),
   `registerFiniteStyle()` (shape / linetype).

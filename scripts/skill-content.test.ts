@@ -47,6 +47,10 @@ import {
   validate,
 } from "@ggsvelte/spec";
 import type { SpecInput } from "@ggsvelte/spec";
+import {
+  GEOM_REGISTER_HINTS,
+  STAT_REGISTER_HINTS,
+} from "../packages/core/src/pipeline/register-hints.ts";
 import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/grammar-families.ts";
 import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-attrs.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
@@ -488,39 +492,47 @@ describe("skill teaches the opt-in registration contract", () => {
     expect(section!).toMatch(/full grammar/);
   });
 
-  it("names every current opt-in register / install agents can miss", () => {
+  it("names every public geom/stat register family from the hint maps", () => {
     expect(section).toBeDefined();
-    const required = [
-      "registerAll()",
-      "registerBasic()",
-      "registerSummary()",
-      "installTemporal()",
-      "registerDefaultOrdinalColor()",
-      "registerOrdinalColor()",
-      "registerSequentialColor()",
-      "registerBinnedColor()",
-      "registerManualColor()",
-      "registerIdentityColor()",
-      "registerNumericStyle()",
-      "registerFiniteStyle()",
-      "registerBandGuide()",
-      "registerDiscreteLegend()",
-      "registerContinuousLegend()",
-      "registerBasicPoints()",
-      "registerBasicLines()",
-      "registerBasicAreas()",
-      "registerBasicBars()",
-      "installCandidates()",
-      "@ggsvelte/core/headless/register",
-    ];
-    const missing = required.filter((name) => !section!.includes(name));
+    const families = [
+      ...new Set([...Object.values(STAT_REGISTER_HINTS), ...Object.values(GEOM_REGISTER_HINTS)]),
+    ].toSorted();
+    const missing = families.filter((name) => !section!.includes(`${name}()`));
     expect(missing).toEqual([]);
   });
 
-  it("distinguishes default-palette color from named-scheme color", () => {
+  it("names every lean headless register export plus Temporal / umbrella calls", () => {
     expect(section).toBeDefined();
-    expect(section!).toMatch(/registerDefaultOrdinalColor\(\)[\s\S]*named/i);
-    expect(section!).toMatch(/registerOrdinalColor\(\)/);
+    const headless = readFileSync(
+      join(ROOT, "packages", "core", "src", "headless-register-entry.ts"),
+      "utf8",
+    );
+    const headlessRegisters = [...headless.matchAll(/export \{ (\w+) \}/g)]
+      .map((match) => match[1]!)
+      .filter(
+        (name) =>
+          name.startsWith("register") &&
+          name !== "registerGeomBatch" &&
+          name !== "registerStatFrame",
+      );
+    const extras = [
+      "registerAll",
+      "registerBasic",
+      "installTemporal",
+      "installCandidates",
+      ...headlessRegisters,
+    ];
+    const missing = extras.filter((name) => !section!.includes(`${name}()`));
+    expect(missing).toEqual([]);
+    expect(section!).toContain("@ggsvelte/core/headless/register");
+  });
+
+  it("splits categorical vs sequential named-scheme registration", () => {
+    expect(section).toBeDefined();
+    expect(section!).toMatch(/registerDefaultOrdinalColor\(\)/);
+    expect(section!).toMatch(/categorical[\s\S]*registerOrdinalColor\(\)/i);
+    expect(section!).toMatch(/sequential[\s\S]*registerSequentialColor\(\)/i);
+    expect(section!).toMatch(/infers sequential/);
   });
 
   it("teaches spec-driven Temporal without a scale child", () => {
