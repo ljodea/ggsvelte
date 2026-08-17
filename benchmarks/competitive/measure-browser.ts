@@ -4,8 +4,10 @@
  * Matrix: browser-enabled libs × scenario cases (default subset, or COMPETITIVE_FULL=1).
  * Metrics per cell: cold mount median ms (includes double-rAF) plus IN-PLACE
  * update median ms (same medianMs helper, warmup 2 / samples 11, alternating
- * perturbed data). replace* columns mirror mount until a distinct remount
- * metric is wanted (full remount is not re-sampled).
+ * perturbed data). Each library×case cell gets a fresh page so framework
+ * state and page-heap pressure from earlier cells cannot skew later peers.
+ * replace* columns mirror mount until a distinct remount metric is wanted
+ * (full remount is not re-sampled).
  *
  *   bun run measure-browser.ts
  *   COMPETITIVE_FULL=1 bun run measure-browser.ts
@@ -197,6 +199,16 @@ async function recoverPage(): Promise<void> {
 await gotoBenchPage(page);
 
 for (const cell of matrix) {
+  // A fresh page keeps each cell independent from framework state, detached
+  // DOM, and garbage-collection pressure accumulated by earlier libraries.
+  // The Vite graph and Chromium process stay warm; each cell still performs
+  // its own two warmups before the recorded samples.
+  await page.close();
+  page = await browser.newPage();
+  page.setDefaultTimeout(120_000);
+  wirePageDiagnostics(page);
+  await gotoBenchPage(page);
+
   const label = `${cell.lib.id} ${cell.caseId}`;
   process.stderr.write(`bench mount ${label}...\n`);
   try {
