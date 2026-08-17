@@ -96,8 +96,9 @@ describe("committed bench SVGs", () => {
     const svg = readFileSync(join(STATIC_BENCHMARKS, "bench-scatter-1k-mount.svg"), "utf8");
     expect(tickTitlesTopToBottom(svg)).toEqual([
       "ggsvelte",
-      "TanStack",
+      "ECharts",
       "LayerCake",
+      "TanStack",
       "Unovis",
       "SveltePlot",
     ]);
@@ -142,5 +143,23 @@ describe("homepage bench tabs", () => {
       "Scatter",
       "Scatter 10k",
     ]);
+  });
+
+  it("names ECharts on every default-matrix card and keeps it off the Line 100k form-factor card", () => {
+    for (const card of BENCHMARK_CHART_CARDS) {
+      if (card.id === "line-100k-mount") {
+        expect(card.alt).not.toContain("ECharts");
+      } else {
+        expect(card.alt).toContain("ECharts");
+      }
+    }
+  });
+
+  it("keeps README image alts in lockstep with the default-matrix cards", () => {
+    const readme = readFileSync(join(import.meta.dir, "..", "README.md"), "utf8");
+    for (const card of BENCHMARK_CHART_CARDS) {
+      if (card.id === "line-100k-mount") continue;
+      expect(readme).toContain(`![${card.alt}](apps/docs/static/benchmarks/bench-${card.id}.svg)`);
+    }
   });
 });

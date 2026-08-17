@@ -5,10 +5,10 @@
  * framed for the standard 1200×630 social card crop used by WhatsApp, Slack,
  * iMessage, Discord, Facebook, LinkedIn, and X.
  *
- *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v3.png
+ *   bun scripts/gen-og-home.ts          # rewrite apps/docs/static/og/home-v4.png
  *   bun scripts/gen-og-home.ts --check  # assert committed PNG dimensions + IHDR
  *
- * Bump OG_HOME_FILENAME in docs-seo-image.ts (home-v3.png …) when iterating the
+ * Bump OG_HOME_FILENAME in docs-seo-image.ts (home-v4.png …) when iterating the
  * design so scrapers cannot serve a stale cached card after deploy.
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
