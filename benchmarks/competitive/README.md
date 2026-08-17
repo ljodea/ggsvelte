@@ -18,7 +18,7 @@ This suite expands:
 | Geoms   | scatter, multi-series line, multi-series area, stacked bars                                                                                                         |
 | Sizes   | 1k → 10k default; full matrix adds 100k scatter, uPlot-scale 3×55.5k line, 10×10k line                                                                              |
 | Libs    | ggsvelte SVG, ggsvelte canvas, D3, **uPlot**, **Chart.js**, **ECharts**, **TanStack Charts (React)**, plus SveltePlot/LayerCake/Unovis/**TanStack Charts (Svelte)** |
-| Metrics | gzip bundle per lib×scenario; browser cold mount + full remount (median)                                                                                            |
+| Metrics | gzip bundle per lib×scenario; browser cold mount + in-place update, each with paint-inclusive total and synchronous medians                                         |
 
 Internal mitata workloads in `benchmarks/` remain the self-regression gate. This package is the **external** comparison.
 
