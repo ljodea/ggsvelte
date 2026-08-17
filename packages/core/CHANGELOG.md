@@ -1,5 +1,13 @@
 # @ggsvelte/core
 
+## 0.38.2
+
+### Patch Changes
+
+- 18b49bd: Categorical color and fill scale training now skips redundant catalog lookups across adjacent runs, reducing pipeline time for long-form series data without changing first-seen scale domains.
+- 488756c: Skip trimmed-string allocation when classifying ordinary ASCII categorical labels.
+  - @ggsvelte/spec@0.38.2
+
 ## 0.38.1
 
 ### Patch Changes
