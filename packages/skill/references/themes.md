@@ -49,6 +49,12 @@ optional `"name"` base plus role overrides, e.g.
 The internal `test` theme exists for snapshots only — not a product surface;
 do not document or recommend it.
 
+**Headless named themes:** `@ggsvelte/core/headless` resolves only `default`
+and `void`. A named catalog theme (`dark`, `minimal`, `economist`, …) on that
+entry throws. Use `@ggsvelte/core` or `@ggsvelte/core/render` (or pass the
+full editions table). This is not a `register*()` call. Full inventory:
+SKILL.md Registration.
+
 ## Svelte shells and overrides
 
 One named shell per product theme — `ThemeDefault`, `ThemeLight`,
