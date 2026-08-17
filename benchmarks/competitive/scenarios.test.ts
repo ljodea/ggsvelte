@@ -131,4 +131,12 @@ describe("competitive scenario catalog", () => {
     expect(harness).not.toMatch(/competitiveBench\.replace/);
     expect(harness).toMatch(/replaceMedianMs:\s*mountStats\.median|replaceMedianMs:\s*mountStats/);
   });
+
+  test("browser results pair sync and paint-inclusive medians from the same samples (#1486)", () => {
+    const harness = readFileSync(new URL("./measure-browser.ts", import.meta.url), "utf8");
+    expect(harness).toMatch(/medianTiming/);
+    expect(harness).toMatch(/mountSyncMedianMs/);
+    expect(harness).toMatch(/updateSyncMedianMs/);
+    expect(harness).toMatch(/measuresSync:\s*true/);
+  });
 });

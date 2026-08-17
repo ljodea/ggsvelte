@@ -1,16 +1,16 @@
 /**
  * Browser harness API for Playwright:
- *   window.competitiveBench.mount(lib, caseId) -> { ms, markHint }
+ *   window.competitiveBench.mount(lib, caseId) -> { ms, syncMs, markHint }
  *   window.competitiveBench.replace(lib, caseId) -> { ms }  // full remount with fresh data seed
- *   window.competitiveBench.update(lib, caseId) -> { ms }   // IN-PLACE update (second scoreboard)
+ *   window.competitiveBench.update(lib, caseId) -> { ms, syncMs } // IN-PLACE update
  *   window.competitiveBench.endUpdate()                    // teardown the live update cell
  *   window.competitiveBench.list() -> { libs, cases }
  *   window.competitiveBench.clear()
  *
- * Timing is paint-inclusive: after the sync mount we wait for two animation
+ * `ms` is paint-inclusive: after the sync mount we wait for two animation
  * frames so layout/paint can flush (closer to LightningChart-style "visible on
- * screen" than pure JS-only timers). Small cases therefore sit near a ~1–2
- * frame floor; discriminate on denser cases (e.g. line-3x10k, scatter-10k).
+ * screen" than pure JS-only timers). `syncMs` stops when the adapter returns,
+ * separating synchronous pipeline/draw work from compositor and host noise.
  *
  * Update axis: the first update(lib, caseId) call for a cell mounts UNTIMED
  * and keeps the handle alive page-side; later calls time handle.update(data)
@@ -211,7 +211,10 @@ function mountSync(
   }
 }
 
-async function mountLib(lib: string, caseId: string): Promise<{ ms: number; markHint: number }> {
+async function mountLib(
+  lib: string,
+  caseId: string,
+): Promise<{ ms: number; syncMs: number; markHint: number }> {
   const c = caseById(caseId);
   const meta = LIBS.find((l) => l.id === lib);
   if (meta === undefined) throw new Error(`unknown lib ${lib}`);
@@ -229,11 +232,12 @@ async function mountLib(lib: string, caseId: string): Promise<{ ms: number; mark
   const data = dataForCase(c);
   const t0 = performance.now();
   const result = mountSync(lib as LibId, c.scenario, data, mountEl);
+  const syncMs = performance.now() - t0;
   if (result.handle !== undefined) liveHandle = result.handle;
   await afterPaint();
   const ms = performance.now() - t0;
   status.textContent = `${lib} ${caseId} mount=${ms.toFixed(2)}ms marks≈${result.markHint}`;
-  return { ms, markHint: result.markHint };
+  return { ms, syncMs, markHint: result.markHint };
 }
 
 /** Full remount with the same case (data re-generated). Not an in-place setData. */
@@ -249,7 +253,7 @@ async function replaceLib(lib: string, caseId: string): Promise<{ ms: number }> 
  * double-rAF pattern as mount. Data alternates between two deterministic
  * perturbations so no lib can no-op on identical input.
  */
-async function updateLib(lib: string, caseId: string): Promise<{ ms: number }> {
+async function updateLib(lib: string, caseId: string): Promise<{ ms: number; syncMs: number }> {
   const key = `${lib}::${caseId}`;
   if (updateSlot === null || updateSlot.key !== key) {
     endUpdate();
@@ -279,10 +283,11 @@ async function updateLib(lib: string, caseId: string): Promise<{ ms: number }> {
   const status = document.querySelector("#status") as HTMLElement;
   const t0 = performance.now();
   slot.handle.update(next);
+  const syncMs = performance.now() - t0;
   await afterPaint();
   const ms = performance.now() - t0;
   status.textContent = `${lib} ${caseId} update=${ms.toFixed(2)}ms variant=${variant}`;
-  return { ms };
+  return { ms, syncMs };
 }
 
 function clearMount(): void {
