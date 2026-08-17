@@ -1,5 +1,19 @@
 # @ggsvelte/svelte
 
+## 0.39.0
+
+### Minor Changes
+
+- 7725754: Stop installing the Temporal polyfill in every `GGPlot` bundle. Temporal scale children now install full Temporal support; spec- and `layers`-driven temporal charts must call `installTemporal()` or `registerAll()` at startup.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#explicit-temporal-registration-for-spec-driven-charts>
+
+### Patch Changes
+
+- Updated dependencies [799be44]
+  - @ggsvelte/core@0.39.0
+  - @ggsvelte/spec@0.39.0
+
 ## 0.38.2
 
 ### Patch Changes
