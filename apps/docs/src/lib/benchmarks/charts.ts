@@ -5,8 +5,9 @@
  * never hand-edit the rendered SVGs.
  *
  * Claim discipline (enforced in scripts/gen-benchmark-charts.ts): classic
- * five-bar charts require ggsvelte-svg to beat LayerCake SVG, SveltePlot,
- * Unovis, and TanStack Charts Svelte. The Line 100k form-factor chart shades
+ * six-bar charts require ggsvelte-svg to beat LayerCake SVG, SveltePlot,
+ * Unovis, TanStack Charts Svelte, and ECharts. ECharts is compared to the
+ * full-chart SVG cell, not the marks-only canvas harness. The Line 100k form-factor chart shades
  * every ggsvelte path and still requires the SVG path to beat LayerCake SVG,
  * Unovis, and TanStack Charts Svelte. SveltePlot is omitted from that chart
  * because its mount time stretches the axis. LayerCake canvas may win a cell

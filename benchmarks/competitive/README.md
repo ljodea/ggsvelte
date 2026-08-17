@@ -43,8 +43,10 @@ Results: `results/bundles.json`, `results/browser.json`.
 
 The docs homepage and repo README chart cells under claim discipline in
 `scripts/gen-benchmark-charts.ts` (refuses to emit a chart when ggsvelte SVG
-no longer beats LayerCake SVG, SveltePlot, Unovis, and TanStack Charts Svelte).
-Five-bar tabs use the default `measure:browser` matrix; the Line 100k tab
+no longer beats LayerCake SVG, SveltePlot, Unovis, TanStack Charts Svelte,
+and ECharts). Six-bar tabs use the default `measure:browser` matrix; the
+published ECharts bar is the full-chart canvas generalist against ggsvelte
+SVG (not the marks-only ggsvelte canvas harness). The Line 100k tab
 uses both form factors (ggsvelte SVG + canvas, LayerCake SVG + canvas,
 Unovis, TanStack Svelte) from `measure-100k-peers.ts`. Scatter 100k stays in
 that harness but is not a homepage tab. SveltePlot is still measured there,
