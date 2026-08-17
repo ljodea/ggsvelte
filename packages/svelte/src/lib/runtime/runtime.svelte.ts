@@ -5,26 +5,18 @@
  * Effects register at construction (#627)
  * so relative order vs host effects is preserved.
  */
-import {
-  installCandidates,
-  installTemporal,
-  planStrata,
-  registerBasic,
-  runPipeline,
-} from "@ggsvelte/core";
+import { installCandidates, planStrata, registerBasic, runPipeline } from "@ggsvelte/core";
 import type { RenderModel, ScaleState, Stratum } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 import { untrack } from "svelte";
 
-// GGPlot default registration contract (#1420): basic geoms/stats + Temporal
-// parsing/planning + interaction candidates (#1421), so identity charts, date
-// axes, and hit-testing work out of the box.
-// Specialty geoms/stats self-register from their <Geom*> shells; spec-driven
-// apps call registerAll(). Calls (not the /render side effect) keep one
-// @ggsvelte/core entry in dev-server prebundles — a /render + barrel split
-// would fork the registries.
+// GGPlot default registration contract (#1420): basic geoms/stats +
+// interaction candidates (#1421), so identity charts and hit-testing work out
+// of the box. Temporal scale children self-register full temporal support;
+// spec-driven apps call registerAll(). Calls (not the /render side effect)
+// keep one @ggsvelte/core entry in dev-server prebundles — a /render + barrel
+// split would fork the registries.
 registerBasic();
-installTemporal();
 installCandidates();
 
 import type { LegendFilterClause } from "../legend/filter.js";

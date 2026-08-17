@@ -8008,6 +8008,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "installTemporal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "isCompositionDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"

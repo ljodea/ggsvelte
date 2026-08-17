@@ -12,10 +12,10 @@
  * Never point that lane at this file.
  *
  * NOTE: deliberately NOT registerAll() — installTemporal() evaluates the
- * Temporal polyfill per iframe. Temporal arrives per-file via GGPlot's
- * runtime (component tests), helpers/model.ts, or an explicit registerAll()
- * in the test file (temporal spec-driven suites). Color kinds register
- * here because spec-driven runPipeline helpers map color/fill. installCandidates()
+ * Temporal polyfill per iframe. Temporal arrives per-file via <Scale*Date>
+ * and related temporal children, helpers/model.ts, or an explicit
+ * registerAll() in temporal spec-driven suites. Color kinds register here
+ * because spec-driven runPipeline helpers map color/fill. installCandidates()
  * IS called here: it is a cheap runtime thunk (no polyfill) and direct
  * runPipeline tests may touch model.candidates (#1421).
  */
