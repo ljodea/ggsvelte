@@ -105,7 +105,7 @@ export function mountSceneSvg(
 
   // Detached hosts for fragment parsing (SVG innerHTML is the supported
   // parse path); reused across updates so no per-patch allocation churn.
-  const fragmentHost = document.createElementNS(SVG_NS, "svg") as SVGSVGElement;
+  const fragmentHost = document.createElementNS(SVG_NS, "svg");
   const mountHost = document.createElement("div");
 
   const parseFragment = (markup: string): Element[] => {

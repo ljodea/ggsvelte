@@ -114,7 +114,7 @@ function barsSpec(data: BarsData): SpecInput {
 
 function perturbScatter(d: ScatterData, bump: number): ScatterData {
   const y = Float64Array.from(d.y, (v) => v + bump);
-  const cls = [...d.cls.slice(1), d.cls[0]!];
+  const cls = [...d.cls.slice(1), d.cls[0]];
   return { x: d.x, y, cls };
 }
 
@@ -190,7 +190,11 @@ describe("svg-live patch parity", () => {
     expect(svg.isEqualNode(freshSvg(sceneMoved))).toBe(true);
     // Identical-data update: zero attribute writes anywhere in the subtree.
     const sceneA2 = runScene(lineSpec(a), { width: W, height: H });
-    expect(observedWrites(svg, () => live.update(sceneA2))).toBe(0);
+    expect(
+      observedWrites(svg, () => {
+        live.update(sceneA2);
+      }),
+    ).toBe(0);
     live.destroy();
     container.remove();
   });
@@ -202,7 +206,9 @@ describe("svg-live patch parity", () => {
     const live = mountSceneSvg(container, sceneA);
     const svg = container.querySelector("svg")!;
     expect(
-      observedWrites(svg, () => live.update(runScene(scatterSpec(a), { width: W, height: H }))),
+      observedWrites(svg, () => {
+        live.update(runScene(scatterSpec(a), { width: W, height: H }));
+      }),
     ).toBe(0);
     // Fill-only change: keep the first-appearance domain order anchored by
     // rows 0..5 (c0..c5), flip tail rows c0→c1. Row 0 keeps its fill; row 6
@@ -213,12 +219,14 @@ describe("svg-live patch parity", () => {
     const recolored: ScatterData = { ...a, cls };
     const sceneRecolor = runScene(scatterSpec(recolored), { width: W, height: H });
     const circles = svg.querySelectorAll(".gg-marks circle");
-    const row0 = circles[0]!;
-    const row6 = circles[6]!;
+    const row0 = circles[0];
+    const row6 = circles[6];
     const cxBefore = row6.getAttribute("cx");
     const fill0Before = row0.getAttribute("fill");
     const fill6Before = row6.getAttribute("fill");
-    const writes = observedWrites(svg, () => live.update(sceneRecolor));
+    const writes = observedWrites(svg, () => {
+      live.update(sceneRecolor);
+    });
     expect(row6.getAttribute("cx")).toBe(cxBefore);
     expect(row0.getAttribute("fill")).toBe(fill0Before);
     expect(row6.getAttribute("fill")).not.toBe(fill6Before);
@@ -331,8 +339,8 @@ describe("svg-live patch parity", () => {
     const live = mountSceneSvg(container, sceneA);
     const svg = container.querySelector("svg")!;
     const circles = svg.querySelectorAll(".gg-marks circle");
-    const even = circles[0]!;
-    const odd = circles[1]!;
+    const even = circles[0];
+    const odd = circles[1];
     expect(even.getAttribute("opacity")).toBeNull();
     expect(odd.getAttribute("opacity")).not.toBeNull();
     live.update(sceneB);

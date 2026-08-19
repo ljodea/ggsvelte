@@ -46,7 +46,7 @@ function pointsBatch(n: number, overrides: Record<string, unknown> = {}): Geomet
     shape: "circle",
     fill: "red",
     ...overrides,
-  } as GeometryBatch;
+  } as unknown as GeometryBatch;
 }
 
 function baseScene(batches: GeometryBatch[], overrides: Partial<Scene> = {}): Scene {
@@ -170,7 +170,7 @@ describe("sceneSignature — changes on topology drift", () => {
     const p1 = pointsBatch(2, { panelIndex: 1, layerIndex: 1 });
     const panels = [basePanel(), basePanel({ id: "p1", x: 110 })];
     const a = baseScene([p0, p1], { panels });
-    const swapped = baseScene([p1, { ...p0, panelIndex: 1, layerIndex: 1 } as GeometryBatch], {
+    const swapped = baseScene([p1, { ...p0, panelIndex: 1, layerIndex: 1 }], {
       panels,
     });
     expect(sceneSignature(a)).not.toBe(sceneSignature(swapped));

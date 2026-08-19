@@ -51,6 +51,9 @@ function batchSignature(batch: GeometryBatch): string {
       // count stability is required to keep the group node position stable.
       return `g:${batch.rowIndex.length}`;
   }
+  // Exhaustive over the closed GeometryBatch union; unreachable, and here so
+  // a future kind fails loudly instead of being silently mispatched.
+  throw new Error(`svg-live: unhandled batch kind ${(batch as GeometryBatch).kind}`);
 }
 
 function panelSignature(panel: ScenePanel, batches: readonly GeometryBatch[]): string {
