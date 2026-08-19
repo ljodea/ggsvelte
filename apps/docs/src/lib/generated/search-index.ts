@@ -18106,6 +18106,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["scale-scheme-type"],
   },
   {
+    id: "heading:guide-errors:scale-scheme-oob",
+    kind: "heading",
+    title: "scale-scheme-oob",
+    summary:
+      "scale-scheme-oob in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#scale-scheme-oob",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["scale-scheme-oob"],
+  },
+  {
+    id: "heading:guide-errors:scale-cyclic-domain",
+    kind: "heading",
+    title: "scale-cyclic-domain",
+    summary:
+      "scale-cyclic-domain in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#scale-cyclic-domain",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["scale-cyclic-domain"],
+  },
+  {
     id: "heading:guide-errors:scale-range-color",
     kind: "heading",
     title: "scale-range-color",
@@ -20444,14 +20464,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-926",
+    id: "heading:guide-lifecycle:experimental-927",
     kind: "heading",
-    title: "experimental (926)",
+    title: "experimental (927)",
     summary:
-      "experimental (926) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-926",
+      "experimental (927) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-927",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (926)"],
+    exact: ["experimental (927)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -23134,6 +23154,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["CURRENT_EDITION"],
+  },
+  {
+    id: "api:ggsvelte-spec:CYCLIC_SCHEME_NAMES",
+    kind: "api",
+    title: "CYCLIC_SCHEME_NAMES",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["CYCLIC_SCHEME_NAMES"],
   },
   {
     id: "api:ggsvelte-spec:CellValue",
@@ -43171,9 +43200,35 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "validation",
       "error",
-      'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".',
+      'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential". Cyclic *O schemes are sequential only.',
     ],
     exact: ["scale-scheme-type", "validation:scale-scheme-type"],
+  },
+  {
+    id: "diagnostic:validation:scale-scheme-oob",
+    kind: "diagnostic",
+    title: "scale-scheme-oob · validation",
+    summary: "The out-of-bounds policy is incompatible with the named color scheme or scale type.",
+    href: "/guide/errors#scale-scheme-oob",
+    keywords: [
+      "validation",
+      "error",
+      'Use oob "wrap" with a cyclic *O scheme. Do not set wrap on a binned color scale.',
+    ],
+    exact: ["scale-scheme-oob", "validation:scale-scheme-oob"],
+  },
+  {
+    id: "diagnostic:validation:scale-cyclic-domain",
+    kind: "diagnostic",
+    title: "scale-cyclic-domain · validation",
+    summary: "A cyclic color scheme is missing the explicit two-value domain period.",
+    href: "/guide/errors#scale-cyclic-domain",
+    keywords: [
+      "validation",
+      "error",
+      "Set domain to one period, for example [0, 360] for angles in degrees.",
+    ],
+    exact: ["scale-cyclic-domain", "validation:scale-cyclic-domain"],
   },
   {
     id: "diagnostic:validation:scale-range-color",

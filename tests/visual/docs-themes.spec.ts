@@ -161,22 +161,41 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const rows = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Default order is label-alphabetical (sort control: Name/Color count).
-  await expect(rows).toHaveCount(26);
+  await expect(rows).toHaveCount(47);
   await expect(rows.locator(".name")).toHaveText([
+    "actonS",
+    "bamakoS",
+    "batlowKS",
+    "batlowS",
+    "batlowWS",
+    "bilbaoS",
+    "budaS",
     "Canva",
     "Colorblind",
     "Dark2",
+    "davosS",
+    "devonS",
     "Economist",
     "Few",
     "Few Dark",
     "Few Light",
     "FiveThirtyEight",
     "Flexoki",
+    "glasgowS",
+    "grayCS",
+    "hawaiiS",
     "Hue",
     "Hue Circle",
+    "imolaS",
     "Ipsum",
     "Jewel Bright",
+    "lajollaS",
+    "lapazS",
+    "lipariS",
+    "naviaS",
+    "nuukS",
     "Observable 10",
+    "osloS",
     "Pander",
     "Paul Tol",
     "Seattle Grays",
@@ -184,6 +203,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Stata",
     "Tableau 20",
     "Tableau Color Blind",
+    "tokyoS",
+    "turkuS",
     "WSJ",
     "WSJ Black/Green",
     "WSJ Dem/Rep",
@@ -191,9 +212,18 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "WSJ Red/Green",
   ]);
   await expect(rows.locator(".capacity")).toHaveText([
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
     "4 colors",
     "8 colors",
     "8 colors",
+    "10 colors",
+    "10 colors",
     "9 colors",
     "8 colors",
     "8 colors",
@@ -201,9 +231,19 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "3 colors",
     "8 colors",
     "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
     "19 colors",
+    "10 colors",
     "9 colors",
     "9 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
+    "10 colors",
     "10 colors",
     "8 colors",
     "12 colors",
@@ -211,6 +251,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "15 colors",
     "20 colors",
+    "10 colors",
+    "10 colors",
     "10 colors",
     "6 colors",
     "4 colors",
@@ -320,7 +362,7 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
 
   // Every registered sequential scheme gets a strip on the index.
   const index = page.getByRole("list", { name: "Sequential color schemes" });
-  await expect(index.locator(":scope > li")).toHaveCount(55);
+  await expect(index.locator(":scope > li")).toHaveCount(60);
 
   const region = page.getByRole("region", { name: "Sequential color scales" });
   const cards = region

@@ -57,15 +57,43 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "Dark2",
   /** Even HSL hues — ggplot2-shaped scale_*_hue default discrete path (#829). */
   "hue",
+  // Crameri Scientific colour maps v8.0.1 categorical (*S) 10-class prefixes
+  "actonS",
+  "bamakoS",
+  "batlowS",
+  "batlowWS",
+  "batlowKS",
+  "bilbaoS",
+  "budaS",
+  "davosS",
+  "devonS",
+  "glasgowS",
+  "grayCS",
+  "hawaiiS",
+  "imolaS",
+  "lajollaS",
+  "lapazS",
+  "lipariS",
+  "naviaS",
+  "nuukS",
+  "osloS",
+  "tokyoS",
+  "turkuS",
 ] as const;
+
+/**
+ * Crameri cyclic (*O) sequential schemes. Periodic data only: wrap OOB and
+ * an explicit [min, max] period. Not legal on ordinal or binned scales.
+ */
+export const CYCLIC_SCHEME_NAMES = ["bamO", "brocO", "corkO", "romaO", "vikO"] as const;
 
 /**
  * Named sequential color schemes known to this schema version.
  * Viridis family maps (matplotlib/CC0 samples + Google turbo), ColorBrewer
  * sequential/diverging ramps (#825), and Crameri Scientific colour maps
- * v8.0.1 continuous suite; used by continuous/binned color scales and by
- * discrete even-sampling of continuous ramps (viridis_d parity for viridis
- * family + Crameri).
+ * v8.0.1 continuous suite plus cyclic (*O) ramps; used by continuous color
+ * scales. Discrete even-sampling (viridis_d parity) covers viridis-family
+ * and non-cyclic Crameri ramps only.
  */
 export const SEQUENTIAL_SCHEME_NAMES = [
   "viridis",
@@ -125,6 +153,8 @@ export const SEQUENTIAL_SCHEME_NAMES = [
   "bukavu",
   "fes",
   "oleron",
+  // Crameri cyclic (*O) — sequential family, wrap OOB, explicit period
+  ...CYCLIC_SCHEME_NAMES,
 ] as const;
 
 export const COLOR_SCHEME_NAMES = [

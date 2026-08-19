@@ -6155,6 +6155,90 @@
                 },
                 {
                   "type": "string",
+                  "const": "actonS"
+                },
+                {
+                  "type": "string",
+                  "const": "bamakoS"
+                },
+                {
+                  "type": "string",
+                  "const": "batlowS"
+                },
+                {
+                  "type": "string",
+                  "const": "batlowWS"
+                },
+                {
+                  "type": "string",
+                  "const": "batlowKS"
+                },
+                {
+                  "type": "string",
+                  "const": "bilbaoS"
+                },
+                {
+                  "type": "string",
+                  "const": "budaS"
+                },
+                {
+                  "type": "string",
+                  "const": "davosS"
+                },
+                {
+                  "type": "string",
+                  "const": "devonS"
+                },
+                {
+                  "type": "string",
+                  "const": "glasgowS"
+                },
+                {
+                  "type": "string",
+                  "const": "grayCS"
+                },
+                {
+                  "type": "string",
+                  "const": "hawaiiS"
+                },
+                {
+                  "type": "string",
+                  "const": "imolaS"
+                },
+                {
+                  "type": "string",
+                  "const": "lajollaS"
+                },
+                {
+                  "type": "string",
+                  "const": "lapazS"
+                },
+                {
+                  "type": "string",
+                  "const": "lipariS"
+                },
+                {
+                  "type": "string",
+                  "const": "naviaS"
+                },
+                {
+                  "type": "string",
+                  "const": "nuukS"
+                },
+                {
+                  "type": "string",
+                  "const": "osloS"
+                },
+                {
+                  "type": "string",
+                  "const": "tokyoS"
+                },
+                {
+                  "type": "string",
+                  "const": "turkuS"
+                },
+                {
+                  "type": "string",
                   "const": "viridis"
                 },
                 {
@@ -6372,6 +6456,26 @@
                 {
                   "type": "string",
                   "const": "oleron"
+                },
+                {
+                  "type": "string",
+                  "const": "bamO"
+                },
+                {
+                  "type": "string",
+                  "const": "brocO"
+                },
+                {
+                  "type": "string",
+                  "const": "corkO"
+                },
+                {
+                  "type": "string",
+                  "const": "romaO"
+                },
+                {
+                  "type": "string",
+                  "const": "vikO"
                 }
               ],
               "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"colorblind\", \"hue\", and ColorBrewer qualitative (Dark2); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
@@ -6389,9 +6493,13 @@
                 {
                   "type": "string",
                   "const": "squish"
+                },
+                {
+                  "type": "string",
+                  "const": "wrap"
                 }
               ],
-              "description": "Out-of-bounds policy for an explicit continuous/binned domain: \"censor\" (default) or \"squish\"."
+              "description": "Out-of-bounds policy for an explicit continuous domain: \"censor\" (default), \"squish\", or \"wrap\" (periodic; required for cyclic *O schemes). Not valid on binned color scales."
             },
             "naValue": {
               "type": "string",

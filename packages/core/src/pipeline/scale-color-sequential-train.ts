@@ -1,5 +1,7 @@
 /** Train a transformed sequential color/fill scale. */
-import type { ColorScaleSpec } from "@ggsvelte/spec";
+import { CYCLIC_SCHEME_NAMES, type ColorScaleSpec } from "@ggsvelte/spec";
+
+const CYCLIC_SCHEMES = new Set<string>(CYCLIC_SCHEME_NAMES);
 
 import type { EditionDefaults } from "../editions.js";
 import { trainSequential, type SequentialColorScale } from "../scales/color.js";
@@ -79,6 +81,8 @@ export function trainSequentialColorScale(input: {
     );
   }
   const range = resolveSequentialRange(config, editionDefaults);
+  const cyclic = config?.scheme !== undefined && CYCLIC_SCHEMES.has(config.scheme);
+  const oob = config?.oob ?? (cyclic ? "wrap" : undefined);
   let scale: SequentialColorScale;
   try {
     scale = trainSequential(extent, {
@@ -86,7 +90,7 @@ export function trainSequentialColorScale(input: {
       ...(range !== undefined && { range }),
       ...(config?.reverse !== undefined && { reverse: config.reverse }),
       transform: transformName,
-      ...(config?.oob !== undefined && { oob: config.oob }),
+      ...(oob !== undefined && { oob }),
       ...(config?.naValue !== undefined && { naValue: config.naValue }),
       ...(config?.unknownValue !== undefined && { unknownValue: config.unknownValue }),
     });
@@ -106,7 +110,7 @@ export function trainSequentialColorScale(input: {
     if (
       !Number.isFinite(semantic) ||
       !transform.valid(semantic) ||
-      (config?.oob !== "squish" && (semantic < lower || semantic > upper))
+      (oob !== "squish" && oob !== "wrap" && (semantic < lower || semantic > upper))
     ) {
       unknownCount++;
     }

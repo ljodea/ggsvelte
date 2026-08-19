@@ -53,6 +53,8 @@ const COLORBREWER_SEQUENTIAL = new Set([
   "PuOr",
 ]);
 
+const CRAMERI_CYCLIC = new Set(["bamO", "brocO", "corkO", "romaO", "vikO"]);
+
 const CRAMERI_SEQUENTIAL = new Set([
   "acton",
   "bamako",
@@ -107,10 +109,16 @@ function categoricalNotes(name: string): string | undefined {
     return `ColorBrewer qualitative — prefer <ScaleColorBrewer palette="${name}" /> (maps to scheme).`;
   }
   if (name === "observable10") return "Default categorical scheme when none is set.";
+  if (name.endsWith("S") && name !== "wsj_rgby") {
+    return "Crameri categorical (v8.0.1) — 10-class unordered prefix of the official *S table.";
+  }
   return undefined;
 }
 
 function sequentialHelpers(name: string): readonly string[] {
+  if (CRAMERI_CYCLIC.has(name)) {
+    return ["ScaleColorContinuous", "ScaleFillContinuous"];
+  }
   if (VIRIDIS_FAMILY.has(name)) {
     return [
       "ScaleColorViridisC",
@@ -142,6 +150,9 @@ function sequentialNotes(name: string): string | undefined {
   }
   if (COLORBREWER_SEQUENTIAL.has(name)) {
     return `ColorBrewer ramp — Distiller (continuous), Fermenter (binned), or scheme on continuous.`;
+  }
+  if (CRAMERI_CYCLIC.has(name)) {
+    return "Crameri cyclic (v8.0.1) — periodic data only; wrap OOB; set an explicit domain period.";
   }
   if (CRAMERI_SEQUENTIAL.has(name)) {
     return "Crameri Scientific colour map (v8.0.1) — continuous, CVD-friendly.";

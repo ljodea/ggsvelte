@@ -184,6 +184,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CYCLIC_SCHEME_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CellValue": {
           "kind": "type",
           "lifecycle": "experimental"

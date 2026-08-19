@@ -9,6 +9,7 @@ import { HUE_PALETTE_10 } from "@ggsvelte/spec";
 
 import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
 import { CATEGORICAL_PALETTE_10 } from "./categorical-palette-default.js";
+import { CRAMERI_CATEGORICAL_SCHEMES } from "./crameri-categorical.js";
 
 export { CATEGORICAL_PALETTE_10 };
 
@@ -332,4 +333,5 @@ export const CATEGORICAL_SCHEMES = {
   pander: PANDER_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
+  ...CRAMERI_CATEGORICAL_SCHEMES,
 } as const satisfies Readonly<Record<string, readonly string[]>>;

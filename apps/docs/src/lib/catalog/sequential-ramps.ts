@@ -71,6 +71,11 @@ const SEQUENTIAL_SCHEME_NAME_LIST = [
   "bukavu",
   "fes",
   "oleron",
+  "bamO",
+  "brocO",
+  "corkO",
+  "romaO",
+  "vikO",
 ] as const;
 
 export interface SequentialRampRow {

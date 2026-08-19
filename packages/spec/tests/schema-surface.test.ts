@@ -15,6 +15,7 @@ const VALUE_EXPORTS = [
   "CATEGORICAL_SCHEME_NAMES",
   "CHANNELS",
   "COLOR_SCHEME_NAMES",
+  "CYCLIC_SCHEME_NAMES",
   "ChannelValueSchema",
   "ColLayerSchema",
   "CoordSpecSchema",

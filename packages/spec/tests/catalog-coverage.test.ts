@@ -38,6 +38,15 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   "scale-scheme-type": {
     spec: { layers: [point], scales: { color: { type: "sequential", scheme: "ipsum" } } },
   },
+  "scale-scheme-oob": {
+    spec: {
+      layers: [point],
+      scales: { color: { type: "sequential", scheme: "romaO", domain: [0, 360], oob: "censor" } },
+    },
+  },
+  "scale-cyclic-domain": {
+    spec: { layers: [point], scales: { color: { type: "sequential", scheme: "romaO" } } },
+  },
   "scale-range-color": {
     spec: { layers: [point], scales: { color: { range: ["tomato"] } } },
   },

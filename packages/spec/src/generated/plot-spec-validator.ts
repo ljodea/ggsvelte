@@ -6156,6 +6156,27 @@ const check_369 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "pander") ||
     (typeof value.scheme === "string" && value.scheme === "Dark2") ||
     (typeof value.scheme === "string" && value.scheme === "hue") ||
+    (typeof value.scheme === "string" && value.scheme === "actonS") ||
+    (typeof value.scheme === "string" && value.scheme === "bamakoS") ||
+    (typeof value.scheme === "string" && value.scheme === "batlowS") ||
+    (typeof value.scheme === "string" && value.scheme === "batlowWS") ||
+    (typeof value.scheme === "string" && value.scheme === "batlowKS") ||
+    (typeof value.scheme === "string" && value.scheme === "bilbaoS") ||
+    (typeof value.scheme === "string" && value.scheme === "budaS") ||
+    (typeof value.scheme === "string" && value.scheme === "davosS") ||
+    (typeof value.scheme === "string" && value.scheme === "devonS") ||
+    (typeof value.scheme === "string" && value.scheme === "glasgowS") ||
+    (typeof value.scheme === "string" && value.scheme === "grayCS") ||
+    (typeof value.scheme === "string" && value.scheme === "hawaiiS") ||
+    (typeof value.scheme === "string" && value.scheme === "imolaS") ||
+    (typeof value.scheme === "string" && value.scheme === "lajollaS") ||
+    (typeof value.scheme === "string" && value.scheme === "lapazS") ||
+    (typeof value.scheme === "string" && value.scheme === "lipariS") ||
+    (typeof value.scheme === "string" && value.scheme === "naviaS") ||
+    (typeof value.scheme === "string" && value.scheme === "nuukS") ||
+    (typeof value.scheme === "string" && value.scheme === "osloS") ||
+    (typeof value.scheme === "string" && value.scheme === "tokyoS") ||
+    (typeof value.scheme === "string" && value.scheme === "turkuS") ||
     (typeof value.scheme === "string" && value.scheme === "viridis") ||
     (typeof value.scheme === "string" && value.scheme === "magma") ||
     (typeof value.scheme === "string" && value.scheme === "plasma") ||
@@ -6210,11 +6231,17 @@ const check_369 = (value) =>
     (typeof value.scheme === "string" && value.scheme === "vik") ||
     (typeof value.scheme === "string" && value.scheme === "bukavu") ||
     (typeof value.scheme === "string" && value.scheme === "fes") ||
-    (typeof value.scheme === "string" && value.scheme === "oleron")) &&
+    (typeof value.scheme === "string" && value.scheme === "oleron") ||
+    (typeof value.scheme === "string" && value.scheme === "bamO") ||
+    (typeof value.scheme === "string" && value.scheme === "brocO") ||
+    (typeof value.scheme === "string" && value.scheme === "corkO") ||
+    (typeof value.scheme === "string" && value.scheme === "romaO") ||
+    (typeof value.scheme === "string" && value.scheme === "vikO")) &&
   (!("reverse" in value) || typeof value.reverse === "boolean") &&
   (!("oob" in value) ||
     (typeof value.oob === "string" && value.oob === "censor") ||
-    (typeof value.oob === "string" && value.oob === "squish")) &&
+    (typeof value.oob === "string" && value.oob === "squish") ||
+    (typeof value.oob === "string" && value.oob === "wrap")) &&
   (!("naValue" in value) ||
     (typeof value.naValue === "string" && External[219].test(value.naValue))) &&
   (!("unknownValue" in value) ||

@@ -406,7 +406,7 @@ exports[`ERROR_CATALOG coverage [invalid-type] is reproducible; message + fix sn
 exports[`ERROR_CATALOG coverage [scale-scheme-type] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
-    "fix": "Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".",
+    "fix": "Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential". Cyclic *O schemes are sequential only.",
     "summary": "A named color scheme is incompatible with the configured color scale type.",
     "tier": 1,
   },
@@ -418,6 +418,47 @@ exports[`ERROR_CATALOG coverage [scale-scheme-type] is reproducible; message + f
     },
     "message": "The categorical scheme "ipsum" cannot be used with a sequential color scale.",
     "path": "/scales/color/scheme",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-scheme-oob] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use oob "wrap" with a cyclic *O scheme. Do not set wrap on a binned color scale.",
+    "summary": "The out-of-bounds policy is incompatible with the named color scheme or scale type.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-scheme-oob",
+    "fix": {
+      "description": "Set oob to "wrap", or omit it (cyclic schemes default to wrap).",
+      "example": "wrap",
+    },
+    "message": "The cyclic scheme "romaO" requires wrap out-of-bounds.",
+    "path": "/scales/color/oob",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-cyclic-domain] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set domain to one period, for example [0, 360] for angles in degrees.",
+    "summary": "A cyclic color scheme is missing the explicit two-value domain period.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-cyclic-domain",
+    "fix": {
+      "description": "Set domain to one period, for example [0, 360] for degrees.",
+      "example": [
+        0,
+        360,
+      ],
+    },
+    "message": "The cyclic scheme "romaO" requires an explicit two-value domain period.",
+    "path": "/scales/color/domain",
   },
 }
 `;

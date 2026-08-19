@@ -34,6 +34,15 @@ function hexChannel(hex: string, i: number): number {
 
 const to2 = (n: number) => Math.round(n).toString(16).padStart(2, "0");
 
+/** Map value onto [lower, upper) so the period endpoints share one colour. */
+export function wrapIntoPeriod(value: number, lower: number, upper: number): number {
+  const period = upper - lower;
+  if (period === 0) return lower;
+  let offset = (value - lower) % period;
+  if (offset < 0) offset += period;
+  return lower + offset;
+}
+
 /**
  * Piecewise-linear interpolation over evenly spaced #rrggbb stops.
  * t is clamped to [0, 1]; output is a deterministic lowercase #rrggbb.
@@ -112,7 +121,7 @@ export interface SequentialConfig {
   range?: readonly string[];
   reverse?: boolean;
   transform?: "identity" | "log10" | "sqrt";
-  oob?: "censor" | "squish";
+  oob?: "censor" | "squish" | "wrap";
   naValue?: string;
   unknownValue?: string;
 }
@@ -166,7 +175,9 @@ export function trainSequential(
       }
       const lower = Math.min(min, max);
       const upper = Math.max(min, max);
-      if (semantic < lower || semantic > upper) {
+      if (config.oob === "wrap") {
+        semantic = wrapIntoPeriod(semantic, lower, upper);
+      } else if (semantic < lower || semantic > upper) {
         if (config.oob !== "squish") {
           return config.unknownValue === undefined ? undefined : unknownValue;
         }

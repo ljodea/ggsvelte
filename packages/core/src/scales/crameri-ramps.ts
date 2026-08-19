@@ -6,9 +6,9 @@
  *
  * Each ramp is 11 stops sampled evenly from the official 256-row RGB
  * table (0–1 floats → #rrggbb). Piecewise-linear sRGB interpolation
- * (rampColor) fills between stops. Cyclic (*O) maps are omitted — no
- * circular colour scale type yet. Categorical (*S) maps are out of scope
- * for this module (continuous registry only).
+ * (rampColor) fills between stops. Cyclic (*O) maps are included; they
+ * need wrap out-of-bounds and an explicit period. Categorical (*S) maps
+ * live in crameri-categorical.ts.
  *
  * Pure data — resolution falls through here from
  * `resolveSequentialPipelineRange` / `resolveOrdinalPaletteStops` after the
@@ -541,6 +541,81 @@ const CRAMERI_OLERON_RAMP: readonly string[] = [
   "#fdfde6",
 ];
 
+/** Scientific colour map "bamO" — 11 stops, Zenodo 8.0.1 (cyclic). */
+const CRAMERI_BAMO_RAMP: readonly string[] = [
+  "#4f3043",
+  "#834675",
+  "#ae6d9e",
+  "#d19ec2",
+  "#d9c5cb",
+  "#cecdbb",
+  "#a2b185",
+  "#78835b",
+  "#5b5c44",
+  "#4b403b",
+  "#4e3042",
+];
+
+/** Scientific colour map "brocO" — 11 stops, Zenodo 8.0.1 (cyclic). */
+const CRAMERI_BROCO_RAMP: readonly string[] = [
+  "#372f38",
+  "#373f60",
+  "#4c6790",
+  "#7894b4",
+  "#adbecd",
+  "#cfd3c5",
+  "#bcbc92",
+  "#8f8f5c",
+  "#615f36",
+  "#423c29",
+  "#372f37",
+];
+
+/** Scientific colour map "corkO" — 11 stops, Zenodo 8.0.1 (cyclic). */
+const CRAMERI_CORKO_RAMP: readonly string[] = [
+  "#3f3e3a",
+  "#3e425a",
+  "#4d6389",
+  "#738fb0",
+  "#a1b8c7",
+  "#afcbbc",
+  "#90ba91",
+  "#66955e",
+  "#4a6934",
+  "#424c2d",
+  "#3f3e3a",
+];
+
+/** Scientific colour map "romaO" — 11 stops, Zenodo 8.0.1 (cyclic). */
+const CRAMERI_ROMAO_RAMP: readonly string[] = [
+  "#733957",
+  "#863f38",
+  "#9c5d2b",
+  "#b88e3b",
+  "#d3c876",
+  "#cbe1b3",
+  "#9bd4cd",
+  "#65adca",
+  "#4e7cb2",
+  "#5e4f85",
+  "#723959",
+];
+
+/** Scientific colour map "vikO" — 11 stops, Zenodo 8.0.1 (cyclic). */
+const CRAMERI_VIKO_RAMP: readonly string[] = [
+  "#4f1a3d",
+  "#3c3263",
+  "#355c8d",
+  "#5e8db1",
+  "#a4b9c8",
+  "#d5beb3",
+  "#d59c7d",
+  "#ba6a45",
+  "#8a3320",
+  "#651725",
+  "#50193c",
+];
+
 /** Named Crameri continuous ramps keyed by portable scheme name. */
 const CRAMERI_RAMPS = {
   acton: CRAMERI_ACTON_RAMP,
@@ -578,6 +653,11 @@ const CRAMERI_RAMPS = {
   bukavu: CRAMERI_BUKAVU_RAMP,
   fes: CRAMERI_FES_RAMP,
   oleron: CRAMERI_OLERON_RAMP,
+  bamO: CRAMERI_BAMO_RAMP,
+  brocO: CRAMERI_BROCO_RAMP,
+  corkO: CRAMERI_CORKO_RAMP,
+  romaO: CRAMERI_ROMAO_RAMP,
+  vikO: CRAMERI_VIKO_RAMP,
 } as const;
 
 type CrameriSchemeName = keyof typeof CRAMERI_RAMPS;

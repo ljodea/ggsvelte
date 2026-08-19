@@ -23,7 +23,7 @@ const BAND_GUIDE_BANNED = /band-guide\.[cm]?[jt]s$/;
 const CONTINUOUS_LEGEND_BANNED = /legend-build-continuous\.[cm]?[jt]s$/;
 const STYLE_SEQUENTIAL_BANNED = /scale-style-numeric-sequential\.[cm]?[jt]s$/;
 const PALETTE_CATALOG_BANNED =
-  /categorical-palettes|colorbrewer-palettes|crameri-ramps|sequential-schemes|hue-grey-palettes/;
+  /categorical-palettes|colorbrewer-palettes|crameri-ramps|crameri-categorical|sequential-schemes|hue-grey-palettes/;
 
 async function buildEntry(entryName: string): Promise<{ moduleIds: string[]; rawBytes: number }> {
   const outDir = path.join(root, "results", "bundles", `_lean-candidates-test-${entryName}`);

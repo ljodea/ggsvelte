@@ -506,7 +506,25 @@ describe("Crameri Scientific colour maps", () => {
     expect(resolveSequentialPipelineRange({ scheme: "viridis" }, VIRIDIS_RAMP_10)).toBe(
       VIRIDIS_RAMP_10,
     );
-    expect(crameriRampStops("romaO")).toBeUndefined();
     expect(crameriRampStops("batlowS")).toBeUndefined();
+  });
+
+  it("resolves cyclic *O ramps as 11-stop sequential tables", () => {
+    const romaO = [
+      "#733957",
+      "#863f38",
+      "#9c5d2b",
+      "#b88e3b",
+      "#d3c876",
+      "#cbe1b3",
+      "#9bd4cd",
+      "#65adca",
+      "#4e7cb2",
+      "#5e4f85",
+      "#723959",
+    ];
+    expect(crameriRampStops("romaO")).toEqual(romaO);
+    expect(resolveSequentialPipelineRange({ scheme: "romaO" }, VIRIDIS_RAMP_10)).toEqual(romaO);
+    expect(continuousSchemeRamp("romaO")).toBeUndefined();
   });
 });
