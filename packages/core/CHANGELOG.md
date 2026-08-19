@@ -1,5 +1,26 @@
 # @ggsvelte/core
 
+## 0.40.0
+
+### Minor Changes
+
+- d798f17: Add Crameri v8.0.1 categorical `*S` palettes and cyclic `*O` ramps. Cyclic schemes need an explicit domain period and wrap out-of-bounds.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 23ac1af: Discrete colour legends on line, path, and step layers draw stroke segments instead of filled squares. A constant aes linetype appears on the matching key.
+
+  Migration: none — internal colour-legend key style for line geoms
+
+- 5e7dd00: Discrete colour legends on line-only plots keep stroke keys when linetype is mapped on a hidden or separate guide.
+
+  Migration: none — internal colour-legend key style when linetype is mapped
+
+- Updated dependencies [d798f17]
+  - @ggsvelte/spec@0.40.0
+
 ## 0.39.0
 
 ### Minor Changes

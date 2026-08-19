@@ -1,5 +1,13 @@
 # @ggsvelte/spec
 
+## 0.40.0
+
+### Minor Changes
+
+- d798f17: Add Crameri v8.0.1 categorical `*S` palettes and cyclic `*O` ramps. Cyclic schemes need an explicit domain period and wrap out-of-bounds.
+
+  Migration: none — additive
+
 ## 0.39.0
 
 ## 0.38.2
