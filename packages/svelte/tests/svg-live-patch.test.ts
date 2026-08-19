@@ -250,6 +250,35 @@ describe("svg-live patch parity", () => {
     container.remove();
   });
 
+  test("opacity that rounds to 1 stays emitted when alphas appear in place", () => {
+    // Devin Review #1662: alphaAttr omits only raw alpha === 1; 0.997 still
+    // emits opacity="1". Patcher and fallback attrs must share that rule.
+    const a = scatter(1e3);
+    const sceneA = runScene(scatterSpec(a), { width: W, height: H });
+    const raw = runScene(scatterSpec(a), { width: W, height: H });
+    const sceneB: Scene = {
+      ...raw,
+      batches: raw.batches.map((batch) =>
+        batch.kind === "points"
+          ? {
+              ...batch,
+              alphas: new Float32Array(batch.positions.length / 2).fill(0.997),
+            }
+          : batch,
+      ),
+    };
+    const container = freshContainer();
+    const live = mountSceneSvg(container, sceneA);
+    const svg = container.querySelector("svg")!;
+    live.update(sceneB);
+    // Same count/signature: positional patch, NOT a remount.
+    expect(container.querySelector("svg")).toBe(svg);
+    expect(svg.querySelector(".gg-points circle")?.getAttribute("opacity")).toBe("1");
+    expect(svg.isEqualNode(freshSvg(sceneB))).toBe(true);
+    live.destroy();
+    container.remove();
+  });
+
   test("area update: parity through path patcher (fill branch)", () => {
     const a = series(200, 2);
     const b = perturbSeries(a, 1.5);

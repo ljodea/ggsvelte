@@ -19,7 +19,7 @@
  * plots inlined in one document carry the same documented id-collision caveat
  * as two renderToSVGString outputs.
  */
-import type { Scene, SceneLegend, ScenePanel } from "../scene.js";
+import type { GeometryBatch, Scene, SceneLegend, ScenePanel } from "../scene.js";
 import { groupBatchesByPanel } from "../group-batches-by-panel.js";
 import { themeVar } from "../theme.js";
 import { paintDefsSvg } from "../mark-paint.js";
@@ -263,7 +263,13 @@ export function mountSceneSvg(
   };
 
   /** Returns false on any structural drift — caller remounts. */
-  const patchPanel = (next: Scene, index: number, panel: ScenePanel): boolean => {
+  const patchPanel = (
+    next: Scene,
+    index: number,
+    panel: ScenePanel,
+    nextBatches: readonly GeometryBatch[],
+    prevBatches: readonly GeometryBatch[] | undefined,
+  ): boolean => {
     const theme = next.theme;
     const group = svg.querySelector(`g.gg-panel[data-panel="${index}"]`);
     if (group === null) return false;
@@ -289,14 +295,6 @@ export function mountSceneSvg(
     // Marks: positional batch patching with per-batch rebuild fallback.
     if (panel.clip === false) marks.removeAttribute("clip-path");
     else writeIfChanged(marks, "clip-path", `url(#gg-clip-${index})`);
-    const { byPanel } = groupBatchesByPanel(next.panels.length, next.batches, false);
-    const { byPanel: prevByPanel } = groupBatchesByPanel(
-      current.panels.length,
-      current.batches,
-      false,
-    );
-    const nextBatches = byPanel[index]!;
-    const prevBatches = prevByPanel[index];
     if (prevBatches === undefined) return false;
     const batchGroups = marks.querySelectorAll(":scope > g.gg-batch");
     if (batchGroups.length !== nextBatches.length) return false;
@@ -392,8 +390,15 @@ export function mountSceneSvg(
         patchRoot(next);
         patchDefs(next);
         patchLetterbox(next);
+        // Group once per update, not once per panel (O(P² + P·B) otherwise).
+        const { byPanel } = groupBatchesByPanel(next.panels.length, next.batches, false);
+        const { byPanel: prevByPanel } = groupBatchesByPanel(
+          current.panels.length,
+          current.batches,
+          false,
+        );
         for (let i = 0; i < next.panels.length; i++) {
-          if (!patchPanel(next, i, next.panels[i]!)) {
+          if (!patchPanel(next, i, next.panels[i]!, byPanel[i]!, prevByPanel[i])) {
             remount(next);
             return;
           }

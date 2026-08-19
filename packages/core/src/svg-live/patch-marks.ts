@@ -81,7 +81,7 @@ function pointAttrs(
   const y = batch.positions[j * 2 + 1]!;
   const geometry = pointShapeGeometry(shape, x, y, size);
   const fill = pointFillAt(batch, j, themeInk);
-  const opacity = batch.alphas === undefined ? "" : px(batch.alphas?.[j] ?? 1);
+  const alphaRaw = batch.alphas?.[j] ?? 1;
   const attrs: AttrMap = { class: `gg-shape-${shape}` };
   let tag: string;
   switch (geometry.kind) {
@@ -121,7 +121,9 @@ function pointAttrs(
     default:
       return null;
   }
-  if (opacity !== "" && opacity !== "1") attrs["opacity"] = opacity;
+  // alphaAttr omission rule: absent iff the raw alpha is exactly 1; a value
+  // that merely rounds to "1" is still emitted by the string renderer.
+  if (batch.alphas !== undefined && alphaRaw !== 1) attrs["opacity"] = px(alphaRaw);
   return { tag, attrs };
 }
 
