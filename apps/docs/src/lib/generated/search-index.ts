@@ -20564,14 +20564,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core (./headless)"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-41",
+    id: "heading:guide-lifecycle:experimental-42",
     kind: "heading",
-    title: "experimental (41)",
+    title: "experimental (42)",
     summary:
-      "experimental (41) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-41",
+      "experimental (42) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-42",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (41)"],
+    exact: ["experimental (42)"],
   },
   {
     id: "heading:guide-lifecycle:ggsvelte-core-headless-register",
@@ -35727,6 +35727,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core-headless",
     keywords: ["@ggsvelte/core", "./headless", "value", "experimental"],
     exact: ["runPipeline"],
+  },
+  {
+    id: "api:ggsvelte-core-headless:runScene",
+    kind: "api",
+    title: "runScene",
+    summary: "@ggsvelte/core ./headless · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core-headless",
+    keywords: ["@ggsvelte/core", "./headless", "value", "experimental"],
+    exact: ["runScene"],
   },
   {
     id: "api:ggsvelte-core-headless:sceneLabel",

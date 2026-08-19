@@ -56,6 +56,10 @@
     "./dom": {
       "types": "./dist/dom/index.d.ts",
       "default": "./dist/dom/index.js"
+    },
+    "./svg-live": {
+      "types": "./dist/svg-live/index.d.ts",
+      "default": "./dist/svg-live/index.js"
     }
   },
   "publishConfig": {

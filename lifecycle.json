@@ -5800,6 +5800,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "runScene": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "sceneLabel": {
           "kind": "value",
           "lifecycle": "experimental"

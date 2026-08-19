@@ -10,6 +10,9 @@
  */
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
 export { runPipeline } from "./pipeline/run-pipeline.js";
+// Scene-only runner for the lean SVG path (no RenderModel-only contracts);
+// pairs with mountSceneSvg from "@ggsvelte/core/svg-live" for live updates.
+export { runScene } from "./pipeline/run-scene.js";
 export type {
   Advisory,
   AxisValueFormatter,

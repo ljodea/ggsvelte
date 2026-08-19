@@ -1,7 +1,8 @@
 /**
  * Lean SVG-only ggsvelte mounts (keeps @ggsvelte/core/dom and planStrata out of the graph).
  */
-import { renderToSVGString } from "@ggsvelte/core/headless";
+import { countMarks, renderToSVGString, runScene } from "@ggsvelte/core/headless";
+import { mountSceneSvg } from "@ggsvelte/core/svg-live";
 import type { SpecInput } from "@ggsvelte/spec/portable";
 
 import {
@@ -22,40 +23,56 @@ export type MountHandle = {
 
 export type MountResult = { markHint: number; handle: MountHandle };
 
-// These deterministic fixtures contain plain number/string columns and never
-// mutate input after mount, so direct SpecInput avoids optional builder sugar
-// without changing Date conversion or defensive-copy semantics relevant here.
-function scatterSpec(data: ScatterColumns): SpecInput {
+// Specs use a named data ref ({ name: "main" }) built ONCE per scenario;
+// mount/update feed columns via RunOptions.data so normalization never
+// snapshots 30k cells through toPortable on an update (same posture as the
+// canvas adapter). Inline columns remain for the bundle-* string entries.
+const DATA_NAME = "main";
+
+function scatterSpec(): SpecInput {
   return {
-    data: { columns: data },
+    data: { name: DATA_NAME },
     aes: { x: "x", y: "y", color: "cls" },
     layers: [{ geom: "point", params: { size: 1.5, alpha: 0.7 } }],
   };
 }
 
-function lineSpec(data: SeriesColumns): SpecInput {
+function lineSpec(): SpecInput {
   return {
-    data: { columns: data },
+    data: { name: DATA_NAME },
     aes: { x: "x", y: "y", color: "series", group: "series" },
     layers: [{ geom: "line" }],
   };
 }
 
-function areaSpec(data: SeriesColumns): SpecInput {
+function areaSpec(): SpecInput {
   // Identity (not stack): competitors overlay series; default geomArea is stack.
   return {
-    data: { columns: data },
+    data: { name: DATA_NAME },
     aes: { x: "x", y: "y", fill: "series", group: "series" },
     layers: [{ geom: "area", position: "identity" }],
   };
 }
 
-function barsSpec(data: BarsColumns): SpecInput {
+function barsSpec(): SpecInput {
   return {
-    data: { columns: data },
+    data: { name: DATA_NAME },
     aes: { x: "category", y: "value", fill: "stack" },
     layers: [{ geom: "col" }],
   };
+}
+
+function scenarioSpec(scenario: ScenarioId): SpecInput {
+  switch (scenario) {
+    case "scatter-color":
+      return scatterSpec();
+    case "line-multiseries":
+      return lineSpec();
+    case "area-multiseries":
+      return areaSpec();
+    case "bars-stacked":
+      return barsSpec();
+  }
 }
 
 export function mountGgsvelteSvg(
@@ -63,56 +80,56 @@ export function mountGgsvelteSvg(
   data: ScatterColumns | SeriesColumns | BarsColumns,
   root: HTMLElement,
 ): MountResult {
-  const render = (d: UpdateColumns): number => {
-    let spec;
-    switch (scenario) {
-      case "scatter-color":
-        spec = scatterSpec(d as ScatterColumns);
-        break;
-      case "line-multiseries":
-        spec = lineSpec(d as SeriesColumns);
-        break;
-      case "area-multiseries":
-        spec = areaSpec(d as SeriesColumns);
-        break;
-      case "bars-stacked":
-        spec = barsSpec(d as BarsColumns);
-        break;
-    }
-    const svg = renderToSVGString(spec, { width: PLOT_WIDTH, height: PLOT_HEIGHT });
-    root.replaceChildren();
-    root.innerHTML = svg;
-    return root.querySelectorAll("circle, path, rect, line").length;
-  };
-  const markHint = render(data);
+  const portable = scenarioSpec(scenario);
+  const run = (d: UpdateColumns) =>
+    runScene(portable, { width: PLOT_WIDTH, height: PLOT_HEIGHT, data: { [DATA_NAME]: d } });
+  // Live update path (#1471): mount once, then patch positionally on update.
+  // The patcher falls back to a full remount whenever the scene skeleton
+  // changes, so correctness matches the previous string-render + DOM swap.
+  const initial = run(data);
+  const live = mountSceneSvg(root, initial);
   return {
-    markHint,
+    markHint: countMarks(initial),
     handle: {
-      // Honest update path TODAY: ggsvelte's lean SVG path has no in-place DOM
-      // patching, so an update is a full re-render (new spec +
-      // renderToSVGString) followed by a DOM swap — update == remount here.
       update: (d) => {
-        render(d);
+        live.update(run(d));
       },
       destroy: () => {
-        root.replaceChildren();
+        live.destroy();
       },
     },
   };
 }
 
+/** Inline-column variants for the bundle-measure string entries. */
+function scatterSpecInline(data: ScatterColumns): SpecInput {
+  return { ...scatterSpec(), data: { columns: data } };
+}
+
+function lineSpecInline(data: SeriesColumns): SpecInput {
+  return { ...lineSpec(), data: { columns: data } };
+}
+
+function areaSpecInline(data: SeriesColumns): SpecInput {
+  return { ...areaSpec(), data: { columns: data } };
+}
+
+function barsSpecInline(data: BarsColumns): SpecInput {
+  return { ...barsSpec(), data: { columns: data } };
+}
+
 export function bundleScatterSvg(data: ScatterColumns): string {
-  return renderToSVGString(scatterSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return renderToSVGString(scatterSpecInline(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
 }
 
 export function bundleLineSvg(data: SeriesColumns): string {
-  return renderToSVGString(lineSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return renderToSVGString(lineSpecInline(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
 }
 
 export function bundleAreaSvg(data: SeriesColumns): string {
-  return renderToSVGString(areaSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return renderToSVGString(areaSpecInline(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
 }
 
 export function bundleBarsSvg(data: BarsColumns): string {
-  return renderToSVGString(barsSpec(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+  return renderToSVGString(barsSpecInline(data), { width: PLOT_WIDTH, height: PLOT_HEIGHT });
 }
