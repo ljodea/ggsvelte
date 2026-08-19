@@ -1,5 +1,5 @@
 /**
- * Attach constant point-mark shapes to discrete color/fill legend keys.
+ * Attach constant mark style to discrete paint legend keys.
  *
  * Paint scales train colour only. Layer params like `shape: "cross"` (and the
  * default circle for point-family geoms) live on the mark, so without this
@@ -7,14 +7,18 @@
  * for colorblind readers when two layers share one color scale with different
  * shapes (Snow cholera: grey deaths as circles, red pumps as crosses).
  *
- * When shape is a mapped aesthetic, leave the key alone so the shape-scale
- * merge path in prepareLegendInputs can supply it. Area/bar/line geoms stay
- * on square/line defaults (not shape-capable).
+ * Line-family colour keys get the same treatment: a constant or default
+ * `linetype` so renderers draw a stroke segment instead of a square.
+ *
+ * When shape or linetype is a mapped aesthetic, leave that field alone so the
+ * scale-merge path in prepareLegendInputs can supply it. Area/bar/col fill
+ * keys stay squares. Do not stamp linetype onto a key that already carries
+ * an agreed point shape — mergeDiscrete drops shape when both exist.
  */
-import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
 import type { DiscreteLegendInput } from "../legend.js";
-import type { PointShape } from "../scales/style.js";
+import type { Linetype, PointShape } from "../scales/style.js";
 import { encodeKey } from "../scales/state.js";
 
 import type { LayerBinding } from "./types.js";
@@ -22,6 +26,7 @@ import type { LayerBinding } from "./types.js";
 type LegendKeyStyle = ReturnType<NonNullable<DiscreteLegendInput["keyOf"]>>;
 
 const POINT_SHAPE_SET = new Set<string>(POINT_SHAPE_NAMES);
+const LINETYPE_SET = new Set<string>(LINETYPE_NAMES);
 /**
  * Geoms that always emit point marks (PointsBatch). Not the same as
  * STYLE_AESTHETIC_GEOMS.shape, which lists geoms that *accept* a shape aesthetic
@@ -36,6 +41,12 @@ const POINT_MARK_GEOMS = new Set<string>([
   "qq",
   "pointrange",
 ]);
+/**
+ * Canonical stroke geoms that reach the pipeline. Aliases (`freqpoly` →
+ * `line`) are already rewritten. Broader linetype-capable geoms (rule,
+ * smooth, rug, density_2d) stay out until audited.
+ */
+const LINE_MARK_GEOMS = new Set<string>(["line", "path", "step"]);
 
 function isPaintScale(scale: string): scale is "color" | "fill" {
   return scale === "color" || scale === "fill";
@@ -98,9 +109,66 @@ function layerConstantShape(binding: LayerBinding): PointShape | undefined {
 }
 
 /**
- * Enrich a discrete color/fill legend so each domain value carries the
- * constant point shape of the layer(s) that paint it. No-op when no
- * shape-capable layer maps the aesthetic, or when shapes conflict for a value.
+ * Constant linetype for a stroke-mark geom: aes constant, or the plot
+ * default solid. Field / after-stat / scaled-constant linetype returns
+ * undefined so the linetype scale owns the key. LineParams has no linetype
+ * property; do not read layer.params.
+ */
+function layerConstantLinetype(binding: LayerBinding): Linetype | undefined {
+  if (!LINE_MARK_GEOMS.has(binding.layer.geom)) return undefined;
+  if (
+    binding.linetype.field !== null ||
+    binding.linetype.statColumn !== null ||
+    binding.linetype.scaledConstant !== null
+  ) {
+    return undefined;
+  }
+  if (
+    typeof binding.linetype.constant === "string" &&
+    LINETYPE_SET.has(binding.linetype.constant)
+  ) {
+    return binding.linetype.constant as Linetype;
+  }
+  return "solid";
+}
+
+function agreedMarkStyle<T>(
+  relevant: readonly LayerBinding[],
+  aesthetic: "color" | "fill",
+  domain: readonly unknown[],
+  constantOf: (binding: LayerBinding) => T | undefined,
+): Map<string, T> {
+  const byKey = new Map<string, T>();
+  for (const value of domain) {
+    let agreed: T | undefined;
+    let seen = false;
+    let conflict = false;
+    for (const binding of relevant) {
+      if (!layerContributesPaintValue(binding, aesthetic, value)) continue;
+      const style = constantOf(binding);
+      if (style === undefined) continue;
+      if (!seen) {
+        agreed = style;
+        seen = true;
+      } else if (agreed !== style) {
+        conflict = true;
+        break;
+      }
+    }
+    if (!seen || conflict || agreed === undefined) continue;
+    try {
+      byKey.set(encodeKey(value), agreed);
+    } catch {
+      // Non-encodable domain values cannot key a legend entry.
+    }
+  }
+  return byKey;
+}
+
+/**
+ * Enrich a discrete paint legend so each domain value carries the constant
+ * point shape and/or stroke pattern of the layer(s) that paint it. No-op
+ * when no mark-style layer maps the aesthetic, or when styles conflict.
  */
 export function enrichPaintLegendKeys(
   input: DiscreteLegendInput,
@@ -111,31 +179,12 @@ export function enrichPaintLegendKeys(
   const relevant = bindings.filter((binding) => layerMapsPaint(binding, aesthetic));
   if (relevant.length === 0) return input;
 
-  const shapeByKey = new Map<string, PointShape>();
-  for (const value of input.domain) {
-    let agreed: PointShape | undefined;
-    let seen = false;
-    let conflict = false;
-    for (const binding of relevant) {
-      if (!layerContributesPaintValue(binding, aesthetic, value)) continue;
-      const shape = layerConstantShape(binding);
-      if (shape === undefined) continue;
-      if (!seen) {
-        agreed = shape;
-        seen = true;
-      } else if (agreed !== shape) {
-        conflict = true;
-        break;
-      }
-    }
-    if (!seen || conflict || agreed === undefined) continue;
-    try {
-      shapeByKey.set(encodeKey(value), agreed);
-    } catch {
-      // Non-encodable domain values cannot key a legend entry.
-    }
-  }
-  if (shapeByKey.size === 0) return input;
+  const shapeByKey = agreedMarkStyle(relevant, aesthetic, input.domain, layerConstantShape);
+  const linetypeByKey =
+    aesthetic === "color"
+      ? agreedMarkStyle(relevant, aesthetic, input.domain, layerConstantLinetype)
+      : new Map<string, Linetype>();
+  if (shapeByKey.size === 0 && linetypeByKey.size === 0) return input;
 
   // Capture as a free function so oxlint unbound-method does not flag the
   // method reference when we call it from the enriched keyOf.
@@ -144,13 +193,20 @@ export function enrichPaintLegendKeys(
     ...input,
     keyOf(value: unknown): LegendKeyStyle {
       const key: LegendKeyStyle = { ...previousKeyOf(value) };
-      // Preserve a shape already supplied by a merged shape scale.
-      if (key.shape !== undefined) return key;
       try {
-        const shape = shapeByKey.get(encodeKey(value));
-        if (shape !== undefined) key.shape = shape;
+        const encoded = encodeKey(value);
+        if (key.shape === undefined) {
+          const shape = shapeByKey.get(encoded);
+          if (shape !== undefined) key.shape = shape;
+        }
+        // mergeDiscrete deletes shape when both fields exist and no shape
+        // scale is merged. Skip linetype if this key already has a shape.
+        if (key.shape === undefined && key.linetype === undefined) {
+          const linetype = linetypeByKey.get(encoded);
+          if (linetype !== undefined) key.linetype = linetype;
+        }
       } catch {
-        // leave key without shape
+        // leave key without mark style
       }
       return key;
     },
