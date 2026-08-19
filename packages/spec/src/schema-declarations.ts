@@ -5307,9 +5307,9 @@ export const SpecDeclarations = {
           Type.Boolean({ description: "Reverse the output color range. Default false." }),
         ),
         oob: Type.Optional(
-          Type.Union([Type.Literal("censor"), Type.Literal("squish")], {
+          Type.Union([Type.Literal("censor"), Type.Literal("squish"), Type.Literal("wrap")], {
             description:
-              'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
+              'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
           }),
         ),
         naValue: Type.Optional(

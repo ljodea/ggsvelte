@@ -72,10 +72,11 @@ is opt-in per family. One forgotten call fails at render:
   explicit `range`. A named **categorical** scheme (`observable10`,
   `colorblind`, `Dark2`, …) needs `registerOrdinalColor()`. A named
   **sequential or diverging** scheme (`viridis`, `magma`, `Blues`, `RdBu`,
-  Crameri `batlow`, …) needs `registerSequentialColor()` — a sequential
-  name with no `type` infers sequential, so `registerOrdinalColor()` is
-  not enough. Explicit `type: "ordinal"` (including discrete sampling of
-  a sequential name) still needs `registerOrdinalColor()`. Other kinds:
+  Crameri `batlow`, cyclic `romaO`, …) needs `registerSequentialColor()`
+  — a sequential name with no `type` infers sequential, so
+  `registerOrdinalColor()` is not enough. Cyclic `*O` names are sequential
+  only. Explicit `type: "ordinal"` (including discrete sampling of a
+  non-cyclic sequential name) still needs `registerOrdinalColor()`. Other kinds:
   `registerBinnedColor()`, `registerManualColor()`,
   `registerIdentityColor()`.
 - Style: `registerNumericStyle()` (size / linewidth / alpha),
@@ -257,9 +258,9 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 81 named schemes — 26 categorical (`observable10`, `colorblind`,
-  `Dark2`…) and 55 sequential/diverging (`viridis`, `magma`,
-  `Blues`, `RdBu`, Crameri Scientific maps like `batlow`…).
+  `identity`. 107 named schemes — 47 categorical (`observable10`, `colorblind`,
+  `Dark2`, Crameri `batlowS`…) and 60 sequential/diverging (`viridis`, `magma`,
+  `Blues`, `RdBu`, Crameri `batlow`, cyclic `romaO`…).
   Size/linewidth/alpha and shape/linetype have their own scale families.
 - Three equivalent skins:
   JSON `"scales": {"x": {"type": "linear", "transform": "log10"}}` ≡ helper

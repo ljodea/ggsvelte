@@ -8,12 +8,16 @@
  * - palette / ramp precedence
  * - transform registry as the only forward/valid source for sequential color
  */
+import { CYCLIC_SCHEME_NAMES } from "@ggsvelte/spec";
+
 import { CATEGORICAL_PALETTE_10, CATEGORICAL_SCHEMES } from "./categorical-palettes.js";
 import { colorBrewerStops } from "./colorbrewer-palettes.js";
 import { crameriRampStops } from "./crameri-ramps.js";
 import { normalizeColor } from "./normalize-color.js";
 import { sequentialSchemeRamp } from "./sequential-schemes.js";
 import { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
+
+const CYCLIC_SCHEMES = new Set<string>(CYCLIC_SCHEME_NAMES);
 
 /** Default NA / unknown color when authors omit either side. */
 export const DEFAULT_MISSING_COLOR = "#999999";
@@ -69,6 +73,12 @@ export function resolveOrdinalPipelineRange(
  * discrete-table fallthrough (max-n stops), not even-sampled.
  */
 export function continuousSchemeRamp(name: string | undefined): readonly string[] | undefined {
+  if (name === undefined || CYCLIC_SCHEMES.has(name)) return undefined;
+  return sequentialSchemeRamp(name) ?? crameriRampStops(name);
+}
+
+/** Sequential + cyclic Crameri ramps. Cyclic names are excluded from ordinal sampling. */
+export function sequentialOrCyclicRamp(name: string | undefined): readonly string[] | undefined {
   if (name === undefined) return undefined;
   return sequentialSchemeRamp(name) ?? crameriRampStops(name);
 }
@@ -108,7 +118,7 @@ export function resolveSequentialPipelineRange(
   // Named continuous schemes first (viridis family + Crameri); ColorBrewer
   // palette names fall through to the brewer tables (#825).
   const namedSchemeRamp =
-    continuousSchemeRamp(config?.scheme) ??
+    sequentialOrCyclicRamp(config?.scheme) ??
     (config?.scheme === undefined ? undefined : colorBrewerStops(config.scheme));
   return config?.range ?? namedSchemeRamp ?? edition;
 }

@@ -532,7 +532,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -551,8 +551,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -621,7 +621,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -708,7 +708,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -727,8 +727,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -798,7 +798,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -810,8 +810,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -907,7 +907,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -919,8 +919,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1015,7 +1015,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1089,7 +1089,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1108,8 +1108,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1191,7 +1191,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1210,8 +1210,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1297,8 +1297,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1383,8 +1383,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1481,8 +1481,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1756,7 +1756,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1768,8 +1768,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -1883,7 +1883,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1958,7 +1958,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -1970,8 +1970,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2044,8 +2044,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2130,8 +2130,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2228,8 +2228,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2333,8 +2333,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2420,8 +2420,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2507,8 +2507,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2577,7 +2577,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -2596,8 +2596,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2668,7 +2668,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -2757,7 +2757,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -2776,8 +2776,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2849,7 +2849,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -2861,8 +2861,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -2960,7 +2960,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -2972,8 +2972,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3070,7 +3070,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -3146,7 +3146,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -3165,8 +3165,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3250,7 +3250,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -3269,8 +3269,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3358,8 +3358,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3446,8 +3446,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3546,8 +3546,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3829,7 +3829,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -3841,8 +3841,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -3960,7 +3960,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4037,7 +4037,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4049,8 +4049,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4125,8 +4125,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4213,8 +4213,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4313,8 +4313,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4420,8 +4420,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4509,8 +4509,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4598,8 +4598,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4668,7 +4668,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4687,8 +4687,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4757,7 +4757,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4844,7 +4844,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4863,8 +4863,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -4934,7 +4934,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -4946,8 +4946,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5043,7 +5043,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -5055,8 +5055,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5151,7 +5151,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -5225,7 +5225,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -5244,8 +5244,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5327,7 +5327,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -5346,8 +5346,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5433,8 +5433,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5519,8 +5519,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5617,8 +5617,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -5892,7 +5892,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -5904,8 +5904,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6019,7 +6019,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -6094,7 +6094,7 @@ export const SCALE_REFERENCE_DATA = {
         description:
           'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "colorblind", "hue", and ColorBrewer qualitative (Dark2); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
         typeSummary:
-          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron"',
+          '"observable10" | "ipsum" | "flexoki" | "colorblind" | "stata" | "economist" | "solarized" | "few" | "few_light" | "few_dark" | "fivethirtyeight" | "ptol" | "canva" | "wsj" | "wsj_rgby" | "wsj_red_green" | "wsj_black_green" | "wsj_dem_rep" | "tableau20" | "tableau_colorblind" | "tableau_seattle_grays" | "tableau_jewel_bright" | "tableau_hue_circle" | "pander" | "Dark2" | "hue" | "actonS" | "bamakoS" | "batlowS" | "batlowWS" | "batlowKS" | "bilbaoS" | "budaS" | "davosS" | "devonS" | "glasgowS" | "grayCS" | "hawaiiS" | "imolaS" | "lajollaS" | "lapazS" | "lipariS" | "naviaS" | "nuukS" | "osloS" | "tokyoS" | "turkuS" | "viridis" | "magma" | "plasma" | "inferno" | "cividis" | "turbo" | "Blues" | "Greens" | "Reds" | "Oranges" | "Purples" | "Greys" | "YlOrRd" | "YlGnBu" | "BuPu" | "RdYlBu" | "RdBu" | "BrBG" | "Spectral" | "PuOr" | "acton" | "bamako" | "batlow" | "batlowW" | "batlowK" | "bilbao" | "buda" | "davos" | "devon" | "glasgow" | "grayC" | "hawaii" | "imola" | "lajolla" | "lapaz" | "lipari" | "navia" | "naviaW" | "nuuk" | "oslo" | "tokyo" | "turku" | "bam" | "berlin" | "broc" | "cork" | "lisbon" | "managua" | "roma" | "tofino" | "vanimo" | "vik" | "bukavu" | "fes" | "oleron" | "bamO" | "brocO" | "corkO" | "romaO" | "vikO"',
         required: false,
       },
       {
@@ -6106,8 +6106,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6180,8 +6180,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6266,8 +6266,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6364,8 +6364,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6469,8 +6469,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6556,8 +6556,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {
@@ -6643,8 +6643,8 @@ export const SCALE_REFERENCE_DATA = {
       {
         name: "oob",
         description:
-          'Out-of-bounds policy for an explicit continuous/binned domain: "censor" (default) or "squish".',
-        typeSummary: '"censor" | "squish"',
+          'Out-of-bounds policy for an explicit continuous domain: "censor" (default), "squish", or "wrap" (periodic; required for cyclic *O schemes). Not valid on binned color scales.',
+        typeSummary: '"censor" | "squish" | "wrap"',
         required: false,
       },
       {

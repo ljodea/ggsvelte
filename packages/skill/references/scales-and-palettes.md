@@ -63,8 +63,9 @@ options fail schema validation):
   `data` rebuilds), `reverse`, `onExhaust`. No transform, breaks, oob, labels.
 - **sequential** — continuous ramp. `scheme` or `range` (>= 2 colors
   interpolated), `transform`, `domain` `[min, max]`, `breaks` (colorbar
-  reference ticks), `oob`, `labels`, temporal parser options. Guide plan:
-  `colorbar`.
+  reference ticks), `oob` (`censor` default, `squish`, or `wrap` for
+  periodic data). Cyclic `*O` schemes require `wrap` (the default when
+  omitted) and an explicit domain period. Guide plan: `colorbar`.
 - **binned** — color steps. Same shape as sequential but `breaks` are ordered
   boundaries (at most 65). Guide plan: `colorsteps`.
 - **manual** — explicit mapping. `range` is required and must supply one color
@@ -176,7 +177,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (26)
+### Categorical schemes (47)
 
 | Scheme                | Description                                                        |
 | --------------------- | ------------------------------------------------------------------ |
@@ -206,17 +207,39 @@ byte-identity-preserving: `value` is not routed through any helper.
 | pander                | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
 | Dark2                 | ColorBrewer qualitative, dark tones                                |
 | hue                   | Evenly spaced HSL hues — the ggplot2-shaped `scale_*_hue` default  |
+| actonS                | Crameri categorical 10-class prefix (unordered)                    |
+| bamakoS               | Crameri categorical 10-class prefix (unordered)                    |
+| batlowS               | Crameri categorical 10-class prefix (unordered)                    |
+| batlowWS              | Crameri categorical 10-class prefix (unordered)                    |
+| batlowKS              | Crameri categorical 10-class prefix (unordered)                    |
+| bilbaoS               | Crameri categorical 10-class prefix (unordered)                    |
+| budaS                 | Crameri categorical 10-class prefix (unordered)                    |
+| davosS                | Crameri categorical 10-class prefix (unordered)                    |
+| devonS                | Crameri categorical 10-class prefix (unordered)                    |
+| glasgowS              | Crameri categorical 10-class prefix (unordered)                    |
+| grayCS                | Crameri categorical 10-class prefix (unordered)                    |
+| hawaiiS               | Crameri categorical 10-class prefix (unordered)                    |
+| imolaS                | Crameri categorical 10-class prefix (unordered)                    |
+| lajollaS              | Crameri categorical 10-class prefix (unordered)                    |
+| lapazS                | Crameri categorical 10-class prefix (unordered)                    |
+| lipariS               | Crameri categorical 10-class prefix (unordered)                    |
+| naviaS                | Crameri categorical 10-class prefix (unordered)                    |
+| nuukS                 | Crameri categorical 10-class prefix (unordered)                    |
+| osloS                 | Crameri categorical 10-class prefix (unordered)                    |
+| tokyoS                | Crameri categorical 10-class prefix (unordered)                    |
+| turkuS                | Crameri categorical 10-class prefix (unordered)                    |
 
 There is no registered `"grey"` / `"gray"` scheme name. Use
 `<ScaleColorGrey />` / `scaleColorGrey()` (or `start`/`end`) — those bake an
-explicit greyscale `range`. Sequential scheme names are also legal on ordinal
-scales (discrete sampling along the ramp — what `scale_*_viridis_d` does).
+explicit greyscale `range`. Non-cyclic sequential scheme names are also legal
+on ordinal scales (discrete sampling along the ramp — what `scale_*_viridis_d`
+does). Cyclic `*O` names are sequential only.
 
 **Palette exhaustion** (`onExhaust`, ordinal scales only): `cycle` (default)
 restarts the palette and emits the bounded `palette-exhausted` warning once;
 `error` throws the `palette-exhausted` pipeline error instead.
 
-### Sequential schemes (55)
+### Sequential schemes (60)
 
 | Scheme   | Description                                            |
 | -------- | ------------------------------------------------------ |
@@ -275,6 +298,11 @@ restarts the palette and emits the bounded `palette-exhausted` warning once;
 | bukavu   | Crameri multi-sequential (scientific, CVD-friendly)    |
 | fes      | Crameri multi-sequential (scientific, CVD-friendly)    |
 | oleron   | Crameri multi-sequential (scientific, CVD-friendly)    |
+| bamO     | Crameri cyclic — periodic data only; wrap OOB          |
+| brocO    | Crameri cyclic — periodic data only; wrap OOB          |
+| corkO    | Crameri cyclic — periodic data only; wrap OOB          |
+| romaO    | Crameri cyclic — periodic data only; wrap OOB          |
+| vikO     | Crameri cyclic — periodic data only; wrap OOB          |
 
 ### Finite symbol sets (default assignment order)
 

@@ -33,6 +33,7 @@ import { SpecDeclarations } from "./schema-declarations.js";
 export {
   CATEGORICAL_SCHEME_NAMES,
   COLOR_SCHEME_NAMES,
+  CYCLIC_SCHEME_NAMES,
   LINETYPE_NAMES,
   MAX_BINNED_BREAKS,
   MAX_GLOW_RADIUS,

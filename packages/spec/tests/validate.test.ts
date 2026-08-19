@@ -167,6 +167,68 @@ describe("validate — agent errors (snapshot-tested messages)", () => {
     ]);
   });
 
+  it("rejects a cyclic scheme without an explicit domain period", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "sequential", scheme: "romaO" } },
+    });
+    expect(errors).toEqual([
+      {
+        code: "scale-cyclic-domain",
+        path: "/scales/color/domain",
+        message: 'The cyclic scheme "romaO" requires an explicit two-value domain period.',
+        fix: {
+          description: "Set domain to one period, for example [0, 360] for degrees.",
+          example: [0, 360],
+        },
+      },
+    ]);
+  });
+
+  it("rejects censor out-of-bounds on a cyclic scheme", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "sequential", scheme: "romaO", domain: [0, 360], oob: "censor" } },
+    });
+    expect(errors[0]).toMatchObject({
+      code: "scale-scheme-oob",
+      path: "/scales/color/oob",
+    });
+  });
+
+  it("rejects a cyclic scheme on an ordinal color scale", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "ordinal", scheme: "romaO" } },
+    });
+    expect(errors.some((error) => error.code === "scale-scheme-type")).toBe(true);
+    expect(errors.some((error) => error.code === "scale-cyclic-domain")).toBe(true);
+  });
+
+  it("rejects wrap out-of-bounds on a binned color scale", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "binned", scheme: "viridis", oob: "wrap" } },
+    });
+    expect(errors).toContainEqual({
+      code: "scale-scheme-oob",
+      path: "/scales/color/oob",
+      message: "The binned color scale cannot use wrap out-of-bounds.",
+      fix: {
+        description: 'Use "censor" or "squish" on binned color scales.',
+        example: "censor",
+      },
+    });
+  });
+
+  it("accepts a cyclic scheme with an explicit period", () => {
+    const result = validate({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "sequential", scheme: "romaO", domain: [0, 360] } },
+    });
+    expect(result.ok).toBe(true);
+  });
+
   it("allows sequential-family schemes on ordinal color scales for discrete viridis (#828)", () => {
     // Manual color scales reject `scheme` at the TypeBox branch (range-only);
     // ordinal may name a sequential-family scheme for discrete sampling.

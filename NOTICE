@@ -190,9 +190,9 @@ scheme lookup — not a copy of ggplot2 R sources.
 Crameri Scientific colour maps (bundled continuous scheme stops)
 ----------------------------------------------------------------
 packages/core/src/scales/crameri-ramps.ts samples 11 evenly spaced #rrggbb
-stops from each continuous map in Scientific Colour Maps v8.0.1 (sequential,
-diverging, and multi-sequential). Cyclic (*O) and categorical (*S) maps are
-not bundled.
+stops from each continuous and cyclic (*O) map in Scientific Colour Maps
+v8.0.1. packages/core/src/scales/crameri-categorical.ts vendors the first 10
+colours of each official categorical (*S) table.
 
   Copyright (c) 2023 Fabio Crameri
   License: MIT

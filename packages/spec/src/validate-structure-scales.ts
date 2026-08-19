@@ -3,7 +3,11 @@
  * Layer grammar: validate-structure-layers.ts (+ layer-rule/ribbon/computed-y). Facet: validate-structure-facet.ts.
  */
 import type { SpecError } from "./errors.js";
-import { CATEGORICAL_SCHEME_NAMES, SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
+import {
+  CATEGORICAL_SCHEME_NAMES,
+  CYCLIC_SCHEME_NAMES,
+  SEQUENTIAL_SCHEME_NAMES,
+} from "./schema-names.js";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -11,6 +15,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 const CATEGORICAL_SCHEMES = new Set<string>(CATEGORICAL_SCHEME_NAMES);
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
+const CYCLIC_SCHEMES = new Set<string>(CYCLIC_SCHEME_NAMES);
 
 /** Named color schemes must match the configured color scale family. */
 const GUIDE_AESTHETICS = [
@@ -89,6 +94,80 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
         },
       });
     }
+    if (type === "binned" && scale["oob"] === "wrap") {
+      errors.push({
+        code: "scale-scheme-oob",
+        path: `/scales/${channel}/oob`,
+        message: `The binned ${channel} scale cannot use wrap out-of-bounds.`,
+        fix: {
+          description: 'Use "censor" or "squish" on binned color scales.',
+          example: "censor",
+        },
+      });
+    }
+
+    if (typeof scheme === "string" && CYCLIC_SCHEMES.has(scheme)) {
+      if (type !== undefined && type !== "sequential") {
+        errors.push({
+          code: "scale-scheme-type",
+          path: `/scales/${channel}/scheme`,
+          message: `The cyclic scheme "${scheme}" cannot be used with a ${String(type)} color scale.`,
+          fix: {
+            description: 'Use type "sequential" with an explicit domain period and oob "wrap".',
+            example: "sequential",
+          },
+        });
+      }
+      if (scale["oob"] === "censor" || scale["oob"] === "squish") {
+        errors.push({
+          code: "scale-scheme-oob",
+          path: `/scales/${channel}/oob`,
+          message: `The cyclic scheme "${scheme}" requires wrap out-of-bounds.`,
+          fix: {
+            description: 'Set oob to "wrap", or omit it (cyclic schemes default to wrap).',
+            example: "wrap",
+          },
+        });
+      }
+      if (!Array.isArray(scale["domain"]) || scale["domain"].length !== 2) {
+        errors.push({
+          code: "scale-cyclic-domain",
+          path: `/scales/${channel}/domain`,
+          message: `The cyclic scheme "${scheme}" requires an explicit two-value domain period.`,
+          fix: {
+            description: "Set domain to one period, for example [0, 360] for degrees.",
+            example: [0, 360],
+          },
+        });
+      }
+      if (scale["range"] !== undefined) {
+        errors.push({
+          code: "scale-scheme-type",
+          path: `/scales/${channel}/range`,
+          message: `The cyclic scheme "${scheme}" cannot be combined with an explicit range.`,
+          fix: {
+            description: "Remove range and keep the named cyclic scheme, or drop the scheme.",
+          },
+        });
+      }
+      const cyclicTransform = scale["transform"];
+      const cyclicTemporal = scale["temporalKind"] !== undefined || scale["parse"] !== undefined;
+      if (
+        (typeof cyclicTransform === "string" && cyclicTransform !== "identity") ||
+        cyclicTemporal
+      ) {
+        errors.push({
+          code: "scale-type-transform-conflict",
+          path: `/scales/${channel}/transform`,
+          message: `The cyclic scheme "${scheme}" cannot apply a transform or temporal parser.`,
+          fix: {
+            description: "Remove transform and temporal options. Wrap in semantic space only.",
+            example: "identity",
+          },
+        });
+      }
+    }
+
     if (
       (type === "sequential" || type === "binned") &&
       typeof scheme === "string" &&

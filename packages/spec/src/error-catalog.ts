@@ -95,7 +95,17 @@ export const ERROR_CATALOG = {
   "scale-scheme-type": {
     tier: 1,
     summary: "A named color scheme is incompatible with the configured color scale type.",
-    fix: 'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".',
+    fix: 'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential". Cyclic *O schemes are sequential only.',
+  },
+  "scale-scheme-oob": {
+    tier: 1,
+    summary: "The out-of-bounds policy is incompatible with the named color scheme or scale type.",
+    fix: 'Use oob "wrap" with a cyclic *O scheme. Do not set wrap on a binned color scale.',
+  },
+  "scale-cyclic-domain": {
+    tier: 1,
+    summary: "A cyclic color scheme is missing the explicit two-value domain period.",
+    fix: "Set domain to one period, for example [0, 360] for angles in degrees.",
   },
   "scale-range-color": {
     tier: 1,
