@@ -208,6 +208,12 @@ function mergeDiscrete(group: readonly DiscreteLegendInput[]): DiscreteLegendInp
     keyOf(value: unknown): LegendKeyStyle {
       const key: LegendKeyStyle = {};
       for (const input of group) Object.assign(key, input.keyOf?.(value));
+      // Paint enrichment may stamp a solid linetype fallback on colour keys.
+      // Dedicated style scales must win regardless of input order.
+      for (const input of group) {
+        if (input.scale === "color" || input.scale === "fill") continue;
+        Object.assign(key, input.keyOf?.(value));
+      }
       // Paint enrichment may stamp shape:"circle" onto colour keys. When the
       // same domain also carries linetype (line+point dual layers), keep the
       // dash pattern unless a shape scale is in the merge group — otherwise

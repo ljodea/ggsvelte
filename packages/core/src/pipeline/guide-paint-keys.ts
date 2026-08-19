@@ -10,10 +10,14 @@
  * Line-family colour keys get the same treatment: a constant or default
  * `linetype` so renderers draw a stroke segment instead of a square.
  *
- * When shape or linetype is a mapped aesthetic, leave that field alone so the
- * scale-merge path in prepareLegendInputs can supply it. Area/bar/col fill
- * keys stay squares. Do not stamp linetype onto a key that already carries
- * an agreed point shape — mergeDiscrete drops shape when both exist.
+ * When shape or linetype is a mapped aesthetic, leave the agreed-constant
+ * map empty so the scale-merge path in prepareLegendInputs can supply the
+ * scaled value. Colour keys on line-only plots still get a solid stroke
+ * fallback when merge does not set linetype (hidden or separate linetype
+ * guide). Area/bar/col fill keys stay squares. Do not stamp linetype onto
+ * a key that already carries an agreed point shape — mergeDiscrete drops
+ * shape when both exist. Two constant linetypes that conflict also get the
+ * solid fallback so the colour key stays a stroke.
  */
 import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
@@ -166,9 +170,41 @@ function agreedMarkStyle<T>(
 }
 
 /**
+ * Domain values whose colour keys should draw a stroke even when no
+ * constant linetype agreed. Only when every contributing layer is a
+ * line-family geom. A point or text layer on the same colour scale
+ * suppresses the fallback. Fill-only geoms clear aes.color, so they
+ * never join this set.
+ */
+function lineStrokeFallbackKeys(
+  relevant: readonly LayerBinding[],
+  aesthetic: "color" | "fill",
+  domain: readonly unknown[],
+): Set<string> {
+  const keys = new Set<string>();
+  for (const value of domain) {
+    let sawLine = false;
+    let sawOther = false;
+    for (const binding of relevant) {
+      if (!layerContributesPaintValue(binding, aesthetic, value)) continue;
+      if (LINE_MARK_GEOMS.has(binding.layer.geom)) sawLine = true;
+      else sawOther = true;
+    }
+    if (!sawLine || sawOther) continue;
+    try {
+      keys.add(encodeKey(value));
+    } catch {
+      // Non-encodable domain values cannot key a legend entry.
+    }
+  }
+  return keys;
+}
+
+/**
  * Enrich a discrete paint legend so each domain value carries the constant
  * point shape and/or stroke pattern of the layer(s) that paint it. No-op
- * when no mark-style layer maps the aesthetic, or when styles conflict.
+ * when no mark-style layer maps the aesthetic, or when styles conflict
+ * and no line-only stroke fallback applies.
  */
 export function enrichPaintLegendKeys(
   input: DiscreteLegendInput,
@@ -184,7 +220,13 @@ export function enrichPaintLegendKeys(
     aesthetic === "color"
       ? agreedMarkStyle(relevant, aesthetic, input.domain, layerConstantLinetype)
       : new Map<string, Linetype>();
-  if (shapeByKey.size === 0 && linetypeByKey.size === 0) return input;
+  const strokeFallback =
+    aesthetic === "color"
+      ? lineStrokeFallbackKeys(relevant, aesthetic, input.domain)
+      : new Set<string>();
+  if (shapeByKey.size === 0 && linetypeByKey.size === 0 && strokeFallback.size === 0) {
+    return input;
+  }
 
   // Capture as a free function so oxlint unbound-method does not flag the
   // method reference when we call it from the enriched keyOf.
@@ -201,9 +243,11 @@ export function enrichPaintLegendKeys(
         }
         // mergeDiscrete deletes shape when both fields exist and no shape
         // scale is merged. Skip linetype if this key already has a shape.
-        if (key.shape === undefined && key.linetype === undefined) {
-          const linetype = linetypeByKey.get(encoded);
-          if (linetype !== undefined) key.linetype = linetype;
+        // Colour-key linetype only when every contributing layer is a
+        // line-family geom. Otherwise a lone line's default solid would
+        // paint stroke keys on mixed text/point colour legends.
+        if (key.shape === undefined && key.linetype === undefined && strokeFallback.has(encoded)) {
+          key.linetype = linetypeByKey.get(encoded) ?? "solid";
         }
       } catch {
         // leave key without mark style
