@@ -108,10 +108,11 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
 
     if (typeof scheme === "string" && CYCLIC_SCHEMES.has(scheme)) {
       if (type !== undefined && type !== "sequential") {
+        const typeLabel = typeof type === "string" ? type : "this";
         errors.push({
           code: "scale-scheme-type",
           path: `/scales/${channel}/scheme`,
-          message: `The cyclic scheme "${scheme}" cannot be used with a ${String(type)} color scale.`,
+          message: `The cyclic scheme "${scheme}" cannot be used with a ${typeLabel} color scale.`,
           fix: {
             description: 'Use type "sequential" with an explicit domain period and oob "wrap".',
             example: "sequential",
