@@ -11187,6 +11187,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "scale-scheme-oob",
+        title: "scale-scheme-oob",
+        level: 3,
+      },
+      {
+        id: "scale-cyclic-domain",
+        title: "scale-cyclic-domain",
+        level: 3,
+      },
+      {
         id: "scale-range-color",
         title: "scale-range-color",
         level: 3,
@@ -12381,8 +12391,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-926",
-        title: "experimental (926)",
+        id: "experimental-927",
+        title: "experimental (927)",
         level: 3,
       },
       {
