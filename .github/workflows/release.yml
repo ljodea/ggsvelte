@@ -29,7 +29,7 @@
 #      commit is still missing from npm — no silent skips.
 #   6. changesets/action opens/updates the "Version Packages" PR when
 #      .changeset/*.md files are present (version-only — no publish script).
-#      Custom `version: bun run version` runs `changeset version` then
+#      Custom `version-script: bun run version` runs `changeset version` then
 #      sync-comparison-versions so README + docs homepage API-stability
 #      cells land at the same lockstep version as package.json.
 #      The action leaves the workspace on changeset-release/main; that is fine
@@ -177,18 +177,21 @@ jobs:
       - name: Assert every package.json version is on npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         run: bun scripts/assert-npm-published.ts
-      # Version PR only — never pass `publish` to changesets/action. Publish is
-      # a separate step so leftover changesets cannot suppress shipping
-      # already-bumped versions (the concurrent-merge race).
+      # Version PR only — never pass `publish` / `publish-script` to
+      # changesets/action. Publish is a separate step so leftover changesets
+      # cannot suppress shipping already-bumped versions (the concurrent-merge
+      # race).
       #
-      # `version: bun run version` replaces the default `changeset version`.
+      # `version-script: bun run version` replaces the default `changeset version`.
       # Root package.json's version script runs changeset version, then
       # sync-comparison-versions so the Version Packages PR also rewrites the
       # README + docs homepage API-stability cells to the just-bumped lockstep
       # version (otherwise those tables lag every release).
+      #
+      # Action v2 requires @changesets/cli v3, the version-script input name,
+      # and github-token (env.GITHUB_TOKEN is ignored).
       - name: changesets — open/update Version Packages PR
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        uses: changesets/action@198f833dd7d863100ea6e28967bc9a9fdefadb0a # v2.1.0
         with:
-          version: bun run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: bun run version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
