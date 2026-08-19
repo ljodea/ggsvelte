@@ -17,7 +17,7 @@ import {
 } from "./render-svg-panel-chrome.js";
 import { renderLegend } from "./render-svg-legend.js";
 
-function collectPaintResources(scene: Scene): {
+export function collectPaintResources(scene: Scene): {
   paints: ResolvedGradientPaint[];
   glows: ResolvedGlow[];
 } {

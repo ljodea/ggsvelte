@@ -48,6 +48,8 @@ type BenchApi = {
     libs: { id: string; browser: boolean }[];
     cases: { id: string }[];
   };
+  /** #1471: live patcher DOM ≡ fresh full render. */
+  parityLiveSvg: (caseId: string) => { equal: boolean; detail: string };
 };
 
 type Timing = { ms: number; syncMs: number };
@@ -253,6 +255,18 @@ for (const cell of matrix) {
       const w = window as unknown as { competitiveBench: BenchApi };
       w.competitiveBench.endUpdate();
     });
+    // #1471 parity gate: after timing, prove the live patcher's DOM output
+    // equals a fresh full render for this case (runs only for ggsvelte-svg;
+    // a failed gate fails the cell so regressions block the scoreboard).
+    if (cell.lib.id === "ggsvelte-svg") {
+      const parity = await page.evaluate((caseId) => {
+        const w = window as unknown as { competitiveBench: BenchApi };
+        return w.competitiveBench.parityLiveSvg(caseId);
+      }, cell.caseId);
+      if (!parity.equal) {
+        throw new Error(`live-SVG parity failed for ${cell.caseId}: ${parity.detail}`);
+      }
+    }
     results.push({
       lib: cell.lib.id,
       caseId: cell.caseId,

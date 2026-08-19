@@ -5800,6 +5800,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "runScene": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "sceneLabel": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5986,6 +5990,29 @@
           "lifecycle": "experimental"
         },
         "sizeCanvasForDpr": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
+      "package": "@ggsvelte/core",
+      "entry": "./svg-live",
+      "source": "packages/core/src/svg-live/index.ts",
+      "exports": {
+        "LiveSvgHandle": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LiveSvgOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "mountSceneSvg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneSignature": {
           "kind": "value",
           "lifecycle": "experimental"
         }

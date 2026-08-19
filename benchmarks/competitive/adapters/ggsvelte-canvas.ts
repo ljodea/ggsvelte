@@ -112,11 +112,9 @@ export function mountGgsvelteCanvas(
     if (!sized) {
       sizeCanvasForDpr(canvas, ctx, model.scene.width, model.scene.height, dpr);
       sized = true;
-    } else {
-      // Same canvas element on updates: clear the frame (logical coords — the
-      // dpr transform set by sizeCanvasForDpr persists) and redraw.
-      ctx.clearRect(0, 0, model.scene.width, model.scene.height);
     }
+    // No adapter-side clearRect: drawStratum clears the CSS-px viewport per
+    // its documented contract, so a redraw never accumulates.
     let batches = 0;
     for (const stratum of strata) {
       if (stratum.backend !== "canvas") continue;

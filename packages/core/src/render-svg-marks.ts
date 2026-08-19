@@ -33,7 +33,7 @@ import { escapeXML, px } from "./render-svg-format.js";
 /** When true, use solid paint fallbacks and skip glow filters. */
 export type PaintRenderMode = "full" | "fallback";
 
-function paintFill(
+export function paintFill(
   solid: string,
   paint: ResolvedGradientPaint | undefined,
   mode: PaintRenderMode,
@@ -42,7 +42,7 @@ function paintFill(
   return `url(#${paint.id})`;
 }
 
-function paintStroke(
+export function paintStroke(
   solid: string,
   paint: ResolvedGradientPaint | undefined,
   mode: PaintRenderMode,
