@@ -188,6 +188,108 @@ describe("responsive guide planning", () => {
     expect(svg).not.toContain('<line class="gg-legend-key"');
   });
 
+  it("keeps scaled linetype on a merged colour+linetype legend", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region", linetype: "region" }))
+      .geomLine()
+      .labs({ color: "Region", linetype: "Region" });
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.aesthetics).toEqual(["color", "linetype"]);
+    const patterns = legends[0]!.entries.map((entry) => entry.linetype);
+    expect(patterns.every((pattern) => pattern !== undefined)).toBe(true);
+    expect(new Set(patterns).size).toBeGreaterThan(1);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    expect(svg).toContain('<line class="gg-legend-key"');
+    expect(svg).not.toContain("gg-legend-swatch");
+  });
+
+  it("puts a solid stroke on colour keys when the linetype guide is hidden", () => {
+    const styled = [
+      { x: 1, y: 2, region: "North", style: "A" },
+      { x: 2, y: 4, region: "South", style: "B" },
+      { x: 3, y: 3, region: "North", style: "A" },
+    ];
+    const spec = gg(styled, aes({ x: "x", y: "y", color: "region", linetype: "style" }))
+      .geomLine()
+      .guides({ linetype: guideNone() });
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.aesthetics).toEqual(["color"]);
+    expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    expect(svg).toContain('<line class="gg-legend-key"');
+    expect(svg).not.toContain("gg-legend-swatch");
+  });
+
+  it("puts a solid stroke on colour keys when linetype has its own guide", () => {
+    const styled = [
+      { x: 1, y: 2, region: "North", style: "A" },
+      { x: 2, y: 4, region: "South", style: "B" },
+      { x: 3, y: 3, region: "North", style: "A" },
+    ];
+    const spec = gg(styled, aes({ x: "x", y: "y", color: "region", linetype: "style" })).geomLine();
+    const legends = discrete(720, spec);
+    expect(legends.map((legend) => legend.aesthetics)).toEqual([["color"], ["linetype"]]);
+    const colorLegend = legends.find((legend) => legend.aesthetics.includes("color"));
+    expect(colorLegend?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    const colorStart = svg.indexOf("gg-legend-color");
+    const linetypeStart = svg.indexOf("gg-legend-linetype");
+    expect(colorStart).toBeGreaterThan(-1);
+    expect(linetypeStart).toBeGreaterThan(-1);
+    const colorChunk =
+      colorStart < linetypeStart ? svg.slice(colorStart, linetypeStart) : svg.slice(colorStart);
+    expect(colorChunk).toContain('<line class="gg-legend-key"');
+    expect(colorChunk).not.toContain("gg-legend-swatch");
+  });
+
+  it("falls back to a solid stroke when constant linetypes conflict", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region" }))
+      .geomLine({ aes: aes({ linetype: { value: "dashed" } }) })
+      .geomLine({ aes: aes({ linetype: { value: "dotted" } }) });
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+  });
+
+  it("does not put a stroke fallback on colour keys when a point layer also maps colour", () => {
+    const styled = [
+      { x: 1, y: 2, region: "North", style: "A" },
+      { x: 2, y: 4, region: "South", style: "B" },
+      { x: 3, y: 3, region: "North", style: "A" },
+    ];
+    const spec = gg(styled, aes({ x: "x", y: "y", color: "region" }))
+      .geomPoint({ aes: aes({ shape: "style" }) })
+      .geomLine({ aes: aes({ linetype: "style" }) });
+    const colorLegend = discrete(720, spec).find((legend) => legend.aesthetics.includes("color"));
+    expect(colorLegend).toBeDefined();
+    expect(colorLegend!.entries.every((entry) => entry.linetype === undefined)).toBe(true);
+  });
+
+  it("puts a solid stroke on colour keys when linetype is a hidden scaled constant", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region" }))
+      .geomLine({
+        aes: aes({ linetype: { value: "dashed", scale: true } }),
+      })
+      .guides({ linetype: guideNone() });
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.aesthetics).toEqual(["color"]);
+    expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+  });
+
+  it("keeps colour keys as squares when a non-line layer shares the colour scale", () => {
+    // col/bar/area clear aes.color (fill-only geoms). text maps colour and is
+    // not a LINE_MARK_GEOM, so it must suppress the stroke fallback.
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region", label: "region" }))
+      .geomText()
+      .geomLine();
+    const colorLegend = discrete(720, spec).find((legend) => legend.aesthetics.includes("color"));
+    expect(colorLegend).toBeDefined();
+    expect(colorLegend!.entries.every((entry) => entry.linetype === undefined)).toBe(true);
+    expect(colorLegend!.entries.every((entry) => entry.shape === undefined)).toBe(true);
+  });
+
   it("keeps swapped per-layer aesthetic sources in separate guides", () => {
     const swappedRows = [
       { x: 1, y: 1, a: "North", b: "North" },
