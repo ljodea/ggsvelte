@@ -226,4 +226,16 @@ describe("sceneSignature — changes on topology drift", () => {
       }) as unknown as GeometryBatch;
     expect(sceneSignature(baseScene([glyphs(1)]))).not.toBe(sceneSignature(baseScene([glyphs(2)])));
   });
+
+  it("any theme token change forces a remount (patchers resolve against the new theme)", () => {
+    // Devin Review on #1662: resolving prev attrs with the NEW theme makes
+    // theme-driven colors compare equal and never write; the theme must be
+    // structural. Equal-valued theme objects must NOT remount.
+    const base = baseScene([]);
+    expect(sceneSignature(base)).toBe(sceneSignature(baseScene([])));
+    const darkInk = baseScene([], { theme: { ...resolveTheme(), ink: "#ffffff" } });
+    expect(sceneSignature(base)).not.toBe(sceneSignature(darkInk));
+    const noPanel = baseScene([], { theme: { ...resolveTheme(), panel: "none" } });
+    expect(sceneSignature(base)).not.toBe(sceneSignature(noPanel));
+  });
 });

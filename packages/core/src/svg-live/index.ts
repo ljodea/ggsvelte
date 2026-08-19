@@ -1,3 +1,4 @@
+// @lifecycle-default experimental
 /**
  * Live (patchable) SVG rendering (#1471): the incremental update path.
  *

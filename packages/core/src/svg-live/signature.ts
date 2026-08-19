@@ -88,6 +88,11 @@ export function sceneSignature(scene: Scene): string {
   const legends = scene.legends
     .map((l) => `${l.type}:${l.scale}:${l.position ?? "right"}:${l.direction ?? "vertical"}`)
     .join(";");
+  // Theme fingerprint: every token (ink/accent/paper fallbacks, fonts,
+  // panel/border presence) feeds the emitted attributes, so ANY theme change
+  // must remount — the patchers resolve both prev and next against the new
+  // theme and would otherwise keep stale colors (Devin Review #1662).
+  const theme = JSON.stringify(scene.theme);
   return [
     scene.width,
     scene.height,
@@ -95,7 +100,7 @@ export function sceneSignature(scene: Scene): string {
     scene.title === "" ? 0 : 1,
     scene.subtitle === "" ? 0 : 1,
     scene.caption === "" ? 0 : 1,
-    scene.theme.paper === "none" ? 0 : 1,
+    theme,
     scene.axes.x.title === "" ? 0 : 1,
     scene.axes.y.title === "" ? 0 : 1,
     panels,

@@ -5996,6 +5996,29 @@
       }
     },
     {
+      "package": "@ggsvelte/core",
+      "entry": "./svg-live",
+      "source": "packages/core/src/svg-live/index.ts",
+      "exports": {
+        "LiveSvgHandle": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LiveSvgOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "mountSceneSvg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneSignature": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
       "package": "@ggsvelte/svelte",
       "entry": ".",
       "source": "packages/svelte/src/lib/index.ts",
