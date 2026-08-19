@@ -149,7 +149,7 @@ describe("release wiring auto-bumps comparison tables on Version Packages", () =
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
       scripts: Record<string, string>;
     };
-    // changesets/action `version:` replaces `changeset version`; the custom
+    // changesets/action `version-script:` replaces `changeset version`; the custom
     // script must call it, then rewrite README + docs projection.
     expect(pkg.scripts["version"]).toMatch(/changeset version/);
     expect(pkg.scripts["version"]).toContain("sync-comparison-versions");
@@ -167,7 +167,8 @@ describe("release wiring auto-bumps comparison tables on Version Packages", () =
     const nextStep = yml.indexOf("\n      - ", stepAt + 1);
     const step = nextStep === -1 ? yml.slice(stepAt) : yml.slice(stepAt, nextStep);
     expect(step).toContain("changesets/action@");
-    // Custom version input — not the default bare `changeset version`.
-    expect(step).toMatch(/version:\s*bun run version/);
+    // Custom version-script input (action v2) — not the default bare `changeset version`.
+    expect(step).toMatch(/version-script:\s*bun run version/);
+    expect(step).not.toMatch(/^\s+version:\s/m);
   });
 });

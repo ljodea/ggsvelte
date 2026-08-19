@@ -561,11 +561,19 @@ describe("R0 release wiring", () => {
 
   it("versions only publishable packages", () => {
     const config = JSON.parse(read(".changeset/config.json")) as {
+      $schema?: string;
+      format?: string | false;
+      ignore?: string[];
       fixed?: string[][];
       linked?: string[][];
       privatePackages?: boolean | { version?: boolean; tag?: boolean };
     };
     expect(config.privatePackages).toBe(false);
+    // CLI v3 `format: auto` can pick oxfmt (also installed). Prettier is the
+    // documented markdown formatter, so keep changelog generation on it.
+    expect(config.format).toBe("prettier");
+    expect(config.$schema).toContain("@changesets/config@4.0.0");
+    expect(config.ignore).toEqual(["@ggsvelte-spike/*"]);
     // fixed (not linked): any release bumps all five so package-identity
     // lockstep versions stay equal even when only one package has a changeset.
     expect(config.fixed).toEqual([
@@ -856,6 +864,29 @@ it("uses job-private Bun caches across CI workflows (issue #319)", () => {
 
 describe("release.yml concurrent-merge race recovery", () => {
   const release = () => read(".github/workflows/release.yml");
+  // Peeled v2.1.0 tag → commit (changesets/action@v2.1.0). Verified against
+  // the annotated tag object, not copied from Dependabot #1655 alone.
+  const CHANGESETS_ACTION_V2 = "changesets/action@198f833dd7d863100ea6e28967bc9a9fdefadb0a";
+
+  type ReleaseStep = {
+    name?: string;
+    uses?: string;
+    with?: Record<string, string>;
+    env?: Record<string, string>;
+  };
+
+  function versionPackagesStep(): ReleaseStep {
+    const workflow = Bun.YAML.parse(release()) as {
+      jobs?: { release?: { steps?: ReleaseStep[] } };
+    };
+    const step = workflow.jobs?.release?.steps?.find(
+      (candidate) => candidate.name === "changesets — open/update Version Packages PR",
+    );
+    if (step === undefined) {
+      throw new Error("release.yml is missing the Version Packages step");
+    }
+    return step;
+  }
 
   it("queues releases and never cancels an in-flight publish", () => {
     const yml = release();
@@ -867,13 +898,34 @@ describe("release.yml concurrent-merge race recovery", () => {
     // changesets/action is either/or: any leftover .changeset/*.md makes it
     // skip publish while staying green. Publish lives in a separate step so
     // concurrent feature merges cannot suppress shipping already-bumped versions.
-    const yml = release();
-    expect(yml).toContain("changesets/action@");
-    expect(yml).toContain("changesets — open/update Version Packages PR");
-    // No changesets/action `publish:` input anywhere in the workflow. The
-    // publish command lives only in publish-unpublished.ts.
-    expect(yml).not.toMatch(/publish:\s*bun node_modules/);
-    expect(yml).not.toMatch(/publish:\s*changeset/);
+    const step = versionPackagesStep();
+    expect(step.uses).toStartWith("changesets/action@");
+    expect(step.with ?? {}).not.toHaveProperty("publish");
+    expect(step.with ?? {}).not.toHaveProperty("publish-script");
+  });
+
+  it("wires changesets/action v2 with version-script and github-token", () => {
+    // Action v2 ignores the v1 `version` input and no longer reads env.GITHUB_TOKEN.
+    // github-token is the required input. This does not claim the action scrubs
+    // INPUT_GITHUB_TOKEN before it runs `bun run version`.
+    const step = versionPackagesStep();
+    expect(step.uses).toBe(CHANGESETS_ACTION_V2);
+    expect(step.with).toEqual({
+      "version-script": "bun run version",
+      "github-token": "${{ secrets.GITHUB_TOKEN }}",
+    });
+    expect(step.env).toBeUndefined();
+  });
+
+  it("pins @changesets/cli 3 so action v2 can run", () => {
+    const pkg = JSON.parse(read("package.json")) as {
+      devDependencies: Record<string, string>;
+    };
+    const cli = pkg.devDependencies["@changesets/cli"];
+    expect(cli).toBe("3.0.0");
+    expect(read("CONTRIBUTING.md")).toMatch(
+      new RegExp(String.raw`\|\s*@changesets/cli\s+\|\s*${cli}\s+\|`),
+    );
   });
 
   it("publishes, stages, tags, and asserts on the main tip before the version-PR step", () => {
