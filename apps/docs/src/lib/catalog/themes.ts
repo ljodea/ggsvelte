@@ -87,6 +87,28 @@ const PALETTE_LABELS = {
   hue: "Hue",
   // ColorBrewer qualitative (#825) — keep the upstream palette names.
   Dark2: "Dark2",
+  // Crameri categorical *S (v8.0.1) — keep the official names.
+  actonS: "actonS",
+  bamakoS: "bamakoS",
+  batlowS: "batlowS",
+  batlowWS: "batlowWS",
+  batlowKS: "batlowKS",
+  bilbaoS: "bilbaoS",
+  budaS: "budaS",
+  davosS: "davosS",
+  devonS: "devonS",
+  glasgowS: "glasgowS",
+  grayCS: "grayCS",
+  hawaiiS: "hawaiiS",
+  imolaS: "imolaS",
+  lajollaS: "lajollaS",
+  lapazS: "lapazS",
+  lipariS: "lipariS",
+  naviaS: "naviaS",
+  nuukS: "nuukS",
+  osloS: "osloS",
+  tokyoS: "tokyoS",
+  turkuS: "turkuS",
 } as const satisfies Record<PaletteOptionName, string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */
