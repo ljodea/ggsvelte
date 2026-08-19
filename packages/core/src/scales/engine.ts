@@ -78,7 +78,7 @@ export function continuousSchemeRamp(name: string | undefined): readonly string[
 }
 
 /** Sequential + cyclic Crameri ramps. Cyclic names are excluded from ordinal sampling. */
-export function sequentialOrCyclicRamp(name: string | undefined): readonly string[] | undefined {
+function sequentialOrCyclicRamp(name: string | undefined): readonly string[] | undefined {
   if (name === undefined) return undefined;
   return sequentialSchemeRamp(name) ?? crameriRampStops(name);
 }
