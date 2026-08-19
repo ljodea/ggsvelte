@@ -101,6 +101,93 @@ describe("responsive guide planning", () => {
     expect(legends[0]?.entries.every((entry) => entry.shape === undefined)).toBe(true);
   });
 
+  it("puts a solid stroke on colour legend keys for geomLine", () => {
+    // Colour scale alone used to draw filled squares. A line layer must show
+    // stroke segments so colourblind readers can match keys to marks.
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region" })).geomLine();
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    expect(svg).toContain('<line class="gg-legend-key"');
+    expect(svg).not.toContain("gg-legend-swatch");
+  });
+
+  it("puts a constant aes linetype on colour legend keys for geomLine", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region" })).geomLine({
+      aes: aes({ linetype: { value: "dashed" } }),
+    });
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["dashed", "dashed"]);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    expect(svg).toContain('<line class="gg-legend-key"');
+    expect(svg).toContain('stroke-dasharray="6 4"');
+    expect(svg).not.toContain("gg-legend-swatch");
+  });
+
+  it("uses per-layer linetypes when scaled colour constants share one colour scale", () => {
+    // Two line layers, each a scaled colour constant with its own stroke
+    // pattern — same shape as Deaths circle / Pumps cross for points.
+    const legends = discrete(
+      720,
+      gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))
+        .geomLine({
+          aes: aes({ color: { value: "Observed", scale: true } }),
+        })
+        .geomLine({
+          data: [{ x: 2, y: 2 }],
+          aes: aes({
+            x: "x",
+            y: "y",
+            color: { value: "Forecast", scale: true },
+            linetype: { value: "dashed" },
+          }),
+        })
+        .scales({
+          color: {
+            type: "manual",
+            domain: ["Observed", "Forecast"],
+            range: ["#1e293b", "#b91c1c"],
+          },
+        }),
+    );
+    expect(legends).toHaveLength(1);
+    const byValue = Object.fromEntries(
+      legends[0]!.entries.map((entry) => [String(entry.value), entry.linetype]),
+    );
+    expect(byValue).toEqual({ Observed: "solid", Forecast: "dashed" });
+  });
+
+  it("puts stroke keys on colour legends for geomPath and geomStep", () => {
+    for (const layer of [
+      (plot: ReturnType<typeof gg>) => plot.geomPath(),
+      (plot: ReturnType<typeof gg>) => plot.geomStep(),
+    ]) {
+      const spec = layer(gg(rows, aes({ x: "x", y: "y", color: "region" })));
+      const legends = discrete(720, spec);
+      expect(legends[0]?.entries.map((entry) => entry.linetype)).toEqual(["solid", "solid"]);
+      const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+      expect(svg).toContain('<line class="gg-legend-key"');
+      expect(svg).not.toContain("gg-legend-swatch");
+    }
+  });
+
+  it("keeps point shapes on mixed point+line colour keys", () => {
+    // mergeDiscrete deletes shape when a key also has linetype and no shape
+    // scale is merged. A colour-only point+line plot must keep the point key.
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region" }))
+      .geomPoint({ shape: "square" })
+      .geomLine();
+    const legends = discrete(720, spec);
+    expect(legends).toHaveLength(1);
+    expect(legends[0]?.entries.map((entry) => entry.shape)).toEqual(["square", "square"]);
+    expect(legends[0]?.entries.every((entry) => entry.linetype === undefined)).toBe(true);
+    const svg = renderToSVGString(spec.spec(), { width: 720, height: 360 });
+    expect(svg).toContain("gg-shape-square");
+    expect(svg).not.toContain('<line class="gg-legend-key"');
+  });
+
   it("keeps swapped per-layer aesthetic sources in separate guides", () => {
     const swappedRows = [
       { x: 1, y: 1, a: "North", b: "North" },
