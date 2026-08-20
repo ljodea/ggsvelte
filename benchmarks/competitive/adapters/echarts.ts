@@ -95,9 +95,9 @@ export function mountEcharts(
           chart.dispose();
         },
         update: (d) => {
-          // Series count is stable across update variants (rotated cls labels
-          // are the same set), so index-merge setOption replaces the data.
-          chart.setOption(optionFor(d as ScatterColumns));
+          // Replace the complete series array so rotated categorical labels
+          // cannot leave stale ECharts series behind.
+          chart.setOption(optionFor(d as ScatterColumns), { replaceMerge: ["series"] });
         },
       },
     };
@@ -135,7 +135,7 @@ export function mountEcharts(
           chart.dispose();
         },
         update: (d) => {
-          chart.setOption(optionFor(d as BarsColumns));
+          chart.setOption(optionFor(d as BarsColumns), { replaceMerge: ["series"] });
         },
       },
     };
@@ -168,7 +168,7 @@ export function mountEcharts(
         chart.dispose();
       },
       update: (d) => {
-        chart.setOption(optionFor(d as SeriesColumns));
+        chart.setOption(optionFor(d as SeriesColumns), { replaceMerge: ["series"] });
       },
     },
   };

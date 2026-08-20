@@ -12,26 +12,10 @@
     {
       "ggsvelte": "ggsvelte-svg",
       "peer": "layercake",
-      "caseId": "scatter-color-10k",
+      "caseId": "line-3x1k",
       "kind": "update",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "VOID COMPARISON pending #1486: the layercake fixture's setRows does not propagate into LayerCake's legacy data stores - its update leaves the DOM pixel-identical (verified via DOM/pixel probes; its ~41ms total is pure Svelte row-diffing with zero visual effect). ggsvelte now patches in place (56.7ms total / 20.2ms sync vs 73.8/42.4 pre-#1471); real peers lose (d3 join 75.4ms, tanstack-svelte 137ms). Re-evaluate once the fixture actually re-renders."
-    },
-    {
-      "ggsvelte": "ggsvelte-svg",
-      "peer": "layercake",
-      "caseId": "line-3x10k",
-      "kind": "update",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "VOID COMPARISON pending #1486: layercake SVG line update is a no-op (path d identical before/after; DOM probe-verified). ggsvelte patches in place at 40.1ms total / 9.4ms sync (was 40.3/18.9 pre-#1471). Re-evaluate once the fixture actually re-renders."
-    },
-    {
-      "ggsvelte": "ggsvelte-svg",
-      "peer": "unovis",
-      "caseId": "scatter-color-10k",
-      "kind": "update",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "REAL gap, still open: Unovis setData is a lean canvas-class redraw (18.4ms total, RasterTask ~19.7ms in trace) vs our in-place SVG patch (56.7ms). 10k live SVG nodes have a Chromium style-recalc/paint floor SVG cannot beat; canvas-class rendering wins at 10k points. The ggsvelte-canvas form (19.8ms) matches it."
+      "note": "REAL short-cell gap after the truthful update repair: five fresh processes measured median-of-medians 8.9ms vs LayerCake 6.4ms. The absolute gap is ~2.5ms but exceeded the gate in all five runs; keep tracked until a runtime angle closes it."
     },
     {
       "ggsvelte": "ggsvelte-svg",
@@ -39,15 +23,7 @@
       "caseId": "bars-stacked-50x4",
       "kind": "update",
       "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "VOID COMPARISON pending #1486: layercake bar update is a no-op (DOM probe-verified). ggsvelte patches in place at 7.6ms total / 3.4ms sync. Re-evaluate once the fixture actually re-renders."
-    },
-    {
-      "ggsvelte": "ggsvelte-canvas",
-      "peer": "layercake-canvas",
-      "caseId": "line-3x10k",
-      "kind": "update",
-      "issue": "https://github.com/ljodea/ggsvelte/issues/1471",
-      "note": "VOID COMPARISON pending #1486: layercake-canvas update is a no-op (canvas pixel dataURL identical before/after, probe-verified). ggsvelte-canvas redraws for real at 44.4ms total / 5.9ms sync (single clearRect after #1471 cleanup). Re-evaluate once the fixture actually re-renders."
+      "note": "REAL short-cell gap after the truthful update repair: current full-matrix medians are 7.1ms vs LayerCake 4.2ms. Both paths visibly mutate and reach fresh-final parity."
     }
   ],
   "budgets": {

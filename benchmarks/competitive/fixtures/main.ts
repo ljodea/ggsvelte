@@ -3,6 +3,7 @@
  *   window.competitiveBench.mount(lib, caseId) -> { ms, syncMs, markHint }
  *   window.competitiveBench.replace(lib, caseId) -> { ms }  // full remount with fresh data seed
  *   window.competitiveBench.update(lib, caseId) -> { ms, syncMs } // IN-PLACE update
+ *   window.competitiveBench.verifyUpdate(lib, caseId)             // mutation + fresh parity
  *   window.competitiveBench.endUpdate()                    // teardown the live update cell
  *   window.competitiveBench.list() -> { libs, cases }
  *   window.competitiveBench.clear()
@@ -43,15 +44,19 @@ import {
   CASES,
   dataForCase,
   LIBS,
+  perturbForUpdate,
   type BarsColumns,
   type LibId,
   type ScenarioCase,
   type ScenarioId,
   type ScatterColumns,
   type SeriesColumns,
+  type UpdateColumns,
 } from "../scenarios";
 
-type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+const ggplotAdapter = new URLSearchParams(location.search).has("ggplot")
+  ? await import("../adapters/ggsvelte-ggplot")
+  : null;
 
 registerBasicPoints();
 registerBasicLines();
@@ -103,48 +108,6 @@ function endUpdate(): void {
     }
     updateSlot = null;
   }
-}
-
-/** Rotate a trailing numeric label suffix ("series-3" / "stack-1") by shift.
- * Deterministic; the label SET stays identical so per-name color domains and
- * series counts don't change across update variants. */
-function rotateLabel(label: string, shift: number, count: number): string {
-  const m = /^(.*?)(\d+)$/.exec(label);
-  if (m === null || count <= 0) return label;
-  const idx = (Number.parseInt(m[2]!, 10) + shift) % count;
-  return `${m[1]}${idx}`;
-}
-
-/**
- * Deterministic perturbation of the mount dataset for the update scoreboard:
- * same shape/size, different values (y' = y*0.9 + 5*variant), cls/stack
- * labels rotated by the variant. Two variants alternate across successive
- * update calls so no lib can no-op on identical data. Series names for
- * line/area stay stable (uPlot/Chart.js series counts are fixed at mount).
- */
-function perturbed(data: UpdateColumns, variant: 1 | 2): UpdateColumns {
-  const bump = variant * 5;
-  if ("cls" in data) {
-    const classes = new Set(data.cls).size;
-    return {
-      x: data.x,
-      y: data.y.map((v) => v * 0.9 + bump),
-      cls: data.cls.map((c) => rotateLabel(c, variant, classes)),
-    };
-  }
-  if ("series" in data) {
-    return {
-      x: data.x,
-      y: data.y.map((v) => v * 0.9 + bump),
-      series: data.series,
-    };
-  }
-  const stacks = new Set(data.stack).size;
-  return {
-    category: data.category,
-    value: data.value.map((v) => v * 0.9 + bump),
-    stack: data.stack.map((s) => rotateLabel(s, variant, stacks)),
-  };
 }
 
 async function afterPaint(): Promise<void> {
@@ -204,6 +167,10 @@ function mountSync(
       const r = mountTanstackReact(scenario, data, root);
       return { markHint: r.markHint, handle: r.handle };
     }
+    case "ggsvelte-ggplot": {
+      if (ggplotAdapter === null) throw new Error("ggsvelte-ggplot is not loaded");
+      return ggplotAdapter.mountGgsvelteGgplot(scenario, data as ScatterColumns, root);
+    }
     default:
       throw new Error(
         `lib ${lib} has no browser harness (bundle-only peer — see scenarios.ts LIBS)`,
@@ -218,7 +185,9 @@ async function mountLib(
   const c = caseById(caseId);
   const meta = LIBS.find((l) => l.id === lib);
   if (meta === undefined) throw new Error(`unknown lib ${lib}`);
-  if (!meta.browser) throw new Error(`${lib} is bundle-only in this harness`);
+  if (!meta.browser && !(lib === "ggsvelte-ggplot" && ggplotAdapter !== null)) {
+    throw new Error(`${lib} is bundle-only in this harness`);
+  }
   if (!meta.scenarios.includes(c.scenario)) {
     throw new Error(`${lib} does not support scenario ${c.scenario}`);
   }
@@ -261,7 +230,9 @@ async function updateLib(lib: string, caseId: string): Promise<{ ms: number; syn
     const c = caseById(caseId);
     const meta = LIBS.find((l) => l.id === lib);
     if (meta === undefined) throw new Error(`unknown lib ${lib}`);
-    if (!meta.browser) throw new Error(`${lib} is bundle-only in this harness`);
+    if (!meta.browser && !(lib === "ggsvelte-ggplot" && ggplotAdapter !== null)) {
+      throw new Error(`${lib} is bundle-only in this harness`);
+    }
     if (!meta.scenarios.includes(c.scenario)) {
       throw new Error(`${lib} does not support scenario ${c.scenario}`);
     }
@@ -279,7 +250,7 @@ async function updateLib(lib: string, caseId: string): Promise<{ ms: number; syn
   const slot = updateSlot;
   slot.calls += 1;
   const variant = (slot.calls % 2 === 1 ? 1 : 2) as 1 | 2;
-  const next = perturbed(slot.caseData, variant);
+  const next = perturbForUpdate(slot.caseData, variant);
   const status = document.querySelector("#status") as HTMLElement;
   const t0 = performance.now();
   slot.handle.update(next);
@@ -294,6 +265,143 @@ function clearMount(): void {
   endUpdate();
   destroyLive();
   document.querySelector("#mount")?.replaceChildren();
+}
+
+type UpdateVerification = {
+  equal: boolean;
+  detail: string;
+  mutated: boolean;
+};
+
+function canonicalDom(root: HTMLElement): string {
+  const clone = root.cloneNode(true) as HTMLElement;
+  // Transition helpers can retain stale geometry in zero-opacity exit nodes.
+  // They are not visible output and must not make mutation/fresh parity fail.
+  for (const el of clone.querySelectorAll<HTMLElement | SVGElement>("[style]")) {
+    const style = el.getAttribute("style") ?? "";
+    if (/(?:^|;)\s*opacity\s*:\s*0(?:\s*;|\s*$)/.test(style)) el.remove();
+  }
+  const ids = new Map<string, string>();
+  let nextId = 0;
+  for (const el of clone.querySelectorAll("[id]")) {
+    const id = el.getAttribute("id");
+    if (id !== null) ids.set(id, `__id_${nextId++}__`);
+  }
+  // Replace longer ids first so `#foo` cannot corrupt a `#foobar` reference.
+  const idReplacements = [...ids].sort(([left], [right]) => right.length - left.length);
+  for (const el of clone.querySelectorAll("*")) {
+    for (const attr of Array.from(el.attributes)) {
+      let value = attr.value;
+      for (const [id, replacement] of idReplacements) {
+        if (attr.name === "id" && value === id) value = replacement;
+        value = value.replaceAll(`url(#${id})`, `url(#${replacement})`);
+        // Unovis embeds the document URL before the fragment in clip-path
+        // styles (`url(http://host/page#generated-id)`). Normalize that form
+        // as well as local `url(#generated-id)` references.
+        value = value.replaceAll(`#${id}`, `#${replacement}`);
+        if ((attr.localName === "href" || attr.name.startsWith("aria-")) && value === `#${id}`) {
+          value = `#${replacement}`;
+        }
+        if (attr.name === "aria-labelledby" || attr.name === "aria-describedby") {
+          value = value
+            .split(/\s+/)
+            .map((token) => (token === id ? replacement : token))
+            .join(" ");
+        }
+      }
+      if (value !== attr.value) el.setAttributeNS(attr.namespaceURI, attr.name, value);
+    }
+  }
+  for (const canvas of clone.querySelectorAll("canvas")) canvas.textContent = "";
+  return clone.innerHTML;
+}
+
+function canvasPixelHash(root: HTMLElement): string {
+  let hash = 0x811c9dc5;
+  let count = 0;
+  for (const canvas of root.querySelectorAll("canvas")) {
+    const context = canvas.getContext("2d");
+    if (context === null) continue;
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    count += 1;
+    for (const byte of pixels) {
+      hash ^= byte;
+      hash = Math.imul(hash, 0x01000193);
+    }
+  }
+  return `${count}:${(hash >>> 0).toString(16)}`;
+}
+
+function visibleSnapshot(root: HTMLElement): string {
+  const canvas = canvasPixelHash(root);
+  return canvas.startsWith("0:") ? canonicalDom(root) : `canvas:${canvas}`;
+}
+
+function verificationRoot(): HTMLElement {
+  const root = document.createElement("div");
+  root.style.cssText =
+    "position:fixed;left:-10000px;top:0;width:800px;height:500px;visibility:hidden";
+  document.body.appendChild(root);
+  return root;
+}
+
+/**
+ * Update truth gate: the same mounted chart must visibly change between the
+ * two benchmark variants, and its final output must equal a fresh mount of
+ * the second variant. It uses the benchmark's exact update + double-rAF wait.
+ */
+async function verifyUpdate(lib: string, caseId: string): Promise<UpdateVerification> {
+  const c = caseById(caseId);
+  const data = dataForCase(c);
+  const first = perturbForUpdate(data, 1);
+  const final = perturbForUpdate(data, 2);
+  const updatedRoot = verificationRoot();
+  const freshRoot = verificationRoot();
+  let updated: MountHandle | undefined;
+  let fresh: MountHandle | undefined;
+  try {
+    const mounted = mountSync(lib as LibId, c.scenario, data, updatedRoot);
+    updated = mounted.handle;
+    if (updated?.update === undefined) {
+      return { equal: false, mutated: false, detail: `${lib} has no in-place update path` };
+    }
+    await afterPaint();
+    updated.update(first);
+    await afterPaint();
+    const firstSnapshot = visibleSnapshot(updatedRoot);
+    updated.update(final);
+    await afterPaint();
+    const finalSnapshot = visibleSnapshot(updatedRoot);
+    const freshMounted = mountSync(lib as LibId, c.scenario, final, freshRoot);
+    fresh = freshMounted.handle;
+    await afterPaint();
+    const freshSnapshot = visibleSnapshot(freshRoot);
+    const mutated = firstSnapshot !== finalSnapshot;
+    const equal = finalSnapshot === freshSnapshot;
+    const diffAt = equal
+      ? -1
+      : Array.from({ length: Math.max(finalSnapshot.length, freshSnapshot.length) }).findIndex(
+          (_, index) => finalSnapshot[index] !== freshSnapshot[index],
+        );
+    const parityDetail =
+      diffAt < 0
+        ? "updated final output differs from a fresh final-data mount"
+        : `updated/fresh differ at ${diffAt}: ${JSON.stringify(finalSnapshot.slice(diffAt, diffAt + 120))} vs ${JSON.stringify(freshSnapshot.slice(diffAt, diffAt + 120))}`;
+    return {
+      equal: mutated && equal,
+      mutated,
+      detail: !mutated
+        ? "variant 1 and variant 2 produced identical visible output"
+        : equal
+          ? "updated output changed and equals a fresh final-data mount"
+          : parityDetail,
+    };
+  } finally {
+    updated?.destroy();
+    fresh?.destroy();
+    updatedRoot.remove();
+    freshRoot.remove();
+  }
 }
 
 /**
@@ -311,8 +419,8 @@ function parityLiveSvg(caseId: string): { equal: boolean; detail: string } {
   const rootA = document.createElement("div");
   const rootB = document.createElement("div");
   const a = mountGgsvelteSvg(c.scenario, data, rootA);
-  const finalData = perturbed(data, 2);
-  a.handle.update?.(perturbed(data, 1));
+  const finalData = perturbForUpdate(data, 2);
+  a.handle.update?.(perturbForUpdate(data, 1));
   a.handle.update?.(finalData);
   const b = mountGgsvelteSvg(c.scenario, finalData, rootB);
   const elA = rootA.firstElementChild;
@@ -373,7 +481,7 @@ function listCatalog(): {
   return {
     libs: LIBS.map((l) => ({
       id: l.id,
-      browser: l.browser,
+      browser: l.browser || (l.id === "ggsvelte-ggplot" && ggplotAdapter !== null),
       scenarios: [...l.scenarios],
     })),
     cases: CASES.map((c) => ({
@@ -397,6 +505,8 @@ declare global {
       list: typeof listCatalog;
       /** Live-SVG patcher parity gate (#1471). */
       parityLiveSvg: typeof parityLiveSvg;
+      /** Every timed update mutates output and reaches fresh-final parity. */
+      verifyUpdate: typeof verifyUpdate;
     };
   }
 }
@@ -409,4 +519,5 @@ window.competitiveBench = {
   clear: clearMount,
   list: listCatalog,
   parityLiveSvg,
+  verifyUpdate,
 };

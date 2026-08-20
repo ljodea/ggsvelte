@@ -15,14 +15,15 @@
     width,
     height,
   }: { rows: Row[]; width: number; height: number } = $props();
-  // Plain-props mount (zero proxy cost); updates flow through the exported
-  // setRows — component exports land on the object returned by svelte's
-  // mount(). $state.raw: 30k-row datasets must NOT be deep-proxied.
+  // svelte-ignore state_referenced_locally
   let rows = $state.raw(initialRows);
   export function setRows(next: Row[]) {
     rows = next;
   }
-
+  const onRenderComplete = $derived.by(() => {
+    void rows;
+    return () => {};
+  });
   const classColor = new Map<string, string>(
     ["series-0", "series-1", "series-2", "series-3", "series-4"].map(
       (name, i) => [name, COLORS[i % COLORS.length]!],
@@ -34,9 +35,9 @@
 </script>
 
 <div style="width:{width}px; height:{height}px; position:relative;">
-  <VisXYContainer data={rows} {width} {height}>
-    <VisScatter {x} {y} {color} size={3} />
-    <VisAxis type="x" />
-    <VisAxis type="y" />
+  <VisXYContainer data={rows} {width} {height} duration={0} {onRenderComplete}>
+    <VisScatter {x} {y} {color} size={3} duration={0} />
+    <VisAxis type="x" duration={0} />
+    <VisAxis type="y" duration={0} />
   </VisXYContainer>
 </div>
