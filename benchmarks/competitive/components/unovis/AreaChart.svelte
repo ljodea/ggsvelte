@@ -15,7 +15,7 @@
 
   let {
     rows: initialRows,
-    seriesNames: names,
+    seriesNames,
     width,
     height,
   }: {
@@ -24,25 +24,34 @@
     width: number;
     height: number;
   } = $props();
+  // svelte-ignore state_referenced_locally
   let rows = $state.raw(initialRows);
   export function setRows(next: WideRow[]) {
     rows = next;
   }
-
+  // @unovis/svelte sets changed data with preventRender=true. Changing a
+  // non-visual container callback makes that wrapper schedule the same chart's
+  // render after it has installed the new rows.
+  const onRenderComplete = $derived.by(() => {
+    void rows;
+    return () => {};
+  });
   const x = (d: WideRow) => d.x;
-  const series = names.map((name, i) => ({
-    name,
-    y: (d: WideRow) => d[name] ?? 0,
-    color: COLORS[i % COLORS.length]!,
-  }));
+  const series = $derived(
+    seriesNames.map((name, i) => ({
+      name,
+      y: (d: WideRow) => d[name] ?? 0,
+      color: COLORS[i % COLORS.length]!,
+    })),
+  );
 </script>
 
 <div style="width:{width}px; height:{height}px; position:relative;">
-  <VisXYContainer data={rows} {width} {height}>
+  <VisXYContainer data={rows} {width} {height} duration={0} {onRenderComplete}>
     {#each series as s (s.name)}
-      <VisArea {x} y={s.y} color={s.color} opacity={0.4} />
+      <VisArea {x} y={s.y} color={s.color} opacity={0.4} duration={0} />
     {/each}
-    <VisAxis type="x" />
-    <VisAxis type="y" />
+    <VisAxis type="x" duration={0} />
+    <VisAxis type="y" duration={0} />
   </VisXYContainer>
 </div>

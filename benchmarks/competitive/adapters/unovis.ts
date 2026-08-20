@@ -80,6 +80,9 @@ function pivotBars(d: BarsColumns): { rows: WideRow[]; stackNames: string[] } {
       stackNames.push(s);
     }
   }
+  // Preserve stack/color order across update variants. The perturbation
+  // rotates label encounter order to catch stale categorical mappings.
+  stackNames.sort();
   const rows: WideRow[] = categories.map((_, i) => {
     const row: WideRow = { x: i };
     for (const s of stackNames) row[s] = 0;

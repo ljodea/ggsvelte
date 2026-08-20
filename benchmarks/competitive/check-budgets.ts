@@ -19,9 +19,9 @@
  *      breaks.
  *   3. Known gaps (budgets.json "knownGaps"): explicit, issue-tracked
  *      exemptions to the relative gate. The ratchet is self-destructing —
- *      if a listed gap CLOSES (ggsvelte median <= peer median), the check
+ *      if a listed gap CLOSES beyond the short-cell noise margin, the check
  *      FAILS until the exemption is removed, so the gate tightens
- *      automatically as gaps are fixed.
+ *      automatically as gaps are fixed without flapping on jitter.
  *
  * Cell lists are data-driven from results/browser.json: peers gaining new
  * cells (area, bars, ...) are picked up automatically.
@@ -37,6 +37,8 @@ interface BrowserResult {
   ok: boolean;
   mountMedianMs?: number;
   updateMedianMs?: number;
+  mountSyncMedianMs?: number;
+  updateSyncMedianMs?: number;
   error?: string;
 }
 
@@ -44,6 +46,7 @@ interface BrowserFile {
   generatedAt?: string;
   /** Set by measure-browser when in-place update medians were measured. */
   measuresUpdate?: boolean;
+  measuresSync?: boolean;
   results: BrowserResult[];
 }
 
@@ -78,12 +81,15 @@ const FORM_BY_LIB = new Map(LIBS.map((l) => [l.id, l.form] as const));
 const MAX_RELATIVE_RATIO = 1.0;
 /** Short-cell tolerance: unthrottled double-rAF totals still include host and
  * compositor scheduling, so near-equal medians can cross a strict 1.0 ratio.
- * The paired sync medians attribute that noise but do not replace the total
- * end-to-end gate; repeat dense contested cells before changing an exemption. */
+ * The paired sync medians corroborate a total-time loss before CI fails;
+ * repeat dense contested cells before changing an exemption. */
 const REL_EPS = 0.02;
 const ABS_EPS_MS = 2;
 const withinGate = (ggMs: number, peerMs: number) =>
   ggMs <= peerMs * (MAX_RELATIVE_RATIO + REL_EPS) + ABS_EPS_MS;
+/** A known gap closes only after ggsvelte wins beyond the same noise margin. */
+const clearlyBeats = (ggMs: number, peerMs: number) =>
+  ggMs * (MAX_RELATIVE_RATIO + REL_EPS) + ABS_EPS_MS <= peerMs;
 
 function fail(message: string): never {
   console.error(`check-budgets: ${message}`);
@@ -118,11 +124,16 @@ if (!Array.isArray(browserJson.results) || browserJson.results.length === 0) {
 }
 const results = browserJson.results;
 const measuresUpdate = browserJson.measuresUpdate === true;
+if (browserJson.measuresSync !== true) {
+  fail("results/browser.json has no paired sync measurements — rerun `bun run measure:browser`");
+}
 
 type Kind = "mount" | "update";
 const KINDS: readonly Kind[] = measuresUpdate ? ["mount", "update"] : ["mount"];
 const medianOf = (r: BrowserResult, kind: Kind): number | undefined =>
   kind === "mount" ? r.mountMedianMs : r.updateMedianMs;
+const syncMedianOf = (r: BrowserResult, kind: Kind): number | undefined =>
+  kind === "mount" ? r.mountSyncMedianMs : r.updateSyncMedianMs;
 
 for (const r of results) {
   if (typeof r.lib !== "string" || typeof r.caseId !== "string" || typeof r.ok !== "boolean") {
@@ -135,6 +146,10 @@ for (const r of results) {
     const v = medianOf(r, kind);
     if (r.ok && (typeof v !== "number" || !Number.isFinite(v))) {
       fail(`ok result missing ${kind} median: ${JSON.stringify(r)}`);
+    }
+    const sync = syncMedianOf(r, kind);
+    if (r.ok && (typeof sync !== "number" || !Number.isFinite(sync))) {
+      fail(`ok result missing ${kind} sync median: ${JSON.stringify(r)}`);
     }
   }
 }
@@ -260,6 +275,8 @@ type Comparison = {
   ggMs: number;
   peerMs: number;
   ratio: number;
+  totalPass: boolean;
+  syncPass: boolean;
   pass: boolean;
   /** Same-form peer pair that is GATED, vs cross-form context that is not. */
   gated: boolean;
@@ -274,7 +291,11 @@ for (const gg of okGgsvelte) {
       const ggMs = medianOf(gg, kind)!;
       const peerMs = medianOf(peer, kind)!;
       const ratio = ggMs / peerMs;
-      const pass = withinGate(ggMs, peerMs);
+      const totalPass = withinGate(ggMs, peerMs);
+      const syncPass = withinGate(syncMedianOf(gg, kind)!, syncMedianOf(peer, kind)!);
+      // A total-only miss can be frame/compositor scheduling drift. Require
+      // the paired synchronous phase to corroborate it before failing CI.
+      const pass = totalPass || syncPass;
       const gap = knownGaps.find(
         (g) =>
           g.ggsvelte === gg.lib && g.peer === peer.lib && g.caseId === gg.caseId && g.kind === kind,
@@ -287,6 +308,8 @@ for (const gg of okGgsvelte) {
         ggMs,
         peerMs,
         ratio,
+        totalPass,
+        syncPass,
         pass,
         gated: sameForm,
         gap,
@@ -308,8 +331,9 @@ for (const c of comparisons) {
   if (!c.gated) continue; // cross-form context: printed, never gated
   if (c.gap) {
     seenGapKeys.add(`${c.gap.ggsvelte}|${c.gap.peer}|${c.gap.caseId}|${c.gap.kind}`);
-    if (c.pass) {
-      // Ratchet: the gap CLOSED — the exemption is now stale and must go.
+    if (clearlyBeats(c.ggMs, c.peerMs)) {
+      // Ratchet: require a win beyond the short-cell noise margin. `c.pass`
+      // cannot prove a known gap closed because it includes that tolerance.
       failures++;
       console.error(
         `check-budgets: known gap CLOSED (ggsvelte ${c.ggMs.toFixed(1)}ms <= ${c.peerLib} ${c.peerMs.toFixed(1)}ms on ${c.caseId} ${c.kind}) — remove the exemption from budgets.json knownGaps (${c.gap.issue})`,
@@ -348,11 +372,13 @@ for (const c of comparisons) {
   const verdict = !c.gated
     ? "info (cross-form)"
     : c.gap
-      ? c.pass
+      ? clearlyBeats(c.ggMs, c.peerMs)
         ? `STALE GAP — remove exemption (${c.gap.issue})`
         : `known gap (${c.gap.issue})`
       : c.pass
-        ? "PASS"
+        ? c.totalPass
+          ? "PASS"
+          : "PASS (sync corroboration)"
         : "FAIL";
   console.log(
     [

@@ -37,7 +37,12 @@ const onlyCases = process.env["COMPETITIVE_CASES"]
   .map((s) => s.trim())
   .filter(Boolean);
 const cases = casesForRun(full).filter((c) => !onlyCases || onlyCases.includes(c.id));
-const browserLibs = LIBS.filter((l) => l.browser && (!onlyLibs || onlyLibs.includes(l.id)));
+const browserLibs = LIBS.filter(
+  (lib) =>
+    (lib.browser || (lib.id === "ggsvelte-ggplot" && onlyLibs?.includes(lib.id))) &&
+    (!onlyLibs || onlyLibs.includes(lib.id)),
+);
+const ggplotRequested = browserLibs.some((lib) => lib.id === "ggsvelte-ggplot");
 
 type BenchApi = {
   mount: (lib: string, caseId: string) => Promise<{ ms: number; syncMs: number; markHint: number }>;
@@ -50,6 +55,10 @@ type BenchApi = {
   };
   /** #1471: live patcher DOM ≡ fresh full render. */
   parityLiveSvg: (caseId: string) => { equal: boolean; detail: string };
+  verifyUpdate: (
+    lib: string,
+    caseId: string,
+  ) => Promise<{ equal: boolean; mutated: boolean; detail: string }>;
 };
 
 type Timing = { ms: number; syncMs: number };
@@ -183,12 +192,12 @@ function isTimeout(err: unknown): boolean {
  * (a cold vite dep-optimize can stall the first load past the page timeout). */
 async function gotoBenchPage(p: Page): Promise<void> {
   try {
-    await p.goto("http://127.0.0.1:5199/");
+    await p.goto(`http://127.0.0.1:5199/${ggplotRequested ? "?ggplot=1" : ""}`);
     await waitForBenchApi();
   } catch (err) {
     if (!isTimeout(err)) throw err;
     process.stderr.write("page load timed out; retrying once...\n");
-    await p.goto("http://127.0.0.1:5199/");
+    await p.goto(`http://127.0.0.1:5199/${ggplotRequested ? "?ggplot=1" : ""}`);
     await waitForBenchApi();
   }
 }
@@ -255,6 +264,16 @@ for (const cell of matrix) {
       const w = window as unknown as { competitiveBench: BenchApi };
       w.competitiveBench.endUpdate();
     });
+    const updateVerification = await page.evaluate(
+      ({ library, caseId }) => {
+        const w = window as unknown as { competitiveBench: BenchApi };
+        return w.competitiveBench.verifyUpdate(library, caseId);
+      },
+      { library: cell.lib.id, caseId: cell.caseId },
+    );
+    if (!updateVerification.equal) {
+      throw new Error(`update verification failed: ${updateVerification.detail}`);
+    }
     // #1471 parity gate: after timing, prove the live patcher's DOM output
     // equals a fresh full render for this case (runs only for ggsvelte-svg;
     // a failed gate fails the cell so regressions block the scoreboard).

@@ -55,6 +55,48 @@ export type BarsColumns = {
   readonly stack: string[];
 };
 
+export type UpdateColumns = ScatterColumns | SeriesColumns | BarsColumns;
+
+/** Rotate a trailing numeric label while preserving the label set. */
+function rotateLabel(label: string, shift: number, count: number): string {
+  const match = /^(.*?)(\d+)$/.exec(label);
+  if (match === null || count <= 0) return label;
+  const index = (Number.parseInt(match[2]!, 10) + shift) % count;
+  return `${match[1]}${index}`;
+}
+
+/**
+ * Deterministic update data with the same shape and a visibly different
+ * normalized profile. The index-dependent wave matters: an affine-only
+ * transform disappears when a chart retrains a linear scale.
+ */
+export function perturbForUpdate(data: UpdateColumns, variant: 1 | 2): UpdateColumns {
+  const bump = variant * 5;
+  const perturbY = (value: number, index: number): number =>
+    value * 0.9 + bump + Math.sin((index + 1) * (variant === 1 ? 0.17 : 0.23)) * 3;
+  if ("cls" in data) {
+    const classes = new Set(data.cls).size;
+    return {
+      x: data.x,
+      y: data.y.map(perturbY),
+      cls: data.cls.map((label) => rotateLabel(label, variant, classes)),
+    };
+  }
+  if ("series" in data) {
+    return {
+      x: data.x,
+      y: data.y.map(perturbY),
+      series: data.series,
+    };
+  }
+  const stacks = new Set(data.stack).size;
+  return {
+    category: data.category,
+    value: data.value.map(perturbY),
+    stack: data.stack.map((label) => rotateLabel(label, variant, stacks)),
+  };
+}
+
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return () => {

@@ -11,7 +11,7 @@
 
   let {
     rows: initialRows,
-    seriesNames: names,
+    seriesNames,
     width,
     height,
   }: {
@@ -20,21 +20,25 @@
     width: number;
     height: number;
   } = $props();
+  // svelte-ignore state_referenced_locally
   let rows = $state.raw(initialRows);
   export function setRows(next: WideRow[]) {
     rows = next;
   }
-
+  const onRenderComplete = $derived.by(() => {
+    void rows;
+    return () => {};
+  });
   const x = (d: WideRow) => d.x;
   // Accessors closed over stable series names (fixed at mount for a case).
-  const y = names.map((name) => (d: WideRow) => d[name] ?? 0);
+  const y = $derived(seriesNames.map((name) => (d: WideRow) => d[name] ?? 0));
   const color = (_d: WideRow, i: number) => COLORS[i % COLORS.length]!;
 </script>
 
 <div style="width:{width}px; height:{height}px; position:relative;">
-  <VisXYContainer data={rows} {width} {height}>
-    <VisLine {x} {y} {color} lineWidth={1.5} />
-    <VisAxis type="x" />
-    <VisAxis type="y" />
+  <VisXYContainer data={rows} {width} {height} duration={0} {onRenderComplete}>
+    <VisLine {x} {y} {color} lineWidth={1.5} duration={0} />
+    <VisAxis type="x" duration={0} />
+    <VisAxis type="y" duration={0} />
   </VisXYContainer>
 </div>
