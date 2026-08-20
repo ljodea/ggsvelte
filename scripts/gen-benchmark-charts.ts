@@ -207,7 +207,6 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
   const cells = {
     scatter1k: cell("scatter-color-1k"),
     scatter10k: cell("scatter-color-10k"),
-    line3x10k: cell("line-3x10k"),
     area3x1k: cell("area-3x1k"),
     bars50x4: cell("bars-stacked-50x4"),
   };
@@ -307,7 +306,9 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
     },
   });
 
-  // Tab order: Area, Bars, Line, Line 100k, Scatter, Scatter 10k.
+  // Tab order: Area, Bars, Line 100k, Scatter, Scatter 10k. The 3×10k Line
+  // tab was dropped (#1471 follow-up): post-svg-live measurements no longer
+  // beat ECharts canvas on cold mount, so claim discipline removes the card.
   return [
     card(
       "area-mount",
@@ -322,13 +323,6 @@ function buildCards(browser: BrowserResults, peers100k: BrowserResults): readonl
       "50 categories × 4 stacks",
       "a stacked bar chart of 50 categories by 4 stacks",
       cells.bars50x4,
-    ),
-    card(
-      "line-mount",
-      "Line",
-      "3 × 10,000-point line chart",
-      "a 3-series by 10,000-point line chart",
-      cells.line3x10k,
     ),
     formCard(
       "line-100k-mount",

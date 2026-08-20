@@ -1,6 +1,7 @@
 /**
  * Homepage bench cards: band domain is always speed order, and the tab
- * list stays Area → Bars → Line → Line 100k → Scatter → Scatter 10k.
+ * list stays Area → Bars → Line 100k → Scatter → Scatter 10k (the 3×10k
+ * Line tab was dropped when it stopped beating ECharts on cold mount).
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -134,11 +135,10 @@ describe("benchmarkChartSrc", () => {
 });
 
 describe("homepage bench tabs", () => {
-  it("lists Area, Bars, Line, Line 100k, Scatter, Scatter 10k and omits Scatter 100k", () => {
+  it("lists Area, Bars, Line 100k, Scatter, Scatter 10k and omits Scatter 100k", () => {
     expect(BENCHMARK_CHART_CARDS.map((card) => card.tab)).toEqual([
       "Area",
       "Bars",
-      "Line",
       "Line 100k",
       "Scatter",
       "Scatter 10k",

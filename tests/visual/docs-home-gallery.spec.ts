@@ -23,7 +23,6 @@ test("homepage first viewport leads with title, bench tabs, then featured exampl
   await expect(page.getByRole("tablist", { name: "Benchmark scenarios" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Area" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Bars" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Line", exact: true })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Line 100k" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Scatter", exact: true })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Scatter 10k" })).toBeVisible();

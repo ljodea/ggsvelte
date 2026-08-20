@@ -134,7 +134,6 @@ function cardHtml(benchSvg: string): string {
       <div class="tabs" aria-hidden="true">
         <span class="active">Area</span>
         <span>Bars</span>
-        <span>Line</span>
         <span>Line 100k</span>
         <span>Scatter</span>
         <span>Scatter 10k</span>
