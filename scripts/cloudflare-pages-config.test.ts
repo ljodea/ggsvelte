@@ -41,7 +41,7 @@ describe("Cloudflare Pages project contract", () => {
       buildCommand: "bun run build:cloudflare",
       destinationDirectory: "apps/docs/build",
       rootDirectory: "",
-      runtimes: { BUN_VERSION: "1.3.14", NODE_VERSION: "22" },
+      runtimes: { BUN_VERSION: "1.4.0", NODE_VERSION: "22" },
       environments: {
         production: { DOCS_BUILD_MODE: "cloudflare-production" },
         preview: { DOCS_BUILD_MODE: "cloudflare-preview" },
@@ -73,6 +73,7 @@ describe("Cloudflare Pages project contract", () => {
       "examples/**",
       "scripts/**",
       "lifecycle.json",
+      "support-matrix.json",
       "package.json",
       "bun.lock",
       "tsconfig.json",
@@ -81,6 +82,7 @@ describe("Cloudflare Pages project contract", () => {
     ]);
 
     const workflow = readFileSync(join(ROOT, config.workflow), "utf8");
+    expect(workflow).toContain("support-matrix.json");
     expect(workflow).toContain("node-version: 22");
     expect(workflow).toContain("bun run build:cloudflare");
     expect(workflow).toContain("bunx wrangler pages deploy apps/docs/build");

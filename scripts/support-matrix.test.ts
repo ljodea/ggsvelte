@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -156,6 +156,7 @@ describe("consumer support matrix", () => {
     const consumerTag = `v${matrix.browsers.playwright}-noble`;
     const publisherTag = extractWorkflowEnvTag(buildCiImage, "PLAYWRIGHT_TAG");
     expect(rootManifest.packageManager).toBe(`bun@${matrix.packageManagers.bun}`);
+    expect(rootManifest.devDependencies["@types/bun"]).toBe(`^${matrix.packageManagers.bun}`);
     expect(rootManifest.devDependencies["@playwright/test"]).toBe(matrix.browsers.playwright);
     expect(rootManifest.devDependencies["pnpm"]).toBe(matrix.packageManagers.pnpm);
     expect(svelteManifest.devDependencies["playwright"]).toBe(matrix.browsers.playwright);
@@ -164,6 +165,32 @@ describe("consumer support matrix", () => {
     // Dockerfile ARG default tracks the publisher (build-arg overrides it;
     // keeping the default aligned avoids silent rebuilds against a stale base).
     expect(dockerfile).toContain(`ARG PLAYWRIGHT_TAG=${publisherTag}`);
+  });
+
+  test("keeps live bun pins aligned with the support matrix", () => {
+    const bun = loadSupportMatrix(root).packageManagers.bun;
+    const mise = readFileSync(join(root, "mise.toml"), "utf8");
+    const setupBun = readFileSync(join(root, ".github/actions/ci-setup-bun/action.yml"), "utf8");
+    const pages = readFileSync(join(root, "apps/docs/deployment/cloudflare-pages.json"), "utf8");
+    const contributing = readFileSync(join(root, "CONTRIBUTING.md"), "utf8");
+    expect(mise).toContain(`bun = "${bun}"`);
+    expect(setupBun).toContain(`default: "${bun}"`);
+    expect(pages).toContain(`"BUN_VERSION": "${bun}"`);
+    expect(contributing).toContain(`bun ${bun}`);
+    expect(contributing).toContain(`${bun} (pinned)`);
+    const workflowDir = join(root, ".github/workflows");
+    const literalPins: string[] = [];
+    for (const name of readdirSync(workflowDir)) {
+      if (!name.endsWith(".yml")) continue;
+      const text = readFileSync(join(workflowDir, name), "utf8");
+      for (const match of text.matchAll(/bun-version:\s*(\S+)/g)) {
+        const value = match[1]!.replaceAll('"', "");
+        if (value.startsWith("${{")) continue;
+        literalPins.push(`${name}:${value}`);
+        expect(value, name).toBe(bun);
+      }
+    }
+    expect(literalPins.length).toBeGreaterThan(0);
   });
 
   test("keeps the README support claim aligned with the matrix", () => {

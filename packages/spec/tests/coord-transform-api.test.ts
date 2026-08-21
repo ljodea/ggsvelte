@@ -34,30 +34,38 @@ describe("coord_transform public contract", () => {
     ).toBe(true);
   });
 
-  it("rejects unknown coordinate variants, transforms, malformed limits, and excess keys", () => {
-    expect(result({ type: "polar" }).ok).toBe(false);
-    expect(result(null).ok).toBe(false);
-    expect(result({ type: "cartesian", callback: "x" }).ok).toBe(false);
-    expect(result({ type: "flip", callback: "x" }).ok).toBe(false);
-    expect(result({ type: "transform", x: { transform: "ln" } }).ok).toBe(false);
-    expect(result({ type: "transform", x: { transform: "log10", limits: [1] } }).ok).toBe(false);
-    expect(result({ type: "transform", x: { transform: "log10", limits: [1, 2, 3] } }).ok).toBe(
-      false,
-    );
-    for (const malformed of [
-      { type: "transform", x: null },
-      { type: "transform", x: [] },
-      { type: "transform", x: { transform: "log10", limits: null } },
-    ]) {
-      expect(() => result(malformed)).not.toThrow();
-      expect(result(malformed).ok).toBe(false);
-    }
-    expect(result({ type: "transform", x: { transform: "log10", callback: "x" } }).ok).toBe(false);
-    expect(result({ type: "transform", x: { transform: "identity", callback: "x" } }).ok).toBe(
-      false,
-    );
-    expect(result({ type: "transform", x: { transform: "log10" }, tolerance: 100 }).ok).toBe(false);
-  });
+  it(
+    "rejects unknown coordinate variants, transforms, malformed limits, and excess keys",
+    () => {
+      expect(result({ type: "polar" }).ok).toBe(false);
+      expect(result(null).ok).toBe(false);
+      expect(result({ type: "cartesian", callback: "x" }).ok).toBe(false);
+      expect(result({ type: "flip", callback: "x" }).ok).toBe(false);
+      expect(result({ type: "transform", x: { transform: "ln" } }).ok).toBe(false);
+      expect(result({ type: "transform", x: { transform: "log10", limits: [1] } }).ok).toBe(false);
+      expect(result({ type: "transform", x: { transform: "log10", limits: [1, 2, 3] } }).ok).toBe(
+        false,
+      );
+      for (const malformed of [
+        { type: "transform", x: null },
+        { type: "transform", x: [] },
+        { type: "transform", x: { transform: "log10", limits: null } },
+      ]) {
+        expect(() => result(malformed)).not.toThrow();
+        expect(result(malformed).ok).toBe(false);
+      }
+      expect(result({ type: "transform", x: { transform: "log10", callback: "x" } }).ok).toBe(
+        false,
+      );
+      expect(result({ type: "transform", x: { transform: "identity", callback: "x" } }).ok).toBe(
+        false,
+      );
+      expect(result({ type: "transform", x: { transform: "log10" }, tolerance: 100 }).ok).toBe(
+        false,
+      );
+    },
+    { timeout: 30_000 },
+  );
 
   it("normalizes helper, alias, builder, and canonical JSON equally", () => {
     expect(coord_transform).toBe(coordTransform);

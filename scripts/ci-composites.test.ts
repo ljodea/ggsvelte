@@ -6,6 +6,8 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { loadSupportMatrix } from "./support-matrix.js";
+
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
 
@@ -155,7 +157,7 @@ describe("ci-setup-bun composite", () => {
     const action = read(SETUP_BUN);
     expect(action).toContain("oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6");
     expect(action).toContain("bun-version:");
-    expect(action).toContain("1.3.14");
+    expect(action).toContain(loadSupportMatrix(root).packageManagers.bun);
     expect(action).not.toContain("actions/checkout@");
   });
 
