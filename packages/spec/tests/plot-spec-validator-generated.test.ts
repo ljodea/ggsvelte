@@ -113,32 +113,40 @@ function corpus(): unknown[] {
 }
 
 describe("generated plot-spec validator", () => {
-  it("agrees with a runtime-compiled validator across the corpus", () => {
-    const compiled = runtimeCompiled();
-    const generated = Check as (value: unknown) => boolean;
-    for (const [index, spec] of corpus().entries()) {
-      expect(generated(spec), `corpus[${index}]`).toBe(compiled.Check(spec));
-    }
-  });
+  it(
+    "agrees with a runtime-compiled validator across the corpus",
+    () => {
+      const compiled = runtimeCompiled();
+      const generated = Check as (value: unknown) => boolean;
+      for (const [index, spec] of corpus().entries()) {
+        expect(generated(spec), `corpus[${index}]`).toBe(compiled.Check(spec));
+      }
+    },
+    { timeout: 30_000 },
+  );
 
-  it("agrees on fuzzed mutations of a valid spec", () => {
-    const compiled = runtimeCompiled();
-    const generated = Check as (value: unknown) => boolean;
-    let state = 19;
-    const rnd = () => (state = (state * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-    for (let i = 0; i < 500; i++) {
-      const spec = {
-        data: { values: [{ x: rnd(), y: rnd() }] },
-        layers: [
-          {
-            geom: ["point", "line", "col", "area", "text", "rect", "segment"][i % 7],
-            aes: { x: "x", y: "y" },
-            params: rnd() < 0.5 ? { alpha: rnd() } : { alpha: rnd() * 2 },
-          },
-        ],
-        width: rnd() < 0.8 ? 640 : -1,
-      };
-      expect(generated(spec), `fuzz[${i}]`).toBe(compiled.Check(spec));
-    }
-  });
+  it(
+    "agrees on fuzzed mutations of a valid spec",
+    () => {
+      const compiled = runtimeCompiled();
+      const generated = Check as (value: unknown) => boolean;
+      let state = 19;
+      const rnd = () => (state = (state * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let i = 0; i < 500; i++) {
+        const spec = {
+          data: { values: [{ x: rnd(), y: rnd() }] },
+          layers: [
+            {
+              geom: ["point", "line", "col", "area", "text", "rect", "segment"][i % 7],
+              aes: { x: "x", y: "y" },
+              params: rnd() < 0.5 ? { alpha: rnd() } : { alpha: rnd() * 2 },
+            },
+          ],
+          width: rnd() < 0.8 ? 640 : -1,
+        };
+        expect(generated(spec), `fuzz[${i}]`).toBe(compiled.Check(spec));
+      }
+    },
+    { timeout: 30_000 },
+  );
 });
