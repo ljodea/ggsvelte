@@ -66,3 +66,13 @@ repos:
         # VR baselines (tests/visual/__screenshots__) land only via the
         # audited vr-update/pr-N branch. The hook checks the staged diff so
         # clean committed baselines do not break `pre-commit run --all-files`.
+
+      - id: max-loc
+        name: max 500 LOC on hand-written code
+        entry: scripts/guards/max-loc.sh
+        language: system
+        files: \.(ts|tsx|js|mjs|cjs|svelte)$|max-loc-exclusions\.txt$
+        exclude: ^spikes/
+        # Ratchet list of legacy oversize files (with baselines) lives in
+        # scripts/guards/max-loc-exclusions.txt — entries may only be pruned.
+        # Generated artifacts are auto-exempt via their DO NOT EDIT header.

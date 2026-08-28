@@ -353,6 +353,16 @@ badge is overall project coverage.
   VR baselines land only via the `vr-approve` workflow; if you must commit
   baselines locally, `SKIP=block-output-paths git commit …` and say why in the
   PR.
+- The `max-loc` hook enforces a hard 500-line limit on hand-written code
+  (`*.ts|tsx|js|mjs|cjs|svelte`, `spikes/` excluded; physical lines, comments
+  and blanks included). Files whose header declares them generated
+  (`generat` + `do not edit` in the first 5 lines) are exempt. Legacy oversize
+  files are pinned in `scripts/guards/max-loc-exclusions.txt` as a ratchet:
+  a pinned file may not grow past its recorded baseline, entries whose file
+  shrank under the limit or was deleted must be pruned, and the list may only
+  ever shrink — refactor the file instead of raising a baseline.
+  Full-tree audit: `scripts/guards/max-loc.sh --all`; tests:
+  `bun test scripts/max-loc.test.ts`.
 
 ## Package READMEs (npm front doors)
 
