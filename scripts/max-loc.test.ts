@@ -261,6 +261,28 @@ describe("max-loc guard", () => {
     rmSync(repo.dir, { recursive: true });
   });
 
+  it("anchors the ratchet to the PR base in CI (GITHUB_BASE_REF)", () => {
+    const repo = makeRepo();
+    repo.writeList("legacy.ts 501 # legacy\n");
+    repo.write("legacy.ts", overLimit);
+    repo.commit("base");
+    spawnSync("git", ["update-ref", "refs/remotes/origin/main", "HEAD"], { cwd: repo.dir });
+    spawnSync("git", ["checkout", "-qb", "pr"], { cwd: repo.dir });
+    repo.write("legacy.ts", "y\n".repeat(502));
+    repo.writeList("legacy.ts 502 # raised\n");
+    const res = spawnSync("bash", [GUARD, "legacy.ts"], {
+      cwd: repo.dir,
+      env: {
+        ...process.env,
+        MAX_LOC_EXCLUSIONS: join(repo.dir, "exclusions.txt"),
+        GITHUB_BASE_REF: "main",
+      },
+    });
+    expect(res.status).toBe(1);
+    expect(new TextDecoder().decode(res.stderr)).toContain("baseline raised 501 -> 502");
+    rmSync(repo.dir, { recursive: true });
+  });
+
   it("guards run when only the exclusion list changes (hook files pattern)", () => {
     const config = readFileSync(join(ROOT, ".pre-commit-config.yaml"), "utf8");
     const hook = config.slice(config.indexOf("id: max-loc"));

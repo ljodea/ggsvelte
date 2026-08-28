@@ -86,14 +86,26 @@ parse_exclusions() { # <list-file>
 parse_exclusions "${LIST}"
 
 
-# ---- ratchet anchor: baselines may only decrease vs HEAD ------------------
-# No commit yet (fresh repo, first commit of the list) -> nothing to anchor
-# against; enforcement starts from the first commit containing the list.
+# ---- ratchet anchor: baselines may only decrease vs the anchor ------------
+# Local hook runs: anchor is HEAD (each commit re-anchors, so squashed PRs
+# cannot smuggle a raised baseline past history). CI `--all-files` runs the
+# committed checkout where HEAD == working tree, so there the anchor is the
+# merge base with the PR base branch (GITHUB_BASE_REF), falling back to HEAD
+# when the base ref is unavailable (shallow checkout, same-branch push).
+# Fresh repos with no commit: nothing to anchor against yet.
 ratchet_violations=()
-if git rev-parse --verify -q HEAD >/dev/null 2>&1 \
-  && git cat-file -e "HEAD:${LIST_REL}" 2>/dev/null; then
+ANCHOR_REF="HEAD"
+if [[ -n "${GITHUB_BASE_REF:-}" ]] \
+  && ANCHOR_REF="$(git merge-base HEAD "refs/remotes/origin/${GITHUB_BASE_REF}" 2>/dev/null)" \
+  && [[ -n "${ANCHOR_REF}" ]]; then
+  : # merge base found
+else
+  ANCHOR_REF="HEAD"
+fi
+if git rev-parse --verify -q "${ANCHOR_REF}" >/dev/null 2>&1 \
+  && git cat-file -e "${ANCHOR_REF}:${LIST_REL}" 2>/dev/null; then
   HEAD_LIST="$(mktemp "${TMPDIR:-/tmp}/max-loc-head.XXXXXX")"
-  git show "HEAD:${LIST_REL}" >"${HEAD_LIST}" 2>/dev/null || true
+  git show "${ANCHOR_REF}:${LIST_REL}" >"${HEAD_LIST}" 2>/dev/null || true
   PARSE_TARGET="HEAD"
   parse_exclusions "${HEAD_LIST}"
   PARSE_TARGET="EXCL"
