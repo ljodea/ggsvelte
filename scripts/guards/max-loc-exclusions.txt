@@ -3,7 +3,6 @@
 # are auto-exempt by the guard and must NOT be listed here.
 packages/svelte/src/lib/data/chocolate-bars.ts 20278 # pure data corpus, no logic — permanently exempt
 packages/svelte/src/lib/data/coffee-ratings.ts 16103 # pure data corpus, no logic — permanently exempt
-packages/spec/src/schema-declarations.ts 6203 # legacy oversize; pending refactor slice S3
 packages/svelte/src/lib/data/fastfood-menu.ts 4674 # pure data corpus, no logic — permanently exempt
 packages/svelte/src/lib/data/palmer-penguins.ts 3723 # pure data corpus, no logic — permanently exempt
 scripts/llms-guide-content.ts 3261 # legacy oversize; pending refactor slice S7
@@ -11,9 +10,7 @@ packages/svelte/src/lib/data/mpg.ts 3099 # pure data corpus, no logic — perman
 examples/interaction/tooltip/data.ts 3019 # pure data corpus, no logic — permanently exempt
 scripts/ci-routing.test.ts 1571 # legacy oversize; pending refactor slice S7
 tests/evals/model.ts 1266 # legacy oversize; pending refactor slice S7
-packages/spec/src/scale-reference-build.ts 1090 # legacy oversize; pending refactor slice S3
 packages/svelte/src/lib/index.ts 1086 # legacy oversize; pending refactor slice S5
-packages/spec/src/index.ts 1018 # legacy oversize; pending refactor slice S3
 examples/hex/basic/data.ts 1014 # pure data corpus, no logic — permanently exempt
 scripts/release-wiring.test.ts 1005 # legacy oversize; pending refactor slice S7
 examples/density/overlay/data.ts 948 # pure data corpus, no logic — permanently exempt
