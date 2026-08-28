@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -16,6 +16,7 @@ interface Repo {
   write(path: string, content: string): void;
   writeList(content: string): string;
   guard(args: string[]): { status: number; stderr: string };
+  commit(message: string): void;
 }
 
 function makeRepo(): Repo {
@@ -43,6 +44,12 @@ function makeRepo(): Repo {
         status: res.status ?? 1,
         stderr: new TextDecoder().decode(res.stderr),
       };
+    },
+    commit(message) {
+      spawnSync("git", ["add", "-A"], { cwd: dir });
+      spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", message], {
+        cwd: dir,
+      });
     },
   };
 }
@@ -181,5 +188,52 @@ describe("max-loc guard", () => {
       },
     });
     expect(res.status).toBe(0);
+  });
+
+  it("--all excludes tracked spikes/ files", () => {
+    const repo = makeRepo();
+    repo.writeList("");
+    repo.write("spikes/lab/big.ts", overLimit);
+    repo.guard(["--all"]);
+    expect(repo.guard(["--all"]).status).toBe(0);
+    rmSync(repo.dir, { recursive: true });
+  });
+
+  it("rejects raised baselines and new entries vs HEAD", () => {
+    const repo = makeRepo();
+    repo.writeList("legacy.ts 501 # legacy\n");
+    repo.write("legacy.ts", overLimit);
+    repo.write("other.ts", overLimit);
+    repo.commit("baseline");
+
+    repo.write("legacy.ts", "y\n".repeat(502));
+    repo.writeList("legacy.ts 502 # raised\n");
+    const raised = repo.guard(["legacy.ts", join(repo.dir, "exclusions.txt")]);
+    expect(raised.status).toBe(1);
+    expect(raised.stderr).toContain("baseline raised 501 -> 502");
+
+    repo.writeList("legacy.ts 501 # legacy\nother.ts 501 # new\n");
+    const added = repo.guard(["other.ts", join(repo.dir, "exclusions.txt")]);
+    expect(added.status).toBe(1);
+    expect(added.stderr).toContain("NEW exclusion entry");
+    rmSync(repo.dir, { recursive: true });
+  });
+
+  it("accepts pruning an entry after the file shrank", () => {
+    const repo = makeRepo();
+    repo.writeList("legacy.ts 501 # legacy\n");
+    repo.write("legacy.ts", overLimit);
+    repo.commit("baseline");
+
+    repo.write("legacy.ts", atLimit);
+    repo.writeList("");
+    expect(repo.guard(["legacy.ts", join(repo.dir, "exclusions.txt")]).status).toBe(0);
+    rmSync(repo.dir, { recursive: true });
+  });
+
+  it("guards run when only the exclusion list changes (hook files pattern)", () => {
+    const config = readFileSync(join(ROOT, ".pre-commit-config.yaml"), "utf8");
+    const hook = config.slice(config.indexOf("id: max-loc"));
+    expect(hook).toMatch(/max-loc-exclusions\.txt/);
   });
 });

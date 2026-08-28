@@ -71,7 +71,7 @@ repos:
         name: max 500 LOC on hand-written code
         entry: scripts/guards/max-loc.sh
         language: system
-        files: \.(ts|tsx|js|mjs|cjs|svelte)$
+        files: \.(ts|tsx|js|mjs|cjs|svelte)$|max-loc-exclusions\.txt$
         exclude: ^spikes/
         # Ratchet list of legacy oversize files (with baselines) lives in
         # scripts/guards/max-loc-exclusions.txt — entries may only be pruned.
