@@ -15,6 +15,7 @@ import {
   manifestHelpers,
   SHELL_MANIFEST,
 } from "./gen-scale-children-manifest.ts";
+import { extractExports } from "./gen-lifecycle.ts";
 import {
   GENERATED_HEADER,
   INDEX_PATH,
@@ -167,17 +168,36 @@ describe("index region rewrite", () => {
     expect(out).toBe(`// keep\n${REGION_START}\nnew\n${REGION_END}\n// after\n`);
   });
 
-  it("emits one lifecycle-tagged export per shell + alias", () => {
+  it("emits one compact lifecycle-tagged export line per shell + alias", () => {
     const region = renderIndexRegion();
     expect(region.startsWith(REGION_START)).toBe(true);
     expect(region.endsWith(REGION_END)).toBe(true);
-    const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
-    expect(exportCount).toBe(100 + 28);
-    expect(region).toContain(
-      'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
-    );
+    const body = region.split("\n").slice(1, -1);
+    expect(body).toHaveLength(100 + 28);
+    const compact =
+      /^\/\*\* @lifecycle stable-intent \*\/ export \{ default as (\w+) \} from "\.\/scale\/(\w+)\.svelte";$/;
+    for (const line of body) {
+      expect(compact.test(line), `non-compact export line: ${line}`).toBe(true);
+    }
+    expect(
+      body.includes(
+        '/** @lifecycle stable-intent */ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
+      ),
+    ).toBe(true);
     // No ScaleColour*.svelte files — aliases point at Color components.
-    expect(region).not.toMatch(/ScaleColour\w+\.svelte/);
+    expect(body.join("\n")).not.toMatch(/ScaleColour\w+\.svelte/);
+  });
+
+  it("gen-lifecycle parses the compact region as stable-intent value exports", () => {
+    const exports = extractExports(
+      `// @lifecycle-default experimental\n${renderIndexRegion()}\n`,
+      INDEX_PATH,
+    );
+    expect(exports).toHaveLength(100 + 28);
+    for (const e of exports) {
+      expect(e.kind).toBe("value");
+      expect(e.lifecycle).toBe("stable-intent");
+    }
   });
 });
 

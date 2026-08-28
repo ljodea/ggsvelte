@@ -153,11 +153,14 @@ function renderJitterShell(spec: ShellSpec): string {
   ].join("\n");
 }
 
+/**
+ * One compact lifecycle-tagged export line (form gen-lifecycle already
+ * parses): an inline `@lifecycle` JSDoc marker, then the single-name
+ * statement on the same line. oxfmt hugs single-specifier exports, so the
+ * line is stable at any length.
+ */
 function exportLine(component: string): string {
-  return [
-    `/** @lifecycle stable-intent */`,
-    `export { default as ${component} } from "./geoms/${component}.svelte";`,
-  ].join("\n");
+  return `/** @lifecycle stable-intent */ export { default as ${component} } from "./geoms/${component}.svelte";`;
 }
 
 /** Render the full delimited index region body (markers included). Pure. */
