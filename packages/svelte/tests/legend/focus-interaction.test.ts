@@ -7,11 +7,11 @@ import type { LegendFocusEvent } from "../../src/lib/index.js";
 import { until } from "../helpers/until.js";
 
 function afterFrame(): Promise<void> {
-  const { promise, resolve } = Promise.withResolvers<void>();
-  requestAnimationFrame(() => {
-    resolve();
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
   });
-  return promise;
 }
 
 describe("style legend focus", () => {

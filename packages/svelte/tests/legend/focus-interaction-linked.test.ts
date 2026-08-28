@@ -9,11 +9,11 @@ function state(container: HTMLElement): DOMStringMap {
 }
 
 function afterFrame(): Promise<void> {
-  const { promise, resolve } = Promise.withResolvers<void>();
-  requestAnimationFrame(() => {
-    resolve();
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
   });
-  return promise;
 }
 describe("linked legend focus", () => {
   it("maps encoded legend values to stable row keys with one transition and no rerun", async () => {
