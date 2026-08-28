@@ -38,7 +38,9 @@ function makeRepo(): Repo {
     guard(args) {
       const res = spawnSync("bash", [GUARD, ...args], {
         cwd: dir,
-        env: { ...process.env, MAX_LOC_EXCLUSIONS: listPath },
+        // Strip CI anchor vars: the temp repo has no base ref to resolve, and
+        // only the dedicated GITHUB_BASE_REF test may set it.
+        env: { ...process.env, GITHUB_BASE_REF: undefined, MAX_LOC_EXCLUSIONS: listPath },
       });
       return {
         status: res.status ?? 1,
@@ -214,6 +216,7 @@ describe("max-loc guard", () => {
       cwd: ROOT,
       env: {
         ...process.env,
+        GITHUB_BASE_REF: undefined,
         MAX_LOC_EXCLUSIONS: join(ROOT, "scripts", "guards", "max-loc-exclusions.txt"),
       },
     });
