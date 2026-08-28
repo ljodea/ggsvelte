@@ -1,6 +1,8 @@
 /**
  * buildSfFrame edges not always hit via pipeline (empty panel, MultiLine expand,
- * invalid Multi* coords, no-drawable throw). Happy paths live in geom-sf.test.ts.
+ * invalid Multi* coords, no-drawable throw). Happy paths live in the
+ * geom-sf-areas / geom-sf-holes / geom-sf-paths / geom-sf-pipeline siblings
+ * under pipeline-m2.
  */
 import { describe, expect, it } from "bun:test";
 
