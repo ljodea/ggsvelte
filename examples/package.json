@@ -9,7 +9,7 @@
     "@ggsvelte/svelte": "workspace:*"
   },
   "devDependencies": {
-    "svelte": "^5.56.9",
+    "svelte": "^5.56.10",
     "typescript": "^6.0.3"
   }
 }
