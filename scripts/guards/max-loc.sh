@@ -134,6 +134,9 @@ fi
 # ---- collect candidate files --------------------------------------------
 declare -a files=()
 collect() { # <path> — filter by scope, append to files
+  # Deleted paths (renames, stale HEAD-list entries) are handled by the
+  # stale-entry audit below — never handed to awk.
+  [[ -f "$1" ]] || return 0
   case "$1" in
     spikes/*) ;;
     *.ts|*.tsx|*.js|*.mjs|*.cjs|*.svelte) files+=("$1") ;;
