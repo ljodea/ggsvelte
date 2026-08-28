@@ -7,7 +7,7 @@
  * source, that each helper normalizes to its declared canonical family, and
  * that the ledger distinguishes canonical families from accepted authoring
  * aliases (`type: "log"`) and pre-stat transform capabilities. The
- * "appears in generated agent docs" arm lives in scripts/gen-llms.test.ts,
+ * "appears in generated agent docs" arm lives in scripts/gen-llms/guide-content.test.ts,
  * which can import the generated guide content.
  */
 import { describe, expect, it } from "bun:test";

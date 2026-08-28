@@ -59,7 +59,7 @@ in every sandbox where an agent authors specs.
 
 The skill cannot quietly fall behind the library. CI enforces three layers:
 
-1. **Content contracts** (`scripts/skill-content.test.ts`,
+1. **Content contracts** (`scripts/skill-content/*.test.ts`,
    `scripts/skill-package.test.ts`) — inventory completeness for every geom,
    stat, position, theme, and color scheme; every complete JSON fence
    normalizes and validates; pack shape and lock-step version.

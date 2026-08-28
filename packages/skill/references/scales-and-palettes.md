@@ -1,4 +1,4 @@
-<!-- Source of truth: packages/spec/src/schema-names.ts (scheme/shape/linetype names), packages/spec/src/capabilities.ts (SCALE_CAPABILITIES), scripts/gen-scale-children.ts (Scale* component generation), packages/spec/src/scale-*.ts helpers. Inventory tables are asserted complete by scripts/skill-content.test.ts. -->
+<!-- Source of truth: packages/spec/src/schema-names.ts (scheme/shape/linetype names), packages/spec/src/capabilities.ts (SCALE_CAPABILITIES), scripts/gen-scale-children.ts (Scale* component generation), packages/spec/src/scale-*.ts helpers. Inventory tables are asserted complete by scripts/skill-content/inventory.test.ts. -->
 
 # Scales and palettes
 
