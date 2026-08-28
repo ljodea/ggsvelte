@@ -1,43 +1,21 @@
 /**
- * Legend-filter controller unit + integration tests (S2 extraction).
+ * Legend-filter controller state tests: construction ordering, toggle and
+ * include/exclude mode semantics, scaled-constant gating, capability/mode
+ * reset, and catalog reconciliation.
  * Factories own effects — instantiate under `$effect.root` and destroy.
  */
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
+import { aes, gg } from "@ggsvelte/spec";
 
-import GGPlot from "../../src/lib/GGPlot.svelte";
 import type { LegendFilterEvent } from "../../src/lib/legend/filter.js";
 import { createLegendFilterState } from "../../src/lib/legend/filter-state.svelte.js";
-import { createPlotRuntime, type PlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
-import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
-import { render } from "../helpers/render.js";
-import { until } from "../helpers/until.js";
 
-const filterRows = [
-  { x: 1, y: 1, group: "north" },
-  { x: 2, y: 2, group: "south" },
-];
-
-type FilterCb = ((event: LegendFilterEvent) => void) | undefined;
-/** Getter that supplies no host callback. */
-const noCallback = (): FilterCb => undefined;
-
-function colorSpec(
-  data: readonly { x: number; y: number; group: string }[] = filterRows,
-): PortableSpec {
-  return gg([...data], aes({ x: "x", y: "y", color: "group" }))
-    .geomPoint()
-    .spec();
-}
-
-function clickEvent(detail = 1): MouseEvent {
-  return new MouseEvent("click", { bubbles: true, detail });
-}
+import { clickEvent, colorSpec, filterRows, noCallback } from "./filter-state-fixtures.js";
 
 describe("createLegendFilterState construction", () => {
   it("does not invoke the model getter during construction (before first flush)", () => {
@@ -414,204 +392,5 @@ describe("createLegendFilterState catalog reconciliation", () => {
     expect(restored.visible).toBe(true);
 
     destroy();
-  });
-});
-
-describe("runtime + legend-filter real cycle", () => {
-  it("toggling a filter retrains the model via rowFilters", () => {
-    const spec = colorSpec();
-
-    const { value, destroy } = withFlushedEffectRoot(() => {
-      const runtimeDeps = createReactiveRuntimeDeps({
-        assembled: spec,
-        effectiveSpec: spec,
-      });
-      // Host wiring: the controller is constructed BEFORE the runtime and
-      // reads the model through a getter closure over the later-declared
-      // runtime (never invoked during construction), so the catalog effect
-      // always sees the freshly retrained model — no manual re-sync.
-      let runtimeRef: PlotRuntime | null = null;
-      let controller!: ReturnType<typeof createLegendFilterState>;
-      controller = createLegendFilterState({
-        effectiveSpec: () => spec,
-        legendFilterProp: () => true,
-        onlegendfilter: noCallback,
-        oninteraction: noCallback,
-        announce: () => {},
-        model: () => runtimeRef?.model ?? null,
-        catalogEntries: () => controller.computeEntries(runtimeRef?.model ?? null),
-      });
-      const runtime = createPlotRuntime({
-        ...runtimeDeps,
-        effectiveLegendFilters: () => controller.filters,
-      });
-      runtimeRef = runtime;
-      return { runtime, controller };
-    });
-
-    const { runtime, controller } = value;
-    expect(runtime.model).not.toBeNull();
-    expect(runtime.model!.candidates.size).toBe(2);
-
-    const north = controller
-      .computeEntries(runtime.model)
-      .find((entry) => entry.entry.value === "north")!;
-    controller.toggle(north, clickEvent());
-    flushSync();
-
-    expect(controller.filters).toHaveLength(1);
-    expect(runtime.model).not.toBeNull();
-    expect(runtime.model!.candidates.size).toBe(1);
-
-    destroy();
-  });
-});
-
-describe("LegendFilters component layout and pointer source", () => {
-  it("combined GuideLegend focus + filter reserves both rows", async () => {
-    const { default: LegendFocusAndFilterPlot } =
-      await import("../fixtures/LegendFocusAndFilterPlot.svelte");
-    const view = render(LegendFocusAndFilterPlot);
-    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
-    await until(() => view.container.querySelector(".gg-legend-target") !== null);
-
-    // Commit a legend focus so the clear control appears (combined layout).
-    const legendTarget = view.container.querySelector<HTMLElement>(".gg-legend-target")!;
-    legendTarget.focus();
-    legendTarget.click();
-    await until(() => view.container.querySelector(".gg-with-legend-clear") !== null);
-
-    const root = view.container.querySelector<HTMLElement>(".gg-plot-root")!;
-    expect(root.classList.contains("gg-with-legend-filters")).toBe(true);
-    // Clear sits to the right of the scene — must not stack a second bottom
-    // row or inflate margin-bottom past the filters-only reservation.
-    expect(getComputedStyle(root).marginBottom).toBe("58px");
-
-    const fieldset = view.container.querySelector<HTMLElement>(".gg-legend-filters")!;
-    // Clear is no longer below the chart, so filters stay on the first control row.
-    expect(fieldset.classList.contains("gg-legend-filters-below-clear")).toBe(false);
-    // Used value of calc(100% + 4px) with scene height 260 → 264px.
-    expect(getComputedStyle(fieldset).top).toBe("264px");
-
-    const clear = view.container.querySelector<HTMLElement>(".gg-legend-clear")!;
-    expect(clear).not.toBeNull();
-    // Legend-relative: under the pressed guide, still inside the scene
-    // (not the old top-right park and not a second bottom row).
-    const clearTop = Number(clear.style.top.replace("px", ""));
-    const clearLeft = Number(clear.style.left.replace("px", ""));
-    expect(clearTop).toBeGreaterThan(4);
-    expect(clearTop).toBeLessThan(260);
-    expect(clearLeft).toBeGreaterThanOrEqual(4);
-    expect(clearLeft).toBeLessThan(360);
-    expect(clear.style.top).not.toBe("4px");
-    expect(clear.style.left).not.toBe("308px");
-  });
-
-  it("narrow container keeps existing max-width and overflow behavior", async () => {
-    const view = render(GGPlot, {
-      data: filterRows,
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" as const }],
-      legendFilter: true,
-      width: 120,
-      height: 200,
-    });
-    await until(() => view.container.querySelector(".gg-legend-filters") !== null);
-
-    const fieldset = view.container.querySelector<HTMLElement>(".gg-legend-filters")!;
-    const style = getComputedStyle(fieldset);
-    expect(style.maxWidth).toBe("calc(100% - 8px)");
-    expect(style.overflowX).toBe("auto");
-  });
-
-  it("reset-button focus restoration lands on the first checkbox", async () => {
-    const view = render(GGPlot, {
-      data: filterRows,
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" as const }],
-      legendFilter: true,
-      width: 360,
-      height: 260,
-    });
-    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
-
-    view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
-    await until(
-      () => view.container.querySelector("button[aria-label='Reset legend filters']") !== null,
-    );
-    const reset = view.container.querySelector<HTMLButtonElement>(
-      "button[aria-label='Reset legend filters']",
-    )!;
-    reset.focus();
-    reset.click();
-    await until(
-      () =>
-        document.activeElement ===
-        view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']"),
-    );
-    expect(document.activeElement).toBe(
-      view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']"),
-    );
-  });
-
-  it("pointerdown touch sets event source; pointercancel clears it", async () => {
-    const events: LegendFilterEvent[] = [];
-    const view = render(GGPlot, {
-      data: filterRows,
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" as const }],
-      legendFilter: true,
-      width: 360,
-      height: 260,
-      onlegendfilter: (event: LegendFilterEvent) => {
-        events.push(event);
-      },
-    });
-    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
-
-    const north = view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!;
-    north.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" }));
-    north.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
-    await until(() => events.some((event) => event.phase === "change"));
-    expect(events.at(-1)?.source).toBe("touch");
-
-    // Cancel clears the sticky pointer type so the next click is pointer.
-    const south = view.container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!;
-    south.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" }));
-    south.dispatchEvent(new PointerEvent("pointercancel", { bubbles: true }));
-    south.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
-    await until(() => events.filter((event) => event.phase === "change").length >= 2);
-    expect(events.at(-1)?.source).toBe("pointer");
-  });
-});
-
-describe("filter capability disable onrender sequence (S2 host)", () => {
-  it("emits onrender without a stale filtered model when filtering is disabled", async () => {
-    const renders: number[] = [];
-    const props = {
-      data: filterRows,
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" as const }],
-      legendFilter: true as boolean,
-      width: 360,
-      height: 260,
-      onrender: (model: { candidates: { size: number } }) => {
-        renders.push(model.candidates.size);
-      },
-    };
-    const view = render(GGPlot, props);
-    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
-    expect(renders.at(-1)).toBe(2);
-
-    view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
-    await until(() => renders.at(-1) === 1);
-    const afterFilterCount = renders.length;
-
-    await view.rerender({ ...props, legendFilter: false });
-    await until(() => renders.at(-1) === 2 && renders.length > afterFilterCount);
-
-    expect(renders.at(-1)).toBe(2);
-    const afterDisable = renders.slice(afterFilterCount);
-    expect(afterDisable.at(-1)).toBe(2);
   });
 });
