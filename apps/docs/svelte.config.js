@@ -30,7 +30,7 @@ export default {
       $examples: "../../examples",
       // Shared doc-content generators (guide markdown + llms surfaces) and
       // the generated lifecycle artifact — single sources, bun-tested at the
-      // repo root (scripts/gen-llms.test.ts, scripts/gen-lifecycle.test.ts).
+      // repo root (scripts/gen-llms/, scripts/gen-lifecycle.test.ts).
       $scripts: "../../scripts",
       $lifecycle: "../../lifecycle.json",
     },

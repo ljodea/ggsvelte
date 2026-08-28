@@ -5,7 +5,7 @@
  * cherry-blossom observations, then steps that each add one grammar element.
  * Every step declares two deltas — PortableSpec and Svelte source — and
  * `foldSakura` accumulates both so the finished file, PortableSpec JSON, and
- * agent snippets cannot drift (asserted in scripts/sakura-lesson.test.ts).
+ * agent snippets cannot drift (asserted in scripts/quickstart/*.test.ts).
  *
  * Shared by the getting-started guide markdown, the llms surfaces, and the
  * packed consumer-compat fixture app.

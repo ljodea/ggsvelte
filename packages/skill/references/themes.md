@@ -1,4 +1,4 @@
-<!-- Source of truth: packages/spec/src/schema-names.ts (THEME_NAMES, THEME_NAME_ALIASES), packages/core/src/theme-builtins.ts (token maps), packages/svelte/src/lib (Theme* shells). Inventory table is asserted complete by scripts/skill-content.test.ts. -->
+<!-- Source of truth: packages/spec/src/schema-names.ts (THEME_NAMES, THEME_NAME_ALIASES), packages/core/src/theme-builtins.ts (token maps), packages/svelte/src/lib (Theme* shells). Inventory table is asserted complete by scripts/skill-content/inventory.test.ts. -->
 
 # Themes
 

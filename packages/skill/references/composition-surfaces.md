@@ -1,4 +1,4 @@
-<!-- Source of truth: packages/svelte/src/lib/index.ts (component exports), packages/svelte/src/lib/plot-props.ts, packages/svelte/src/lib/layers/ (merge semantics, grammar-families). Theme roster lives in themes.md (asserted complete by scripts/skill-content.test.ts). -->
+<!-- Source of truth: packages/svelte/src/lib/index.ts (component exports), packages/svelte/src/lib/plot-props.ts, packages/svelte/src/lib/layers/ (merge semantics, grammar-families). Theme roster lives in themes.md (asserted complete by scripts/skill-content/inventory.test.ts). -->
 
 # Composition surfaces: coords, facets, guides, labs
 

@@ -1,8 +1,8 @@
 /**
- * gen-llms unit tests: the markdown renderer, the catalog-driven guide
- * sections (coverage against the real catalogs), and the llms.txt /
- * llms-full.txt builders (with the real manifest — zero-manual-upkeep proof:
- * every example the manifest knows appears).
+ * Catalog-driven guide sections: each built page must cover its source
+ * catalog (errors, advisories, lifecycle, quickstart embed, temporal,
+ * production support matrix, interactions) — zero manual upkeep, the pages
+ * cannot drift from the catalogs they document.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -10,95 +10,28 @@ import { join } from "node:path";
 
 import { ADVISORY_CATALOG, CLI_DIAGNOSTIC_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG, PIPELINE_ERROR_CATALOG } from "@ggsvelte/spec";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.ts";
-
-import { EXAMPLES } from "../examples/manifest.ts";
-import supportMatrix from "../support-matrix.json";
-import type { LifecycleDoc } from "./gen-llms.ts";
-import { QUICKSTART_PAGE_SVELTE, SAKURA_STEPS } from "./quickstart.ts";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../packages/svelte/src/lib/interaction/interaction.ts";
+import { QUICKSTART_PAGE_SVELTE, SAKURA_STEPS } from "../quickstart.ts";
 import {
   buildAdvisoriesMd,
   buildDiagnosticDocs,
   buildErrorsMd,
   buildLifecycleMd,
-  buildLlmsFull,
-  buildLlmsIndex,
   GETTING_STARTED_MD,
-  PRODUCTION_MD,
-  STATISTICS_POSITIONS_MD,
-  INTERACTIONS_MD,
-  INTERACTION_REFERENCE_MD,
   INTERACTION_REFERENCE_INDEX,
+  INTERACTION_REFERENCE_MD,
+  INTERACTIONS_MD,
+  PRODUCTION_MD,
+  renderMarkdown,
+  STATISTICS_POSITIONS_MD,
   TEMPORAL_SCALES_MD,
   UPGRADING_MD,
-  guidePages,
-  pruneSpecData,
-  renderMarkdown,
-} from "./gen-llms.ts";
+  type LifecycleDoc,
+} from "../gen-llms.ts";
 
 const lifecycle = JSON.parse(
-  readFileSync(join(import.meta.dir, "..", "lifecycle.json"), "utf8"),
+  readFileSync(join(import.meta.dir, "..", "..", "lifecycle.json"), "utf8"),
 ) as LifecycleDoc;
-
-describe("renderMarkdown", () => {
-  it("renders headings, paragraphs, lists, code, inline code, links", () => {
-    const html = renderMarkdown(
-      "# T\n\npara with `code` and [x](/y)\n\n- a\n- b\n\n```ts\nconst a = 1 < 2;\n```\n",
-    );
-    expect(html).toContain('<h1 id="t">T</h1>');
-    expect(html).toContain('<p>para with <code>code</code> and <a href="/y">x</a></p>');
-    expect(html).toContain("<ul><li>a</li><li>b</li></ul>");
-    expect(html).toContain('<pre><code class="hljs language-ts">');
-    expect(html).toContain('hljs-keyword">const</span>');
-    expect(html).toContain('hljs-number">1</span>');
-    expect(html).toContain("&lt;");
-  });
-
-  it("escapes HTML everywhere", () => {
-    expect(renderMarkdown("<script>alert(1)</script>")).not.toContain("<script>");
-  });
-
-  it("prefixes root-relative guide links for project-hosted docs", () => {
-    const html = renderMarkdown(
-      "[docs](/guide/errors) [external](https://example.com)",
-      "/ggsvelte",
-    );
-    expect(html).toContain('href="/ggsvelte/guide/errors"');
-    expect(html).toContain('href="https://example.com"');
-  });
-
-  it("renders allowlisted copy fences with accessible icon controls and status", () => {
-    const html = renderMarkdown('```json fragment copy\n{"x": 1}\n```');
-    expect(html).toContain('<button type="button" data-copy-code="guide-code-1"');
-    expect(html).toContain('aria-label="Copy code"');
-    expect(html).toContain('aria-describedby="guide-code-1-status"');
-    expect(html).toContain("<svg");
-    expect(html).not.toContain(">Copy code</button>");
-    expect(html).toContain('<pre id="guide-code-1"><code class="hljs language-json">');
-    expect(html).toContain("hljs-");
-    expect(html).toContain('<span id="guide-code-1-status" role="status" class="visually-hidden">');
-  });
-
-  it("never stamps a classification label over a code block", () => {
-    for (const fence of [
-      '```json fragment copy\n{"x": 1}\n```',
-      "```svelte complete\n<script></script>\n```",
-      "```sh complete\nbun add @ggsvelte/svelte\n```",
-      "```ts\nconst x = 1;\n```",
-    ]) {
-      const html = renderMarkdown(fence);
-      expect(html).not.toContain("guide-code-classification");
-      expect(html).not.toMatch(/>(Fragment|Complete file|Complete command|Complete example)</);
-    }
-  });
-
-  it("adds stable unique heading fragments", () => {
-    const html = renderMarkdown("# Events\n\n## `onselect` event\n\n## `onselect` event");
-    expect(html).toContain('<h1 id="events">Events</h1>');
-    expect(html).toContain('<h2 id="onselect-event"><code>onselect</code> event</h2>');
-    expect(html).toContain('<h2 id="onselect-event-2"><code>onselect</code> event</h2>');
-  });
-});
 
 describe("guide sections cover their catalogs", () => {
   it("errors page presents every source-qualified diagnostic with stable anchors", () => {
@@ -206,6 +139,15 @@ describe("guide sections cover their catalogs", () => {
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {
+    type SupportMatrix = {
+      node: { range: string };
+      svelte: { range: string; current: string };
+      packageManagers: { npm: string; pnpm: string; bun: string };
+      browsers: { playwright: string };
+    };
+    const supportMatrix = JSON.parse(
+      readFileSync(join(import.meta.dir, "..", "..", "support-matrix.json"), "utf8"),
+    ) as SupportMatrix;
     expect(PRODUCTION_MD).toContain(`Node.js \`${supportMatrix.node.range}\``);
     expect(PRODUCTION_MD).toContain(`Svelte \`${supportMatrix.svelte.range}\``);
     expect(PRODUCTION_MD).toContain(`current ${supportMatrix.svelte.current}`);
@@ -354,168 +296,5 @@ describe("guide sections cover their catalogs", () => {
     expect(UPGRADING_MD).toContain("deprecated since 0.1.0");
     expect(UPGRADING_MD).toContain("# Upgrade guide");
     expect(UPGRADING_MD).not.toContain("migrating-pre-0-1");
-  });
-});
-
-describe("pruneSpecData", () => {
-  it("truncates values rows and column arrays, reporting the pruned count", () => {
-    const values = pruneSpecData(
-      {
-        data: { values: Array.from({ length: 50 }, (_, i) => ({ x: i })) },
-        layers: [],
-      },
-      20,
-    );
-    expect(values.prunedRows).toBe(30);
-    expect((values.spec as { data: { values: unknown[] } }).data.values).toHaveLength(20);
-    const columns = pruneSpecData(
-      {
-        datasets: {
-          d: { columns: { x: Array.from({ length: 25 }, (_, i) => i) } },
-        },
-        layers: [],
-      },
-      20,
-    );
-    expect(columns.prunedRows).toBe(5);
-  });
-
-  it("leaves small specs byte-identical in structure", () => {
-    const spec = { data: { values: [{ x: 1 }] }, layers: [{ geom: "point" }] };
-    expect(pruneSpecData(spec, 20).spec).toEqual(spec);
-    expect(pruneSpecData(spec, 20).prunedRows).toBe(0);
-  });
-});
-
-describe("llms surfaces", () => {
-  const pages = guidePages(lifecycle);
-
-  it("publishes absolute canonical links and implementation-derived release facts", () => {
-    const txt = buildLlmsIndex(pages.slice(0, 1), EXAMPLES.slice(0, 1), {
-      canonicalBase: "https://ggsvelte.sh",
-      packageVersion: "0.4.0",
-      currentEdition: 2,
-      themeNames: ["light", "dark"],
-    });
-
-    expect(txt).toContain("Package version: 0.4.0");
-    expect(txt).toContain("Defaults edition: 2");
-    expect(txt).toContain("Registered chart themes (2): light, dark");
-    expect(txt).toContain("(https://ggsvelte.sh/guide/getting-started)");
-    expect(txt).toContain("(https://ggsvelte.sh/examples/");
-    expect(txt).not.toMatch(/\]\(\//);
-  });
-
-  it("llms.txt lists every guide page and every manifest example", () => {
-    const txt = buildLlmsIndex(pages, EXAMPLES);
-    expect(txt.startsWith("# ggsvelte\n")).toBe(true);
-    for (const page of pages) expect(txt).toContain(`(https://ggsvelte.sh/guide/${page.slug})`);
-    expect(txt).toContain("(https://ggsvelte.sh/schema/v0.json)");
-    expect(txt).not.toContain("(https://ggsvelte.sh/playground)");
-    expect(txt).toContain("(https://ggsvelte.sh/reference/interactions)");
-    for (const ex of EXAMPLES) {
-      expect(txt).toContain(`(https://ggsvelte.sh/examples/${ex.id})`);
-    }
-    expect(pages.map((page) => page.slug)).toContain("interactions");
-    expect(pages.map((page) => page.slug)).toContain("interaction-reference");
-    expect(pages.map((page) => page.slug)).not.toContain("migrating-pre-0-1");
-    expect(pages.map((page) => page.slug)).toContain("upgrading");
-    expect(pages.map((page) => page.slug)).toContain("production");
-    expect(pages.map((page) => page.slug)).not.toContain("compatibility");
-    expect(pages.map((page) => page.slug)).not.toContain("themes-color");
-    expect(pages.map((page) => page.slug)).not.toContain("data-mappings");
-  });
-
-  it("keeps first-party interaction examples focused on the current API", () => {
-    const inspection = EXAMPLES.find((example) => example.id === "interaction/tooltip");
-    const selection = EXAMPLES.find((example) => example.id === "interaction/brush-zoom");
-    const linked = EXAMPLES.find((example) => example.id === "interaction/linked-views");
-    expect(inspection?.title).toBe("Inspect and pin data");
-    expect(inspection?.tags).toContain("inspect");
-    // #1010: every shipped example carries a written gallery description. The
-    // rule this replaces was "deleted, not rewritten" — which was right about
-    // AI slop and wrong as a permanent state.
-    expect(inspection?.description.length).toBeGreaterThan(0);
-    expect(selection?.title).toBe("Interval selection and zoom");
-    expect(selection?.tags).toContain("select");
-    expect(linked?.title).toBe("Link plots, controls, and a table");
-    expect(linked?.tags).toContain("controller");
-    expect(linked?.tags).toContain("linked-views");
-  });
-
-  it("llms-full.txt carries the same canonical origin and release facts", () => {
-    const txt = buildLlmsFull(
-      [
-        {
-          slug: "start",
-          title: "Start",
-          description: "Start here.",
-          markdown:
-            '# Start\n\n[Errors](/guide/errors)\n\n[Legacy](https://ljodea.github.io/ggsvelte/guide/errors)\n\n```ts fragment\nconst preserved = "https://ljodea.github.io/ggsvelte/guide/errors";\n```',
-        },
-      ],
-      [],
-      {
-        canonicalBase: "https://preview.example",
-        packageVersion: "0.4.0",
-        currentEdition: 2,
-        themeNames: ["light", "dark"],
-      },
-    );
-
-    expect(txt).toContain("Package version: 0.4.0");
-    expect(txt).toContain("Defaults edition: 2");
-    expect(txt).toContain("Registered chart themes (2): light, dark");
-    expect(txt).toContain("[Errors](https://preview.example/guide/errors)");
-    expect(txt).toContain("[Legacy](https://preview.example/guide/errors)");
-    expect(txt).not.toContain("[Legacy](https://ljodea.github.io/ggsvelte");
-    expect(txt).toContain('const preserved = "https://ljodea.github.io/ggsvelte/guide/errors";');
-    expect(txt).not.toMatch(/\]\(\//);
-  });
-
-  it("llms-full.txt embeds guide prose + spec JSON + svelte source per example", () => {
-    const examples = EXAMPLES.slice(0, 2).map((e) => ({
-      ...e,
-      specJSON: `{\n  "marker": "spec-${e.id}"\n}`,
-      svelteSource: `<!-- svelte-${e.id} -->`,
-    }));
-    const txt = buildLlmsFull(pages, examples);
-    for (const page of pages) expect(txt).toContain(page.markdown.trim().split("\n")[0]!);
-    for (const ex of examples) {
-      expect(txt).toContain(`## ${ex.title} (${ex.id})`);
-      expect(txt).toContain(`spec-${ex.id}`);
-      expect(txt).toContain(`svelte-${ex.id}`);
-    }
-  });
-});
-
-describe("public export surface (split-safe)", () => {
-  it("exposes exactly the documented runtime export set from gen-llms", async () => {
-    const mod = await import("./gen-llms.ts");
-    const expected = [
-      "FACETS_COORDINATES_MD",
-      "GETTING_STARTED_MD",
-      "INTERACTIONS_MD",
-      "INTERACTION_REFERENCE_INDEX",
-      "INTERACTION_REFERENCE_MD",
-      "PRODUCTION_MD",
-      "SCALES_GUIDES_MD",
-      "STATISTICS_POSITIONS_MD",
-      "TEMPORAL_SCALES_MD",
-      "UPGRADING_MD",
-      "buildAdvisoriesMd",
-      "buildDiagnosticDocs",
-      "buildErrorsMd",
-      "buildLifecycleMd",
-      "buildLlmsFull",
-      "buildLlmsIndex",
-      "docsDiscoveryFacts",
-      "extractMarkdownHeadings",
-      "guidePages",
-      "markdownOutsideFences",
-      "pruneSpecData",
-      "renderMarkdown",
-    ].toSorted();
-    expect(Object.keys(mod).toSorted()).toEqual(expected);
   });
 });

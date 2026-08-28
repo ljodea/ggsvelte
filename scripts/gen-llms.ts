@@ -11,7 +11,7 @@
  * - this file — guidePages, llms surfaces, public re-exports
  *
  * Everything here is pure (data in, string out) and unit-tested in
- * scripts/gen-llms.test.ts; apps/docs imports it via the `$scripts` alias
+ * scripts/gen-llms/*.test.ts; apps/docs imports it via the `$scripts` alias
  * for its prerendered endpoints and guide pages.
  */
 import { CURRENT_EDITION, THEME_NAMES } from "@ggsvelte/spec";

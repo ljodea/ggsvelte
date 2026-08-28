@@ -1,4 +1,4 @@
-<!-- Recipes adapted from examples/<category>/<name>/ where noted; hand-authored recipes are validated by scripts/skill-content.test.ts (normalize + validate on every json complete fence). -->
+<!-- Recipes adapted from examples/<category>/<name>/ where noted; hand-authored recipes are validated by scripts/skill-content/fences.test.ts (normalize + validate on every json complete fence). -->
 
 # Long-tail recipes
 

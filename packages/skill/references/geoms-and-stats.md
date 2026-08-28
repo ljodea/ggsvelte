@@ -1,4 +1,4 @@
-<!-- Source of truth: packages/spec/src/schema-catalog.ts (KNOWN_GEOMS, KNOWN_STATS, KNOWN_POSITIONS, GEOM_DEFAULTS), packages/spec/src/schema-declarations.ts (per-geom position unions, params), packages/spec/src/geom-params.ts (GEOM_PARAM_KEYS), scripts/gen-geom-children.ts (Geom* shell generation), packages/svelte/src/lib/geoms/. Inventory tables are asserted complete by scripts/skill-content.test.ts. -->
+<!-- Source of truth: packages/spec/src/schema-catalog.ts (KNOWN_GEOMS, KNOWN_STATS, KNOWN_POSITIONS, GEOM_DEFAULTS), packages/spec/src/schema-declarations.ts (per-geom position unions, params), packages/spec/src/geom-params.ts (GEOM_PARAM_KEYS), scripts/gen-geom-children.ts (Geom* shell generation), packages/svelte/src/lib/geoms/. Inventory tables are asserted complete by scripts/skill-content/inventory.test.ts. -->
 
 # Geoms, stats, and positions
 
