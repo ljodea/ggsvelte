@@ -40,10 +40,12 @@ elif [[ $# -eq 0 ]]; then
 fi
 
 # ---- exclusion-list parsing (bash: validation) ----------------------------
-# <path> <baseline-LOC> # reason; blank lines and # comments allowed.
-# Fills the parallel arrays named by the 2nd/3rd arguments.
-parse_exclusions() { # <list-file> <paths-array-name> <locs-array-name>
-  local file="$1" paths_name="$2" locs_name="$3" line entry path baseline extra
+# parse_exclusions <list-file> — validates the list and fills the global
+# target arrays selected by PARSE_TARGET ("EXCL" -> EXCL_PATH/EXCL_LOC,
+# "HEAD" -> HEAD_PATH/HEAD_LOC). No eval indirection: bash 3.2 safe.
+PARSE_TARGET="EXCL"
+parse_exclusions() { # <list-file>
+  local file="$1" line entry path baseline extra i
   if [[ ! -f "${file}" ]]; then
     printf '%s\n' "MAX-LOC: exclusion list missing: ${file} (create it, even if empty)" >&2
     exit 1
@@ -59,8 +61,7 @@ parse_exclusions() { # <list-file> <paths-array-name> <locs-array-name>
       printf '%s\n' "MAX-LOC: malformed exclusion entry (want '<path> <baseline-LOC> # reason'): ${line}" >&2
       exit 1
     fi
-    local i
-    for i in "${!paths[@]}"; do
+    for i in ${paths[@]+"${!paths[@]}"}; do
       if [[ "${paths[$i]}" == "${path}" ]]; then
         printf '%s\n' "MAX-LOC: duplicate exclusion entry: ${path}" >&2
         exit 1
@@ -69,11 +70,21 @@ parse_exclusions() { # <list-file> <paths-array-name> <locs-array-name>
     paths+=("${path}")
     locs+=("${baseline}")
   done <"${file}"
-  eval "${paths_name}=(\"\${paths[@]}\")"
-  eval "${locs_name}=(\"\${locs[@]}\")"
+  if [[ "${PARSE_TARGET}" == "EXCL" ]]; then
+    EXCL_PATH=(); EXCL_LOC=()
+    for i in ${paths[@]+"${!paths[@]}"}; do
+      EXCL_PATH+=("${paths[$i]}"); EXCL_LOC+=("${locs[$i]}")
+    done
+  else
+    HEAD_PATH=(); HEAD_LOC=()
+    for i in ${paths[@]+"${!paths[@]}"}; do
+      HEAD_PATH+=("${paths[$i]}"); HEAD_LOC+=("${locs[$i]}")
+    done
+  fi
 }
 
-parse_exclusions "${LIST}" EXCL_PATH EXCL_LOC
+parse_exclusions "${LIST}"
+
 
 # ---- ratchet anchor: baselines may only decrease vs HEAD ------------------
 # No commit yet (fresh repo, first commit of the list) -> nothing to anchor
@@ -83,12 +94,14 @@ if git rev-parse --verify -q HEAD >/dev/null 2>&1 \
   && git cat-file -e "HEAD:${LIST_REL}" 2>/dev/null; then
   HEAD_LIST="$(mktemp "${TMPDIR:-/tmp}/max-loc-head.XXXXXX")"
   git show "HEAD:${LIST_REL}" >"${HEAD_LIST}" 2>/dev/null || true
-  parse_exclusions "${HEAD_LIST}" HEAD_PATH HEAD_LOC
+  PARSE_TARGET="HEAD"
+  parse_exclusions "${HEAD_LIST}"
+  PARSE_TARGET="EXCL"
   rm -f "${HEAD_LIST}"
   wt_i=0
-  for wt_path in "${EXCL_PATH[@]}"; do
+  for wt_path in ${EXCL_PATH[@]+"${EXCL_PATH[@]}"}; do
     head_base=""
-    for h_i in "${!HEAD_PATH[@]}"; do
+    for h_i in ${HEAD_PATH[@]+"${!HEAD_PATH[@]}"}; do
       if [[ "${HEAD_PATH[$h_i]}" == "${wt_path}" ]]; then
         head_base="${HEAD_LOC[$h_i]}"
         break
@@ -120,6 +133,14 @@ else
     collect "${f}"
   done
 fi
+# The ratchet is only as strong as the audit behind it: whenever the guard
+# runs at all, the pinned files participate (cheap — one awk pass). A commit
+# that edits ONLY the list (prune/lower) still re-audits the affected files,
+# and --all already contains them via git ls-files.
+for f in ${EXCL_PATH[@]+"${EXCL_PATH[@]}"} \
+  ${HEAD_PATH[@]+"${HEAD_PATH[@]}"}; do
+  collect "${f}"
+done
 
 # ---- single awk pass: count lines, detect generated, classify -------------
 # Classification outcomes:
@@ -146,6 +167,10 @@ if [[ ${#files[@]} -gt 0 ]]; then
       close(listfile)
     }
     function classify(p, c, g) {
+      if (p in BASE && g) {
+        print "STALE" SEP p SEP c
+        return
+      }
       if (c <= limit) {
         if (p in BASE) print "STALE" SEP p SEP c
         return
@@ -159,11 +184,13 @@ if [[ ${#files[@]} -gt 0 ]]; then
     }
     FNR == 1 {
       if (prev != "") classify(prev, count, gen)
-      prev = FILENAME; count = 0; gen = 0
+      prev = FILENAME; count = 0; gen = 0; saw_gen = 0; saw_dne = 0
     }
     FNR <= 5 {
       h = tolower($0)
-      if (h ~ /generat/ && h ~ /do not edit/) gen = 1
+      if (h ~ /generat/) saw_gen = 1
+      if (h ~ /do not edit/) saw_dne = 1
+      gen = saw_gen && saw_dne
     }
     { count++ }
     END { if (prev != "") classify(prev, count, gen) }
@@ -172,7 +199,7 @@ fi
 
 # Listed-but-deleted or now-empty files never hit awk's classifier; audit the
 # list itself so those entries fail even when nothing else changed.
-for f in "${EXCL_PATH[@]}"; do
+for f in ${EXCL_PATH[@]+"${EXCL_PATH[@]}"}; do
   if [[ ! -s "${f}" ]]; then
     if [[ ! -f "${f}" ]]; then
       stale+=("${f} (deleted)")
