@@ -14,6 +14,14 @@ export type {
   ParsedColumnOptions,
   Rows,
 } from "./table-types.js";
+
+/**
+ * Stable-surface re-exports: the parsed/transformed column views stay
+ * importable from `./table.js`. Consumed (pinned) by the column-view
+ * surface test in tests/scale-transform.test.ts.
+ */
+export type { ParsedColumnView } from "./table-types.js";
+export type { TransformedColumnView } from "./table-types.js";
 export {
   cellToNumber,
   cellsToNumeric,
