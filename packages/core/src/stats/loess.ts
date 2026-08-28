@@ -35,8 +35,9 @@
  * it (t quantiles are insensitive to df at those sizes; decision 0010).
  */
 
-/** Exact-δ2 size limit (above it, df falls back to δ1). */
-const DELTA2_EXACT_LIMIT = 300;
+import { solveFirstColumn, solveSystem } from "./loess-linear-system.js";
+import { buildVertices1D, cellIndex, DEFAULT_CELL, hermite } from "./loess-interpolate.js";
+import { DELTA2_EXACT_LIMIT, exactDelta2 } from "./loess-statistics.js";
 
 /**
  * Size at which the default surface switches from direct/exact to
@@ -45,12 +46,6 @@ const DELTA2_EXACT_LIMIT = 300;
  * O(n·q). Mirrors the density dual-path pattern (size-gated exact path).
  */
 const INTERPOLATE_DIRECT_LIMIT = 500;
-
-/** R loess.control(cell) default — leaf capacity is floor(n·span·cell). */
-const DEFAULT_CELL = 0.2;
-
-/** R ehg126 bounding-box pad: 0.5% of the data range. */
-const BOX_PAD = 0.005;
 
 export interface LoessOptions {
   /** Neighborhood fraction (0, 1]; q = floor(span · n). R default 0.75. */
@@ -91,172 +86,6 @@ export interface LoessModel {
 function tricube(u: number): number {
   const t = 1 - u * u * u;
   return t * t * t;
-}
-
-/** δ2 = tr(((I−L)ᵀ(I−L))²) = ‖(I−L)ᵀ(I−L)‖²_F over a dense L (n ≤ limit). */
-function exactDelta2(dense: Float64Array, n: number): number {
-  const b = new Float64Array(n * n);
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      let v = 0;
-      for (let k = 0; k < n; k++) {
-        const ikr = (k === r ? 1 : 0) - dense[k * n + r]!;
-        const ikc = (k === c ? 1 : 0) - dense[k * n + c]!;
-        v += ikr * ikc;
-      }
-      b[r * n + c] = v;
-    }
-  }
-  let delta2 = 0;
-  for (let i = 0; i < n * n; i++) delta2 += b[i]! * b[i]!;
-  return delta2;
-}
-
-/**
- * Solve the (d+1)×(d+1) system M a = rhs by Gaussian elimination with
- * partial pivoting. Returns null when (numerically) singular. `rhs` is
- * length `size` (copied into the augmented column).
- */
-function solveSystem(m: Float64Array, size: number, rhs: Float64Array): Float64Array | null {
-  const a = new Float64Array(size * (size + 1));
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) a[r * (size + 1) + c] = m[r * size + c]!;
-    a[r * (size + 1) + size] = rhs[r]!;
-  }
-  for (let col = 0; col < size; col++) {
-    let pivot = col;
-    for (let r = col + 1; r < size; r++) {
-      if (Math.abs(a[r * (size + 1) + col]!) > Math.abs(a[pivot * (size + 1) + col]!)) pivot = r;
-    }
-    const pv = a[pivot * (size + 1) + col]!;
-    if (!(Math.abs(pv) > 1e-12 * Math.max(1, Math.abs(m[0]!)))) return null;
-    if (pivot !== col) {
-      for (let c = col; c <= size; c++) {
-        const t = a[col * (size + 1) + c]!;
-        a[col * (size + 1) + c] = a[pivot * (size + 1) + c]!;
-        a[pivot * (size + 1) + c] = t;
-      }
-    }
-    for (let r = col + 1; r < size; r++) {
-      const f = a[r * (size + 1) + col]! / a[col * (size + 1) + col]!;
-      if (f === 0) continue;
-      for (let c = col; c <= size; c++) {
-        a[r * (size + 1) + c] = a[r * (size + 1) + c]! - f * a[col * (size + 1) + c]!;
-      }
-    }
-  }
-  const out = new Float64Array(size);
-  for (let r = size - 1; r >= 0; r--) {
-    let v = a[r * (size + 1) + size]!;
-    for (let c = r + 1; c < size; c++) v -= a[r * (size + 1) + c]! * out[c]!;
-    out[r] = v / a[r * (size + 1) + r]!;
-  }
-  return out;
-}
-
-/** Solve M a = e1 (first column of M⁻¹). */
-function solveFirstColumn(m: Float64Array, size: number): Float64Array | null {
-  const rhs = new Float64Array(size);
-  rhs[0] = 1;
-  return solveSystem(m, size, rhs);
-}
-
-/**
- * 1D kd-tree-style vertices: start with the padded data range, recursively
- * median-split leaves whose point count exceeds floor(n·span·cell). R's
- * multi-D kd-tree reduces to this for univariate loess (geom_smooth).
- */
-function buildVertices1D(xs: Float64Array, n: number, span: number, cell: number): Float64Array {
-  const xmin = xs[0]!;
-  const xmax = xs[n - 1]!;
-  const range = Math.max(xmax - xmin, Number.EPSILON);
-  const pad = BOX_PAD * range;
-  const vLo0 = xmin - pad;
-  const vHi0 = xmax + pad;
-  const fc = Math.max(1, Math.floor(n * span * cell + 1e-9));
-  const verts: number[] = [vLo0, vHi0];
-
-  const split = (vLo: number, vHi: number, p0: number, p1: number): void => {
-    const count = p1 - p0;
-    if (count <= fc) return;
-    if (!(vHi > vLo)) return;
-    // Median of points in this leaf; ties go to the high child (R convention).
-    const mid = p0 + (count >> 1);
-    const cut = xs[mid]!;
-    if (!(cut > vLo && cut < vHi)) {
-      // Degenerate: all points share an x, or cut lands on a bound.
-      if (xs[p0] === xs[p1 - 1]) return;
-      // Walk to a cut strictly inside the cell.
-      let i = mid;
-      while (i < p1 && !(xs[i]! > vLo && xs[i]! < vHi)) i++;
-      if (i >= p1) {
-        i = mid - 1;
-        while (i >= p0 && !(xs[i]! > vLo && xs[i]! < vHi)) i--;
-        if (i < p0) return;
-      }
-      const cut2 = xs[i]!;
-      if (!(cut2 > vLo && cut2 < vHi)) return;
-      verts.push(cut2);
-      // Sorted xs → left = [p0, first index with xs >= cut2).
-      let lo = p0;
-      let hi = p1;
-      while (lo < hi) {
-        const m = (lo + hi) >> 1;
-        if (xs[m]! < cut2) lo = m + 1;
-        else hi = m;
-      }
-      split(vLo, cut2, p0, lo);
-      split(cut2, vHi, lo, p1);
-      return;
-    }
-    verts.push(cut);
-    // Points with x < cut go left; x >= cut go right (sorted → mid split).
-    split(vLo, cut, p0, mid);
-    split(cut, vHi, mid, p1);
-  };
-
-  split(vLo0, vHi0, 0, n);
-  verts.sort((a, b) => a - b);
-  // Unique (within a tight epsilon of the data scale).
-  const eps = 1e-12 * Math.max(1, range);
-  const uniq: number[] = [verts[0]!];
-  for (let i = 1; i < verts.length; i++) {
-    if (verts[i]! - uniq.at(-1)! > eps) uniq.push(verts[i]!);
-  }
-  return Float64Array.from(uniq);
-}
-
-/** Cubic Hermite blend of endpoint values + derivatives (R ehg128, 1D). */
-function hermite(
-  h: number,
-  g0: number,
-  g1: number,
-  gp0: number,
-  gp1: number,
-  width: number,
-): number {
-  const h2 = h * h;
-  const omh = 1 - h;
-  const phi0 = omh * omh * (1 + 2 * h);
-  const phi1 = h2 * (3 - 2 * h);
-  const psi0 = h * omh * omh;
-  const psi1 = h2 * (h - 1);
-  return phi0 * g0 + phi1 * g1 + (psi0 * gp0 + psi1 * gp1) * width;
-}
-
-/** Binary-search the cell [verts[i], verts[i+1]] containing x0 (clamped). */
-function cellIndex(verts: Float64Array, x0: number): number {
-  const nv = verts.length;
-  if (x0 <= verts[0]!) return 0;
-  if (x0 >= verts[nv - 1]!) return nv - 2;
-  let lo = 0;
-  let hi = nv - 1;
-  while (lo + 1 < hi) {
-    const mid = (lo + hi) >> 1;
-    if (verts[mid]! <= x0) lo = mid;
-    else hi = mid;
-  }
-  return lo;
 }
 
 /**

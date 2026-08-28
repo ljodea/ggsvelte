@@ -158,6 +158,19 @@ describe("immutability", () => {
   });
 });
 
+// Surface contract: the column view types stay importable from the stable
+// ./table.js barrel even though in-repo consumers use table-types.js directly.
+import type { ParsedColumnView, TransformedColumnView } from "../src/table.js";
+
+describe("column view barrel surface", () => {
+  it("exposes ParsedColumnView and TransformedColumnView from ./table.js", () => {
+    const parsed = null as unknown as ParsedColumnView | null;
+    const transformed = null as unknown as TransformedColumnView | null;
+    expect(parsed).toBeNull();
+    expect(transformed).toBeNull();
+  });
+});
+
 describe("TransformedColumnView cache", () => {
   const rows = Array.from({ length: 100 }, (_, i) => ({ x: i + 1, panel: i % 4 }));
   const parent = ColumnTable.fromRows(rows);
