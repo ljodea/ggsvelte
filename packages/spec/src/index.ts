@@ -11,289 +11,90 @@
 // @lifecycle-default experimental
 
 // Schemas + Static types
-export {
-  AesSchema,
-  AreaLayerSchema,
-  BarLayerSchema,
-  BoxplotLayerSchema,
-  CATEGORICAL_SCHEME_NAMES,
-  CHANNELS,
-  COLOR_SCHEME_NAMES,
-  CYCLIC_SCHEME_NAMES,
-  ChannelValueSchema,
-  ColLayerSchema,
-  CoordSpecSchema,
-  CoordFixedSpecSchema,
-  CoordSfSpecSchema,
-  CoordRadialSpecSchema,
-  CoordTransformAxisSpecSchema,
-  CoordTransformSpecSchema,
-  CURRENT_EDITION,
-  DataRefSchema,
-  DensityLayerSchema,
-  DotplotLayerSchema,
-  ErrorbarLayerSchema,
-  LinerangeLayerSchema,
-  PointrangeLayerSchema,
-  CrossbarLayerSchema,
-  RectLayerSchema,
-  TileLayerSchema,
-  Bin2dLayerSchema,
-  RasterLayerSchema,
-  HexLayerSchema,
-  RibbonLayerSchema,
-  SegmentLayerSchema,
-  CountLayerSchema,
-  ViolinLayerSchema,
-  FunctionLayerSchema,
-  PolygonLayerSchema,
-  AblineLayerSchema,
-  CurveLayerSchema,
-  RugLayerSchema,
-  StepLayerSchema,
-  QqLayerSchema,
-  QqLineLayerSchema,
-  FacetFieldRefSchema,
-  FacetStripSpecSchema,
-  FacetSpecSchema,
-  ALIAS_GEOMS,
-  GEOM_ALIASES,
-  GEOM_DEFAULTS,
-  HistogramLayerSchema,
-  FreqpolyLayerSchema,
-  HlineLayerSchema,
-  JitterLayerSchema,
-  KNOWN_GEOMS,
-  KNOWN_POSITIONS,
-  KNOWN_STATS,
-  LayerSpecSchema,
-  LineLayerSchema,
-  PathLayerSchema,
-  LINETYPE_NAMES,
-  MAX_BINNED_BREAKS,
-  MAX_GLOW_RADIUS,
-  MAX_PAINT_STOPS,
-  POINT_SHAPE_NAMES,
-  PlotSpecSchema,
-  PointLayerSchema,
-  RuleLayerSchema,
-  VlineLayerSchema,
-  ScalesSchema,
-  SEQUENTIAL_SCHEME_NAMES,
-  TemporalParserSpecSchemaRef,
-  SmoothLayerSchema,
-  SpecModule,
-  TextLayerSchema,
-  LabelLayerSchema,
-  THEME_NAMES,
-  THEME_NAME_ALIASES,
-} from "./schema.js";
+export { AesSchema, AreaLayerSchema, BarLayerSchema, BoxplotLayerSchema } from "./schema.js";
+export { CATEGORICAL_SCHEME_NAMES, CHANNELS, COLOR_SCHEME_NAMES } from "./schema.js";
+export { CYCLIC_SCHEME_NAMES, ChannelValueSchema, ColLayerSchema } from "./schema.js";
+export { CoordSpecSchema, CoordFixedSpecSchema, CoordSfSpecSchema } from "./schema.js";
+export { CoordRadialSpecSchema, CoordTransformAxisSpecSchema } from "./schema.js";
+export { CoordTransformSpecSchema, CURRENT_EDITION, DataRefSchema } from "./schema.js";
+export { DensityLayerSchema, DotplotLayerSchema, ErrorbarLayerSchema } from "./schema.js";
+export { LinerangeLayerSchema, PointrangeLayerSchema, CrossbarLayerSchema } from "./schema.js";
+export { RectLayerSchema, TileLayerSchema, Bin2dLayerSchema, RasterLayerSchema } from "./schema.js";
+export { HexLayerSchema, RibbonLayerSchema, SegmentLayerSchema } from "./schema.js";
+export { CountLayerSchema, ViolinLayerSchema, FunctionLayerSchema } from "./schema.js";
+export { PolygonLayerSchema, AblineLayerSchema, CurveLayerSchema } from "./schema.js";
+export { RugLayerSchema, StepLayerSchema, QqLayerSchema, QqLineLayerSchema } from "./schema.js";
+export { FacetFieldRefSchema, FacetStripSpecSchema, FacetSpecSchema } from "./schema.js";
+export { ALIAS_GEOMS, GEOM_ALIASES, GEOM_DEFAULTS, HistogramLayerSchema } from "./schema.js";
+export { FreqpolyLayerSchema, HlineLayerSchema, JitterLayerSchema, KNOWN_GEOMS } from "./schema.js";
+export { KNOWN_POSITIONS, KNOWN_STATS, LayerSpecSchema, LineLayerSchema } from "./schema.js";
+export { PathLayerSchema, LINETYPE_NAMES, MAX_BINNED_BREAKS, MAX_GLOW_RADIUS } from "./schema.js";
+export { MAX_PAINT_STOPS, POINT_SHAPE_NAMES, PlotSpecSchema, PointLayerSchema } from "./schema.js";
+export { RuleLayerSchema, VlineLayerSchema, ScalesSchema } from "./schema.js";
+export { SEQUENTIAL_SCHEME_NAMES, TemporalParserSpecSchemaRef } from "./schema.js";
+export { SmoothLayerSchema, SpecModule, TextLayerSchema, LabelLayerSchema } from "./schema.js";
+export { THEME_NAMES, THEME_NAME_ALIASES } from "./schema.js";
+export type { A11yMode, Aes, AreaLayer, AreaParams, BarLayer, BarParams } from "./schema.js";
+export type { BoxplotLayer, BoxplotParams, CellValue, ChannelName } from "./schema.js";
+export type { ChannelValue, ColorStop, ColLayer, ColorScaleSpec, GradientPaint } from "./schema.js";
+export type { GlowSpec, LinearGradientPaint, PaintSpace, RadialGradientPaint } from "./schema.js";
+export type { AlphaScaleSpec, ColParams, CoordSpec, CoordFixedSpec } from "./schema.js";
+export type { CoordSfSpec, CoordRadialSpec, CoordTransformAxisSpec } from "./schema.js";
+export type { CoordTransformSpec, DataColumns, DataName, DataRef, DataValues } from "./schema.js";
+export type { DensityLayer, DensityParams, Density2dParams, Density2dLayer } from "./schema.js";
+export type { Density2dFilledLayer, DotplotLayer, DotplotParams, ErrorbarLayer } from "./schema.js";
+export type { ErrorbarParams, LinerangeLayer, LinerangeParams, PointrangeLayer } from "./schema.js";
+export type { PointrangeParams, CrossbarLayer, CrossbarParams, RectLayer } from "./schema.js";
+export type { RectParams, TileLayer, TileParams, Bin2dLayer, Bin2dParams } from "./schema.js";
+export type { RasterLayer, RasterParams, HexLayer, HexParams, RibbonLayer } from "./schema.js";
+export type { RibbonParams, FacetFieldRef, FacetScales, FacetSpec } from "./schema.js";
+export type { FacetStripSpec, AliasGeomName, GeomName, NormalizedGeomName } from "./schema.js";
+export type { NormalizedLayerSpec, NormalizedSpec, GuideSpec, GuidesSpec } from "./schema.js";
+export type { GuideThemeSpec, AxisGuideSpec, LegendGuideSpec } from "./schema.js";
+export type { ColorbarGuideSpec, ColorstepsGuideSpec, NoneGuideSpec } from "./schema.js";
+export type { HistogramLayer, FreqpolyLayer, HlineLayer, HlineParams } from "./schema.js";
+export type { InlineData, JitterLayer, Labs, LayerSpec, LegendSpec, LineLayer } from "./schema.js";
+export type { LineParams, PathParams, PathLayer, StepLayer, StepParams } from "./schema.js";
+export type { PointLayer, PointParams, PointPosition } from "./schema.js";
 export type {
-  A11yMode,
-  Aes,
-  AreaLayer,
-  AreaParams,
-  BarLayer,
-  BarParams,
-  BoxplotLayer,
-  BoxplotParams,
-  CellValue,
-  ChannelName,
-  ChannelValue,
-  ColorStop,
-  ColLayer,
-  ColorScaleSpec,
-  GradientPaint,
-  GlowSpec,
-  LinearGradientPaint,
-  PaintSpace,
-  RadialGradientPaint,
-  AlphaScaleSpec,
-  ColParams,
-  CoordSpec,
-  CoordFixedSpec,
-  CoordSfSpec,
-  CoordRadialSpec,
-  CoordTransformAxisSpec,
-  CoordTransformSpec,
-  DataColumns,
-  DataName,
-  DataRef,
-  DataValues,
-  DensityLayer,
-  DensityParams,
-  Density2dParams,
-  Density2dLayer,
-  Density2dFilledLayer,
-  DotplotLayer,
-  DotplotParams,
-  ErrorbarLayer,
-  ErrorbarParams,
-  LinerangeLayer,
-  LinerangeParams,
-  PointrangeLayer,
-  PointrangeParams,
-  CrossbarLayer,
-  CrossbarParams,
-  RectLayer,
-  RectParams,
-  TileLayer,
-  TileParams,
-  Bin2dLayer,
-  Bin2dParams,
-  RasterLayer,
-  RasterParams,
-  HexLayer,
-  HexParams,
-  RibbonLayer,
-  RibbonParams,
-  FacetFieldRef,
-  FacetScales,
-  FacetSpec,
-  FacetStripSpec,
-  AliasGeomName,
-  GeomName,
-  NormalizedGeomName,
-  NormalizedLayerSpec,
-  NormalizedSpec,
-  GuideSpec,
-  GuidesSpec,
-  GuideThemeSpec,
-  AxisGuideSpec,
-  LegendGuideSpec,
-  ColorbarGuideSpec,
-  ColorstepsGuideSpec,
-  NoneGuideSpec,
-  HistogramLayer,
-  FreqpolyLayer,
-  HlineLayer,
-  HlineParams,
-  InlineData,
-  JitterLayer,
-  Labs,
-  LayerSpec,
-  LegendSpec,
-  LineLayer,
-  LineParams,
-  PathParams,
-  PathLayer,
-  StepLayer,
-  StepParams,
-  PointLayer,
-  PointParams,
-  PointPosition,
   PortableSpec, // @lifecycle stable-intent
-  PositionName,
-  PositionParams,
-  PositionScaleSpec,
-  PositiveStyleScaleSpec,
-  ShapeScaleSpec,
-  LinetypeScaleSpec,
-  LinetypeName,
-  PointShapeName,
-  RenderBackend,
-  RuleLayer,
-  RuleParams,
-  VlineLayer,
-  VlineParams,
-  SegmentLayer,
-  CurveLayer,
-  SfLayer,
-  SfTextLayer,
-  SfLabelLayer,
-  SpokeLayer,
-  SpokeParams,
-  SegmentParams,
-  CountLayer,
-  ViolinLayer,
-  ViolinParams,
-  FunctionLayer,
-  FunctionParams,
-  FunctionRegistryName,
-  FunctionArgs,
-  PolygonLayer,
-  PolygonParams,
-  AblineLayer,
-  AblineParams,
-  CurveParams,
-  MapParams,
-  SfParams,
-  MapLayer,
-  SfTextParams,
-  SfLabelParams,
-  BlankLayer,
-  BlankParams,
-  RugLayer,
-  RugParams,
-  QqLayer,
-  QqParams,
-  QqLineLayer,
-  QqLineParams,
-  ScaleExpansion,
-  Scales,
-  QuantileLayer,
-  QuantileParams,
-  ContourParams,
-  ContourLayer,
-  SmoothLayer,
-  SmoothParams,
-  StackablePosition,
-  StatName,
-  SummaryFun,
-  TextLayer,
-  LabelLayer,
-  TemporalParserSpec,
-  TextParams,
-  LabelParams,
-  ThemeName,
-  ThemeSpec,
 } from "./schema.js";
+export type { PositionName, PositionParams, PositionScaleSpec } from "./schema.js";
+export type { PositiveStyleScaleSpec, ShapeScaleSpec, LinetypeScaleSpec } from "./schema.js";
+export type { LinetypeName, PointShapeName, RenderBackend, RuleLayer } from "./schema.js";
+export type { RuleParams, VlineLayer, VlineParams, SegmentLayer, CurveLayer } from "./schema.js";
+export type { SfLayer, SfTextLayer, SfLabelLayer, SpokeLayer, SpokeParams } from "./schema.js";
+export type { SegmentParams, CountLayer, ViolinLayer, ViolinParams } from "./schema.js";
+export type { FunctionLayer, FunctionParams, FunctionRegistryName } from "./schema.js";
+export type { FunctionArgs, PolygonLayer, PolygonParams, AblineLayer } from "./schema.js";
+export type { AblineParams, CurveParams, MapParams, SfParams, MapLayer } from "./schema.js";
+export type { SfTextParams, SfLabelParams, BlankLayer, BlankParams, RugLayer } from "./schema.js";
+export type { RugParams, QqLayer, QqParams, QqLineLayer, QqLineParams } from "./schema.js";
+export type { ScaleExpansion, Scales, QuantileLayer, QuantileParams } from "./schema.js";
+export type { ContourParams, ContourLayer, SmoothLayer, SmoothParams } from "./schema.js";
+export type { StackablePosition, StatName, SummaryFun, TextLayer, LabelLayer } from "./schema.js";
+export type { TemporalParserSpec, TextParams, LabelParams, ThemeName } from "./schema.js";
+export type { ThemeSpec } from "./schema.js";
 
-export {
-  guideAxis,
-  guideColorbar,
-  guideColorsteps,
-  guideLegend,
-  guideNone,
-  guides,
-  guide_axis,
-  guide_colorbar,
-  guide_colorsteps,
-  guide_legend,
-  guide_none,
-} from "./guide-helpers.js";
-export type {
-  AxisGuideOptions,
-  ColorbarGuideOptions,
-  ColorstepsGuideOptions,
-  LegendGuideOptions,
-} from "./guide-helpers.js";
+export { guideAxis, guideColorbar, guideColorsteps, guideLegend } from "./guide-helpers.js";
+export { guideNone, guides, guide_axis, guide_colorbar } from "./guide-helpers.js";
+export { guide_colorsteps, guide_legend, guide_none } from "./guide-helpers.js";
+export type { AxisGuideOptions, ColorbarGuideOptions } from "./guide-helpers.js";
+export type { ColorstepsGuideOptions, LegendGuideOptions } from "./guide-helpers.js";
 
 // Checked public capability ledger
-export {
-  buildGreyPalette,
-  buildHuePalette,
-  GREY_PALETTE_10,
-  HUE_PALETTE_10,
-  hslToHex,
-} from "./hue-grey-palettes.js";
-export {
-  SCALE_CAPABILITIES,
-  STYLE_AESTHETIC_GEOMS,
-  STYLE_ORDINAL_SCALE_HELPERS,
-  scaleCapabilityCamelHelpers,
-  builderScaleHelperNames,
-} from "./capabilities.js";
+export { buildGreyPalette, buildHuePalette, GREY_PALETTE_10 } from "./hue-grey-palettes.js";
+export { HUE_PALETTE_10, hslToHex } from "./hue-grey-palettes.js";
+export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";
+export { STYLE_ORDINAL_SCALE_HELPERS, scaleCapabilityCamelHelpers } from "./capabilities.js";
+export { builderScaleHelperNames } from "./capabilities.js";
 export type { ScaleCapability, StyleAesthetic } from "./capabilities.js";
 /** @lifecycle experimental */
 export { GEOM_PARAM_KEYS } from "./geom-params.js";
 /** @lifecycle experimental */
-export {
-  GEOM_REFERENCE,
-  SHARED_LAYER_PROPS,
-  componentNameForGeom,
-  geomReferenceList,
-} from "./geom-reference.js";
+export { GEOM_REFERENCE, SHARED_LAYER_PROPS, componentNameForGeom } from "./geom-reference.js";
+/** @lifecycle experimental */
+export { geomReferenceList } from "./geom-reference.js";
 /** @lifecycle experimental */
 export type { GeomParamDoc, GeomReferenceEntry, SharedLayerPropDoc } from "./geom-reference.js";
 /** @lifecycle experimental */
@@ -309,603 +110,237 @@ export { COORD_REFERENCE, KNOWN_COORD_TYPES, coordReferenceList } from "./coord-
 /** @lifecycle experimental */
 export type { CoordParamDoc, CoordReferenceEntry, CoordTypeName } from "./coord-reference.js";
 /** @lifecycle experimental */
-export {
-  SCALE_FAMILY_LABELS,
-  SCALE_REFERENCE,
-  allScaleHelpers,
-  componentNameForScaleHelper,
-  knownScaleSlugs,
-  primaryScaleHelpers,
-  scaleReferenceByFamily,
-  scaleReferenceList,
-  scaleReferencePrimaries,
-  slugForScaleHelper,
-} from "./scale-reference.js";
+export { SCALE_FAMILY_LABELS, SCALE_REFERENCE, allScaleHelpers } from "./scale-reference.js";
 /** @lifecycle experimental */
-export type {
-  ScaleAesthetic,
-  ScaleFamily,
-  ScaleParamDoc,
-  ScaleReferenceEntry,
-} from "./scale-reference.js";
+export { componentNameForScaleHelper, knownScaleSlugs } from "./scale-reference.js";
 /** @lifecycle experimental */
-export {
-  GUIDE_CHANNELS,
-  GUIDE_REFERENCE,
-  KNOWN_GUIDE_TYPES,
-  guideReferenceList,
-} from "./guide-reference.js";
+export { primaryScaleHelpers, scaleReferenceByFamily } from "./scale-reference.js";
 /** @lifecycle experimental */
-export type {
-  GuideChannelName,
-  GuideParamDoc,
-  GuideReferenceEntry,
-  GuideTypeName,
-} from "./guide-reference.js";
+export { scaleReferenceList, scaleReferencePrimaries } from "./scale-reference.js";
+/** @lifecycle experimental */
+export { slugForScaleHelper } from "./scale-reference.js";
+/** @lifecycle experimental */
+export type { ScaleAesthetic, ScaleFamily, ScaleParamDoc } from "./scale-reference.js";
+/** @lifecycle experimental */
+export type { ScaleReferenceEntry } from "./scale-reference.js";
+/** @lifecycle experimental */
+export { GUIDE_CHANNELS, GUIDE_REFERENCE, KNOWN_GUIDE_TYPES } from "./guide-reference.js";
+/** @lifecycle experimental */
+export { guideReferenceList } from "./guide-reference.js";
+/** @lifecycle experimental */
+export type { GuideChannelName, GuideParamDoc, GuideReferenceEntry } from "./guide-reference.js";
+/** @lifecycle experimental */
+export type { GuideTypeName } from "./guide-reference.js";
 
 // Temporal parsing, inference, and authoring conversions
-export {
-  canonicalTemporalParserKey,
-  dmy,
-  dmy_hm,
-  dmy_hms,
-  dym,
-  dym_hm,
-  dym_hms,
-  fromEpochMilliseconds,
-  fromEpochSeconds,
-  inferTemporalColumn,
-  mdy,
-  mdy_hm,
-  mdy_hms,
-  my,
-  myd,
-  myd_hm,
-  myd_hms,
-  parseTemporal,
-  parseTemporalColumn,
-  parseTemporalFormat,
-  TEMPORAL_PARSER_NAMES,
-  temporalParserConfigurationError,
-  TemporalParseError,
-  TemporalParserSpecSchema,
-  ydm,
-  ydm_hm,
-  ydm_hms,
-  ym,
-  ymd,
-  ymd_hm,
-  ymd_hms,
-  yq,
-} from "./temporal.js";
-export type {
-  TemporalDecision,
-  TemporalDisambiguation,
-  TemporalFailure,
-  TemporalKind,
-  TemporalScaleKind,
-  ParsedTemporalColumn,
-  TemporalParseOptions,
-  TemporalParseResult,
-  TemporalParserName,
-  TemporalPrecision,
-} from "./temporal.js";
+export { canonicalTemporalParserKey, dmy, dmy_hm, dmy_hms, dym, dym_hm } from "./temporal.js";
+export { dym_hms, fromEpochMilliseconds, fromEpochSeconds } from "./temporal.js";
+export { inferTemporalColumn, mdy, mdy_hm, mdy_hms, my, myd, myd_hm, myd_hms } from "./temporal.js";
+export { parseTemporal, parseTemporalColumn, parseTemporalFormat } from "./temporal.js";
+export { TEMPORAL_PARSER_NAMES, temporalParserConfigurationError } from "./temporal.js";
+export { TemporalParseError, TemporalParserSpecSchema, ydm, ydm_hm, ydm_hms } from "./temporal.js";
+export { ym, ymd, ymd_hm, ymd_hms, yq } from "./temporal.js";
+export type { TemporalDecision, TemporalDisambiguation, TemporalFailure } from "./temporal.js";
+export type { TemporalKind, TemporalScaleKind, ParsedTemporalColumn } from "./temporal.js";
+export type { TemporalParseOptions, TemporalParseResult, TemporalParserName } from "./temporal.js";
+export type { TemporalPrecision } from "./temporal.js";
 export { MONTH_DAY_REFERENCE_YEAR } from "./temporal.js";
 /** Registers `@js-temporal/polyfill` for full temporal graphs (not lean render). */
 export { ensureTemporalPolyfill } from "./temporal-polyfill.js";
-export {
-  MAX_TEMPORAL_CANDIDATES,
-  MAX_TEMPORAL_MAJOR_TICKS,
-  MAX_TEMPORAL_MINOR_TICKS,
-  MIN_TEMPORAL_LABEL_GAP_PX,
-  parseTemporalInterval,
-  TEMPORAL_INTERVAL_UNITS,
-  TEMPORAL_LABEL_TOKENS,
-  TEMPORAL_WEEKDAYS,
-  TemporalIntervalError,
-  TemporalIntervalSpecSchema,
-  TemporalLabelSpecSchema,
-  temporalIntervalTicks,
-  temporalLabelConfigurationError,
-  temporalLocaleConfigurationError,
-  TemporalWeekStartSchema,
-} from "./temporal-guides.js";
-export type {
-  TemporalInterval,
-  TemporalIntervalSpec,
-  TemporalIntervalUnit,
-  TemporalWeekStart,
-} from "./temporal-guides.js";
+export { MAX_TEMPORAL_CANDIDATES, MAX_TEMPORAL_MAJOR_TICKS } from "./temporal-guides.js";
+export { MAX_TEMPORAL_MINOR_TICKS, MIN_TEMPORAL_LABEL_GAP_PX } from "./temporal-guides.js";
+export { parseTemporalInterval, TEMPORAL_INTERVAL_UNITS } from "./temporal-guides.js";
+export { TEMPORAL_LABEL_TOKENS, TEMPORAL_WEEKDAYS } from "./temporal-guides.js";
+export { TemporalIntervalError, TemporalIntervalSpecSchema } from "./temporal-guides.js";
+export { TemporalLabelSpecSchema, temporalIntervalTicks } from "./temporal-guides.js";
+export { temporalLabelConfigurationError } from "./temporal-guides.js";
+export { temporalLocaleConfigurationError, TemporalWeekStartSchema } from "./temporal-guides.js";
+export type { TemporalInterval, TemporalIntervalSpec } from "./temporal-guides.js";
+export type { TemporalIntervalUnit, TemporalWeekStart } from "./temporal-guides.js";
 
 // Coordinate helpers
-export {
-  coord_equal,
-  coord_fixed,
-  coord_polar,
-  coord_radial,
-  coord_sf,
-  coord_transform,
-  coordEqual,
-  coordFixed,
-  coordPolar,
-  coordRadial,
-  coordSf,
-  coordTransform,
-} from "./coord-helpers.js";
-export type {
-  CoordFixedOptions,
-  CoordPolarOptions,
-  CoordRadialOptions,
-  CoordRadialReverse,
-  CoordRadialTheta,
-  CoordSfOptions,
-  CoordTransformAxisOptions,
-  CoordTransformName,
-  CoordTransformOptions,
-} from "./coord-helpers.js";
+export { coord_equal, coord_fixed, coord_polar, coord_radial, coord_sf } from "./coord-helpers.js";
+export { coord_transform, coordEqual, coordFixed, coordPolar } from "./coord-helpers.js";
+export { coordRadial, coordSf, coordTransform } from "./coord-helpers.js";
+export type { CoordFixedOptions, CoordPolarOptions, CoordRadialOptions } from "./coord-helpers.js";
+export type { CoordRadialReverse, CoordRadialTheta, CoordSfOptions } from "./coord-helpers.js";
+export type { CoordTransformAxisOptions, CoordTransformName } from "./coord-helpers.js";
+export type { CoordTransformOptions } from "./coord-helpers.js";
 // Scale helpers
-export {
-  configuredColorScaleType,
-  canonicalMultiScaleChannel,
-  scaleContinuousIdentity,
-  scaleDiscreteIdentity,
-  scaleDiscreteManual,
-  scaleType,
-  scale_continuous_identity,
-  scale_discrete_identity,
-  scale_discrete_manual,
-  scale_type,
-  scaleColorBinned,
-  scaleColorBrewer,
-  scaleColorContinuous,
-  scaleColorDate,
-  scaleColorDatetime,
-  scaleColorDiscrete,
-  scaleColorDistiller,
-  scaleColorFermenter,
-  scaleColorGradient,
-  scaleColorGradient2,
-  scaleColorGradientn,
-  scaleColorIdentity,
-  scaleColorLog10,
-  scaleColorManual,
-  scaleColorSqrt,
-  scaleColorSteps,
-  scaleColorSteps2,
-  scaleColorStepsn,
-  scaleColorHue,
-  scaleColorGrey,
-  scaleColorGray,
-  scaleColorOrdinal,
-  scaleColourBinned,
-  scaleColourBrewer,
-  scaleColourContinuous,
-  scaleColourDate,
-  scaleColourDatetime,
-  scaleColourDiscrete,
-  scaleColourDistiller,
-  scaleColourFermenter,
-  scaleColourGradient,
-  scaleColourGradient2,
-  scaleColourGradientn,
-  scaleColourIdentity,
-  scaleColourLog10,
-  scaleColourManual,
-  scaleColourSqrt,
-  scaleColourSteps,
-  scaleColourSteps2,
-  scaleColourStepsn,
-  scaleColourHue,
-  scaleColourGrey,
-  scaleColourGray,
-  scaleColourOrdinal,
-  scaleFillBinned,
-  scaleFillBrewer,
-  scaleFillContinuous,
-  scaleFillDate,
-  scaleFillDatetime,
-  scaleFillDiscrete,
-  scaleFillDistiller,
-  scaleFillFermenter,
-  scaleFillGradient,
-  scaleFillGradient2,
-  scaleFillGradientn,
-  scaleFillIdentity,
-  scaleFillLog10,
-  scaleFillManual,
-  scaleFillSqrt,
-  scaleFillSteps,
-  scaleFillSteps2,
-  scaleFillStepsn,
-  scaleColorViridisB,
-  scaleColorViridisC,
-  scaleColorViridisD,
-  scaleColourViridisB,
-  scaleColourViridisC,
-  scaleColourViridisD,
-  scaleFillViridisB,
-  scaleFillViridisC,
-  scaleFillViridisD,
-  scaleFillHue,
-  scaleFillGrey,
-  scaleFillGray,
-  scaleFillOrdinal,
-  scale_color_binned,
-  scale_color_brewer,
-  scale_color_continuous,
-  scale_color_date,
-  scale_color_datetime,
-  scale_color_discrete,
-  scale_color_distiller,
-  scale_color_fermenter,
-  scale_color_gradient,
-  scale_color_gradient2,
-  scale_color_gradientn,
-  scale_color_identity,
-  scale_color_log10,
-  scale_color_manual,
-  scale_color_sqrt,
-  scale_color_steps,
-  scale_color_steps2,
-  scale_color_stepsn,
-  scale_color_viridis_b,
-  scale_color_viridis_c,
-  scale_color_viridis_d,
-  scale_color_hue,
-  scale_color_grey,
-  scale_color_gray,
-  scale_color_ordinal,
-  scale_colour_binned,
-  scale_colour_brewer,
-  scale_colour_continuous,
-  scale_colour_date,
-  scale_colour_datetime,
-  scale_colour_discrete,
-  scale_colour_distiller,
-  scale_colour_fermenter,
-  scale_colour_gradient,
-  scale_colour_gradient2,
-  scale_colour_gradientn,
-  scale_colour_identity,
-  scale_colour_log10,
-  scale_colour_manual,
-  scale_colour_sqrt,
-  scale_colour_steps,
-  scale_colour_steps2,
-  scale_colour_stepsn,
-  scale_colour_viridis_b,
-  scale_colour_viridis_c,
-  scale_colour_viridis_d,
-  scale_colour_hue,
-  scale_colour_grey,
-  scale_colour_gray,
-  scale_colour_ordinal,
-  scale_fill_binned,
-  scale_fill_brewer,
-  scale_fill_continuous,
-  scale_fill_date,
-  scale_fill_datetime,
-  scale_fill_discrete,
-  scale_fill_distiller,
-  scale_fill_fermenter,
-  scale_fill_gradient,
-  scale_fill_gradient2,
-  scale_fill_gradientn,
-  scale_fill_identity,
-  scale_fill_log10,
-  scale_fill_manual,
-  scale_fill_sqrt,
-  scale_fill_steps,
-  scale_fill_steps2,
-  scale_fill_stepsn,
-  scale_fill_viridis_b,
-  scale_fill_viridis_c,
-  scale_fill_viridis_d,
-  scale_fill_hue,
-  scale_fill_grey,
-  scale_fill_gray,
-  scale_fill_ordinal,
-  scaleXBinned,
-  scaleXContinuous,
-  scaleXDate,
-  scaleXDatetime,
-  scaleXTime,
-  scaleXDiscrete,
-  scaleXLog10,
-  scaleXReverse,
-  scaleXSqrt,
-  scaleYBinned,
-  scaleYContinuous,
-  scaleYDate,
-  scaleYDatetime,
-  scaleYTime,
-  scaleXMonthDay,
-  scaleYMonthDay,
-  scaleYDiscrete,
-  scaleYLog10,
-  scaleYReverse,
-  scaleYSqrt,
-  scale_x_binned,
-  scale_x_continuous,
-  scale_x_date,
-  scale_x_datetime,
-  scale_x_time,
-  scale_x_discrete,
-  scale_x_log10,
-  scale_x_reverse,
-  scale_x_sqrt,
-  scale_y_binned,
-  scale_y_continuous,
-  scale_y_date,
-  scale_y_datetime,
-  scale_y_time,
-  scale_x_month_day,
-  scale_y_month_day,
-  scale_y_discrete,
-  scale_y_log10,
-  scale_y_reverse,
-  scale_y_sqrt,
-} from "./scale-helpers.js";
-export {
-  scaleAlpha,
-  scaleAlphaBinned,
-  scaleAlphaContinuous,
-  scaleAlphaDate,
-  scaleAlphaDatetime,
-  scaleAlphaDiscrete,
-  scaleAlphaIdentity,
-  scaleAlphaManual,
-  scaleAlphaOrdinal,
-  scaleLinewidth,
-  scaleLinewidthBinned,
-  scaleLinewidthContinuous,
-  scaleLinewidthDate,
-  scaleLinewidthDatetime,
-  scaleLinewidthDiscrete,
-  scaleLinewidthIdentity,
-  scaleLinewidthManual,
-  scaleLinewidthOrdinal,
-  scaleLinetype,
-  scaleLinetypeBinned,
-  scaleLinetypeDiscrete,
-  scaleLinetypeIdentity,
-  scaleLinetypeManual,
-  scaleShape,
-  scaleShapeBinned,
-  scaleShapeDiscrete,
-  scaleShapeIdentity,
-  scaleShapeManual,
-  scaleShapeOrdinal,
-  scaleSize,
-  scaleSizeArea,
-  scaleSizeBinned,
-  scaleSizeBinnedArea,
-  scaleSizeContinuous,
-  scaleSizeDate,
-  scaleSizeDatetime,
-  scaleSizeDiscrete,
-  scaleSizeIdentity,
-  scaleSizeManual,
-  scaleSizeOrdinal,
-  scaleRadius,
-  scale_alpha,
-  scale_alpha_binned,
-  scale_alpha_continuous,
-  scale_alpha_date,
-  scale_alpha_datetime,
-  scale_alpha_discrete,
-  scale_alpha_identity,
-  scale_alpha_manual,
-  scale_alpha_ordinal,
-  scale_linetype,
-  scale_linetype_binned,
-  scale_linetype_discrete,
-  scale_linetype_identity,
-  scale_linetype_manual,
-  scale_linewidth,
-  scale_linewidth_binned,
-  scale_linewidth_continuous,
-  scale_linewidth_date,
-  scale_linewidth_datetime,
-  scale_linewidth_discrete,
-  scale_linewidth_identity,
-  scale_linewidth_manual,
-  scale_linewidth_ordinal,
-  scale_shape,
-  scale_shape_binned,
-  scale_shape_discrete,
-  scale_shape_identity,
-  scale_shape_manual,
-  scale_shape_ordinal,
-  scale_size,
-  scale_size_area,
-  scale_size_binned,
-  scale_size_binned_area,
-  scale_size_continuous,
-  scale_size_date,
-  scale_size_datetime,
-  scale_size_discrete,
-  scale_size_identity,
-  scale_size_manual,
-  scale_size_ordinal,
-  scale_radius,
-} from "./scale-helpers.js";
-export type {
-  BinnedColorScaleOptions,
-  ColorBrewerScaleOptions,
-  ColorDistillerScaleOptions,
-  ColorFermenterScaleOptions,
-  ColorScaleOptions,
-  ContinuousPositionScaleOptions,
-  DiscreteColorScaleOptions,
-  IdentityColorScaleOptions,
-  StepsScaleOptions,
-  Steps2ScaleOptions,
-  StepsnScaleOptions,
-  GradientScaleOptions,
-  Gradient2ScaleOptions,
-  GradientnScaleOptions,
-  HueScaleOptions,
-  GreyScaleOptions,
-  OrdinalColorScaleOptions,
-  ManualColorScaleOptions,
-  ViridisOptionName,
-  ViridisScaleOptions,
-  MultiIdentityScaleOptions,
-  MultiManualScaleOptions,
-  MultiScaleAesthetic,
-  MultiScaleChannel,
-  RecommendedScaleType,
-  ScaleTypeAesthetic,
-  DiscreteNumericStyleScaleOptions,
-  BinnedFiniteStyleScaleOptions,
-  DiscreteFiniteStyleScaleOptions,
-  FiniteStyleScaleOptions,
-  IdentityFiniteStyleScaleOptions,
-  IdentityNumericStyleScaleOptions,
-  ManualFiniteStyleScaleOptions,
-  ManualNumericStyleScaleOptions,
-  NumericStyleScaleOptions,
-  SequentialStyleScaleOptions,
-  SizeAreaScaleOptions,
-  SizeSequentialStyleScaleOptions,
-  SizeTemporalNumericStyleScaleOptions,
-  TemporalNumericStyleScaleOptions,
-  SequentialColorScaleOptions,
-  TemporalColorScaleOptions,
-  TransformedColorScaleOptions,
-  DiscretePositionScaleOptions,
-  TemporalScaleOptions,
-  TransformedPositionScaleOptions,
-} from "./scale-helpers.js";
+export { configuredColorScaleType, canonicalMultiScaleChannel } from "./scale-helpers.js";
+export { scaleContinuousIdentity, scaleDiscreteIdentity } from "./scale-helpers.js";
+export { scaleDiscreteManual, scaleType, scale_continuous_identity } from "./scale-helpers.js";
+export { scale_discrete_identity, scale_discrete_manual, scale_type } from "./scale-helpers.js";
+export { scaleColorBinned, scaleColorBrewer, scaleColorContinuous } from "./scale-helpers.js";
+export { scaleColorDate, scaleColorDatetime, scaleColorDiscrete } from "./scale-helpers.js";
+export { scaleColorDistiller, scaleColorFermenter, scaleColorGradient } from "./scale-helpers.js";
+export { scaleColorGradient2, scaleColorGradientn, scaleColorIdentity } from "./scale-helpers.js";
+export { scaleColorLog10, scaleColorManual, scaleColorSqrt } from "./scale-helpers.js";
+export { scaleColorSteps, scaleColorSteps2, scaleColorStepsn } from "./scale-helpers.js";
+export { scaleColorHue, scaleColorGrey, scaleColorGray } from "./scale-helpers.js";
+export { scaleColorOrdinal, scaleColourBinned, scaleColourBrewer } from "./scale-helpers.js";
+export { scaleColourContinuous, scaleColourDate, scaleColourDatetime } from "./scale-helpers.js";
+export { scaleColourDiscrete, scaleColourDistiller } from "./scale-helpers.js";
+export { scaleColourFermenter, scaleColourGradient } from "./scale-helpers.js";
+export { scaleColourGradient2, scaleColourGradientn } from "./scale-helpers.js";
+export { scaleColourIdentity, scaleColourLog10, scaleColourManual } from "./scale-helpers.js";
+export { scaleColourSqrt, scaleColourSteps, scaleColourSteps2 } from "./scale-helpers.js";
+export { scaleColourStepsn, scaleColourHue, scaleColourGrey } from "./scale-helpers.js";
+export { scaleColourGray, scaleColourOrdinal, scaleFillBinned } from "./scale-helpers.js";
+export { scaleFillBrewer, scaleFillContinuous, scaleFillDate } from "./scale-helpers.js";
+export { scaleFillDatetime, scaleFillDiscrete, scaleFillDistiller } from "./scale-helpers.js";
+export { scaleFillFermenter, scaleFillGradient, scaleFillGradient2 } from "./scale-helpers.js";
+export { scaleFillGradientn, scaleFillIdentity, scaleFillLog10 } from "./scale-helpers.js";
+export { scaleFillManual, scaleFillSqrt, scaleFillSteps } from "./scale-helpers.js";
+export { scaleFillSteps2, scaleFillStepsn, scaleColorViridisB } from "./scale-helpers.js";
+export { scaleColorViridisC, scaleColorViridisD, scaleColourViridisB } from "./scale-helpers.js";
+export { scaleColourViridisC, scaleColourViridisD, scaleFillViridisB } from "./scale-helpers.js";
+export { scaleFillViridisC, scaleFillViridisD, scaleFillHue } from "./scale-helpers.js";
+export { scaleFillGrey, scaleFillGray, scaleFillOrdinal } from "./scale-helpers.js";
+export { scale_color_binned, scale_color_brewer, scale_color_continuous } from "./scale-helpers.js";
+export { scale_color_date, scale_color_datetime, scale_color_discrete } from "./scale-helpers.js";
+export { scale_color_distiller, scale_color_fermenter } from "./scale-helpers.js";
+export { scale_color_gradient, scale_color_gradient2 } from "./scale-helpers.js";
+export { scale_color_gradientn, scale_color_identity, scale_color_log10 } from "./scale-helpers.js";
+export { scale_color_manual, scale_color_sqrt, scale_color_steps } from "./scale-helpers.js";
+export { scale_color_steps2, scale_color_stepsn, scale_color_viridis_b } from "./scale-helpers.js";
+export { scale_color_viridis_c, scale_color_viridis_d, scale_color_hue } from "./scale-helpers.js";
+export { scale_color_grey, scale_color_gray, scale_color_ordinal } from "./scale-helpers.js";
+export { scale_colour_binned, scale_colour_brewer } from "./scale-helpers.js";
+export { scale_colour_continuous, scale_colour_date } from "./scale-helpers.js";
+export { scale_colour_datetime, scale_colour_discrete } from "./scale-helpers.js";
+export { scale_colour_distiller, scale_colour_fermenter } from "./scale-helpers.js";
+export { scale_colour_gradient, scale_colour_gradient2 } from "./scale-helpers.js";
+export { scale_colour_gradientn, scale_colour_identity } from "./scale-helpers.js";
+export { scale_colour_log10, scale_colour_manual, scale_colour_sqrt } from "./scale-helpers.js";
+export { scale_colour_steps, scale_colour_steps2, scale_colour_stepsn } from "./scale-helpers.js";
+export { scale_colour_viridis_b, scale_colour_viridis_c } from "./scale-helpers.js";
+export { scale_colour_viridis_d, scale_colour_hue, scale_colour_grey } from "./scale-helpers.js";
+export { scale_colour_gray, scale_colour_ordinal, scale_fill_binned } from "./scale-helpers.js";
+export { scale_fill_brewer, scale_fill_continuous, scale_fill_date } from "./scale-helpers.js";
+export { scale_fill_datetime, scale_fill_discrete, scale_fill_distiller } from "./scale-helpers.js";
+export { scale_fill_fermenter, scale_fill_gradient } from "./scale-helpers.js";
+export { scale_fill_gradient2, scale_fill_gradientn } from "./scale-helpers.js";
+export { scale_fill_identity, scale_fill_log10, scale_fill_manual } from "./scale-helpers.js";
+export { scale_fill_sqrt, scale_fill_steps, scale_fill_steps2 } from "./scale-helpers.js";
+export { scale_fill_stepsn, scale_fill_viridis_b, scale_fill_viridis_c } from "./scale-helpers.js";
+export { scale_fill_viridis_d, scale_fill_hue, scale_fill_grey } from "./scale-helpers.js";
+export { scale_fill_gray, scale_fill_ordinal, scaleXBinned } from "./scale-helpers.js";
+export { scaleXContinuous, scaleXDate, scaleXDatetime, scaleXTime } from "./scale-helpers.js";
+export { scaleXDiscrete, scaleXLog10, scaleXReverse, scaleXSqrt } from "./scale-helpers.js";
+export { scaleYBinned, scaleYContinuous, scaleYDate, scaleYDatetime } from "./scale-helpers.js";
+export { scaleYTime, scaleXMonthDay, scaleYMonthDay, scaleYDiscrete } from "./scale-helpers.js";
+export { scaleYLog10, scaleYReverse, scaleYSqrt, scale_x_binned } from "./scale-helpers.js";
+export { scale_x_continuous, scale_x_date, scale_x_datetime } from "./scale-helpers.js";
+export { scale_x_time, scale_x_discrete, scale_x_log10, scale_x_reverse } from "./scale-helpers.js";
+export { scale_x_sqrt, scale_y_binned, scale_y_continuous, scale_y_date } from "./scale-helpers.js";
+export { scale_y_datetime, scale_y_time, scale_x_month_day } from "./scale-helpers.js";
+export { scale_y_month_day, scale_y_discrete, scale_y_log10 } from "./scale-helpers.js";
+export { scale_y_reverse, scale_y_sqrt } from "./scale-helpers.js";
+export { scaleAlpha, scaleAlphaBinned, scaleAlphaContinuous } from "./scale-helpers.js";
+export { scaleAlphaDate, scaleAlphaDatetime, scaleAlphaDiscrete } from "./scale-helpers.js";
+export { scaleAlphaIdentity, scaleAlphaManual, scaleAlphaOrdinal } from "./scale-helpers.js";
+export { scaleLinewidth, scaleLinewidthBinned, scaleLinewidthContinuous } from "./scale-helpers.js";
+export { scaleLinewidthDate, scaleLinewidthDatetime } from "./scale-helpers.js";
+export { scaleLinewidthDiscrete, scaleLinewidthIdentity } from "./scale-helpers.js";
+export { scaleLinewidthManual, scaleLinewidthOrdinal, scaleLinetype } from "./scale-helpers.js";
+export { scaleLinetypeBinned, scaleLinetypeDiscrete } from "./scale-helpers.js";
+export { scaleLinetypeIdentity, scaleLinetypeManual, scaleShape } from "./scale-helpers.js";
+export { scaleShapeBinned, scaleShapeDiscrete, scaleShapeIdentity } from "./scale-helpers.js";
+export { scaleShapeManual, scaleShapeOrdinal, scaleSize, scaleSizeArea } from "./scale-helpers.js";
+export { scaleSizeBinned, scaleSizeBinnedArea, scaleSizeContinuous } from "./scale-helpers.js";
+export { scaleSizeDate, scaleSizeDatetime, scaleSizeDiscrete } from "./scale-helpers.js";
+export { scaleSizeIdentity, scaleSizeManual, scaleSizeOrdinal } from "./scale-helpers.js";
+export { scaleRadius, scale_alpha, scale_alpha_binned } from "./scale-helpers.js";
+export { scale_alpha_continuous, scale_alpha_date, scale_alpha_datetime } from "./scale-helpers.js";
+export { scale_alpha_discrete, scale_alpha_identity, scale_alpha_manual } from "./scale-helpers.js";
+export { scale_alpha_ordinal, scale_linetype, scale_linetype_binned } from "./scale-helpers.js";
+export { scale_linetype_discrete, scale_linetype_identity } from "./scale-helpers.js";
+export { scale_linetype_manual, scale_linewidth, scale_linewidth_binned } from "./scale-helpers.js";
+export { scale_linewidth_continuous, scale_linewidth_date } from "./scale-helpers.js";
+export { scale_linewidth_datetime, scale_linewidth_discrete } from "./scale-helpers.js";
+export { scale_linewidth_identity, scale_linewidth_manual } from "./scale-helpers.js";
+export { scale_linewidth_ordinal, scale_shape, scale_shape_binned } from "./scale-helpers.js";
+export { scale_shape_discrete, scale_shape_identity, scale_shape_manual } from "./scale-helpers.js";
+export { scale_shape_ordinal, scale_size, scale_size_area } from "./scale-helpers.js";
+export { scale_size_binned, scale_size_binned_area } from "./scale-helpers.js";
+export { scale_size_continuous, scale_size_date, scale_size_datetime } from "./scale-helpers.js";
+export { scale_size_discrete, scale_size_identity, scale_size_manual } from "./scale-helpers.js";
+export { scale_size_ordinal, scale_radius } from "./scale-helpers.js";
+export type { BinnedColorScaleOptions, ColorBrewerScaleOptions } from "./scale-helpers.js";
+export type { ColorDistillerScaleOptions, ColorFermenterScaleOptions } from "./scale-helpers.js";
+export type { ColorScaleOptions, ContinuousPositionScaleOptions } from "./scale-helpers.js";
+export type { DiscreteColorScaleOptions, IdentityColorScaleOptions } from "./scale-helpers.js";
+export type { StepsScaleOptions, Steps2ScaleOptions, StepsnScaleOptions } from "./scale-helpers.js";
+export type { GradientScaleOptions, Gradient2ScaleOptions } from "./scale-helpers.js";
+export type { GradientnScaleOptions, HueScaleOptions, GreyScaleOptions } from "./scale-helpers.js";
+export type { OrdinalColorScaleOptions, ManualColorScaleOptions } from "./scale-helpers.js";
+export type { ViridisOptionName, ViridisScaleOptions } from "./scale-helpers.js";
+export type { MultiIdentityScaleOptions, MultiManualScaleOptions } from "./scale-helpers.js";
+export type { MultiScaleAesthetic, MultiScaleChannel } from "./scale-helpers.js";
+export type { RecommendedScaleType, ScaleTypeAesthetic } from "./scale-helpers.js";
+export type { DiscreteNumericStyleScaleOptions } from "./scale-helpers.js";
+export type { BinnedFiniteStyleScaleOptions } from "./scale-helpers.js";
+export type { DiscreteFiniteStyleScaleOptions, FiniteStyleScaleOptions } from "./scale-helpers.js";
+export type { IdentityFiniteStyleScaleOptions } from "./scale-helpers.js";
+export type { IdentityNumericStyleScaleOptions } from "./scale-helpers.js";
+export type { ManualFiniteStyleScaleOptions } from "./scale-helpers.js";
+export type { ManualNumericStyleScaleOptions, NumericStyleScaleOptions } from "./scale-helpers.js";
+export type { SequentialStyleScaleOptions, SizeAreaScaleOptions } from "./scale-helpers.js";
+export type { SizeSequentialStyleScaleOptions } from "./scale-helpers.js";
+export type { SizeTemporalNumericStyleScaleOptions } from "./scale-helpers.js";
+export type { TemporalNumericStyleScaleOptions } from "./scale-helpers.js";
+export type { SequentialColorScaleOptions, TemporalColorScaleOptions } from "./scale-helpers.js";
+export type { TransformedColorScaleOptions } from "./scale-helpers.js";
+export type { DiscretePositionScaleOptions, TemporalScaleOptions } from "./scale-helpers.js";
+export type { TransformedPositionScaleOptions } from "./scale-helpers.js";
 
 // Portability (PortableSpec vs RuntimeSpec)
-export {
-  isPortable,
-  portabilityIssues,
-  toPortable,
-  toPortableLossy,
-  UnportableSpecError,
-} from "./portability.js";
+export { isPortable, portabilityIssues, toPortable, toPortableLossy } from "./portability.js";
+export { UnportableSpecError } from "./portability.js";
 export type { JSONValue, LossyResult, PortabilityIssue } from "./portability.js";
-export type {
-  ChannelFn,
-  RuntimeAes,
-  RuntimeAreaLayer,
-  RuntimeBarLayer,
-  RuntimeBoxplotLayer,
-  RuntimeChannelValue,
-  RuntimeColLayer,
-  RuntimeDensityLayer,
-  RuntimeErrorbarLayer,
-  RuntimeLinerangeLayer,
-  RuntimePointrangeLayer,
-  RuntimeCrossbarLayer,
-  RuntimeRibbonLayer,
-  RuntimeHistogramLayer,
-  RuntimeFreqpolyLayer,
-  RuntimeHlineLayer,
-  RuntimeJitterLayer,
-  RuntimeLayerSpec,
-  RuntimeLineLayer,
-  RuntimePathLayer,
-  RuntimePointLayer,
-  RuntimeRasterLayer,
-  RuntimeHexLayer,
-  RuntimeRectLayer,
-  RuntimeSegmentLayer,
-  RuntimeCountLayer,
-  RuntimeViolinLayer,
-  RuntimeFunctionLayer,
-  RuntimePolygonLayer,
-  RuntimeAblineLayer,
-  RuntimeContourLayer,
-  RuntimeDensity2dLayer,
-  RuntimeDensity2dFilledLayer,
-  RuntimeDotplotLayer,
-  RuntimeMapLayer,
-  RuntimeBlankLayer,
-  RuntimeSpokeLayer,
-  RuntimeRugLayer,
-  RuntimeSfLayer,
-  RuntimeSfTextLayer,
-  RuntimeSfLabelLayer,
-  RuntimeCurveLayer,
-  RuntimeStepLayer,
-  RuntimeQqLayer,
-  RuntimeQqLineLayer,
-  RuntimeRuleLayer,
-  RuntimeSmoothLayer,
-  RuntimeQuantileLayer,
-  RuntimeSpec,
-  RuntimeTextLayer,
-  RuntimeLabelLayer,
-  RuntimeTileLayer,
-  RuntimeBin2dLayer,
-  RuntimeVlineLayer,
-} from "./runtime.js";
+export type { ChannelFn, RuntimeAes, RuntimeAreaLayer, RuntimeBarLayer } from "./runtime.js";
+export type { RuntimeBoxplotLayer, RuntimeChannelValue, RuntimeColLayer } from "./runtime.js";
+export type { RuntimeDensityLayer, RuntimeErrorbarLayer } from "./runtime.js";
+export type { RuntimeLinerangeLayer, RuntimePointrangeLayer } from "./runtime.js";
+export type { RuntimeCrossbarLayer, RuntimeRibbonLayer, RuntimeHistogramLayer } from "./runtime.js";
+export type { RuntimeFreqpolyLayer, RuntimeHlineLayer, RuntimeJitterLayer } from "./runtime.js";
+export type { RuntimeLayerSpec, RuntimeLineLayer, RuntimePathLayer } from "./runtime.js";
+export type { RuntimePointLayer, RuntimeRasterLayer, RuntimeHexLayer } from "./runtime.js";
+export type { RuntimeRectLayer, RuntimeSegmentLayer, RuntimeCountLayer } from "./runtime.js";
+export type { RuntimeViolinLayer, RuntimeFunctionLayer, RuntimePolygonLayer } from "./runtime.js";
+export type { RuntimeAblineLayer, RuntimeContourLayer, RuntimeDensity2dLayer } from "./runtime.js";
+export type { RuntimeDensity2dFilledLayer, RuntimeDotplotLayer } from "./runtime.js";
+export type { RuntimeMapLayer, RuntimeBlankLayer, RuntimeSpokeLayer } from "./runtime.js";
+export type { RuntimeRugLayer, RuntimeSfLayer, RuntimeSfTextLayer } from "./runtime.js";
+export type { RuntimeSfLabelLayer, RuntimeCurveLayer, RuntimeStepLayer } from "./runtime.js";
+export type { RuntimeQqLayer, RuntimeQqLineLayer, RuntimeRuleLayer } from "./runtime.js";
+export type { RuntimeSmoothLayer, RuntimeQuantileLayer, RuntimeSpec } from "./runtime.js";
+export type { RuntimeTextLayer, RuntimeLabelLayer, RuntimeTileLayer } from "./runtime.js";
+export type { RuntimeBin2dLayer, RuntimeVlineLayer } from "./runtime.js";
 
 // Canonicalizer
 /** @lifecycle stable-intent */
 export { normalize } from "./normalize.js";
 export { normalizeChannel } from "./normalize.js";
-export type {
-  AesInput,
-  AreaLayerInput,
-  BarLayerInput,
-  BoxplotLayerInput,
-  ChannelInput,
-  ColLayerInput,
-  DensityLayerInput,
-  ErrorbarLayerInput,
-  LinerangeLayerInput,
-  PointrangeLayerInput,
-  CrossbarLayerInput,
-  RibbonLayerInput,
-  SegmentLayerInput,
-  CountLayerInput,
-  ViolinLayerInput,
-  FunctionLayerInput,
-  PolygonLayerInput,
-  AblineLayerInput,
-  ContourLayerInput,
-  Density2dLayerInput,
-  Density2dFilledLayerInput,
-  DotplotLayerInput,
-  MapLayerInput,
-  BlankLayerInput,
-  SpokeLayerInput,
-  RugLayerInput,
-  SfLayerInput,
-  SfTextLayerInput,
-  SfLabelLayerInput,
-  CurveLayerInput,
-  StepLayerInput,
-  QqLayerInput,
-  QqLineLayerInput,
-  FacetFieldInput,
-  FacetInput,
-  HistogramLayerInput,
-  FreqpolyLayerInput,
-  HlineLayerInput,
-  JitterLayerInput,
-  LayerInput,
-  LineLayerInput,
-  PathLayerInput,
-  PointLayerInput,
-  RasterLayerInput,
-  HexLayerInput,
-  RectLayerInput,
-  RuleLayerInput,
-  QuantileLayerInput,
-  SmoothLayerInput,
-  TileLayerInput,
-  Bin2dLayerInput,
-  SpecInput,
-  TextLayerInput,
-  LabelLayerInput,
-  VlineLayerInput,
-} from "./normalize.js";
+export type { AesInput, AreaLayerInput, BarLayerInput, BoxplotLayerInput } from "./normalize.js";
+export type { ChannelInput, ColLayerInput, DensityLayerInput } from "./normalize.js";
+export type { ErrorbarLayerInput, LinerangeLayerInput, PointrangeLayerInput } from "./normalize.js";
+export type { CrossbarLayerInput, RibbonLayerInput, SegmentLayerInput } from "./normalize.js";
+export type { CountLayerInput, ViolinLayerInput, FunctionLayerInput } from "./normalize.js";
+export type { PolygonLayerInput, AblineLayerInput, ContourLayerInput } from "./normalize.js";
+export type { Density2dLayerInput, Density2dFilledLayerInput } from "./normalize.js";
+export type { DotplotLayerInput, MapLayerInput, BlankLayerInput } from "./normalize.js";
+export type { SpokeLayerInput, RugLayerInput, SfLayerInput } from "./normalize.js";
+export type { SfTextLayerInput, SfLabelLayerInput, CurveLayerInput } from "./normalize.js";
+export type { StepLayerInput, QqLayerInput, QqLineLayerInput } from "./normalize.js";
+export type { FacetFieldInput, FacetInput, HistogramLayerInput } from "./normalize.js";
+export type { FreqpolyLayerInput, HlineLayerInput, JitterLayerInput } from "./normalize.js";
+export type { LayerInput, LineLayerInput, PathLayerInput, PointLayerInput } from "./normalize.js";
+export type { RasterLayerInput, HexLayerInput, RectLayerInput } from "./normalize.js";
+export type { RuleLayerInput, QuantileLayerInput, SmoothLayerInput } from "./normalize.js";
+export type { TileLayerInput, Bin2dLayerInput, SpecInput, TextLayerInput } from "./normalize.js";
+export type { LabelLayerInput, VlineLayerInput } from "./normalize.js";
 
 // Validation + agent error contract
 /** @lifecycle stable-intent */
@@ -923,17 +358,10 @@ export type { ErrorCatalogEntry } from "./errors.js";
 export { PIPELINE_ERROR_CATALOG } from "./pipeline-error-catalog.js";
 export type { PipelineErrorCatalogEntry, PipelineErrorCode } from "./pipeline-error-catalog.js";
 export { DEFAULT_VALIDATE_LIMITS, effectiveChannel, STAT_COLUMNS } from "./validate-data.js";
-export type {
-  DataProfile,
-  DataProfileField,
-  ProfileFieldType,
-  ValidateLimits,
-  ValidateOptions,
-} from "./validate-data.js";
+export type { DataProfile, DataProfileField, ProfileFieldType } from "./validate-data.js";
+export type { ValidateLimits, ValidateOptions } from "./validate-data.js";
+export { didYouMean, ERROR_CODES, levenshtein } from "./errors.js";
 export {
-  didYouMean,
-  ERROR_CODES,
-  levenshtein,
   SpecValidationError, // @lifecycle stable-intent
 } from "./errors.js";
 /** @lifecycle stable-intent */
@@ -943,76 +371,30 @@ export type { SpecError, SpecErrorCode, SpecErrorFix } from "./errors.js";
 export { aes, gg, GGBuilder } from "./builder.js";
 /** Authoring data snapshot + portable Date→ISO (shared by builder + assemble). */
 export { calendarDateFields, toAuthoringDataRef, toDataRef } from "./builder-data.js";
-export type {
-  AuthoringCellValue,
-  AuthoringColumns,
-  AuthoringDataRef,
-  AuthoringRows,
-  DataInput,
-  GeomAreaOptions,
-  GeomBarOptions,
-  GeomBoxplotOptions,
-  GeomColOptions,
-  GeomDensityOptions,
-  GeomDensity2dOptions,
-  GeomDensity2dFilledOptions,
-  GeomDotplotOptions,
-  GeomErrorbarOptions,
-  GeomLinerangeOptions,
-  GeomPointrangeOptions,
-  GeomCrossbarOptions,
-  GeomHistogramOptions,
-  GeomFreqpolyOptions,
-  GeomHlineOptions,
-  GeomJitterOptions,
-  GeomLineOptions,
-  GeomPathOptions,
-  GeomPointOptions,
-  GeomQuantileOptions,
-  GeomContourOptions,
-  GeomRasterOptions,
-  GeomHexOptions,
-  GeomRectOptions,
-  GeomRuleOptions,
-  GeomRugOptions,
-  GeomSegmentOptions,
-  GeomCountOptions,
-  GeomViolinOptions,
-  GeomFunctionOptions,
-  GeomPolygonOptions,
-  GeomAblineOptions,
-  GeomCurveOptions,
-  GeomMapOptions,
-  GeomBlankOptions,
-  GeomSpokeOptions,
-  GeomSfOptions,
-  GeomSfTextOptions,
-  GeomSfLabelOptions,
-  GeomStepOptions,
-  GeomQqOptions,
-  GeomQqLineOptions,
-  GeomSmoothOptions,
-  GeomTextOptions,
-  GeomLabelOptions,
-  GeomTileOptions,
-  GeomBin2dOptions,
-  GeomVlineOptions,
-} from "./builder.js";
+export type { AuthoringCellValue, AuthoringColumns, AuthoringDataRef } from "./builder.js";
+export type { AuthoringRows, DataInput, GeomAreaOptions, GeomBarOptions } from "./builder.js";
+export type { GeomBoxplotOptions, GeomColOptions, GeomDensityOptions } from "./builder.js";
+export type { GeomDensity2dOptions, GeomDensity2dFilledOptions } from "./builder.js";
+export type { GeomDotplotOptions, GeomErrorbarOptions, GeomLinerangeOptions } from "./builder.js";
+export type { GeomPointrangeOptions, GeomCrossbarOptions } from "./builder.js";
+export type { GeomHistogramOptions, GeomFreqpolyOptions, GeomHlineOptions } from "./builder.js";
+export type { GeomJitterOptions, GeomLineOptions, GeomPathOptions } from "./builder.js";
+export type { GeomPointOptions, GeomQuantileOptions, GeomContourOptions } from "./builder.js";
+export type { GeomRasterOptions, GeomHexOptions, GeomRectOptions } from "./builder.js";
+export type { GeomRuleOptions, GeomRugOptions, GeomSegmentOptions } from "./builder.js";
+export type { GeomCountOptions, GeomViolinOptions, GeomFunctionOptions } from "./builder.js";
+export type { GeomPolygonOptions, GeomAblineOptions, GeomCurveOptions } from "./builder.js";
+export type { GeomMapOptions, GeomBlankOptions, GeomSpokeOptions } from "./builder.js";
+export type { GeomSfOptions, GeomSfTextOptions, GeomSfLabelOptions } from "./builder.js";
+export type { GeomStepOptions, GeomQqOptions, GeomQqLineOptions } from "./builder.js";
+export type { GeomSmoothOptions, GeomTextOptions, GeomLabelOptions } from "./builder.js";
+export type { GeomTileOptions, GeomBin2dOptions, GeomVlineOptions } from "./builder.js";
 
 // Within-mark paint helpers (#591)
-export {
-  fillPaintLinear,
-  fillPaintRadial,
-  glow,
-  strokePaintLinear,
-  strokePaintRadial,
-} from "./paint-helpers.js";
-export type {
-  ColorStopInput,
-  GlowOptions,
-  LinearPaintOptions,
-  RadialPaintOptions,
-} from "./paint-helpers.js";
+export { fillPaintLinear, fillPaintRadial, glow, strokePaintLinear } from "./paint-helpers.js";
+export { strokePaintRadial } from "./paint-helpers.js";
+export type { ColorStopInput, GlowOptions, LinearPaintOptions } from "./paint-helpers.js";
+export type { RadialPaintOptions } from "./paint-helpers.js";
 
 // Schema artifact (schema/v0.json)
 export { buildSchemaArtifact, SCHEMA_VERSION, schemaArtifactJSON } from "./artifact.js";
