@@ -5,66 +5,19 @@
  */
 import type {
   A11yMode,
-  AreaParams,
-  BarParams,
-  BoxplotParams,
   ChannelValue,
-  ColParams,
   CoordSpec,
   DataRef,
-  DensityParams,
-  Density2dParams,
-  DotplotParams,
-  ErrorbarParams,
-  LinerangeParams,
-  PointrangeParams,
-  CrossbarParams,
-  RibbonParams,
   FacetScales,
   GuidesSpec,
   InlineData,
   Labs,
   LegendSpec,
-  LineParams,
-  PathParams,
-  PointParams,
-  PointPosition,
-  PositionParams,
-  RasterParams,
-  HexParams,
-  RectParams,
-  RenderBackend,
-  RuleParams,
-  HlineParams,
-  VlineParams,
-  RugParams,
-  SegmentParams,
-  ViolinParams,
-  FunctionParams,
-  PolygonParams,
-  AblineParams,
-  CurveParams,
-  MapParams,
-  BlankParams,
-  SfParams,
-  SfTextParams,
-  SfLabelParams,
-  SpokeParams,
-  StepParams,
-  QqParams,
-  QqLineParams,
   Scales,
-  QuantileParams,
-  ContourParams,
-  SmoothParams,
-  StackablePosition,
-  TextParams,
-  LabelParams,
   ThemeName,
   ThemeSpec,
-  TileParams,
-  Bin2dParams,
 } from "./schema.js";
+import type { LayerInput } from "./normalize-input-layers-special.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
 export type ChannelInput = string | ChannelValue;
@@ -98,24 +51,6 @@ export interface AesInput {
   radius?: ChannelInput;
 }
 
-interface LayerInputBase {
-  aes?: AesInput;
-  /**
-   * Optional layer-local data. When omitted, the layer inherits plot-level
-   * `data`. Accepts the same DataRef forms as plot-level data.
-   */
-  data?: DataRef;
-  /** Rendering backend hint ("auto" is the default and canonicalizes away). */
-  render?: RenderBackend;
-  /**
-   * Set false to exclude this layer from inspection (#1068): its marks never
-   * become tooltip, hover, or keyboard-traversal candidates. For decorative
-   * layers whose marks would otherwise capture the pointer. Schema admits
-   * only the literal `false` (same contract as GeomProps / PortableSpec).
-   */
-  inspect?: false;
-}
-
 /** Facet field accepted at the TS/builder level (bare-string field shorthand). */
 export type FacetFieldInput =
   | string
@@ -141,416 +76,61 @@ export interface FacetInput {
   };
 }
 
-export interface PointLayerInput extends LayerInputBase {
-  geom: "point";
-  stat?: "identity" | "unique" | "summary_bin" | "summary_rolling" | "manual" | "sum";
-  position?: PointPosition;
-  positionParams?: PositionParams;
-  params?: PointParams;
-}
+export type {
+  AreaLayerInput,
+  BarLayerInput,
+  BoxplotLayerInput,
+  ColLayerInput,
+  ContourLayerInput,
+  CountLayerInput,
+  CrossbarLayerInput,
+  Density2dFilledLayerInput,
+  Density2dLayerInput,
+  DensityLayerInput,
+  DotplotLayerInput,
+  ErrorbarLayerInput,
+  FreqpolyLayerInput,
+  HistogramLayerInput,
+  HlineLayerInput,
+  JitterLayerInput,
+  LabelLayerInput,
+  LineLayerInput,
+  LinerangeLayerInput,
+  PathLayerInput,
+  PointLayerInput,
+  PointrangeLayerInput,
+  QuantileLayerInput,
+  RibbonLayerInput,
+  RuleLayerInput,
+  SmoothLayerInput,
+  TextLayerInput,
+  ViolinLayerInput,
+  VlineLayerInput,
+} from "./normalize-input-layers-marks.js";
 
-export interface CountLayerInput extends LayerInputBase {
-  geom: "count";
-  stat?: "sum";
-  position?: PointPosition;
-  positionParams?: PositionParams;
-  params?: PointParams;
-}
-
-export interface LineLayerInput extends LayerInputBase {
-  geom: "line";
-  /** identity | unique | bin | align | connect | summary_bin | manual | ecdf */
-  stat?:
-    | "identity"
-    | "unique"
-    | "bin"
-    | "align"
-    | "connect"
-    | "summary_bin"
-    | "summary_rolling"
-    | "manual"
-    | "ecdf";
-  position?: "identity";
-  params?: LineParams;
-}
-
-export interface PathLayerInput extends LayerInputBase {
-  geom: "path";
-  /** identity | unique | connect | manual (#814) | ellipse (#812) */
-  stat?: "identity" | "unique" | "connect" | "manual" | "ellipse";
-  position?: "identity";
-  params?: PathParams;
-}
-
-export interface ColLayerInput extends LayerInputBase {
-  geom: "col";
-  stat?: "identity" | "unique";
-  position?: StackablePosition;
-  params?: ColParams;
-}
-
-export interface BarLayerInput extends LayerInputBase {
-  geom: "bar";
-  stat?: "count" | "bin";
-  position?: StackablePosition;
-  params?: BarParams;
-}
-
-export interface HistogramLayerInput extends LayerInputBase {
-  geom: "histogram";
-  stat?: "bin";
-  position?: StackablePosition;
-  params?: BarParams;
-}
-export interface FreqpolyLayerInput extends LayerInputBase {
-  geom: "freqpoly";
-  stat?: "bin";
-  position?: "identity";
-  params?: LineParams;
-}
-
-export interface AreaLayerInput extends LayerInputBase {
-  geom: "area";
-  stat?: "identity" | "unique" | "align";
-  position?: StackablePosition;
-  params?: AreaParams;
-}
-
-export interface RuleLayerInput extends LayerInputBase {
-  geom: "rule";
-  stat?: "identity" | "unique";
-  position?: "identity";
-  params?: RuleParams;
-}
-
-export interface HlineLayerInput extends LayerInputBase {
-  geom: "hline";
-  stat?: "identity";
-  position?: "identity";
-  params?: HlineParams;
-}
-
-export interface VlineLayerInput extends LayerInputBase {
-  geom: "vline";
-  stat?: "identity";
-  position?: "identity";
-  params?: VlineParams;
-}
-
-export interface JitterLayerInput extends LayerInputBase {
-  geom: "jitter";
-  stat?: "identity";
-  position?: "jitter";
-  positionParams?: PositionParams;
-  params?: PointParams;
-}
-
-export interface TextLayerInput extends LayerInputBase {
-  geom: "text";
-  stat?: "identity" | "unique";
-  position?: "identity" | "nudge";
-  positionParams?: PositionParams;
-  params?: TextParams;
-}
-
-export interface LabelLayerInput extends LayerInputBase {
-  geom: "label";
-  stat?: "identity";
-  position?: "identity" | "nudge";
-  positionParams?: PositionParams;
-  params?: LabelParams;
-}
-
-export interface SmoothLayerInput extends LayerInputBase {
-  geom: "smooth";
-  stat?: "smooth";
-  position?: "identity";
-  params?: SmoothParams;
-}
-
-export interface QuantileLayerInput extends LayerInputBase {
-  geom: "quantile";
-  stat?: "quantile";
-  position?: "identity";
-  params?: QuantileParams;
-}
-
-export interface ContourLayerInput extends LayerInputBase {
-  geom: "contour";
-  stat?: "contour";
-  position?: "identity";
-  params?: ContourParams;
-}
-
-export interface BoxplotLayerInput extends LayerInputBase {
-  geom: "boxplot";
-  stat?: "boxplot";
-  position?: "dodge" | "identity";
-  params?: BoxplotParams;
-}
-
-export interface DensityLayerInput extends LayerInputBase {
-  geom: "density";
-  stat?: "density";
-  position?: "identity";
-  params?: DensityParams;
-}
-
-export interface Density2dLayerInput extends LayerInputBase {
-  geom: "density_2d";
-  stat?: "density_2d";
-  position?: "identity";
-  params?: Density2dParams;
-}
-
-export interface Density2dFilledLayerInput extends LayerInputBase {
-  geom: "density_2d_filled";
-  stat?: "density_2d_filled";
-  position?: "identity";
-  params?: Density2dParams;
-}
-
-export interface DotplotLayerInput extends LayerInputBase {
-  geom: "dotplot";
-  stat?: "bindot";
-  position?: "identity";
-  params?: DotplotParams;
-}
-
-export interface ErrorbarLayerInput extends LayerInputBase {
-  geom: "errorbar";
-  stat?: "identity" | "unique" | "summary" | "summary_bin";
-  position?: "identity";
-  params?: ErrorbarParams;
-}
-
-export interface LinerangeLayerInput extends LayerInputBase {
-  geom: "linerange";
-  stat?: "identity" | "summary";
-  position?: "identity";
-  params?: LinerangeParams;
-}
-
-export interface PointrangeLayerInput extends LayerInputBase {
-  geom: "pointrange";
-  stat?: "identity" | "summary";
-  position?: "identity";
-  params?: PointrangeParams;
-}
-
-export interface CrossbarLayerInput extends LayerInputBase {
-  geom: "crossbar";
-  stat?: "identity" | "summary";
-  position?: "identity";
-  params?: CrossbarParams;
-}
-
-export interface RectLayerInput extends LayerInputBase {
-  geom: "rect";
-  stat?: "identity" | "unique";
-  position?: "identity";
-  params?: RectParams;
-}
-
-export interface TileLayerInput extends LayerInputBase {
-  geom: "tile";
-  stat?: "identity";
-  position?: "identity";
-  params?: TileParams;
-}
-
-export interface Bin2dLayerInput extends LayerInputBase {
-  geom: "bin_2d";
-  stat?: "bin_2d";
-  position?: "identity";
-  params?: Bin2dParams;
-}
-
-export interface RasterLayerInput extends LayerInputBase {
-  geom: "raster";
-  stat?: "identity";
-  position?: "identity";
-  params?: RasterParams;
-}
-
-export interface HexLayerInput extends LayerInputBase {
-  geom: "hex";
-  stat?: "bin_hex";
-  position?: "identity";
-  params?: HexParams;
-}
-
-export interface RibbonLayerInput extends LayerInputBase {
-  geom: "ribbon";
-  stat?: "identity" | "unique";
-  position?: "identity";
-  params?: RibbonParams;
-}
-
-export interface SegmentLayerInput extends LayerInputBase {
-  geom: "segment";
-  stat?: "identity" | "unique";
-  position?: "identity";
-  params?: SegmentParams;
-}
-
-export interface ViolinLayerInput extends LayerInputBase {
-  geom: "violin";
-  stat?: "ydensity";
-  position?: "dodge" | "identity";
-  params?: ViolinParams;
-}
-
-export interface FunctionLayerInput extends LayerInputBase {
-  geom: "function";
-  stat?: "function";
-  position?: "identity";
-  params: FunctionParams;
-}
-
-export interface PolygonLayerInput extends LayerInputBase {
-  geom: "polygon";
-  stat?: "identity";
-  position?: "identity";
-  params?: PolygonParams;
-}
-
-export interface QqLayerInput extends LayerInputBase {
-  geom: "qq";
-  stat?: "qq";
-  position?: "identity";
-  params?: QqParams;
-}
-
-export interface QqLineLayerInput extends LayerInputBase {
-  geom: "qq_line";
-  stat?: "qq_line";
-  position?: "identity";
-  params?: QqLineParams;
-}
-
-export interface AblineLayerInput extends LayerInputBase {
-  geom: "abline";
-  stat?: "identity";
-  position?: "identity";
-  params?: AblineParams;
-}
-
-export interface CurveLayerInput extends LayerInputBase {
-  geom: "curve";
-  stat?: "identity";
-  position?: "identity";
-  params?: CurveParams;
-}
-
-export interface MapLayerInput extends LayerInputBase {
-  geom: "map";
-  stat?: "identity";
-  position?: "identity";
-  params: MapParams;
-}
-
-export interface SfLayerInput extends LayerInputBase {
-  geom: "sf";
-  /** Geometry expand (ggplot2 `stat_sf`); default from GEOM_DEFAULTS. */
-  stat?: "sf";
-  position?: "identity";
-  params?: SfParams;
-}
-
-export interface SfTextLayerInput extends LayerInputBase {
-  geom: "sf_text";
-  stat?: "sf_coordinates";
-  position?: "identity";
-  params?: SfTextParams;
-}
-
-export interface SfLabelLayerInput extends LayerInputBase {
-  geom: "sf_label";
-  stat?: "sf_coordinates";
-  position?: "identity";
-  params?: SfLabelParams;
-}
-
-export interface BlankLayerInput extends LayerInputBase {
-  geom: "blank";
-  stat?: "identity";
-  position?: "identity";
-  params?: BlankParams;
-}
-
-export interface SpokeLayerInput extends LayerInputBase {
-  geom: "spoke";
-  stat?: "identity";
-  position?: "identity";
-  params?: SpokeParams;
-}
-
-export interface RugLayerInput extends LayerInputBase {
-  geom: "rug";
-  stat?: "identity";
-  position?: "identity";
-  params?: RugParams;
-}
-
-export interface StepLayerInput extends LayerInputBase {
-  geom: "step";
-  stat?: "identity";
-  position?: "identity";
-  params?: StepParams;
-}
-
-/** Layer accepted at the TS/builder level. */
-export type LayerInput =
-  | PointLayerInput
-  | LineLayerInput
-  | PathLayerInput
-  | ColLayerInput
-  | BarLayerInput
-  | HistogramLayerInput
-  | FreqpolyLayerInput
-  | AreaLayerInput
-  | RibbonLayerInput
-  | RuleLayerInput
-  | HlineLayerInput
-  | VlineLayerInput
-  | JitterLayerInput
-  | TextLayerInput
-  | LabelLayerInput
-  | SmoothLayerInput
-  | QuantileLayerInput
-  | ContourLayerInput
-  | BoxplotLayerInput
-  | DensityLayerInput
-  | Density2dLayerInput
-  | Density2dFilledLayerInput
-  | DotplotLayerInput
-  | ErrorbarLayerInput
-  | LinerangeLayerInput
-  | PointrangeLayerInput
-  | CrossbarLayerInput
-  | AblineLayerInput
-  | RectLayerInput
-  | TileLayerInput
-  | Bin2dLayerInput
-  | RasterLayerInput
-  | SegmentLayerInput
-  | CountLayerInput
-  | ViolinLayerInput
-  | HexLayerInput
-  | FunctionLayerInput
-  | PolygonLayerInput
-  | CurveLayerInput
-  | MapLayerInput
-  | SfLayerInput
-  | SfTextLayerInput
-  | SfLabelLayerInput
-  | BlankLayerInput
-  | SpokeLayerInput
-  | RugLayerInput
-  | StepLayerInput
-  | QqLayerInput
-  | QqLineLayerInput;
+export type {
+  AblineLayerInput,
+  Bin2dLayerInput,
+  BlankLayerInput,
+  CurveLayerInput,
+  FunctionLayerInput,
+  HexLayerInput,
+  LayerInput,
+  MapLayerInput,
+  PolygonLayerInput,
+  QqLayerInput,
+  QqLineLayerInput,
+  RasterLayerInput,
+  RectLayerInput,
+  RugLayerInput,
+  SegmentLayerInput,
+  SfLabelLayerInput,
+  SfLayerInput,
+  SfTextLayerInput,
+  SpokeLayerInput,
+  StepLayerInput,
+  TileLayerInput,
+} from "./normalize-input-layers-special.js";
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {
