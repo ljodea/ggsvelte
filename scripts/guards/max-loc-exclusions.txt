@@ -1,6 +1,13 @@
 # 500-LOC ratchet list — entries may only be REMOVED (or their LOC shrink).
 # Format: <path> <baseline-LOC> # reason. Generated files (DO NOT EDIT header)
 # are auto-exempt by the guard and must NOT be listed here.
+#
+# 2026-08: the 500-LOC program is complete. Every hand-written code file was
+# refactored under the limit across #1675-#1685 (core src/tests, spec
+# schema/routing/evals, svelte src/tests, scripts). The entries below are the
+# permanent waivers: pure data corpora with zero imports/logic — splitting
+# them is busywork. A guard run (--all) fails on any NEW oversize hand-written
+# file, so this list cannot grow.
 packages/svelte/src/lib/data/chocolate-bars.ts 20278 # pure data corpus, no logic — permanently exempt
 packages/svelte/src/lib/data/coffee-ratings.ts 16103 # pure data corpus, no logic — permanently exempt
 packages/svelte/src/lib/data/fastfood-menu.ts 4674 # pure data corpus, no logic — permanently exempt
