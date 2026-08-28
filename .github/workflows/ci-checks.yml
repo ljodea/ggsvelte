@@ -18,6 +18,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # max-loc guard anchors its exclusion ratchet to the merge base with
+          # the PR base branch; depth-1 checkouts cannot resolve that anchor.
+          fetch-depth: 0
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-bun-install
         with:

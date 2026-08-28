@@ -95,12 +95,15 @@ parse_exclusions "${LIST}"
 # Fresh repos with no commit: nothing to anchor against yet.
 ratchet_violations=()
 ANCHOR_REF="HEAD"
-if [[ -n "${GITHUB_BASE_REF:-}" ]] \
-  && ANCHOR_REF="$(git merge-base HEAD "refs/remotes/origin/${GITHUB_BASE_REF}" 2>/dev/null)" \
-  && [[ -n "${ANCHOR_REF}" ]]; then
-  : # merge base found
-else
-  ANCHOR_REF="HEAD"
+if [[ -n "${GITHUB_BASE_REF:-}" ]]; then
+  # CI pull_request run: the ratchet MUST anchor to the PR base — falling
+  # back to HEAD would compare the list with itself. Fail closed when the
+  # base history is unavailable (see ci-checks.yml fetch-depth: 0).
+  if ! ANCHOR_REF="$(git merge-base HEAD "refs/remotes/origin/${GITHUB_BASE_REF}" 2>/dev/null)" \
+    || [[ -z "${ANCHOR_REF}" ]]; then
+    printf '%s\n' "MAX-LOC: cannot anchor the exclusion ratchet to base '${GITHUB_BASE_REF}' (shallow checkout?). Fetch full history in CI." >&2
+    exit 1
+  fi
 fi
 if git rev-parse --verify -q "${ANCHOR_REF}" >/dev/null 2>&1 \
   && git cat-file -e "${ANCHOR_REF}:${LIST_REL}" 2>/dev/null; then
