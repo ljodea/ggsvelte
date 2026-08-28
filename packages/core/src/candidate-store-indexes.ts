@@ -1,5 +1,7 @@
-import { compareTokens } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
+import { buildCandidateCoincidence } from "./candidate-store-coincidence.js";
+import { createLazyCandidateAxisGroups } from "./candidate-store-axis-groups.js";
+import type { CandidateStoreIndexes } from "./candidate-store-index-types.js";
 import {
   defaultAutoMode,
   candidatePrimitiveCount,
@@ -17,15 +19,17 @@ import type {
 import type { Scene } from "./scene.js";
 import type { CellValue } from "./table.js";
 
+export type {
+  BucketBoundary,
+  CandidateStoreIndexes,
+  SeriesBoundary,
+} from "./candidate-store-index-types.js";
+
 const NO_ROW = 0xffffffff;
 
 /** ResolvedCandidateInspectMode → compact code; shared with pipeline candidate resolvers. */
 export const AUTO_MODE_CODE = { exact: 0, x: 1, y: 2, xy: 3 } as const;
 
-/** Anchor equality matching the old `${x}` string-key grouping: ±0 equal, NaN ≈ NaN. */
-function sameAnchorCoord(u: number, v: number): boolean {
-  return u === v || (Number.isNaN(u) && Number.isNaN(v));
-}
 export const AUTO_MODES = [
   "exact",
   "x",
@@ -33,88 +37,11 @@ export const AUTO_MODES = [
   "xy",
 ] as const satisfies readonly ResolvedCandidateInspectMode[];
 
-export type SeriesBoundary = Readonly<{
-  start: number;
-  end: number;
-  layerIndex: number;
-  seriesId: number;
-}>;
-
-export type BucketBoundary = Readonly<{
-  start: number;
-  end: number;
-  series: readonly SeriesBoundary[];
-}>;
-
-/** Compact typed-array indexes + traversal/group tables for an assembled candidate store. */
-export type CandidateStoreIndexes = {
-  readonly scene: Scene;
-  readonly epoch: number;
-  readonly flip: boolean;
-  readonly hitTolerance: number;
-  readonly n: number;
-  readonly batchIds: Uint32Array;
-  readonly primitiveIds: Uint32Array;
-  readonly panelIds: Uint32Array;
-  readonly rows: Uint32Array;
-  readonly series: Uint32Array;
-  readonly ranks: Uint32Array;
-  readonly sources: Uint32Array;
-  readonly lineages: Uint32Array;
-  readonly autoModes: Uint8Array;
-  readonly xs: Float32Array;
-  readonly ys: Float32Array;
-  readonly xTokenIds: Int32Array;
-  readonly yTokenIds: Int32Array;
-  readonly xDates: Uint8Array;
-  readonly yDates: Uint8Array;
-  readonly tokens: CanonicalAxisToken[];
-  readonly invalidX: Map<number, CellValue>;
-  readonly invalidY: Map<number, CellValue>;
-  readonly traversal: Uint32Array;
-  readonly traversalRank: Uint32Array;
-  readonly orderByX: Uint32Array;
-  readonly coincidentStack: (Uint32Array | undefined)[];
-  readonly coincidentAt: Uint32Array;
-  /**
-   * Axis-group tables behind group(): permutation + bucket boundaries, built
-   * once on first call (memoized) — never on the first-hover path.
-   */
-  axisGroups(): {
-    permutations: Record<"x" | "y", Uint32Array>;
-    buckets: Record<"x" | "y", Map<number, BucketBoundary>>;
-  };
-  logicalValue(id: number, axis: "x" | "y"): CellValue;
-  fact(id: number): CandidateFacts | null;
-};
-
 /**
  * Build candidate identity tables, traversal orders, coincident stacks, and
  * group() bucket permutations. Growable construction buffers are cleared at
  * the end of this function (retained-memory budget boundary).
  */
-/**
- * Exclusive end of the (layer, series) run starting at `from` within
- * `valid[0..end)` — extracted to keep the bucket walk under the nesting
- * budget and to give the hot scan a tight local frame.
- */
-function seriesRunEnd(
-  valid: number[],
-  from: number,
-  end: number,
-  layerPerCandidate: Uint32Array,
-  series: Uint32Array,
-  layerIndex: number,
-  seriesId: number,
-): number {
-  let cursor = from + 1;
-  while (cursor < end) {
-    const id = valid[cursor]!;
-    if (layerPerCandidate[id]! !== layerIndex || series[id] !== seriesId) break;
-    cursor++;
-  }
-  return cursor;
-}
 
 /** Pad a lazily materialized style array with nulls up to candidate `upto`. */
 function backfillStyle(arr: CellValue[], upto: number): void {
@@ -504,177 +431,29 @@ export function buildCandidateStoreIndexes(
     return a - b;
   });
 
-  // Coincident multi-member stacks by (panel, x, y) in paint/source order (ascending id).
-  // Singletons are omitted so dense plots do not retain n one-element Uint32Arrays;
-  // `cycle` treats a missing stack as identity. Multi-member stacks make cycle O(1).
-  const coincidentStack: (Uint32Array | undefined)[] = Array.from({ length: n });
-  const coincidentAt = new Uint32Array(n);
-  {
-    const emitCoincidentRun = (ids: Uint32Array, runStart: number, runEnd: number): void => {
-      const length = runEnd - runStart;
-      if (length < 2) return;
-      // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
-      // Members are ascending id (candidate ids are assigned in batch-then-
-      // primitive order, the traversal sort's trailing keys), matching the old
-      // id-order push sequence.
-      const stack = new Uint32Array(length);
-      for (let j = 0; j < length; j++) stack[j] = ids[runStart + j]!;
-      for (let j = 0; j < length; j++) {
-        const id = stack[j]!;
-        coincidentStack[id] = stack;
-        coincidentAt[id] = j;
-      }
-    };
-    if (anyNonFiniteAnchor) {
-      // Non-finite anchors: the traversal comparator's subtraction is unstable
-      // on NaN, so group with explicit string-key-equivalent semantics —
-      // String() is injective on widened Float32 values, String(-0) === "0"
-      // groups ±0, and "NaN" groups NaN anchors with NaN anchors.
-      const cmpCoord = (u: number, v: number): number => {
-        if (sameAnchorCoord(u, v)) return 0;
-        if (Number.isNaN(u)) return -1;
-        if (Number.isNaN(v)) return 1;
-        return u < v ? -1 : 1;
-      };
-      const byCoincidence = Uint32Array.from({ length: n }, (_, id) => id);
-      byCoincidence.sort(
-        (a, b) =>
-          panelIds[a]! - panelIds[b]! ||
-          cmpCoord(xs[a]!, xs[b]!) ||
-          cmpCoord(ys[a]!, ys[b]!) ||
-          a - b,
-      );
-      let runStart = 0;
-      for (let i = 1; i <= n; i++) {
-        const first = byCoincidence[runStart]!;
-        const current = i < n ? byCoincidence[i]! : -1;
-        if (
-          i < n &&
-          panelIds[current] === panelIds[first] &&
-          sameAnchorCoord(xs[current]!, xs[first]!) &&
-          sameAnchorCoord(ys[current]!, ys[first]!)
-        )
-          continue;
-        emitCoincidentRun(byCoincidence, runStart, i);
-        runStart = i;
-      }
-    } else {
-      // Fast path: with all-finite anchors, traversal order (panel, y, x,
-      // batch, primitive) makes coincident (panel, x, y) runs contiguous —
-      // zero extra sorting. ±0 pairs are equal under the comparator's
-      // subtraction, matching the old string-key grouping.
-      let runStart = 0;
-      for (let i = 1; i <= n; i++) {
-        const first = traversal[runStart]!;
-        const current = i < n ? traversal[i]! : -1;
-        if (
-          i < n &&
-          panelIds[current] === panelIds[first] &&
-          xs[current] === xs[first] &&
-          ys[current] === ys[first]
-        )
-          continue;
-        emitCoincidentRun(traversal, runStart, i);
-        runStart = i;
-      }
-    }
-  }
-  // Axis-group tables (permutation + bucket boundaries) serve group() ONLY.
-  // Building them eagerly cost an O(u log u) token-rank sort and O(n)
-  // bucket-map writes on every store build — including first-hover sessions
-  // that never group. Build once, on first group(), memoized. `valid` is a
-  // fresh identity-filter (the eager path filtered `order`, which is scratch
-  // and cleared below); contents are identical.
-  type AxisGroupTables = {
-    permutations: Record<"x" | "y", Uint32Array>;
-    buckets: Record<"x" | "y", Map<number, BucketBoundary>>;
-  };
-  let axisGroupTables: AxisGroupTables | null = null;
-  const axisGroups = (): AxisGroupTables => {
-    if (axisGroupTables !== null) return axisGroupTables;
-    const permutations: Record<"x" | "y", Uint32Array> = {
-      x: new Uint32Array(0),
-      y: new Uint32Array(0),
-    };
-    const buckets: Record<"x" | "y", Map<number, BucketBoundary>> = {
-      x: new Map<number, BucketBoundary>(),
-      y: new Map<number, BucketBoundary>(),
-    };
-    // Rank tokens once (m log m, m = unique tokens) so the permutation sort's
-    // hot comparator is arithmetic instead of compareTokens object dispatch.
-    // Ranks preserve compareTokens order exactly.
-    const tokenRank = new Int32Array(tokens.length);
-    {
-      const tokenOrder = Array.from({ length: tokens.length }, (_, id) => id);
-      tokenOrder.sort((a, b) => compareTokens(tokens[a]!, tokens[b]!));
-      for (let rank = 0; rank < tokenOrder.length; rank++) tokenRank[tokenOrder[rank]!] = rank;
-    }
-    // Per-candidate layer ids, read once — the permutation comparator and the
-    // bucket boundary walk otherwise chase scene.batches[…].layerIndex per
-    // comparison.
-    const layerPerCandidate = new Uint32Array(n);
-    for (let id = 0; id < n; id++) layerPerCandidate[id] = scene.batches[batchIds[id]!]!.layerIndex;
-    // Bucket maps key on panel * tokenCount + tokenId (numeric, no per-bucket
-    // `${panel}|${key}` strings — dense plots have O(n) buckets).
-    const tokenCount = Math.max(tokens.length, 1);
-    const bucketKey = (panel: number, tokenId: number): number => panel * tokenCount + tokenId;
-    for (const axis of ["x", "y"] as const) {
-      const keys = axis === "x" ? xTokenIds : yTokenIds,
-        orth = axis === "x" ? (flip ? xs : ys) : flip ? ys : xs;
-      const valid: number[] = [];
-      for (let id = 0; id < n; id++) if (keys[id] !== -1) valid.push(id);
-      valid.sort(
-        (a, b) =>
-          panelIds[a]! - panelIds[b]! ||
-          tokenRank[keys[a]!]! - tokenRank[keys[b]!]! ||
-          ranks[a]! - ranks[b]! ||
-          layerPerCandidate[a]! - layerPerCandidate[b]! ||
-          series[a]! - series[b]! ||
-          orth[a]! - orth[b]! ||
-          batchIds[a]! - batchIds[b]! ||
-          sources[a]! - sources[b]!,
-      );
-      const permutation = Uint32Array.from(valid);
-      permutations[axis] = permutation;
-      for (let start = 0; start < valid.length;) {
-        const first = valid[start]!;
-        const panel = panelIds[first]!;
-        const key = keys[first]!;
-        let end = start + 1;
-        while (end < valid.length && panelIds[valid[end]!] === panel && keys[valid[end]!] === key)
-          end++;
-        const seriesBoundaries: SeriesBoundary[] = [];
-        for (let seriesStart = start; seriesStart < end;) {
-          const seriesFirst = valid[seriesStart]!;
-          const layerIndex = layerPerCandidate[seriesFirst]!;
-          const seriesId = series[seriesFirst]!;
-          const seriesEnd = seriesRunEnd(
-            valid,
-            seriesStart,
-            end,
-            layerPerCandidate,
-            series,
-            layerIndex,
-            seriesId,
-          );
-          seriesBoundaries.push({ start: seriesStart, end: seriesEnd, layerIndex, seriesId });
-          seriesStart = seriesEnd;
-        }
-        // The boundaries array is built locally and never mutated after this
-        // point; treat as immutable by convention (same contract as the
-        // coincident stacks) instead of paying one Object.freeze per bucket —
-        // dense plots have O(n) buckets.
-        buckets[axis].set(bucketKey(panel, key), {
-          start,
-          end,
-          series: seriesBoundaries,
-        });
-        start = end;
-      }
-    }
-    axisGroupTables = { permutations, buckets };
-    return axisGroupTables;
-  };
+  const { coincidentStack, coincidentAt } = buildCandidateCoincidence({
+    n,
+    panelIds,
+    xs,
+    ys,
+    traversal,
+    anyNonFiniteAnchor,
+  });
+  const axisGroups = createLazyCandidateAxisGroups({
+    scene,
+    n,
+    flip,
+    tokens,
+    batchIds,
+    panelIds,
+    ranks,
+    series,
+    sources,
+    xTokenIds,
+    yTokenIds,
+    xs,
+    ys,
+  });
 
   // Do not retain construction scratch beside the store (the 100k-candidate
   // retained-memory budget is measured after this boundary). The per-

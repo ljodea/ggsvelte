@@ -31,21 +31,15 @@ apps/docs/src/lib/theme-specimens/data.ts 821 # pure data corpus, no logic — p
 examples/point/stat-unique/data.ts 796 # pure data corpus, no logic — permanently exempt
 examples/line/ecdf/data.ts 793 # pure data corpus, no logic — permanently exempt
 packages/spec/tests/validate-tier2-data.test.ts 788 # legacy oversize; pending refactor slice S4
-packages/core/src/theme-builtins.ts 775 # legacy oversize; pending refactor slice S1
 packages/svelte/tests/inspection/coordinator.test.ts 736 # legacy oversize; pending refactor slice S6
-packages/core/src/candidate-store-indexes.ts 720 # legacy oversize; pending refactor slice S1
 packages/svelte/src/lib/surface/surface-state.svelte.ts 717 # legacy oversize; pending refactor slice S5
-packages/core/src/pipeline/build-candidates.ts 703 # legacy oversize; pending refactor slice S1
 scripts/quickstart/steps.ts 698 # legacy oversize; pending refactor slice S7
 examples/path/trajectory/data.ts 697 # pure data corpus, no logic — permanently exempt
 packages/svelte/tests/inspection/display-members.test.ts 695 # legacy oversize; pending refactor slice S6
 packages/core/src/scales/crameri-ramps.ts 672 # pure data corpus, no logic — permanently exempt
 packages/svelte/tests/runtime/semantic-keys-pure.test.ts 668 # legacy oversize; pending refactor slice S6
-packages/core/src/stats/loess.ts 663 # legacy oversize; pending refactor slice S1
 packages/svelte/tests/assembly/assemble.test.ts 652 # legacy oversize; pending refactor slice S6
-packages/core/src/table.ts 639 # legacy oversize; pending refactor slice S1
 scripts/ci-routing/routing.ts 638 # legacy oversize; pending refactor slice S7
-packages/core/src/svg-live/patch-marks.ts 630 # legacy oversize; pending refactor slice S1
 packages/svelte/tests/interval/consumption.test.ts 628 # legacy oversize; pending refactor slice S6
 packages/svelte/tests/legend/filter-state.test.ts 617 # legacy oversize; pending refactor slice S6
 packages/core/tests/pipeline-layer-data.test.ts 613 # legacy oversize; pending refactor slice S2
@@ -64,7 +58,6 @@ packages/svelte/src/lib/legend/focus-state.svelte.ts 543 # legacy oversize; pend
 packages/svelte/tests/runtime/semantic-candidate-projection.test.ts 543 # legacy oversize; pending refactor slice S6
 examples/point/gradient-continuous/data.ts 530 # pure data corpus, no logic — permanently exempt
 packages/core/tests/crameri-ramps.test.ts 530 # legacy oversize; pending refactor slice S2
-packages/core/src/layout/band-guide.ts 527 # legacy oversize; pending refactor slice S1
 packages/svelte/src/lib/scene/Batch.svelte 526 # legacy oversize; pending refactor slice S5
 benchmarks/competitive/fixtures/main.ts 523 # legacy oversize; pending refactor slice S7
 packages/spec/src/capabilities.ts 522 # legacy oversize; pending refactor slice S4
