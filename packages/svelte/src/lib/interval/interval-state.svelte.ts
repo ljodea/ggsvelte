@@ -1,11 +1,14 @@
 /**
- * Interval-selection + bounds-editor controller extracted from GGPlot for S5.
+ * Interval-selection controller extracted from GGPlot for S5.
  *
- * Owns committedInterval / committedIntervalRecord / boundsEditor /
- * boundsReturnFocus, the interval ScopedStore (local vs controller records),
- * construction-time deriveds (effectiveIntervals, effectiveIntervalKeys,
- * currentInterval* family, boundsEditorInput), both effects (interval-reconcile
- * + bounds-cancel), private helpers, and the public clear/commit/bounds methods.
+ * Owns committedInterval / committedIntervalRecord, the interval ScopedStore
+ * (local vs controller records), construction-time deriveds
+ * (effectiveIntervals, effectiveIntervalKeys, currentInterval* family,
+ * intervalBoundsTargetAvailable), the interval-reconcile effect, private
+ * helpers, and the public clear/commit/bounds methods. The bounds-editor
+ * state machine (boundsEditor, boundsReturnFocus, boundsEditorInput, cancel
+ * effect, open/cancel actions) lives in interval-bounds-state.svelte.ts;
+ * pure helpers live in interval-state-helpers.ts.
  *
  * Construction-time deriveds may legitimately read model / effectiveZoomDomains
  * (factory sits after the runtime). Armed later-declared / handler-only deps
@@ -18,13 +21,7 @@
  * Semantic diagnostics retain their later effect-registration position
  * through the service's phased `registerEffects()` API (#165).
  */
-import {
-  decodeKey,
-  encodeKey,
-  type ScenePanel,
-  type SemanticViewportSelection,
-} from "@ggsvelte/core";
-import type { TemporalScaleKind } from "@ggsvelte/spec";
+import { encodeKey, type ScenePanel } from "@ggsvelte/core";
 
 import type { InteractionContext } from "../interaction/interaction-context.svelte.js";
 import type {
@@ -49,7 +46,9 @@ import {
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "./consumption.js";
-import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
+import { semanticAxisFromBounds } from "./precise-bounds.js";
+import { facetIdentityValueLabel, viewportSelection } from "./interval-state-helpers.js";
+import { createIntervalBoundsEditor } from "./interval-bounds-state.svelte.js";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -105,43 +104,6 @@ export type IntervalState = {
 };
 
 // ---------------------------------------------------------------------------
-// Module helpers (pure — no factory capture)
-// ---------------------------------------------------------------------------
-
-function facetIdentityValueLabel(encodedValue: string): string {
-  const value = decodeKey(encodedValue);
-  const kind =
-    value instanceof Date
-      ? "date"
-      : value === null
-        ? "null"
-        : typeof value === "string"
-          ? "text"
-          : typeof value;
-  const display = value instanceof Date ? value.toISOString() : String(value);
-  return `${kind} ${display}`;
-}
-
-function semanticViewportAxisSelection(
-  semantic: SemanticIntervalAxis | undefined,
-): SemanticViewportSelection["x"] {
-  return semantic === undefined
-    ? undefined
-    : semantic.kind === "band"
-      ? { kind: "band", keys: semantic.values }
-      : { kind: "continuous", domain: semantic.domain };
-}
-
-function viewportSelection(domains: ReadonlyIntervalDomains): SemanticViewportSelection {
-  const x = semanticViewportAxisSelection(domains.x);
-  const y = semanticViewportAxisSelection(domains.y);
-  return {
-    ...(x !== undefined && { x }),
-    ...(y !== undefined && { y }),
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
 
@@ -162,13 +124,6 @@ export function createIntervalState(
     controller: context.interaction,
     scope: context.resolvedInteractionScope,
   });
-  let boundsEditor = $state<{
-    action: "select" | "zoom";
-    axis: "x" | "y";
-    panelId?: string;
-    panelLabel?: string;
-  } | null>(null);
-  let boundsReturnFocus = $state<HTMLElement | null>(null);
 
   const effectiveIntervals = $derived(committedIntervals.value);
 
@@ -259,71 +214,20 @@ export function createIntervalState(
     return intervalPanelLabel(currentIntervalPanel);
   });
 
-  const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
-    const editor = boundsEditor;
-    if (editor === null || context.model() === null) return null;
-    const model = context.model()!;
-    // Axis guide plans carry temporalKind (including monthDay); the trained
-    // continuous scale does not. Use the first matching axis plan so the
-    // bounds editor can format drafts without the reference year.
-    let temporalKind: TemporalScaleKind | null = null;
-    for (const plan of model.guidePlans) {
-      if (plan.type === "axis" && plan.aesthetic === editor.axis) {
-        temporalKind = plan.temporalKind;
-        break;
-      }
-    }
-    if (editor.action === "zoom") {
-      const viewportPanel = model.viewport.panels[0];
-      if (viewportPanel === undefined) return null;
-      const scale = viewportPanel.axisEditModel(editor.axis);
-      if (scale.kind === "band") return null;
-      const bounds = options.effectiveZoomDomains()?.[editor.axis] ?? scale.domain;
-      return boundsEditorInputForScale({
-        axis: editor.axis,
-        action: "zoom",
-        scale,
-        bounds,
-        temporalKind,
-      });
-    }
-    const record = currentIntervalRecord;
-    const targetPanelId = record?.panelId ?? editor.panelId;
-    if (targetPanelId === undefined) return null;
-    const viewportPanel = model.viewport.panel(targetPanelId);
-    if (viewportPanel === null) return null;
-    const scale = viewportPanel.axisEditModel(editor.axis);
-    const semantic = record?.domains[editor.axis];
-    const bounds =
-      semantic?.kind === "band"
-        ? ([semantic.values[0] ?? "", semantic.values.at(-1) ?? ""] as const)
-        : semantic?.domain;
-    return boundsEditorInputForScale({
-      axis: editor.axis,
-      action: "select",
-      scale,
-      temporalKind,
-      ...(bounds !== undefined && { bounds }),
-    });
-  });
-
-  $effect(() => {
-    if (boundsEditor === null || boundsEditorInput !== null) return;
-    const target = boundsEditor.panelLabel ?? "the target panel";
-    boundsEditor = null;
-    boundsReturnFocus = null;
-    // The original button may have been reused for a different panel. The
-    // capture surface is the stable recovery target for reactive cancellation;
-    // explicit Apply/Cancel still restores the initiating button.
-    queueMicrotask(() => {
-      context.captureSurface()?.focus();
-      context.announce(`Bounds editing cancelled because ${target} is no longer available.`);
-    });
-  });
-
   const intervalBoundsTargetAvailable = $derived(
     currentIntervalRecord === null || currentIntervalPanel !== undefined,
   );
+
+  const bounds = createIntervalBoundsEditor({
+    model: context.model,
+    captureSurface: context.captureSurface,
+    announce: context.announce,
+    effectiveZoomDomains: options.effectiveZoomDomains,
+    currentIntervalRecord: () => currentIntervalRecord,
+    currentIntervalPanel: () => currentIntervalPanel,
+    inspectionPanel: options.inspectionPanel,
+    intervalPanelLabel,
+  });
 
   function clearIntervalSelection(source: InteractionSource): void {
     const current = committedInterval;
@@ -362,14 +266,14 @@ export function createIntervalState(
   function semanticAxis(
     panelId: string,
     axis: "x" | "y",
-    bounds: readonly [unknown, unknown] | undefined,
+    axisBounds: readonly [unknown, unknown] | undefined,
   ): SemanticIntervalAxis | undefined {
-    if (bounds === undefined || context.model() === null) return undefined;
+    if (axisBounds === undefined || context.model() === null) return undefined;
     const viewportPanel = context.model()!.viewport.panel(panelId);
     if (viewportPanel === null) return undefined;
     const scale = viewportPanel.axisEditModel(axis);
     if (scale.kind === "band") {
-      const values = scale.slice(bounds);
+      const values = scale.slice(axisBounds);
       if (values === undefined) return undefined;
       return Object.freeze({
         kind: "band",
@@ -377,8 +281,8 @@ export function createIntervalState(
       });
     }
     return semanticAxisFromBounds(scale.type, scale.transform, [
-      Number(bounds[0]),
-      Number(bounds[1]),
+      Number(axisBounds[0]),
+      Number(axisBounds[1]),
     ]);
   }
 
@@ -455,36 +359,6 @@ export function createIntervalState(
     options.emitSelection(eventValue);
   }
 
-  function openBoundsEditor(
-    action: "select" | "zoom",
-    axis: "x" | "y",
-    trigger: HTMLElement,
-  ): void {
-    boundsReturnFocus = trigger;
-    if (action === "select") {
-      const model = context.model();
-      const panel =
-        currentIntervalRecord === null
-          ? (() => {
-              const inspectionTarget = options.inspectionPanel();
-              if (inspectionTarget !== null && model !== null) {
-                return model.scene.panels.find((candidate) => candidate.id === inspectionTarget.id);
-              }
-              return model?.scene.panels[0];
-            })()
-          : currentIntervalPanel;
-      if (panel === undefined || panel === null) return;
-      boundsEditor = {
-        action,
-        axis,
-        panelId: panel.id,
-        panelLabel: intervalPanelLabel(panel),
-      };
-      return;
-    }
-    boundsEditor = { action, axis };
-  }
-
   function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
     if (event.action === "zoom") {
       if (event.scale === "band") return;
@@ -495,11 +369,11 @@ export function createIntervalState(
         }),
         event.inputSource,
       );
-      boundsEditor = null;
+      bounds.cancel();
       return;
     }
     const prior = currentIntervalRecord;
-    const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
+    const targetPanelId = prior?.panelId ?? bounds.boundsEditor?.panelId;
     if (targetPanelId === null || targetPanelId === undefined || context.model() === null) return;
     const model = context.model()!;
     if (model.viewport.panel(targetPanelId) === null) return;
@@ -544,11 +418,7 @@ export function createIntervalState(
     });
     committedInterval = persistentSelectionOrNull(context.selectConfig()?.persistent, eventValue);
     options.emitSelection(eventValue);
-    boundsEditor = null;
-  }
-
-  function cancelBoundsEditor(): void {
-    boundsEditor = null;
+    bounds.cancel();
   }
 
   return {
@@ -565,10 +435,10 @@ export function createIntervalState(
       return currentIntervalTargetLabel;
     },
     get boundsEditorInput() {
-      return boundsEditorInput;
+      return bounds.boundsEditorInput;
     },
     get boundsReturnFocus() {
-      return boundsReturnFocus;
+      return bounds.boundsReturnFocus;
     },
     get intervalBoundsTargetAvailable() {
       return intervalBoundsTargetAvailable;
@@ -576,8 +446,12 @@ export function createIntervalState(
     clearIntervalSelection,
     clearCurrentPanelInterval,
     finishBrushSelect,
-    openBoundsEditor,
+    openBoundsEditor: (...args: Parameters<typeof bounds.openBoundsEditor>) => {
+      bounds.openBoundsEditor(...args);
+    },
     applyPreciseBounds,
-    cancelBoundsEditor,
+    cancelBoundsEditor: () => {
+      bounds.cancel();
+    },
   };
 }

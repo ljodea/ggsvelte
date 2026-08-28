@@ -37,7 +37,15 @@ describe("#704 grammar prop removal", () => {
         new RegExp(`prop:\\s*["']${prop}["']`),
       );
     }
-    // legendFocus / legendFilter dual-read (0.19→0.20) emit sites.
+  });
+
+  it("legendFocus/legendFilter dual-read emit sites still exist (S5 diagnostics module)", () => {
+    // Emit sites moved from plot-engine.svelte.ts to the diagnostics module
+    // (plan §5) — intent unchanged: the dual-read emit paths must still exist.
+    const source = readFileSync(
+      join(root, "diagnostics/plot-engine-diagnostics.svelte.ts"),
+      "utf8",
+    );
     expect(source).toContain('prop: "legendFocus"');
     expect(source).toContain('prop: "legendFilter"');
   });

@@ -1,8 +1,10 @@
 /**
  * Legend-focus controller extracted from GGPlot for S3.
  *
- * Owns chart-local emphasis, preview/commit state, roving/touch suppress flags,
- * interaction handlers, and phased reconcile effects. Construction-time
+ * Owns chart-local emphasis, preview/commit state, roving/touch suppress
+ * flags, and interaction handlers. The four host-derived reconcile effects
+ * live in focus-reconcile.svelte.ts, registered synchronously by
+ * installHostDerivedEffects. Construction-time
  * deriveds must NOT read model/entryKeys/entries (construction-order DAG).
  * Those are methods/effects registered after the host declares the later
  * bindings.
@@ -26,15 +28,14 @@ import {
 import type { InteractiveLegendEntry, LegendEntryAction, LegendEntryIdentity } from "./focus.js";
 import {
   findLegendPressedIdentity,
-  reconcileLegendPreview,
   resolveLegendEmphasisKeys,
   resolveLegendPreviewKeysDecision,
 } from "./focus-emphasis.js";
 import {
-  planLegendCommittedReconcile,
-  planLegendFocusDisabledClear,
-  planLegendRovingFocusSync,
-} from "./focus-plans.js";
+  installLegendFocusReconcileEffects,
+  type LegendFocusCommittedState,
+  type LegendFocusPreviewState,
+} from "./focus-reconcile.svelte.js";
 import type { LegendEntryKeyAccess } from "./entry-key-index.svelte.js";
 import {
   resolveLegendClearControlSource,
@@ -134,14 +135,8 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       controller.clearEmphasis({ scope, source }) !== null,
     same: samePropertyKeySet,
   });
-  let legendPreview = $state<{
-    action: LegendEntryAction;
-    keys: readonly PropertyKey[];
-  } | null>(null);
-  let legendCommitted = $state<{
-    identity: LegendEntryIdentity;
-    keys: readonly PropertyKey[];
-  } | null>(null);
+  let legendPreview = $state<LegendFocusPreviewState>(null);
+  let legendCommitted = $state<LegendFocusCommittedState>(null);
   let legendRovingIndex = $state(0);
   let legendTouchIndex = -1;
   let legendClearPointerType: string | null = null;
@@ -412,106 +407,27 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   }
 
   function installHostDerivedEffects(): void {
-    $effect.pre(() => {
-      const count = deps.entries().length;
-      const active = document.activeElement;
-      // Number(dataset.index) may be NaN — pure plan maps non-finite → 0.
-      const focusedIndex =
-        active instanceof HTMLElement &&
-        active.matches("[data-gg-legend-target]") &&
-        (deps.root()?.contains(active) ?? false)
-          ? Number(active.dataset["index"])
-          : null;
-      const plan = planLegendRovingFocusSync({
-        currentRoving: legendRovingIndex,
-        entryCount: count,
-        focusedIndex,
-      });
-      if (plan.nextIndex !== legendRovingIndex) legendRovingIndex = plan.nextIndex;
-      if (plan.type !== "refocus") return;
-      const returnIndex = plan.returnIndex;
-      queueMicrotask(() => {
-        deps
-          .root()
-          ?.querySelector<HTMLElement>(
-            `[data-gg-legend-target][data-index="${String(returnIndex)}"]`,
-          )
-          ?.focus();
-      });
-    });
-
-    $effect(() => {
-      const usesLocalEmphasis = deps.interaction() === undefined;
-      const plan = planLegendCommittedReconcile({
-        committed: legendCommitted,
-        entries: deps.entries(),
-        keyIndex: deps.entryKeys().legendEntryKeyIndex,
-        usesLocalEmphasis,
-        // Only consulted when usesLocalEmphasis; store value is the local shadow.
-        localEmphasisCount: usesLocalEmphasis ? emphasisKeys.value.length : 0,
-      });
-      switch (plan.type) {
-        case "noop":
-          return;
-        case "clear-committed":
-          legendCommitted = null;
-          break;
-        case "clear-committed-local-emit":
-          legendCommitted = null;
-          emphasisKeys.clear("programmatic");
-          emitLegendFocus({
-            type: "legend-focus",
-            phase: "clear",
-            source: "programmatic",
-          });
-          break;
-      }
-    });
-
-    // Reconcile transient preview when data/domain reshuffles entry membership.
-    $effect(() => {
-      const preview = legendPreview;
-      if (preview === null) return;
-      const next = reconcileLegendPreview({
-        preview: { identity: preview.action.identity, keys: preview.keys },
-        entries: deps.entries(),
-        keyIndex: deps.entryKeys().legendEntryKeyIndex,
-      });
-      if (next === null) {
-        previewLegend(null);
-        return;
-      }
-      if (samePropertyKeySet(next.keys, preview.keys)) return;
-      legendPreview = {
-        action: { ...preview.action, identity: next.identity },
-        keys: next.keys,
-      };
-    });
-
-    // Drop chart-local emphasis when legend focus is turned off at runtime.
-    // Shared controller emphasis is intentionally retained (clear-host only).
-    $effect(() => {
-      const usesLocalEmphasis = deps.interaction() === undefined;
-      const plan = planLegendFocusDisabledClear({
-        legendFocusEnabled: deps.legendFocusEnabled(),
-        hasPreview: legendPreview !== null,
-        hasCommitted: legendCommitted !== null,
-        hasLocalEmphasis: usesLocalEmphasis && emphasisKeys.value.length > 0,
-        usesLocalEmphasis,
-      });
-      switch (plan.type) {
-        case "noop":
-          return;
-        case "clear-host":
-          legendPreview = null;
-          legendCommitted = null;
-          break;
-        case "clear-host-local":
-          legendPreview = null;
-          legendCommitted = null;
-          emphasisKeys.clear("programmatic");
-          break;
-      }
+    installLegendFocusReconcileEffects({
+      entries: deps.entries,
+      entryKeys: deps.entryKeys,
+      root: deps.root,
+      interaction: deps.interaction,
+      legendFocusEnabled: deps.legendFocusEnabled,
+      emphasisKeys,
+      rovingIndex: () => legendRovingIndex,
+      setRovingIndex: (next) => {
+        legendRovingIndex = next;
+      },
+      committed: () => legendCommitted,
+      setCommitted: (next) => {
+        legendCommitted = next;
+      },
+      preview: () => legendPreview,
+      setPreview: (next) => {
+        legendPreview = next;
+      },
+      emitLegendFocus,
+      previewLegend,
     });
   }
 
