@@ -108,7 +108,8 @@
     {
       "files": [
         "packages/core/src/pipeline/temporal-position.ts",
-        "packages/core/src/pipeline/temporal-preflight-annotations.ts"
+        "packages/core/src/pipeline/temporal-preflight-annotations.ts",
+        "packages/core/src/pipeline/temporal-preflight-fields.ts"
       ],
       "rules": {
         "eslint/complexity": ["error", { "max": 20 }]
