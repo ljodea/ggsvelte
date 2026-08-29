@@ -49,11 +49,10 @@
   },
   "overrides": [
     {
-      // Staged rollout inventory (2026-08-29): docs 1, examples 1, scripts 13,
-      // tests 8, spec 30, svelte 11, core 122. packages/cli, packages/skill,
-      // and benchmarks already pass and are enforced by the global rule.
+      // Staged rollout inventory (2026-08-29): examples 1, scripts 13, tests 8,
+      // spec 30, svelte 11, core 122. apps/docs, packages/cli,
+      // packages/skill, and benchmarks pass and use the global rule.
       "files": [
-        "apps/docs/**",
         "examples/**",
         "scripts/**",
         "tests/**",
