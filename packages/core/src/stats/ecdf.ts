@@ -40,6 +40,44 @@ export interface EcdfStatResult {
   dropped: number;
 }
 
+function collectFiniteRows(x: Float64Array, groups: readonly number[]) {
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < x.length; i++) {
+    if (!Number.isFinite(x[i]!)) {
+      dropped++;
+      continue;
+    }
+    const group = groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
+function evaluationGrid(values: Float64Array, gridN: number | undefined): number[] {
+  const xmin = values[0]!;
+  const xmax = values.at(-1)!;
+  if (gridN !== undefined && Number.isFinite(gridN) && gridN >= 1) {
+    const n = Math.floor(gridN);
+    if (n === 1 || xmin === xmax) return [xmin];
+    const step = (xmax - xmin) / (n - 1);
+    return Array.from({ length: n }, (_, i) => xmin + i * step);
+  }
+
+  const unique: number[] = [];
+  for (const value of values) {
+    if (unique.length === 0 || unique.at(-1)! !== value) unique.push(value);
+  }
+  return unique;
+}
+
 export function statEcdf(input: EcdfStatInput): EcdfStatResult {
   const { x, groups } = input;
   const params = input.params ?? {};
@@ -47,23 +85,7 @@ export function statEcdf(input: EcdfStatInput): EcdfStatResult {
   const gridN = params.n;
   const carriedNames = Object.keys(input.carried ?? {});
 
-  const groupOrder: number[] = [];
-  const groupRows = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    if (!Number.isFinite(x[i]!)) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let rows = groupRows.get(g);
-    if (rows === undefined) {
-      rows = [];
-      groupRows.set(g, rows);
-      groupOrder.push(g);
-    }
-    rows.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: groupRows, dropped } = collectFiniteRows(x, groups);
 
   const outX: number[] = [];
   const outEcdf: number[] = [];
@@ -79,25 +101,7 @@ export function statEcdf(input: EcdfStatInput): EcdfStatResult {
     values.sort();
     const nObs = values.length;
     const xmin = values[0]!;
-    const xmax = values[nObs - 1]!;
-
-    let evalX: number[];
-    if (gridN !== undefined && Number.isFinite(gridN) && gridN >= 1) {
-      const n = Math.floor(gridN);
-      evalX = [];
-      if (n === 1 || xmin === xmax) {
-        evalX.push(xmin);
-      } else {
-        const step = (xmax - xmin) / (n - 1);
-        for (let k = 0; k < n; k++) evalX.push(xmin + k * step);
-      }
-    } else {
-      evalX = [];
-      for (let j = 0; j < nObs; j++) {
-        const v = values[j]!;
-        if (evalX.length === 0 || evalX.at(-1)! !== v) evalX.push(v);
-      }
-    }
+    const evalX = evaluationGrid(values, gridN);
 
     const pushRow = (xv: number, yv: number) => {
       outX.push(xv);

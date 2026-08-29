@@ -72,8 +72,149 @@ export interface SmoothStatResult {
   methodInferred: boolean;
 }
 
+type SmoothEvaluator = {
+  evaluate: (x: number) => { fit: number; seFit: number };
+  ciMult: number;
+};
+
+function collectFiniteRows(input: SmoothStatInput) {
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < input.x.length; i++) {
+    if (!Number.isFinite(input.x[i]!) || !Number.isFinite(input.y[i]!)) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
+function groupValues(input: SmoothStatInput, rows: number[]) {
+  const x = new Float64Array(rows.length);
+  const y = new Float64Array(rows.length);
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i < rows.length; i++) {
+    x[i] = input.x[rows[i]!]!;
+    y[i] = input.y[rows[i]!]!;
+    if (x[i]! < min) min = x[i]!;
+    if (x[i]! > max) max = x[i]!;
+  }
+  return { x, y, min, max };
+}
+
+function lmEvaluator(x: Float64Array, y: Float64Array, level: number): SmoothEvaluator | null {
+  const n = x.length;
+  if (n < 2) return null;
+  let sx = 0;
+  let sy = 0;
+  for (let i = 0; i < n; i++) {
+    sx += x[i]!;
+    sy += y[i]!;
+  }
+  const xbar = sx / n;
+  const ybar = sy / n;
+  let sxx = 0;
+  let sxy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = x[i]! - xbar;
+    sxx += dx * dx;
+    sxy += dx * (y[i]! - ybar);
+  }
+  const slope = sxy / sxx;
+  const intercept = ybar - slope * xbar;
+  let rss = 0;
+  for (let i = 0; i < n; i++) {
+    const error = y[i]! - (intercept + slope * x[i]!);
+    rss += error * error;
+  }
+  const sigma = n > 2 ? Math.sqrt(rss / (n - 2)) : NaN;
+  return {
+    ciMult: qt((1 + level) / 2, n - 2),
+    evaluate: (x0) => ({
+      fit: intercept + slope * x0,
+      seFit: sigma * Math.sqrt(1 / n + ((x0 - xbar) * (x0 - xbar)) / sxx),
+    }),
+  };
+}
+
+function makeEvaluator(
+  method: "lm" | "loess",
+  x: Float64Array,
+  y: Float64Array,
+  range: { min: number; max: number },
+  options: { level: number; span: number; degree: 1 | 2; wantSE: boolean },
+): SmoothEvaluator | null {
+  if (method === "lm") {
+    return range.min === range.max ? null : lmEvaluator(x, y, options.level);
+  }
+  const model = loessFit(x, y, {
+    span: options.span,
+    degree: options.degree,
+    statistics: options.wantSE,
+  });
+  if (model === null) return null;
+  return {
+    ciMult: options.wantSE ? qt((1 + options.level) / 2, model.df) : NaN,
+    evaluate: (x0: number) => ({
+      fit: model.predict(x0),
+      seFit: options.wantSE ? model.sigma * model.seNorm(x0) : NaN,
+    }),
+  };
+}
+
+type SmoothOutput = {
+  x: number[];
+  y: number[];
+  ymin: number[];
+  ymax: number[];
+  se: number[];
+  groups: number[];
+  carried: Record<string, CellValue[]>;
+};
+
+function emitGrid(
+  output: SmoothOutput,
+  evaluator: SmoothEvaluator,
+  group: number,
+  rows: number[],
+  range: { min: number; max: number },
+  input: SmoothStatInput,
+  options: { evalN: number; wantSE: boolean; carriedNames: string[] },
+): void {
+  const step = options.evalN === 1 ? 0 : (range.max - range.min) / (options.evalN - 1);
+  const hasBand = options.wantSE && Number.isFinite(evaluator.ciMult);
+  for (let k = 0; k < options.evalN; k++) {
+    const x = range.min + k * step;
+    const { fit, seFit } = evaluator.evaluate(x);
+    output.x.push(x);
+    output.y.push(fit);
+    if (hasBand && Number.isFinite(seFit)) {
+      output.ymin.push(fit - evaluator.ciMult * seFit);
+      output.ymax.push(fit + evaluator.ciMult * seFit);
+      output.se.push(seFit);
+    } else {
+      output.ymin.push(NaN);
+      output.ymax.push(NaN);
+      output.se.push(NaN);
+    }
+    output.groups.push(group);
+    for (const name of options.carriedNames) {
+      output.carried[name]!.push(input.carried![name]![rows[0]!]!);
+    }
+  }
+}
+
 export function statSmooth(input: SmoothStatInput): SmoothStatResult {
-  const { x, y, groups } = input;
   const params = input.params ?? {};
   const level = params.level ?? 0.95;
   const wantSE = params.se ?? true;
@@ -83,23 +224,7 @@ export function statSmooth(input: SmoothStatInput): SmoothStatResult {
   const carriedNames = Object.keys(input.carried ?? {});
 
   // Partition finite pairs per group (first-seen group order).
-  const groupOrder: number[] = [];
-  const groupRows = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    if (!Number.isFinite(x[i]!) || !Number.isFinite(y[i]!)) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let rows = groupRows.get(g);
-    if (rows === undefined) {
-      rows = [];
-      groupRows.set(g, rows);
-      groupOrder.push(g);
-    }
-    rows.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: groupRows, dropped } = collectFiniteRows(input);
 
   let maxGroup = 0;
   for (const rows of groupRows.values()) maxGroup = Math.max(maxGroup, rows.length);
@@ -118,89 +243,29 @@ export function statSmooth(input: SmoothStatInput): SmoothStatResult {
 
   for (const g of groupOrder) {
     const rows = groupRows.get(g)!;
-    const nx = rows.length;
-    const gx = new Float64Array(nx);
-    const gy = new Float64Array(nx);
-    let min = Infinity;
-    let max = -Infinity;
-    for (let j = 0; j < nx; j++) {
-      gx[j] = x[rows[j]!]!;
-      gy[j] = y[rows[j]!]!;
-      if (gx[j]! < min) min = gx[j]!;
-      if (gx[j]! > max) max = gx[j]!;
+    const { x: gx, y: gy, min, max } = groupValues(input, rows);
+    const evaluator = makeEvaluator(method, gx, gy, { min, max }, { level, span, degree, wantSE });
+    if (evaluator === null) {
+      droppedGroups++;
+      continue;
     }
-
-    // Per-eval-point fit + se·norm, method-specific.
-    let evaluate: ((x0: number) => { fit: number; seFit: number }) | null = null;
-    let ciMult = NaN;
-
-    if (method === "lm") {
-      if (nx < 2 || min === max) {
-        droppedGroups++;
-        continue;
-      }
-      let sx = 0;
-      let sy = 0;
-      for (let j = 0; j < nx; j++) {
-        sx += gx[j]!;
-        sy += gy[j]!;
-      }
-      const xbar = sx / nx;
-      const ybar = sy / nx;
-      let sxx = 0;
-      let sxy = 0;
-      for (let j = 0; j < nx; j++) {
-        const dx = gx[j]! - xbar;
-        sxx += dx * dx;
-        sxy += dx * (gy[j]! - ybar);
-      }
-      const slope = sxy / sxx;
-      const intercept = ybar - slope * xbar;
-      let rss = 0;
-      for (let j = 0; j < nx; j++) {
-        const e = gy[j]! - (intercept + slope * gx[j]!);
-        rss += e * e;
-      }
-      const sigma = nx > 2 ? Math.sqrt(rss / (nx - 2)) : NaN;
-      ciMult = qt((1 + level) / 2, nx - 2);
-      evaluate = (x0: number) => ({
-        fit: intercept + slope * x0,
-        seFit: sigma * Math.sqrt(1 / nx + ((x0 - xbar) * (x0 - xbar)) / sxx),
-      });
-    } else {
-      const model = loessFit(gx, gy, { span, degree, statistics: wantSE });
-      if (model === null) {
-        droppedGroups++;
-        continue;
-      }
-      ciMult = wantSE ? qt((1 + level) / 2, model.df) : NaN;
-      evaluate = (x0: number) => ({
-        fit: model.predict(x0),
-        seFit: wantSE ? model.sigma * model.seNorm(x0) : NaN,
-      });
-    }
-
-    const step = evalN === 1 ? 0 : (max - min) / (evalN - 1);
-    const bandOK = wantSE && Number.isFinite(ciMult);
-    for (let k = 0; k < evalN; k++) {
-      const x0 = min + k * step;
-      const { fit, seFit } = evaluate(x0);
-      outX.push(x0);
-      outY.push(fit);
-      if (bandOK && Number.isFinite(seFit)) {
-        outYmin.push(fit - ciMult * seFit);
-        outYmax.push(fit + ciMult * seFit);
-        outSE.push(seFit);
-      } else {
-        outYmin.push(NaN);
-        outYmax.push(NaN);
-        outSE.push(NaN);
-      }
-      outGroups.push(g);
-      for (const name of carriedNames) {
-        carried[name]!.push(input.carried![name]![rows[0]!]!);
-      }
-    }
+    emitGrid(
+      {
+        x: outX,
+        y: outY,
+        ymin: outYmin,
+        ymax: outYmax,
+        se: outSE,
+        groups: outGroups,
+        carried,
+      },
+      evaluator,
+      g,
+      rows,
+      { min, max },
+      input,
+      { evalN, wantSE, carriedNames },
+    );
   }
 
   return {

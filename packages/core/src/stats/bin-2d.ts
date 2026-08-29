@@ -63,8 +63,168 @@ function finiteRange(values: Float64Array): [number, number] | null {
   return [min, max];
 }
 
+type BinBreaks = ReturnType<typeof binBreaksBins>;
+
+function indexGroups(input: Bin2dStatInput, rowCount: number) {
+  const order: number[] = [];
+  const slots = new Map<number, number>();
+  const sampleRows: number[] = [];
+  for (let i = 0; i < rowCount; i++) {
+    const group = input.groups[i]!;
+    if (slots.has(group)) continue;
+    slots.set(group, order.length);
+    order.push(group);
+    sampleRows.push(i);
+  }
+  return { order, slots, sampleRows };
+}
+
+function countCells(
+  input: Bin2dStatInput,
+  rowCount: number,
+  xBreaks: BinBreaks,
+  yBreaks: BinBreaks,
+  groupSlots: Map<number, number>,
+) {
+  const nx = xBreaks.breaks.length - 1;
+  const cellCount = nx * (yBreaks.breaks.length - 1);
+  const counts = new Float64Array(groupSlots.size * cellCount);
+  let dropped = 0;
+  for (let i = 0; i < rowCount; i++) {
+    const x = input.x[i]!;
+    const y = input.y[i]!;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      dropped++;
+      continue;
+    }
+    const ix = binIndexOf(x, xBreaks.fuzzy, xBreaks.rightClosed);
+    const iy = binIndexOf(y, yBreaks.fuzzy, yBreaks.rightClosed);
+    if (ix === -1 || iy === -1) {
+      dropped++;
+      continue;
+    }
+    const rawWeight = input.weights?.[i];
+    const weight = rawWeight === undefined ? 1 : Number.isFinite(rawWeight) ? rawWeight : 0;
+    const slot = groupSlots.get(input.groups[i]!)! * cellCount + iy * nx + ix;
+    counts[slot] = counts[slot]! + weight;
+  }
+  return { counts, dropped };
+}
+
+function outputRowCount(
+  counts: Float64Array,
+  groupCount: number,
+  cellCount: number,
+  drop: boolean,
+) {
+  let result = 0;
+  for (let group = 0; group < groupCount; group++) {
+    for (let cell = 0; cell < cellCount; cell++) {
+      if (!drop || counts[group * cellCount + cell] !== 0) result++;
+    }
+  }
+  return result;
+}
+
+function density(count: number, area: number, total: number): number {
+  return total > 0 && area > 0 ? count / area / total : 0;
+}
+
+function normalized(value: number, max: number): number {
+  return max > 0 ? value / max : 0;
+}
+
+function emitCells(
+  input: Bin2dStatInput,
+  counts: Float64Array,
+  xBreaks: BinBreaks,
+  yBreaks: BinBreaks,
+  groupOrder: number[],
+  sampleRows: number[],
+  carriedNames: string[],
+  drop: boolean,
+  rowCount: number,
+) {
+  const x = new Float64Array(rowCount);
+  const y = new Float64Array(rowCount);
+  const xmin = new Float64Array(rowCount);
+  const xmax = new Float64Array(rowCount);
+  const ymin = new Float64Array(rowCount);
+  const ymax = new Float64Array(rowCount);
+  const count = new Float64Array(rowCount);
+  const densities = new Float64Array(rowCount);
+  const ncount = new Float64Array(rowCount);
+  const ndensity = new Float64Array(rowCount);
+  const groups: number[] = [];
+  const carried: Record<string, CellValue[]> = {};
+  for (const name of carriedNames) carried[name] = [];
+
+  const nx = xBreaks.breaks.length - 1;
+  const ny = yBreaks.breaks.length - 1;
+  const cellCount = nx * ny;
+  let row = 0;
+  for (let group = 0; group < groupOrder.length; group++) {
+    let total = 0;
+    let maxCount = 0;
+    for (let cell = 0; cell < cellCount; cell++) {
+      const value = counts[group * cellCount + cell]!;
+      total += Math.abs(value);
+      if (Math.abs(value) > maxCount) maxCount = Math.abs(value);
+    }
+    let maxDensity = 0;
+    for (let iy = 0; iy < ny; iy++) {
+      const height = yBreaks.breaks[iy + 1]! - yBreaks.breaks[iy]!;
+      for (let ix = 0; ix < nx; ix++) {
+        const width = xBreaks.breaks[ix + 1]! - xBreaks.breaks[ix]!;
+        const value = density(counts[group * cellCount + iy * nx + ix]!, width * height, total);
+        if (value > maxDensity) maxDensity = value;
+      }
+    }
+    for (let iy = 0; iy < ny; iy++) {
+      const yLo = yBreaks.breaks[iy]!;
+      const yHi = yBreaks.breaks[iy + 1]!;
+      for (let ix = 0; ix < nx; ix++) {
+        const xLo = xBreaks.breaks[ix]!;
+        const xHi = xBreaks.breaks[ix + 1]!;
+        const value = counts[group * cellCount + iy * nx + ix]!;
+        if (drop && value === 0) continue;
+        const cellDensity = density(value, (xHi - xLo) * (yHi - yLo), total);
+        x[row] = (xLo + xHi) / 2;
+        y[row] = (yLo + yHi) / 2;
+        xmin[row] = xLo;
+        xmax[row] = xHi;
+        ymin[row] = yLo;
+        ymax[row] = yHi;
+        count[row] = value;
+        densities[row] = cellDensity;
+        ncount[row] = normalized(value, maxCount);
+        ndensity[row] = normalized(cellDensity, maxDensity);
+        groups.push(groupOrder[group]!);
+        for (const name of carriedNames) {
+          carried[name]!.push(input.carried![name]![sampleRows[group]!]!);
+        }
+        row++;
+      }
+    }
+  }
+  return {
+    x,
+    y,
+    xmin,
+    xmax,
+    ymin,
+    ymax,
+    count,
+    densities,
+    ncount,
+    ndensity,
+    groups,
+    carried,
+  };
+}
+
 export function statBin2d(input: Bin2dStatInput): Bin2dStatResult {
-  const { x, y, groups, weights } = input;
+  const { x, y } = input;
   const params = input.params ?? {};
   const drop = params.drop !== false;
   const carriedNames = Object.keys(input.carried ?? {});
@@ -108,134 +268,40 @@ export function statBin2d(input: Bin2dStatInput): Bin2dStatResult {
   const ny = yBreaks.breaks.length - 1;
   if (nx <= 0 || ny <= 0) return empty(nIn);
 
-  const groupOrder: number[] = [];
-  const groupSlot = new Map<number, number>();
-  const sampleRow: number[] = [];
-  for (let i = 0; i < nIn; i++) {
-    const g = groups[i]!;
-    if (!groupSlot.has(g)) {
-      groupSlot.set(g, groupOrder.length);
-      groupOrder.push(g);
-      sampleRow.push(i);
-    }
-  }
+  const { order: groupOrder, slots: groupSlot, sampleRows: sampleRow } = indexGroups(input, nIn);
   const gCount = groupOrder.length;
   const cellCount = nx * ny;
-  const counts = new Float64Array(gCount * cellCount);
-  let dropped = 0;
-  for (let i = 0; i < nIn; i++) {
-    const xv = x[i]!;
-    const yv = y[i]!;
-    if (!Number.isFinite(xv) || !Number.isFinite(yv)) {
-      dropped++;
-      continue;
-    }
-    const ix = binIndexOf(xv, xBreaks.fuzzy, xBreaks.rightClosed);
-    const iy = binIndexOf(yv, yBreaks.fuzzy, yBreaks.rightClosed);
-    if (ix === -1 || iy === -1) {
-      dropped++;
-      continue;
-    }
-    let w = 1;
-    if (weights !== null && weights !== undefined) {
-      w = Number.isFinite(weights[i]!) ? weights[i]! : 0;
-    }
-    const slot = groupSlot.get(groups[i]!)! * cellCount + iy * nx + ix;
-    counts[slot] = counts[slot]! + w;
-  }
+  const { counts, dropped } = countCells(input, nIn, xBreaks, yBreaks, groupSlot);
 
   // First pass: how many output rows?
-  let nOut = 0;
-  for (let s = 0; s < gCount; s++) {
-    for (let c = 0; c < cellCount; c++) {
-      const cnt = counts[s * cellCount + c]!;
-      if (!drop || cnt !== 0) nOut++;
-    }
-  }
+  const nOut = outputRowCount(counts, gCount, cellCount, drop);
   if (nOut === 0) return empty(dropped);
 
-  const outX = new Float64Array(nOut);
-  const outY = new Float64Array(nOut);
-  const outXmin = new Float64Array(nOut);
-  const outXmax = new Float64Array(nOut);
-  const outYmin = new Float64Array(nOut);
-  const outYmax = new Float64Array(nOut);
-  const outCount = new Float64Array(nOut);
-  const outDensity = new Float64Array(nOut);
-  const outNcount = new Float64Array(nOut);
-  const outNdensity = new Float64Array(nOut);
-  const outGroups: number[] = [];
-  const carried: Record<string, CellValue[]> = {};
-  for (const name of carriedNames) carried[name] = [];
-
-  let row = 0;
-  for (let s = 0; s < gCount; s++) {
-    let total = 0;
-    let maxCount = 0;
-    for (let c = 0; c < cellCount; c++) {
-      const cnt = counts[s * cellCount + c]!;
-      total += Math.abs(cnt);
-      if (Math.abs(cnt) > maxCount) maxCount = Math.abs(cnt);
-    }
-    let maxDensity = 0;
-    for (let iy = 0; iy < ny; iy++) {
-      const yLo = yBreaks.breaks[iy]!;
-      const yHi = yBreaks.breaks[iy + 1]!;
-      const wy = yHi - yLo;
-      for (let ix = 0; ix < nx; ix++) {
-        const xLo = xBreaks.breaks[ix]!;
-        const xHi = xBreaks.breaks[ix + 1]!;
-        const wx = xHi - xLo;
-        const area = wx * wy;
-        const cnt = counts[s * cellCount + iy * nx + ix]!;
-        const d = total > 0 && area > 0 ? cnt / area / total : 0;
-        if (d > maxDensity) maxDensity = d;
-      }
-    }
-    for (let iy = 0; iy < ny; iy++) {
-      const yLo = yBreaks.breaks[iy]!;
-      const yHi = yBreaks.breaks[iy + 1]!;
-      const wy = yHi - yLo;
-      for (let ix = 0; ix < nx; ix++) {
-        const xLo = xBreaks.breaks[ix]!;
-        const xHi = xBreaks.breaks[ix + 1]!;
-        const wx = xHi - xLo;
-        const cnt = counts[s * cellCount + iy * nx + ix]!;
-        if (drop && cnt === 0) continue;
-        const area = wx * wy;
-        const d = total > 0 && area > 0 ? cnt / area / total : 0;
-        outX[row] = (xLo + xHi) / 2;
-        outY[row] = (yLo + yHi) / 2;
-        outXmin[row] = xLo;
-        outXmax[row] = xHi;
-        outYmin[row] = yLo;
-        outYmax[row] = yHi;
-        outCount[row] = cnt;
-        outDensity[row] = d;
-        outNcount[row] = maxCount > 0 ? cnt / maxCount : 0;
-        outNdensity[row] = maxDensity > 0 ? d / maxDensity : 0;
-        outGroups.push(groupOrder[s]!);
-        for (const name of carriedNames) {
-          carried[name]!.push(input.carried![name]![sampleRow[s]!]!);
-        }
-        row++;
-      }
-    }
-  }
+  const output = emitCells(
+    input,
+    counts,
+    xBreaks,
+    yBreaks,
+    groupOrder,
+    sampleRow,
+    carriedNames,
+    drop,
+    nOut,
+  );
 
   return {
-    x: outX,
-    y: outY,
-    xmin: outXmin,
-    xmax: outXmax,
-    ymin: outYmin,
-    ymax: outYmax,
-    count: outCount,
-    density: outDensity,
-    ncount: outNcount,
-    ndensity: outNdensity,
-    groups: outGroups,
-    carried,
+    x: output.x,
+    y: output.y,
+    xmin: output.xmin,
+    xmax: output.xmax,
+    ymin: output.ymin,
+    ymax: output.ymax,
+    count: output.count,
+    density: output.densities,
+    ncount: output.ncount,
+    ndensity: output.ndensity,
+    groups: output.groups,
+    carried: output.carried,
     dropped,
     usedDefaultBins,
   };

@@ -93,6 +93,16 @@ function edgeInterp(
   return { x: ax + (bx - ax) * u, y: ay + (by - ay) * u };
 }
 
+function cellMask(values: readonly number[], level: number): number {
+  if (!values.every((value) => Number.isFinite(value)) || !Number.isFinite(level)) return -1;
+  let mask = 0;
+  if (values[0]! >= level) mask |= 1;
+  if (values[1]! >= level) mask |= 2;
+  if (values[3]! >= level) mask |= 4;
+  if (values[2]! >= level) mask |= 8;
+  return mask;
+}
+
 /** Emit 0–2 undirected segments for one cell at one level (marching squares). */
 export function cellSegments(
   x0: number,
@@ -105,15 +115,9 @@ export function cellSegments(
   z11: number,
   level: number,
 ): Array<[Pt, Pt]> {
-  if (![z00, z10, z01, z11].every((z) => Number.isFinite(z)) || !Number.isFinite(level)) {
-    return [];
-  }
   // Bitmask: corner ≥ level. corners: 0=SW, 1=SE, 2=NE, 3=NW
-  let mask = 0;
-  if (z00 >= level) mask |= 1;
-  if (z10 >= level) mask |= 2;
-  if (z11 >= level) mask |= 4;
-  if (z01 >= level) mask |= 8;
+  const mask = cellMask([z00, z10, z01, z11], level);
+  if (mask < 0) return [];
   if (mask === 0 || mask === 15) return [];
 
   const bottom = () => edgeInterp(x0, y0, z00, x1, y0, z10, level);
@@ -321,30 +325,83 @@ export function stitchSegments(segments: Array<[Pt, Pt]>): Pt[][] {
   return polylines;
 }
 
+function collectFiniteRows(input: ContourStatInput) {
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < input.x.length; i++) {
+    const finite =
+      Number.isFinite(input.x[i]!) && Number.isFinite(input.y[i]!) && Number.isFinite(input.z[i]!);
+    if (!finite) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
+type ContourVertex = Pt & { level: number; piece: number };
+
+function contourGroup(
+  input: ContourStatInput,
+  rows: number[],
+  params: ContourParamsInput,
+): ContourVertex[] | null {
+  const gx = Float64Array.from(rows, (row) => input.x[row]!);
+  const gy = Float64Array.from(rows, (row) => input.y[row]!);
+  const gz = Float64Array.from(rows, (row) => input.z[row]!);
+  const xs = uniqueSorted(gx);
+  const ys = uniqueSorted(gy);
+  if (xs.length < 2 || ys.length < 2) return null;
+  const xi = new Map(xs.map((value, i) => [value, i]));
+  const yi = new Map(ys.map((value, i) => [value, i]));
+  const grid: (number | null)[][] = Array.from({ length: ys.length }, () =>
+    Array.from({ length: xs.length }, () => null),
+  );
+  for (let k = 0; k < rows.length; k++) grid[yi.get(gy[k]!)!]![xi.get(gx[k]!)!] = gz[k]!;
+
+  let zmin = Infinity;
+  let zmax = -Infinity;
+  for (const row of grid) {
+    for (const value of row) {
+      if (value === null || !Number.isFinite(value)) continue;
+      if (value < zmin) zmin = value;
+      if (value > zmax) zmax = value;
+    }
+  }
+  if (!(zmax > zmin) && params.breaks === undefined) return null;
+  const levels = contourLevels(
+    Number.isFinite(zmin) ? zmin : 0,
+    Number.isFinite(zmax) ? zmax : 1,
+    params,
+  );
+  if (levels.length === 0) return null;
+
+  const vertices: ContourVertex[] = [];
+  let piece = 0;
+  for (const level of levels) {
+    for (const line of stitchSegments(gridCellSegments(xs, ys, grid, level))) {
+      const pieceId = piece++;
+      for (const point of line) vertices.push({ ...point, level, piece: pieceId });
+    }
+  }
+  return vertices;
+}
+
 export function statContour(input: ContourStatInput): ContourStatResult {
-  const { x, y, z, groups } = input;
   const params = input.params ?? {};
   const carriedNames = Object.keys(input.carried ?? {});
 
   // Group order first-seen
-  const groupOrder: number[] = [];
-  const groupRows = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    const ok = Number.isFinite(x[i]!) && Number.isFinite(y[i]!) && Number.isFinite(z[i]!);
-    if (!ok) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let list = groupRows.get(g);
-    if (list === undefined) {
-      list = [];
-      groupRows.set(g, list);
-      groupOrder.push(g);
-    }
-    list.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: groupRows, dropped } = collectFiniteRows(input);
 
   const outX: number[] = [];
   const outY: number[] = [];
@@ -356,65 +413,19 @@ export function statContour(input: ContourStatInput): ContourStatResult {
 
   for (const g of groupOrder) {
     const rows = groupRows.get(g)!;
-    const gx = Float64Array.from(rows, (r) => x[r]!);
-    const gy = Float64Array.from(rows, (r) => y[r]!);
-    const gz = Float64Array.from(rows, (r) => z[r]!);
-    const xs = uniqueSorted(gx);
-    const ys = uniqueSorted(gy);
-    if (xs.length < 2 || ys.length < 2) {
+    const vertices = contourGroup(input, rows, params);
+    if (vertices === null) {
       droppedGroups++;
       continue;
     }
-    const xi = new Map(xs.map((v, i) => [v, i]));
-    const yi = new Map(ys.map((v, i) => [v, i]));
-    const grid: (number | null)[][] = Array.from({ length: ys.length }, () =>
-      Array.from({ length: xs.length }, () => null),
-    );
-    for (let k = 0; k < rows.length; k++) {
-      const i = xi.get(gx[k]!)!;
-      const j = yi.get(gy[k]!)!;
-      grid[j]![i] = gz[k]!;
-    }
-
-    let zmin = Infinity;
-    let zmax = -Infinity;
-    for (const row of grid) {
-      for (const v of row) {
-        if (v === null || !Number.isFinite(v)) continue;
-        if (v < zmin) zmin = v;
-        if (v > zmax) zmax = v;
-      }
-    }
-    if (!(zmax > zmin) && params.breaks === undefined) {
-      droppedGroups++;
-      continue;
-    }
-    const levels = contourLevels(
-      Number.isFinite(zmin) ? zmin : 0,
-      Number.isFinite(zmax) ? zmax : 1,
-      params,
-    );
-    if (levels.length === 0) {
-      droppedGroups++;
-      continue;
-    }
-
     const sample = rows[0]!;
-    let pieceCounter = 0;
-    for (const level of levels) {
-      const segs = gridCellSegments(xs, ys, grid, level);
-      const lines = stitchSegments(segs);
-      for (const line of lines) {
-        const piece = pieceCounter++;
-        for (const p of line) {
-          outX.push(p.x);
-          outY.push(p.y);
-          outLevel.push(level);
-          outGroups.push(g);
-          outPiece.push(piece);
-          sampleRows.push(sample);
-        }
-      }
+    for (const vertex of vertices) {
+      outX.push(vertex.x);
+      outY.push(vertex.y);
+      outLevel.push(vertex.level);
+      outGroups.push(g);
+      outPiece.push(vertex.piece);
+      sampleRows.push(sample);
     }
   }
 

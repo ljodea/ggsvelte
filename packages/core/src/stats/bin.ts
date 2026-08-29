@@ -77,21 +77,72 @@ export interface BinStatResult {
   cut: { fuzzy: readonly number[]; rightClosed: boolean; binIndex: Int32Array };
 }
 
+type BinBreaks = ReturnType<typeof binBreaksBins>;
+
+function finiteRange(values: Float64Array): [number, number] | undefined {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return min > max ? undefined : [min, max];
+}
+
+function indexGroups(input: BinStatInput) {
+  const order: number[] = [];
+  const slots = new Map<number, number>();
+  const sampleRows: number[] = [];
+  for (let i = 0; i < input.x.length; i++) {
+    const group = input.groups[i]!;
+    if (slots.has(group)) continue;
+    slots.set(group, order.length);
+    order.push(group);
+    sampleRows.push(i);
+  }
+  return { order, slots, sampleRows };
+}
+
+function countBins(input: BinStatInput, breaks: BinBreaks, groupSlots: Map<number, number>) {
+  const binCount = breaks.breaks.length - 1;
+  const counts = new Float64Array(groupSlots.size * binCount);
+  let dropped = 0;
+  for (let i = 0; i < input.x.length; i++) {
+    const value = input.x[i]!;
+    if (!Number.isFinite(value)) {
+      dropped++;
+      continue;
+    }
+    const bin = binIndexOf(value, breaks.fuzzy, breaks.rightClosed);
+    if (bin === -1) {
+      dropped++;
+      continue;
+    }
+    const rawWeight = input.weights?.[i];
+    const weight = rawWeight === undefined ? 1 : Number.isFinite(rawWeight) ? rawWeight : 0;
+    const slot = groupSlots.get(input.groups[i]!)! * binCount + bin;
+    counts[slot] = counts[slot]! + weight;
+  }
+  return { counts, dropped };
+}
+
+function density(count: number, width: number, total: number): number {
+  return total > 0 ? count / width / total : 0;
+}
+
+function normalized(value: number, max: number): number {
+  return max > 0 ? value / max : 0;
+}
+
 export function statBin(input: BinStatInput): BinStatResult {
-  const { x, groups, weights } = input;
+  const { x } = input;
   const params = input.params ?? {};
   const carriedNames = Object.keys(input.carried ?? {});
   const usedDefaultBins = params.bins === undefined && params.binwidth === undefined;
 
   // Layer-wide finite range (shared breaks across groups).
-  let min = Infinity;
-  let max = -Infinity;
-  for (let i = 0; i < x.length; i++) {
-    const v = x[i]!;
-    if (!Number.isFinite(v)) continue;
-    if (v < min) min = v;
-    if (v > max) max = v;
-  }
+  const dataRange = finiteRange(x);
   const empty: BinStatResult = {
     x: new Float64Array(0),
     xmin: new Float64Array(0),
@@ -106,10 +157,10 @@ export function statBin(input: BinStatInput): BinStatResult {
     usedDefaultBins,
     cut: { fuzzy: [], rightClosed: true, binIndex: new Int32Array(0) },
   };
-  if (min > max) return empty;
+  if (dataRange === undefined) return empty;
 
   const closed = params.closed ?? "right";
-  const range: [number, number] = input.range ?? [min, max];
+  const range: [number, number] = input.range ?? dataRange;
   const breaks =
     params.binwidth === undefined
       ? binBreaksBins(range, params.bins ?? 30, params.boundary, params.center, closed)
@@ -117,40 +168,10 @@ export function statBin(input: BinStatInput): BinStatResult {
   const binCount = breaks.breaks.length - 1;
 
   // Present groups in first-seen order, with one carried sample row each.
-  const groupOrder: number[] = [];
-  const groupSlot = new Map<number, number>();
-  const sampleRow: number[] = [];
-  for (let i = 0; i < x.length; i++) {
-    const g = groups[i]!;
-    if (!groupSlot.has(g)) {
-      groupSlot.set(g, groupOrder.length);
-      groupOrder.push(g);
-      sampleRow.push(i);
-    }
-  }
+  const { order: groupOrder, slots: groupSlot, sampleRows: sampleRow } = indexGroups(input);
 
   // Count per (group, bin).
-  const counts = new Float64Array(groupOrder.length * binCount);
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    const v = x[i]!;
-    if (!Number.isFinite(v)) {
-      dropped++;
-      continue;
-    }
-    const bin = binIndexOf(v, breaks.fuzzy, breaks.rightClosed);
-    if (bin === -1) {
-      dropped++;
-      continue;
-    }
-    let w = 1;
-    if (weights !== null && weights !== undefined) {
-      // ggplot2: missing weights count as 0.
-      w = Number.isFinite(weights[i]!) ? weights[i]! : 0;
-    }
-    const slot = groupSlot.get(groups[i]!)! * binCount + bin;
-    counts[slot] = counts[slot]! + w;
-  }
+  const { counts, dropped } = countBins(input, breaks, groupSlot);
 
   // Emit all (group × bin) rows, zero-count bins included.
   const n = groupOrder.length * binCount;
@@ -177,7 +198,7 @@ export function statBin(input: BinStatInput): BinStatResult {
     let maxDensity = 0;
     for (let b = 0; b < binCount; b++) {
       const width = breaks.breaks[b + 1]! - breaks.breaks[b]!;
-      const d = total > 0 ? counts[s * binCount + b]! / width / total : 0;
+      const d = density(counts[s * binCount + b]!, width, total);
       if (d > maxDensity) maxDensity = d;
     }
     for (let b = 0; b < binCount; b++) {
@@ -191,9 +212,9 @@ export function statBin(input: BinStatInput): BinStatResult {
       outXmin[row] = lo;
       outXmax[row] = hi;
       outCount[row] = c;
-      outDensity[row] = total > 0 ? c / width / total : 0;
-      outNcount[row] = maxCount > 0 ? c / maxCount : 0;
-      outNdensity[row] = maxDensity > 0 ? (total > 0 ? c / width / total : 0) / maxDensity : 0;
+      outDensity[row] = density(c, width, total);
+      outNcount[row] = normalized(c, maxCount);
+      outNdensity[row] = normalized(density(c, width, total), maxDensity);
       outGroups.push(groupOrder[s]!);
       for (const name of carriedNames) {
         carried[name]!.push(input.carried![name]![sampleRow[s]!]!);

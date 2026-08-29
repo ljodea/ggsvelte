@@ -100,6 +100,47 @@ export type ProductKdeGridResult = number[][] & {
   examinations?: number;
 };
 
+function sortedPairs(xs: Float64Array, ys: Float64Array) {
+  const order = Array.from({ length: xs.length }, (_, i) => i).toSorted(
+    (a, b) => xs[a]! - xs[b]! || a - b,
+  );
+  const x = new Float64Array(xs.length);
+  const y = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) {
+    x[i] = xs[order[i]!]!;
+    y[i] = ys[order[i]!]!;
+  }
+  return { x, y };
+}
+
+function extent(values: Float64Array): [number, number] {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const value of values) {
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return [min, max];
+}
+
+function packRow(
+  y: number,
+  window: number,
+  sortedX: Float64Array,
+  sortedY: Float64Array,
+  rowX: Float64Array,
+  rowY: Float64Array,
+): number {
+  let count = 0;
+  for (let i = 0; i < sortedX.length; i++) {
+    if (Math.abs(y - sortedY[i]!) > window) continue;
+    rowX[count] = sortedX[i]!;
+    rowY[count] = sortedY[i]!;
+    count++;
+  }
+  return count;
+}
+
 /**
  * Product-Gaussian KDE on a regular grid.
  *
@@ -134,15 +175,7 @@ export function productKdeGrid(
     return z;
   }
 
-  const order = Array.from({ length: nx }, (_, i) => i).toSorted(
-    (a, b) => xs[a]! - xs[b]! || a - b,
-  );
-  const sortedX = new Float64Array(nx);
-  const sortedY = new Float64Array(nx);
-  for (let i = 0; i < nx; i++) {
-    sortedX[i] = xs[order[i]!]!;
-    sortedY[i] = ys[order[i]!]!;
-  }
+  const { x: sortedX, y: sortedY } = sortedPairs(xs, ys);
 
   const wx = 8 * hx;
   const wy = 8 * hy;
@@ -154,20 +187,8 @@ export function productKdeGrid(
   // fits inside the window, no gather can remove anything, so read the sorted
   // arrays directly. That is the wide-bandwidth case, where the gather would be
   // pure overhead.
-  let yMin = Number.POSITIVE_INFINITY;
-  let yMax = Number.NEGATIVE_INFINITY;
-  for (let k = 0; k < nx; k++) {
-    const v = sortedY[k]!;
-    if (v < yMin) yMin = v;
-    if (v > yMax) yMax = v;
-  }
-  let gyMin = Number.POSITIVE_INFINITY;
-  let gyMax = Number.NEGATIVE_INFINITY;
-  for (let j = 0; j < gridNY; j++) {
-    const v = gy[j]!;
-    if (v < gyMin) gyMin = v;
-    if (v > gyMax) gyMax = v;
-  }
+  const [yMin, yMax] = extent(sortedY);
+  const [gyMin, gyMax] = extent(gy);
   const everyRowTakesEverySample = Math.max(gyMax - yMin, yMax - gyMin) <= wy;
 
   // Samples inside the current row's y window, packed by value in the same
@@ -181,15 +202,7 @@ export function productKdeGrid(
   for (let j = 0; j < gridNY; j++) {
     const yj = gy[j]!;
     if (!everyRowTakesEverySample) {
-      rowCount = 0;
-      for (let k = 0; k < nx; k++) {
-        // Negated so a non-finite dy is admitted, as the per-cell test was.
-        if (!(Math.abs(yj - sortedY[k]!) > wy)) {
-          rowX[rowCount] = sortedX[k]!;
-          rowY[rowCount] = sortedY[k]!;
-          rowCount++;
-        }
-      }
+      rowCount = packRow(yj, wy, sortedX, sortedY, rowX, rowY);
     }
     let lo = 0;
     for (let i = 0; i < gridNX; i++) {
@@ -269,29 +282,133 @@ function resolveH(
   return [(hx * adjust) / 4, (hy * adjust) / 4];
 }
 
+function collectFiniteRows(input: Density2dStatInput) {
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < input.x.length; i++) {
+    if (!Number.isFinite(input.x[i]!) || !Number.isFinite(input.y[i]!)) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
+function groupValues(input: Density2dStatInput, rows: number[]) {
+  const x = new Float64Array(rows.length);
+  const y = new Float64Array(rows.length);
+  let xmin = Infinity;
+  let xmax = -Infinity;
+  let ymin = Infinity;
+  let ymax = -Infinity;
+  for (let i = 0; i < rows.length; i++) {
+    x[i] = input.x[rows[i]!]!;
+    y[i] = input.y[rows[i]!]!;
+    if (x[i]! < xmin) xmin = x[i]!;
+    if (x[i]! > xmax) xmax = x[i]!;
+    if (y[i]! < ymin) ymin = y[i]!;
+    if (y[i]! > ymax) ymax = y[i]!;
+  }
+  return { x, y, xmin, xmax, ymin, ymax };
+}
+
+function densitySurface(
+  input: Density2dStatInput,
+  rows: number[],
+  params: Density2dParamsInput,
+  gridN: number,
+) {
+  const values = groupValues(input, rows);
+  let bandwidth: [number, number];
+  try {
+    bandwidth = resolveH(values.x, values.y, params);
+  } catch {
+    return null;
+  }
+  const [hx, hy] = bandwidth;
+  if (!(hx > 0) || !(hy > 0)) return null;
+  const [x0, x1] = expandRange(values.xmin, values.xmax, 0.05);
+  const [y0, y1] = expandRange(values.ymin, values.ymax, 0.05);
+  const gx = linspace(x0, x1, gridN);
+  const gy = linspace(y0, y1, gridN);
+  const z = productKdeGrid(values.x, values.y, gx, gy, hx, hy);
+  let zmin = Infinity;
+  let zmax = -Infinity;
+  for (const row of z) {
+    for (const value of row) {
+      if (value < zmin) zmin = value;
+      if (value > zmax) zmax = value;
+    }
+  }
+  const levels = contourLevels(zmin, zmax, {
+    bins: params.bins,
+    breaks: params.breaks,
+    binwidth: params.binwidth,
+  });
+  return levels.length === 0 || !(zmax > zmin) ? null : { gx, gy, z, zmin, zmax, levels };
+}
+
+type DensityContourVertex = {
+  x: number;
+  y: number;
+  level: number;
+  piece: number;
+};
+
+function densityContours(
+  surface: NonNullable<ReturnType<typeof densitySurface>>,
+  filled: boolean,
+): { vertices: DensityContourVertex[]; openRingsDropped: number } {
+  const vertices: DensityContourVertex[] = [];
+  let openRingsDropped = 0;
+  let piece = 0;
+  for (const level of surface.levels) {
+    if (level <= surface.zmin || level >= surface.zmax) continue;
+    const segments: Array<[{ x: number; y: number }, { x: number; y: number }]> = [];
+    for (let j = 0; j < surface.gy.length - 1; j++) {
+      for (let i = 0; i < surface.gx.length - 1; i++) {
+        segments.push(
+          ...cellSegments(
+            surface.gx[i]!,
+            surface.gx[i + 1]!,
+            surface.gy[j]!,
+            surface.gy[j + 1]!,
+            surface.z[j]![i]!,
+            surface.z[j]![i + 1]!,
+            surface.z[j + 1]![i]!,
+            surface.z[j + 1]![i + 1]!,
+            level,
+          ),
+        );
+      }
+    }
+    for (const line of stitchSegments(segments)) {
+      if (filled && !isClosedRing(line)) {
+        openRingsDropped++;
+        continue;
+      }
+      const pieceId = piece++;
+      for (const point of line) vertices.push({ ...point, level, piece: pieceId });
+    }
+  }
+  return { vertices, openRingsDropped };
+}
+
 export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
-  const { x, y, groups } = input;
   const params = input.params ?? {};
   const gridN = params.n ?? 100;
   const carriedNames = Object.keys(input.carried ?? {});
 
-  const groupOrder: number[] = [];
-  const groupRows = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    if (!Number.isFinite(x[i]!) || !Number.isFinite(y[i]!)) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let list = groupRows.get(g);
-    if (list === undefined) {
-      list = [];
-      groupRows.set(g, list);
-      groupOrder.push(g);
-    }
-    list.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: groupRows, dropped } = collectFiniteRows(input);
 
   const outX: number[] = [];
   const outY: number[] = [];
@@ -310,104 +427,22 @@ export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
       droppedGroups++;
       continue;
     }
-    const nx = rows.length;
-    const xs = new Float64Array(nx);
-    const ys = new Float64Array(nx);
-    let xmin = Infinity;
-    let xmax = -Infinity;
-    let ymin = Infinity;
-    let ymax = -Infinity;
-    for (let j = 0; j < nx; j++) {
-      const xv = x[rows[j]!]!;
-      const yv = y[rows[j]!]!;
-      xs[j] = xv;
-      ys[j] = yv;
-      if (xv < xmin) xmin = xv;
-      if (xv > xmax) xmax = xv;
-      if (yv < ymin) ymin = yv;
-      if (yv > ymax) ymax = yv;
-    }
-
-    let hx: number;
-    let hy: number;
-    try {
-      [hx, hy] = resolveH(xs, ys, params);
-    } catch {
+    const surface = densitySurface(input, rows, params, gridN);
+    if (surface === null) {
       droppedGroups++;
       continue;
     }
-    if (!(hx > 0) || !(hy > 0)) {
-      droppedGroups++;
-      continue;
-    }
-
-    const [x0, x1] = expandRange(xmin, xmax, 0.05);
-    const [y0, y1] = expandRange(ymin, ymax, 0.05);
-    const gx = linspace(x0, x1, gridN);
-    const gy = linspace(y0, y1, gridN);
-    // Sorted-x sliding window (same ±8σ / invN contract as the direct product).
-    const z = productKdeGrid(xs, ys, gx, gy, hx, hy);
-
-    let zmin = Infinity;
-    let zmax = -Infinity;
-    for (let j = 0; j < gridN; j++) {
-      for (let i = 0; i < gridN; i++) {
-        const v = z[j]![i]!;
-        if (v < zmin) zmin = v;
-        if (v > zmax) zmax = v;
-      }
-    }
-    const levels = contourLevels(zmin, zmax, {
-      bins: params.bins,
-      breaks: params.breaks,
-      binwidth: params.binwidth,
-    });
-    if (levels.length === 0 || !(zmax > zmin)) {
-      droppedGroups++;
-      continue;
-    }
-
+    const contours = densityContours(surface, filled);
+    openRingsDropped += contours.openRingsDropped;
     const sample = rows[0]!;
-    let pieceCounter = 0;
-    for (const level of levels) {
-      // Endpoints of the density surface rarely produce isolines.
-      if (level <= zmin || level >= zmax) continue;
-      const segs: Array<[{ x: number; y: number }, { x: number; y: number }]> = [];
-      for (let j = 0; j < gridN - 1; j++) {
-        for (let i = 0; i < gridN - 1; i++) {
-          segs.push(
-            ...cellSegments(
-              gx[i]!,
-              gx[i + 1]!,
-              gy[j]!,
-              gy[j + 1]!,
-              z[j]![i]!,
-              z[j]![i + 1]!,
-              z[j + 1]![i]!,
-              z[j + 1]![i + 1]!,
-              level,
-            ),
-          );
-        }
-      }
-      const lines = stitchSegments(segs);
-      for (const line of lines) {
-        if (filled && !isClosedRing(line)) {
-          openRingsDropped++;
-          continue;
-        }
-        const piece = pieceCounter++;
-        // Encode group as composite later in frame; store source group id here.
-        for (const p of line) {
-          outX.push(p.x);
-          outY.push(p.y);
-          outLevel.push(level);
-          outDensity.push(level);
-          outGroups.push(g);
-          outPiece.push(piece);
-          sampleRows.push(sample);
-        }
-      }
+    for (const vertex of contours.vertices) {
+      outX.push(vertex.x);
+      outY.push(vertex.y);
+      outLevel.push(vertex.level);
+      outDensity.push(vertex.level);
+      outGroups.push(g);
+      outPiece.push(vertex.piece);
+      sampleRows.push(sample);
     }
   }
 
