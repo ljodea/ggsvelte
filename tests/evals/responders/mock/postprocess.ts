@@ -6,7 +6,14 @@
 import type { MockContext } from "./types.ts";
 
 export function postprocess(ctx: MockContext): void {
-  const { prompt, pick, spec, scales } = ctx;
+  addRuleAnnotation(ctx);
+  applyFacets(ctx);
+  applyCoordinatesAndScales(ctx);
+  applyLegend(ctx);
+}
+
+function addRuleAnnotation(ctx: MockContext): void {
+  const { prompt, spec } = ctx;
 
   // --- rule annotation add-on (geom_hline / geom_vline sugar #818) ---------
   // Prefer explicit intercepts: "y = 10", "x = 2.5", or "at N" after
@@ -45,8 +52,11 @@ export function postprocess(ctx: MockContext): void {
       params: vertical ? { xintercept: value } : { yintercept: value },
     });
   }
+}
 
-  // --- facets ---------------------------------------------------------------
+function applyFacets(ctx: MockContext): void {
+  const { prompt, pick, spec } = ctx;
+
   if (prompt.includes("grid") && prompt.includes("rows")) {
     const rows = pick.mentionedCat();
     const cols = pick.mentionedCat();
@@ -63,6 +73,10 @@ export function postprocess(ctx: MockContext): void {
       spec.facet = facet;
     }
   }
+}
+
+function applyCoordinatesAndScales(ctx: MockContext): void {
+  const { prompt, spec, scales } = ctx;
 
   // --- coord / scales ---------------------------------------------------------
   const hasHorizontalRibbon = spec.layers.some(
@@ -102,6 +116,11 @@ export function postprocess(ctx: MockContext): void {
   const ordered = /\b(dmy|mdy|ymd|ydm|myd|dym)\b/.exec(prompt)?.[1];
   if (ordered !== undefined) scales["x"] = { type: "time", parse: ordered };
   if (Object.keys(scales).length > 0) spec.scales = scales;
+}
+
+function applyLegend(ctx: MockContext): void {
+  const { prompt, spec } = ctx;
+
   if (/legend[^.]*\b(?:below|bottom)\b|\b(?:below|bottom)[^.]*legend/.test(prompt)) {
     const aesthetic = spec.layers.some((layer) => layer.aes?.["color"] !== undefined)
       ? "color"

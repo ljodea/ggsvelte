@@ -8,7 +8,9 @@ import { fieldNamed } from "./profile.ts";
 import { colorFor, f } from "./style.ts";
 import type { MockAes, MockContext, MockLayer } from "./types.ts";
 
-export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
+type SpecialtyHandler = (ctx: MockContext) => MockLayer[] | undefined;
+
+function synthesizeFunction(ctx: MockContext): MockLayer[] | undefined {
   const { prompt, profile, pick } = ctx;
 
   // geom_function / stat_function: portable named registry curve (#797).
@@ -60,6 +62,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeInterval(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // Interval family beyond errorbar (#793). Multi-geom prompts emit all
   // named forms so corpus golds with three layers stay mock-reachable.
   if (/\bgeom[_\s]?linerange\b|\bgeom[_\s]?pointrange\b|\bgeom[_\s]?crossbar\b/.test(prompt)) {
@@ -92,6 +100,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeQq(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_qq + geom_qq_line: sample channel (ggplot2 aes.sample) (#804).
   if (
     /\bq-?q\b/.test(prompt) ||
@@ -115,6 +129,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeStep(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
+
   // geom_step: hv/vh staircase polylines (#789). Not the intentional
   // "stepped" unknown-geom repair fixture handled in the basic families.
   if (
@@ -134,6 +154,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizeCount(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_count: stat sum at unique (x, y); size defaults to after_stat n (#795).
   if (/\bgeom[_\s]?count\b|\boverplotting\b/.test(prompt)) {
     const x = fieldNamed(profile, "x") ?? pick.quant() ?? "x";
@@ -142,6 +168,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     colorFor(ctx, "color", aes);
     return [{ geom: "count", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeViolin(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
 
   // geom_violin: mirrored ydensity polygons per discrete x (#798).
   if (/\bgeom[_\s]?violin\b|\bviolin plots?\b|\bviolin\b/.test(prompt)) {
@@ -156,6 +188,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     }
     return [layer];
   }
+
+  return undefined;
+}
+
+function synthesizeLabel(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
 
   // geom_label alone: boxed text marks, no companion point layer (#792).
   if (
@@ -173,6 +211,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizePolygon(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_polygon: closed filled rings in data order, one per group (#807).
   // Vertex fields are positional, not prompt-ordered — prefer literal x/y.
   if (
@@ -186,6 +230,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     colorFor(ctx, "fill", layer.aes);
     return [layer];
   }
+
+  return undefined;
+}
+
+function synthesizeSpoke(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_spoke: origin + angle (radians) + radius → segment (#810).
   if (
@@ -212,6 +262,12 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     }
     return [layer];
   }
+
+  return undefined;
+}
+
+function synthesizeBlank(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_blank: scale training without marks (#791).
   if (
@@ -242,5 +298,26 @@ export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+const SPECIALTY_HANDLERS: SpecialtyHandler[] = [
+  synthesizeFunction,
+  synthesizeInterval,
+  synthesizeQq,
+  synthesizeStep,
+  synthesizeCount,
+  synthesizeViolin,
+  synthesizeLabel,
+  synthesizePolygon,
+  synthesizeSpoke,
+  synthesizeBlank,
+];
+
+export function synthesizeSpecialty(ctx: MockContext): MockLayer[] | undefined {
+  for (const handler of SPECIALTY_HANDLERS) {
+    const layers = handler(ctx);
+    if (layers !== undefined) return layers;
+  }
   return undefined;
 }

@@ -9,34 +9,40 @@ import { fieldNamed } from "./profile.ts";
 import { colorFor, f, stylesFor } from "./style.ts";
 import type { MockAes, MockContext, MockLayer } from "./types.ts";
 
-export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
-  const { prompt, profile, pick, scales, repair } = ctx;
+type BasicHandler = (ctx: MockContext) => MockLayer[] | undefined;
+
+function synthesizeRibbon(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt } = ctx;
 
   // Horizontal (y + xmin/xmax) vs vertical (x + ymin/ymax) ribbons.
   if (/\bribbon\b/.test(prompt) && !/without .*(?:band|ribbon)/.test(prompt)) {
     if (/\bhorizontal\b|map y to|xmin to|xmax to/.test(prompt) && !/ymin to|ymax to/.test(prompt)) {
-      const y = fieldNamed(profile, "station") ?? pick.quant() ?? "y";
-      const xmin =
-        fieldNamed(profile, "min_depth") ?? fieldNamed(profile, "xmin") ?? pick.quant() ?? "xmin";
-      const xmax =
-        fieldNamed(profile, "max_depth") ?? fieldNamed(profile, "xmax") ?? pick.quant() ?? "xmax";
-      return [
-        {
-          geom: "ribbon",
-          aes: { y: f(y), xmin: f(xmin), xmax: f(xmax) },
-        },
-      ];
+      return horizontalRibbon(ctx);
     }
-    const x = fieldNamed(profile, "week") ?? pick.temporal() ?? pick.quant() ?? "x";
-    const ymin = fieldNamed(profile, "lo") ?? fieldNamed(profile, "ymin") ?? pick.quant() ?? "ymin";
-    const ymax = fieldNamed(profile, "hi") ?? fieldNamed(profile, "ymax") ?? pick.quant() ?? "ymax";
-    return [
-      {
-        geom: "ribbon",
-        aes: { x: f(x), ymin: f(ymin), ymax: f(ymax) },
-      },
-    ];
+    return verticalRibbon(ctx);
   }
+
+  return undefined;
+}
+
+function horizontalRibbon({ profile, pick }: MockContext): MockLayer[] {
+  const y = fieldNamed(profile, "station") ?? pick.quant() ?? "y";
+  const xmin =
+    fieldNamed(profile, "min_depth") ?? fieldNamed(profile, "xmin") ?? pick.quant() ?? "xmin";
+  const xmax =
+    fieldNamed(profile, "max_depth") ?? fieldNamed(profile, "xmax") ?? pick.quant() ?? "xmax";
+  return [{ geom: "ribbon", aes: { y: f(y), xmin: f(xmin), xmax: f(xmax) } }];
+}
+
+function verticalRibbon({ profile, pick }: MockContext): MockLayer[] {
+  const x = fieldNamed(profile, "week") ?? pick.temporal() ?? pick.quant() ?? "x";
+  const ymin = fieldNamed(profile, "lo") ?? fieldNamed(profile, "ymin") ?? pick.quant() ?? "ymin";
+  const ymax = fieldNamed(profile, "hi") ?? fieldNamed(profile, "ymax") ?? pick.quant() ?? "ymax";
+  return [{ geom: "ribbon", aes: { x: f(x), ymin: f(ymin), ymax: f(ymax) } }];
+}
+
+function synthesizeDistribution(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick, scales, repair } = ctx;
 
   // Intentionally-invalid first attempt (unknown geom) to exercise the
   // repair round; the repair call returns the fixed valid spec.
@@ -68,6 +74,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     colorFor(ctx, "color", aes);
     return [{ geom: "density", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeInterval(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
 
   if (/box ?plot|compare (?:the )?teams?/.test(prompt)) {
     const x = pick.cat() ?? "x";
@@ -106,6 +118,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeTrend(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick, scales } = ctx;
+
   if (/smooth|trend line|regression|best[- ]fit|loess/.test(prompt)) {
     const first = pick.quant() ?? "x";
     const second = pick.quant() ?? "y";
@@ -131,6 +149,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     if (pick.typeOf(x) === "temporal") scales["x"] = { type: "time" };
     return [{ geom: "area", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeScatter(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
 
   if (/scatter|\b(?:versus|vs\.?|against)\b|relationship|correlat/.test(prompt)) {
     const first = pick.quant() ?? "x";
@@ -163,6 +187,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeLineAndCount(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick, scales } = ctx;
+
   if (
     /line chart|connected line|over time|time series|per (?:day|week|month|hour)|trend/.test(prompt)
   ) {
@@ -186,6 +216,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizeJitterAndRule(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
+
   if (/\bjitter/.test(prompt)) {
     const x = pick.cat() ?? "x";
     const y = pick.quant() ?? "y";
@@ -208,6 +244,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     return [{ geom: "rule", aes: { x: f(x) } }];
   }
 
+  return undefined;
+}
+
+function synthesizeBar(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick } = ctx;
+
   if (/bar|column/.test(prompt)) {
     const x = pick.cat() ?? "x";
     const y = pick.mentionedQuant();
@@ -229,6 +271,12 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeFallback(ctx: MockContext): MockLayer[] {
+  const { pick, scales } = ctx;
+
   // Fallback: temporal+quant → line; two quants → point; else bar count.
   const t = pick.temporal();
   const q1 = pick.quant();
@@ -242,4 +290,23 @@ export function synthesizeBasic(ctx: MockContext): MockLayer[] | undefined {
   }
   const x = pick.cat() ?? q1 ?? "x";
   return [{ geom: "bar", aes: { x: f(x) } }];
+}
+
+const BASIC_HANDLERS: BasicHandler[] = [
+  synthesizeRibbon,
+  synthesizeDistribution,
+  synthesizeInterval,
+  synthesizeTrend,
+  synthesizeScatter,
+  synthesizeLineAndCount,
+  synthesizeJitterAndRule,
+  synthesizeBar,
+];
+
+export function synthesizeBasic(ctx: MockContext): MockLayer[] {
+  for (const handler of BASIC_HANDLERS) {
+    const layers = handler(ctx);
+    if (layers !== undefined) return layers;
+  }
+  return synthesizeFallback(ctx);
 }
