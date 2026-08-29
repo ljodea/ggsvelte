@@ -76,6 +76,81 @@ export type FixedAspectCoordSpec =
   | CoordSfSpec
   | { type: "radial"; aspect?: number };
 
+function assertFixedFacetScales(input: { freeX: boolean; freeY: boolean }, name: string): void {
+  if (!input.freeX && !input.freeY) return;
+  const cause =
+    "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";
+  throw new PipelineError("coord-fixed-free-scales", "/facet/scales", cause, {
+    code: "coord-fixed-free-scales",
+    severity: "error",
+    path: "/facet/scales",
+    problem: `${name} is incompatible with free positional facet scales.`,
+    cause,
+    fixes: [
+      { description: 'Use facet.scales = "fixed".' },
+      { description: `Remove the ${name} coordinate.` },
+    ],
+    documentationUrl: "/guide/coordinate-systems#fixed-aspect",
+  });
+}
+
+function invalidAspect(
+  problem: string,
+  cause: string,
+  name: string,
+  path: string,
+  fixes: readonly { description: string }[],
+): never {
+  throw new PipelineError("coord-fixed-invalid-aspect", path, cause, {
+    code: "coord-fixed-invalid-aspect",
+    severity: "error",
+    path,
+    problem: `${name} ${problem}`,
+    cause,
+    fixes,
+    documentationUrl: "/guide/coordinate-systems#fixed-aspect",
+  });
+}
+
+function assertPositiveAspect(aspect: number, name: string): void {
+  if (Number.isFinite(aspect) && aspect > 0) return;
+  invalidAspect(
+    "computed a non-finite or non-positive target aspect.",
+    "Fixed-aspect coordinates require a finite positive physical data-unit ratio after trained scale spans are applied.",
+    name,
+    "/coord/ratio",
+    [
+      { description: "Use a moderate finite ratio (for example between 0.1 and 10)." },
+      { description: "Ensure positional domains are non-degenerate after training." },
+    ],
+  );
+}
+
+function assertPositiveAllocation(width: number, height: number, name: string): void {
+  if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) return;
+  invalidAspect(
+    "has no positive panel allocation to fit a data rectangle into.",
+    "Fixed-aspect coordinates need a positive finite panel allocation after chart chrome is reserved.",
+    name,
+    "/coord",
+    [
+      { description: "Increase the plot width/height." },
+      { description: "Reduce chrome that consumes the entire allocation." },
+    ],
+  );
+}
+
+function assertPositiveFit(width: number, height: number, name: string): void {
+  if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) return;
+  invalidAspect(
+    "cannot fit a positive finite data rectangle at the requested ratio.",
+    "Fixed-aspect fitting produced a non-finite or non-positive data rectangle; the ratio or allocation is too extreme to size honestly.",
+    name,
+    "/coord/ratio",
+    [{ description: "Use a less extreme ratio." }, { description: "Enlarge the plot allocation." }],
+  );
+}
+
 export function applyFixedAspectLayout(input: {
   placements: readonly PanelPlacement[];
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
@@ -94,22 +169,7 @@ export function applyFixedAspectLayout(input: {
       : input.coord.type === "radial"
         ? "coord_radial"
         : "coord_fixed";
-  if (input.freeX || input.freeY) {
-    const cause =
-      "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";
-    throw new PipelineError("coord-fixed-free-scales", "/facet/scales", cause, {
-      code: "coord-fixed-free-scales",
-      severity: "error",
-      path: "/facet/scales",
-      problem: `${name} is incompatible with free positional facet scales.`,
-      cause,
-      fixes: [
-        { description: 'Use facet.scales = "fixed".' },
-        { description: `Remove the ${name} coordinate.` },
-      ],
-      documentationUrl: "/guide/coordinate-systems#fixed-aspect",
-    });
-  }
+  assertFixedFacetScales(input, name);
   if (input.placements.length === 0) return { placements: [], degraded: false };
 
   const firstScales = input.panelScales[0];
@@ -121,22 +181,7 @@ export function applyFixedAspectLayout(input: {
     input.coord.type === "radial"
       ? (input.coord.aspect ?? 1)
       : (input.coord.ratio ?? 1) * (scaleSpaceSpan(firstScales.y) / scaleSpaceSpan(firstScales.x));
-  if (!Number.isFinite(targetAspect) || targetAspect <= 0) {
-    const cause =
-      "Fixed-aspect coordinates require a finite positive physical data-unit ratio after trained scale spans are applied.";
-    throw new PipelineError("coord-fixed-invalid-aspect", "/coord/ratio", cause, {
-      code: "coord-fixed-invalid-aspect",
-      severity: "error",
-      path: "/coord/ratio",
-      problem: `${name} computed a non-finite or non-positive target aspect.`,
-      cause,
-      fixes: [
-        { description: "Use a moderate finite ratio (for example between 0.1 and 10)." },
-        { description: "Ensure positional domains are non-degenerate after training." },
-      ],
-      documentationUrl: "/guide/coordinate-systems#fixed-aspect",
-    });
-  }
+  assertPositiveAspect(targetAspect, name);
 
   // Fixed-scale facets promise equal data rectangles. Use the common largest
   // rectangle that fits every already-computed panel allocation.
@@ -146,53 +191,13 @@ export function applyFixedAspectLayout(input: {
   const availableHeight = input.faceted
     ? Math.min(...input.placements.map((placement) => placement.height))
     : input.placements[0]!.height;
-  if (
-    !Number.isFinite(availableWidth) ||
-    !Number.isFinite(availableHeight) ||
-    availableWidth <= 0 ||
-    availableHeight <= 0
-  ) {
-    const cause =
-      "Fixed-aspect coordinates need a positive finite panel allocation after chart chrome is reserved.";
-    throw new PipelineError("coord-fixed-invalid-aspect", "/coord", cause, {
-      code: "coord-fixed-invalid-aspect",
-      severity: "error",
-      path: "/coord",
-      problem: `${name} has no positive panel allocation to fit a data rectangle into.`,
-      cause,
-      fixes: [
-        { description: "Increase the plot width/height." },
-        { description: "Reduce chrome that consumes the entire allocation." },
-      ],
-      documentationUrl: "/guide/coordinate-systems#fixed-aspect",
-    });
-  }
+  assertPositiveAllocation(availableWidth, availableHeight, name);
   const availableAspect = availableHeight / availableWidth;
   const fittedWidth =
     availableAspect > targetAspect ? availableWidth : availableHeight / targetAspect;
   const fittedHeight =
     availableAspect > targetAspect ? availableWidth * targetAspect : availableHeight;
-  if (
-    !Number.isFinite(fittedWidth) ||
-    !Number.isFinite(fittedHeight) ||
-    fittedWidth <= 0 ||
-    fittedHeight <= 0
-  ) {
-    const cause =
-      "Fixed-aspect fitting produced a non-finite or non-positive data rectangle; the ratio or allocation is too extreme to size honestly.";
-    throw new PipelineError("coord-fixed-invalid-aspect", "/coord/ratio", cause, {
-      code: "coord-fixed-invalid-aspect",
-      severity: "error",
-      path: "/coord/ratio",
-      problem: `${name} cannot fit a positive finite data rectangle at the requested ratio.`,
-      cause,
-      fixes: [
-        { description: "Use a less extreme ratio." },
-        { description: "Enlarge the plot allocation." },
-      ],
-      documentationUrl: "/guide/coordinate-systems#fixed-aspect",
-    });
-  }
+  assertPositiveFit(fittedWidth, fittedHeight, name);
   const degraded =
     fittedWidth < MIN_READABLE_FIXED_PANEL_PX || fittedHeight < MIN_READABLE_FIXED_PANEL_PX;
 
