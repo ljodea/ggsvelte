@@ -85,8 +85,59 @@ export function closestOrthInRange(
     return closestOrthLinear(permutation, orth, batchIds, sources, start, end, seedOrth);
   }
 
-  // lower_bound: first index with orth >= seedOrth (JS: NaN/∞ comparisons
-  // match Array sort used to build the range).
+  return closestOrthFinite(permutation, orth, batchIds, sources, start, end, seedOrth);
+}
+
+function closestOrthFinite(
+  permutation: ArrayLike<number>,
+  orth: ArrayLike<number>,
+  batchIds: ArrayLike<number>,
+  sources: ArrayLike<number>,
+  start: number,
+  end: number,
+  seedOrth: number,
+): number {
+  const lo = lowerBoundOrth(permutation, orth, start, end, seedOrth);
+  let bestId = -1;
+  let bestDist = Number.POSITIVE_INFINITY;
+  const note = (id: number): void => {
+    const distance = Math.abs(orth[id]! - seedOrth);
+    if (Number.isFinite(distance) && (bestId < 0 || distance < bestDist)) {
+      bestId = id;
+      bestDist = distance;
+    }
+  };
+  if (lo > start) note(permutation[lo - 1]!);
+  if (lo < end) note(permutation[lo]!);
+  if (bestId < 0)
+    return closestOrthLinear(permutation, orth, batchIds, sources, start, end, seedOrth);
+  let left =
+    lo > start && Math.abs(orth[permutation[lo - 1]!]! - seedOrth) === bestDist
+      ? lo - 1
+      : lo < end
+        ? lo
+        : lo - 1;
+  while (left > start && Math.abs(orth[permutation[left - 1]!]! - seedOrth) === bestDist) left--;
+  let best = permutation[left]!;
+  for (let i = left + 1; i < end; i++) {
+    const id = permutation[i]!;
+    const distance = Math.abs(orth[id]! - seedOrth);
+    if (distance !== bestDist) {
+      if (!Number.isFinite(distance) || distance > bestDist) break;
+      continue;
+    }
+    if (betterOrthCandidate(id, best, orth, batchIds, sources, seedOrth)) best = id;
+  }
+  return best;
+}
+
+function lowerBoundOrth(
+  permutation: ArrayLike<number>,
+  orth: ArrayLike<number>,
+  start: number,
+  end: number,
+  seedOrth: number,
+): number {
   let lo = start;
   let hi = end;
   while (lo < hi) {
@@ -94,49 +145,7 @@ export function closestOrthInRange(
     if (orth[permutation[mid]!]! < seedOrth) lo = mid + 1;
     else hi = mid;
   }
-
-  // Probe the two candidates that straddle seedOrth to learn min distance.
-  let bestId = -1;
-  let bestDist = Number.POSITIVE_INFINITY;
-  const note = (id: number): void => {
-    const distance = Math.abs(orth[id]! - seedOrth);
-    if (!Number.isFinite(distance)) return;
-    if (bestId < 0 || distance < bestDist) {
-      bestId = id;
-      bestDist = distance;
-    }
-  };
-  if (lo > start) note(permutation[lo - 1]!);
-  if (lo < end) note(permutation[lo]!);
-  if (bestId < 0) {
-    return closestOrthLinear(permutation, orth, batchIds, sources, start, end, seedOrth);
-  }
-
-  // Left edge of the equal-distance run (scan L→R so full ties keep first).
-  let left =
-    lo > start && Math.abs(orth[permutation[lo - 1]!]! - seedOrth) === bestDist
-      ? lo - 1
-      : lo < end
-        ? lo
-        : lo - 1;
-  while (left > start) {
-    const distance = Math.abs(orth[permutation[left - 1]!]! - seedOrth);
-    if (distance !== bestDist) break;
-    left--;
-  }
-
-  let best = permutation[left]!;
-  for (let i = left + 1; i < end; i++) {
-    const id = permutation[i]!;
-    const distance = Math.abs(orth[id]! - seedOrth);
-    if (distance !== bestDist) {
-      // Sorted orth: once distance exceeds bestDist we are past the run.
-      if (!Number.isFinite(distance) || distance > bestDist) break;
-      continue;
-    }
-    if (betterOrthCandidate(id, best, orth, batchIds, sources, seedOrth)) best = id;
-  }
-  return best;
+  return lo;
 }
 
 /**
@@ -191,33 +200,50 @@ export function directionalNearestInOrder(
   if (!Number.isFinite(targetPrimary)) return startId;
 
   // Walk the equal-primary run (forward: ascending indices; backward: descending).
+  return directionalRun(
+    order,
+    primary,
+    orth,
+    panelStart,
+    panelEnd,
+    runStart,
+    targetPrimary,
+    startId,
+    seedOrth,
+    forward,
+    onProbe,
+  );
+}
+
+function directionalRun(
+  order: ArrayLike<number>,
+  primary: ArrayLike<number>,
+  orth: ArrayLike<number>,
+  panelStart: number,
+  panelEnd: number,
+  runStart: number,
+  targetPrimary: number,
+  startId: number,
+  seedOrth: number,
+  forward: boolean,
+  onProbe?: (orderIndex: number) => void,
+): number {
   let best = -1;
   let bestOrth = Number.POSITIVE_INFINITY;
-  if (forward) {
-    for (let i = runStart; i < panelEnd; i++) {
-      onProbe?.(i);
-      const id = order[i]!;
-      if (primary[id]! !== targetPrimary) break;
-      if (id === startId) continue;
-      const o = Math.abs(orth[id]! - seedOrth);
-      if (!Number.isFinite(o)) continue;
-      if (best < 0 || o < bestOrth || (o === bestOrth && id > best)) {
-        best = id;
-        bestOrth = o;
-      }
-    }
-  } else {
-    for (let i = runStart; i >= panelStart; i--) {
-      onProbe?.(i);
-      const id = order[i]!;
-      if (primary[id]! !== targetPrimary) break;
-      if (id === startId) continue;
-      const o = Math.abs(orth[id]! - seedOrth);
-      if (!Number.isFinite(o)) continue;
-      if (best < 0 || o < bestOrth || (o === bestOrth && id > best)) {
-        best = id;
-        bestOrth = o;
-      }
+  const step = forward ? 1 : -1;
+  const limit = forward ? panelEnd : panelStart - 1;
+  for (let i = runStart; i !== limit; i += step) {
+    onProbe?.(i);
+    const id = order[i]!;
+    if (primary[id]! !== targetPrimary) break;
+    if (id === startId) continue;
+    const distance = Math.abs(orth[id]! - seedOrth);
+    if (
+      Number.isFinite(distance) &&
+      (best < 0 || distance < bestOrth || (distance === bestOrth && id > best))
+    ) {
+      best = id;
+      bestOrth = distance;
     }
   }
   return best < 0 ? startId : best;
