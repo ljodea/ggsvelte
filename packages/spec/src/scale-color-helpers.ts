@@ -14,24 +14,26 @@ const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 export function configuredColorScaleType(
   config: ColorScaleSpec | undefined,
 ): ColorScaleSpec["type"] | undefined {
-  if (config?.type !== undefined) return config.type;
-  if (config?.scheme !== undefined && config.range === undefined) {
+  if (config === undefined) return undefined;
+  if (config.type !== undefined) return config.type;
+  if (config.scheme !== undefined && config.range === undefined) {
     return SEQUENTIAL_SCHEMES.has(config.scheme) ? "sequential" : "ordinal";
   }
-  if (
-    config?.transform !== undefined ||
-    config?.temporalKind !== undefined ||
-    config?.parse !== undefined ||
-    config?.parseFailure !== undefined ||
-    config?.timezone !== undefined ||
-    config?.disambiguation !== undefined ||
-    config?.breaks !== undefined ||
-    config?.oob !== undefined ||
-    config?.labels !== undefined
-  ) {
+  const sequentialOptions = [
+    config.transform,
+    config.temporalKind,
+    config.parse,
+    config.parseFailure,
+    config.timezone,
+    config.disambiguation,
+    config.breaks,
+    config.oob,
+    config.labels,
+  ];
+  if (sequentialOptions.some((value) => value !== undefined)) {
     return "sequential";
   }
-  if (config?.domainMode !== undefined || config?.onExhaust !== undefined) return "ordinal";
+  if (config.domainMode !== undefined || config.onExhaust !== undefined) return "ordinal";
   return undefined;
 }
 

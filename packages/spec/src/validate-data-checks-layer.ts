@@ -110,275 +110,383 @@ export function collectLayerDataChecks(input: {
   layerMaps: readonly (FieldEvidenceMap | null)[] | null;
   scaleRequestsTime: (channel: ChannelName) => boolean;
 }): LayerWalkCollections {
-  const { layers, plotAes, plotFields, layerMaps, scaleRequestsTime } = input;
+  const collections = emptyLayerWalkCollections();
+  for (let index = 0; index < input.layers.length; index++) {
+    collectLayerDataChecksForLayer(input, index, collections);
+  }
+  return collections;
+}
+
+type LayerWalkInput = Parameters<typeof collectLayerDataChecks>[0];
+type FieldTypeOf = (channel: ChannelName) => [string, ProfileFieldType] | null;
+type LayerTypeContext = {
+  geom: string;
+  stat: string;
+  index: number;
+  fieldTypeOf: FieldTypeOf;
+  scaleRequestsTime: (channel: ChannelName) => boolean;
+};
+
+function emptyLayerWalkCollections(): LayerWalkCollections {
+  return {
+    errors: [],
+    axisFields: { x: [], y: [] },
+    colorFields: { color: [], fill: [] },
+    colorScaledConstants: { color: [], fill: [] },
+    finiteStyleFields: { shape: [], linetype: [] },
+    numericStyleFields: { size: [], linewidth: [], alpha: [] },
+    numericStyleScaledConstants: { size: [], linewidth: [], alpha: [] },
+  };
+}
+
+function collectLayerDataChecksForLayer(
+  input: LayerWalkInput,
+  index: number,
+  collections: LayerWalkCollections,
+): void {
+  const layer = input.layers[index];
+  if (!isRecord(layer)) return;
+  const geom = typeof layer["geom"] === "string" ? layer["geom"] : "";
+  const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
+  const defaultStat = GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity";
+  const stat = typeof layer["stat"] === "string" ? layer["stat"] : defaultStat;
+  const fields =
+    input.layerMaps === null ? input.plotFields : (input.layerMaps[index] ?? input.plotFields);
+  if (fields === null) return;
+  const fieldTypeOf = layerFieldTypeLookup(
+    input.plotAes,
+    layerAes,
+    fields,
+    input.scaleRequestsTime,
+  );
+  collections.errors.push(
+    ...geomFieldTypeErrors({
+      geom,
+      stat,
+      index,
+      fieldTypeOf,
+      scaleRequestsTime: input.scaleRequestsTime,
+    }),
+  );
+  collectLayerChannels({
+    plotAes: input.plotAes,
+    layerAes,
+    fields,
+    stat,
+    index,
+    collections,
+  });
+}
+
+function layerFieldTypeLookup(
+  plotAes: Aes | undefined,
+  layerAes: Aes | undefined,
+  fields: FieldEvidenceMap,
+  scaleRequestsTime: (channel: ChannelName) => boolean,
+): FieldTypeOf {
+  return (channel) => {
+    const mapped = effectiveChannel(plotAes, layerAes, channel);
+    if (mapped === undefined || !("field" in mapped)) return null;
+    const type = fields.get(mapped.field)?.type;
+    if (type === undefined || type === null) return null;
+    return [mapped.field, scaleRequestsTime(channel) ? "temporal" : type];
+  };
+}
+
+function geomFieldTypeErrors(context: LayerTypeContext): SpecError[] {
+  return [
+    ...smoothTypeErrors(context),
+    ...boxplotTypeErrors(context),
+    ...continuousStatTypeErrors(context),
+    ...intervalTypeErrors(context),
+    ...rectTypeErrors(context),
+    ...rasterTypeErrors(context),
+    ...tileTypeErrors(context),
+  ];
+}
+
+function channelTypeError(
+  index: number,
+  channel: ChannelName,
+  message: string,
+  description: string,
+): SpecError {
+  return {
+    code: "channel-type-mismatch",
+    path: `/layers/${index}/aes/${channel}`,
+    message,
+    fix: { description },
+  };
+}
+
+function isDiscreteType(type: ProfileFieldType): boolean {
+  return type === "nominal" || type === "ordinal";
+}
+
+function smoothTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (context.geom !== "smooth") return [];
   const errors: SpecError[] = [];
-  const axisFields: Record<"x" | "y", ChannelFieldUse[]> = { x: [], y: [] };
-  const colorFields: Record<"color" | "fill", ChannelFieldUse[]> = { color: [], fill: [] };
-  const colorScaledConstants: Record<"color" | "fill", unknown[]> = { color: [], fill: [] };
-  const finiteStyleFields: Record<"shape" | "linetype", ChannelFieldUse[]> = {
-    shape: [],
-    linetype: [],
-  };
-  const numericStyleFields: Record<"size" | "linewidth" | "alpha", ChannelFieldUse[]> = {
-    size: [],
-    linewidth: [],
-    alpha: [],
-  };
-  const numericStyleScaledConstants: Record<"size" | "linewidth" | "alpha", unknown[]> = {
-    size: [],
-    linewidth: [],
-    alpha: [],
-  };
+  for (const channel of ["x", "y"] as const) {
+    const info = context.fieldTypeOf(channel);
+    if (info === null || !isDiscreteType(info[1])) continue;
+    errors.push(
+      channelTypeError(
+        context.index,
+        channel,
+        `The smooth stat needs quantitative x and y, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+        "Map the channel to a numeric field, or use a boxplot for discrete x.",
+      ),
+    );
+  }
+  return errors;
+}
 
-  for (let i = 0; i < layers.length; i++) {
-    const layer = layers[i];
-    if (!isRecord(layer)) continue;
-    const geom = typeof layer["geom"] === "string" ? layer["geom"] : "";
-    const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
-    const defaultStat = GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity";
-    const stat = typeof layer["stat"] === "string" ? layer["stat"] : defaultStat;
+function boxplotTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (context.geom !== "boxplot") return [];
+  const errors: SpecError[] = [];
+  const x = context.fieldTypeOf("x");
+  if (x !== null && (x[1] === "quantitative" || x[1] === "temporal")) {
+    errors.push(
+      channelTypeError(
+        context.index,
+        "x",
+        `The boxplot geom needs a DISCRETE x this milestone, but field "${x[0]}" is ${x[1]}.`,
+        "Map x to a categorical field (strings), or bin the values into labeled categories first.",
+      ),
+    );
+  }
+  const y = context.fieldTypeOf("y");
+  if (y !== null && isDiscreteType(y[1])) {
+    errors.push(
+      channelTypeError(
+        context.index,
+        "y",
+        `The boxplot stat needs a quantitative y, but field "${y[0]}" is ${y[1]}.`,
+        "Map y to a numeric field.",
+      ),
+    );
+  }
+  return errors;
+}
 
-    const fields: FieldEvidenceMap | null =
-      layerMaps === null ? plotFields : (layerMaps[i] ?? plotFields);
-    if (fields === null) continue; // runtime-only named data: skip field checks
-    const available = [...fields.keys()];
+function continuousStatTypeErrors(context: LayerTypeContext): SpecError[] {
+  const { geom, stat } = context;
+  const continuous =
+    ["histogram", "freqpoly", "density"].includes(geom) ||
+    ((geom === "bar" || geom === "line") && stat === "bin");
+  if (!continuous) return [];
+  const x = context.fieldTypeOf("x");
+  if (x === null || !isDiscreteType(x[1])) return [];
+  return [
+    channelTypeError(
+      context.index,
+      "x",
+      `The ${geom === "density" ? "density" : "bin"} stat needs a continuous x, but field "${x[0]}" is ${x[1]}.`,
+      'Use geom "bar" (the count stat) to count categories instead.',
+    ),
+  ];
+}
 
-    // --- geom/stat field-type rules (M2 statistical layer) -----------------
-    const fieldTypeOf = (channel: ChannelName): [string, ProfileFieldType] | null => {
-      const m = effectiveChannel(plotAes, layerAes, channel);
-      if (m === undefined || !("field" in m)) return null;
-      const t = fields.get(m.field)?.type;
-      if (t === undefined || t === null) return null;
-      // Geom/stat contracts see position values after configured temporal parsing.
-      // Parse failures and configuration errors are owned by scale validation below.
-      return [m.field, scaleRequestsTime(channel) ? "temporal" : t];
-    };
-    const typeError = (channel: ChannelName, message: string, fixDesc: string) => {
-      errors.push({
-        code: "channel-type-mismatch",
-        path: `/layers/${i}/aes/${channel}`,
-        message,
-        fix: { description: fixDesc },
-      });
-    };
-    if (geom === "smooth") {
-      for (const channel of ["x", "y"] as const) {
-        const info = fieldTypeOf(channel);
-        if (info !== null && (info[1] === "nominal" || info[1] === "ordinal")) {
-          typeError(
-            channel,
-            `The smooth stat needs quantitative x and y, but field "${info[0]}" (${channel}) is ${info[1]}.`,
-            "Map the channel to a numeric field, or use a boxplot for discrete x.",
-          );
-        }
-      }
-    }
-    if (geom === "boxplot") {
-      const x = fieldTypeOf("x");
-      if (x !== null && (x[1] === "quantitative" || x[1] === "temporal")) {
-        typeError(
-          "x",
-          `The boxplot geom needs a DISCRETE x this milestone, but field "${x[0]}" is ${x[1]}.`,
-          "Map x to a categorical field (strings), or bin the values into labeled categories first.",
-        );
-      }
-      const y = fieldTypeOf("y");
-      if (y !== null && (y[1] === "nominal" || y[1] === "ordinal")) {
-        typeError(
-          "y",
-          `The boxplot stat needs a quantitative y, but field "${y[0]}" is ${y[1]}.`,
-          "Map y to a numeric field.",
-        );
-      }
-    }
-    if (
-      geom === "histogram" ||
-      geom === "freqpoly" ||
-      geom === "density" ||
-      (geom === "bar" && stat === "bin") ||
-      (geom === "line" && stat === "bin")
-    ) {
-      const x = fieldTypeOf("x");
-      if (x !== null && (x[1] === "nominal" || x[1] === "ordinal")) {
-        typeError(
-          "x",
-          `The ${geom === "density" ? "density" : "bin"} stat needs a continuous x, but field "${x[0]}" is ${x[1]}.`,
-          'Use geom "bar" (the count stat) to count categories instead.',
-        );
-      }
-    }
-    if (
-      geom === "errorbar" ||
-      geom === "linerange" ||
-      geom === "pointrange" ||
-      geom === "crossbar"
-    ) {
-      for (const channel of ["ymin", "ymax"] as const) {
-        const info = fieldTypeOf(channel);
-        if (
-          info !== null &&
-          (info[1] === "nominal" || info[1] === "ordinal") &&
-          !scaleRequestsTime("y")
-        ) {
-          typeError(
-            channel,
-            `The ${geom} geom needs quantitative bounds, but field "${info[0]}" (${channel}) is ${info[1]}.`,
-            "Map the channel to a numeric field.",
-          );
-        }
-      }
-    }
-    if (geom === "rect") {
-      for (const channel of ["xmin", "xmax"] as const) {
-        const info = fieldTypeOf(channel);
-        if (
-          info !== null &&
-          (info[1] === "nominal" || info[1] === "ordinal") &&
-          !scaleRequestsTime("x")
-        ) {
-          typeError(
-            channel,
-            `The rect geom needs quantitative edges, but field "${info[0]}" (${channel}) is ${info[1]}.`,
-            "Map the channel to a numeric field.",
-          );
-        }
-      }
-      for (const channel of ["ymin", "ymax"] as const) {
-        const info = fieldTypeOf(channel);
-        if (
-          info !== null &&
-          (info[1] === "nominal" || info[1] === "ordinal") &&
-          !scaleRequestsTime("y")
-        ) {
-          typeError(
-            channel,
-            `The rect geom needs quantitative edges, but field "${info[0]}" (${channel}) is ${info[1]}.`,
-            "Map the channel to a numeric field.",
-          );
-        }
-      }
-    }
-    if (geom === "raster") {
-      for (const channel of ["x", "y"] as const) {
-        const info = fieldTypeOf(channel);
-        if (info !== null && (info[1] === "nominal" || info[1] === "ordinal")) {
-          typeError(
-            channel,
-            `The raster geom needs continuous ${channel}, but field "${info[0]}" is ${info[1]}.`,
-            'Use geom "tile" for discrete axes.',
-          );
-        }
-      }
-    }
-    if (geom === "tile") {
-      for (const channel of ["width", "height"] as const) {
-        const info = fieldTypeOf(channel);
-        if (info !== null && info[1] !== "quantitative") {
-          typeError(
-            channel,
-            `The tile geom needs quantitative ${channel}, but field "${info[0]}" is ${info[1]}.`,
-            `Map ${channel} to a positive numeric field, or use params.${channel}.`,
-          );
-        }
-      }
-    }
+function intervalTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (!["errorbar", "linerange", "pointrange", "crossbar"].includes(context.geom)) return [];
+  if (context.scaleRequestsTime("y")) return [];
+  const errors: SpecError[] = [];
+  for (const channel of ["ymin", "ymax"] as const) {
+    const info = context.fieldTypeOf(channel);
+    if (info === null || !isDiscreteType(info[1])) continue;
+    errors.push(
+      channelTypeError(
+        context.index,
+        channel,
+        `The ${context.geom} geom needs quantitative bounds, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+        "Map the channel to a numeric field.",
+      ),
+    );
+  }
+  return errors;
+}
 
-    for (const channel of CHANNELS) {
-      const mapped = effectiveChannel(plotAes, layerAes, channel);
-      if (mapped === undefined) continue;
-      const path = `/layers/${i}/aes/${channel}`;
+function rectTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (context.geom !== "rect") return [];
+  return [
+    ...rectAxisTypeErrors(context, "x", ["xmin", "xmax"]),
+    ...rectAxisTypeErrors(context, "y", ["ymin", "ymax"]),
+  ];
+}
 
-      if ("stat" in mapped) {
-        const generated =
-          (channel === "y" ? STAT_Y_CHANNEL_COLUMNS[stat] : STAT_COLUMNS[stat]) ?? [];
-        if (!generated.includes(mapped.stat)) {
-          errors.push({
-            code: "unknown-stat-column",
-            path,
-            message:
-              generated.length === 0
-                ? `Channel "${channel}" maps stat column "${mapped.stat}", but this layer's stat ("${stat}") generates no columns.`
-                : `Channel "${channel}" maps stat column "${mapped.stat}", but this layer's stat ("${stat}") generates: ${generated.join(", ")}.`,
-            ...(generated.length > 0 && { allowed: [...generated] }),
-          });
-        }
-        continue;
-      }
-      if ("value" in mapped) {
-        // Runtime trains manual/ordinal color domains on scaled constants too.
-        if (
-          (channel === "color" || channel === "fill") &&
-          mapped.scale === true &&
-          mapped.value !== null
-        ) {
-          colorScaledConstants[channel].push(mapped.value);
-        }
-        // The runtime trains numeric style scales on scaled constants as well, so
-        // a scaled string constant on a sequential/binned size/linewidth/alpha
-        // scale must face the same scale-family check as a mapped field below.
-        if (
-          (channel === "size" || channel === "linewidth" || channel === "alpha") &&
-          mapped.scale === true &&
-          mapped.value !== null
-        ) {
-          numericStyleScaledConstants[channel].push(mapped.value);
-        }
-        continue;
-      }
-      if (!("field" in mapped)) continue;
+function rectAxisTypeErrors(
+  context: LayerTypeContext,
+  axis: "x" | "y",
+  channels: readonly ChannelName[],
+): SpecError[] {
+  if (context.scaleRequestsTime(axis)) return [];
+  const errors: SpecError[] = [];
+  for (const channel of channels) {
+    const info = context.fieldTypeOf(channel);
+    if (info === null || !isDiscreteType(info[1])) continue;
+    errors.push(
+      channelTypeError(
+        context.index,
+        channel,
+        `The rect geom needs quantitative edges, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+        "Map the channel to a numeric field.",
+      ),
+    );
+  }
+  return errors;
+}
 
-      const info = fields.get(mapped.field);
-      if (info === undefined) {
-        const suggestion = didYouMean(mapped.field, available);
-        errors.push({
-          code: "unknown-field",
-          path,
-          message:
-            `Unknown field "${mapped.field}" (available: ${available.join(", ") || "none"}).` +
-            (suggestion === undefined ? "" : ` Did you mean "${suggestion}"?`),
-          allowed: available,
-          ...(suggestion !== undefined && {
-            fix: {
-              description: `Map "${channel}" to "${suggestion}".`,
-              example: { field: suggestion },
-            },
-          }),
-        });
-        continue;
-      }
-      if (info.allNull) {
-        errors.push({
-          code: "all-null-column",
-          path,
-          message: `Field "${mapped.field}" contains only null values; the "${channel}" channel cannot be drawn from it.`,
-        });
-        continue;
-      }
-      if (channel === "x" || channel === "xmin" || channel === "xmax" || channel === "xend") {
-        axisFields.x.push({ field: mapped.field, path });
-      }
-      if (channel === "y" || channel === "ymin" || channel === "ymax" || channel === "yend") {
-        axisFields.y.push({ field: mapped.field, path });
-      }
-      if (channel === "color" || channel === "fill") {
-        colorFields[channel].push({ field: mapped.field, path });
-      }
-      if (channel === "shape" || channel === "linetype") {
-        finiteStyleFields[channel].push({ field: mapped.field, path });
-      }
-      if (channel === "size" || channel === "linewidth" || channel === "alpha") {
-        numericStyleFields[channel].push({ field: mapped.field, path });
-      }
+function rasterTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (context.geom !== "raster") return [];
+  const errors: SpecError[] = [];
+  for (const channel of ["x", "y"] as const) {
+    const info = context.fieldTypeOf(channel);
+    if (info === null || !isDiscreteType(info[1])) continue;
+    errors.push(
+      channelTypeError(
+        context.index,
+        channel,
+        `The raster geom needs continuous ${channel}, but field "${info[0]}" is ${info[1]}.`,
+        'Use geom "tile" for discrete axes.',
+      ),
+    );
+  }
+  return errors;
+}
+
+function tileTypeErrors(context: LayerTypeContext): SpecError[] {
+  if (context.geom !== "tile") return [];
+  const errors: SpecError[] = [];
+  for (const channel of ["width", "height"] as const) {
+    const info = context.fieldTypeOf(channel);
+    if (info === null || info[1] === "quantitative") continue;
+    errors.push(
+      channelTypeError(
+        context.index,
+        channel,
+        `The tile geom needs quantitative ${channel}, but field "${info[0]}" is ${info[1]}.`,
+        `Map ${channel} to a positive numeric field, or use params.${channel}.`,
+      ),
+    );
+  }
+  return errors;
+}
+
+function collectLayerChannels(input: {
+  plotAes: Aes | undefined;
+  layerAes: Aes | undefined;
+  fields: FieldEvidenceMap;
+  stat: string;
+  index: number;
+  collections: LayerWalkCollections;
+}): void {
+  const available = [...input.fields.keys()];
+  for (const channel of CHANNELS) {
+    const mapped = effectiveChannel(input.plotAes, input.layerAes, channel);
+    if (mapped === undefined) continue;
+    const path = `/layers/${input.index}/aes/${channel}`;
+    if ("stat" in mapped) {
+      const error = statColumnError(channel, mapped.stat, input.stat, path);
+      if (error !== null) input.collections.errors.push(error);
+    } else if ("value" in mapped) {
+      collectScaledConstant(input.collections, channel, mapped);
+    } else if ("field" in mapped) {
+      collectFieldChannel(input.collections, channel, mapped.field, path, input.fields, available);
     }
   }
+}
 
+function statColumnError(
+  channel: ChannelName,
+  statColumn: string,
+  stat: string,
+  path: string,
+): SpecError | null {
+  const generated = (channel === "y" ? STAT_Y_CHANNEL_COLUMNS[stat] : STAT_COLUMNS[stat]) ?? [];
+  if (generated.includes(statColumn)) return null;
   return {
-    errors,
-    axisFields,
-    colorFields,
-    colorScaledConstants,
-    finiteStyleFields,
-    numericStyleFields,
-    numericStyleScaledConstants,
+    code: "unknown-stat-column",
+    path,
+    message:
+      generated.length === 0
+        ? `Channel "${channel}" maps stat column "${statColumn}", but this layer's stat ("${stat}") generates no columns.`
+        : `Channel "${channel}" maps stat column "${statColumn}", but this layer's stat ("${stat}") generates: ${generated.join(", ")}.`,
+    ...(generated.length > 0 && { allowed: [...generated] }),
   };
+}
+
+function collectScaledConstant(
+  collections: LayerWalkCollections,
+  channel: ChannelName,
+  mapped: { value: unknown; scale?: boolean },
+): void {
+  if (mapped.scale !== true || mapped.value === null) return;
+  if (channel === "color" || channel === "fill") {
+    collections.colorScaledConstants[channel].push(mapped.value);
+  }
+  if (channel === "size" || channel === "linewidth" || channel === "alpha") {
+    collections.numericStyleScaledConstants[channel].push(mapped.value);
+  }
+}
+
+function collectFieldChannel(
+  collections: LayerWalkCollections,
+  channel: ChannelName,
+  field: string,
+  path: string,
+  fields: FieldEvidenceMap,
+  available: string[],
+): void {
+  const info = fields.get(field);
+  if (info === undefined) {
+    collections.errors.push(unknownFieldError(channel, field, path, available));
+    return;
+  }
+  if (info.allNull) {
+    collections.errors.push({
+      code: "all-null-column",
+      path,
+      message: `Field "${field}" contains only null values; the "${channel}" channel cannot be drawn from it.`,
+    });
+    return;
+  }
+  collectFieldUse(collections, channel, { field, path });
+}
+
+function unknownFieldError(
+  channel: ChannelName,
+  field: string,
+  path: string,
+  available: string[],
+): SpecError {
+  const suggestion = didYouMean(field, available);
+  return {
+    code: "unknown-field",
+    path,
+    message:
+      `Unknown field "${field}" (available: ${available.join(", ") || "none"}).` +
+      (suggestion === undefined ? "" : ` Did you mean "${suggestion}"?`),
+    allowed: available,
+    ...(suggestion !== undefined && {
+      fix: {
+        description: `Map "${channel}" to "${suggestion}".`,
+        example: { field: suggestion },
+      },
+    }),
+  };
+}
+
+function collectFieldUse(
+  collections: LayerWalkCollections,
+  channel: ChannelName,
+  use: ChannelFieldUse,
+): void {
+  if (["x", "xmin", "xmax", "xend"].includes(channel)) collections.axisFields.x.push(use);
+  if (["y", "ymin", "ymax", "yend"].includes(channel)) collections.axisFields.y.push(use);
+  if (channel === "color" || channel === "fill") collections.colorFields[channel].push(use);
+  if (channel === "shape" || channel === "linetype")
+    collections.finiteStyleFields[channel].push(use);
+  if (channel === "size" || channel === "linewidth" || channel === "alpha") {
+    collections.numericStyleFields[channel].push(use);
+  }
 }

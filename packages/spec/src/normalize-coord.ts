@@ -69,31 +69,39 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
       : undefined;
   if (record["type"] === "flip") return { ...record } as CoordSpec;
   if (record["type"] === "fixed" || record["type"] === "sf") {
-    const fixed = { ...record } as unknown as { type: "fixed" | "sf"; ratio?: unknown };
-    if (fixed.ratio === 1 || fixed.ratio === undefined) delete fixed.ratio;
-    return fixed as CoordSpec;
+    return normalizeFixedCoord(record);
   }
   if (record["type"] === "radial") {
-    const radial = { ...record } as unknown as CoordRadialSpec & Record<string, unknown>;
-    if (radial.theta === "x" || radial.theta === undefined) delete radial.theta;
-    if (radial.start === 0 || radial.start === undefined) delete radial.start;
-    if (radial.innerRadius === 0 || radial.innerRadius === undefined) delete radial.innerRadius;
-    if (radial.expand === true || radial.expand === undefined) delete radial.expand;
-    // Radial default clip is off (false); only keep explicit true (or malformed).
-    if (radial.clip === false || radial.clip === undefined) delete radial.clip;
-    if (radial.reverse === "none" || radial.reverse === undefined) delete radial.reverse;
-    // Shallow-copy valid-shaped limit tuples; leave malformed arrays intact so
-    // schema validation can reject wrong lengths (same as transform axes).
-    if (Array.isArray(radial.thetaLimits) && radial.thetaLimits.length === 2) {
-      radial.thetaLimits = [radial.thetaLimits[0]!, radial.thetaLimits[1]!];
-    }
-    if (Array.isArray(radial.rLimits) && radial.rLimits.length === 2) {
-      radial.rLimits = [radial.rLimits[0]!, radial.rLimits[1]!];
-    }
-    return radial;
+    return normalizeRadialCoord(record);
   }
   if (record["type"] !== "transform") return { ...record } as CoordSpec;
-  const transformed = coord as CoordTransformSpec;
+  return normalizeTransformCoord(coord as CoordTransformSpec);
+}
+
+function normalizeFixedCoord(record: Record<string, unknown>): CoordSpec {
+  const fixed = { ...record } as unknown as { type: "fixed" | "sf"; ratio?: unknown };
+  if (fixed.ratio === 1 || fixed.ratio === undefined) delete fixed.ratio;
+  return fixed as CoordSpec;
+}
+
+function normalizeRadialCoord(record: Record<string, unknown>): CoordSpec {
+  const radial = { ...record } as unknown as CoordRadialSpec & Record<string, unknown>;
+  if (radial.theta === "x" || radial.theta === undefined) delete radial.theta;
+  if (radial.start === 0 || radial.start === undefined) delete radial.start;
+  if (radial.innerRadius === 0 || radial.innerRadius === undefined) delete radial.innerRadius;
+  if (radial.expand === true || radial.expand === undefined) delete radial.expand;
+  if (radial.clip === false || radial.clip === undefined) delete radial.clip;
+  if (radial.reverse === "none" || radial.reverse === undefined) delete radial.reverse;
+  if (Array.isArray(radial.thetaLimits) && radial.thetaLimits.length === 2) {
+    radial.thetaLimits = [radial.thetaLimits[0]!, radial.thetaLimits[1]!];
+  }
+  if (Array.isArray(radial.rLimits) && radial.rLimits.length === 2) {
+    radial.rLimits = [radial.rLimits[0]!, radial.rLimits[1]!];
+  }
+  return radial;
+}
+
+function normalizeTransformCoord(transformed: CoordTransformSpec): CoordSpec | undefined {
   const x = normalizeCoordAxis(transformed.x);
   const y = normalizeCoordAxis(transformed.y);
   const hasUnknownKey = Object.keys(transformed).some(

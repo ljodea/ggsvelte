@@ -135,40 +135,18 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     // specs remain composable.
     // Eligibility: record layers with a known geom whose branch is valid
     // (see branchOkLayers above). Uses shared GEOM_BRANCHES for known-geom keys.
-    if (options !== undefined && isRecord(input) && Array.isArray(input["layers"])) {
-      const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
-      const layers = input["layers"] as unknown[];
-      for (let i = 0; i < layers.length; i++) {
-        const layer = layers[i];
-        if (!isRecord(layer)) continue;
-        const geom = layer["geom"];
-        // Own-key check, as in validate-schema-shape: `in` walks the prototype
-        // chain, so a geom named "constructor" would look like a known key.
-        if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) continue;
-        if (branchOkLayers !== "all" && !branchOkLayers.has(i)) continue;
-        errors.push(...layerStructuralErrors(layer, geom, i, plotAes));
-      }
-    }
-
     // --- tier 2 (opt-in): facet form rules --------------------------------------
     // Runs for any record-valued facet, even when the facet is schema-invalid.
-    if (options !== undefined && isRecord(input) && isRecord(input["facet"])) {
-      errors.push(...facetStructuralErrors(input["facet"]));
-    }
+    errors.push(
+      ...collectLayerGrammarErrors(input, options, branchOkLayers),
+      ...collectFacetGrammarErrors(input, options),
+    );
 
     // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
     // One resolveLayerFieldEvidence pass for plot + layer tables; dataChecks and
     // lintSpec share it. On limit/profile errors, lint gets no shared map so it
     // does not re-scan data that data-aware validation already refused.
-    let advisories: SpecAdvisory[] | undefined;
-    if (options !== undefined && isRecord(input)) {
-      const layerResolved = resolveLayerFieldEvidence(input, options, limits);
-      errors.push(...dataChecks(input, options, limits, layerResolved));
-      if (options.lint === true) {
-        const shared = layerResolved.status === "ok" ? layerResolved.plot : null;
-        advisories = lintSpec(input, options, shared);
-      }
-    }
+    const advisories = collectDataValidation(input, options, limits, errors);
     const withAdvisories = advisories !== undefined && advisories.length > 0 ? { advisories } : {};
 
     if (errors.length > limits.maxDiagnostics) {
@@ -189,4 +167,46 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
       exactOptionalPropertyTypes: previousExactOptional,
     });
   }
+}
+
+function collectLayerGrammarErrors(
+  input: unknown,
+  options: ValidateOptions | undefined,
+  branchOkLayers: ReadonlySet<number> | "all",
+): SpecError[] {
+  if (options === undefined || !isRecord(input) || !Array.isArray(input["layers"])) return [];
+  const errors: SpecError[] = [];
+  const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
+  const layers = input["layers"] as unknown[];
+  for (let index = 0; index < layers.length; index++) {
+    const layer = layers[index];
+    if (!isRecord(layer)) continue;
+    const geom = layer["geom"];
+    if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) continue;
+    if (branchOkLayers !== "all" && !branchOkLayers.has(index)) continue;
+    errors.push(...layerStructuralErrors(layer, geom, index, plotAes));
+  }
+  return errors;
+}
+
+function collectFacetGrammarErrors(
+  input: unknown,
+  options: ValidateOptions | undefined,
+): SpecError[] {
+  if (options === undefined || !isRecord(input) || !isRecord(input["facet"])) return [];
+  return facetStructuralErrors(input["facet"]);
+}
+
+function collectDataValidation(
+  input: unknown,
+  options: ValidateOptions | undefined,
+  limits: typeof DEFAULT_VALIDATE_LIMITS,
+  errors: SpecError[],
+): SpecAdvisory[] | undefined {
+  if (options === undefined || !isRecord(input)) return undefined;
+  const layerResolved = resolveLayerFieldEvidence(input, options, limits);
+  errors.push(...dataChecks(input, options, limits, layerResolved));
+  if (options.lint !== true) return undefined;
+  const shared = layerResolved.status === "ok" ? layerResolved.plot : null;
+  return lintSpec(input, options, shared);
 }

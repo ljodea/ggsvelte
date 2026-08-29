@@ -170,32 +170,36 @@ function typeSummaryOf(node: unknown, depth = 0): string {
     return JSON.stringify(node["const"]);
   }
   const anyOf = node["anyOf"];
-  if (Array.isArray(anyOf)) {
-    const parts = anyOf.map((branch) => typeSummaryOf(branch, depth + 1));
-    if (parts.every((p) => p.startsWith('"') || p.startsWith("'") || /^-?\d/.test(p))) {
-      return [...new Set(parts)].join(" | ");
-    }
-    return parts.join(" | ");
-  }
+  if (Array.isArray(anyOf)) return unionSummary(anyOf, depth);
   const type = node["type"];
   if (type === "number" || type === "integer") return type === "integer" ? "integer" : "number";
   if (type === "string") return "string";
   if (type === "boolean") return "boolean";
   if (type === "object") return "object";
-  if (type === "array") {
-    const items = node["items"];
-    const itemSummary = items === undefined ? "unknown" : typeSummaryOf(items, depth + 1);
-    const min = node["minItems"];
-    const max = node["maxItems"];
-    if (typeof min === "number" && typeof max === "number" && min === max) {
-      return `[${Array.from({ length: min }, () => itemSummary).join(", ")}]`;
-    }
-    return `${itemSummary}[]`;
-  }
+  if (type === "array") return arraySummary(node, depth);
   if (Array.isArray(type)) {
     return type.filter((t) => t !== "null").join(" | ") || "unknown";
   }
   return "unknown";
+}
+
+function unionSummary(anyOf: unknown[], depth: number): string {
+  const parts = anyOf.map((branch) => typeSummaryOf(branch, depth + 1));
+  if (parts.every((part) => part.startsWith('"') || part.startsWith("'") || /^-?\d/.test(part))) {
+    return [...new Set(parts)].join(" | ");
+  }
+  return parts.join(" | ");
+}
+
+function arraySummary(node: Record<string, unknown>, depth: number): string {
+  const items = node["items"];
+  const itemSummary = items === undefined ? "unknown" : typeSummaryOf(items, depth + 1);
+  const min = node["minItems"];
+  const max = node["maxItems"];
+  if (typeof min === "number" && typeof max === "number" && min === max) {
+    return `[${Array.from({ length: min }, () => itemSummary).join(", ")}]`;
+  }
+  return `${itemSummary}[]`;
 }
 
 function descriptionOf(node: unknown, name: string): string {

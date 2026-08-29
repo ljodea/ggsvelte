@@ -193,12 +193,7 @@ function canonicalGeom(geom: LayerInput["geom"]): NormalizedGeomName {
 function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): NormalizedLayerSpec {
   // Data-driven hline/vline are one-axis rules: drop the orthogonal position
   // channel from inheritance so plot-level x+y does not trigger rule-both-axes.
-  let layerAesInput = layer.aes;
-  if (layer.geom === "hline" && !isAnnotationRule(layer)) {
-    layerAesInput = { ...layerAesInput, x: null };
-  } else if (layer.geom === "vline" && !isAnnotationRule(layer)) {
-    layerAesInput = { ...layerAesInput, y: null };
-  }
+  const layerAesInput = normalizeRuleAesInput(layer);
 
   const inherited = isAnnotationRule(layer) || isAnnotationAbline(layer) ? undefined : plotAes;
   let aes = resolveLayerAes(inherited, normalizeAes(layerAesInput));
@@ -217,40 +212,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): Normalized
   // Stat default mappings (ggplot2's `after_stat()` default aes): the count
   // and bin stats map y to their count column; the density stat maps y to
   // its density column.
-  if ((stat === "count" || stat === "bin") && aes?.y === undefined) {
-    aes = { ...aes, y: { stat: "count" } };
-  }
-  if (stat === "density" && aes?.y === undefined) {
-    aes = { ...aes, y: { stat: "density" } };
-  }
-  // geom_count / stat_sum: size defaults to after_stat(n) when unset.
-  if (stat === "sum" && aes?.size === undefined) {
-    aes = { ...aes, size: { stat: "n" } };
-  }
-  if (stat === "function" && aes?.y === undefined) {
-    aes = { ...aes, y: { stat: "y" } };
-  }
-  // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
-  if (stat === "bin_hex" && aes?.fill === undefined) {
-    aes = { ...aes, fill: { stat: "count" } };
-  }
-  if (stat === "ecdf" && aes?.y === undefined) {
-    aes = { ...aes, y: { stat: "ecdf" } };
-  }
-  // density_2d_filled defaults fill to after_stat(level) like ggplot2.
-  if (
-    (stat === "density_2d_filled" || layer.geom === "density_2d_filled") &&
-    aes?.fill === undefined
-  ) {
-    aes = { ...aes, fill: { stat: "level" } };
-  }
-  if (stat === "bindot" && aes?.y === undefined) {
-    aes = { ...aes, y: { stat: "stackpos" } };
-  }
-  // bin_2d maps fill to after_stat count (ggplot2 geom_bin2d default aes).
-  if (stat === "bin_2d" && aes?.fill === undefined) {
-    aes = { ...aes, fill: { stat: "count" } };
-  }
+  aes = normalizeStatAes(aes, stat, layer.geom);
   const geom = canonicalGeom(layer.geom);
   const positionParams =
     "positionParams" in layer && layer.positionParams !== undefined
@@ -262,12 +224,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): Normalized
   // canonicalizes away (same rule as coord "cartesian" / a11y "auto").
   const render = layer.render === "auto" ? undefined : layer.render;
   // Jitter alias has no position field on the input type; always use defaults.
-  const position =
-    layer.geom === "jitter"
-      ? defaults.position
-      : "position" in layer && layer.position !== undefined
-        ? layer.position
-        : defaults.position;
+  const position = normalizeLayerPosition(layer, defaults.position);
   const out = {
     geom,
     stat,
@@ -285,6 +242,55 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): Normalized
     ...(params !== undefined && { params }),
   };
   return out as NormalizedLayerSpec;
+}
+
+function normalizeRuleAesInput(layer: LayerInput): LayerInput["aes"] {
+  if (layer.geom === "hline" && !isAnnotationRule(layer)) return { ...layer.aes, x: null };
+  if (layer.geom === "vline" && !isAnnotationRule(layer)) return { ...layer.aes, y: null };
+  return layer.aes;
+}
+
+function normalizeStatAes(
+  aes: Aes | undefined,
+  stat: string,
+  geom: LayerInput["geom"],
+): Aes | undefined {
+  let normalized = normalizeStatPositionAes(aes, stat);
+  normalized = normalizeStatStyleAes(normalized, stat, geom);
+  return normalized;
+}
+
+function normalizeStatPositionAes(aes: Aes | undefined, stat: string): Aes | undefined {
+  if ((stat === "count" || stat === "bin") && aes?.y === undefined) {
+    return { ...aes, y: { stat: "count" } };
+  }
+  if (stat === "density" && aes?.y === undefined) return { ...aes, y: { stat: "density" } };
+  if (stat === "function" && aes?.y === undefined) return { ...aes, y: { stat: "y" } };
+  if (stat === "ecdf" && aes?.y === undefined) return { ...aes, y: { stat: "ecdf" } };
+  if (stat === "bindot" && aes?.y === undefined) return { ...aes, y: { stat: "stackpos" } };
+  return aes;
+}
+
+function normalizeStatStyleAes(
+  aes: Aes | undefined,
+  stat: string,
+  geom: LayerInput["geom"],
+): Aes | undefined {
+  if (stat === "sum" && aes?.size === undefined) return { ...aes, size: { stat: "n" } };
+  if (stat === "bin_hex" && aes?.fill === undefined) return { ...aes, fill: { stat: "count" } };
+  if ((stat === "density_2d_filled" || geom === "density_2d_filled") && aes?.fill === undefined) {
+    return { ...aes, fill: { stat: "level" } };
+  }
+  if (stat === "bin_2d" && aes?.fill === undefined) return { ...aes, fill: { stat: "count" } };
+  return aes;
+}
+
+function normalizeLayerPosition(
+  layer: LayerInput,
+  defaultPosition: NormalizedLayerSpec["position"],
+): NormalizedLayerSpec["position"] {
+  if (layer.geom === "jitter") return defaultPosition;
+  return "position" in layer && layer.position !== undefined ? layer.position : defaultPosition;
 }
 
 /** Canonicalize one facet field: bare string -> { field }; clone levels/labels. */

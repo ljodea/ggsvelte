@@ -158,7 +158,17 @@ export function temporalIntervalTicks(
   if (timezone === "UTC" || timezone === "Etc/UTC" || timezone === "Z") {
     return utcCalendarTicks(min, max, interval, weekStart, limit);
   }
+  return zonedCalendarTicks(min, max, interval, timezone, weekStart, limit);
+}
 
+function zonedCalendarTicks(
+  min: number,
+  max: number,
+  interval: TemporalInterval,
+  timezone: string,
+  weekStart: number,
+  limit: number,
+): number[] {
   const Temporal = temporalImplementation();
   const current = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(timezone);
   const parts = {

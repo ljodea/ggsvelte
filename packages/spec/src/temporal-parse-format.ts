@@ -122,20 +122,12 @@ export function parseExactFormat(
   if (!compiled.ok) return temporalParseFailure(compiled.reason);
   const match = compiled.regex.exec(value);
   if (match === null) return temporalParseFailure("value does not match the exact format");
-  const values: Record<string, string> = {};
-  for (let index = 0; index < compiled.tokens.length; index++) {
-    values[compiled.tokens[index]!] = match[index + 1]!;
-  }
-  if (values["Y"] === undefined) return temporalParseFailure("exact formats require %Y");
-  if (values["m"] !== undefined && values["q"] !== undefined)
-    return temporalParseFailure("exact formats cannot contain both %m and %q");
-  const hasClockTime =
-    values["H"] !== undefined ||
-    values["M"] !== undefined ||
-    values["S"] !== undefined ||
-    values["L"] !== undefined;
-  if (hasClockTime && (values["H"] === undefined || values["M"] === undefined))
-    return temporalParseFailure("time formats require both %H and %M");
+  const values = exactFormatValues(compiled.tokens, match);
+  const validationError = validateExactFormatValues(values);
+  if (validationError !== null) return temporalParseFailure(validationError);
+  const hasClockTime = [values["H"], values["M"], values["S"], values["L"]].some(
+    (part) => part !== undefined,
+  );
   const parts: DateParts = {
     year: Number(values["Y"]),
     month: values["q"] === undefined ? Number(values["m"] ?? 1) : (Number(values["q"]) - 1) * 3 + 1,
@@ -145,6 +137,40 @@ export function parseExactFormat(
     second: Number(values["S"] ?? 0),
     millisecond: Number((values["L"] ?? "0").padEnd(3, "0")),
   };
+  const precision = exactFormatPrecision(values, hasClockTime);
+  const kind: TemporalKind = hasClockTime || values["z"] !== undefined ? "datetime" : "date";
+  return withMetadata(partsToEpoch(parts, options, values["z"], kind), kind, precision);
+}
+
+function exactFormatValues(
+  tokens: readonly string[],
+  match: RegExpExecArray,
+): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (let index = 0; index < tokens.length; index++) {
+    values[tokens[index]!] = match[index + 1]!;
+  }
+  return values;
+}
+
+function validateExactFormatValues(values: Record<string, string>): string | null {
+  if (values["Y"] === undefined) return "exact formats require %Y";
+  if (values["m"] !== undefined && values["q"] !== undefined) {
+    return "exact formats cannot contain both %m and %q";
+  }
+  const hasClockTime = [values["H"], values["M"], values["S"], values["L"]].some(
+    (part) => part !== undefined,
+  );
+  if (hasClockTime && (values["H"] === undefined || values["M"] === undefined)) {
+    return "time formats require both %H and %M";
+  }
+  return null;
+}
+
+function exactFormatPrecision(
+  values: Record<string, string>,
+  hasClockTime: boolean,
+): TemporalPrecision {
   let precision: TemporalPrecision = "year";
   if (values["m"] !== undefined) precision = "month";
   if (values["q"] !== undefined) precision = "quarter";
@@ -152,8 +178,7 @@ export function parseExactFormat(
   if (hasClockTime) precision = "minute";
   if (values["S"] !== undefined) precision = "second";
   if (values["L"] !== undefined) precision = "millisecond";
-  const kind: TemporalKind = hasClockTime || values["z"] !== undefined ? "datetime" : "date";
-  return withMetadata(partsToEpoch(parts, options, values["z"], kind), kind, precision);
+  return precision;
 }
 
 const FORMAT_SAMPLE_VALUES: Readonly<Record<string, string>> = {

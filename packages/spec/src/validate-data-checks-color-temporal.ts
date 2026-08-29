@@ -15,6 +15,21 @@ import {
   type TemporalDecisionCache,
 } from "./validate-data-checks-temporal.js";
 
+type ParsedBound = { epochMs: number; kind: string | undefined };
+type ParseBound = (value: unknown) => ParsedBound | null;
+type TrainingFieldResult = {
+  trainingFields: ReadonlySet<string>;
+  kindConflicts: boolean;
+  conflictingKind: string | null;
+};
+type TemporalRecoverySetup = {
+  temporalInputsUsable: boolean;
+  requestsTemporal: boolean;
+  parser: Parameters<typeof temporalDecisionForField>[3];
+  temporalOptions: Parameters<typeof temporalDecisionForField>[4];
+  parseBound: ParseBound;
+};
+
 /**
  * Recovery sources for `parseFailure: "censor"` on temporal color/fill scales.
  * Mirrors runtime `collectColorChannelValues` + sequential/binned train:
@@ -48,149 +63,173 @@ export function colorTemporalCensorRecovery(input: {
 } {
   const { config, colorFields, colorScaledConstants, temporalDecisionCache, typeOf, evidenceOf } =
     input;
-  const parseUsable = temporalParserUsable(config?.parse);
-  const temporalOptionsUsable =
+  const setup = temporalRecoverySetup(config);
+  const { hasExplicitDomain, domainBlocksRecovery } = temporalDomainRecovery(
+    config,
+    setup.parseBound,
+  );
+
+  // Do not drop null breaks: runtime maps every authored break and throws
+  // color-binned-breaks when any maps to undefined.
+  const hasBinnedBreaks = temporalBinnedBreaksTrain(config, setup.parseBound);
+  const fieldResult = temporalTrainingFields({
+    config,
+    colorFields,
+    temporalDecisionCache,
+    typeOf,
+    evidenceOf,
+    parser: setup.parser,
+    temporalOptions: setup.temporalOptions,
+    enabled: setup.temporalInputsUsable && setup.requestsTemporal,
+  });
+
+  const kindOk = (kind: string | undefined): boolean =>
+    config?.temporalKind === undefined || kind === undefined || kind === config.temporalKind;
+  const constantResult = temporalTrainingConstants(colorScaledConstants, setup.parseBound, kindOk);
+  return {
+    hasExplicitDomain,
+    hasBinnedBreaks,
+    domainBlocksRecovery,
+    trainingFields: fieldResult.trainingFields,
+    constantTrains: constantResult.constantTrains,
+    kindConflicts: fieldResult.kindConflicts || constantResult.kindConflicts,
+    conflictingKind: constantResult.conflictingKind ?? fieldResult.conflictingKind,
+  };
+}
+
+function temporalRecoverySetup(config: ColorScaleSpec | undefined): TemporalRecoverySetup {
+  const temporalInputsUsable =
+    temporalParserUsable(config?.parse) &&
     (config?.timezone === undefined || typeof config.timezone === "string") &&
     (config?.disambiguation === undefined || typeof config.disambiguation === "string");
-  const temporalInputsUsable = parseUsable && temporalOptionsUsable;
   const temporalOptions = {
-    ...(config?.timezone !== undefined &&
-      typeof config.timezone === "string" && { timezone: config.timezone }),
-    ...(config?.disambiguation !== undefined &&
-      typeof config.disambiguation === "string" && {
-        disambiguation: config.disambiguation,
-      }),
+    ...(typeof config?.timezone === "string" && { timezone: config.timezone }),
+    ...(typeof config?.disambiguation === "string" && { disambiguation: config.disambiguation }),
   };
-  // Runtime uses config?.parse ?? "auto" in resolveColorValueView — kind-conflict
-  // detection must do the same (not only when parse is explicit). parseTemporal does
-  // not accept "auto", so column parsing is the shared path for both cases.
   const parser: Parameters<typeof temporalDecisionForField>[3] = config?.parse ?? "auto";
-  const parseBound = (value: unknown): { epochMs: number; kind: string | undefined } | null => {
-    if (!temporalInputsUsable) return null;
-    if (value === null || value === undefined) return null;
-    if (!(value instanceof Date) && typeof value !== "string" && typeof value !== "number") {
+  const requestsTemporal = [
+    config?.temporalKind,
+    config?.parse,
+    config?.timezone,
+    config?.disambiguation,
+  ].some((value) => value !== undefined);
+  return {
+    temporalInputsUsable,
+    requestsTemporal,
+    parser,
+    temporalOptions,
+    parseBound: temporalBoundParser(temporalInputsUsable, parser, temporalOptions),
+  };
+}
+
+function temporalDomainRecovery(
+  config: ColorScaleSpec | undefined,
+  parseBound: ParseBound,
+): { hasExplicitDomain: boolean; domainBlocksRecovery: boolean } {
+  const domainValues = Array.isArray(config?.domain)
+    ? config.domain.filter((value) => value !== null)
+    : [];
+  const hasExplicitDomain =
+    domainValues.length === 2 && domainValues.every((value) => parseBound(value) !== null);
+  return {
+    hasExplicitDomain,
+    domainBlocksRecovery: Array.isArray(config?.domain) && !hasExplicitDomain,
+  };
+}
+
+function temporalBoundParser(
+  usable: boolean,
+  parser: Parameters<typeof parseTemporalColumn>[1],
+  options: Parameters<typeof parseTemporalColumn>[2],
+): ParseBound {
+  return (value) => {
+    if (!usable || value === null || value === undefined) return null;
+    if (!(value instanceof Date) && typeof value !== "string" && typeof value !== "number")
       return null;
-    }
     const column = parseTemporalColumn(
       [value] as Parameters<typeof parseTemporalColumn>[0],
       parser,
-      temporalOptions,
+      options,
     );
     if (column.valid[0] !== 1) return null;
     const epochMs = column.semantic[0];
     if (epochMs === undefined || !Number.isFinite(epochMs)) return null;
     return { epochMs, kind: column.decision.kind ?? undefined };
   };
+}
 
-  const domainValues = Array.isArray(config?.domain)
-    ? config.domain.filter((value) => value !== null)
-    : [];
-  const hasExplicitDomain =
-    domainValues.length === 2 && domainValues.every((value) => parseBound(value) !== null);
-  // Runtime throws color-domain-invalid / color-binned-domain whenever domain is
-  // authored but not exactly two parseable endpoints — before siblings/breaks train.
-  const domainBlocksRecovery = Array.isArray(config?.domain) && !hasExplicitDomain;
-
-  // Do not drop null breaks: runtime maps every authored break and throws
-  // color-binned-breaks when any maps to undefined.
-  const authoredBreaks =
-    config?.type === "binned" && Array.isArray(config.breaks) ? config.breaks : [];
-  const parsedBreakEpochs: number[] = [];
-  let hasBinnedBreaks = false;
-  if (authoredBreaks.length >= 2) {
-    let allParseable = true;
-    for (const value of authoredBreaks) {
-      if (value === null) {
-        allParseable = false;
-        break;
-      }
-      const parsed = parseBound(value);
-      if (parsed === null) {
-        allParseable = false;
-        break;
-      }
-      parsedBreakEpochs.push(parsed.epochMs);
-    }
-    if (allParseable && parsedBreakEpochs.length >= 2) {
-      hasBinnedBreaks = true;
-      for (let index = 1; index < parsedBreakEpochs.length; index++) {
-        const prev = parsedBreakEpochs[index - 1];
-        const current = parsedBreakEpochs[index];
-        if (prev === undefined || current === undefined || current <= prev) {
-          hasBinnedBreaks = false;
-          break;
-        }
-      }
-    }
+function temporalBinnedBreaksTrain(
+  config: ColorScaleSpec | undefined,
+  parseBound: ParseBound,
+): boolean {
+  const breaks = config?.type === "binned" && Array.isArray(config.breaks) ? config.breaks : [];
+  if (breaks.length < 2) return false;
+  const epochs: number[] = [];
+  for (const value of breaks) {
+    if (value === null) return false;
+    const parsed = parseBound(value);
+    if (parsed === null) return false;
+    epochs.push(parsed.epochMs);
   }
+  return epochs.every((epoch, index) => index === 0 || epoch > (epochs[index - 1] ?? epoch));
+}
 
+function temporalTrainingFields(input: {
+  config: ColorScaleSpec | undefined;
+  colorFields: readonly ChannelFieldUse[];
+  temporalDecisionCache: TemporalDecisionCache;
+  typeOf: (use: ChannelFieldUse) => string | null;
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
+  parser: Parameters<typeof temporalDecisionForField>[3];
+  temporalOptions: Parameters<typeof temporalDecisionForField>[4];
+  enabled: boolean;
+}): TrainingFieldResult {
   const trainingFields = new Set<string>();
-  let kindConflicts = false;
   let conflictingKind: string | null = null;
-  const requestsTemporal =
-    config?.temporalKind !== undefined ||
-    config?.parse !== undefined ||
-    config?.timezone !== undefined ||
-    config?.disambiguation !== undefined;
-  if (temporalInputsUsable && requestsTemporal) {
-    for (const use of colorFields) {
-      const type = typeOf(use);
-      // Always reparse under the configured parser — type:"temporal" from default
-      // evidence does not mean the value trains when parse is an explicit override.
-      if (
-        type !== "temporal" &&
-        type !== "quantitative" &&
-        type !== "nominal" &&
-        type !== "ordinal"
-      ) {
-        continue;
-      }
-      const decision = temporalDecisionForField(
-        temporalDecisionCache,
-        use.field,
-        evidenceOf(use),
-        parser,
-        temporalOptions,
-      );
-      if (decision === null || decision === undefined) continue;
-      const trains = decision.status === "temporal" || (decision.validatedCount ?? 0) > 0;
-      if (!trains) continue;
-      if (
-        typeof config?.temporalKind === "string" &&
-        decision.kind !== null &&
-        decision.kind !== undefined &&
-        decision.kind !== config.temporalKind
-      ) {
-        kindConflicts = true;
-        conflictingKind = decision.kind;
-        continue;
-      }
-      trainingFields.add(use.field);
+  if (!input.enabled) return { trainingFields, kindConflicts: false, conflictingKind };
+  for (const use of input.colorFields) {
+    if (!fieldCanTrainTemporal(input.typeOf(use))) continue;
+    const decision = temporalDecisionForField(
+      input.temporalDecisionCache,
+      use.field,
+      input.evidenceOf(use),
+      input.parser,
+      input.temporalOptions,
+    );
+    if (decision === null || decision === undefined) continue;
+    if (decision.status !== "temporal" && (decision.validatedCount ?? 0) === 0) continue;
+    if (
+      typeof input.config?.temporalKind === "string" &&
+      decision.kind !== null &&
+      decision.kind !== undefined &&
+      decision.kind !== input.config.temporalKind
+    ) {
+      conflictingKind = decision.kind;
+      continue;
     }
+    trainingFields.add(use.field);
   }
+  return { trainingFields, kindConflicts: conflictingKind !== null, conflictingKind };
+}
 
-  const kindOk = (kind: string | undefined): boolean =>
-    config?.temporalKind === undefined || kind === undefined || kind === config.temporalKind;
+function fieldCanTrainTemporal(type: string | null): boolean {
+  return type === "temporal" || type === "quantitative" || type === "nominal" || type === "ordinal";
+}
+
+function temporalTrainingConstants(
+  values: readonly unknown[],
+  parseBound: ParseBound,
+  kindOk: (kind: string | undefined) => boolean,
+): { constantTrains: boolean; kindConflicts: boolean; conflictingKind: string | null } {
   let constantTrains = false;
-  for (const value of colorScaledConstants) {
+  let conflictingKind: string | null = null;
+  for (const value of values) {
     const parsed = parseBound(value);
     if (parsed === null) continue;
-    if (kindOk(parsed.kind)) {
-      constantTrains = true;
-    } else {
-      kindConflicts = true;
-      conflictingKind = parsed.kind ?? null;
-    }
+    if (kindOk(parsed.kind)) constantTrains = true;
+    else conflictingKind = parsed.kind ?? null;
   }
-  return {
-    hasExplicitDomain,
-    hasBinnedBreaks,
-    domainBlocksRecovery,
-    trainingFields,
-    constantTrains,
-    kindConflicts,
-    conflictingKind,
-  };
+  return { constantTrains, kindConflicts: conflictingKind !== null, conflictingKind };
 }
 
 export function censoredTemporalColorRecovers(input: {

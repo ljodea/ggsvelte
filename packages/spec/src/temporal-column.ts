@@ -188,6 +188,43 @@ function inferTemporalColumnInternal(
   if (candidates.length > 1) return nominalDecision("ambiguous", values, candidates, analyzed);
 
   const parser = allDates ? null : candidates[0]!;
+  const scan = scanTemporalValues(values, parser, options, onSuccess);
+  const failedCount = nonNullCount - scan.validatedCount;
+  if (failedCount > 0) {
+    return {
+      ...nominalDecision("invalid", values, parser === null ? ["native-date"] : [parser], analyzed),
+      parser,
+      parserKey: `auto:${parser ?? "native-date"}:invalid`,
+      validatedCount: scan.validatedCount,
+      failedCount,
+      failures: scan.failures,
+    };
+  }
+  return {
+    status: "temporal",
+    parser: parser ?? "native-date",
+    parserKey: `auto:${parser ?? "native-date"}`,
+    kind: scan.kind ?? "datetime",
+    precision: scan.precision ?? "millisecond",
+    evidence: sample.slice(0, 8).map((value) => evidenceValue(value)),
+    nonNullCount,
+    validatedCount: scan.validatedCount,
+    failedCount: 0,
+    candidates: parser === null ? ["native-date"] : [parser],
+  };
+}
+
+function scanTemporalValues(
+  values: readonly unknown[],
+  parser: TemporalParserName | null,
+  options: TemporalParseOptions,
+  onSuccess?: (index: number, epochMs: number) => void,
+): {
+  validatedCount: number;
+  failures: TemporalFailure[];
+  kind: TemporalKind | null;
+  precision: TemporalPrecision | null;
+} {
   let validatedCount = 0;
   const failures: TemporalFailure[] = [];
   let kind: TemporalKind | null = null;
@@ -211,29 +248,7 @@ function inferTemporalColumnInternal(
     kind = kind === "datetime" || parsed.kind === "datetime" ? "datetime" : "date";
     precision = finestPrecision(precision, parsed.precision);
   }
-  const failedCount = nonNullCount - validatedCount;
-  if (failedCount > 0) {
-    return {
-      ...nominalDecision("invalid", values, parser === null ? ["native-date"] : [parser], analyzed),
-      parser,
-      parserKey: `auto:${parser ?? "native-date"}:invalid`,
-      validatedCount,
-      failedCount,
-      failures,
-    };
-  }
-  return {
-    status: "temporal",
-    parser: parser ?? "native-date",
-    parserKey: `auto:${parser ?? "native-date"}`,
-    kind: kind ?? "datetime",
-    precision: precision ?? "millisecond",
-    evidence: sample.slice(0, 8).map((value) => evidenceValue(value)),
-    nonNullCount,
-    validatedCount,
-    failedCount: 0,
-    candidates: parser === null ? ["native-date"] : [parser],
-  };
+  return { validatedCount, failures, kind, precision };
 }
 
 export function inferTemporalColumn(

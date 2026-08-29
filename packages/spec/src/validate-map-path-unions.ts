@@ -82,56 +82,7 @@ export function mapUnionPathGroup(
     isChannelPath(path);
 
   if (isChannel && !members.allConst) {
-    // Near-canonical channel object:
-    // - mixed forms (field+value) → invalid-channel-value
-    // - form-illegal keys (field+scale) / typos → fall through to addl
-    // - nested type failures only (value: {}) → suppress union catalog
-    if (
-      isRecord(valueAtPath) &&
-      looksLikeChannelForm(valueAtPath) &&
-      typeof valueAtPath !== "string"
-    ) {
-      const discs = channelDiscriminatorKeys(valueAtPath);
-      if (discs.length > 1) {
-        return {
-          status: "done",
-          errors: [
-            {
-              code: "invalid-channel-value",
-              path,
-              message: `Channel "${key}" mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of {"field": ...}, {"value": ...}, or {"stat": ...}.`,
-              fix: {
-                description: `Pick a single channel form for "${key}".`,
-                example: CHANNEL_FIX_EXAMPLE,
-              },
-            },
-          ],
-        };
-      }
-      const formKeys = allowedKeysForPresentChannelForm(valueAtPath);
-      if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
-        return { status: "continue", activeFormKeys: formKeys };
-      }
-      // Nested path owns the diagnostic — empty done, not fall-through.
-      return { status: "done", errors: [] };
-    }
-    const bareString = typeof valueAtPath === "string";
-    return {
-      status: "done",
-      errors: [
-        {
-          code: "invalid-channel-value",
-          path,
-          message: bareString
-            ? `Channel "${key}" is the bare string ${JSON.stringify(valueAtPath)}; portable specs require the canonical form {"field": ${JSON.stringify(valueAtPath)}}.`
-            : `Channel "${key}" must be {"field": ...}, {"value": ...}, {"stat": ...}, or null.`,
-          fix: {
-            description: `Use a canonical channel form, e.g. {"field": "column_name"} to map "${key}" to a data column.`,
-            example: bareString ? { field: valueAtPath } : CHANNEL_FIX_EXAMPLE,
-          },
-        },
-      ],
-    };
+    return mapChannelUnion(group, path, key, valueAtPath);
   }
 
   const isDataUnion =
@@ -140,69 +91,21 @@ export function mapUnionPathGroup(
     (isDataUnionPath(path) && anyOfErr !== undefined);
 
   if (isDataUnion) {
-    const allowedDataDiscriminators = dataDiscriminatorsForUnion(members, path);
-    const allowedDataForms = allowedDataDiscriminators.map((discriminator) =>
-      discriminator === "values"
-        ? '{"values": [...rows]}'
-        : discriminator === "columns"
-          ? '{"columns": {...arrays}}'
-          : '{"name": "dataset"}',
-    );
-    const allowedDataFormsMessage =
-      allowedDataForms.length === 2
-        ? `${allowedDataForms[0]} or ${allowedDataForms[1]}`
-        : `${allowedDataForms.slice(0, -1).join(", ")}, or ${allowedDataForms.at(-1)}`;
-    // Already wrapped as an allowed data form:
-    // - mixed allowed forms (values+name on DataRef) → invalid-data
-    // - illegal discriminators / extra siblings → fall through for unexpected-property
-    // - nested cell failures only → suppress invalid-data re-wrap
-    if (isRecord(valueAtPath) && looksLikeDataContainer(valueAtPath)) {
-      const discs = dataDiscriminatorKeys(valueAtPath, allowedDataDiscriminators);
-      if (discs.length > 1) {
-        return {
-          status: "done",
-          errors: [
-            {
-              code: "invalid-data",
-              path,
-              message: `Data mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of ${allowedDataFormsMessage}.`,
-              allowed: [...allowedDataDiscriminators],
-              fix: {
-                description: "Pick a single data form.",
-                example: { values: [{ x: 1, y: 2 }] },
-              },
-            },
-          ],
-        };
-      }
-      const presentFormKeys = allowedKeysForPresentDataForm(valueAtPath, allowedDataDiscriminators);
-      const formKeys = presentFormKeys ?? new Set(allowedDataDiscriminators);
-      if (hasActionableAddlNoise(group, formKeys)) {
-        return { status: "continue", activeFormKeys: formKeys };
-      }
-      // Nested path owns the diagnostic — empty done, not fall-through.
-      return { status: "done", errors: [] };
-    }
-    return {
-      status: "done",
-      errors: [
-        {
-          code: "invalid-data",
-          path,
-          message: `Data must be one of ${allowedDataFormsMessage}.`,
-          allowed: [...allowedDataDiscriminators],
-          fix: {
-            description: 'Wrap inline rows as {"values": [...]}.',
-            example: { values: [{ x: 1, y: 2 }] },
-          },
-        },
-      ],
-    };
+    return mapDataUnion(group, members, path, valueAtPath);
   }
 
-  // Prefer allowed values from the actual const errors TypeBox emitted —
-  // schemaPath resolution against Cyclic $defs can land on the wrong
-  // sibling union (e.g. scale type vs coord type both use `properties/type`).
+  return mapEnumUnion(anyOfErr, constErrs, members, hasObjectBranchNoise, valueAtPath, path, key);
+}
+
+function mapEnumUnion(
+  anyOfErr: TLocalizedValidationError | undefined,
+  constErrs: readonly TLocalizedValidationError[],
+  members: ReturnType<typeof unionMembers>,
+  hasObjectBranchNoise: boolean,
+  valueAtPath: unknown,
+  path: string,
+  key: string,
+): UnionPathResult {
   let allowed: string[] = [];
   if (constErrs.length > 0) {
     allowed = constErrs
@@ -266,7 +169,113 @@ export function mapUnionPathGroup(
       ],
     };
   }
-  // Mixed union with object-branch property noise: fall through to
-  // additionalProperties / required handlers below.
   return { status: "continue", activeFormKeys: null };
+}
+
+function mapChannelUnion(
+  group: readonly TLocalizedValidationError[],
+  path: string,
+  key: string,
+  valueAtPath: unknown,
+): UnionPathResult {
+  if (isRecord(valueAtPath) && looksLikeChannelForm(valueAtPath)) {
+    const discs = channelDiscriminatorKeys(valueAtPath);
+    if (discs.length > 1) {
+      return {
+        status: "done",
+        errors: [
+          {
+            code: "invalid-channel-value",
+            path,
+            message: `Channel "${key}" mixes forms (${discs.map((disc) => `"${disc}"`).join(" and ")}); use exactly one of {"field": ...}, {"value": ...}, or {"stat": ...}.`,
+            fix: {
+              description: `Pick a single channel form for "${key}".`,
+              example: CHANNEL_FIX_EXAMPLE,
+            },
+          },
+        ],
+      };
+    }
+    const formKeys = allowedKeysForPresentChannelForm(valueAtPath);
+    if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
+      return { status: "continue", activeFormKeys: formKeys };
+    }
+    return { status: "done", errors: [] };
+  }
+  const bareString = typeof valueAtPath === "string";
+  return {
+    status: "done",
+    errors: [
+      {
+        code: "invalid-channel-value",
+        path,
+        message: bareString
+          ? `Channel "${key}" is the bare string ${JSON.stringify(valueAtPath)}; portable specs require the canonical form {"field": ${JSON.stringify(valueAtPath)}}.`
+          : `Channel "${key}" must be {"field": ...}, {"value": ...}, {"stat": ...}, or null.`,
+        fix: {
+          description: `Use a canonical channel form, e.g. {"field": "column_name"} to map "${key}" to a data column.`,
+          example: bareString ? { field: valueAtPath } : CHANNEL_FIX_EXAMPLE,
+        },
+      },
+    ],
+  };
+}
+
+function mapDataUnion(
+  group: readonly TLocalizedValidationError[],
+  members: ReturnType<typeof unionMembers>,
+  path: string,
+  valueAtPath: unknown,
+): UnionPathResult {
+  const allowed = dataDiscriminatorsForUnion(members, path);
+  const forms = allowed.map((discriminator) => {
+    if (discriminator === "values") return '{"values": [...rows]}';
+    if (discriminator === "columns") return '{"columns": {...arrays}}';
+    return '{"name": "dataset"}';
+  });
+  const formsMessage =
+    forms.length === 2
+      ? `${forms[0]} or ${forms[1]}`
+      : `${forms.slice(0, -1).join(", ")}, or ${forms.at(-1)}`;
+  if (isRecord(valueAtPath) && looksLikeDataContainer(valueAtPath)) {
+    const discs = dataDiscriminatorKeys(valueAtPath, allowed);
+    if (discs.length > 1) {
+      return {
+        status: "done",
+        errors: [
+          {
+            code: "invalid-data",
+            path,
+            message: `Data mixes forms (${discs.map((disc) => `"${disc}"`).join(" and ")}); use exactly one of ${formsMessage}.`,
+            allowed: [...allowed],
+            fix: {
+              description: "Pick a single data form.",
+              example: { values: [{ x: 1, y: 2 }] },
+            },
+          },
+        ],
+      };
+    }
+    const presentFormKeys = allowedKeysForPresentDataForm(valueAtPath, allowed);
+    const formKeys = presentFormKeys ?? new Set(allowed);
+    if (hasActionableAddlNoise(group, formKeys)) {
+      return { status: "continue", activeFormKeys: formKeys };
+    }
+    return { status: "done", errors: [] };
+  }
+  return {
+    status: "done",
+    errors: [
+      {
+        code: "invalid-data",
+        path,
+        message: `Data must be one of ${formsMessage}.`,
+        allowed: [...allowed],
+        fix: {
+          description: 'Wrap inline rows as {"values": [...]}.',
+          example: { values: [{ x: 1, y: 2 }] },
+        },
+      },
+    ],
+  };
 }

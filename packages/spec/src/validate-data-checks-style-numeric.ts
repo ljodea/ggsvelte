@@ -13,6 +13,27 @@ import {
   type TemporalDecisionCache,
 } from "./validate-data-checks-temporal.js";
 
+type NumericStyleConfig = {
+  type?: string;
+  temporalKind?: unknown;
+  parse?: unknown;
+  timezone?: unknown;
+  disambiguation?: unknown;
+  domain?: unknown;
+  parseFailure?: unknown;
+  breaks?: unknown;
+};
+
+type NumericStyleFacts = {
+  requestsTemporal: boolean;
+  temporalInputsUsable: boolean;
+  parser: Parameters<typeof parseTemporalColumn>[1];
+  temporalOptions: Parameters<typeof parseTemporalColumn>[2];
+  hasEpochParser: boolean;
+  hasExplicitDomain: boolean;
+  hasBinnedBreaks: boolean;
+};
+
 /** True when a scaled constant is what the core `cellToNumber()` coerces to a
  *  finite number, mirroring the non-temporal numeric-style path
  *  (scale-style-values.ts). Booleans, numeric strings and ISO date strings all
@@ -87,22 +108,13 @@ function quantitativeTemporalFieldError(input: {
   const censorRecovers =
     parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks || channelTrains);
   if (decision === null || decision === undefined) {
-    // Profile-backed: no samples. An epoch parser makes numbers temporal, but always as
-    // `datetime`, so it can never satisfy a requested `date` kind — the runtime throws
-    // style-temporal-kind. Reject that combination outright.
-    if (hasEpochParser && typeof temporalKind === "string" && temporalKind !== "datetime") {
-      return {
-        code: "scale-type-mismatch",
-        path: `/scales/${aesthetic}`,
-        message: `scales.${aesthetic} requests temporal kind "${temporalKind}" but an epoch parser yields "datetime".`,
-        fix: {
-          description: `Set scales.${aesthetic}.temporalKind to "datetime", or use a parser that yields ${temporalKind} values.`,
-        },
-      };
-    }
-    // Otherwise defer only when the scale renders regardless of the eventual data — a
-    // (kind-compatible) epoch parser, or censor recovery trained from parseable bounds.
-    return hasEpochParser || censorRecovers ? null : mismatch;
+    return profileQuantitativeTemporalError({
+      aesthetic,
+      temporalKind,
+      hasEpochParser,
+      censorRecovers,
+      mismatch,
+    });
   }
   const censoredInvalid =
     parse !== undefined &&
@@ -128,6 +140,27 @@ function quantitativeTemporalFieldError(input: {
     };
   }
   return null;
+}
+
+function profileQuantitativeTemporalError(input: {
+  aesthetic: "size" | "linewidth" | "alpha";
+  temporalKind: unknown;
+  hasEpochParser: boolean;
+  censorRecovers: boolean;
+  mismatch: SpecError;
+}): SpecError | null {
+  const { aesthetic, temporalKind, hasEpochParser, censorRecovers, mismatch } = input;
+  if (hasEpochParser && typeof temporalKind === "string" && temporalKind !== "datetime") {
+    return {
+      code: "scale-type-mismatch",
+      path: `/scales/${aesthetic}`,
+      message: `scales.${aesthetic} requests temporal kind "${temporalKind}" but an epoch parser yields "datetime".`,
+      fix: {
+        description: `Set scales.${aesthetic}.temporalKind to "datetime", or use a parser that yields ${temporalKind} values.`,
+      },
+    };
+  }
+  return hasEpochParser || censorRecovers ? null : mismatch;
 }
 
 /** A scaled numeric-style constant is checked against the same resolution path the
@@ -244,106 +277,20 @@ export function checkNumericStyleScaleDataCompatibility(input: {
   // same "use ordinal" guidance color scales give. Fields without an explicit
   // sequential/binned type default to an ordinal numeric style and are fine.
   for (const aesthetic of ["size", "linewidth", "alpha"] as const) {
-    const config = scales?.[aesthetic] as
-      | {
-          type?: string;
-          temporalKind?: unknown;
-          parse?: unknown;
-          timezone?: unknown;
-          disambiguation?: unknown;
-          domain?: unknown;
-          parseFailure?: unknown;
-          breaks?: unknown;
-        }
-      | undefined;
+    const config = scales?.[aesthetic] as NumericStyleConfig | undefined;
     if (config?.type !== "sequential" && config?.type !== "binned") continue;
-    const requestsTemporal =
-      config.temporalKind !== undefined ||
-      config.parse !== undefined ||
-      config.timezone !== undefined ||
-      config.disambiguation !== undefined;
-    // Config-level temporal facts, shared by the field checks and the scaled-constant
-    // checks below (both mirror the runtime resolveNumericStyleValueView path).
-    // A schema-invalid parser or option (e.g. a Symbol timezone) reaches tier-2 (schema
-    // errors don't short-circuit it); handing it to the temporal helpers throws in their
-    // cache-key/evidence formatting instead of yielding the schema diagnostic, so gate
-    // every temporal call on the inputs being usable and defer otherwise.
-    const parseUsable = temporalParserUsable(config.parse);
-    const temporalOptionsUsable =
-      (config.timezone === undefined || typeof config.timezone === "string") &&
-      (config.disambiguation === undefined || typeof config.disambiguation === "string");
-    const temporalInputsUsable = parseUsable && temporalOptionsUsable;
-    const parser = (config.parse ?? "auto") as Parameters<typeof parseTemporalColumn>[1];
-    const temporalOptions = {
-      ...(config.timezone !== undefined && { timezone: config.timezone }),
-      ...(config.disambiguation !== undefined && { disambiguation: config.disambiguation }),
-    } as Parameters<typeof parseTemporalColumn>[2];
-    // Only an epoch parser turns quantitative (numeric) values temporal at runtime.
-    const hasEpochParser =
-      typeof config.parse === "object" && config.parse !== null && "epoch" in config.parse;
-    // A censor-recovery bound (explicit domain / binned breaks) only rescues an
-    // otherwise-invalid temporal column if a usable, explicit parser can actually parse
-    // it. Without a parser the runtime infers a non-temporal auto parser and throws
-    // style-domain-invalid / style-binned-breaks, so require parseability before
-    // treating either as a recovery bound (matches numericSequentialResolution).
-    const parseableBound = (value: unknown): boolean =>
-      temporalInputsUsable &&
-      config.parse !== undefined &&
-      parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions).ok;
-    const domainValues = Array.isArray(config.domain)
-      ? config.domain.filter((value) => value !== null)
-      : [];
-    const hasExplicitDomain =
-      domainValues.length === 2 && domainValues.every((value) => parseableBound(value));
-    const binnedBreaks =
-      config.type === "binned" && Array.isArray(config.breaks)
-        ? config.breaks.filter((value) => value !== null)
-        : [];
-    const hasBinnedBreaks =
-      binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value));
+    const facts = numericStyleFacts(config);
     // Pass 1: channel-wide training sources (sibling fields + scaled constants).
     // Runtime trains sequential/binned style scales from the full channel value
     // list, so an all-invalid field/constant is censored when any sibling trains.
-    let fieldTrainsScale = false;
-    for (const use of numericStyleFields[aesthetic]) {
-      const type = typeOf(use);
-      if (type === "temporal") {
-        fieldTrainsScale = true;
-        continue;
-      }
-      if (type !== "quantitative" || !requestsTemporal || !temporalInputsUsable) continue;
-      const decision = temporalDecisionForField(
-        temporalDecisionCache,
-        use.field,
-        evidenceOf(use),
-        parser as Parameters<typeof temporalDecisionForField>[3],
-        temporalOptions as Parameters<typeof temporalDecisionForField>[4],
-      );
-      fieldTrainsScale ||=
-        decision !== null &&
-        decision !== undefined &&
-        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0);
-    }
-    let constantTrainsScale = false;
-    if (requestsTemporal && temporalInputsUsable) {
-      for (const value of numericStyleScaledConstants[aesthetic]) {
-        if (value instanceof Date) {
-          constantTrainsScale = true;
-          break;
-        }
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        const decision = parseTemporalColumn(
-          [value] as Parameters<typeof parseTemporalColumn>[0],
-          parser,
-          temporalOptions,
-        ).decision;
-        if (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0) {
-          constantTrainsScale = true;
-          break;
-        }
-      }
-    }
-    const channelTrains = fieldTrainsScale || constantTrainsScale;
+    const channelTrains = numericStyleChannelTrains({
+      uses: numericStyleFields[aesthetic],
+      constants: numericStyleScaledConstants[aesthetic],
+      evidenceOf,
+      typeOf,
+      cache: temporalDecisionCache,
+      facts,
+    });
 
     // Pass 2: field diagnostics (use channel-wide censor recovery).
     for (const use of numericStyleFields[aesthetic]) {
@@ -351,15 +298,15 @@ export function checkNumericStyleScaleDataCompatibility(input: {
       // A quantitative field carrying temporal options fails at resolve time
       // unless a working parser (or censor recovery) yields temporal values —
       // mirror the color checker rather than deferring unconditionally.
-      if (type === "quantitative" && requestsTemporal) {
+      if (type === "quantitative" && facts.requestsTemporal) {
         // Defer to the schema diagnostic when the parser/options are schema-invalid.
-        if (!temporalInputsUsable) continue;
+        if (!facts.temporalInputsUsable) continue;
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
           evidenceOf(use),
-          parser as Parameters<typeof temporalDecisionForField>[3],
-          temporalOptions as Parameters<typeof temporalDecisionForField>[4],
+          facts.parser as Parameters<typeof temporalDecisionForField>[3],
+          facts.temporalOptions as Parameters<typeof temporalDecisionForField>[4],
         );
         const error = quantitativeTemporalFieldError({
           decision,
@@ -368,9 +315,9 @@ export function checkNumericStyleScaleDataCompatibility(input: {
           temporalKind: config.temporalKind,
           parse: config.parse,
           parseFailure: config.parseFailure,
-          hasEpochParser,
-          hasExplicitDomain,
-          hasBinnedBreaks,
+          hasEpochParser: facts.hasEpochParser,
+          hasExplicitDomain: facts.hasExplicitDomain,
+          hasBinnedBreaks: facts.hasBinnedBreaks,
           channelTrains,
         });
         if (error !== null) errors.push(error);
@@ -380,7 +327,7 @@ export function checkNumericStyleScaleDataCompatibility(input: {
       // scales give. A nominal field carrying temporal options may still resolve
       // to temporal at runtime, so defer (mirror the color checker).
       if (type !== "nominal" && type !== "ordinal") continue;
-      if (requestsTemporal) continue;
+      if (facts.requestsTemporal) continue;
       errors.push({
         code: "scale-type-mismatch",
         path: `/scales/${aesthetic}`,
@@ -395,21 +342,114 @@ export function checkNumericStyleScaleDataCompatibility(input: {
     // resolve throws at runtime (style-domain-empty / style-temporal-parse). Reject
     // it here too, mirroring the field checks above for both resolution paths.
     const censorRecovers =
-      config.parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks || channelTrains);
+      config.parseFailure === "censor" &&
+      (facts.hasExplicitDomain || facts.hasBinnedBreaks || channelTrains);
     for (const value of numericStyleScaledConstants[aesthetic]) {
       const error = numericStyleConstantError({
         value,
         aesthetic,
         configType: config.type,
-        requestsTemporal,
+        requestsTemporal: facts.requestsTemporal,
         temporalKind: config.temporalKind,
-        parseUsable: temporalInputsUsable,
-        parser,
-        options: temporalOptions,
+        parseUsable: facts.temporalInputsUsable,
+        parser: facts.parser,
+        options: facts.temporalOptions,
         censorRecovers,
       });
       if (error !== null) errors.push(error);
     }
   }
   return errors;
+}
+
+function numericStyleFacts(config: NumericStyleConfig): NumericStyleFacts {
+  const requestsTemporal = [
+    config.temporalKind,
+    config.parse,
+    config.timezone,
+    config.disambiguation,
+  ].some((value) => value !== undefined);
+  const temporalInputsUsable =
+    temporalParserUsable(config.parse) &&
+    (config.timezone === undefined || typeof config.timezone === "string") &&
+    (config.disambiguation === undefined || typeof config.disambiguation === "string");
+  const parser = (config.parse ?? "auto") as Parameters<typeof parseTemporalColumn>[1];
+  const temporalOptions = {
+    ...(config.timezone !== undefined && { timezone: config.timezone }),
+    ...(config.disambiguation !== undefined && { disambiguation: config.disambiguation }),
+  } as Parameters<typeof parseTemporalColumn>[2];
+  const parseableBound = (value: unknown): boolean =>
+    temporalInputsUsable &&
+    config.parse !== undefined &&
+    parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions).ok;
+  const domainValues = Array.isArray(config.domain) ? config.domain.filter(nonNull) : [];
+  const binnedBreaks =
+    config.type === "binned" && Array.isArray(config.breaks) ? config.breaks.filter(nonNull) : [];
+  return {
+    requestsTemporal,
+    temporalInputsUsable,
+    parser,
+    temporalOptions,
+    hasEpochParser:
+      typeof config.parse === "object" && config.parse !== null && "epoch" in config.parse,
+    hasExplicitDomain:
+      domainValues.length === 2 && domainValues.every((value) => parseableBound(value)),
+    hasBinnedBreaks:
+      binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value)),
+  };
+}
+
+function nonNull(value: unknown): boolean {
+  return value !== null;
+}
+
+function numericStyleChannelTrains(input: {
+  uses: ChannelFieldUse[];
+  constants: unknown[];
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
+  typeOf: (use: ChannelFieldUse) => FieldEvidenceEntry["type"] | null;
+  cache: TemporalDecisionCache;
+  facts: NumericStyleFacts;
+}): boolean {
+  const { uses, constants, evidenceOf, typeOf, cache, facts } = input;
+  if (uses.some((use) => fieldTrainsNumericStyle(use, evidenceOf, typeOf, cache, facts)))
+    return true;
+  if (!facts.requestsTemporal || !facts.temporalInputsUsable) return false;
+  return constants.some((value) => constantTrainsNumericStyle(value, facts));
+}
+
+function fieldTrainsNumericStyle(
+  use: ChannelFieldUse,
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined,
+  typeOf: (use: ChannelFieldUse) => FieldEvidenceEntry["type"] | null,
+  cache: TemporalDecisionCache,
+  facts: NumericStyleFacts,
+): boolean {
+  const type = typeOf(use);
+  if (type === "temporal") return true;
+  if (type !== "quantitative" || !facts.requestsTemporal || !facts.temporalInputsUsable)
+    return false;
+  const decision = temporalDecisionForField(
+    cache,
+    use.field,
+    evidenceOf(use),
+    facts.parser as Parameters<typeof temporalDecisionForField>[3],
+    facts.temporalOptions as Parameters<typeof temporalDecisionForField>[4],
+  );
+  return (
+    decision !== null &&
+    decision !== undefined &&
+    (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0)
+  );
+}
+
+function constantTrainsNumericStyle(value: unknown, facts: NumericStyleFacts): boolean {
+  if (value instanceof Date) return true;
+  if (typeof value !== "string" && typeof value !== "number") return false;
+  const decision = parseTemporalColumn(
+    [value] as Parameters<typeof parseTemporalColumn>[0],
+    facts.parser,
+    facts.temporalOptions,
+  ).decision;
+  return decision.status === "temporal" || (decision.validatedCount ?? 0) > 0;
 }

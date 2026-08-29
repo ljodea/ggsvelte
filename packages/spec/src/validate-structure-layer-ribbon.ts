@@ -37,19 +37,15 @@ export function ribbonStructuralErrors(
   const orientation: "x" | "y" | null =
     pinned === "x" || pinned === "y" ? pinned : xContract ? "x" : yContract ? "y" : null;
 
-  const needed: ChannelName[] =
+  const usesYContract =
     orientation === "y" ||
     (orientation === null &&
-      (mapped("y") !== undefined || mapped("xmin") !== undefined || mapped("xmax") !== undefined))
-      ? ["y", "xmin", "xmax"]
-      : orientation === "x" || orientation === null
-        ? ["x", "ymin", "ymax"]
-        : ["x", "ymin", "ymax"];
+      [mapped("y"), mapped("xmin"), mapped("xmax")].some((value) => value !== undefined));
+  const needed: ChannelName[] = usesYContract ? ["y", "xmin", "xmax"] : ["x", "ymin", "ymax"];
 
   for (const channel of needed) {
     if (mapped(channel) !== undefined) continue;
-    const suffix =
-      orientation === null ? "for its interval contract" : `with orientation "${orientation}"`;
+    const suffix = ribbonContractSuffix(orientation);
     pushMissingChannel(
       errors,
       layerPath,
@@ -58,4 +54,8 @@ export function ribbonStructuralErrors(
     );
   }
   return errors;
+}
+
+function ribbonContractSuffix(orientation: "x" | "y" | null): string {
+  return orientation === null ? "for its interval contract" : `with orientation "${orientation}"`;
 }

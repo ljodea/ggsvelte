@@ -197,14 +197,7 @@ export function resolveLayerFieldEvidence(
   limits: ValidateLimits,
 ): ResolveLayerFieldEvidenceResult {
   if (options.profile !== undefined) {
-    const bad = profileErrors(options.profile);
-    if (bad.length > 0) return { status: "errors", errors: bad };
-    const fields: FieldEvidenceMap = new Map();
-    for (const f of options.profile.fields) {
-      fields.set(f.name, { type: f.type, allNull: false, values: null, temporal: null });
-    }
-    const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
-    return { status: "ok", plot: fields, layers: layers.map(() => fields) };
+    return evidenceFromProfile(options.profile, spec);
   }
 
   const datasets = spec["datasets"];
@@ -232,9 +225,6 @@ export function resolveLayerFieldEvidence(
   }
 
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
-  const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];
-  /** Layer index → dataset name, for the layers that reference one. */
-  const layerNames: Array<string | null> = [];
   // Several layers commonly name one dataset. Pivoting {values} rows into
   // columns is O(rows x columns), so resolve each name once rather than once
   // per reference. Inline data keeps its own table: equal content is not the
@@ -246,34 +236,12 @@ export function resolveLayerFieldEvidence(
   // The plot's own table seeds it, so a layer naming the plot's dataset reuses
   // that pivot instead of building a second one.
   if (plotColumns !== null && plotName !== null) columnsByName.set(plotName, plotColumns);
-  for (const layer of layers) {
-    if (!isRecord(layer) || layer["data"] === undefined) {
-      layerColumns.push(null); // inherit plot
-      layerNames.push(null);
-      continue;
-    }
-    const data = layer["data"];
-    const name = isRecord(data) && typeof data["name"] === "string" ? data["name"] : null;
-    let cols = name === null ? undefined : columnsByName.get(name);
-    if (cols === undefined) {
-      const resolved = columnsFromDataRef(data, datasets);
-      if (resolved === null) {
-        // Named ref not in datasets (or malformed) — runtime-only / skip.
-        // Left unmemoized: a miss is cheap and re-resolving keeps the
-        // runtime marker distinct from a resolved table.
-        layerColumns.push("runtime");
-        layerNames.push(null);
-        continue;
-      }
-      cols = resolved;
-      if (name !== null) columnsByName.set(name, cols);
-    }
-    // Deduplicate limit accounting for shared named datasets.
-    const key = name === null ? `inline:${layerColumns.length}` : `name:${name}`;
-    countTable(key, cols);
-    layerColumns.push(cols);
-    layerNames.push(name);
-  }
+  const { layerColumns, layerNames } = resolveLayerColumns(
+    layers,
+    datasets,
+    columnsByName,
+    countTable,
+  );
 
   if (plotColumns === null && layerColumns.every((c) => c === null || c === "runtime")) {
     return { status: "none" };
@@ -322,6 +290,58 @@ export function resolveLayerFieldEvidence(
     return built;
   });
   return { status: "ok", plot, layers: layerMaps };
+}
+
+function evidenceFromProfile(
+  profile: NonNullable<ValidateOptions["profile"]>,
+  spec: Record<string, unknown>,
+): ResolveLayerFieldEvidenceResult {
+  const bad = profileErrors(profile);
+  if (bad.length > 0) return { status: "errors", errors: bad };
+  const fields: FieldEvidenceMap = new Map();
+  for (const field of profile.fields) {
+    fields.set(field.name, { type: field.type, allNull: false, values: null, temporal: null });
+  }
+  const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
+  return { status: "ok", plot: fields, layers: layers.map(() => fields) };
+}
+
+function resolveLayerColumns(
+  layers: unknown[],
+  datasets: unknown,
+  columnsByName: Map<string, Record<string, readonly CellValue[]>>,
+  countTable: (key: string, columns: Record<string, readonly CellValue[]>) => void,
+): {
+  layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime">;
+  layerNames: Array<string | null>;
+} {
+  const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];
+  const layerNames: Array<string | null> = [];
+  for (const layer of layers) {
+    if (!isRecord(layer) || layer["data"] === undefined) {
+      layerColumns.push(null);
+      layerNames.push(null);
+      continue;
+    }
+    const data = layer["data"];
+    const name = isRecord(data) && typeof data["name"] === "string" ? data["name"] : null;
+    let columns = name === null ? undefined : columnsByName.get(name);
+    if (columns === undefined) {
+      const resolved = columnsFromDataRef(data, datasets);
+      if (resolved === null) {
+        layerColumns.push("runtime");
+        layerNames.push(null);
+        continue;
+      }
+      columns = resolved;
+      if (name !== null) columnsByName.set(name, columns);
+    }
+    const key = name === null ? `inline:${layerColumns.length}` : `name:${name}`;
+    countTable(key, columns);
+    layerColumns.push(columns);
+    layerNames.push(name);
+  }
+  return { layerColumns, layerNames };
 }
 
 function estimateBytes(columns: Record<string, readonly CellValue[]>, rowCount: number): number {
