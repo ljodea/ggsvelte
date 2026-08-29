@@ -59,6 +59,20 @@ function looksLikeFractionalCalendarYears(values: readonly CellValue[]): boolean
   if (yearLike.length < MIN_YEAR_LIKE_SAMPLES) return false;
   if (yearLike.length / finiteCount < MIN_YEAR_LIKE_DOMINANCE) return false;
 
+  const stats = fractionalYearStats(yearLike);
+  if (stats.fractional < MIN_FRACTIONAL_SAMPLES) return false;
+  if (stats.fractional / yearLike.length < MIN_FRACTIONAL_RATE) return false;
+  if (stats.monthGridHits / yearLike.length < MIN_MONTH_GRID_HIT_RATE) return false;
+  if (stats.monthIndices.size < MIN_DISTINCT_MONTHS) return false;
+  return stats.nonQuarterFractional >= 1;
+}
+
+function fractionalYearStats(yearLike: readonly number[]): {
+  fractional: number;
+  monthGridHits: number;
+  monthIndices: Set<number>;
+  nonQuarterFractional: number;
+} {
   let fractional = 0;
   let monthGridHits = 0;
   const monthIndices = new Set<number>();
@@ -81,14 +95,7 @@ function looksLikeFractionalCalendarYears(values: readonly CellValue[]): boolean
       if (isFractional && !QUARTER_MONTH_INDEX.has(k)) nonQuarterFractional++;
     }
   }
-
-  if (fractional < MIN_FRACTIONAL_SAMPLES) return false;
-  if (fractional / yearLike.length < MIN_FRACTIONAL_RATE) return false;
-  if (monthGridHits / yearLike.length < MIN_MONTH_GRID_HIT_RATE) return false;
-  // Reject quarter/half-only grids (e.g. 1000.5, 2500.25, 3000.75).
-  if (monthIndices.size < MIN_DISTINCT_MONTHS) return false;
-  if (nonQuarterFractional < 1) return false;
-  return true;
+  return { fractional, monthGridHits, monthIndices, nonQuarterFractional };
 }
 
 /** First year-like fractional sample for advisory copy, or null. */
@@ -151,7 +158,7 @@ function countTransformDomain(
 }
 
 /** Scale-scoped advisories for one lintSpec pass. */
-export function collectScaleLintAdvisories(input: {
+function collectTransformAdvisories(input: {
   layers: unknown[];
   scales: Record<string, unknown> | undefined;
   fieldOf: LintFieldOf;
@@ -203,6 +210,17 @@ export function collectScaleLintAdvisories(input: {
       }
     }
   }
+
+  return advisories;
+}
+
+function collectFractionalYearAdvisories(input: {
+  layers: unknown[];
+  scales: Record<string, unknown> | undefined;
+  fieldOf: LintFieldOf;
+}): SpecAdvisory[] {
+  const { layers, scales, fieldOf } = input;
+  const advisories: SpecAdvisory[] = [];
 
   // --- fractional-calendar-years (x only, once) ------------------------------
   // Monthly series re-encoded as year + month/12 and plotted on a default or
@@ -256,4 +274,12 @@ export function collectScaleLintAdvisories(input: {
   }
 
   return advisories;
+}
+
+export function collectScaleLintAdvisories(input: {
+  layers: unknown[];
+  scales: Record<string, unknown> | undefined;
+  fieldOf: LintFieldOf;
+}): SpecAdvisory[] {
+  return [...collectTransformAdvisories(input), ...collectFractionalYearAdvisories(input)];
 }

@@ -39,13 +39,7 @@ export function ruleFamilyStructuralErrors(
   // Pre-normalize data-driven aliases: orthogonal axis is not part of the form.
   if (!intercepts && geom === "hline") x = undefined;
   if (!intercepts && geom === "vline") y = undefined;
-  const interceptHint =
-    geom === "hline"
-      ? "params.yintercept"
-      : geom === "vline"
-        ? "params.xintercept"
-        : "params.xintercept/yintercept";
-  const dataHint = geom === "hline" ? "aes.y" : geom === "vline" ? "aes.x" : "aes.x/aes.y";
+  const { interceptHint, dataHint } = ruleHints(geom);
   if (intercepts && (x !== undefined || y !== undefined)) {
     errors.push({
       code: "rule-form-ambiguous",
@@ -54,10 +48,7 @@ export function ruleFamilyStructuralErrors(
       fix: {
         description:
           "Remove the intercept params (data-driven form), or unset the position aes with null (annotation form).",
-        example:
-          geom === "vline"
-            ? { geom: "vline", params: { xintercept: 0 } }
-            : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
+        example: ruleExample(geom),
       },
     });
   } else if (!intercepts && x === undefined && y === undefined) {
@@ -66,16 +57,8 @@ export function ruleFamilyStructuralErrors(
       path: layerPath,
       message: `This ${geom} layer has neither fixed intercepts (${interceptHint}) nor a mapped ${dataHint} — nothing to draw.`,
       fix: {
-        description:
-          geom === "hline"
-            ? "Set params.yintercept for an annotation, or map aes.y for data-driven rules."
-            : geom === "vline"
-              ? "Set params.xintercept for an annotation, or map aes.x for data-driven rules."
-              : "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
-        example:
-          geom === "vline"
-            ? { geom: "vline", params: { xintercept: 0 } }
-            : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
+        description: missingRuleDescription(geom),
+        example: ruleExample(geom),
       },
     });
   } else if (!intercepts && x !== undefined && y !== undefined) {
@@ -91,4 +74,25 @@ export function ruleFamilyStructuralErrors(
     });
   }
   return errors;
+}
+
+function ruleHints(geom: string): { interceptHint: string; dataHint: string } {
+  if (geom === "hline") return { interceptHint: "params.yintercept", dataHint: "aes.y" };
+  if (geom === "vline") return { interceptHint: "params.xintercept", dataHint: "aes.x" };
+  return { interceptHint: "params.xintercept/yintercept", dataHint: "aes.x/aes.y" };
+}
+
+function ruleExample(geom: string) {
+  if (geom === "vline") return { geom: "vline", params: { xintercept: 0 } };
+  return { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } };
+}
+
+function missingRuleDescription(geom: string): string {
+  if (geom === "hline") {
+    return "Set params.yintercept for an annotation, or map aes.y for data-driven rules.";
+  }
+  if (geom === "vline") {
+    return "Set params.xintercept for an annotation, or map aes.x for data-driven rules.";
+  }
+  return "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.";
 }

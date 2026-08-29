@@ -88,6 +88,209 @@ function expectedManualDomainLength(
   return { kind: unknownFieldValues ? "min" : "exact", size: seen.size };
 }
 
+function manualColorRangeErrors(input: {
+  channel: "color" | "fill";
+  config: ColorScaleSpec | undefined;
+  effectiveType: string | undefined;
+  uses: readonly ChannelFieldUse[];
+  constants: readonly unknown[];
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
+}): SpecError[] {
+  const { channel, config, effectiveType, uses, constants, evidenceOf } = input;
+  if (effectiveType !== "manual" && config?.type !== "manual") return [];
+  if (!Array.isArray(config?.range)) return [];
+  const expected = expectedManualDomainLength(
+    config.domain,
+    uses.map((use) => evidenceOf(use)?.values),
+    constants,
+  );
+  if (expected === null) return [];
+  const mismatch =
+    expected.kind === "exact"
+      ? config.range.length !== expected.size
+      : config.range.length < expected.size;
+  if (!mismatch) return [];
+  return [
+    {
+      code: "color-manual-domain-range",
+      path: `/scales/${channel}`,
+      message:
+        expected.kind === "exact"
+          ? `The manual ${channel} scale needs one range color per domain value (${String(expected.size)} values, ${String(config.range.length)} colors).`
+          : `The manual ${channel} scale has at least ${String(expected.size)} known domain values (scaled constants and/or observed categories) but only ${String(config.range.length)} range colors.`,
+      fix: {
+        description: `Provide at least ${String(expected.size)} range colors, or set scales.${channel}.domain explicitly to match the range length.`,
+      },
+    },
+  ];
+}
+
+type ColorFieldInput = {
+  channel: "color" | "fill";
+  config: ColorScaleSpec | undefined;
+  effectiveType: string | undefined;
+  inferredFromSequentialScheme: boolean;
+  requestsTemporal: boolean;
+  recovery: ReturnType<typeof colorTemporalCensorRecovery>;
+  use: ChannelFieldUse;
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
+  typeOf: (use: ChannelFieldUse) => string | null;
+  temporalDecisionCache: TemporalDecisionCache;
+};
+
+function colorFieldErrors(input: ColorFieldInput): SpecError[] {
+  const type = input.typeOf(input.use);
+  const transformError = temporalColorTransformError(input, type);
+  if (transformError !== null) return [transformError];
+  if (type === "quantitative" && input.requestsTemporal) {
+    return quantitativeTemporalColorErrors(input);
+  }
+  if (type !== "nominal" && type !== "ordinal") return [];
+  if (input.requestsTemporal && !temporalParserUsable(input.config?.parse)) return [];
+  return input.requestsTemporal
+    ? discreteTemporalColorErrors(input, type)
+    : [discreteSequentialColorError(input, type)];
+}
+
+function temporalColorTransformError(
+  input: ColorFieldInput,
+  type: string | null,
+): SpecError | null {
+  const transform = input.config?.transform;
+  if (type !== "temporal" || transform === undefined || transform === "identity") return null;
+  return {
+    code: "scale-type-mismatch",
+    path: input.use.path,
+    message: `scales.${input.channel}.transform is "${transform}" but field "${input.use.field}" is temporal; temporal color scales permit only the identity transform.`,
+    fix: {
+      description: `Remove scales.${input.channel}.transform to keep temporal inference, or map a non-temporal quantitative field.`,
+    },
+  };
+}
+
+function colorTemporalDecision(input: ColorFieldInput) {
+  return temporalDecisionForField(
+    input.temporalDecisionCache,
+    input.use.field,
+    input.evidenceOf(input.use),
+    input.config?.parse ?? "auto",
+    {
+      ...(input.config?.timezone !== undefined && { timezone: input.config.timezone }),
+      ...(input.config?.disambiguation !== undefined && {
+        disambiguation: input.config.disambiguation,
+      }),
+    },
+  );
+}
+
+function quantitativeTemporalColorErrors(input: ColorFieldInput): SpecError[] {
+  if (!temporalParserUsable(input.config?.parse)) return [];
+  const decision = colorTemporalDecision(input);
+  const recovers = censoredTemporalColorRecovers({
+    config: input.config,
+    decision,
+    field: input.use.field,
+    recovery: input.recovery,
+  });
+  if (decision?.status !== "temporal" && !recovers) {
+    return [
+      {
+        code: "scale-type-mismatch",
+        path: input.use.path,
+        message: `scales.${input.channel} requests temporal colors but field "${input.use.field}" is quantitative (numbers are not treated as temporal without a successful epoch parse).`,
+        fix: {
+          description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal color options.`,
+        },
+      },
+    ];
+  }
+  const kindError = temporalColorKindError(input, decision?.kind);
+  return kindError === null ? [] : [kindError];
+}
+
+function temporalColorKindError(
+  input: ColorFieldInput,
+  actualKind: string | null | undefined,
+): SpecError | null {
+  const expectedKind = input.config?.temporalKind;
+  if (
+    expectedKind === undefined ||
+    actualKind === null ||
+    actualKind === undefined ||
+    actualKind === expectedKind
+  )
+    return null;
+  return {
+    code: "scale-type-mismatch",
+    path: input.use.path,
+    message: `scales.${input.channel} requests temporal kind "${expectedKind}" but field "${input.use.field}" parses as "${actualKind}".`,
+    fix: {
+      description: `Use the ${actualKind} color helper or correct the source precision.`,
+    },
+  };
+}
+
+function discreteSequentialColorError(
+  input: ColorFieldInput,
+  type: "nominal" | "ordinal",
+): SpecError {
+  const { channel, config, effectiveType, inferredFromSequentialScheme, use } = input;
+  return {
+    code: "scale-type-mismatch",
+    path: use.path,
+    message: inferredFromSequentialScheme
+      ? `scales.${channel}.scheme is "${config?.scheme}" and selects a sequential scale, but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`
+      : `scales.${channel}.type is "${effectiveType}" but field "${use.field}" is ${type}; quantitative color scales need quantitative or temporal values.`,
+    fix: inferredFromSequentialScheme
+      ? {
+          description: `Set scales.${channel}.scheme to a categorical scheme, remove it to infer an ordinal scale from "${use.field}", or map a quantitative field.`,
+          example: { scheme: "observable10" },
+        }
+      : { description: `Set scales.${channel}.type to "ordinal".` },
+  };
+}
+
+function discreteTemporalColorErrors(
+  input: ColorFieldInput,
+  type: "nominal" | "ordinal",
+): SpecError[] {
+  const decision = colorTemporalDecision(input);
+  const recovers = censoredTemporalColorRecovers({
+    config: input.config,
+    decision,
+    field: input.use.field,
+    recovery: input.recovery,
+  });
+  if (decision?.status === "temporal" || recovers) {
+    const kindError = temporalColorKindError(input, decision?.kind);
+    return kindError === null ? [] : [kindError];
+  }
+  const detail = colorTemporalDecisionDetail(decision);
+  return [
+    {
+      code: "scale-type-mismatch",
+      path: input.use.path,
+      message: `scales.${input.channel} requests temporal colors but field "${input.use.field}" is ${type}.${detail}`,
+      fix: {
+        description:
+          input.config?.parse === undefined
+            ? `Set scales.${input.channel}.parse to the exact temporal order, or use type: "ordinal".`
+            : `Correct the rejected values, choose the matching parser, or set parseFailure: "censor" explicitly.`,
+      },
+    },
+  ];
+}
+
+function colorTemporalDecisionDetail(decision: ReturnType<typeof colorTemporalDecision>): string {
+  if (decision?.status === "ambiguous") {
+    return ` Automatic temporal inference was ambiguous between: ${decision.candidates.join(", ")}.`;
+  }
+  if (decision?.status === "invalid") {
+    return ` Temporal parsing rejected ${String(decision.failedCount)} value(s).`;
+  }
+  return "";
+}
+
 /** Post-layer color/fill scale type compatibility against collected field uses. */
 export function checkColorScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
@@ -113,31 +316,16 @@ export function checkColorScaleDataCompatibility(input: {
     const config = scales?.[channel] as ColorScaleSpec | undefined;
     const effectiveType = configuredColorScaleType(config);
 
-    // Manual range length vs domain / inferred unique values (union across layers).
-    if ((effectiveType === "manual" || config?.type === "manual") && Array.isArray(config?.range)) {
-      const range = config.range;
-      const expected = expectedManualDomainLength(
-        config.domain,
-        colorFields[channel].map((use) => evidenceOf(use)?.values),
-        colorScaledConstants[channel],
-      );
-      const rangeMismatch =
-        expected !== null &&
-        (expected.kind === "exact" ? range.length !== expected.size : range.length < expected.size);
-      if (rangeMismatch && expected !== null) {
-        errors.push({
-          code: "color-manual-domain-range",
-          path: `/scales/${channel}`,
-          message:
-            expected.kind === "exact"
-              ? `The manual ${channel} scale needs one range color per domain value (${String(expected.size)} values, ${String(range.length)} colors).`
-              : `The manual ${channel} scale has at least ${String(expected.size)} known domain values (scaled constants and/or observed categories) but only ${String(range.length)} range colors.`,
-          fix: {
-            description: `Provide at least ${String(expected.size)} range colors, or set scales.${channel}.domain explicitly to match the range length.`,
-          },
-        });
-      }
-    }
+    errors.push(
+      ...manualColorRangeErrors({
+        channel,
+        config,
+        effectiveType,
+        uses: colorFields[channel],
+        constants: colorScaledConstants[channel],
+        evidenceOf,
+      }),
+    );
 
     const inferredFromSequentialScheme =
       config?.type === undefined &&
@@ -146,11 +334,12 @@ export function checkColorScaleDataCompatibility(input: {
       SEQUENTIAL_SCHEMES.has(config.scheme);
     if (effectiveType !== "sequential" && effectiveType !== "binned") continue;
 
-    const requestsTemporal =
-      config?.temporalKind !== undefined ||
-      config?.parse !== undefined ||
-      config?.timezone !== undefined ||
-      config?.disambiguation !== undefined;
+    const requestsTemporal = [
+      config?.temporalKind,
+      config?.parse,
+      config?.timezone,
+      config?.disambiguation,
+    ].some((value) => value !== undefined);
     const recovery = colorTemporalCensorRecovery({
       config,
       colorFields: colorFields[channel],
@@ -161,176 +350,46 @@ export function checkColorScaleDataCompatibility(input: {
     });
     // Runtime collects all channel values into one temporal column; a kind
     // conflict (sibling field or scaled constant) throws color-temporal-kind.
-    if (
-      recovery.kindConflicts &&
-      typeof config?.temporalKind === "string" &&
-      recovery.conflictingKind !== null
-    ) {
-      errors.push({
-        code: "scale-type-mismatch",
-        path: `/scales/${channel}`,
-        message: `scales.${channel} requests temporal kind "${config.temporalKind}" but a channel value parses as "${recovery.conflictingKind}".`,
-        fix: {
-          description: `Use ${config.temporalKind} values for every color mapping and scaled constant, or set temporalKind to "${recovery.conflictingKind}".`,
-        },
-      });
-    }
+    const conflictError = colorChannelKindConflictError(channel, config, recovery);
+    if (conflictError !== null) errors.push(conflictError);
 
     for (const use of colorFields[channel]) {
-      const type = typeOf(use);
-      if (
-        type === "temporal" &&
-        config?.transform !== undefined &&
-        config.transform !== "identity"
-      ) {
-        errors.push({
-          code: "scale-type-mismatch",
-          path: use.path,
-          message: `scales.${channel}.transform is "${config.transform}" but field "${use.field}" is temporal; temporal color scales permit only the identity transform.`,
-          fix: {
-            description: `Remove scales.${channel}.transform to keep temporal inference, or map a non-temporal quantitative field.`,
-          },
-        });
-        continue;
-      }
-
-      // Quantitative fields with temporal-only options fail at resolve time unless
-      // parseFailure: "censor" recovers via this field, a sibling, a scaled constant,
-      // or a parseable domain / binned breaks (pipeline only throws color-transform-empty
-      // when every channel value fails and no authored bound trains the scale).
-      if (type === "quantitative" && requestsTemporal) {
-        // A schema-invalid parser reaches tier-2 (schema errors don't short-circuit
-        // it); handing it to temporalDecisionForField would throw instead of
-        // yielding the schema diagnostic. Defer to that diagnostic.
-        if (!temporalParserUsable(config?.parse)) continue;
-        const info = evidenceOf(use);
-        const decision = temporalDecisionForField(
-          temporalDecisionCache,
-          use.field,
-          info,
-          config?.parse ?? "auto",
-          {
-            ...(config?.timezone !== undefined && { timezone: config.timezone }),
-            ...(config?.disambiguation !== undefined && {
-              disambiguation: config.disambiguation,
-            }),
-          },
-        );
-        const censoredInvalid = censoredTemporalColorRecovers({
+      errors.push(
+        ...colorFieldErrors({
+          channel,
           config,
-          decision,
-          field: use.field,
+          effectiveType,
+          inferredFromSequentialScheme,
+          requestsTemporal,
           recovery,
-        });
-        if (decision?.status !== "temporal" && !censoredInvalid) {
-          errors.push({
-            code: "scale-type-mismatch",
-            path: use.path,
-            message: `scales.${channel} requests temporal colors but field "${use.field}" is quantitative (numbers are not treated as temporal without a successful epoch parse).`,
-            fix: {
-              description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal color options.`,
-            },
-          });
-          continue;
-        }
-        if (
-          config?.temporalKind !== undefined &&
-          decision?.kind !== null &&
-          decision?.kind !== undefined &&
-          decision.kind !== config.temporalKind
-        ) {
-          errors.push({
-            code: "scale-type-mismatch",
-            path: use.path,
-            message: `scales.${channel} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
-            fix: {
-              description: `Use the ${decision.kind ?? "matching"} color helper or correct the source precision.`,
-            },
-          });
-          continue;
-        }
-      }
-
-      if (type !== "nominal" && type !== "ordinal") continue;
-
-      // Same schema-invalid-parser guard as the quantitative branch above: a
-      // malformed parser would throw in temporalDecisionForField below.
-      if (requestsTemporal && !temporalParserUsable(config?.parse)) continue;
-
-      if (!requestsTemporal) {
-        errors.push({
-          code: "scale-type-mismatch",
-          path: use.path,
-          message: inferredFromSequentialScheme
-            ? `scales.${channel}.scheme is "${config.scheme}" and selects a sequential scale, but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`
-            : `scales.${channel}.type is "${effectiveType}" but field "${use.field}" is ${type}; quantitative color scales need quantitative or temporal values.`,
-          fix: inferredFromSequentialScheme
-            ? {
-                description: `Set scales.${channel}.scheme to a categorical scheme, remove it to infer an ordinal scale from "${use.field}", or map a quantitative field.`,
-                example: { scheme: "observable10" },
-              }
-            : { description: `Set scales.${channel}.type to "ordinal".` },
-        });
-        continue;
-      }
-
-      const info = evidenceOf(use);
-      const decision = temporalDecisionForField(
-        temporalDecisionCache,
-        use.field,
-        info,
-        config?.parse ?? "auto",
-        {
-          ...(config?.timezone !== undefined && { timezone: config.timezone }),
-          ...(config?.disambiguation !== undefined && {
-            disambiguation: config.disambiguation,
-          }),
-        },
+          use,
+          evidenceOf,
+          typeOf,
+          temporalDecisionCache,
+        }),
       );
-      const censoredInvalid = censoredTemporalColorRecovers({
-        config,
-        decision,
-        field: use.field,
-        recovery,
-      });
-      if (decision?.status === "temporal" || censoredInvalid) {
-        // Mirror runtime: compare recovered kind even when status is invalid+censored.
-        if (
-          config?.temporalKind !== undefined &&
-          decision?.kind !== null &&
-          decision?.kind !== undefined &&
-          decision.kind !== config.temporalKind
-        ) {
-          errors.push({
-            code: "scale-type-mismatch",
-            path: use.path,
-            message: `scales.${channel} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
-            fix: {
-              description: `Use the ${decision.kind ?? "matching"} color helper or correct the source precision.`,
-            },
-          });
-        }
-        continue;
-      }
-
-      const detail =
-        decision?.status === "ambiguous"
-          ? ` Automatic temporal inference was ambiguous between: ${decision.candidates.join(", ")}.`
-          : decision?.status === "invalid"
-            ? ` Temporal parsing rejected ${String(decision.failedCount)} value(s).`
-            : "";
-      errors.push({
-        code: "scale-type-mismatch",
-        path: use.path,
-        message: `scales.${channel} requests temporal colors but field "${use.field}" is ${type}.${detail}`,
-        fix: {
-          description:
-            config?.parse === undefined
-              ? `Set scales.${channel}.parse to the exact temporal order, or use type: "ordinal".`
-              : `Correct the rejected values, choose the matching parser, or set parseFailure: "censor" explicitly.`,
-        },
-      });
     }
   }
   return errors;
+}
+
+function colorChannelKindConflictError(
+  channel: "color" | "fill",
+  config: ColorScaleSpec | undefined,
+  recovery: ReturnType<typeof colorTemporalCensorRecovery>,
+): SpecError | null {
+  if (
+    !recovery.kindConflicts ||
+    typeof config?.temporalKind !== "string" ||
+    recovery.conflictingKind === null
+  )
+    return null;
+  return {
+    code: "scale-type-mismatch",
+    path: `/scales/${channel}`,
+    message: `scales.${channel} requests temporal kind "${config.temporalKind}" but a channel value parses as "${recovery.conflictingKind}".`,
+    fix: {
+      description: `Use ${config.temporalKind} values for every color mapping and scaled constant, or set temporalKind to "${recovery.conflictingKind}".`,
+    },
+  };
 }

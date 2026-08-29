@@ -213,19 +213,7 @@ export function parseTemporal(
       : temporalParseFailure("invalid Date value");
   }
   if (typeof parser === "object" && "epoch" in parser) {
-    if (
-      (typeof value !== "number" && typeof value !== "string") ||
-      (typeof value === "string" && value.trim() === "")
-    ) {
-      return temporalParseFailure(`expected epoch ${parser.epoch}`);
-    }
-    const numeric = typeof value === "number" ? value : Number(value);
-    if (!Number.isFinite(numeric))
-      return temporalParseFailure(`expected finite epoch ${parser.epoch}`);
-    const epochMs = parser.epoch === "seconds" ? numeric * 1000 : numeric;
-    return Number.isFinite(new Date(epochMs).getTime())
-      ? { ok: true, epochMs, kind: "datetime", precision: "millisecond" }
-      : temporalParseFailure("instant is outside the supported range");
+    return parseEpoch(value, parser.epoch);
   }
   if (typeof value !== "string" || value.trim() !== value)
     return temporalParseFailure("expected an exact temporal string");
@@ -236,6 +224,21 @@ export function parseTemporal(
     return parsePeriod(value, parser, options);
   }
   return parseOrdered(value, parser, options);
+}
+
+function parseEpoch(value: unknown, unit: "seconds" | "milliseconds"): TemporalParseResult {
+  if (
+    (typeof value !== "number" && typeof value !== "string") ||
+    (typeof value === "string" && value.trim() === "")
+  ) {
+    return temporalParseFailure(`expected epoch ${unit}`);
+  }
+  const numeric = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(numeric)) return temporalParseFailure(`expected finite epoch ${unit}`);
+  const epochMs = unit === "seconds" ? numeric * 1000 : numeric;
+  return Number.isFinite(new Date(epochMs).getTime())
+    ? { ok: true, epochMs, kind: "datetime", precision: "millisecond" }
+    : temporalParseFailure("instant is outside the supported range");
 }
 
 function fnv1a(value: string): string {

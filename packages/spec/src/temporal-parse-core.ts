@@ -158,29 +158,33 @@ function daysInMonth(year: number, month: number): number {
 }
 
 function validateParts(parts: DateParts): string | null {
-  if (!Number.isInteger(parts.year) || parts.year < 0 || parts.year > 9999) {
+  if (!integerInRange(parts.year, 0, 9999)) {
     return "year must be an integer from 0000 through 9999";
   }
-  if (!Number.isInteger(parts.month) || parts.month < 1 || parts.month > 12) {
+  if (!integerInRange(parts.month, 1, 12)) {
     return "month must be from 1 through 12";
   }
   const maxDay = daysInMonth(parts.year, parts.month);
-  if (!Number.isInteger(parts.day) || parts.day < 1 || parts.day > maxDay) {
+  if (!integerInRange(parts.day, 1, maxDay)) {
     return `day must be from 1 through ${maxDay} for this month`;
   }
-  if (!Number.isInteger(parts.hour) || parts.hour < 0 || parts.hour > 23) {
+  if (!integerInRange(parts.hour, 0, 23)) {
     return "hour must be from 0 through 23";
   }
-  if (!Number.isInteger(parts.minute) || parts.minute < 0 || parts.minute > 59) {
+  if (!integerInRange(parts.minute, 0, 59)) {
     return "minute must be from 0 through 59";
   }
-  if (!Number.isInteger(parts.second) || parts.second < 0 || parts.second > 59) {
+  if (!integerInRange(parts.second, 0, 59)) {
     return "second must be from 0 through 59";
   }
-  if (!Number.isInteger(parts.millisecond) || parts.millisecond < 0 || parts.millisecond > 999) {
+  if (!integerInRange(parts.millisecond, 0, 999)) {
     return "millisecond must be from 0 through 999";
   }
   return null;
+}
+
+function integerInRange(value: number, min: number, max: number): boolean {
+  return Number.isInteger(value) && value >= min && value <= max;
 }
 
 function utcEpoch(parts: DateParts): number {

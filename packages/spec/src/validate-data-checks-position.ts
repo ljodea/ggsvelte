@@ -67,20 +67,49 @@ export function scaleRequestsTime(
   axis: "x" | "y",
 ): boolean {
   const config = scales?.[axis] as PositionScaleSpec | undefined;
-  return (
-    config?.type !== "band" &&
-    (config?.type === "time" ||
-      config?.parse !== undefined ||
-      config?.temporalKind !== undefined ||
-      config?.timezone !== undefined ||
-      config?.disambiguation !== undefined ||
-      config?.parseFailure !== undefined ||
-      config?.dateBreaks !== undefined ||
-      config?.dateMinorBreaks !== undefined ||
-      config?.dateLabels !== undefined ||
-      config?.locale !== undefined ||
-      config?.weekStart !== undefined)
-  );
+  if (config?.type === "band") return false;
+  if (config?.type === "time") return true;
+  return [
+    config?.parse,
+    config?.temporalKind,
+    config?.timezone,
+    config?.disambiguation,
+    config?.parseFailure,
+    config?.dateBreaks,
+    config?.dateMinorBreaks,
+    config?.dateLabels,
+    config?.locale,
+    config?.weekStart,
+  ].some((value) => value !== undefined);
+}
+
+function temporalAxisConfigurationError(config: PositionScaleSpec | undefined): string | null {
+  const effectiveParser = config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
+  const parserError = temporalParserConfigurationError(effectiveParser, {
+    ...(config?.timezone !== undefined && { timezone: config.timezone }),
+    ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
+  });
+  if (parserError !== null) return parserError;
+  const intervalError = temporalIntervalConfigurationError(config);
+  if (intervalError !== null) return intervalError;
+  const labelError =
+    config?.dateLabels === undefined
+      ? null
+      : temporalLabelConfigurationError(config.dateLabels, config.temporalKind);
+  if (labelError !== null) return labelError;
+  return config?.locale === undefined ? null : temporalLocaleConfigurationError(config.locale);
+}
+
+function temporalIntervalConfigurationError(config: PositionScaleSpec | undefined): string | null {
+  for (const interval of [config?.dateBreaks, config?.dateMinorBreaks]) {
+    if (interval === undefined) continue;
+    try {
+      parseTemporalInterval(interval);
+    } catch (error) {
+      return error instanceof Error ? error.message : "invalid temporal interval";
+    }
+  }
+  return null;
 }
 
 /**
@@ -103,31 +132,7 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
       continue;
     }
     if (config?.type === "band" || !scaleRequestsTime(scales, axis)) continue;
-    // Mirror the runtime effective parser (temporal-position.ts): unset parse
-    // on monthDay means `md`, not `auto`. Same expression as
-    // checkPositionScaleDataCompatibility below.
-    const effectiveParser = config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
-    let configurationError = temporalParserConfigurationError(effectiveParser, {
-      ...(config?.timezone !== undefined && { timezone: config.timezone }),
-      ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
-    });
-    if (configurationError === null) {
-      for (const interval of [config?.dateBreaks, config?.dateMinorBreaks]) {
-        if (interval === undefined) continue;
-        try {
-          parseTemporalInterval(interval);
-        } catch (error) {
-          configurationError = error instanceof Error ? error.message : "invalid temporal interval";
-          break;
-        }
-      }
-    }
-    if (configurationError === null && config?.dateLabels !== undefined) {
-      configurationError = temporalLabelConfigurationError(config.dateLabels, config.temporalKind);
-    }
-    if (configurationError === null && config?.locale !== undefined) {
-      configurationError = temporalLocaleConfigurationError(config.locale);
-    }
+    const configurationError = temporalAxisConfigurationError(config);
     if (configurationError === null) continue;
     invalidTemporalAxes.add(axis);
     errors.push({
@@ -167,73 +172,104 @@ export function checkPositionScaleDataCompatibility(input: {
     if (declared === undefined || declared === "band" || invalidTemporalAxes.has(axis)) continue;
     for (const use of axisFields[axis]) {
       const info = evidenceOf(use);
-      const type = info?.type ?? null;
-      if (type === null) continue;
+      if (info === undefined || info.type === null) continue;
+      const type = info.type;
       if (declared === "time") {
-        // Same effective parser as validateTemporalAxisConfiguration above.
-        const effectiveParser =
-          config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
-        const decision = temporalDecisionForField(
-          temporalDecisionCache,
-          use.field,
-          info,
-          effectiveParser,
-          {
-            ...(config?.timezone !== undefined && { timezone: config.timezone }),
-            ...(config?.disambiguation !== undefined && {
-              disambiguation: config.disambiguation,
-            }),
-          },
-        );
-        const censoredInvalid =
-          config?.parse !== undefined &&
-          config.parseFailure === "censor" &&
-          decision?.status === "invalid";
-        const profileTemporal = info?.values === null && type === "temporal";
-        if (decision?.status === "temporal" || censoredInvalid || profileTemporal) {
-          appendTemporalKindMismatch(errors, {
-            axis,
-            path: use.path,
-            field: use.field,
-            expected: config?.temporalKind,
-            actual: decision?.kind ?? null,
-          });
-          continue;
-        }
-        const firstFailure = decision?.failures?.[0];
-        const detail =
-          firstFailure === undefined
-            ? decision?.status === "ambiguous"
-              ? ` Automatic temporal inference was ambiguous between: ${decision.candidates.join(", ")}.`
-              : decision?.status === "invalid"
-                ? ` Automatic temporal inference failed whole-column validation for ${decision.failedCount} value(s).`
-                : ""
-            : ` Parser ${JSON.stringify(effectiveParser)} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
-        errors.push({
-          code: "scale-type-mismatch",
-          path: use.path,
-          message: `scales.${axis} requests time but field "${use.field}" is ${type}.${detail}`,
-          fix: {
-            description:
-              config?.parse === undefined
-                ? `Set scales.${axis}.parse to an explicit temporal order, or set scales.${axis}.type to "band" to keep categories.`
-                : `Correct the rejected values, choose the matching scales.${axis}.parse value, or use parseFailure: "censor" explicitly.`,
-          },
-        });
-        continue;
-      }
-      if (
+        errors.push(...timePositionErrors(axis, use, info, config, temporalDecisionCache));
+      } else if (
         (declared === "log" || declared === "linear") &&
         (type === "nominal" || type === "ordinal")
       ) {
-        errors.push({
-          code: "scale-type-mismatch",
-          path: use.path,
-          message: `scales.${axis}.type is "${declared}" but field "${use.field}" is ${type}; use a band scale (or a quantitative field).`,
-          fix: { description: `Set scales.${axis}.type to "band".` },
-        });
+        errors.push(linearPositionError(axis, declared, use, type));
       }
     }
   }
   return errors;
+}
+
+function timePositionErrors(
+  axis: "x" | "y",
+  use: ChannelFieldUse,
+  info: FieldEvidenceEntry,
+  config: PositionScaleSpec | undefined,
+  cache: TemporalDecisionCache,
+): SpecError[] {
+  const effectiveParser = config?.parse ?? (config?.temporalKind === "monthDay" ? "md" : "auto");
+  const options = temporalPositionOptions(config);
+  const decision = temporalDecisionForField(cache, use.field, info, effectiveParser, options);
+  const profileTemporal = info.values === null && info.type === "temporal";
+  if (timePositionResolves(config, decision, profileTemporal)) {
+    const errors: SpecError[] = [];
+    appendTemporalKindMismatch(errors, {
+      axis,
+      path: use.path,
+      field: use.field,
+      expected: config?.temporalKind,
+      actual: decision?.kind ?? null,
+    });
+    return errors;
+  }
+  const firstFailure = decision?.failures?.[0];
+  const detail =
+    firstFailure === undefined
+      ? temporalDecisionDetail(decision)
+      : ` Parser ${JSON.stringify(effectiveParser)} rejected ${decision?.failedCount ?? 0} value(s), including row ${firstFailure.index}: ${JSON.stringify(firstFailure.value)}.`;
+  return [
+    {
+      code: "scale-type-mismatch",
+      path: use.path,
+      message: `scales.${axis} requests time but field "${use.field}" is ${info.type}.${detail}`,
+      fix: {
+        description:
+          config?.parse === undefined
+            ? `Set scales.${axis}.parse to an explicit temporal order, or set scales.${axis}.type to "band" to keep categories.`
+            : `Correct the rejected values, choose the matching scales.${axis}.parse value, or use parseFailure: "censor" explicitly.`,
+      },
+    },
+  ];
+}
+
+function temporalPositionOptions(config: PositionScaleSpec | undefined) {
+  return {
+    ...(config?.timezone !== undefined && { timezone: config.timezone }),
+    ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
+  };
+}
+
+function timePositionResolves(
+  config: PositionScaleSpec | undefined,
+  decision: ReturnType<typeof temporalDecisionForField>,
+  profileTemporal: boolean,
+): boolean {
+  return (
+    decision?.status === "temporal" ||
+    profileTemporal ||
+    (config?.parse !== undefined &&
+      config.parseFailure === "censor" &&
+      decision?.status === "invalid")
+  );
+}
+
+function temporalDecisionDetail(decision: ReturnType<typeof temporalDecisionForField>): string {
+  if (decision?.status === "ambiguous") {
+    return ` Automatic temporal inference was ambiguous between: ${decision.candidates.join(", ")}.`;
+  }
+  if (decision?.status === "invalid") {
+    return ` Automatic temporal inference failed whole-column validation for ${decision.failedCount} value(s).`;
+  }
+  return "";
+}
+
+function linearPositionError(
+  axis: "x" | "y",
+  declared: "log" | "linear",
+  use: ChannelFieldUse,
+  type: "nominal" | "ordinal",
+): SpecError {
+  return {
+    code: "scale-type-mismatch",
+    path: use.path,
+    message: `scales.${axis}.type is "${declared}" but field "${use.field}" is ${type}; use a band scale (or a quantitative field).`,
+    fix: { description: `Set scales.${axis}.type to "band".` },
+  };
 }
