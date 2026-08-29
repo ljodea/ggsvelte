@@ -76,6 +76,137 @@ function dashStr(dash: readonly number[]): string {
   return dash.length === 0 ? "" : dash.join(" ");
 }
 
+function sameRingStarts(prev: Uint32Array | undefined, next: Uint32Array | undefined): boolean {
+  if (prev === undefined || next === undefined) return prev === next;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < next.length; i++) if (prev[i] !== next[i]) return false;
+  return true;
+}
+
+function samePathGeometry(
+  prev: PathsBatch,
+  next: PathsBatch,
+  s: number,
+  start: number,
+  end: number,
+): boolean {
+  const prevStart = prev.pathOffsets[s]!;
+  const prevEnd = prev.pathOffsets[s + 1]!;
+  const length = end - start;
+  if (length !== prevEnd - prevStart) return false;
+  if (prev.curve !== next.curve || (prev.closed === true) !== (next.closed === true)) return false;
+  if (!sameRingStarts(prev.ringStarts, next.ringStarts)) return false;
+  for (let i = 0; i < length * 2; i++) {
+    if (prev.positions[prevStart * 2 + i] !== next.positions[start * 2 + i]) return false;
+  }
+  return true;
+}
+
+type PathStyle = ReturnType<typeof resolvePathMark>;
+
+function writePathStyle(
+  el: Element,
+  prev: PathsBatch,
+  next: PathsBatch,
+  styleP: PathStyle,
+  styleN: PathStyle,
+  branch: number,
+  themeColors: { ink: string; accent: string },
+  ctx: BatchPatchContext,
+): void {
+  const w = writeOrRemove;
+  if (branch === 0) {
+    w(
+      el,
+      "fill",
+      paintFill(
+        styleN.fill === "none" ? themeColors.accent : styleN.fill,
+        next.fillPaint,
+        ctx.paintMode,
+      ),
+      paintFill(
+        styleP.fill === "none" ? themeColors.accent : styleP.fill,
+        prev.fillPaint,
+        ctx.paintMode,
+      ),
+    );
+    return;
+  }
+  w(
+    el,
+    "stroke",
+    paintStroke(
+      branch === 2 && styleN.stroke === "none" ? themeColors.ink : styleN.stroke,
+      next.strokePaint,
+      ctx.paintMode,
+    ),
+    paintStroke(
+      branch === 2 && styleP.stroke === "none" ? themeColors.ink : styleP.stroke,
+      prev.strokePaint,
+      ctx.paintMode,
+    ),
+  );
+  if (styleN.width !== styleP.width) el.setAttribute("stroke-width", px(styleN.width));
+  w(el, "stroke-dasharray", dashStr(styleN.dash), dashStr(styleP.dash));
+  w(el, "stroke-linejoin", styleN.linejoin, styleP.linejoin);
+  w(el, "stroke-linecap", styleN.linecap, styleP.linecap);
+  if (branch === 1) {
+    w(
+      el,
+      "fill",
+      paintFill(
+        styleN.fill === "none" ? themeColors.accent : styleN.fill,
+        next.fillPaint,
+        ctx.paintMode,
+      ),
+      paintFill(
+        styleP.fill === "none" ? themeColors.accent : styleP.fill,
+        prev.fillPaint,
+        ctx.paintMode,
+      ),
+    );
+  }
+}
+
+function patchPath(
+  el: Element,
+  prev: PathsBatch,
+  next: PathsBatch,
+  s: number,
+  start: number,
+  end: number,
+  themeColors: { ink: string; accent: string },
+  ctx: BatchPatchContext,
+): boolean {
+  const styleN = resolvePathMark(next, s, themeColors);
+  const styleP = resolvePathMark(prev, s, themeColors);
+  const branch = pathBranch(next, styleN.stroke);
+  if (branch !== pathBranch(prev, styleP.stroke)) {
+    const nextAttrs = pathAttrs(next, s, themeColors, ctx);
+    const prevAttrs = pathAttrs(prev, s, themeColors, ctx);
+    if (nextAttrs === null || prevAttrs === null) return false;
+    writeAttrs(el, nextAttrs, prevAttrs);
+    return true;
+  }
+  if (!samePathGeometry(prev, next, s, start, end)) {
+    const d = pathData(
+      next.positions,
+      start,
+      end,
+      next.curve,
+      next.closed === true,
+      next.ringStarts,
+    );
+    if (d === "") return false;
+    el.setAttribute("d", d);
+  }
+  writePathStyle(el, prev, next, styleP, styleN, branch, themeColors, ctx);
+  writeOrRemove(el, "fill-rule", next.fillRule ?? "", prev.fillRule ?? "");
+  const alphaN = next.alphas?.[s] ?? 1;
+  if (alphaN !== (prev.alphas?.[s] ?? 1)) writeAlpha(el, alphaN);
+  return true;
+}
+
 /**
  * Hot path for dense line/area updates: the `d` rebuild is skipped when the
  * span's vertices are bit-identical between scenes (raw Float32 compares —
@@ -93,7 +224,6 @@ export function patchPaths(
   const themeColors = { ink: themeVar("ink", ctx.theme), accent: themeVar("accent", ctx.theme) };
   const kids = group.children;
   const subpaths = next.pathOffsets.length - 1;
-  const w = writeOrRemove;
   // Signature equality guarantees the non-empty span sequence aligns 1:1.
   let k = 0;
   for (let s = 0; s < subpaths; s++) {
@@ -103,101 +233,7 @@ export function patchPaths(
     const el = kids[k]!;
     k++;
     if (el === undefined || el.tagName !== "path") return false;
-    const styleN = resolvePathMark(next, s, themeColors);
-    const styleP = resolvePathMark(prev, s, themeColors);
-    if (pathBranch(next, styleN.stroke) !== pathBranch(prev, styleP.stroke)) {
-      const na = pathAttrs(next, s, themeColors, ctx);
-      const pa = pathAttrs(prev, s, themeColors, ctx);
-      if (na === null || pa === null) return false;
-      writeAttrs(el, na, pa);
-      continue;
-    }
-    const pStart = prev.pathOffsets[s]!;
-    const pEnd = prev.pathOffsets[s + 1]!;
-    const len = end - start;
-    let same =
-      len === pEnd - pStart &&
-      prev.curve === next.curve &&
-      (prev.closed === true) === (next.closed === true);
-    const rn = next.ringStarts;
-    const rp = prev.ringStarts;
-    if (same && (rn !== undefined || rp !== undefined)) {
-      same =
-        rn !== undefined &&
-        rp !== undefined &&
-        rn.length === rp.length &&
-        Array.from(rn).every((v, i) => v === rp[i]);
-    }
-    for (let i = 0; same && i < len * 2; i++) {
-      if (prev.positions[pStart * 2 + i] !== next.positions[start * 2 + i]) same = false;
-    }
-    if (!same) {
-      const d = pathData(
-        next.positions,
-        start,
-        end,
-        next.curve,
-        next.closed === true,
-        next.ringStarts,
-      );
-      if (d === "") return false;
-      el.setAttribute("d", d);
-    }
-    const b = pathBranch(next, styleN.stroke);
-    if (b === 0) {
-      w(
-        el,
-        "fill",
-        paintFill(
-          styleN.fill === "none" ? themeColors.accent : styleN.fill,
-          next.fillPaint,
-          ctx.paintMode,
-        ),
-        paintFill(
-          styleP.fill === "none" ? themeColors.accent : styleP.fill,
-          prev.fillPaint,
-          ctx.paintMode,
-        ),
-      );
-    } else {
-      w(
-        el,
-        "stroke",
-        paintStroke(
-          b === 2 && styleN.stroke === "none" ? themeColors.ink : styleN.stroke,
-          next.strokePaint,
-          ctx.paintMode,
-        ),
-        paintStroke(
-          b === 2 && styleP.stroke === "none" ? themeColors.ink : styleP.stroke,
-          prev.strokePaint,
-          ctx.paintMode,
-        ),
-      );
-      if (styleN.width !== styleP.width) el.setAttribute("stroke-width", px(styleN.width));
-      w(el, "stroke-dasharray", dashStr(styleN.dash), dashStr(styleP.dash));
-      w(el, "stroke-linejoin", styleN.linejoin, styleP.linejoin);
-      w(el, "stroke-linecap", styleN.linecap, styleP.linecap);
-      if (b === 1) {
-        w(
-          el,
-          "fill",
-          paintFill(
-            styleN.fill === "none" ? themeColors.accent : styleN.fill,
-            next.fillPaint,
-            ctx.paintMode,
-          ),
-          paintFill(
-            styleP.fill === "none" ? themeColors.accent : styleP.fill,
-            prev.fillPaint,
-            ctx.paintMode,
-          ),
-        );
-      }
-    }
-    w(el, "fill-rule", next.fillRule ?? "", prev.fillRule ?? "");
-    const alphaN = next.alphas?.[s] ?? 1;
-    if (alphaN !== (prev.alphas?.[s] ?? 1)) writeAlpha(el, alphaN);
+    if (!patchPath(el, prev, next, s, start, end, themeColors, ctx)) return false;
   }
   return k === kids.length;
 }
