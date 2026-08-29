@@ -106,6 +106,124 @@ function resolveClosedBandFrameRow(
   };
 }
 
+type PathBatch = Extract<GeometryBatch, { kind: "paths" }>;
+type SegmentBatch = Extract<GeometryBatch, { kind: "segments" }>;
+
+interface FrameRowResolution {
+  frameRow: number;
+  derivedGroup: number;
+}
+
+function defaultFrameRow(
+  frame: LayerFrame | undefined,
+  primitiveIndex: number,
+): FrameRowResolution {
+  const frameRow = Math.min(primitiveIndex, Math.max(0, (frame?.n ?? 1) - 1));
+  return { frameRow, derivedGroup: frame?.groups[frameRow] ?? 0 };
+}
+
+function resolveUnprojectedPathRow(
+  frame: LayerFrame,
+  batch: PathBatch,
+  primitiveIndex: number,
+  orderedGroups: readonly number[],
+  fallback: FrameRowResolution,
+): FrameRowResolution {
+  const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
+  if (subpath === null) return fallback;
+  const derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
+  const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
+  const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
+  const reflected =
+    local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+  return {
+    frameRow: rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? fallback.frameRow,
+    derivedGroup,
+  };
+}
+
+function resolveProjectedClosedPathRow(
+  frame: LayerFrame,
+  primitiveIndex: number,
+  orderedGroups: readonly number[],
+  fallback: FrameRowResolution,
+): FrameRowResolution {
+  const resolved = resolveClosedBandFrameRow(
+    getClosedBandLayout(frame, orderedGroups),
+    primitiveIndex,
+  );
+  if (resolved !== null) return resolved;
+  const frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+  return {
+    frameRow,
+    derivedGroup: frame.groups[frameRow] ?? fallback.derivedGroup,
+  };
+}
+
+function resolvePathFrameRow(
+  frame: LayerFrame,
+  batch: PathBatch,
+  primitiveIndex: number,
+  orderedGroups: readonly number[],
+  fallback: FrameRowResolution,
+): FrameRowResolution {
+  const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
+  if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
+    return {
+      frameRow: explicitFrameRow,
+      derivedGroup: frame.groups[explicitFrameRow] ?? fallback.derivedGroup,
+    };
+  }
+  const emittedClosedRow =
+    batch.closed === true ? batch.closedFrameRows?.[primitiveIndex] : undefined;
+  if (emittedClosedRow !== undefined) {
+    return {
+      frameRow: emittedClosedRow,
+      derivedGroup: frame.groups[emittedClosedRow] ?? fallback.derivedGroup,
+    };
+  }
+  if (batch.semanticIndex === undefined) {
+    return resolveUnprojectedPathRow(frame, batch, primitiveIndex, orderedGroups, fallback);
+  }
+  if (batch.closed === true) {
+    return resolveProjectedClosedPathRow(frame, primitiveIndex, orderedGroups, fallback);
+  }
+  const frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+  return {
+    frameRow,
+    derivedGroup: frame.groups[frameRow] ?? fallback.derivedGroup,
+  };
+}
+
+function resolveSegmentFrameRow(
+  frame: LayerFrame,
+  batch: SegmentBatch,
+  primitiveIndex: number,
+  fallback: FrameRowResolution,
+): FrameRowResolution {
+  let frameRow = fallback.frameRow;
+  if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(primitiveIndex / 3);
+  else if (frame.binding.layer.geom === "boxplot" && batch.rowIndex.length >= frame.n * 2)
+    frameRow = Math.floor(primitiveIndex / 2);
+  return {
+    frameRow,
+    derivedGroup:
+      frame.groups[Math.min(frameRow, frame.groups.length - 1)] ?? fallback.derivedGroup,
+  };
+}
+
+function resolveBoxplotOutlierRow(
+  frame: LayerFrame,
+  primitiveIndex: number,
+  fallback: FrameRowResolution,
+): FrameRowResolution {
+  const frameRow = frame.box?.outlierBox[primitiveIndex] ?? fallback.frameRow;
+  return {
+    frameRow,
+    derivedGroup: frame.groups[frameRow] ?? fallback.derivedGroup,
+  };
+}
+
 export function resolveCandidateFrameRow(input: {
   frame: LayerFrame | undefined;
   batch: GeometryBatch;
@@ -113,81 +231,14 @@ export function resolveCandidateFrameRow(input: {
   orderedGroups: readonly number[];
   outlierLocalRow: number | null;
 }): { frameRow: number; derivedGroup: number } {
-  const { frame, batch, primitiveIndex, orderedGroups, outlierLocalRow } = input;
-  let frameRow = Math.min(primitiveIndex, Math.max(0, (frame?.n ?? 1) - 1));
-  let derivedGroup = frame?.groups[frameRow] ?? 0;
-
-  if (frame !== undefined && batch.kind === "paths") {
-    const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
-    // Emitted closed-path frame rows are exact in both primitive-index spaces:
-    // with no coord they index render vertices, and after projection
-    // `semanticIndex` is a post-hole-strip vertex id keyed to this same array
-    // (hole stripping rewrites it alongside positions; projection leaves it).
-    const emittedClosedRow =
-      batch.closed === true ? batch.closedFrameRows?.[primitiveIndex] : undefined;
-    if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
-      // Style-split lines emit exact frame rows so candidate identity survives
-      // subpath reindexing after mapped stroke-style breaks.
-      frameRow = explicitFrameRow;
-      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-    } else if (emittedClosedRow !== undefined) {
-      // Prefer emitted rows for every closed path, coord or not. Polygon rings
-      // (geom_polygon / geom_sf / density_2d_filled) keep authored winding and
-      // are not a 2×N reflected band, so the sorted-row reconstruction below
-      // would claim a neighbouring ring's row (#916); filtered ribbons need the
-      // same exactness after non-finite edge drops (#502).
-      frameRow = emittedClosedRow;
-      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-    } else if (batch.semanticIndex === undefined) {
-      // After coord projection, candidate facts pass semanticIndex (pre-render
-      // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
-      // cannot index that space; reconstruct group/local from frame groups instead.
-      // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
-      // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
-      const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
-      if (subpath !== null) {
-        derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-        const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
-        const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
-        const reflected =
-          local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-        frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
-      }
-    } else if (batch.closed === true) {
-      // Closed band with no emitted rows (handled above): reconstruct the 2×N
-      // upper/lower reflection from full frame groups.
-      const resolved = resolveClosedBandFrameRow(
-        getClosedBandLayout(frame, orderedGroups),
-        primitiveIndex,
-      );
-      if (resolved === null) {
-        frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
-        derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-      } else {
-        frameRow = resolved.frameRow;
-        derivedGroup = resolved.derivedGroup;
-      }
-    } else {
-      // Open paths: semantic index is the pre-split vertex / frame row.
-      frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
-      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-    }
-  } else if (frame !== undefined && batch.kind === "segments") {
-    if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(primitiveIndex / 3);
-    else if (frame.binding.layer.geom === "boxplot" && batch.rowIndex.length >= frame.n * 2)
-      frameRow = Math.floor(primitiveIndex / 2);
-    derivedGroup = frame.groups[Math.min(frameRow, frame.groups.length - 1)] ?? derivedGroup;
-  } else if (
-    frame?.box !== null &&
-    frame?.binding.layer.geom === "boxplot" &&
-    batch.kind === "points"
-  ) {
-    frameRow = frame.box.outlierBox[primitiveIndex] ?? frameRow;
-    derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-  } else if (outlierLocalRow !== null && frame !== undefined) {
-    // outlier points already resolved via outlierBox above when geom matches;
-    // keep default frameRow for other point batches.
-  }
-
-  return { frameRow, derivedGroup };
+  const { frame, batch, primitiveIndex, orderedGroups } = input;
+  const fallback = defaultFrameRow(frame, primitiveIndex);
+  if (frame === undefined) return fallback;
+  if (batch.kind === "paths")
+    return resolvePathFrameRow(frame, batch, primitiveIndex, orderedGroups, fallback);
+  if (batch.kind === "segments")
+    return resolveSegmentFrameRow(frame, batch, primitiveIndex, fallback);
+  if (frame.box !== null && frame.binding.layer.geom === "boxplot" && batch.kind === "points")
+    return resolveBoxplotOutlierRow(frame, primitiveIndex, fallback);
+  return fallback;
 }

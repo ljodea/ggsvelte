@@ -3,6 +3,7 @@ import { positionColumn, xConversionOf, yConversionOf } from "../temporal-positi
 import type { FinalizedLayerFrame } from "../types.js";
 import { NO_ROW } from "../types.js";
 import {
+  type AggregateLineageXView,
   aggregateLineageXKey,
   appendSourceRowByGroupKey,
   appendSourceRowByGroupX,
@@ -37,115 +38,151 @@ export interface CandidateIdentityIndex {
   readonly frameGroups: Map<string, number[]>;
 }
 
+type CandidateIdentityMaps = CandidateIdentityIndex;
+
+interface FrameIdentityViews {
+  readonly frameKey: string;
+  readonly layerIndex: number;
+  readonly lineageXView: AggregateLineageXView | null;
+  readonly stat: string;
+  readonly xField: string | null;
+  readonly xNumericForSmooth: Float64Array | null;
+  readonly yNumeric: Float64Array | null;
+}
+
+function createCandidateIdentityMaps(): CandidateIdentityMaps {
+  return {
+    seriesByRow: new Map(),
+    sourceRowsByGroup: new Map(),
+    sourceRowsByGroupX: new Map(),
+    sourceRowsByGroupBin: new Map(),
+    sourceRowsByGroupY: new Map(),
+    frameGroups: new Map(),
+  };
+}
+
+function frameIdentityViews(frame: FinalizedLayerFrame, panelIndex: number): FrameIdentityViews {
+  const layerIndex = frame.binding.index;
+  const stat = frame.binding.layer.stat ?? "identity";
+  const xField = frame.binding.xField;
+  const yField = frame.binding.yField;
+  const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
+  const finiteY =
+    (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
+  const yNumeric =
+    finiteY && yField !== null
+      ? positionColumn(frame.table, yField, yConversionOf(frame.binding), frame.binding.yTransform)
+      : null;
+  const xNumericForSmooth =
+    stat === "smooth" && xField !== null
+      ? positionColumn(frame.table, xField, xConversionOf(frame.binding), frame.binding.xTransform)
+      : null;
+  const lineageXView =
+    bucketByX && xField !== null
+      ? resolveAggregateLineageXView(frame.table, xField, frame.binding)
+      : null;
+  return {
+    frameKey: `${panelIndex}:${layerIndex}`,
+    layerIndex,
+    lineageXView,
+    stat,
+    xField,
+    xNumericForSmooth,
+    yNumeric,
+  };
+}
+
+function indexFrameInputRows(
+  frame: FinalizedLayerFrame,
+  panelIndex: number,
+  maps: CandidateIdentityMaps,
+  views: FrameIdentityViews,
+): void {
+  for (let localRow = 0; localRow < frame.inputGroups.length; localRow++) {
+    const group = frame.inputGroups[localRow]!;
+    const sourceRow = globalSourceRowForInputRow(frame, localRow);
+    const key = `${views.frameKey}:${group}`;
+    appendSourceRowByGroupKey(maps.sourceRowsByGroup, key, sourceRow);
+    if (views.lineageXView !== null && views.xField !== null) {
+      appendSourceRowByGroupX({
+        sourceRowsByGroupX: maps.sourceRowsByGroupX,
+        panelIndex,
+        layerIndex: views.layerIndex,
+        group,
+        xKey: aggregateLineageXKey(
+          frame.table,
+          views.xField,
+          localRow,
+          frame.binding,
+          views.lineageXView,
+        ),
+        sourceRow,
+        include: views.yNumeric === null || Number.isFinite(views.yNumeric[localRow]!),
+      });
+    }
+    const yOk = views.yNumeric !== null && Number.isFinite(views.yNumeric[localRow]!);
+    const xOk =
+      views.xNumericForSmooth === null || Number.isFinite(views.xNumericForSmooth[localRow]!);
+    if (yOk && xOk) appendSourceRowByGroupKey(maps.sourceRowsByGroupY, key, sourceRow);
+  }
+}
+
+function indexFrameSeriesRows(
+  frame: FinalizedLayerFrame,
+  panelIndex: number,
+  layerIndex: number,
+  seriesByRow: Map<string, number>,
+): void {
+  for (let row = 0; row < frame.rowIndex.length; row++) {
+    const sourceRow = frame.rowIndex[row]!;
+    if (sourceRow !== NO_ROW) {
+      seriesByRow.set(`${panelIndex}:${layerIndex}:${sourceRow}`, frame.groups[row] ?? 0);
+    }
+  }
+}
+
+function indexFrame(
+  frame: FinalizedLayerFrame,
+  panelIndex: number,
+  maps: CandidateIdentityMaps,
+): void {
+  const views = frameIdentityViews(frame, panelIndex);
+  maps.frameGroups.set(views.frameKey, [...new Set(frame.groups)]);
+  indexFrameInputRows(frame, panelIndex, maps, views);
+  if (views.stat === "bin" || views.stat === "summary_bin") {
+    buildBinLineageBuckets({
+      frame,
+      panelIndex,
+      layerIndex: views.layerIndex,
+      sourceRowsByGroupBin: maps.sourceRowsByGroupBin,
+    });
+  }
+  indexFrameSeriesRows(frame, panelIndex, views.layerIndex, maps.seriesByRow);
+}
+
+function freezeIdentityBuckets(maps: CandidateIdentityMaps): void {
+  for (const map of [
+    maps.sourceRowsByGroup,
+    maps.sourceRowsByGroupX,
+    maps.sourceRowsByGroupBin,
+    maps.sourceRowsByGroupY,
+  ]) {
+    for (const [key, rows] of map) map.set(key, Object.freeze(rows) as number[]);
+  }
+}
+
 export function buildCandidateIdentityIndex(
   panelFrames: readonly (readonly FinalizedLayerFrame[])[],
   _facetPanels: readonly FacetPanelDef[],
 ): CandidateIdentityIndex {
-  const seriesByRow = new Map<string, number>();
-  const sourceRowsByGroup = new Map<string, number[]>();
-  const sourceRowsByGroupX = new Map<string, number[]>();
-  const sourceRowsByGroupBin = new Map<string, number[]>();
-  const sourceRowsByGroupY = new Map<string, number[]>();
-  const frameGroups = new Map<string, number[]>();
+  const maps = createCandidateIdentityMaps();
   for (let panelIndex = 0; panelIndex < panelFrames.length; panelIndex++) {
     for (const frame of panelFrames[panelIndex] ?? []) {
-      const layerIndex = frame.binding.index;
-      const frameKey = `${panelIndex}:${layerIndex}`;
-      frameGroups.set(frameKey, [...new Set(frame.groups)]);
-      // Pre-stat groups cached on the frame during buildFrame (issue #217).
-      const inputGroups = frame.inputGroups;
-      const stat = frame.binding.layer.stat ?? "identity";
-      // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
-      const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
-      const xField = frame.binding.xField;
-      // Panel-local input rows → finalized global source ids (issue #626).
-      const yField = frame.binding.yField;
-      const finiteY =
-        (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
-      // Match stat reads: finite membership is after the pre-stat transform so
-      // log/sqrt OOD rows do not appear in candidate lineage for the fit.
-      const yNumeric =
-        finiteY && yField !== null
-          ? positionColumn(
-              frame.table,
-              yField,
-              yConversionOf(frame.binding),
-              frame.binding.yTransform,
-            )
-          : null;
-      const xNumericForSmooth =
-        stat === "smooth" && xField !== null
-          ? positionColumn(
-              frame.table,
-              xField,
-              xConversionOf(frame.binding),
-              frame.binding.xTransform,
-            )
-          : null;
-      // Resolve conversion/parsed/position columns once per frame (#1307).
-      const lineageXView =
-        bucketByX && xField !== null
-          ? resolveAggregateLineageXView(frame.table, xField, frame.binding)
-          : null;
-      for (let localRow = 0; localRow < inputGroups.length; localRow++) {
-        const group = inputGroups[localRow]!;
-        const sourceRow = globalSourceRowForInputRow(frame, localRow);
-        const key = `${frameKey}:${group}`;
-        appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
-        if (lineageXView !== null && xField !== null) {
-          // Summary/boxplot: only finite y belongs in the final represented
-          // membership. Always create the group×x key (include=false) so an
-          // all-non-finite bucket is an empty frozen array, not a map miss.
-          const includeInX = yNumeric === null || Number.isFinite(yNumeric[localRow]!);
-          appendSourceRowByGroupX({
-            sourceRowsByGroupX,
-            panelIndex,
-            layerIndex,
-            group,
-            xKey: aggregateLineageXKey(frame.table, xField, localRow, frame.binding, lineageXView),
-            sourceRow,
-            include: includeInX,
-          });
-        }
-        const yOk = yNumeric !== null && Number.isFinite(yNumeric[localRow]!);
-        const xOk = xNumericForSmooth === null || Number.isFinite(xNumericForSmooth[localRow]!);
-        if (yOk && xOk) {
-          appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
-        }
-      }
-      if (stat === "bin" || stat === "summary_bin") {
-        buildBinLineageBuckets({
-          frame,
-          panelIndex,
-          layerIndex,
-          sourceRowsByGroupBin,
-        });
-      }
-      for (let i = 0; i < frame.rowIndex.length; i++) {
-        const sourceRow = frame.rowIndex[i]!;
-        if (sourceRow !== NO_ROW) {
-          seriesByRow.set(`${panelIndex}:${layerIndex}:${sourceRow}`, frame.groups[i] ?? 0);
-        }
-      }
+      indexFrame(frame, panelIndex, maps);
     }
   }
-  // Seal bucket arrays so resolve-time consumers cannot mutate shared lineage.
-  for (const map of [
-    sourceRowsByGroup,
-    sourceRowsByGroupX,
-    sourceRowsByGroupBin,
-    sourceRowsByGroupY,
-  ]) {
-    for (const [key, rows] of map) map.set(key, Object.freeze(rows) as number[]);
-  }
-  return {
-    seriesByRow,
-    sourceRowsByGroup,
-    sourceRowsByGroupX,
-    sourceRowsByGroupBin,
-    sourceRowsByGroupY,
-    frameGroups,
-  };
+  freezeIdentityBuckets(maps);
+  return maps;
 }
 
 export function createLazyIdentityIndex(
