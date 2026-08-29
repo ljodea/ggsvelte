@@ -42,26 +42,39 @@ export function resolveAxisGuide(
 ): AxisGuideAppearance {
   const local = typedGuide(scales[aesthetic]?.guide);
   const top = guides?.[aesthetic];
-  if (top?.type === "none" || (top === undefined && local?.type === "none")) {
+  if (axisHidden(local, top)) {
     return { visible: false, showTicks: false, showLabels: false, collision: "auto" };
   }
-  const localAxis = local?.type === "axis" ? local : undefined;
-  const chosen =
-    top?.type === "axis"
-      ? { ...localAxis, ...top, theme: { ...localAxis?.theme, ...top.theme } }
-      : top === undefined
-        ? localAxis
-        : undefined;
-  const themeAllowsLabels =
-    theme === undefined || (aesthetic === "x" ? theme.labelsX : theme.labelsY);
+  const chosen = chooseAxisGuide(local, top);
   return {
     visible: true,
     ...(chosen?.title !== undefined && { title: chosen.title }),
     showTicks: chosen?.showTicks ?? true,
-    showLabels: (chosen?.showLabels ?? true) && themeAllowsLabels,
+    showLabels: (chosen?.showLabels ?? true) && axisThemeAllowsLabels(aesthetic, theme),
     collision: chosen?.collision ?? "auto",
     ...(chosen?.theme !== undefined && { theme: chosen.theme }),
   };
+}
+
+function axisHidden(local: GuideSpec | undefined, top: GuideSpec | undefined): boolean {
+  return top?.type === "none" || (top === undefined && local?.type === "none");
+}
+
+function chooseAxisGuide(
+  local: GuideSpec | undefined,
+  top: GuideSpec | undefined,
+): Extract<GuideSpec, { type: "axis" }> | undefined {
+  const localAxis = local?.type === "axis" ? local : undefined;
+  if (top?.type === "axis")
+    return { ...localAxis, ...top, theme: { ...localAxis?.theme, ...top.theme } };
+  return top === undefined ? localAxis : undefined;
+}
+
+function axisThemeAllowsLabels(
+  aesthetic: "x" | "y",
+  theme: Pick<ThemeTokens, "labelsX" | "labelsY"> | undefined,
+): boolean {
+  return theme === undefined || (aesthetic === "x" ? theme.labelsX : theme.labelsY);
 }
 
 export interface LegendResolutionItem {
@@ -236,69 +249,83 @@ export function prepareLegendInputs(input: {
   scales: Scales;
   guides: GuidesSpec | undefined;
 }): LegendInput[] {
-  const prepared: Array<{
-    input: LegendInput;
-    plan: Exclude<GuidePlan, { type: "axis" }>;
-    identity: string;
-  }> = [];
-  for (const item of input.items) {
-    if (item.input === null || item.plan === null) continue;
-    const aesthetic = item.input.scale;
-    const defaultType =
-      item.input.kind === "ramp"
-        ? "colorbar"
-        : item.input.kind === "steps"
-          ? "colorsteps"
-          : "legend";
-    const guide = effectiveGuide(aesthetic, defaultType, input.scales, input.guides);
-    if (guide.type === "none") continue;
-    const appearance = appearanceOf(guide, item.input.title);
-    const expected = defaultType;
-    if (appearance.type !== expected) {
-      throw new PipelineError(
-        "guide-aesthetic-incompatible",
-        input.guides?.[aesthetic] === undefined
-          ? `/scales/${aesthetic}/guide`
-          : `/guides/${aesthetic}`,
-        `The ${appearance.type} guide is incompatible with the trained ${expected} guide for ${aesthetic}. Use ${expected}, none, or choose a matching explicit scale family.`,
-      );
-    }
-    if (
-      item.plan.type === "discrete" &&
-      (item.plan.scaleType === "manual" || item.plan.scaleType === "identity") &&
-      item.plan.entries.length < 2 &&
-      appearance.force !== true
-    ) {
-      continue;
-    }
-    const decorated = {
-      ...item.input,
-      title: appearance.title,
-      aesthetics: Object.freeze([item.input.scale]),
-      appearance,
-    } as LegendInput;
-    // Point-family layers carry shape as a mark constant (param or default
-    // circle). Fold those into color/fill keys so the legend matches the plot
-    // (cross vs point), not anonymous colored squares.
-    const withMarkKeys =
-      decorated.kind === "discrete" && isPaintLegend(decorated)
-        ? enrichPaintLegendKeys(decorated, input.bindings)
-        : decorated;
-    prepared.push({
-      input: withMarkKeys,
-      plan: item.plan,
-      identity:
-        withMarkKeys.kind === "discrete"
-          ? mergeIdentity(
-              withMarkKeys,
-              item.plan,
-              sourceIdentity(aesthetic, input.bindings),
-              appearance,
-            )
-          : `unique:${item.plan.id}`,
-    });
-  }
+  const prepared = input.items
+    .map((item) => prepareLegendItem(item, input))
+    .filter((item): item is PreparedLegend => item !== undefined);
+  return mergePreparedLegends(prepared);
+}
 
+type PreparedLegend = {
+  input: LegendInput;
+  plan: Exclude<GuidePlan, { type: "axis" }>;
+  identity: string;
+};
+
+function prepareLegendItem(
+  item: LegendResolutionItem,
+  input: Parameters<typeof prepareLegendInputs>[0],
+): PreparedLegend | undefined {
+  if (item.input === null || item.plan === null) return undefined;
+  const aesthetic = item.input.scale;
+  const defaultType =
+    item.input.kind === "ramp" ? "colorbar" : item.input.kind === "steps" ? "colorsteps" : "legend";
+  const guide = effectiveGuide(aesthetic, defaultType, input.scales, input.guides);
+  if (guide.type === "none") return undefined;
+  const appearance = appearanceOf(guide, item.input.title);
+  if (appearance.type !== defaultType)
+    throwGuideCompatibilityError(input, aesthetic, appearance.type, defaultType);
+  if (singleManualLegend(item.plan, appearance)) return undefined;
+  const decorated = {
+    ...item.input,
+    title: appearance.title,
+    aesthetics: Object.freeze([item.input.scale]),
+    appearance,
+  } as LegendInput;
+  const withMarkKeys =
+    decorated.kind === "discrete" && isPaintLegend(decorated)
+      ? enrichPaintLegendKeys(decorated, input.bindings)
+      : decorated;
+  return {
+    input: withMarkKeys,
+    plan: item.plan,
+    identity:
+      withMarkKeys.kind === "discrete"
+        ? mergeIdentity(
+            withMarkKeys,
+            item.plan,
+            sourceIdentity(aesthetic, input.bindings),
+            appearance,
+          )
+        : `unique:${item.plan.id}`,
+  };
+}
+
+function throwGuideCompatibilityError(
+  input: Parameters<typeof prepareLegendInputs>[0],
+  aesthetic: GuideAesthetic,
+  actual: string,
+  expected: string,
+): never {
+  throw new PipelineError(
+    "guide-aesthetic-incompatible",
+    input.guides?.[aesthetic] === undefined ? `/scales/${aesthetic}/guide` : `/guides/${aesthetic}`,
+    `The ${actual} guide is incompatible with the trained ${expected} guide for ${aesthetic}. Use ${expected}, none, or choose a matching explicit scale family.`,
+  );
+}
+
+function singleManualLegend(
+  plan: Exclude<GuidePlan, { type: "axis" }>,
+  appearance: ResolvedLegendAppearance,
+): boolean {
+  return (
+    plan.type === "discrete" &&
+    (plan.scaleType === "manual" || plan.scaleType === "identity") &&
+    plan.entries.length < 2 &&
+    appearance.force !== true
+  );
+}
+
+function mergePreparedLegends(prepared: readonly PreparedLegend[]): LegendInput[] {
   const out: LegendInput[] = [];
   const merged = new Set<number>();
   for (let index = 0; index < prepared.length; index++) {

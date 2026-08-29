@@ -2,13 +2,18 @@
  * Layer grouping and carried discrete columns for stats/identity frames.
  */
 import { deriveGroups, type ChannelGroupingOverrides } from "../grouping.js";
-import { cellToNumber, type CellValue, type Discreteness } from "../table.js";
+import {
+  cellToNumber,
+  type CellValue,
+  type Discreteness,
+  type ParsedColumnOptions,
+} from "../table.js";
 import type { ColumnTable } from "../table.js";
 import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import { styleBinIndex } from "./style-bin-index.js";
 import { positionDiscreteness } from "./temporal-position.js";
-import type { LayerBinding } from "./types.js";
+import type { LayerBinding, StyleBinding } from "./types.js";
 
 /**
  * Global semantic [low, high] for a binned style field, computed from the
@@ -52,50 +57,27 @@ function binnedStyleColumn(
       disambiguation: binding.binDisambiguation,
     }),
   };
-  const parsed = table.parsed(binding.field, parser, options);
-  const numeric = parsed.semantic;
-  const semanticOf = (value: CellValue): number | undefined => {
-    if (binding.binTemporal === true) {
-      const runtime = getTemporalRuntime();
-      if (runtime !== null) {
-        const result = runtime.parseColumn([value], binding.binParse ?? "auto", options);
-        return result.valid[0] === 1 ? result.semantic[0] : undefined;
-      }
-      // Lean path: ISO via cellToNumber (polyfill-free).
-      const number = cellToNumber(value);
-      return Number.isFinite(number) ? number : undefined;
-    }
-    const number = cellToNumber(value);
-    return Number.isFinite(number) ? number : undefined;
-  };
-  let inferredLow = Number.POSITIVE_INFINITY;
-  let inferredHigh = Number.NEGATIVE_INFINITY;
-  for (const value of numeric) {
-    if (!Number.isFinite(value)) continue;
-    inferredLow = Math.min(inferredLow, value);
-    inferredHigh = Math.max(inferredHigh, value);
-  }
-  if (!Number.isFinite(inferredLow)) return Array.from({ length: numeric.length }, () => null);
+  const numeric = table.parsed(binding.field, parser, options).semantic;
+  const semanticOf = semanticValue(binding, options);
+  const inferred = numericExtent(numeric);
+  if (inferred === undefined) return Array.from({ length: numeric.length }, () => null);
   const domainNumbers = binding.binDomain
-    ?.map(semanticOf)
-    .filter((value): value is number => value !== undefined);
+    ?.map((value) => semanticOf(value))
+    .filter((value) => isNumber(value));
   // The style-scale trainer normalizes an authored domain with Math.min/max
   // before deriving default breaks (scale-style.ts). A reversed authored domain
   // like [10, 0] would otherwise produce descending breaks here and treat every
   // in-domain value as out-of-bounds, so grouping bins would diverge from the
   // rendered scale. Normalize the bounds to match the trainer.
-  const rawLow = domainNumbers?.[0] ?? binding.binExtent?.[0] ?? inferredLow;
-  const rawHigh = domainNumbers?.at(-1) ?? binding.binExtent?.[1] ?? inferredHigh;
+  const rawLow = domainNumbers?.[0] ?? binding.binExtent?.[0] ?? inferred[0];
+  const rawHigh = domainNumbers?.at(-1) ?? binding.binExtent?.[1] ?? inferred[1];
   const low = Math.min(rawLow, rawHigh);
   const high = Math.max(rawLow, rawHigh);
   const binCount = binding.binCount ?? 5;
   const configuredBreaks = binding.binBreaks
-    ?.map(semanticOf)
-    .filter((value): value is number => value !== undefined);
-  const breaks =
-    configuredBreaks !== undefined && configuredBreaks.length >= 2
-      ? configuredBreaks
-      : Array.from({ length: binCount + 1 }, (_, index) => low + ((high - low) * index) / binCount);
+    ?.map((value) => semanticOf(value))
+    .filter((value) => isNumber(value));
+  const breaks = resolveBinBreaks(configuredBreaks, binCount, low, high);
   return Array.from(numeric, (value) => {
     if (!Number.isFinite(value)) return null;
     let bounded = value;
@@ -107,6 +89,49 @@ function binnedStyleColumn(
   });
 }
 
+function resolveBinBreaks(
+  configured: readonly number[] | undefined,
+  binCount: number,
+  low: number,
+  high: number,
+): readonly number[] {
+  return configured !== undefined && configured.length >= 2
+    ? configured
+    : Array.from({ length: binCount + 1 }, (_, index) => low + ((high - low) * index) / binCount);
+}
+
+function isNumber(value: number | undefined): value is number {
+  return value !== undefined;
+}
+
+function semanticValue(
+  binding: LayerBinding["size"],
+  options: ParsedColumnOptions,
+): (value: CellValue) => number | undefined {
+  return (value) => {
+    if (binding.binTemporal === true) {
+      const runtime = getTemporalRuntime();
+      if (runtime !== null) {
+        const result = runtime.parseColumn([value], binding.binParse ?? "auto", options);
+        return result.valid[0] === 1 ? result.semantic[0] : undefined;
+      }
+    }
+    const number = cellToNumber(value);
+    return Number.isFinite(number) ? number : undefined;
+  };
+}
+
+function numericExtent(values: Iterable<number>): readonly [number, number] | undefined {
+  let low = Number.POSITIVE_INFINITY;
+  let high = Number.NEGATIVE_INFINITY;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    low = Math.min(low, value);
+    high = Math.max(high, value);
+  }
+  return Number.isFinite(low) ? [low, high] : undefined;
+}
+
 export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] {
   const aes = binding.layer.aes ?? {};
   // Explicit aes.group wins outright in deriveGroups — skip per-channel
@@ -115,60 +140,88 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
   if (groupChannel !== undefined && groupChannel !== null && !("stat" in groupChannel)) {
     return deriveGroups(table.columns(), { group: groupChannel }).groups as number[];
   }
+  const { declared, overrides } = groupingInputs(binding, table, aes);
+  return deriveGroups(table.columns(), aes, declared, overrides).groups as number[];
+}
+
+function groupingInputs(
+  binding: LayerBinding,
+  table: ColumnTable,
+  aes: NonNullable<LayerBinding["layer"]["aes"]>,
+): {
+  declared: Record<string, Discreteness>;
+  overrides: Record<string, ChannelGroupingOverrides[string]>;
+} {
   const declared: Record<string, Discreteness> = {};
   const overrides: Record<string, ChannelGroupingOverrides[string]> = {};
   for (const [channel, mapping] of Object.entries(aes)) {
-    if (
-      mapping !== null &&
-      mapping !== undefined &&
-      "field" in mapping &&
-      table.has(mapping.field)
-    ) {
-      const conversion =
-        mapping.field === binding.xField ||
-        mapping.field === binding.xminField ||
-        mapping.field === binding.xmaxField
-          ? binding.xConversion
-          : mapping.field === binding.yField ||
-              mapping.field === binding.yminField ||
-              mapping.field === binding.ymaxField
-            ? binding.yConversion
-            : mapping.field === binding.xminField || mapping.field === binding.xmaxField
-              ? binding.xConversion
-              : undefined;
-      const forcedDiscrete =
-        (channel === "color" && binding.color.forcedDiscrete === true) ||
-        (channel === "fill" && binding.fill.forcedDiscrete === true) ||
-        (channel === "size" && binding.size.forcedDiscrete === true) ||
-        (channel === "linewidth" && binding.linewidth.forcedDiscrete === true) ||
-        (channel === "alpha" && binding.alpha.forcedDiscrete === true) ||
-        (channel === "shape" && binding.shape.forcedDiscrete === true) ||
-        (channel === "linetype" && binding.linetype.forcedDiscrete === true);
-      const style =
-        channel === "size" ||
-        channel === "linewidth" ||
-        channel === "alpha" ||
-        channel === "shape" ||
-        channel === "linetype"
-          ? binding[channel]
-          : undefined;
-      const discreteness = forcedDiscrete
-        ? "discrete"
-        : style?.forcedContinuous === true
-          ? "continuous"
-          : conversion === undefined
-            ? table.discreteness(mapping.field)
-            : positionDiscreteness(table, mapping.field, conversion);
-      declared[mapping.field] = discreteness;
-      const binned = style === undefined ? undefined : binnedStyleColumn(style, table);
-      overrides[channel] = {
-        discreteness,
-        ...(binned !== undefined && { column: binned }),
-      };
-    }
+    const entry = groupingInput(binding, table, channel, mapping);
+    if (entry === undefined) continue;
+    declared[entry.field] = entry.discreteness;
+    overrides[channel] = entry.override;
   }
-  // deriveGroups already returns a fresh number[]; do not spread-copy 30k ids.
-  return deriveGroups(table.columns(), aes, declared, overrides).groups as number[];
+  return { declared, overrides };
+}
+
+function groupingInput(
+  binding: LayerBinding,
+  table: ColumnTable,
+  channel: string,
+  mapping: unknown,
+):
+  | { field: string; discreteness: Discreteness; override: ChannelGroupingOverrides[string] }
+  | undefined {
+  if (
+    mapping === null ||
+    mapping === undefined ||
+    typeof mapping !== "object" ||
+    !("field" in mapping)
+  )
+    return undefined;
+  const field = mapping.field;
+  if (typeof field !== "string" || !table.has(field)) return undefined;
+  const conversion = positionConversion(binding, field);
+  const style = styleBinding(binding, channel);
+  const discreteness = isForcedDiscrete(binding, channel)
+    ? "discrete"
+    : style?.forcedContinuous === true
+      ? "continuous"
+      : conversion === null
+        ? table.discreteness(field)
+        : positionDiscreteness(table, field, conversion);
+  const binned = style === null ? undefined : binnedStyleColumn(style, table);
+  return {
+    field,
+    discreteness,
+    override: { discreteness, ...(binned !== undefined && { column: binned }) },
+  };
+}
+
+function positionConversion(binding: LayerBinding, field: string) {
+  if (field === binding.xField || field === binding.xminField || field === binding.xmaxField)
+    return binding.xConversion;
+  if (field === binding.yField || field === binding.yminField || field === binding.ymaxField)
+    return binding.yConversion;
+  return null;
+}
+
+function isForcedDiscrete(binding: LayerBinding, channel: string): boolean {
+  if (channel === "color") return binding.color.forcedDiscrete === true;
+  if (channel === "fill") return binding.fill.forcedDiscrete === true;
+  return styleBinding(binding, channel)?.forcedDiscrete === true;
+}
+
+function styleBinding(binding: LayerBinding, channel: string): StyleBinding | null {
+  if (
+    channel === "size" ||
+    channel === "linewidth" ||
+    channel === "alpha" ||
+    channel === "shape" ||
+    channel === "linetype"
+  ) {
+    return binding[channel];
+  }
+  return null;
 }
 
 /** Carried mapped columns for stats (styles/label, minus the x field). */
