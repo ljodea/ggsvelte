@@ -22,8 +22,8 @@ import {
   paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
-// paint helpers imported below
 import { areaGroupFillsOf } from "./geometry-paths-area-fill.js";
+import { closedRibbonBatch, openRibbonBatch } from "./geometry-ribbon-batches.js";
 
 type Outline = "both" | "upper" | "lower" | "full";
 type LineCap = "butt" | "round" | "square";
@@ -41,6 +41,20 @@ interface RibbonParams {
 interface RibbonRun {
   rows: number[];
   group: number;
+}
+
+function groupRibbonRows(frame: LayerFrame): number[][] {
+  const byGroup = new Map<number, number[]>();
+  for (let row = 0; row < frame.n; row++) {
+    const group = frame.groups[row]!;
+    let rows = byGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      byGroup.set(group, rows);
+    }
+    rows.push(row);
+  }
+  return [...byGroup.values()];
 }
 
 function ribbonParams(frame: LayerFrame): RibbonParams {
@@ -115,6 +129,46 @@ function sortGroupRowsByRunning(
   for (const rows of groupRows) sortFiniteSlotsInPlace(rows, y);
 }
 
+function scanFiniteRibbonRuns(
+  frame: LayerFrame,
+  fx: Frame,
+  orientation: "x" | "y",
+  groupRows: readonly number[][],
+  lo: Float64Array,
+  hi: Float64Array,
+): { runs: RibbonRun[]; removed: number } {
+  const runs: RibbonRun[] = [];
+  let removed = 0;
+  for (const rows of groupRows) {
+    if (rows.length === 0) continue;
+    const group = frame.groups[rows[0]!]!;
+    let current: number[] = [];
+    for (const row of rows) {
+      const a = lo[row]!;
+      const b = hi[row]!;
+      const running = projectRunning(frame, fx, orientation, row);
+      const lower = projectMeasure(frame, fx, orientation, a);
+      const upper = projectMeasure(frame, fx, orientation, b);
+      if (
+        !Number.isFinite(a) ||
+        !Number.isFinite(b) ||
+        !Number.isFinite(running) ||
+        !Number.isFinite(lower) ||
+        !Number.isFinite(upper)
+      ) {
+        removed++;
+        if (current.length >= 2) runs.push({ rows: current, group });
+        current = [];
+        continue;
+      }
+      current.push(row);
+    }
+    if (current.length >= 2) runs.push({ rows: current, group });
+    else if (current.length === 1) removed++;
+  }
+  return { runs, removed };
+}
+
 /**
  * Collect finite runs: running + both bounds finite. Gaps split groups into
  * multiple closed subpaths (ggplot2 ribbon NA handling).
@@ -136,51 +190,12 @@ function finiteRibbonRuns(
   if (orientation === "y" && frame.yNumeric === null && frame.yValues === null) return [];
 
   // Bucket by group without requiring the orthogonal axis.
-  const byGroup = new Map<number, number[]>();
-  for (let row = 0; row < frame.n; row++) {
-    const g = frame.groups[row]!;
-    let rows = byGroup.get(g);
-    if (rows === undefined) {
-      rows = [];
-      byGroup.set(g, rows);
-    }
-    rows.push(row);
-  }
-  const groupRows = [...byGroup.values()];
+  const groupRows = groupRibbonRows(frame);
   if (groupRows.length === 0) return [];
   sortGroupRowsByRunning(groupRows, frame, fx, orientation);
 
-  const runs: RibbonRun[] = [];
-  let removed = 0;
-  for (const rows of groupRows) {
-    if (rows.length === 0) continue;
-    const group = frame.groups[rows[0]!]!;
-    let current: number[] = [];
-    for (const row of rows) {
-      const a = lo[row]!;
-      const b = hi[row]!;
-      // Require bounds finite, running coord projectable (band or continuous), and
-      // measure bounds projectable (band measure axes yield NaN — drop the row).
-      const runningPx = projectRunning(frame, fx, orientation, row);
-      const loPx = projectMeasure(frame, fx, orientation, a);
-      const hiPx = projectMeasure(frame, fx, orientation, b);
-      if (
-        !Number.isFinite(a) ||
-        !Number.isFinite(b) ||
-        !Number.isFinite(runningPx) ||
-        !Number.isFinite(loPx) ||
-        !Number.isFinite(hiPx)
-      ) {
-        removed++;
-        if (current.length >= 2) runs.push({ rows: current, group });
-        current = [];
-        continue;
-      }
-      current.push(row);
-    }
-    if (current.length >= 2) runs.push({ rows: current, group });
-    else if (current.length === 1) removed++;
-  }
+  // Require finite bounds plus projectable running and measure coordinates.
+  const { runs, removed } = scanFiniteRibbonRuns(frame, fx, orientation, groupRows, lo, hi);
   if (removed > 0) removedWarning(removed, frame.binding.index, warnings);
   return runs;
 }
@@ -394,7 +409,6 @@ export function ribbonBatches(
     (solidStrokes !== null && solidStrokes.some((s) => s !== null));
   const outlineWidth = constantStyle(frame.binding, params, "linewidth", DEFAULT_LINEWIDTH);
 
-  const out: PathsBatch[] = [];
   const fullStroke = outline === "full" && hasExplicitColor;
   const closed = writeClosedRuns({
     frame,
@@ -405,88 +419,44 @@ export function ribbonBatches(
     strokeOf,
     strokeWidth: fullStroke ? outlineWidth : 0,
   });
-
-  out.push({
-    kind: "paths",
-    layerIndex,
-    panelIndex: 0,
-    positions: closed.positions,
-    rowIndex: closed.rowIndex,
-    closedFrameRows: closed.closedFrameRows,
-    pathOffsets: closed.pathOffsets,
-    strokes: closed.strokes,
-    fills: closed.fills,
-    closed: true,
-    linewidth: fullStroke ? outlineWidth : 0,
-    ...(fullStroke && linewidths !== undefined && { linewidths }),
-    alpha: alphas === undefined ? constantAlpha : 1,
-    ...(alphas !== undefined && { alphas }),
-    ...(fullStroke &&
-      typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
-    ...(fullStroke && linetypeIndexes !== undefined && { linetypeIndexes }),
-    ...(fullStroke && { linecap, linejoin }),
-    curve: "linear",
-    ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
-    ...(fullStroke && strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
-    ...(glowResolved !== undefined && { glow: glowResolved }),
-  });
-
-  if (outline !== "full" && hasExplicitColor) {
-    const open = writeOpenEdges({
-      frame,
-      fx,
-      orientation,
-      runs,
-      edge: outline,
-      strokeOf,
-    });
-    // "both" emits two subpaths per run — repeat style vectors to match.
-    const edgeCount = outline === "both" ? 2 : 1;
-    const expand = <T>(values: T[] | Float32Array | Uint8Array | undefined) => {
-      if (values === undefined || edgeCount === 1) return values;
-      if (values instanceof Float32Array) {
-        const expanded = new Float32Array(values.length * edgeCount);
-        for (let i = 0; i < values.length; i++) {
-          for (let e = 0; e < edgeCount; e++) expanded[i * edgeCount + e] = values[i]!;
-        }
-        return expanded;
-      }
-      if (values instanceof Uint8Array) {
-        const expanded = new Uint8Array(values.length * edgeCount);
-        for (let i = 0; i < values.length; i++) {
-          for (let e = 0; e < edgeCount; e++) expanded[i * edgeCount + e] = values[i]!;
-        }
-        return expanded;
-      }
-      const expanded: T[] = [];
-      for (const value of values) for (let e = 0; e < edgeCount; e++) expanded.push(value);
-      return expanded;
-    };
-    const outlineLinewidths = expand(linewidths);
-    const outlineAlphas = expand(alphas);
-    const outlineLinetypes = expand(linetypeIndexes);
-    // Open outline batches are presentation-only (no candidate duplication).
-    out.push({
-      kind: "paths",
+  const out: PathsBatch[] = [
+    closedRibbonBatch({
       layerIndex,
-      panelIndex: 0,
-      positions: open.positions,
-      rowIndex: open.rowIndex,
-      frameRowIndex: open.frameRowIndex,
-      pathOffsets: open.pathOffsets,
-      strokes: open.strokes,
-      linewidth: outlineWidth,
-      ...(outlineLinewidths !== undefined && { linewidths: outlineLinewidths as Float32Array }),
-      alpha: outlineAlphas === undefined ? constantAlpha : 1,
-      ...(outlineAlphas !== undefined && { alphas: outlineAlphas as Float32Array }),
-      ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
-      ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
-      ...(outlineLinetypes !== undefined && { linetypeIndexes: outlineLinetypes as Uint8Array }),
+      closed,
+      fullStroke,
+      outlineWidth,
+      constantAlpha,
+      alphas,
+      linewidths,
+      linetypeIndexes,
+      literalLinetype,
       linecap,
       linejoin,
-      curve: "linear",
-      candidates: false,
-    });
+      fillPaintResolved,
+      strokePaintResolved,
+      glowResolved,
+    }),
+  ];
+
+  if (outline !== "full" && hasExplicitColor) {
+    // Open outline batches are presentation-only (no candidate duplication).
+    const open = writeOpenEdges({ frame, fx, orientation, runs, edge: outline, strokeOf });
+    out.push(
+      openRibbonBatch({
+        layerIndex,
+        open,
+        edgeCount: outline === "both" ? 2 : 1,
+        outlineWidth,
+        constantAlpha,
+        alphas,
+        linewidths,
+        linetypeIndexes,
+        literalLinetype,
+        linecap,
+        linejoin,
+        strokePaintResolved,
+      }),
+    );
   }
 
   return out;
