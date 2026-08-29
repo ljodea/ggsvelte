@@ -16,16 +16,7 @@ export function isoHasClock(value: string): boolean {
   return /[T ]\d{2}:\d{2}/.test(value);
 }
 
-/** Parse common ISO date/datetime strings to UTC epoch ms, or undefined. */
-export function isoEpochMs(value: string): number | undefined {
-  // Cheap reject before the full regex: YYYY-MM-DD is 10 chars, and the year
-  // must start with a digit. Series labels ("s0") and other short strings hit
-  // this path on every cell during column coercion.
-  if (value.length < 10) return undefined;
-  const c0 = value.codePointAt(0);
-  if (c0 === undefined || c0 < 48 /* 0 */ || c0 > 57 /* 9 */) return undefined;
-  const match = ISO_LIKE.exec(value);
-  if (match === null) return undefined;
+function parseIsoCalendar(match: RegExpExecArray): number | undefined {
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
@@ -33,11 +24,9 @@ export function isoEpochMs(value: string): number | undefined {
   const hour = match[4] === undefined ? 0 : Number(match[4]);
   const minute = match[5] === undefined ? 0 : Number(match[5]);
   const second = match[6] === undefined ? 0 : Number(match[6]);
-  // Truncate fractional seconds to milliseconds (up to 9 digits accepted).
   const fractionRaw = match[7] ?? "0";
   const fraction = Number(fractionRaw.padEnd(3, "0").slice(0, 3));
   if (hour > 23 || minute > 59 || second > 59) return undefined;
-  // Date.UTC maps years 0–99 to 1900+; use setUTCFullYear for full range.
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
   date.setUTCHours(hour, minute, second, fraction);
@@ -48,13 +37,28 @@ export function isoEpochMs(value: string): number | undefined {
   ) {
     return undefined;
   }
-  let epoch = date.getTime();
-  if (match[8] !== undefined) {
-    const sign = match[8] === "+" ? 1 : -1;
-    const offH = Number(match[9]);
-    const offM = Number(match[10]);
-    if (offH > 23 || offM > 59) return undefined;
-    epoch -= sign * (offH * 60 + offM) * 60_000;
-  }
-  return epoch;
+  return date.getTime();
+}
+
+function applyIsoOffset(epoch: number, match: RegExpExecArray): number | undefined {
+  if (match[8] === undefined) return epoch;
+  const sign = match[8] === "+" ? 1 : -1;
+  const offH = Number(match[9]);
+  const offM = Number(match[10]);
+  if (offH > 23 || offM > 59) return undefined;
+  return epoch - sign * (offH * 60 + offM) * 60_000;
+}
+
+/** Parse common ISO date/datetime strings to UTC epoch ms, or undefined. */
+export function isoEpochMs(value: string): number | undefined {
+  // Cheap reject before the full regex: YYYY-MM-DD is 10 chars, and the year
+  // must start with a digit. Series labels ("s0") and other short strings hit
+  // this path on every cell during column coercion.
+  if (value.length < 10) return undefined;
+  const c0 = value.codePointAt(0);
+  if (c0 === undefined || c0 < 48 /* 0 */ || c0 > 57 /* 9 */) return undefined;
+  const match = ISO_LIKE.exec(value);
+  if (match === null) return undefined;
+  const epoch = parseIsoCalendar(match);
+  return epoch === undefined ? undefined : applyIsoOffset(epoch, match);
 }
