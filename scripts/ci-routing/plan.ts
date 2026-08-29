@@ -8,7 +8,7 @@
 import { isDocsRenderPath } from "./docs-membership";
 import { matchPathPattern } from "./match";
 import { LANE_PATTERNS } from "./patterns";
-import type { ChangeFlags, JobName, JobPlan, JobResult } from "./types";
+import type { ChangeFlags, ChangeLane, JobName, JobPlan, JobResult } from "./types";
 
 const JOB_NAMES: readonly JobName[] = [
   "checks",
@@ -60,6 +60,14 @@ export type PlanOptions = {
   forceAll?: boolean;
 };
 
+function anyChanged(changes: ChangeFlags, lanes: readonly ChangeLane[]): boolean {
+  return lanes.some((lane) => changes[lane]);
+}
+
+function anyTrue(...values: readonly boolean[]): boolean {
+  return values.includes(true);
+}
+
 /**
  * Map change lanes → jobs, including monorepo dependency edges:
  * spec → core consumers; core → svelte; packages → VR/pages/build/consumer.
@@ -89,89 +97,87 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
 
   // Product-wide force. Intentionally excludes ci.yml / .github/actions so
   // Dependabot action pin bumps stay on the cheap CI-plumbing surface.
-  const forceProduct = changes.lockfile || changes.ci_routing;
-  const packageSurface =
-    changes.spec || changes.core || changes.svelte || changes.cli || forceProduct;
-  const docsSurface = changes.docs || changes.examples || forceProduct;
-  const browserSurface =
-    packageSurface || changes.spikes || changes.visual || changes.performance || forceProduct;
+  const forceProduct = anyChanged(changes, ["lockfile", "ci_routing"]);
+  const packageSurface = anyTrue(
+    anyChanged(changes, ["spec", "core", "svelte", "cli"]),
+    forceProduct,
+  );
+  const docsSurface = anyTrue(anyChanged(changes, ["docs", "examples"]), forceProduct);
+  const browserSurface = anyTrue(
+    packageSurface,
+    anyChanged(changes, ["spikes", "visual", "performance"]),
+  );
   // Split former monolithic "build" job so expensive steps fail/finish in parallel:
   // - build: package tsc + knip + type-aware + publint (scripts/evals need this)
   // - svelte_check: packages/svelte + apps/docs svelte-check (product surface only)
   // - docs_site: vite adapter-static + pages-links (product surface only)
   // A scripts/**/*.test.ts change must NOT schedule svelte_check or docs_site.
-  const staticAnalysisSurface =
-    packageSurface ||
-    docsSurface ||
-    changes.scripts ||
-    changes.evals ||
-    changes.workers ||
-    forceProduct;
-  const svelteCheckSurface = packageSurface || docsSurface || forceProduct;
-  const docsSiteSurface = packageSurface || docsSurface || forceProduct;
+  const staticAnalysisSurface = anyTrue(
+    packageSurface,
+    docsSurface,
+    anyChanged(changes, ["scripts", "evals", "workers"]),
+  );
+  const svelteCheckSurface = anyTrue(packageSurface, docsSurface);
+  const docsSiteSurface = anyTrue(packageSurface, docsSurface);
 
   // Pixel VR: render-relevant only (not pure guide/content generators).
-  const vr =
-    packageSurface || changes.examples || changes.visual || changes.docs_render || forceProduct;
+  const vr = anyTrue(packageSurface, anyChanged(changes, ["examples", "visual", "docs_render"]));
 
   // Non-pixel docs structure/a11y Playwright — content and render both need it.
-  const docsJourneys = docsSurface || packageSurface || changes.visual || forceProduct;
+  const docsJourneys = anyTrue(docsSurface, packageSurface, changes.visual);
 
   // Shared packages/*/dist artifact for jobs that previously each ran
   // `bun run build`. Unit/bench-smoke stay on the cheaper `bun run check`
   // (spec/core only) and do not wait on the full Svelte package build.
   // packages_dist must follow vr and docs_journeys so artifact consumers never skip.
-  const packagesDist =
-    packageSurface ||
-    changes.spikes ||
-    changes.visual ||
-    changes.performance ||
-    changes.consumer_tools ||
-    vr ||
-    docsJourneys ||
-    forceProduct;
+  const packagesDist = anyTrue(
+    packageSurface,
+    anyChanged(changes, ["spikes", "visual", "performance", "consumer_tools"]),
+    vr,
+    docsJourneys,
+  );
 
   return {
     // Cheap format/lint parity — always on so markdown-only PRs still get oxfmt/prettier.
     checks: true,
-    unit:
-      changes.spec ||
-      changes.core ||
-      changes.svelte ||
-      changes.cli ||
-      changes.scripts ||
-      changes.benchmarks ||
-      changes.evals ||
+    unit: anyTrue(
+      anyChanged(changes, [
+        "spec",
+        "core",
+        "svelte",
+        "cli",
+        "scripts",
+        "benchmarks",
+        "evals",
+        "workers",
+        "docs",
+        "examples",
+        "workflows",
+        "ci_actions",
+      ]),
       // workers/** own bun tests (when present) run in the unit job.
-      changes.workers ||
-      changes.docs ||
-      changes.examples ||
-      changes.workflows ||
       // release-wiring.test.ts reads composite action.yml and asserts the
       // content-hash protocol; schedule unit when those recipes change.
-      changes.ci_actions ||
       forceProduct,
+    ),
     component: browserSurface,
-    consumer: packageSurface || changes.consumer_tools || forceProduct,
+    consumer: anyTrue(packageSurface, changes.consumer_tools, forceProduct),
     build: staticAnalysisSurface,
     svelte_check: svelteCheckSurface,
     docs_site: docsSiteSurface,
     // Composite action recipe edits must still lint the actions surface even
     // when no workflow YAML changed (Dependabot directories for composites).
-    actions_security: changes.workflows || changes.ci_actions || forceProduct,
+    actions_security: anyTrue(changes.workflows, changes.ci_actions, forceProduct),
     // retained-memory imports packages/svelte inspection coordinator.
-    bench_smoke:
-      changes.benchmarks ||
-      changes.spec ||
-      changes.core ||
-      changes.svelte ||
-      changes.cli ||
+    bench_smoke: anyTrue(
+      anyChanged(changes, ["benchmarks", "spec", "core", "svelte", "cli"]),
       forceProduct,
+    ),
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
     packages_dist: packagesDist,
     vr,
-    pages: packageSurface || docsSurface || forceProduct,
+    pages: anyTrue(packageSurface, docsSurface, forceProduct),
     docs_journeys: docsJourneys,
   };
 }

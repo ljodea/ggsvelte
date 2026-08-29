@@ -106,73 +106,103 @@ function fail(message: string): never {
   throw new Error(`Invalid docs route inventory: ${message}`);
 }
 
+interface RouteValidationState<Route extends DocsRouteRecord> {
+  readonly byPath: Map<string, Route>;
+  readonly indexableTitles: Map<string, string>;
+  readonly indexableDescriptions: Map<string, string>;
+  readonly navOrdersBySection: Map<string, Map<number, string>>;
+}
+
+function validateRoute<Route extends DocsRouteRecord>(
+  route: Route,
+  state: RouteValidationState<Route>,
+): void {
+  if (route.path !== "/" && (!route.path.startsWith("/") || route.path.endsWith("/"))) {
+    fail(`route path must be an absolute path without a trailing slash: ${route.path}`);
+  }
+  if (!route.canonicalPath.startsWith("/")) {
+    fail(`canonicalPath must be absolute for ${route.path}: ${route.canonicalPath}`);
+  }
+  if (route.title.trim() === "" || route.description.trim() === "") {
+    fail(`title and description are required for ${route.path}`);
+  }
+  if (state.byPath.has(route.path)) fail(`duplicate path ${route.path}`);
+  if (route.kind === "alias" && (route.index || route.sitemap)) {
+    fail(`alias ${route.path} must be noindex and excluded from the sitemap`);
+  }
+  if (route.kind === "performance" && (route.index || route.sitemap)) {
+    fail(`performance route ${route.path} must be noindex and excluded from the sitemap`);
+  }
+  if (route.sitemap && !route.index) fail(`${route.path} cannot enter the sitemap while noindex`);
+  validateRouteNavigation(route, state.navOrdersBySection);
+  validateIndexableMetadata(route, state.indexableTitles, state.indexableDescriptions);
+  state.byPath.set(route.path, route);
+}
+
+function validateRouteNavigation(
+  route: DocsRouteRecord,
+  navOrdersBySection: Map<string, Map<number, string>>,
+): void {
+  if (route.navigation === undefined) return;
+  const { section, order } = route.navigation;
+  const byOrder = navOrdersBySection.get(section) ?? new Map<number, string>();
+  const owner = byOrder.get(order);
+  if (owner !== undefined) {
+    fail(
+      `duplicate navigation order ${order} in section "${section}" for ${owner} and ${route.path}`,
+    );
+  }
+  byOrder.set(order, route.path);
+  navOrdersBySection.set(section, byOrder);
+}
+
+function validateIndexableMetadata(
+  route: DocsRouteRecord,
+  indexableTitles: Map<string, string>,
+  indexableDescriptions: Map<string, string>,
+): void {
+  if (!route.index) return;
+  const titleOwner = indexableTitles.get(route.title);
+  if (titleOwner !== undefined) {
+    fail(`duplicate indexable title for ${titleOwner} and ${route.path}: ${route.title}`);
+  }
+  const descriptionOwner = indexableDescriptions.get(route.description);
+  if (descriptionOwner !== undefined) {
+    fail(
+      `duplicate indexable description for ${descriptionOwner} and ${route.path}: ${route.description}`,
+    );
+  }
+  indexableTitles.set(route.title, route.path);
+  indexableDescriptions.set(route.description, route.path);
+}
+
+function validateAliasTarget(
+  route: DocsRouteRecord,
+  byPath: ReadonlyMap<string, DocsRouteRecord>,
+): void {
+  if (route.kind !== "alias") return;
+  const seen = new Set([route.path]);
+  let targetPath = route.canonicalPath;
+  while (true) {
+    const target = byPath.get(targetPath);
+    if (target === undefined) fail(`alias ${route.path} targets missing route ${targetPath}`);
+    if (target.kind !== "alias") return;
+    if (seen.has(target.path)) fail(`alias cycle includes ${[...seen, target.path].join(" -> ")}`);
+    seen.add(target.path);
+    targetPath = target.canonicalPath;
+  }
+}
+
 export function validateRouteInventory<Route extends DocsRouteRecord>(routes: Route[]): Route[] {
   const byPath = new Map<string, Route>();
   const indexableTitles = new Map<string, string>();
   const indexableDescriptions = new Map<string, string>();
   /** section → (order → path) so sidebar sort keys cannot silently collide. */
   const navOrdersBySection = new Map<string, Map<number, string>>();
-  for (const route of routes) {
-    if (route.path !== "/" && (!route.path.startsWith("/") || route.path.endsWith("/"))) {
-      fail(`route path must be an absolute path without a trailing slash: ${route.path}`);
-    }
-    if (!route.canonicalPath.startsWith("/")) {
-      fail(`canonicalPath must be absolute for ${route.path}: ${route.canonicalPath}`);
-    }
-    if (route.title.trim() === "" || route.description.trim() === "") {
-      fail(`title and description are required for ${route.path}`);
-    }
-    if (byPath.has(route.path)) fail(`duplicate path ${route.path}`);
-    if (route.kind === "alias" && (route.index || route.sitemap)) {
-      fail(`alias ${route.path} must be noindex and excluded from the sitemap`);
-    }
-    if (route.kind === "performance" && (route.index || route.sitemap)) {
-      fail(`performance route ${route.path} must be noindex and excluded from the sitemap`);
-    }
-    if (route.sitemap && !route.index) fail(`${route.path} cannot enter the sitemap while noindex`);
-    if (route.navigation !== undefined) {
-      const { section, order } = route.navigation;
-      const byOrder = navOrdersBySection.get(section) ?? new Map<number, string>();
-      const owner = byOrder.get(order);
-      if (owner !== undefined) {
-        fail(
-          `duplicate navigation order ${order} in section "${section}" for ${owner} and ${route.path}`,
-        );
-      }
-      byOrder.set(order, route.path);
-      navOrdersBySection.set(section, byOrder);
-    }
-    if (route.index) {
-      const titleOwner = indexableTitles.get(route.title);
-      if (titleOwner !== undefined) {
-        fail(`duplicate indexable title for ${titleOwner} and ${route.path}: ${route.title}`);
-      }
-      const descriptionOwner = indexableDescriptions.get(route.description);
-      if (descriptionOwner !== undefined) {
-        fail(
-          `duplicate indexable description for ${descriptionOwner} and ${route.path}: ${route.description}`,
-        );
-      }
-      indexableTitles.set(route.title, route.path);
-      indexableDescriptions.set(route.description, route.path);
-    }
-    byPath.set(route.path, route);
-  }
+  const state = { byPath, indexableTitles, indexableDescriptions, navOrdersBySection };
+  for (const route of routes) validateRoute(route, state);
 
-  for (const route of routes) {
-    if (route.kind !== "alias") continue;
-    const seen = new Set([route.path]);
-    let targetPath = route.canonicalPath;
-    while (true) {
-      const target = byPath.get(targetPath);
-      if (target === undefined) fail(`alias ${route.path} targets missing route ${targetPath}`);
-      if (target.kind !== "alias") break;
-      if (seen.has(target.path))
-        fail(`alias cycle includes ${[...seen, target.path].join(" -> ")}`);
-      seen.add(target.path);
-      targetPath = target.canonicalPath;
-    }
-  }
+  for (const route of routes) validateAliasTarget(route, byPath);
 
   return routes;
 }

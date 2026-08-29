@@ -59,9 +59,7 @@ function lifecycleAnchor(packageName: string, entry: string): string {
   return slug(`${packageName}${entry === "." ? "" : ` ${entry}`}`);
 }
 
-export function createDocsSearchEntries(): DocsSearchEntry[] {
-  const entries: DocsSearchEntry[] = [];
-
+function appendRouteEntries(entries: DocsSearchEntry[]): void {
   const routes: readonly DocsRouteMetadata[] = DOCS_ROUTES;
   for (const route of routes) {
     if (!route.index || route.kind !== "page" || route.path.startsWith("/examples/")) continue;
@@ -88,7 +86,9 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       });
     }
   }
+}
 
+function appendExampleEntries(entries: DocsSearchEntry[]): void {
   for (const example of EXAMPLES) {
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,
@@ -103,7 +103,9 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       exact: [example.title],
     });
   }
+}
 
+function appendLifecycleEntries(entries: DocsSearchEntry[]): void {
   for (const surface of lifecycle.surfaces) {
     const anchor = lifecycleAnchor(surface.package, surface.entry);
     for (const [name, metadata] of Object.entries(surface.exports)) {
@@ -129,7 +131,9 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       exact: [tag],
     });
   }
+}
 
+function appendDiagnosticEntries(entries: DocsSearchEntry[]): void {
   for (const diagnostic of buildDiagnosticDocs()) {
     entries.push({
       id: `diagnostic:${diagnostic.source}:${diagnostic.code}`,
@@ -141,7 +145,9 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       exact: [diagnostic.code, `${diagnostic.source}:${diagnostic.code}`],
     });
   }
+}
 
+function appendCliEntries(entries: DocsSearchEntry[]): void {
   for (const option of CLI_REFERENCE_OPTIONS) {
     entries.push({
       id: `cli:${option.anchor}`,
@@ -153,7 +159,15 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       exact: [option.flag, ...option.aliases],
     });
   }
+}
 
+export function createDocsSearchEntries(): DocsSearchEntry[] {
+  const entries: DocsSearchEntry[] = [];
+  appendRouteEntries(entries);
+  appendExampleEntries(entries);
+  appendLifecycleEntries(entries);
+  appendDiagnosticEntries(entries);
+  appendCliEntries(entries);
   return validateDocsSearchEntries(entries);
 }
 

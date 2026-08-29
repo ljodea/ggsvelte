@@ -36,6 +36,57 @@ function directives(policy: string): Map<string, Set<string>> {
   );
 }
 
+function validateInlineScripts(
+  path: string,
+  html: string,
+  parsed: ReadonlyMap<string, ReadonlySet<string>>,
+): string[] {
+  const problems: string[] = [];
+  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    const attributes = match[1] ?? "";
+    const content = match[2] ?? "";
+    if (attribute(attributes, "src") !== null) continue;
+    if (attribute(attributes, "type")?.toLowerCase() === "application/ld+json") continue;
+    if (parsed.get("script-src")?.has(sha256Source(content)) !== true) {
+      problems.push(`${path}: executable inline script is missing its exact sha256 CSP source`);
+    }
+  }
+  return problems;
+}
+
+function validateInlineStyles(
+  path: string,
+  html: string,
+  parsed: ReadonlyMap<string, ReadonlySet<string>>,
+): string[] {
+  const problems: string[] = [];
+  for (const match of html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+    const content = match[1] ?? "";
+    if (parsed.get("style-src")?.has(sha256Source(content)) !== true) {
+      problems.push(`${path}: inline style element is missing its exact sha256 CSP source`);
+    }
+  }
+  return problems;
+}
+
+function validateInlineAttributes(
+  path: string,
+  html: string,
+  parsed: ReadonlyMap<string, ReadonlySet<string>>,
+): string[] {
+  const problems: string[] = [];
+  if (/<[a-z][^>]*\son[a-z]+\s*=/i.test(html)) {
+    problems.push(`${path}: inline event handler is forbidden`);
+  }
+  if (
+    /<[a-z][^>]*\sstyle\s*=/i.test(html) &&
+    parsed.get("style-src-attr")?.has("'unsafe-inline'") !== true
+  ) {
+    problems.push(`${path}: style attributes require the bounded style-src-attr allowance`);
+  }
+  return problems;
+}
+
 export function validateHtmlCsp(path: string, html: string): string[] {
   const meta = cspMeta(html);
   if (meta === null) return [`${path}: missing enforced content-security-policy meta tag`];
@@ -54,30 +105,11 @@ export function validateHtmlCsp(path: string, html: string): string[] {
       problems.push(`${path}: ${directive} must not allow unsafe-inline`);
     }
   }
-  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-    const attributes = match[1] ?? "";
-    const content = match[2] ?? "";
-    if (attribute(attributes, "src") !== null) continue;
-    if (attribute(attributes, "type")?.toLowerCase() === "application/ld+json") continue;
-    if (parsed.get("script-src")?.has(sha256Source(content)) !== true) {
-      problems.push(`${path}: executable inline script is missing its exact sha256 CSP source`);
-    }
-  }
-  for (const match of html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    const content = match[1] ?? "";
-    if (parsed.get("style-src")?.has(sha256Source(content)) !== true) {
-      problems.push(`${path}: inline style element is missing its exact sha256 CSP source`);
-    }
-  }
-  if (/<[a-z][^>]*\son[a-z]+\s*=/i.test(html)) {
-    problems.push(`${path}: inline event handler is forbidden`);
-  }
-  if (
-    /<[a-z][^>]*\sstyle\s*=/i.test(html) &&
-    parsed.get("style-src-attr")?.has("'unsafe-inline'") !== true
-  ) {
-    problems.push(`${path}: style attributes require the bounded style-src-attr allowance`);
-  }
+  problems.push(
+    ...validateInlineScripts(path, html, parsed),
+    ...validateInlineStyles(path, html, parsed),
+    ...validateInlineAttributes(path, html, parsed),
+  );
   return problems;
 }
 

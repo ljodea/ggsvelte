@@ -90,6 +90,46 @@ function parseEntry(
   return { export: { name, kind, lifecycle: tag } };
 }
 
+function parseExportStatement(
+  match: RegExpMatchArray,
+  fileDefault: LifecycleTag,
+  file: string,
+  out: ExtractedExport[],
+  problems: string[],
+): void {
+  const stmtTagRaw = match[2];
+  if (stmtTagRaw !== undefined && !isTag(stmtTagRaw)) {
+    problems.push(`${file}: unknown statement lifecycle tag "${stmtTagRaw}"`);
+    return;
+  }
+  const stmtTag: LifecycleTag = stmtTagRaw ?? fileDefault;
+  const kind: "value" | "type" = match[3] === undefined ? "value" : "type";
+  for (const rawLine of match[4]!.split("\n")) {
+    const nameTag = /\/\/ @lifecycle ([a-z-]+)/.exec(rawLine);
+    const cleaned = rawLine
+      .replace(/\/\/.*$/, "")
+      .trim()
+      .replace(/,$/, "")
+      .trim();
+    if (cleaned === "") continue;
+    const entries = cleaned
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter((entry) => entry !== "");
+    if (nameTag !== null && entries.length > 1) {
+      problems.push(
+        `${file}: a trailing @lifecycle tag on a multi-name line is ambiguous: "${rawLine.trim()}"`,
+      );
+      continue;
+    }
+    for (const entry of entries) {
+      const parsed = parseEntry(entry, rawLine, nameTag?.[1], stmtTag, kind, file);
+      if ("problem" in parsed) problems.push(parsed.problem);
+      else out.push(parsed.export);
+    }
+  }
+}
+
 /**
  * Extract exports + lifecycle tags from one index-file source (pure —
  * unit-tested). Only re-export statement forms are allowed in index files;
@@ -112,40 +152,8 @@ export function extractExports(source: string, file: string): ExtractedExport[] 
   // through prose comments), then `export [type] { ... } [from "..."];`
   const stmt =
     /(\/\*\* @lifecycle ([a-z-]+) \*\/\s*)?export (type )?\{([^}]*)\}(\s*from\s*"[^"]+")?;/g;
-  let covered = 0;
   for (const m of source.matchAll(stmt)) {
-    covered += m[0].length;
-    const stmtTagRaw = m[2];
-    if (stmtTagRaw !== undefined && !isTag(stmtTagRaw)) {
-      problems.push(`${file}: unknown statement lifecycle tag "${stmtTagRaw}"`);
-      continue;
-    }
-    const stmtTag: LifecycleTag = stmtTagRaw ?? fileDefault;
-    const kind: "value" | "type" = m[3] === undefined ? "value" : "type";
-    for (const rawLine of m[4]!.split("\n")) {
-      const nameTag = /\/\/ @lifecycle ([a-z-]+)/.exec(rawLine);
-      const cleaned = rawLine
-        .replace(/\/\/.*$/, "")
-        .trim()
-        .replace(/,$/, "")
-        .trim();
-      if (cleaned === "") continue;
-      const entries = cleaned
-        .split(",")
-        .map((e) => e.trim())
-        .filter((e) => e !== "");
-      if (nameTag !== null && entries.length > 1) {
-        problems.push(
-          `${file}: a trailing @lifecycle tag on a multi-name line is ambiguous: "${rawLine.trim()}"`,
-        );
-        continue;
-      }
-      for (const entry of entries) {
-        const parsed = parseEntry(entry, rawLine, nameTag?.[1], stmtTag, kind, file);
-        if ("problem" in parsed) problems.push(parsed.problem);
-        else out.push(parsed.export);
-      }
-    }
+    parseExportStatement(m, fileDefault, file, out, problems);
   }
   // Safety: any export form the statement matcher does not cover (declarations,
   // star re-exports, default exports) must not appear in an index file.

@@ -166,6 +166,66 @@ function defaultGalleryGroup() {
 /** Default-path protocol group (projection + PNG/provenance extras). */
 export const galleryPreviewsGroup = defaultGalleryGroup();
 
+interface CustomGalleryContext {
+  readonly entries: readonly ExampleManifestEntry[];
+  readonly source: string;
+  readonly output: string;
+  readonly projection: string;
+  readonly examplesRoot: string;
+  readonly inventory: readonly PreviewInventoryEntry[];
+  readonly expected: ReadonlySet<string>;
+  readonly generated: string;
+}
+
+function checkCustomGalleryPreviews(context: CustomGalleryContext): void {
+  const { entries, source, output, projection, examplesRoot, inventory, expected, generated } =
+    context;
+  if (!existsSync(projection) || readFileSync(projection, "utf8") !== generated) {
+    throw new Error(
+      "Generated gallery preview projection is stale. Run bun run gallery:previews:gen.",
+    );
+  }
+  for (const entry of inventory) {
+    const sourcePath = join(source, entry.filename);
+    const outputPath = join(output, entry.filename);
+    if (!existsSync(outputPath) || digest(sourcePath) !== digest(outputPath)) {
+      throw new Error(`Generated gallery preview is stale: ${entry.filename}`);
+    }
+  }
+  const extras = existsSync(output)
+    ? readdirSync(output).filter((filename) => filename.endsWith(".png") && !expected.has(filename))
+    : [];
+  if (extras.length > 0) throw new Error(`Unexpected generated gallery preview: ${extras[0]}`);
+  assertPreviewProvenance({
+    examplesRoot,
+    previewsDir: output,
+    entries,
+    provenance: loadProvenance(provenancePath(output)),
+  });
+}
+
+function writeCustomGalleryPreviews(context: CustomGalleryContext): void {
+  const { entries, source, output, projection, inventory, expected, generated } = context;
+  mkdirSync(output, { recursive: true });
+  mkdirSync(dirname(projection), { recursive: true });
+  for (const filename of readdirSync(output)) {
+    if (filename.endsWith(".png") && !expected.has(filename)) rmSync(join(output, filename));
+  }
+  for (const entry of inventory) {
+    const from = join(source, entry.filename);
+    const to = join(output, entry.filename);
+    if (from !== to) copyFileSync(from, to);
+  }
+  writeFileSync(projection, generated);
+  const provFile = provenancePath(output);
+  if (existsSync(provFile)) {
+    writeProvenance(
+      provFile,
+      pruneProvenanceToIds(loadProvenance(provFile), new Set(entries.map((entry) => entry.id))),
+    );
+  }
+}
+
 export async function generateGalleryPreviews(
   options: GenerateGalleryPreviewOptions = {},
 ): Promise<void> {
@@ -194,53 +254,22 @@ export async function generateGalleryPreviews(
   const inventory = previewSourceInventory(entries);
   const expected = new Set(inventory.map((entry) => entry.filename));
   const generated = await projectionSource(inventory, source, projection);
+  const context = {
+    entries,
+    source,
+    output,
+    projection,
+    examplesRoot,
+    inventory,
+    expected,
+    generated,
+  };
 
   if (options.check === true) {
-    if (!existsSync(projection) || readFileSync(projection, "utf8") !== generated) {
-      throw new Error(
-        "Generated gallery preview projection is stale. Run bun run gallery:previews:gen.",
-      );
-    }
-    for (const entry of inventory) {
-      const sourcePath = join(source, entry.filename);
-      const outputPath = join(output, entry.filename);
-      if (!existsSync(outputPath) || digest(sourcePath) !== digest(outputPath)) {
-        throw new Error(`Generated gallery preview is stale: ${entry.filename}`);
-      }
-    }
-    const extras = existsSync(output)
-      ? readdirSync(output).filter(
-          (filename) => filename.endsWith(".png") && !expected.has(filename),
-        )
-      : [];
-    if (extras.length > 0) throw new Error(`Unexpected generated gallery preview: ${extras[0]}`);
-    assertPreviewProvenance({
-      examplesRoot,
-      previewsDir: output,
-      entries,
-      provenance: loadProvenance(provenancePath(output)),
-    });
+    checkCustomGalleryPreviews(context);
     return;
   }
-
-  mkdirSync(output, { recursive: true });
-  mkdirSync(dirname(projection), { recursive: true });
-  for (const filename of readdirSync(output)) {
-    if (filename.endsWith(".png") && !expected.has(filename)) rmSync(join(output, filename));
-  }
-  for (const entry of inventory) {
-    const from = join(source, entry.filename);
-    const to = join(output, entry.filename);
-    if (from !== to) copyFileSync(from, to);
-  }
-  writeFileSync(projection, generated);
-  const provFile = provenancePath(output);
-  if (existsSync(provFile)) {
-    writeProvenance(
-      provFile,
-      pruneProvenanceToIds(loadProvenance(provFile), new Set(entries.map((entry) => entry.id))),
-    );
-  }
+  writeCustomGalleryPreviews(context);
 }
 
 if (import.meta.main) {

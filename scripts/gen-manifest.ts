@@ -90,17 +90,50 @@ const JOURNEY_KEYS = new Set([
 ]);
 const REFERENCE_KEYS = new Set(["label", "href"]);
 
-function validateJourney(journey: unknown, id: string): string[] {
-  const problems: string[] = [];
-  if (typeof journey !== "object" || journey === null || Array.isArray(journey)) {
-    return [`${id}: meta.json "journey" must be an object when present`];
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function unknownKeyProblems(
+  value: Record<string, unknown>,
+  allowed: ReadonlySet<string>,
+  prefix: string,
+): string[] {
+  return Object.keys(value)
+    .filter((key) => !allowed.has(key))
+    .map((key) => `${prefix} has unknown key "${key}"`);
+}
+
+function validateJourneyReferences(references: unknown, id: string): string[] {
+  if (!Array.isArray(references) || references.length === 0) {
+    return [`${id}: meta.json "journey.references" must be a non-empty array when set`];
   }
-  const j = journey as Record<string, unknown>;
-  for (const key of Object.keys(j)) {
-    if (!JOURNEY_KEYS.has(key)) {
-      problems.push(`${id}: meta.json "journey" has unknown key "${key}"`);
+  const problems: string[] = [];
+  for (const [index, reference] of references.entries()) {
+    const prefix = `${id}: meta.json "journey.references[${String(index)}]"`;
+    if (!isRecord(reference)) {
+      problems.push(`${prefix} must be an object`);
+      continue;
+    }
+    problems.push(...unknownKeyProblems(reference, REFERENCE_KEYS, prefix));
+    if (typeof reference["label"] !== "string" || reference["label"].trim() === "") {
+      problems.push(`${prefix}.label must be a non-empty string`);
+    }
+    const href = reference["href"];
+    if (typeof href !== "string" || !href.startsWith("/") || href.startsWith("//")) {
+      problems.push(`${prefix}.href must be a root-relative internal link`);
     }
   }
+  return problems;
+}
+
+function validateJourney(journey: unknown, id: string): string[] {
+  const problems: string[] = [];
+  if (!isRecord(journey)) {
+    return [`${id}: meta.json "journey" must be an object when present`];
+  }
+  const j = journey;
+  problems.push(...unknownKeyProblems(j, JOURNEY_KEYS, `${id}: meta.json "journey"`));
   for (const key of ["pointer", "keyboard", "touch"] as const) {
     if (j[key] === undefined) continue;
     if (typeof j[key] !== "string" || j[key].trim() === "") {
@@ -114,41 +147,18 @@ function validateJourney(journey: unknown, id: string): string[] {
   }
   const references = j["references"];
   if (references === undefined) return problems;
-  if (!Array.isArray(references) || references.length === 0) {
-    problems.push(`${id}: meta.json "journey.references" must be a non-empty array when set`);
-    return problems;
-  }
-  for (const [index, reference] of references.entries()) {
-    const prefix = `${id}: meta.json "journey.references[${String(index)}]"`;
-    if (typeof reference !== "object" || reference === null || Array.isArray(reference)) {
-      problems.push(`${prefix} must be an object`);
-      continue;
-    }
-    const r = reference as Record<string, unknown>;
-    for (const key of Object.keys(r)) {
-      if (!REFERENCE_KEYS.has(key)) problems.push(`${prefix} has unknown key "${key}"`);
-    }
-    if (typeof r["label"] !== "string" || r["label"].trim() === "") {
-      problems.push(`${prefix}.label must be a non-empty string`);
-    }
-    const href = r["href"];
-    if (typeof href !== "string" || !href.startsWith("/") || href.startsWith("//")) {
-      problems.push(`${prefix}.href must be a root-relative internal link`);
-    }
-  }
+  problems.push(...validateJourneyReferences(references, id));
   return problems;
 }
 
 /** Validate one parsed meta.json; returns problem strings (empty = valid). */
 export function validateMeta(meta: unknown, id: string): string[] {
   const problems: string[] = [];
-  if (typeof meta !== "object" || meta === null || Array.isArray(meta)) {
+  if (!isRecord(meta)) {
     return [`${id}: meta.json must be a JSON object`];
   }
-  const m = meta as Record<string, unknown>;
-  for (const key of Object.keys(m)) {
-    if (!META_KEYS.has(key)) problems.push(`${id}: meta.json has unknown key "${key}"`);
-  }
+  const m = meta;
+  problems.push(...unknownKeyProblems(m, META_KEYS, `${id}: meta.json`));
   for (const key of ["title", "docsSection"] as const) {
     const v = m[key];
     if (typeof v !== "string" || v.trim() === "") {
