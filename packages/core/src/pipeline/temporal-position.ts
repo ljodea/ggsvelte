@@ -312,12 +312,8 @@ export function positionValueToScaleSpace(
   return transform.transform.valid(numeric) ? transform.transform.forward(numeric) : Number.NaN;
 }
 
-export function positionConversionContext(
-  config: PositionScaleSpec | undefined,
-): PositionConversionContext {
-  if (config === undefined) return AUTO_POSITION_CONVERSION;
-  if (config.type === "band") return DISCRETE_POSITION_CONVERSION;
-  const requestedTime =
+function requestsTemporalPosition(config: PositionScaleSpec): boolean {
+  return (
     config.type === "time" ||
     config.parse !== undefined ||
     config.temporalKind !== undefined ||
@@ -328,7 +324,16 @@ export function positionConversionContext(
     config.dateMinorBreaks !== undefined ||
     config.dateLabels !== undefined ||
     config.locale !== undefined ||
-    config.weekStart !== undefined;
+    config.weekStart !== undefined
+  );
+}
+
+export function positionConversionContext(
+  config: PositionScaleSpec | undefined,
+): PositionConversionContext {
+  if (config === undefined) return AUTO_POSITION_CONVERSION;
+  if (config.type === "band") return DISCRETE_POSITION_CONVERSION;
+  const requestedTime = requestsTemporalPosition(config);
   const forcedNonTemporal =
     (config.type === "linear" || config.type === "log" || config.type === "binned") &&
     !requestedTime;
