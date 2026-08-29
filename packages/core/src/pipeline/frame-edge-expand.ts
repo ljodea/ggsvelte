@@ -63,6 +63,17 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
   if (geom !== "tile" && geom !== "raster") return;
   if (frame.xNumeric === null || frame.yNumeric === null) return;
 
+  if (geom === "tile") {
+    expandTileFrame(frame);
+    return;
+  }
+  expandRasterFrame(frame, warnings);
+}
+
+function expandTileFrame(frame: LayerFrame): void {
+  const xNumeric = frame.xNumeric;
+  const yNumeric = frame.yNumeric;
+  if (xNumeric === null || yNumeric === null) return;
   const xType =
     frame.binding.xField === null
       ? "quantitative"
@@ -76,63 +87,61 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
   // (mixed band+continuous tiles keep continuous-axis domain expansion).
   // Clear inactive edge arrays so inherited plot-level ymin/ymax (or xmin/xmax)
   // meant for rect/ribbon cannot train continuous edge evidence on a band axis.
-  if (geom === "tile") {
-    if (xType === "nominal") {
-      frame.xmin = null;
-      frame.xmax = null;
-    }
-    if (yType === "nominal") {
-      frame.ymin = null;
-      frame.ymax = null;
-    }
-    if (xType === "nominal" && yType === "nominal") return;
-    const params = frame.binding.layer.params ?? {};
-    const defW = defaultResolution(frame.xNumeric);
-    const defH = defaultResolution(frame.yNumeric);
-    // Resolve size columns once — field names are invariant for the frame.
-    const widthCol =
-      frame.binding.widthField === null ? null : frame.table.column(frame.binding.widthField);
-    const heightCol =
-      frame.binding.heightField === null ? null : frame.table.column(frame.binding.heightField);
-    if (xType !== "nominal") {
-      const left = new Float64Array(frame.n);
-      const right = new Float64Array(frame.n);
-      for (let row = 0; row < frame.n; row++) {
-        const cx = frame.xNumeric[row]!;
-        const w = sizeAt(widthCol, params.width, defW, row);
-        if (!Number.isFinite(cx) || !(w > 0) || !Number.isFinite(w)) {
-          left[row] = NaN;
-          right[row] = NaN;
-          continue;
-        }
-        left[row] = cx - w / 2;
-        right[row] = cx + w / 2;
-      }
-      frame.xmin = left;
-      frame.xmax = right;
-    }
-    if (yType !== "nominal") {
-      const bottom = new Float64Array(frame.n);
-      const top = new Float64Array(frame.n);
-      for (let row = 0; row < frame.n; row++) {
-        const cy = frame.yNumeric[row]!;
-        const h = sizeAt(heightCol, params.height, defH, row);
-        if (!Number.isFinite(cy) || !(h > 0) || !Number.isFinite(h)) {
-          bottom[row] = NaN;
-          top[row] = NaN;
-          continue;
-        }
-        bottom[row] = cy - h / 2;
-        top[row] = cy + h / 2;
-      }
-      frame.ymin = bottom;
-      frame.ymax = top;
-    }
-    return;
+  if (xType === "nominal") {
+    frame.xmin = null;
+    frame.xmax = null;
   }
+  if (yType === "nominal") {
+    frame.ymin = null;
+    frame.ymax = null;
+  }
+  if (xType === "nominal" && yType === "nominal") return;
+  const params = (frame.binding.layer.params ?? {}) as { width?: number; height?: number };
+  const defW = defaultResolution(xNumeric);
+  const defH = defaultResolution(yNumeric);
+  const widthCol =
+    frame.binding.widthField === null ? null : frame.table.column(frame.binding.widthField);
+  const heightCol =
+    frame.binding.heightField === null ? null : frame.table.column(frame.binding.heightField);
+  if (xType !== "nominal") {
+    [frame.xmin, frame.xmax] = expandTileAxis(xNumeric, widthCol, params.width, defW);
+  }
+  if (yType !== "nominal") {
+    [frame.ymin, frame.ymax] = expandTileAxis(yNumeric, heightCol, params.height, defH);
+  }
+}
 
-  // raster
-  const params = frame.binding.layer.params ?? {};
+function expandTileAxis(
+  values: Float64Array,
+  sizeColumn: readonly CellValue[] | null,
+  param: number | undefined,
+  fallback: number,
+): readonly [Float64Array, Float64Array] {
+  const low = new Float64Array(values.length);
+  const high = new Float64Array(values.length);
+  for (let row = 0; row < values.length; row++) {
+    const center = values[row]!;
+    const size = sizeAt(sizeColumn, param, fallback, row);
+    if (!Number.isFinite(center) || !(size > 0) || !Number.isFinite(size)) {
+      low[row] = NaN;
+      high[row] = NaN;
+      continue;
+    }
+    low[row] = center - size / 2;
+    high[row] = center + size / 2;
+  }
+  return [low, high];
+}
+
+function expandRasterFrame(frame: LayerFrame, warnings: PipelineWarning[]): void {
+  const xNumeric = frame.xNumeric;
+  const yNumeric = frame.yNumeric;
+  if (xNumeric === null || yNumeric === null) return;
+  const params = (frame.binding.layer.params ?? {}) as {
+    interpolate?: unknown;
+    hjust?: number;
+    vjust?: number;
+  };
   // Schema only admits false; reject any non-false truthy at runtime too.
   if ((params as { interpolate?: unknown }).interpolate === true) {
     throw new PipelineError(
@@ -145,8 +154,8 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
   const vjust = params.vjust ?? 0.5;
   const seen = new Map<string, number>();
   for (let row = 0; row < frame.n; row++) {
-    const x = frame.xNumeric[row]!;
-    const y = frame.yNumeric[row]!;
+    const x = xNumeric[row]!;
+    const y = yNumeric[row]!;
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
     const key = `${x}\0${y}`;
     if (seen.has(key)) {
@@ -158,8 +167,8 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
     }
     seen.set(key, row);
   }
-  const xSpace = spacingOf(uniqueSorted(frame.xNumeric));
-  const ySpace = spacingOf(uniqueSorted(frame.yNumeric));
+  const xSpace = spacingOf(uniqueSorted(xNumeric));
+  const ySpace = spacingOf(uniqueSorted(yNumeric));
   if (xSpace.irregular || ySpace.irregular) {
     warnings.push({
       code: "raster-irregular-spacing",
@@ -171,8 +180,8 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
   const bottom = new Float64Array(frame.n);
   const top = new Float64Array(frame.n);
   for (let row = 0; row < frame.n; row++) {
-    const x = frame.xNumeric[row]!;
-    const y = frame.yNumeric[row]!;
+    const x = xNumeric[row]!;
+    const y = yNumeric[row]!;
     if (!Number.isFinite(x) || !Number.isFinite(y)) {
       left[row] = NaN;
       right[row] = NaN;

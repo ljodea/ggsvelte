@@ -226,44 +226,54 @@ function polygonCentroid(ring: unknown): SfPosition | null {
  * Degenerate / empty parts are skipped.
  */
 export function representativePoints(type: string, coordinates: unknown): readonly SfPosition[] {
-  if (type === "Point") return isFinitePair(coordinates) ? [coordinates] : [];
-  if (type === "MultiPoint") {
-    if (!Array.isArray(coordinates)) return [];
-    const pts: SfPosition[] = [];
-    for (const c of coordinates) {
-      if (isFinitePair(c)) pts.push(c);
-    }
-    return pts;
-  }
-  if (type === "LineString") {
-    const m = meanPosition(ringPositions(coordinates));
-    return m === null ? [] : [m];
-  }
-  if (type === "MultiLineString") {
-    if (!Array.isArray(coordinates)) return [];
-    const out: SfPosition[] = [];
-    for (const line of coordinates) {
-      const m = meanPosition(ringPositions(line));
-      if (m !== null) out.push(m);
-    }
-    return out;
-  }
-  if (type === "Polygon") {
-    if (!Array.isArray(coordinates) || coordinates.length === 0) return [];
-    const c = polygonCentroid(coordinates[0]);
-    return c === null ? [] : [c];
-  }
-  if (type === "MultiPolygon") {
-    if (!Array.isArray(coordinates)) return [];
-    const out: SfPosition[] = [];
-    for (const poly of coordinates) {
-      if (!Array.isArray(poly) || poly.length === 0) continue;
-      const c = polygonCentroid(poly[0]);
-      if (c !== null) out.push(c);
-    }
-    return out;
-  }
+  if (type === "Point") return finitePoint(coordinates);
+  if (type === "MultiPoint") return finitePoints(coordinates);
+  if (type === "LineString") return linePoint(coordinates);
+  if (type === "MultiLineString") return linePoints(coordinates);
+  if (type === "Polygon") return polygonPoint(coordinates);
+  if (type === "MultiPolygon") return polygonPoints(coordinates);
   return [];
+}
+
+function finitePoint(coordinates: unknown): readonly SfPosition[] {
+  return isFinitePair(coordinates) ? [coordinates] : [];
+}
+
+function finitePoints(coordinates: unknown): readonly SfPosition[] {
+  if (!Array.isArray(coordinates)) return [];
+  return coordinates.filter((value): value is SfPosition => isFinitePair(value));
+}
+
+function linePoint(coordinates: unknown): readonly SfPosition[] {
+  const point = meanPosition(ringPositions(coordinates));
+  return point === null ? [] : [point];
+}
+
+function linePoints(coordinates: unknown): readonly SfPosition[] {
+  if (!Array.isArray(coordinates)) return [];
+  const out: SfPosition[] = [];
+  for (const line of coordinates) {
+    const point = meanPosition(ringPositions(line));
+    if (point !== null) out.push(point);
+  }
+  return out;
+}
+
+function polygonPoint(coordinates: unknown): readonly SfPosition[] {
+  if (!Array.isArray(coordinates) || coordinates.length === 0) return [];
+  const point = polygonCentroid(coordinates[0]);
+  return point === null ? [] : [point];
+}
+
+function polygonPoints(coordinates: unknown): readonly SfPosition[] {
+  if (!Array.isArray(coordinates)) return [];
+  const out: SfPosition[] = [];
+  for (const poly of coordinates) {
+    if (!Array.isArray(poly) || poly.length === 0) continue;
+    const point = polygonCentroid(poly[0]);
+    if (point !== null) out.push(point);
+  }
+  return out;
 }
 
 export function geometryFieldName(params: { geometry?: string } | undefined): string {
