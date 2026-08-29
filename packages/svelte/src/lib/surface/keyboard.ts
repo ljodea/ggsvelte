@@ -95,6 +95,60 @@ type SurfaceKeyResolution = {
   readonly preventDefault: boolean;
 };
 
+function arrowDelta(key: string, step: number): PlotPoint {
+  const horizontal = key === "ArrowLeft" ? -step : key === "ArrowRight" ? step : 0;
+  const vertical = key === "ArrowUp" ? -step : key === "ArrowDown" ? step : 0;
+  return { x: horizontal, y: vertical };
+}
+
+function resolveAreaArrow(input: SurfaceKeyboardInput): SurfaceKeyResolution {
+  const panel = input.inspectionPanel ?? input.firstPanel;
+  if (panel === undefined || input.brushCorners === null) {
+    return { preventDefault: true, action: { type: "none" } };
+  }
+  const { x: dx, y: dy } = arrowDelta(input.key, input.shiftKey ? 10 : 1);
+  return {
+    preventDefault: true,
+    action: {
+      type: "nudge-brush",
+      corners: nudgeBrushEnd(input.brushCorners, dx, dy, panel),
+    },
+  };
+}
+
+function resolveAreaCommit(input: SurfaceKeyboardInput): SurfaceKeyResolution {
+  const action: SurfaceKeyAction =
+    input.brushCorners === null
+      ? {
+          type: "begin-area",
+          anchor: input.inspectionAnchor ?? panelCenterAnchor(input.firstPanel),
+        }
+      : {
+          type: "complete-area",
+          finish: resolveFinishBrushAction({
+            ended: { kind: "commit", rect: normalizedRect(input.brushCorners) },
+            activeTool: input.activeTool,
+          }),
+        };
+  return { preventDefault: true, action };
+}
+
+function resolveInspectionActivation(input: SurfaceKeyboardInput): SurfaceKeyResolution | null {
+  if (input.activeTool === "point" && input.hasInspection) {
+    return {
+      preventDefault: true,
+      action: {
+        type: "toggle-point-keys",
+        keys: input.focusKey === null ? input.sourceKeys : [input.focusKey],
+      },
+    };
+  }
+  if (input.hasInspection && input.pinEnabled) {
+    return { preventDefault: true, action: { type: "toggle-pin" } };
+  }
+  return null;
+}
+
 /**
  * Pure decision table for the plot capture-surface `keydown` handler.
  * Preserves existing priority: area draft arrows → area Enter/Space →
@@ -102,60 +156,16 @@ type SurfaceKeyResolution = {
  * Callers own side effects (brush mutation, inspection, tool changes).
  */
 export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKeyResolution {
-  const {
-    key,
-    shiftKey,
-    activeTool,
-    brushCorners,
-    hasInspection,
-    pinEnabled,
-    focusKey,
-    sourceKeys,
-    inspectionAnchor,
-    inspectionPanel,
-    firstPanel,
-  } = input;
+  const { key, activeTool, brushCorners } = input;
   const area = isAreaTool(activeTool);
   const hasDraft = brushCorners !== null;
 
   if (area && key.startsWith("Arrow") && hasDraft) {
-    const step = shiftKey ? 10 : 1;
-    const dx = key === "ArrowLeft" ? -step : key === "ArrowRight" ? step : 0;
-    const dy = key === "ArrowUp" ? -step : key === "ArrowDown" ? step : 0;
-    // Prefer inspection panel, else first panel (host previously inspectionPanel ?? panels[0]).
-    const panel = inspectionPanel ?? firstPanel;
-    if (panel === undefined) {
-      // Draft without a panel: swallow the key (preventDefault) without mutating.
-      return { preventDefault: true, action: { type: "none" } };
-    }
-    return {
-      preventDefault: true,
-      action: {
-        type: "nudge-brush",
-        corners: nudgeBrushEnd(brushCorners, dx, dy, panel),
-      },
-    };
+    return resolveAreaArrow(input);
   }
 
   if (area && (key === "Enter" || key === " ")) {
-    return {
-      preventDefault: true,
-      action:
-        brushCorners === null
-          ? {
-              type: "begin-area",
-              anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
-            }
-          : {
-              type: "complete-area",
-              // Keyboard commits the live draft as-is (no free-corner update).
-              // Zero-size drafts still route as commit → select/zoom/end-area.
-              finish: resolveFinishBrushAction({
-                ended: { kind: "commit", rect: normalizedRect(brushCorners) },
-                activeTool,
-              }),
-            },
-    };
+    return resolveAreaCommit(input);
   }
 
   if (key === "]" || key === "[") {
@@ -169,28 +179,20 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   }
 
   if (key.startsWith("Arrow")) {
+    const { x: dx, y: dy } = arrowDelta(key, 1);
     return {
       preventDefault: true,
       action: {
         type: "navigate-direction",
-        dx: key === "ArrowRight" ? 1 : key === "ArrowLeft" ? -1 : 0,
-        dy: key === "ArrowDown" ? 1 : key === "ArrowUp" ? -1 : 0,
+        dx,
+        dy,
       },
     };
   }
 
-  if ((key === "Enter" || key === " ") && activeTool === "point" && hasInspection) {
-    return {
-      preventDefault: true,
-      action: {
-        type: "toggle-point-keys",
-        keys: focusKey === null ? sourceKeys : [focusKey],
-      },
-    };
-  }
-
-  if ((key === "Enter" || key === " ") && hasInspection && pinEnabled) {
-    return { preventDefault: true, action: { type: "toggle-pin" } };
+  if (key === "Enter" || key === " ") {
+    const activation = resolveInspectionActivation(input);
+    if (activation !== null) return activation;
   }
 
   if (key === "Escape") {

@@ -5,84 +5,118 @@
 import type {
   InteractionConfigInput,
   InteractionTool,
+  LegendFocusInput,
   ResolvedInteractionConfig,
+  SelectInput,
+  ZoomInput,
 } from "./interaction.js";
 import {
   INTERACTION_DIAGNOSTIC_CATALOG,
   type InteractionDiagnostic,
 } from "./interaction-diagnostics.js";
 
+type ResolvedInspect<Row, Key> = ResolvedInteractionConfig<Row, Key>["inspect"];
+type ResolvedSelect = ResolvedInteractionConfig["select"];
+
+function resolveInspect<Row, Key>(
+  input: InteractionConfigInput<Row, Key>["inspect"],
+  diagnostics: InteractionDiagnostic[],
+): ResolvedInspect<Row, Key> {
+  if (input === undefined || input === false) return null;
+  const value = input === true ? {} : input;
+  const maxDistance = value.maxDistance ?? 24;
+  if (!Number.isFinite(maxDistance) || maxDistance < 0) {
+    diagnostics.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INVALID_MAX_DISTANCE,
+      actual: maxDistance,
+    });
+    return null;
+  }
+  return Object.freeze({
+    mode: value.mode ?? "auto",
+    pin: value.pin ?? true,
+    maxDistance,
+    contentMode: value.contentMode ?? "informational",
+    muteSiblings: value.muteSiblings ?? false,
+    ...(value.content !== undefined && { content: value.content }),
+  });
+}
+
+function resolveSelect(
+  input: SelectInput | undefined,
+  hasKey: boolean | undefined,
+  diagnostics: InteractionDiagnostic[],
+): ResolvedSelect {
+  if (input === undefined || input === false) return null;
+  const value = typeof input === "string" ? { type: input } : input;
+  const select = Object.freeze({
+    type: value.type,
+    mode: value.mode ?? "xy",
+    multiple: value.multiple ?? false,
+    persistent: value.persistent ?? true,
+    preset: value.preset ?? "independent",
+  });
+  if (value.type === "point" && hasKey === false) {
+    diagnostics.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_POINT_REQUIRES_KEY,
+    });
+  }
+  if (value.type === "interval" && select.preset !== "independent" && hasKey === false) {
+    diagnostics.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_PRESET_REQUIRES_KEY,
+    });
+  }
+  return select;
+}
+
+function availableInteractionTools<Row, Key>(
+  inspect: ResolvedInspect<Row, Key>,
+  select: ResolvedSelect,
+  zoom: ResolvedInteractionConfig["zoom"],
+): InteractionTool[] {
+  const tools: InteractionTool[] = [];
+  if (inspect !== null || select?.type === "interval" || zoom !== null) tools.push("inspect");
+  if (select?.type === "point") tools.push("point");
+  if (select?.type === "interval") tools.push("select-area");
+  if (zoom !== null) tools.push("zoom-area");
+  return tools;
+}
+
+function resolveZoom(input: ZoomInput | undefined): ResolvedInteractionConfig["zoom"] {
+  if (input === undefined || input === false) return null;
+  const value = input === true ? {} : input;
+  return Object.freeze({
+    mode: value.mode ?? "xy",
+    trigger: value.trigger ?? "brush",
+  });
+}
+
+function resolveLegendFocus(
+  input: LegendFocusInput | undefined,
+  hasKey: boolean | undefined,
+  diagnostics: InteractionDiagnostic[],
+): ResolvedInteractionConfig["legendFocus"] {
+  if (input === undefined || input === false) return null;
+  if (hasKey === false) {
+    diagnostics.push({
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_REQUIRES_KEY,
+    });
+    return null;
+  }
+  const value = input === true ? {} : input;
+  return Object.freeze({ preview: value.preview ?? true });
+}
+
 export function normalizeInteractionConfig<Row, Key>(
   input: InteractionConfigInput<Row, Key>,
   context: { faceted?: boolean; hasKey?: boolean } = {},
 ): ResolvedInteractionConfig<Row, Key> {
   const diagnostics: InteractionDiagnostic[] = [];
-  let inspect: ResolvedInteractionConfig<Row, Key>["inspect"] = null;
-  if (input.inspect !== undefined && input.inspect !== false) {
-    const value = input.inspect === true ? {} : input.inspect;
-    const maxDistance = value.maxDistance ?? 24;
-    if (!Number.isFinite(maxDistance) || maxDistance < 0) {
-      diagnostics.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INVALID_MAX_DISTANCE,
-        actual: maxDistance,
-      });
-    } else {
-      inspect = Object.freeze({
-        mode: value.mode ?? "auto",
-        pin: value.pin ?? true,
-        maxDistance,
-        contentMode: value.contentMode ?? "informational",
-        muteSiblings: value.muteSiblings ?? false,
-        ...(value.content !== undefined && { content: value.content }),
-      });
-    }
-  }
+  const inspect = resolveInspect(input.inspect, diagnostics);
+  const select = resolveSelect(input.select, context.hasKey, diagnostics);
 
-  let select: ResolvedInteractionConfig["select"] = null;
-  if (input.select !== undefined && input.select !== false) {
-    const value = typeof input.select === "string" ? { type: input.select } : input.select;
-    select = Object.freeze({
-      type: value.type,
-      mode: value.mode ?? "xy",
-      multiple: value.multiple ?? false,
-      persistent: value.persistent ?? true,
-      preset: value.preset ?? "independent",
-    });
-    if (value.type === "point" && context.hasKey === false) {
-      diagnostics.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_POINT_REQUIRES_KEY,
-      });
-    }
-    if (value.type === "interval" && select.preset !== "independent" && context.hasKey === false) {
-      // Union combines stored record keys and cross-panel matches candidate
-      // semantic keys: with keyless rows both silently select nothing
-      // outside the origin rectangle.
-      diagnostics.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_PRESET_REQUIRES_KEY,
-      });
-    }
-  }
-
-  let zoom: ResolvedInteractionConfig["zoom"] = null;
-  if (input.zoom !== undefined && input.zoom !== false) {
-    const value = input.zoom === true ? {} : input.zoom;
-    zoom = Object.freeze({
-      mode: value.mode ?? "xy",
-      trigger: value.trigger ?? "brush",
-    });
-  }
-
-  let legendFocus: ResolvedInteractionConfig["legendFocus"] = null;
-  if (input.legendFocus !== undefined && input.legendFocus !== false) {
-    if (context.hasKey === false) {
-      diagnostics.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_REQUIRES_KEY,
-      });
-    } else {
-      const value = input.legendFocus === true ? {} : input.legendFocus;
-      legendFocus = Object.freeze({ preview: value.preview ?? true });
-    }
-  }
+  let zoom = resolveZoom(input.zoom);
+  const legendFocus = resolveLegendFocus(input.legendFocus, context.hasKey, diagnostics);
 
   if (context.faceted === true && zoom !== null) {
     diagnostics.push({
@@ -91,12 +125,7 @@ export function normalizeInteractionConfig<Row, Key>(
     zoom = null;
   }
 
-  const availableTools: InteractionTool[] = [];
-  if (inspect !== null || select?.type === "interval" || zoom !== null)
-    availableTools.push("inspect");
-  if (select?.type === "point") availableTools.push("point");
-  if (select?.type === "interval") availableTools.push("select-area");
-  if (zoom !== null) availableTools.push("zoom-area");
+  const availableTools = availableInteractionTools(inspect, select, zoom);
   const fallbackTool = select?.type === "point" && inspect === null ? "point" : "inspect";
   const requestedTool = input.tool ?? fallbackTool;
   const initialTool = availableTools.includes(requestedTool) ? requestedTool : fallbackTool;

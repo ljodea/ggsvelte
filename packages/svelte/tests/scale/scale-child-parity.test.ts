@@ -79,21 +79,8 @@ function representativeProps(helper: string): Record<string, unknown> {
     // size / linewidth
     return { values: [1, 2, 4] as const };
   }
-  if (helper === "scaleColorDiscrete" || helper === "scaleFillDiscrete") {
-    return { scheme: "colorblind" };
-  }
-  if (helper === "scaleColorContinuous" || helper === "scaleFillContinuous") {
-    return { scheme: "viridis" };
-  }
-  if (helper === "scaleXContinuous" || helper === "scaleYContinuous") {
-    return { domain: [0, 10] as const };
-  }
-  if (helper === "scaleSizeContinuous") {
-    return { range: [1, 6] as const };
-  }
-  if (helper === "scaleShapeDiscrete") {
-    return { range: ["circle", "triangle"] as const };
-  }
+  const common = representativeCommonProps(helper);
+  if (common !== undefined) return common;
   // gradientn requires ≥2 explicit stops (no defaults; #826).
   if (
     helper === "scaleColorGradientn" ||
@@ -111,6 +98,18 @@ function representativeProps(helper: string): Record<string, unknown> {
     return { colours: ["#000000", "#ffffff"] as const };
   }
   return {};
+}
+
+function representativeCommonProps(helper: string): Record<string, unknown> | undefined {
+  if (helper === "scaleColorDiscrete" || helper === "scaleFillDiscrete")
+    return { scheme: "colorblind" };
+  if (helper === "scaleColorContinuous" || helper === "scaleFillContinuous")
+    return { scheme: "viridis" };
+  if (helper === "scaleXContinuous" || helper === "scaleYContinuous")
+    return { domain: [0, 10] as const };
+  if (helper === "scaleSizeContinuous") return { range: [1, 6] as const };
+  if (helper === "scaleShapeDiscrete") return { range: ["circle", "triangle"] as const };
+  return undefined;
 }
 
 function callHelper(helper: string, props: Record<string, unknown>): Scales {

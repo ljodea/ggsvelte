@@ -96,18 +96,10 @@ export function resolveSemanticKeysForPlot(input: {
   });
 }
 
-/**
- * Resolve durable semantic keys for interaction, emitting diagnostics in
- * encounter order: synthetic-rule missing lineage, per-candidate missing
- * lineage, then per-row invalid / unstable / duplicate key diagnostics.
- */
-export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSemanticKeysResult {
-  const keys = new Map<number, PropertyKey | null>();
-  const diagnostics: InteractionDiagnostic[] = [];
-  const { model, datumKey, priorKeys, rowIdentity } = input;
-  if (datumKey === undefined) return { keys, diagnostics };
-
-  const owners = new Map<PropertyKey, number>();
+function sourceRowsForSemanticKeys(
+  model: SemanticKeyModelView,
+  diagnostics: InteractionDiagnostic[],
+): Set<number> {
   const sourceRows = new Set<number>();
   if (
     model.candidateCount === 0 &&
@@ -122,9 +114,6 @@ export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSem
       actual: "synthetic rule has no source rows",
     });
 
-  // Expand each lineage id once. Smooth / aggregate eval-grid marks share one
-  // membership array across C marks (#1140) — re-spreading was O(C·L).
-  // Map value: true when the lineage has no source rows (empty-lineage diag).
   const lineageEmpty = new Map<number, boolean>();
   for (let id = 0; id < model.candidateCount; id++) {
     const candidate = model.candidate(id);
@@ -143,12 +132,27 @@ export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSem
     if (candidate.rowIndex === null && empty)
       diagnostics.push({
         ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_MISSING_LINEAGE,
-        actual: {
-          layerIndex: candidate.layerIndex,
-          candidateId: candidate.id,
-        },
+        actual: { layerIndex: candidate.layerIndex, candidateId: candidate.id },
       });
   }
+  return sourceRows;
+}
+
+/**
+ * Resolve durable semantic keys for interaction, emitting diagnostics in
+ * encounter order: synthetic-rule missing lineage, per-candidate missing
+ * lineage, then per-row invalid / unstable / duplicate key diagnostics.
+ */
+export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSemanticKeysResult {
+  const keys = new Map<number, PropertyKey | null>();
+  const diagnostics: InteractionDiagnostic[] = [];
+  const { model, datumKey, priorKeys, rowIdentity } = input;
+  if (datumKey === undefined) return { keys, diagnostics };
+
+  const owners = new Map<PropertyKey, number>();
+  // Expand each lineage id once. Smooth / aggregate eval-grid marks share one
+  // membership array across C marks (#1140) — re-spreading was O(C·L).
+  const sourceRows = sourceRowsForSemanticKeys(model, diagnostics);
 
   for (const rowIndex of sourceRows) {
     const row = model.row(rowIndex);
