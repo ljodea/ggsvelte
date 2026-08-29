@@ -113,6 +113,35 @@ function emitEdges(input: {
   };
 }
 
+function tileAxis(
+  frame: LayerFrame,
+  fx: Frame,
+  row: number,
+  axis: "x" | "y",
+  param: number | undefined,
+  defaultSize: number,
+): { center: number; size: number } | null {
+  const scale = axis === "x" ? fx.xScale : fx.yScale;
+  const values = axis === "x" ? frame.xValues : frame.yValues;
+  const numeric = axis === "x" ? frame.xNumeric : frame.yNumeric;
+  const field = axis === "x" ? frame.binding.widthField : frame.binding.heightField;
+  if (scale.type === "band") {
+    const center = scale.normalize(values?.[row] ?? null);
+    if (center === undefined || Number.isNaN(center)) return null;
+    const size = sizeAt(frame, field, param, 1, row) * scale.step;
+    return { center, size };
+  }
+  const value = numeric?.[row];
+  if (value === undefined || !Number.isFinite(value)) return null;
+  const size = sizeAt(frame, field, param, defaultSize, row);
+  if (!(size > 0) || !Number.isFinite(size)) return null;
+  const half = size / 2;
+  const lower = scale.normalizeTransformed(value - half);
+  const upper = scale.normalizeTransformed(value + half);
+  if (!Number.isFinite(lower) || !Number.isFinite(upper)) return null;
+  return { center: (lower + upper) / 2, size: Math.abs(upper - lower) };
+}
+
 function emitBandTiles(input: {
   frame: LayerFrame;
   fx: Frame;
@@ -138,87 +167,16 @@ function emitBandTiles(input: {
   const defaultW = fx.xScale.type === "band" ? 1 : defaultResolution(frame.xNumeric);
   const defaultH = fx.yScale.type === "band" ? 1 : defaultResolution(frame.yNumeric);
   for (let row = 0; row < n; row++) {
-    let centerX: number | undefined;
-    let centerY: number | undefined;
-    let wFrac: number;
-    let hFrac: number;
-    if (fx.xScale.type === "band") {
-      const tc = fx.xScale.normalize(frame.xValues?.[row] ?? null);
-      if (tc === undefined || Number.isNaN(tc)) {
-        removed++;
-        continue;
-      }
-      centerX = tc;
-      const w = sizeAt(frame, frame.binding.widthField, widthParam, 1, row);
-      wFrac = w * fx.xScale.step;
-    } else {
-      const cx = frame.xNumeric?.[row];
-      if (cx === undefined || !Number.isFinite(cx)) {
-        removed++;
-        continue;
-      }
-      const w = sizeAt(frame, frame.binding.widthField, widthParam, defaultW, row);
-      if (!(w > 0) || !Number.isFinite(w)) {
-        removed++;
-        continue;
-      }
-      const half = w / 2;
-      const x0t = fx.xScale.normalizeTransformed(cx - half);
-      const x1t = fx.xScale.normalizeTransformed(cx + half);
-      if (!Number.isFinite(x0t) || !Number.isFinite(x1t)) {
-        removed++;
-        continue;
-      }
-      centerX = (x0t + x1t) / 2;
-      wFrac = Math.abs(x1t - x0t);
-    }
-    if (fx.yScale.type === "band") {
-      const tc = fx.yScale.normalize(frame.yValues?.[row] ?? null);
-      if (tc === undefined || Number.isNaN(tc)) {
-        removed++;
-        continue;
-      }
-      centerY = tc;
-      const h = sizeAt(frame, frame.binding.heightField, heightParam, 1, row);
-      hFrac = h * fx.yScale.step;
-    } else {
-      const cy = frame.yNumeric?.[row];
-      if (cy === undefined || !Number.isFinite(cy)) {
-        removed++;
-        continue;
-      }
-      const h = sizeAt(frame, frame.binding.heightField, heightParam, defaultH, row);
-      if (!(h > 0) || !Number.isFinite(h)) {
-        removed++;
-        continue;
-      }
-      const half = h / 2;
-      const y0t = fx.yScale.normalizeTransformed(cy - half);
-      const y1t = fx.yScale.normalizeTransformed(cy + half);
-      if (!Number.isFinite(y0t) || !Number.isFinite(y1t)) {
-        removed++;
-        continue;
-      }
-      centerY = (y0t + y1t) / 2;
-      hFrac = Math.abs(y1t - y0t);
-    }
-    if (
-      centerX === undefined ||
-      centerY === undefined ||
-      Number.isNaN(centerX) ||
-      Number.isNaN(centerY) ||
-      !(wFrac > 0) ||
-      !(hFrac > 0) ||
-      !Number.isFinite(wFrac) ||
-      !Number.isFinite(hFrac)
-    ) {
+    const x = tileAxis(frame, fx, row, "x", widthParam, defaultW);
+    const y = tileAxis(frame, fx, row, "y", heightParam, defaultH);
+    if (x === null || y === null || x.size === 0 || y.size === 0) {
       removed++;
       continue;
     }
-    const xPx = (centerX - wFrac / 2) * fx.innerWidth;
-    const wPx = wFrac * fx.innerWidth;
-    const yTop = (1 - (centerY + hFrac / 2)) * fx.innerHeight;
-    const hPx = hFrac * fx.innerHeight;
+    const xPx = (x.center - x.size / 2) * fx.innerWidth;
+    const wPx = x.size * fx.innerWidth;
+    const yTop = (1 - (y.center + y.size / 2)) * fx.innerHeight;
+    const hPx = y.size * fx.innerHeight;
     const o = kept * 4;
     rects[o] = xPx;
     rects[o + 1] = yTop;
@@ -245,6 +203,54 @@ function emitBandTiles(input: {
     kept,
     removed,
   };
+}
+
+function edgeStrokePaint(
+  frame: LayerFrame,
+  color: ResolvedColorScale | null,
+  emitted: { keptRows: Uint32Array },
+  params: { linewidth?: number },
+): { stroke?: string | null; strokes?: string[] } | null {
+  const { binding } = frame;
+  const wantsMappedStroke =
+    color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
+  if (wantsMappedStroke && color !== null) {
+    return { stroke: null, strokes: mappedPaintVector(frame, "color", color, emitted.keptRows) };
+  }
+  if (binding.color.constant !== null) return { stroke: binding.color.constant };
+  const hasStrokeStyle =
+    typeof binding.linewidth?.constant === "number" ||
+    binding.linewidth?.field !== null ||
+    binding.linewidth?.scaledConstant !== null ||
+    typeof binding.linetype?.constant === "string" ||
+    binding.linetype?.field !== null ||
+    binding.linetype?.scaledConstant !== null ||
+    typeof params.linewidth === "number";
+  return hasStrokeStyle ? { stroke: null } : null;
+}
+
+function applyEdgeStroke(
+  batch: RectsBatch,
+  frame: LayerFrame,
+  styles: ResolvedStyleScales,
+  color: ResolvedColorScale | null,
+  emitted: { keptRows: Uint32Array },
+  params: { alpha?: number; linewidth?: number },
+): void {
+  const paint = edgeStrokePaint(frame, color, emitted, params);
+  if (paint === null) return;
+  Object.assign(batch, paint);
+  const { binding } = frame;
+  batch.strokeWidth = constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH);
+  const linewidths = numericStyleVector(frame, "linewidth", emitted.keptRows, styles);
+  if (linewidths !== undefined) batch.strokeWidths = linewidths;
+  if (typeof binding.linetype?.constant === "string") {
+    batch.linetype = binding.linetype.constant as Linetype;
+  }
+  const linetypeIndexes = indexedStyleVector(frame, "linetype", emitted.keptRows, styles, (value) =>
+    linetypeIndex(value as Linetype),
+  );
+  if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
 }
 
 function styleEdgeBatch(
@@ -280,44 +286,7 @@ function styleEdgeBatch(
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
     batch.fills = mappedPaintVector(frame, "fill", fill, emitted.keptRows);
   }
-  if (withStroke) {
-    const wantsMappedStroke =
-      color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
-    const constantStroke = binding.color.constant;
-    const hasStrokeStyle =
-      typeof binding.linewidth?.constant === "number" ||
-      binding.linewidth?.field !== null ||
-      binding.linewidth?.scaledConstant !== null ||
-      typeof binding.linetype?.constant === "string" ||
-      binding.linetype?.field !== null ||
-      binding.linetype?.scaledConstant !== null ||
-      typeof params.linewidth === "number";
-    if (wantsMappedStroke && color !== null) {
-      batch.strokes = mappedPaintVector(frame, "color", color, emitted.keptRows);
-      batch.stroke = null;
-    } else if (constantStroke !== null) {
-      batch.stroke = constantStroke;
-    } else if (hasStrokeStyle) {
-      // Linewidth/linetype without color: outline with theme ink.
-      batch.stroke = null;
-    }
-    if (batch.stroke !== undefined || batch.strokes !== undefined) {
-      batch.strokeWidth = constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH);
-      const linewidths = numericStyleVector(frame, "linewidth", emitted.keptRows, styles);
-      if (linewidths !== undefined) batch.strokeWidths = linewidths;
-      if (typeof binding.linetype?.constant === "string") {
-        batch.linetype = binding.linetype.constant as Linetype;
-      }
-      const linetypeIndexes = indexedStyleVector(
-        frame,
-        "linetype",
-        emitted.keptRows,
-        styles,
-        (value) => linetypeIndex(value as Linetype),
-      );
-      if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
-    }
-  }
+  if (withStroke) applyEdgeStroke(batch, frame, styles, color, emitted, params);
   return batch;
 }
 
