@@ -58,6 +58,71 @@ export type IntervalBoundsEditorState = {
   cancel(): void;
 };
 
+function temporalKindForAxis(model: RenderModel, axis: "x" | "y"): TemporalScaleKind | null {
+  for (const plan of model.guidePlans) {
+    if (plan.type === "axis" && plan.aesthetic === axis) return plan.temporalKind;
+  }
+  return null;
+}
+
+function zoomBoundsEditorInput(
+  deps: IntervalBoundsEditorDeps,
+  model: RenderModel,
+  editor: IntervalBoundsEditorRef,
+  temporalKind: TemporalScaleKind | null,
+): BoundsEditorInput | null {
+  const viewportPanel = model.viewport.panels[0];
+  if (viewportPanel === undefined) return null;
+  const scale = viewportPanel.axisEditModel(editor.axis);
+  if (scale.kind === "band") return null;
+  const bounds = deps.effectiveZoomDomains()?.[editor.axis] ?? scale.domain;
+  return boundsEditorInputForScale({
+    axis: editor.axis,
+    action: "zoom",
+    scale,
+    bounds,
+    temporalKind,
+  });
+}
+
+function selectionBoundsEditorInput(
+  deps: IntervalBoundsEditorDeps,
+  model: RenderModel,
+  editor: IntervalBoundsEditorRef,
+  temporalKind: TemporalScaleKind | null,
+): BoundsEditorInput | null {
+  const record = deps.currentIntervalRecord();
+  const targetPanelId = record?.panelId ?? editor.panelId;
+  if (targetPanelId === undefined) return null;
+  const viewportPanel = model.viewport.panel(targetPanelId);
+  if (viewportPanel === null) return null;
+  const scale = viewportPanel.axisEditModel(editor.axis);
+  const semantic = record?.domains[editor.axis];
+  const bounds =
+    semantic?.kind === "band"
+      ? ([semantic.values[0] ?? "", semantic.values.at(-1) ?? ""] as const)
+      : semantic?.domain;
+  return boundsEditorInputForScale({
+    axis: editor.axis,
+    action: "select",
+    scale,
+    temporalKind,
+    ...(bounds !== undefined && { bounds }),
+  });
+}
+
+function resolveBoundsEditorInput(
+  deps: IntervalBoundsEditorDeps,
+  editor: IntervalBoundsEditorRef | null,
+): BoundsEditorInput | null {
+  const model = deps.model();
+  if (editor === null || model === null) return null;
+  const temporalKind = temporalKindForAxis(model, editor.axis);
+  return editor.action === "zoom"
+    ? zoomBoundsEditorInput(deps, model, editor, temporalKind)
+    : selectionBoundsEditorInput(deps, model, editor, temporalKind);
+}
+
 // ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
@@ -68,53 +133,7 @@ export function createIntervalBoundsEditor(
   let boundsEditor = $state<IntervalBoundsEditorRef | null>(null);
   let boundsReturnFocus = $state<HTMLElement | null>(null);
 
-  const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
-    const editor = boundsEditor;
-    const model = deps.model();
-    if (editor === null || model === null) return null;
-    // Axis guide plans carry temporalKind (including monthDay); the trained
-    // continuous scale does not. Use the first matching axis plan so the
-    // bounds editor can format drafts without the reference year.
-    let temporalKind: TemporalScaleKind | null = null;
-    for (const plan of model.guidePlans) {
-      if (plan.type === "axis" && plan.aesthetic === editor.axis) {
-        temporalKind = plan.temporalKind;
-        break;
-      }
-    }
-    if (editor.action === "zoom") {
-      const viewportPanel = model.viewport.panels[0];
-      if (viewportPanel === undefined) return null;
-      const scale = viewportPanel.axisEditModel(editor.axis);
-      if (scale.kind === "band") return null;
-      const bounds = deps.effectiveZoomDomains()?.[editor.axis] ?? scale.domain;
-      return boundsEditorInputForScale({
-        axis: editor.axis,
-        action: "zoom",
-        scale,
-        bounds,
-        temporalKind,
-      });
-    }
-    const record = deps.currentIntervalRecord();
-    const targetPanelId = record?.panelId ?? editor.panelId;
-    if (targetPanelId === undefined) return null;
-    const viewportPanel = model.viewport.panel(targetPanelId);
-    if (viewportPanel === null) return null;
-    const scale = viewportPanel.axisEditModel(editor.axis);
-    const semantic = record?.domains[editor.axis];
-    const bounds =
-      semantic?.kind === "band"
-        ? ([semantic.values[0] ?? "", semantic.values.at(-1) ?? ""] as const)
-        : semantic?.domain;
-    return boundsEditorInputForScale({
-      axis: editor.axis,
-      action: "select",
-      scale,
-      temporalKind,
-      ...(bounds !== undefined && { bounds }),
-    });
-  });
+  const boundsEditorInput = $derived.by(() => resolveBoundsEditorInput(deps, boundsEditor));
 
   $effect(() => {
     if (boundsEditor === null || boundsEditorInput !== null) return;

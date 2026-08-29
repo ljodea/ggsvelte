@@ -30,21 +30,29 @@ function componentName(geom: GeomName): string {
 }
 
 /** One representative value per param key family for the whitelist check. */
+const STRING_PARAM_VALUES: Readonly<Record<string, string>> = {
+  fun: "mean",
+  method: "loess",
+  shape: "circle",
+  curve: "linear",
+  connection: "linear",
+  direction: "hv",
+  stackdir: "up",
+  sides: "b",
+  outline: "full",
+  orientation: "x",
+  lineend: "butt",
+  linejoin: "round",
+  anchor: "middle",
+  closed: "right",
+  geometry: "geometry",
+  mapId: "id",
+  scale: "area",
+};
+
 function sampleValue(key: string): unknown {
-  if (key === "fun") return "mean";
-  if (key === "method") return "loess";
-  if (key === "shape") return "circle";
-  if (key === "curve") return "linear";
-  if (key === "connection") return "linear";
-  if (key === "direction") return "hv";
-  if (key === "stackdir") return "up";
-  if (key === "sides") return "b";
-  if (key === "outline") return "full";
-  if (key === "orientation") return "x";
-  if (key === "lineend") return "butt";
-  if (key === "linejoin") return "round";
-  if (key === "anchor") return "middle";
-  if (key === "closed") return "right";
+  const stringValue = STRING_PARAM_VALUES[key];
+  if (stringValue !== undefined) return stringValue;
   if (key === "drop") return true;
   if (key === "se") return true;
   if (key === "trim") return true;
@@ -54,10 +62,7 @@ function sampleValue(key: string): unknown {
   if (key === "breaks") return [0, 1];
   if (key === "quantiles") return [0.25, 0.5, 0.75];
   if (key === "args") return {};
-  if (key === "geometry") return "geometry";
-  if (key === "mapId") return "id";
-  if (key === "scale") return "area";
-  if (typeof key === "string" && (key.endsWith("Paint") || key === "glow")) {
+  if (key.endsWith("Paint") || key === "glow") {
     return key === "glow" ? 2 : "#ff0000";
   }
   if (key === "alpha" || key === "level" || key === "span" || key === "cut" || key === "adjust") {

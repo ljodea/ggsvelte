@@ -32,35 +32,38 @@ export function dataContentOrderToken(
 ): string {
   if (data === null || data === undefined) return "null";
   if (Array.isArray(data)) return rowRefOrderToken(data, sourceIdentity);
-  if (typeof data === "object") {
-    const record = data as Record<string, unknown>;
-    const fieldKeys = Object.keys(record);
-    // DataRef shapes only when single-key (matches packages/spec isDataRef).
-    // A bare column map may own a field named `values`/`columns` alongside
-    // other arrays and must not short-circuit (Codex P2).
-    if (fieldKeys.length === 1 && fieldKeys[0] === "values" && Array.isArray(record["values"])) {
-      return rowRefOrderToken(record["values"] as unknown[], sourceIdentity);
-    }
-    if (
-      fieldKeys.length === 1 &&
-      fieldKeys[0] === "columns" &&
-      record["columns"] !== null &&
-      typeof record["columns"] === "object" &&
-      !Array.isArray(record["columns"])
-    )
-      return `c:${columnMapOrderToken(record["columns"] as Record<string, unknown>, sourceIdentity)}`;
-    if (fieldKeys.length === 1 && fieldKeys[0] === "name" && typeof record["name"] === "string")
-      return `n:${record["name"]}`;
-    // Bare column-oriented object (gg() wraps as { columns }) — fingerprint
-    // each field's array identity so in-place column replacement bumps epoch.
-    if (fieldKeys.length > 0 && fieldKeys.every((key) => Array.isArray(record[key])))
-      return `c:${columnMapOrderToken(record, sourceIdentity)}`;
-    return `o:${sourceIdentity(data)}`;
-  }
+  if (typeof data === "object") return objectDataOrderToken(data, sourceIdentity);
   if (typeof data === "string" || typeof data === "number" || typeof data === "boolean")
     return `p:${String(data)}`;
   if (typeof data === "bigint") return `p:${data.toString()}`;
   return `p:${sourceIdentity(data)}`;
+}
+
+function objectDataOrderToken(data: object, sourceIdentity: (value: unknown) => string): string {
+  const record = data as Record<string, unknown>;
+  const fieldKeys = Object.keys(record);
+  // DataRef shapes only when single-key (matches packages/spec isDataRef).
+  // A bare column map may own a field named `values`/`columns` alongside
+  // other arrays and must not short-circuit (Codex P2).
+  if (fieldKeys.length === 1 && fieldKeys[0] === "values" && Array.isArray(record["values"])) {
+    return rowRefOrderToken(record["values"], sourceIdentity);
+  }
+  const columns = record["columns"];
+  if (
+    fieldKeys.length === 1 &&
+    fieldKeys[0] === "columns" &&
+    columns !== null &&
+    typeof columns === "object" &&
+    !Array.isArray(columns)
+  )
+    return `c:${columnMapOrderToken(columns as Record<string, unknown>, sourceIdentity)}`;
+  if (fieldKeys.length === 1 && fieldKeys[0] === "name" && typeof record["name"] === "string")
+    return `n:${record["name"]}`;
+  // Bare column-oriented object (gg() wraps as { columns }) — fingerprint
+  // each field's array identity so in-place column replacement bumps epoch.
+  if (fieldKeys.length > 0 && fieldKeys.every((key) => Array.isArray(record[key])))
+    return `c:${columnMapOrderToken(record, sourceIdentity)}`;
+  return `o:${sourceIdentity(data)}`;
 }
 
 /** O(fields) fingerprint: each column array's identity (+ length), not cells. */

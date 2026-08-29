@@ -315,6 +315,65 @@ export function createInspectionCoordinator<
     candidate.primitiveIndex === prior.seedPrimitiveIndex &&
     candidateBatchRole(model, candidate, roles) === prior.seedBatchRole;
 
+  const preferredPinnedSeed = (
+    model: RenderModel,
+    prior: Slot,
+    identityEpoch: PropertyKey,
+    roles: readonly string[],
+  ): CandidateFacts | null => {
+    if (prior.identityEpoch !== identityEpoch) return null;
+    const preferred = model.candidates.candidate(prior.seedId);
+    if (preferred === null) return null;
+    if (prior.seedKey === null)
+      return keylessPinMatch(model, prior, preferred, roles) ? preferred : null;
+    return keyedPinRoleMatch(model, prior, preferred, roles) ? preferred : null;
+  };
+
+  const uniqueKeylessPinnedSeed = (
+    model: RenderModel,
+    prior: Slot,
+    roles: readonly string[],
+  ): CandidateFacts | null => {
+    const matches: CandidateFacts[] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate !== null && keylessPinMatch(model, prior, candidate, roles))
+        matches.push(candidate);
+    }
+    return matches.length === 1 ? matches[0]! : null;
+  };
+
+  const uniqueKeyedPinnedSeed = (
+    model: RenderModel,
+    prior: Slot,
+    roles: readonly string[],
+  ): CandidateFacts | null => {
+    const matches: CandidateFacts[] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate !== null && keyedPinMatch(model, prior, candidate)) matches.push(candidate);
+    }
+    if (matches.length === 1) return matches[0]!;
+    if (matches.length < 2) return null;
+    const sourceRows = new Set(matches.map((candidate) => candidate.rowIndex));
+    if (sourceRows.size !== 1) return null;
+    const sameRole = matches.filter(
+      (candidate) =>
+        candidate.kind === prior.seedKind &&
+        candidateBatchRole(model, candidate, roles) === prior.seedBatchRole &&
+        candidate.primitiveIndex === prior.seedPrimitiveIndex,
+    );
+    return sameRole.length === 1 ? sameRole[0]! : null;
+  };
+
+  const clearPinned = (): void => {
+    pinned = null;
+    if (lastSlot !== "pinned") return;
+    lastSemanticFingerprint = null;
+    lastPresentationIdentity = null;
+    lastSlot = null;
+  };
+
   const reconcilePinned = (
     input: Readonly<{
       model: RenderModel;
@@ -326,70 +385,24 @@ export function createInspectionCoordinator<
   ): CoordinatedInspection<Row, Key> | null => {
     const prior = pinned;
     if (prior === null) return null;
-    let seed: CandidateFacts | null = null;
     const roles = rolesFor(input.model);
     // Same identityEpoch: O(1) seedId revalidation when id + role still match.
     // Keyed path requires kind/batch/primitive (not only layer+key) so geom
     // swaps that reuse seedId cannot pin the wrong primitive. Fall through to
     // full scan on miss. Identity-change keyed still full-scans for ambiguity;
     // keyless identity-change clears immediately below.
-    if (prior.identityEpoch === input.identityEpoch) {
-      const preferred = input.model.candidates.candidate(prior.seedId);
-      if (preferred !== null) {
-        if (prior.seedKey === null) {
-          if (keylessPinMatch(input.model, prior, preferred, roles)) seed = preferred;
-        } else if (keyedPinRoleMatch(input.model, prior, preferred, roles)) {
-          seed = preferred;
-        }
-      }
-    }
+    let seed = preferredPinnedSeed(input.model, prior, input.identityEpoch, roles);
     if (seed === null && prior.seedKey === null) {
       if (prior.identityEpoch !== input.identityEpoch) {
-        pinned = null;
-        if (lastSlot === "pinned") {
-          lastSemanticFingerprint = null;
-          lastPresentationIdentity = null;
-          lastSlot = null;
-        }
+        clearPinned();
         return null;
       }
-      const matches: CandidateFacts[] = [];
-      for (let id = 0; id < input.model.candidates.size; id++) {
-        const candidate = input.model.candidates.candidate(id);
-        if (candidate === null) continue;
-        if (!keylessPinMatch(input.model, prior, candidate, roles)) continue;
-        matches.push(candidate);
-      }
-      seed = matches.length === 1 ? matches[0]! : null;
-    } else if (seed === null) {
-      const matches: CandidateFacts[] = [];
-      for (let id = 0; id < input.model.candidates.size; id++) {
-        const candidate = input.model.candidates.candidate(id);
-        if (candidate === null) continue;
-        if (!keyedPinMatch(input.model, prior, candidate)) continue;
-        matches.push(candidate);
-      }
-      if (matches.length === 1) seed = matches[0]!;
-      else if (matches.length > 1) {
-        const sourceRows = new Set(matches.map((candidate) => candidate.rowIndex));
-        if (sourceRows.size === 1) {
-          const sameRole = matches.filter(
-            (candidate) =>
-              candidate.kind === prior.seedKind &&
-              candidateBatchRole(input.model, candidate, roles) === prior.seedBatchRole &&
-              candidate.primitiveIndex === prior.seedPrimitiveIndex,
-          );
-          seed = sameRole.length === 1 ? sameRole[0]! : null;
-        }
-      }
+      seed = uniqueKeylessPinnedSeed(input.model, prior, roles);
+    } else {
+      seed ??= uniqueKeyedPinnedSeed(input.model, prior, roles);
     }
     if (seed === null) {
-      pinned = null;
-      if (lastSlot === "pinned") {
-        lastSemanticFingerprint = null;
-        lastPresentationIdentity = null;
-        lastSlot = null;
-      }
+      clearPinned();
       return null;
     }
     return resolve({

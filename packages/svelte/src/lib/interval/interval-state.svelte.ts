@@ -359,19 +359,19 @@ export function createIntervalState(
     options.emitSelection(eventValue);
   }
 
-  function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
-    if (event.action === "zoom") {
-      if (event.scale === "band") return;
-      options.commitZoom(
-        frozenZoomDomains({
-          ...options.effectiveZoomDomains(),
-          [event.axis]: [...event.bounds],
-        }),
-        event.inputSource,
-      );
-      bounds.cancel();
-      return;
-    }
+  function applyPreciseZoomBounds(event: PreciseBoundsApplyEvent): void {
+    if (event.scale === "band") return;
+    options.commitZoom(
+      frozenZoomDomains({
+        ...options.effectiveZoomDomains(),
+        [event.axis]: [...event.bounds],
+      }),
+      event.inputSource,
+    );
+    bounds.cancel();
+  }
+
+  function applyPreciseSelectionBounds(event: PreciseBoundsApplyEvent): void {
     const prior = currentIntervalRecord;
     const targetPanelId = prior?.panelId ?? bounds.boundsEditor?.panelId;
     if (targetPanelId === null || targetPanelId === undefined || context.model() === null) return;
@@ -419,6 +419,11 @@ export function createIntervalState(
     committedInterval = persistentSelectionOrNull(context.selectConfig()?.persistent, eventValue);
     options.emitSelection(eventValue);
     bounds.cancel();
+  }
+
+  function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
+    if (event.action === "zoom") applyPreciseZoomBounds(event);
+    else applyPreciseSelectionBounds(event);
   }
 
   return {

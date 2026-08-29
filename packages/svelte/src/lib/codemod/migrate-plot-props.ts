@@ -76,6 +76,89 @@ export interface MigrationResult {
  */
 const RULES: Readonly<Record<string, PropRule>> = grammarCodemodRules();
 
+type MigrationAccumulator = {
+  readonly edits: Edit[];
+  readonly changes: PropChange[];
+  readonly skipped: PropSkip[];
+  readonly needed: Set<string>;
+};
+
+function migrateElement(
+  source: string,
+  plotName: string,
+  element: Record<string, unknown>,
+  output: MigrationAccumulator,
+): void {
+  const attributes = Array.isArray(element["attributes"]) ? element["attributes"] : [];
+  const elementStart = (element as unknown as Node).start;
+  const elementEnd = (element as unknown as Node).end;
+  const children: string[] = [];
+  let previousEnd = elementStart + 1 + plotName.length;
+
+  for (const raw of attributes) {
+    if (!isRecord(raw) || !isNode(raw)) continue;
+    const attributeEnd = raw.end;
+    const attributeStart = raw.start;
+    const name = raw["name"];
+    if (raw["type"] !== "Attribute" || typeof name !== "string") {
+      previousEnd = attributeEnd;
+      continue;
+    }
+    const rule = Object.hasOwn(RULES, name) ? RULES[name] : undefined;
+    if (rule === undefined) {
+      previousEnd = attributeEnd;
+      continue;
+    }
+
+    const built = childFor(source, name, rule, raw);
+    if ("skip" in built) {
+      output.skipped.push({
+        prop: name,
+        line: lineOf(source, attributeStart),
+        reason: built.skip,
+        docUrl: rule.docUrl,
+      });
+      previousEnd = attributeEnd;
+      continue;
+    }
+
+    children.push(built.element);
+    output.needed.add(rule.component);
+    output.changes.push({
+      prop: name,
+      component: rule.component,
+      line: lineOf(source, attributeStart),
+    });
+    output.edits.push({ start: previousEnd, end: attributeEnd, text: "" });
+    previousEnd = attributeEnd;
+  }
+
+  if (children.length === 0) return;
+  const fragment = element["fragment"];
+  const fragmentNodes =
+    !Array.isArray(fragment) && isRecord(fragment) && Array.isArray(fragment["nodes"])
+      ? (fragment["nodes"] as unknown[])
+      : [];
+  const firstChild = fragmentNodes.find((node) => isNode(node));
+  const elementIndent = indentAt(source, elementStart);
+  const childIndent = `${elementIndent}  `;
+  const block = children.map((child) => `\n${childIndent}${child}`).join("");
+
+  if (firstChild === undefined) {
+    output.edits.push({
+      start: previousEnd,
+      end: elementEnd,
+      text: `>${block}\n${elementIndent}</${plotName}>`,
+    });
+  } else {
+    output.edits.push({
+      start: firstChild.start,
+      end: firstChild.start,
+      text: block,
+    });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Transform
 // ---------------------------------------------------------------------------
@@ -109,82 +192,9 @@ export function migratePlotProps(source: string, options: MigrateOptions = {}): 
   const skipped: PropSkip[] = [];
   const needed = new Set<string>();
 
-  for (const element of collectComponents(ast.fragment, plotName)) {
-    const attributes = Array.isArray(element["attributes"]) ? element["attributes"] : [];
-    const elementStart = (element as unknown as Node).start;
-    const elementEnd = (element as unknown as Node).end;
-
-    const children: string[] = [];
-    let previousEnd = elementStart + 1 + plotName.length;
-
-    for (const raw of attributes) {
-      if (!isRecord(raw) || !isNode(raw)) continue;
-      const attributeEnd = raw.end;
-      const attributeStart = raw.start;
-      const name = raw["name"];
-      if (raw["type"] !== "Attribute" || typeof name !== "string") {
-        previousEnd = attributeEnd;
-        continue;
-      }
-      // Own keys only — plain RULES[name] walks Object.prototype and would
-      // treat constructor/toString/… as migratable (truthy functions), then
-      // emit <undefined …/> and an import of undefined under --write.
-      const rule = Object.hasOwn(RULES, name) ? RULES[name] : undefined;
-      if (rule === undefined) {
-        previousEnd = attributeEnd;
-        continue;
-      }
-
-      const built = childFor(source, name, rule, raw);
-      if ("skip" in built) {
-        skipped.push({
-          prop: name,
-          line: lineOf(source, attributeStart),
-          reason: built.skip,
-          docUrl: rule.docUrl,
-        });
-        previousEnd = attributeEnd;
-        continue;
-      }
-
-      children.push(built.element);
-      needed.add(rule.component);
-      changes.push({
-        prop: name,
-        component: rule.component,
-        line: lineOf(source, attributeStart),
-      });
-      // Swallow the whitespace that separated this attribute from the last
-      // surviving one, so removing a middle attribute does not leave a double
-      // space and removing the last does not leave a trailing one.
-      edits.push({ start: previousEnd, end: attributeEnd, text: "" });
-      previousEnd = attributeEnd;
-    }
-
-    if (children.length === 0) continue;
-
-    const fragmentNodes = Array.isArray(element["fragment"])
-      ? []
-      : isRecord(element["fragment"]) && Array.isArray(element["fragment"]["nodes"])
-        ? (element["fragment"]["nodes"] as unknown[])
-        : [];
-    const firstChild = fragmentNodes.find((node) => isNode(node));
-    const elementIndent = indentAt(source, elementStart);
-    const childIndent = `${elementIndent}  `;
-    const block = children.map((child) => `\n${childIndent}${child}`).join("");
-
-    if (firstChild === undefined) {
-      // Self-closing `<GGPlot … />`: grow a body. previousEnd is the end of the
-      // last attribute, so this also removes the ` /` before the `>`.
-      edits.push({
-        start: previousEnd,
-        end: elementEnd,
-        text: `>${block}\n${elementIndent}</${plotName}>`,
-      });
-    } else {
-      edits.push({ start: firstChild.start, end: firstChild.start, text: block });
-    }
-  }
+  const output = { edits, changes, skipped, needed };
+  for (const element of collectComponents(ast.fragment, plotName))
+    migrateElement(source, plotName, element, output);
 
   if (changes.length === 0) return { code: source, changes: [], skipped };
 

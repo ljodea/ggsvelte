@@ -190,28 +190,8 @@ export function validateBoundsDraft(
   upperDraft: string,
   inputSource: BoundsInputSource = "keyboard",
 ): BoundsDraftValidation {
-  if (input.scale === "band") {
-    const lowerIndex = Number(lowerDraft);
-    const upperIndex = Number(upperDraft);
-    const errors: { lower?: string; upper?: string } = {};
-    if (!Number.isInteger(lowerIndex) || input.categories[lowerIndex] === undefined) {
-      errors.lower = "Choose a valid lower category.";
-    }
-    if (!Number.isInteger(upperIndex) || input.categories[upperIndex] === undefined) {
-      errors.upper = "Choose a valid upper category.";
-    } else if (errors.lower === undefined && upperIndex < lowerIndex) {
-      errors.upper = "Upper category must be at or after the lower category.";
-    }
-    if (errors.lower !== undefined || errors.upper !== undefined) return { ok: false, errors };
-    return {
-      ok: true,
-      event: {
-        ...baseEvent(input, inputSource),
-        scale: "band",
-        bounds: [input.categories[lowerIndex]!.value, input.categories[upperIndex]!.value],
-      },
-    };
-  }
+  if (input.scale === "band")
+    return validateBandBoundsDraft(input, lowerDraft, upperDraft, inputSource);
 
   const lower =
     input.scale === "time"
@@ -221,28 +201,7 @@ export function validateBoundsDraft(
     input.scale === "time"
       ? parseTime(upperDraft, "Upper bound", input.temporalKind)
       : parseNumber(upperDraft, "Upper bound");
-  const errors: { lower?: string; upper?: string } = {};
-  if (typeof lower === "string") errors.lower = lower;
-  if (typeof upper === "string") errors.upper = upper;
-  if (input.scale === "linear" && input.transform === "log10") {
-    if (typeof lower === "number" && lower <= 0) {
-      errors.lower = "Lower bound must be greater than zero on a log scale.";
-    }
-    if (typeof upper === "number" && upper <= 0) {
-      errors.upper = "Upper bound must be greater than zero on a log scale.";
-    }
-  }
-  if (input.scale === "linear" && input.transform === "sqrt") {
-    if (typeof lower === "number" && lower < 0) {
-      errors.lower = "Lower bound must be zero or greater on a square-root scale.";
-    }
-    if (typeof upper === "number" && upper < 0) {
-      errors.upper = "Upper bound must be zero or greater on a square-root scale.";
-    }
-  }
-  if (typeof lower === "number" && typeof upper === "number" && upper <= lower) {
-    errors.upper = "Upper bound must be greater than the lower bound.";
-  }
+  const errors = continuousBoundsErrors(input, lower, upper);
   if (errors.lower !== undefined || errors.upper !== undefined) return { ok: false, errors };
 
   return {
@@ -261,4 +220,55 @@ export function validateBoundsDraft(
             bounds: [lower as number, upper as number],
           },
   };
+}
+
+function validateBandBoundsDraft(
+  input: BandBoundsEditorInput,
+  lowerDraft: string,
+  upperDraft: string,
+  inputSource: BoundsInputSource,
+): BoundsDraftValidation {
+  const lowerIndex = Number(lowerDraft);
+  const upperIndex = Number(upperDraft);
+  const errors: { lower?: string; upper?: string } = {};
+  if (!Number.isInteger(lowerIndex) || input.categories[lowerIndex] === undefined)
+    errors.lower = "Choose a valid lower category.";
+  if (!Number.isInteger(upperIndex) || input.categories[upperIndex] === undefined)
+    errors.upper = "Choose a valid upper category.";
+  else if (errors.lower === undefined && upperIndex < lowerIndex)
+    errors.upper = "Upper category must be at or after the lower category.";
+  if (errors.lower !== undefined || errors.upper !== undefined) return { ok: false, errors };
+  return {
+    ok: true,
+    event: {
+      ...baseEvent(input, inputSource),
+      scale: "band",
+      bounds: [input.categories[lowerIndex]!.value, input.categories[upperIndex]!.value],
+    },
+  };
+}
+
+function continuousBoundsErrors(
+  input: NumericBoundsEditorInput | TimeBoundsEditorInput,
+  lower: number | string,
+  upper: number | string,
+): BoundsDraftErrors {
+  const errors: { lower?: string; upper?: string } = {};
+  if (typeof lower === "string") errors.lower = lower;
+  if (typeof upper === "string") errors.upper = upper;
+  if (input.scale === "linear" && input.transform === "log10") {
+    if (typeof lower === "number" && lower <= 0)
+      errors.lower = "Lower bound must be greater than zero on a log scale.";
+    if (typeof upper === "number" && upper <= 0)
+      errors.upper = "Upper bound must be greater than zero on a log scale.";
+  }
+  if (input.scale === "linear" && input.transform === "sqrt") {
+    if (typeof lower === "number" && lower < 0)
+      errors.lower = "Lower bound must be zero or greater on a square-root scale.";
+    if (typeof upper === "number" && upper < 0)
+      errors.upper = "Upper bound must be zero or greater on a square-root scale.";
+  }
+  if (typeof lower === "number" && typeof upper === "number" && upper <= lower)
+    errors.upper = "Upper bound must be greater than the lower bound.";
+  return errors;
 }
