@@ -106,9 +106,34 @@ export function legendTitleHeight(title: string, titleSize: number): number {
   return title === "" ? 0 : Math.max(TITLE_HEIGHT, titleSize + TITLE_DESCENDER_GAP);
 }
 
-export function settings(input: LegendInput, position: "right" | "bottom") {
+function legendSettingsMetrics(input: LegendInput): {
+  title: string;
+  titleSize: number;
+  labelSize: number;
+  keySize: number;
+  keyGap: number;
+  rowGap: number;
+  blockGap: number;
+  rampThickness: number;
+  rampLength: number;
+} {
   const appearance = input.appearance;
   const theme = appearance?.theme;
+  return {
+    title: appearance?.title ?? input.title,
+    titleSize: theme?.titleSize ?? FONT_SIZE,
+    labelSize: theme?.labelSize ?? FONT_SIZE,
+    keySize: appearance?.keySize ?? SWATCH_SIZE,
+    keyGap: theme?.keyGap ?? SWATCH_GAP,
+    rowGap: theme?.rowGap ?? 0,
+    blockGap: theme?.blockGap ?? BLOCK_GAP,
+    rampThickness: theme?.colorbarThickness ?? RAMP_WIDTH,
+    rampLength: theme?.colorbarLength ?? HORIZONTAL_RAMP_LENGTH,
+  };
+}
+
+export function settings(input: LegendInput, position: "right" | "bottom") {
+  const appearance = input.appearance;
   const direction =
     appearance?.direction === undefined || appearance.direction === "auto"
       ? position === "bottom"
@@ -119,15 +144,7 @@ export function settings(input: LegendInput, position: "right" | "bottom") {
     appearance,
     position,
     direction,
-    title: appearance?.title ?? input.title,
-    titleSize: theme?.titleSize ?? FONT_SIZE,
-    labelSize: theme?.labelSize ?? FONT_SIZE,
-    keySize: appearance?.keySize ?? SWATCH_SIZE,
-    keyGap: theme?.keyGap ?? SWATCH_GAP,
-    rowGap: theme?.rowGap ?? 0,
-    blockGap: theme?.blockGap ?? BLOCK_GAP,
-    rampThickness: theme?.colorbarThickness ?? RAMP_WIDTH,
-    rampLength: theme?.colorbarLength ?? HORIZONTAL_RAMP_LENGTH,
+    ...legendSettingsMetrics(input),
   } as const;
 }
 

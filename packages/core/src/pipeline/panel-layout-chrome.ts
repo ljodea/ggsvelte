@@ -149,6 +149,64 @@ function makeDisplayScalesFn(
   };
 }
 
+function temporalDisplayAxis(
+  aesthetic: "x" | "y",
+  scale: PositionScale,
+  kind: TemporalScaleKind | null,
+  config: NonNullable<PortableSpec["scales"]>["x"],
+  panelIndex: number,
+) {
+  return scale.type === "time" && kind !== null
+    ? {
+        aesthetic,
+        panelIndex,
+        kind,
+        config: config ?? {},
+        ...(config?.breaks !== undefined && { sourceBreaks: config.breaks }),
+      }
+    : undefined;
+}
+
+function makeDisplayTemporalFn(input: {
+  flip: boolean;
+  xScale: PositionScale;
+  yScale: PositionScale;
+  scalesConfig: NonNullable<PortableSpec["scales"]>;
+  xTemporalKind: TemporalScaleKind | null;
+  yTemporalKind: TemporalScaleKind | null;
+}): DisplayTemporalFn {
+  return (panelIndex: number) => {
+    const xKind = input.xTemporalKind ?? input.scalesConfig.x?.temporalKind ?? null;
+    const yKind = input.yTemporalKind ?? input.scalesConfig.y?.temporalKind ?? null;
+    const x = temporalDisplayAxis("x", input.xScale, xKind, input.scalesConfig.x, panelIndex);
+    const y = temporalDisplayAxis("y", input.yScale, yKind, input.scalesConfig.y, panelIndex);
+    return input.flip
+      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
+      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
+  };
+}
+
+function makeDisplayBandFn(
+  flip: boolean,
+  xScale: PositionScale,
+  yScale: PositionScale,
+  scalesConfig: NonNullable<PortableSpec["scales"]>,
+): DisplayBandFn {
+  return (panelIndex: number) => {
+    const x =
+      xScale.type === "band"
+        ? { aesthetic: "x" as const, panelIndex, config: scalesConfig.x ?? {} }
+        : undefined;
+    const y =
+      yScale.type === "band"
+        ? { aesthetic: "y" as const, panelIndex, config: scalesConfig.y ?? {} }
+        : undefined;
+    return flip
+      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
+      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
+  };
+}
+
 function resolvePanelLayoutLabs(input: {
   allFrames: readonly LayerFrame[];
   labs: NonNullable<PortableSpec["labs"]>;
@@ -260,50 +318,8 @@ function resolvePanelLayoutDisplay(input: {
   const { hBreaks, vBreaks } = flipDisplayBreaks(flip, convertedBreaks("x"), convertedBreaks("y"));
   const { freeH, freeV } = flipDisplayFreeFlags(flip, freeX, freeY);
   const displayScales = makeDisplayScalesFn(flip, panelScales);
-  const displayTemporal = (panelIndex: number) => {
-    const xKind = input.xTemporalKind ?? scalesConfig.x?.temporalKind ?? null;
-    const yKind = input.yTemporalKind ?? scalesConfig.y?.temporalKind ?? null;
-    const x =
-      xScale.type === "time" && xKind !== null
-        ? {
-            aesthetic: "x" as const,
-            panelIndex,
-            kind: xKind,
-            config: scalesConfig.x ?? {},
-            ...(scalesConfig.x?.breaks !== undefined && {
-              sourceBreaks: scalesConfig.x.breaks,
-            }),
-          }
-        : undefined;
-    const y =
-      yScale.type === "time" && yKind !== null
-        ? {
-            aesthetic: "y" as const,
-            panelIndex,
-            kind: yKind,
-            config: scalesConfig.y ?? {},
-            ...(scalesConfig.y?.breaks !== undefined && {
-              sourceBreaks: scalesConfig.y.breaks,
-            }),
-          }
-        : undefined;
-    return flip
-      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
-      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
-  };
-  const displayBand = (panelIndex: number) => {
-    const x =
-      xScale.type === "band"
-        ? { aesthetic: "x" as const, panelIndex, config: scalesConfig.x ?? {} }
-        : undefined;
-    const y =
-      yScale.type === "band"
-        ? { aesthetic: "y" as const, panelIndex, config: scalesConfig.y ?? {} }
-        : undefined;
-    return flip
-      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
-      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
-  };
+  const displayTemporal = makeDisplayTemporalFn(input);
+  const displayBand = makeDisplayBandFn(flip, xScale, yScale, scalesConfig);
 
   return {
     hTitle,

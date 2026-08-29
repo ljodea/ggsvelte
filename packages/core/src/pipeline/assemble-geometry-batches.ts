@@ -81,6 +81,73 @@ function pathLikeGeom(frame: LayerFrame): boolean {
   return PATH_LIKE_GEOMS[geom];
 }
 
+function buildPanelGeometryBatches(input: {
+  frame: LayerFrame;
+  placement: PanelPlacement;
+  panelScale: { x: PositionScale; y: PositionScale };
+  color: ResolvedColorScale | null;
+  fill: ResolvedColorScale | null;
+  styles: ResolvedStyleScales;
+  flip: boolean;
+  projector: PanelCoordProjector | undefined;
+  warnings: PipelineWarning[];
+  panelIndex: number;
+}): GeometryBatch[] {
+  const { frame, placement, panelScale, color, fill, styles, flip, projector, warnings } = input;
+  const joint = projector?.joint === true;
+  const pathLike = joint || pathLikeGeom(frame);
+  const needsPolarScaleRemap =
+    projector !== undefined &&
+    (projector.joint ||
+      !projector.expand ||
+      projector.thetaLimits !== undefined ||
+      projector.rLimits !== undefined);
+  const panelScalesForGeom =
+    projector !== undefined && needsPolarScaleRemap
+      ? scalesForCoordExpand(panelScale, projector.expand, {
+          ...(projector.polarTheta !== undefined && { theta: projector.polarTheta }),
+          ...(projector.thetaLimits !== undefined && { thetaLimits: projector.thetaLimits }),
+          ...(projector.rLimits !== undefined && { rLimits: projector.rLimits }),
+        })
+      : panelScale;
+  const built = buildBatch(
+    frame,
+    geometryPanelFrame(placement, panelScalesForGeom, flip, pathLike ? undefined : projector),
+    color,
+    fill,
+    styles,
+    warnings,
+  );
+  const tessellationBudget = createCoordTessellationBudget(built);
+  let panelBatches: GeometryBatch[] = [];
+  for (const batch of built) {
+    if (flip) flipBatchInPlace(batch, placement.width, placement.height);
+    if (projector !== undefined) {
+      projectGeometryBatch(
+        batch,
+        projector,
+        placement.width,
+        placement.height,
+        warnings,
+        tessellationBudget,
+      );
+    }
+    batch.panelIndex = input.panelIndex;
+    panelBatches.push(batch);
+  }
+  if (projector?.polar !== undefined) {
+    panelBatches = projectPolarGeometryBatches(
+      panelBatches,
+      projector,
+      placement.width,
+      placement.height,
+      warnings,
+      tessellationBudget,
+    );
+  }
+  return panelBatches;
+}
+
 export function buildGeometryBatches(input: {
   layerCount: number;
   facetPanels: readonly FacetPanelDef[];
@@ -112,68 +179,20 @@ export function buildGeometryBatches(input: {
     for (let p = 0; p < facetPanels.length; p++) {
       const frame = panelFrames[p]?.[index];
       if (frame === undefined) continue;
-      const placement = placements[p]!;
-      const projector = coordProjectors[p];
-      const joint = projector?.joint === true;
-      const pathLike = joint || pathLikeGeom(frame);
-      const needsPolarScaleRemap =
-        projector !== undefined &&
-        (projector.joint ||
-          !projector.expand ||
-          projector.thetaLimits !== undefined ||
-          projector.rLimits !== undefined);
-      const panelScalesForGeom =
-        projector !== undefined && needsPolarScaleRemap
-          ? scalesForCoordExpand(panelScales[p]!, projector.expand, {
-              ...(projector.polarTheta !== undefined && { theta: projector.polarTheta }),
-              ...(projector.thetaLimits !== undefined && { thetaLimits: projector.thetaLimits }),
-              ...(projector.rLimits !== undefined && { rLimits: projector.rLimits }),
-            })
-          : panelScales[p]!;
-      const built = buildBatch(
-        frame,
-        // Path topology must retain coordinate-invalid authored/stat vertices
-        // until the post-stat projector can split finite runs without bridging.
-        // Polar is always joint: never early-project through separable axes.
-        geometryPanelFrame(
-          placement,
-          panelScalesForGeom,
+      batches.push(
+        ...buildPanelGeometryBatches({
+          frame,
+          placement: placements[p]!,
+          panelScale: panelScales[p]!,
+          color,
+          fill,
+          styles,
           flip,
-          pathLike || joint ? undefined : projector,
-        ),
-        color,
-        fill,
-        styles,
-        warnings,
-      );
-      const tessellationBudget = createCoordTessellationBudget(built);
-      let panelBatches: GeometryBatch[] = [];
-      for (const batch of built) {
-        if (flip) flipBatchInPlace(batch, placement.width, placement.height);
-        if (projector !== undefined) {
-          projectGeometryBatch(
-            batch,
-            projector,
-            placement.width,
-            placement.height,
-            warnings,
-            tessellationBudget,
-          );
-        }
-        batch.panelIndex = p;
-        panelBatches.push(batch);
-      }
-      if (projector?.polar !== undefined) {
-        panelBatches = projectPolarGeometryBatches(
-          panelBatches,
-          projector,
-          placement.width,
-          placement.height,
+          projector: coordProjectors[p],
           warnings,
-          tessellationBudget,
-        );
-      }
-      batches.push(...panelBatches);
+          panelIndex: p,
+        }),
+      );
     }
   }
   return batches;
