@@ -111,8 +111,112 @@ function directWindowDensities(
   }
 }
 
+function collectFiniteRows(input: DensityStatInput) {
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < input.x.length; i++) {
+    if (!Number.isFinite(input.x[i]!)) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
+function normalizedWeights(weights: Float64Array | null | undefined, rows: number[]) {
+  if (weights === null || weights === undefined) return null;
+  const normalized = new Float64Array(rows.length);
+  let sum = 0;
+  for (let i = 0; i < rows.length; i++) {
+    const weight = weights[rows[i]!]!;
+    normalized[i] = Number.isFinite(weight) ? weight : 0;
+    sum += normalized[i]!;
+  }
+  if (!(sum > 0)) return null;
+  for (let i = 0; i < normalized.length; i++) normalized[i] = normalized[i]! / sum;
+  return normalized;
+}
+
+function sortedValues(input: DensityStatInput, rows: number[]) {
+  const values = new Float64Array(rows.length);
+  for (let i = 0; i < rows.length; i++) values[i] = input.x[rows[i]!]!;
+  const weights = normalizedWeights(input.weights, rows);
+  const order = Array.from({ length: rows.length }, (_, i) => i).toSorted(
+    (a, b) => values[a]! - values[b]!,
+  );
+  const sorted = new Float64Array(rows.length);
+  const sortedWeights = weights === null ? null : new Float64Array(rows.length);
+  for (let i = 0; i < rows.length; i++) {
+    sorted[i] = values[order[i]!]!;
+    if (sortedWeights !== null) sortedWeights[i] = weights![order[i]!]!;
+  }
+  return { sorted, sortedWeights };
+}
+
+function binnedDensities(
+  sorted: Float64Array,
+  sortedWeights: Float64Array | null,
+  bw: number,
+  from: number,
+  step: number,
+  gridN: number,
+  window: number,
+): Float64Array {
+  const densities = new Float64Array(gridN);
+  const binned = new Float64Array(gridN);
+  for (let j = 0; j < sorted.length; j++) {
+    const t = (sorted[j]! - from) / step;
+    const i0 = Math.floor(t);
+    const fraction = t - i0;
+    const weight = sortedWeights === null ? 1 / sorted.length : sortedWeights[j]!;
+    if (i0 >= 0 && i0 < gridN) binned[i0] = binned[i0]! + weight * (1 - fraction);
+    if (fraction > 0 && i0 + 1 < gridN) {
+      binned[i0 + 1] = binned[i0 + 1]! + weight * fraction;
+    }
+  }
+  const support = Math.min(gridN - 1, Math.ceil(window / step));
+  const taps = new Float64Array(support + 1);
+  for (let offset = 0; offset <= support; offset++) {
+    const z = (offset * step) / bw;
+    taps[offset] = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
+  }
+  for (let k = 0; k < gridN; k++) {
+    const lo = Math.max(0, k - support);
+    const hi = Math.min(gridN - 1, k + support);
+    let density = 0;
+    for (let j = lo; j <= hi; j++) density += binned[j]! * taps[Math.abs(k - j)]!;
+    densities[k] = density;
+  }
+  return densities;
+}
+
+function densityGrid(
+  sorted: Float64Array,
+  sortedWeights: Float64Array | null,
+  bw: number,
+  from: number,
+  step: number,
+  gridN: number,
+): Float64Array {
+  const window = 8 * bw;
+  if (sorted.length > 4 * gridN && step > 0 && step <= bw / 4) {
+    return binnedDensities(sorted, sortedWeights, bw, from, step, gridN, window);
+  }
+  const densities = new Float64Array(gridN);
+  directWindowDensities(sorted, sortedWeights, bw, from, step, gridN, window, densities);
+  return densities;
+}
+
 export function statDensity(input: DensityStatInput): DensityStatResult {
-  const { x, groups, weights } = input;
   const params = input.params ?? {};
   const gridN = params.n ?? 512;
   const cut = params.cut ?? 3;
@@ -120,23 +224,7 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
   const carriedNames = Object.keys(input.carried ?? {});
 
   // Partition finite rows per group (first-seen group order).
-  const groupOrder: number[] = [];
-  const groupRows = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < x.length; i++) {
-    if (!Number.isFinite(x[i]!)) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let rows = groupRows.get(g);
-    if (rows === undefined) {
-      rows = [];
-      groupRows.set(g, rows);
-      groupOrder.push(g);
-    }
-    rows.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: groupRows, dropped } = collectFiniteRows(input);
 
   const outX: number[] = [];
   const outDensity: number[] = [];
@@ -154,41 +242,14 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
       continue;
     }
     const nx = rows.length;
-    const values = new Float64Array(nx);
-    for (let j = 0; j < nx; j++) values[j] = x[rows[j]!]!;
-    // Normalized weights (sum 1 within the group; missing weights count 0).
-    let w: Float64Array | null = null;
-    if (weights !== null && weights !== undefined) {
-      w = new Float64Array(nx);
-      let sum = 0;
-      for (let j = 0; j < nx; j++) {
-        const wv = weights[rows[j]!]!;
-        w[j] = Number.isFinite(wv) ? wv : 0;
-        sum += w[j]!;
-      }
-      if (sum > 0) {
-        for (let j = 0; j < nx; j++) w[j] = w[j]! / sum;
-      } else {
-        w = null;
-      }
-    }
     // Sort values (weights follow) so each grid point only visits the
     // ±8·bw window — the gaussian kernel is < 1.3e-14 beyond it, so the
     // cut is exact to double precision (unlike R's FFT binning).
-    const order = Array.from({ length: nx }, (_, j) => j).toSorted(
-      (a, b) => values[a]! - values[b]!,
-    );
-    const sorted = new Float64Array(nx);
-    const sortedW = w === null ? null : new Float64Array(nx);
-    for (let j = 0; j < nx; j++) {
-      sorted[j] = values[order[j]!]!;
-      if (sortedW !== null) sortedW[j] = w![order[j]!]!;
-    }
+    const { sorted, sortedWeights } = sortedValues(input, rows);
     const bw = adjust * (params.bw ?? bwNRD0(sorted));
     const from = sorted[0]! - cut * bw;
     const to = sorted[nx - 1]! + cut * bw;
     const step = gridN === 1 ? 0 : (to - from) / (gridN - 1);
-    const window = 8 * bw;
 
     // Density per grid node. Large groups (well above the grid size) use
     // linear binning onto the grid + an exact discrete gaussian
@@ -202,33 +263,7 @@ export function statDensity(input: DensityStatInput): DensityStatResult {
     // user-coarsened grid (step ≈ bw) would over-smooth by percent levels.
     // step ≤ bw/4 bounds that widening to ~0.5%; coarse grids are cheap
     // for the direct path anyway (gridN small).
-    const densities = new Float64Array(gridN);
-    if (nx > 4 * gridN && step > 0 && step <= bw / 4) {
-      const binned = new Float64Array(gridN);
-      for (let j = 0; j < nx; j++) {
-        const t = (sorted[j]! - from) / step;
-        const i0 = Math.floor(t);
-        const frac = t - i0;
-        const wv = sortedW === null ? 1 / nx : sortedW[j]!;
-        if (i0 >= 0 && i0 < gridN) binned[i0] = binned[i0]! + wv * (1 - frac);
-        if (frac > 0 && i0 + 1 < gridN) binned[i0 + 1] = binned[i0 + 1]! + wv * frac;
-      }
-      const support = Math.min(gridN - 1, Math.ceil(window / step));
-      const taps = new Float64Array(support + 1);
-      for (let m = 0; m <= support; m++) {
-        const z = (m * step) / bw;
-        taps[m] = (INV_SQRT_2PI * Math.exp(-0.5 * z * z)) / bw;
-      }
-      for (let k = 0; k < gridN; k++) {
-        const mLo = Math.max(0, k - support);
-        const mHi = Math.min(gridN - 1, k + support);
-        let d = 0;
-        for (let j = mLo; j <= mHi; j++) d += binned[j]! * taps[Math.abs(k - j)]!;
-        densities[k] = d;
-      }
-    } else {
-      directWindowDensities(sorted, sortedW, bw, from, step, gridN, window, densities);
-    }
+    const densities = densityGrid(sorted, sortedWeights, bw, from, step, gridN);
 
     let maxDensity = 0;
     for (let k = 0; k < gridN; k++) if (densities[k]! > maxDensity) maxDensity = densities[k]!;

@@ -80,8 +80,57 @@ function stackPosition(
   }
 }
 
+type BinBreaks = ReturnType<typeof binBreaksBins>;
+
+function finiteExtent(values: Float64Array): [number, number] | undefined {
+  let min = Infinity;
+  let max = -Infinity;
+  let count = 0;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    count++;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return count === 0 ? undefined : [min, max];
+}
+
+function collectBuckets(input: BindotStatInput, breaks: BinBreaks) {
+  const buckets = new Map<string, { rows: number[] }>();
+  const groupOrder: number[] = [];
+  const seenGroup = new Set<number>();
+  const binCount = breaks.breaks.length - 1;
+  let dropped = 0;
+
+  for (let i = 0; i < input.x.length; i++) {
+    const value = input.x[i]!;
+    if (!Number.isFinite(value)) {
+      dropped++;
+      continue;
+    }
+    const bin = binIndexOf(value, breaks.fuzzy, breaks.rightClosed);
+    if (bin < 0 || bin >= binCount) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    if (!seenGroup.has(group)) {
+      seenGroup.add(group);
+      groupOrder.push(group);
+    }
+    const key = `${group}\0${bin}`;
+    let bucket = buckets.get(key);
+    if (bucket === undefined) {
+      bucket = { rows: [] };
+      buckets.set(key, bucket);
+    }
+    bucket.rows.push(i);
+  }
+  return { buckets, groupOrder, dropped };
+}
+
 export function statBindot(input: BindotStatInput): BindotStatResult {
-  const { x, groups } = input;
+  const { x } = input;
   const params = input.params ?? {};
   const carriedNames = Object.keys(input.carried ?? {});
   const usedDefaultBins = params.bins === undefined && params.binwidth === undefined;
@@ -102,20 +151,11 @@ export function statBindot(input: BindotStatInput): BindotStatResult {
     effectiveBinwidth: 0,
   });
 
-  let min = Infinity;
-  let max = -Infinity;
-  let finite = 0;
-  for (let i = 0; i < x.length; i++) {
-    const v = x[i]!;
-    if (!Number.isFinite(v)) continue;
-    finite++;
-    if (v < min) min = v;
-    if (v > max) max = v;
-  }
-  if (finite === 0) return empty(x.length);
+  const extent = finiteExtent(x);
+  if (extent === undefined) return empty(x.length);
 
   const closed = params.closed ?? "right";
-  const range: [number, number] = input.range ?? [min, max];
+  const range: [number, number] = input.range ?? extent;
   const breaks =
     params.binwidth === undefined
       ? binBreaksBins(range, params.bins ?? 30, params.boundary, params.center, closed)
@@ -125,33 +165,7 @@ export function statBindot(input: BindotStatInput): BindotStatResult {
     binCount > 0 ? breaks.breaks[1]! - breaks.breaks[0]! : (params.binwidth ?? 0);
 
   // Collect kept rows per (group, bin), preserving input order within bucket.
-  type Bucket = { rows: number[] };
-  const buckets = new Map<string, Bucket>();
-  const groupOrder: number[] = [];
-  const seenGroup = new Set<number>();
-  let dropped = x.length - finite;
-
-  for (let i = 0; i < x.length; i++) {
-    const v = x[i]!;
-    if (!Number.isFinite(v)) continue;
-    const bin = binIndexOf(v, breaks.fuzzy, breaks.rightClosed);
-    if (bin < 0 || bin >= binCount) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    if (!seenGroup.has(g)) {
-      seenGroup.add(g);
-      groupOrder.push(g);
-    }
-    const key = `${g}\0${bin}`;
-    let bucket = buckets.get(key);
-    if (bucket === undefined) {
-      bucket = { rows: [] };
-      buckets.set(key, bucket);
-    }
-    bucket.rows.push(i);
-  }
+  const { buckets, groupOrder, dropped } = collectBuckets(input, breaks);
 
   // Emit in first-seen group order, then ascending bin index, then input order.
   const outX: number[] = [];

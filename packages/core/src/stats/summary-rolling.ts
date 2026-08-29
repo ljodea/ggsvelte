@@ -49,8 +49,30 @@ export interface SummaryRollingStatResult {
   dropped: number;
 }
 
+function collectFiniteRows(input: SummaryRollingStatInput) {
+  const { x, y, groups } = input;
+  const order: number[] = [];
+  const rowsByGroup = new Map<number, number[]>();
+  let dropped = 0;
+  for (let i = 0; i < x.length; i++) {
+    if (!Number.isFinite(x[i]) || !Number.isFinite(y[i])) {
+      dropped++;
+      continue;
+    }
+    const group = groups[i]!;
+    let rows = rowsByGroup.get(group);
+    if (rows === undefined) {
+      rows = [];
+      rowsByGroup.set(group, rows);
+      order.push(group);
+    }
+    rows.push(i);
+  }
+  return { order, rowsByGroup, dropped };
+}
+
 export function statSummaryRolling(input: SummaryRollingStatInput): SummaryRollingStatResult {
-  const { x, y, groups, carried = {}, params = {} } = input;
+  const { x, y, carried = {}, params = {} } = input;
   const window = params.window;
   if (window === undefined || !Number.isFinite(window) || window <= 0) {
     throw new Error(
@@ -62,24 +84,7 @@ export function statSummaryRolling(input: SummaryRollingStatInput): SummaryRolli
 
   // Row order grouped by group id, x ascending within each group. Groups
   // appear in first-occurrence order (the pipeline's group id order).
-  const n = x.length;
-  const groupOrder: number[] = [];
-  const byGroup = new Map<number, number[]>();
-  let dropped = 0;
-  for (let i = 0; i < n; i++) {
-    if (!Number.isFinite(x[i]) || !Number.isFinite(y[i])) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    let rows = byGroup.get(g);
-    if (rows === undefined) {
-      rows = [];
-      byGroup.set(g, rows);
-      groupOrder.push(g);
-    }
-    rows.push(i);
-  }
+  const { order: groupOrder, rowsByGroup: byGroup, dropped } = collectFiniteRows(input);
 
   const outX: number[] = [];
   const outY: number[] = [];

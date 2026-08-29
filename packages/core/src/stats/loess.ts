@@ -1,38 +1,14 @@
 /**
- * LOESS — local polynomial regression.
+ * LOESS local polynomial regression with direct/exact and
+ * interpolate/approximate surfaces (decision 0010). The direct surface uses
+ * q ≈ span·n neighborhoods and exact operator statistics for fixture-sized
+ * inputs. The large-n surface fits partition vertices and Hermite-interpolates
+ * values, derivatives, and SE norms in O(nv·q + n).
  *
- * Two surfaces (chosen automatically by n unless overridden):
- *
- *  - **direct + exact** (n ≤ INTERPOLATE_DIRECT_LIMIT, or surface:"direct"):
- *    R's `surface="direct", statistics="exact"` — the reference the R fixtures
- *    pin (decision 0010). Fit at every evaluation / data point with window
- *    q ≈ span·n. Exact δ1 / δ2 / σ when statistics are requested (δ2 exact
- *    only for n ≤ DELTA2_EXACT_LIMIT; above that δ2 falls back to δ1).
- *
- *  - **interpolate + approximate** (n > INTERPOLATE_DIRECT_LIMIT by default):
- *    R's default `surface="interpolate", statistics="approximate"` spirit
- *    that ggplot2's geom_smooth uses. Build a 1D kd-tree-style partition of
- *    the x-range (leaf capacity floor(n·span·cell)), fit only at cell
- *    vertices, cubic-Hermite blend value + derivative for ŷ(x0), and
- *    approximate the SE band from residual RSS + vertex ‖l‖ interpolation.
- *    Cost O(nv·q + n) with nv ≪ n, not O(n·q).
- *
- * Adapted in structure (nearest-neighbor window walk, tricube kernel) from
- * SveltePlot's ISC-licensed `regression/loess.ts`, itself derived from
- * d3-regression (Harry Stevens), science.js (Jason Davies), and
- * vega-statistics (Jeffrey Heer) — see the repo NOTICE file. Substantially
- * rewritten for R parity: span-based neighborhoods (q = floor(span·n)),
- * configurable degree (2 = R default; the reference is degree-1 only),
- * evaluation at arbitrary points (predict), and exact operator statistics
- * (trace(L), δ1, δ2, σ) for the confidence band on the direct path. The
- * reference's robustness iterations are intentionally absent: R's gaussian
- * family fits by weighted least squares with NO robustness iterations.
- *
- * Statistics (direct/exact): ŷ(x0) = l(x0)ᵀ y with Var(ŷ(x0)) = σ²·‖l(x0)‖².
- * σ² = RSS/δ1, δ1 = n − 2·tr(L) + tr(LᵀL) (exact, O(n·q)); δ2 =
- * tr(((I−L)ᵀ(I−L))²) is computed EXACTLY for n ≤ DELTA2_EXACT_LIMIT (dense
- * O(n²·q + n³) algebra — fixture-sized inputs) and approximated by δ1 above
- * it (t quantiles are insensitive to df at those sizes; decision 0010).
+ * The nearest-neighbor walk and tricube-kernel structure began from
+ * SveltePlot's ISC-licensed regression/loess.ts; see NOTICE. This version adds
+ * R-compatible spans, degree-2 fits, arbitrary prediction, and direct-surface
+ * δ1/δ2/σ statistics without robustness iterations.
  */
 
 import { solveFirstColumn, solveSystem } from "./loess-linear-system.js";
@@ -81,6 +57,150 @@ export interface LoessModel {
   delta2: number;
   /** Look-up degrees of freedom for t quantiles: δ1² / δ2. */
   df: number;
+}
+
+type LocalWeights = { i0: number; l: Float64Array };
+type LocalFit = { fit: number; deriv: number; seNorm: number };
+
+interface LoessContext {
+  n: number;
+  span: number;
+  degree: 1 | 2;
+  statistics: boolean;
+  cell: number | undefined;
+  xs: Float64Array;
+  ys: Float64Array;
+  q: number;
+  windowFor: (x: number) => number;
+  localWeightsAt: (x: number, start: number) => LocalWeights | null;
+  localFitAt: (x: number, start: number) => LocalFit | null;
+}
+
+function interpolatedModel(context: LoessContext): LoessModel | null {
+  const { n, span, degree, xs, ys, q, windowFor, localFitAt } = context;
+  const verts = buildVertices1D(xs, n, span, context.cell ?? DEFAULT_CELL);
+  const nv = verts.length;
+  const vFit = new Float64Array(nv);
+  const vDeriv = new Float64Array(nv);
+  const vSe = new Float64Array(nv);
+  let ok = true;
+  let windowStart = windowFor(verts[0]!);
+  for (let vertex = 0; vertex < nv; vertex++) {
+    const x = verts[vertex]!;
+    while (windowStart + q < n && xs[windowStart + q]! - x < x - xs[windowStart]!) windowStart++;
+    if (xs[windowStart] === xs[windowStart + q - 1]) windowStart = windowFor(x);
+    const fit = localFitAt(x, windowStart);
+    if (fit === null) {
+      ok = false;
+      break;
+    }
+    vFit[vertex] = fit.fit;
+    vDeriv[vertex] = fit.deriv;
+    vSe[vertex] = fit.seNorm;
+  }
+  if (!ok) return null;
+
+  const predict = (x: number): number => {
+    if (nv === 1) return vFit[0]!;
+    const i = cellIndex(verts, x);
+    const start = verts[i]!;
+    const width = verts[i + 1]! - start;
+    if (!(width > 0)) return vFit[i]!;
+    const t = Math.min(1, Math.max(0, (x - start) / width));
+    return hermite(t, vFit[i]!, vFit[i + 1]!, vDeriv[i]!, vDeriv[i + 1]!, width);
+  };
+  const seNorm = (x: number): number => {
+    if (nv === 1) return vSe[0]!;
+    const i = cellIndex(verts, x);
+    const start = verts[i]!;
+    const width = verts[i + 1]! - start;
+    if (!(width > 0)) return vSe[i]!;
+    const t = Math.min(1, Math.max(0, (x - start) / width));
+    return (1 - t) * vSe[i]! + t * vSe[i + 1]!;
+  };
+
+  let sigma = NaN;
+  let delta1 = NaN;
+  let delta2 = NaN;
+  let df = NaN;
+  if (context.statistics) {
+    let rss = 0;
+    for (let i = 0; i < n; i++) {
+      const error = ys[i]! - predict(xs[i]!);
+      rss += error * error;
+    }
+    const tau = degree + 1;
+    const trL = tau * (1 + Math.max(0, (1 - span) / span));
+    delta1 = n - trL;
+    if (!(delta1 > 0)) delta1 = Math.max(1, n - trL);
+    sigma = Math.sqrt(rss / delta1);
+    delta2 = delta1;
+    df = (delta1 * delta1) / delta2;
+  }
+  return { predict, seNorm, sigma, delta1, delta2, df };
+}
+
+function directModel(context: LoessContext): LoessModel | null {
+  const { n, xs, ys, q, windowFor, localWeightsAt } = context;
+  const localWeights = (x: number): LocalWeights | null => localWeightsAt(x, windowFor(x));
+  const predictAt = (x: number): { fit: number; norm: number } | null => {
+    const weights = localWeights(x);
+    if (weights === null) return null;
+    let fit = 0;
+    let norm2 = 0;
+    for (let j = 0; j < q; j++) {
+      const weight = weights.l[j]!;
+      fit += weight * ys[weights.i0 + j]!;
+      norm2 += weight * weight;
+    }
+    return { fit, norm: Math.sqrt(norm2) };
+  };
+
+  let sigma = NaN;
+  let delta1 = NaN;
+  let delta2 = NaN;
+  let df = NaN;
+  if (context.statistics) {
+    const dense = n <= DELTA2_EXACT_LIMIT ? new Float64Array(n * n) : null;
+    let trL = 0;
+    let trLtL = 0;
+    let rss = 0;
+    let ok = true;
+    let windowStart = windowFor(xs[0]!);
+    for (let i = 0; i < n; i++) {
+      const x = xs[i]!;
+      while (windowStart + q < n && xs[windowStart + q]! - x < x - xs[windowStart]!) windowStart++;
+      if (xs[windowStart] === xs[windowStart + q - 1]) windowStart = windowFor(x);
+      const weights = localWeightsAt(x, windowStart);
+      if (weights === null) {
+        ok = false;
+        break;
+      }
+      let fit = 0;
+      for (let j = 0; j < q; j++) {
+        const weight = weights.l[j]!;
+        fit += weight * ys[weights.i0 + j]!;
+        trLtL += weight * weight;
+        if (weights.i0 + j === i) trL += weight;
+        if (dense !== null) dense[i * n + weights.i0 + j] = weight;
+      }
+      const error = ys[i]! - fit;
+      rss += error * error;
+    }
+    if (!ok) return null;
+    delta1 = n - 2 * trL + trLtL;
+    sigma = Math.sqrt(rss / delta1);
+    delta2 = dense === null ? delta1 : exactDelta2(dense, n);
+    df = (delta1 * delta1) / delta2;
+  }
+  return {
+    predict: (x) => predictAt(x)?.fit ?? NaN,
+    seNorm: (x) => predictAt(x)?.norm ?? NaN,
+    sigma,
+    delta1,
+    delta2,
+    df,
+  };
 }
 
 function tricube(u: number): number {
@@ -325,167 +445,20 @@ export function loessFit(
     return null;
   };
 
-  // ── Interpolate surface (large n) ──────────────────────────────────────
-  if (surface === "interpolate") {
-    const cell = options.cell ?? DEFAULT_CELL;
-    const verts = buildVertices1D(xs, n, span, cell);
-    const nv = verts.length;
-    const vFit = new Float64Array(nv);
-    const vDeriv = new Float64Array(nv);
-    const vSe = new Float64Array(nv);
-    let ok = true;
-    // Vertices are sorted ascending — warm-slide the nearest-q window.
-    let i0w = windowFor(verts[0]!);
-    for (let v = 0; v < nv; v++) {
-      const x0 = verts[v]!;
-      while (i0w + q < n && xs[i0w + q]! - x0 < x0 - xs[i0w]!) i0w++;
-      const windowFirst = xs[i0w]!;
-      const windowLast = xs[i0w + q - 1]!;
-      if (windowFirst === windowLast) i0w = windowFor(x0);
-      const lf = localFitAt(x0, i0w);
-      if (lf === null) {
-        ok = false;
-        break;
-      }
-      vFit[v] = lf.fit;
-      vDeriv[v] = lf.deriv;
-      vSe[v] = lf.seNorm;
-    }
-    if (!ok) return null;
-
-    const predictInterp = (x0: number): number => {
-      if (nv === 1) return vFit[0]!;
-      const i = cellIndex(verts, x0);
-      const va = verts[i]!;
-      const vb = verts[i + 1]!;
-      const width = vb - va;
-      if (!(width > 0)) return vFit[i]!;
-      // Clamp to the vertex hull (ggplot eval grid sits inside data range).
-      const t = Math.min(1, Math.max(0, (x0 - va) / width));
-      return hermite(t, vFit[i]!, vFit[i + 1]!, vDeriv[i]!, vDeriv[i + 1]!, width);
-    };
-
-    const seNormInterp = (x0: number): number => {
-      if (nv === 1) return vSe[0]!;
-      const i = cellIndex(verts, x0);
-      const va = verts[i]!;
-      const vb = verts[i + 1]!;
-      const width = vb - va;
-      if (!(width > 0)) return vSe[i]!;
-      const t = Math.min(1, Math.max(0, (x0 - va) / width));
-      // Linear blend of ‖l‖ (no derivative of the influence row).
-      return (1 - t) * vSe[i]! + t * vSe[i + 1]!;
-    };
-
-    let sigma = NaN;
-    let delta1 = NaN;
-    let delta2 = NaN;
-    let df = NaN;
-    if (options.statistics) {
-      // Residuals from the interpolated surface at the data; approximate
-      // equivalent parameters (R statistics="approximate" spirit — not the
-      // full ehg141 calibration table). τ = degree+1; inflate when span < 1.
-      let rss = 0;
-      for (let i = 0; i < n; i++) {
-        const e = ys[i]! - predictInterp(xs[i]!);
-        rss += e * e;
-      }
-      const tau = degree + 1;
-      const trL = tau * (1 + Math.max(0, (1 - span) / span));
-      // Near-projection: tr(LᵀL) ≈ tr(L) for a smoother.
-      const trLtL = trL;
-      delta1 = n - 2 * trL + trLtL;
-      if (!(delta1 > 0)) delta1 = Math.max(1, n - trL);
-      sigma = Math.sqrt(rss / delta1);
-      delta2 = delta1;
-      df = (delta1 * delta1) / delta2;
-    }
-
-    return {
-      predict: predictInterp,
-      seNorm: seNormInterp,
-      sigma,
-      delta1,
-      delta2,
-      df,
-    };
-  }
-
-  // ── Direct surface (small n / exact) ───────────────────────────────────
-  const localWeights = (x0: number): { i0: number; l: Float64Array } | null =>
-    localWeightsAt(x0, windowFor(x0));
-
-  const predictAt = (x0: number): { fit: number; norm: number } | null => {
-    const lw = localWeights(x0);
-    if (lw === null) return null;
-    let fit = 0;
-    let norm2 = 0;
-    for (let j = 0; j < q; j++) {
-      const lj = lw.l[j]!;
-      fit += lj * ys[lw.i0 + j]!;
-      norm2 += lj * lj;
-    }
-    return { fit, norm: Math.sqrt(norm2) };
+  const context: LoessContext = {
+    n,
+    span,
+    degree,
+    statistics: options.statistics,
+    cell: options.cell,
+    xs,
+    ys,
+    q,
+    windowFor,
+    localWeightsAt,
+    localFitAt,
   };
-
-  let sigma = NaN;
-  let delta1 = NaN;
-  let delta2 = NaN;
-  let df = NaN;
-  if (options.statistics) {
-    // Fit at every data point: residuals, tr(L), tr(LᵀL) — and the dense L
-    // for exact δ2 on fixture-sized inputs.
-    const dense = n <= DELTA2_EXACT_LIMIT ? new Float64Array(n * n) : null;
-    let trL = 0;
-    let trLtL = 0;
-    let rss = 0;
-    let ok = true;
-    // Warm-start window walk: evaluation points xs[i] are sorted ascending,
-    // so the nearest-q window only slides right — amortized O(n) total
-    // instead of O(n·q). The slide never moves on an exact tie (matches the
-    // cold two-pointer's left preference), and boundary tie-swaps exchange
-    // zero-weight endpoints at dmax, leaving fits, tr(L), tr(LᵀL), and the
-    // dense L bit-identical. The one window-dependent case is dmax = 0
-    // (more than q points share one x): fall back to the cold selection.
-    let i0w = windowFor(xs[0]!);
-    for (let i = 0; i < n; i++) {
-      const x0 = xs[i]!;
-      while (i0w + q < n && xs[i0w + q]! - x0 < x0 - xs[i0w]!) i0w++;
-      const windowFirst = xs[i0w]!;
-      const windowLast = xs[i0w + q - 1]!;
-      if (windowFirst === windowLast) i0w = windowFor(x0);
-      const lw = localWeightsAt(x0, i0w);
-      if (lw === null) {
-        ok = false;
-        break;
-      }
-      let fit = 0;
-      for (let j = 0; j < q; j++) {
-        const lj = lw.l[j]!;
-        fit += lj * ys[lw.i0 + j]!;
-        trLtL += lj * lj;
-        if (lw.i0 + j === i) trL += lj;
-        if (dense !== null) dense[i * n + lw.i0 + j] = lj;
-      }
-      const e = ys[i]! - fit;
-      rss += e * e;
-    }
-    if (!ok) return null;
-    delta1 = n - 2 * trL + trLtL;
-    sigma = Math.sqrt(rss / delta1);
-    // Documented approximation beyond the exact limit: δ2 = δ1.
-    delta2 = dense === null ? delta1 : exactDelta2(dense, n);
-    df = (delta1 * delta1) / delta2;
-  }
-
-  return {
-    predict: (x0: number) => predictAt(x0)?.fit ?? NaN,
-    seNorm: (x0: number) => predictAt(x0)?.norm ?? NaN,
-    sigma,
-    delta1,
-    delta2,
-    df,
-  };
+  return surface === "interpolate" ? interpolatedModel(context) : directModel(context);
 }
 
 /** Exported for tests / docs — size at which default surface flips. */

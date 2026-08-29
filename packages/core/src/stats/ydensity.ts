@@ -56,8 +56,42 @@ interface Bucket {
   rows: number[];
 }
 
+type PartialViolin = {
+  x: CellValue;
+  group: number;
+  y: Float64Array;
+  density: Float64Array;
+  scaled: Float64Array;
+  count: Float64Array;
+  n: number;
+  firstRow: number;
+};
+
+function collectBuckets(input: YDensityStatInput) {
+  const buckets = new Map<string, Bucket>();
+  const order: string[] = [];
+  let dropped = 0;
+  for (let i = 0; i < input.y.length; i++) {
+    if (!Number.isFinite(input.y[i]!)) {
+      dropped++;
+      continue;
+    }
+    const x = input.x[i] ?? null;
+    const group = input.groups[i]!;
+    const key = `${encodeKey(x)}\0${group}`;
+    let bucket = buckets.get(key);
+    if (bucket === undefined) {
+      bucket = { x, group, rows: [] };
+      buckets.set(key, bucket);
+      order.push(key);
+    }
+    bucket.rows.push(i);
+  }
+  return { buckets, order, dropped };
+}
+
 export function statYDensity(input: YDensityStatInput): YDensityStatResult {
-  const { y, x, groups } = input;
+  const { y } = input;
   const params = input.params ?? {};
   const scaleMode: ViolinScale = params.scale ?? "area";
   const trim = params.trim ?? true;
@@ -65,36 +99,7 @@ export function statYDensity(input: YDensityStatInput): YDensityStatResult {
   const gridN = params.n ?? 512;
   const carriedNames = Object.keys(input.carried ?? {});
 
-  const buckets = new Map<string, Bucket>();
-  const order: string[] = [];
-  let dropped = 0;
-  for (let i = 0; i < y.length; i++) {
-    if (!Number.isFinite(y[i]!)) {
-      dropped++;
-      continue;
-    }
-    const xv = x[i] ?? null;
-    const g = groups[i]!;
-    const key = `${encodeKey(xv)}\0${g}`;
-    let b = buckets.get(key);
-    if (b === undefined) {
-      b = { x: xv, group: g, rows: [] };
-      buckets.set(key, b);
-      order.push(key);
-    }
-    b.rows.push(i);
-  }
-
-  type PartialViolin = {
-    x: CellValue;
-    group: number;
-    y: Float64Array;
-    density: Float64Array;
-    scaled: Float64Array;
-    count: Float64Array;
-    n: number;
-    firstRow: number;
-  };
+  const { buckets, order, dropped } = collectBuckets(input);
   const violins: PartialViolin[] = [];
   let droppedGroups = 0;
   let maxN = 1;

@@ -189,8 +189,144 @@ function fillEmptyLatticeCells(counts: Map<string, HexCell>, groupCount: number,
   }
 }
 
+function indexGroups(input: BinHexStatInput, rowCount: number) {
+  const order: number[] = [];
+  const slots = new Map<number, number>();
+  const sampleRows: number[] = [];
+  for (let i = 0; i < rowCount; i++) {
+    const group = input.groups[i]!;
+    if (slots.has(group)) continue;
+    slots.set(group, order.length);
+    order.push(group);
+    sampleRows.push(i);
+  }
+  return { order, slots, sampleRows };
+}
+
+function collectCells(
+  input: BinHexStatInput,
+  rowCount: number,
+  ranges: { x: [number, number]; y: [number, number] },
+  size: number,
+  groupSlots: Map<number, number>,
+) {
+  const counts = new Map<string, HexCell>();
+  const spanX = ranges.x[1] - ranges.x[0];
+  const spanY = ranges.y[1] - ranges.y[0];
+  let dropped = 0;
+  for (let i = 0; i < rowCount; i++) {
+    const x = input.x[i]!;
+    const y = input.y[i]!;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      dropped++;
+      continue;
+    }
+    const axial = pixelToAxial((x - ranges.x[0]) / spanX, (y - ranges.y[0]) / spanY, size);
+    const group = groupSlots.get(input.groups[i]!)!;
+    const key = hexBinKey(group, axial.q, axial.r);
+    const rawWeight = input.weights?.[i];
+    const weight = rawWeight === undefined ? 1 : Number.isFinite(rawWeight) ? rawWeight : 0;
+    const existing = counts.get(key);
+    if (existing === undefined) counts.set(key, { gs: group, ...axial, count: weight });
+    else existing.count += weight;
+  }
+  return { counts, dropped };
+}
+
+function selectedCells(counts: Map<string, HexCell>, drop: boolean): HexCell[] {
+  const cells: HexCell[] = [];
+  for (const cell of counts.values()) {
+    if (!drop || cell.count !== 0) cells.push(cell);
+  }
+  cells.sort((a, b) => a.gs - b.gs || a.r - b.r || a.q - b.q);
+  return cells;
+}
+
+function groupMetrics(cells: HexCell[], dataArea: number) {
+  const totals = new Map<number, number>();
+  const maxCounts = new Map<number, number>();
+  for (const cell of cells) {
+    totals.set(cell.gs, (totals.get(cell.gs) ?? 0) + Math.abs(cell.count));
+    maxCounts.set(cell.gs, Math.max(maxCounts.get(cell.gs) ?? 0, Math.abs(cell.count)));
+  }
+  const maxDensities = new Map<number, number>();
+  for (const cell of cells) {
+    const total = totals.get(cell.gs) ?? 0;
+    const density = total > 0 && dataArea > 0 ? cell.count / dataArea / total : 0;
+    maxDensities.set(cell.gs, Math.max(maxDensities.get(cell.gs) ?? 0, density));
+  }
+  return { totals, maxCounts, maxDensities };
+}
+
+function normalized(value: number, max: number): number {
+  return max > 0 ? value / max : 0;
+}
+
+function emitCells(
+  input: BinHexStatInput,
+  cells: HexCell[],
+  groupOrder: number[],
+  sampleRows: number[],
+  carriedNames: string[],
+  geometry: {
+    xmin: number;
+    ymin: number;
+    spanX: number;
+    spanY: number;
+    size: number;
+  },
+) {
+  const unitArea = ((3 * Math.sqrt(3)) / 2) * geometry.size * geometry.size;
+  const dataArea = unitArea * geometry.spanX * geometry.spanY;
+  const width = Math.sqrt(3) * geometry.size * geometry.spanX;
+  const height = 2 * geometry.size * geometry.spanY;
+  const metrics = groupMetrics(cells, dataArea);
+  const x = new Float64Array(cells.length);
+  const y = new Float64Array(cells.length);
+  const widths = new Float64Array(cells.length);
+  const heights = new Float64Array(cells.length);
+  const count = new Float64Array(cells.length);
+  const density = new Float64Array(cells.length);
+  const ncount = new Float64Array(cells.length);
+  const ndensity = new Float64Array(cells.length);
+  const groups: number[] = [];
+  const carried: Record<string, CellValue[]> = {};
+  for (const name of carriedNames) carried[name] = [];
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i]!;
+    const unit = axialToPixel(cell.q, cell.r, geometry.size);
+    x[i] = geometry.xmin + unit.x * geometry.spanX;
+    y[i] = geometry.ymin + unit.y * geometry.spanY;
+    widths[i] = width;
+    heights[i] = height;
+    count[i] = cell.count;
+    const total = metrics.totals.get(cell.gs) ?? 0;
+    const cellDensity = total > 0 && dataArea > 0 ? cell.count / dataArea / total : 0;
+    density[i] = cellDensity;
+    ncount[i] = normalized(cell.count, metrics.maxCounts.get(cell.gs) ?? 0);
+    ndensity[i] = normalized(cellDensity, metrics.maxDensities.get(cell.gs) ?? 0);
+    groups.push(groupOrder[cell.gs]!);
+    for (const name of carriedNames) {
+      carried[name]!.push(input.carried![name]![sampleRows[cell.gs]!]!);
+    }
+  }
+  return {
+    x,
+    y,
+    widths,
+    heights,
+    count,
+    density,
+    ncount,
+    ndensity,
+    groups,
+    carried,
+  };
+}
+
 export function statBinHex(input: BinHexStatInput): BinHexStatResult {
-  const { x, y, groups, weights } = input;
+  const { x, y } = input;
   const params = input.params ?? {};
   const drop = params.drop !== false;
   const bins = params.bins ?? 30;
@@ -225,44 +361,11 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
   const s = 1 / Math.max(1, bins * Math.sqrt(3));
 
   // Group first-seen order.
-  const groupOrder: number[] = [];
-  const groupSlot = new Map<number, number>();
-  const sampleRow: number[] = [];
-  for (let i = 0; i < nIn; i++) {
-    const g = groups[i]!;
-    if (!groupSlot.has(g)) {
-      groupSlot.set(g, groupOrder.length);
-      groupOrder.push(g);
-      sampleRow.push(i);
-    }
-  }
+  const { order: groupOrder, slots: groupSlot, sampleRows: sampleRow } = indexGroups(input, nIn);
 
   // Key: groupSlot | q | r  → cell (coords stored at insert so collect never
   // re-parses the composite string key).
-  const counts = new Map<string, HexCell>();
-  let dropped = 0;
-
-  for (let i = 0; i < nIn; i++) {
-    const xv = x[i]!;
-    const yv = y[i]!;
-    if (!Number.isFinite(xv) || !Number.isFinite(yv)) {
-      dropped++;
-      continue;
-    }
-    // Normalize to unit square.
-    const nx = (xv - xmin) / spanX;
-    const ny = (yv - ymin) / spanY;
-    const { q, r } = pixelToAxial(nx, ny, s);
-    const gs = groupSlot.get(groups[i]!)!;
-    const key = hexBinKey(gs, q, r);
-    let w = 1;
-    if (weights !== null && weights !== undefined) {
-      w = Number.isFinite(weights[i]!) ? weights[i]! : 0;
-    }
-    const existing = counts.get(key);
-    if (existing === undefined) counts.set(key, { gs, q, r, count: w });
-    else existing.count += w;
-  }
+  const { counts, dropped } = collectCells(input, nIn, ranges, s, groupSlot);
 
   // drop:false — materialize the full axial lattice over the unit square so
   // empty cells appear (counts Map only ever saw occupied keys). Bound by
@@ -272,90 +375,27 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
   }
 
   // Collect cells (coords already known — no key.split / Number re-parse).
-  const cells: HexCell[] = [];
-  for (const cell of counts.values()) {
-    if (drop && cell.count === 0) continue;
-    cells.push(cell);
-  }
+  const cells = selectedCells(counts, drop);
   if (cells.length === 0) return empty(dropped);
-
-  // Sort by group then q,r for determinism.
-  cells.sort((a, b) => a.gs - b.gs || a.r - b.r || a.q - b.q);
-
-  // Per-group totals for density.
-  const groupTotal = new Map<number, number>();
-  const groupMax = new Map<number, number>();
-  for (const c of cells) {
-    groupTotal.set(c.gs, (groupTotal.get(c.gs) ?? 0) + Math.abs(c.count));
-    groupMax.set(c.gs, Math.max(groupMax.get(c.gs) ?? 0, Math.abs(c.count)));
-  }
-
-  // Hex area in unit space: (3√3/2) s² for regular pointy-top.
-  const unitArea = ((3 * Math.sqrt(3)) / 2) * s * s;
-  // Data-space area scale.
-  const dataArea = unitArea * spanX * spanY;
-
-  // Vertex radii in data space: unit center-to-vertex s maps to (s*spanX, s*spanY)
-  // but pointy-top x extent is s*√3 (half-width), y extent is s (half-height to flat? pointy half-height = s).
-  // Full width = 2 * (s * √3 / 2)? Pointy-top: width = √3 * s, height = 2 * s (in unit space).
-  const unitWidth = Math.sqrt(3) * s;
-  const unitHeight = 2 * s;
-  const dataWidth = unitWidth * spanX;
-  const dataHeight = unitHeight * spanY;
-
-  const nOut = cells.length;
-  const outX = new Float64Array(nOut);
-  const outY = new Float64Array(nOut);
-  const outW = new Float64Array(nOut);
-  const outH = new Float64Array(nOut);
-  const outCount = new Float64Array(nOut);
-  const outDensity = new Float64Array(nOut);
-  const outNcount = new Float64Array(nOut);
-  const outNdensity = new Float64Array(nOut);
-  const outGroups: number[] = [];
-  const carried: Record<string, CellValue[]> = {};
-  for (const name of carriedNames) carried[name] = [];
-
-  // Max density per group for ndensity.
-  const groupMaxDensity = new Map<number, number>();
-  for (const c of cells) {
-    const total = groupTotal.get(c.gs) ?? 0;
-    const d = total > 0 && dataArea > 0 ? c.count / dataArea / total : 0;
-    groupMaxDensity.set(c.gs, Math.max(groupMaxDensity.get(c.gs) ?? 0, d));
-  }
-
-  for (let i = 0; i < nOut; i++) {
-    const c = cells[i]!;
-    const { x: ux, y: uy } = axialToPixel(c.q, c.r, s);
-    outX[i] = xmin + ux * spanX;
-    outY[i] = ymin + uy * spanY;
-    outW[i] = dataWidth;
-    outH[i] = dataHeight;
-    outCount[i] = c.count;
-    const total = groupTotal.get(c.gs) ?? 0;
-    const d = total > 0 && dataArea > 0 ? c.count / dataArea / total : 0;
-    outDensity[i] = d;
-    const maxC = groupMax.get(c.gs) ?? 0;
-    outNcount[i] = maxC > 0 ? c.count / maxC : 0;
-    const maxD = groupMaxDensity.get(c.gs) ?? 0;
-    outNdensity[i] = maxD > 0 ? d / maxD : 0;
-    outGroups.push(groupOrder[c.gs]!);
-    for (const name of carriedNames) {
-      carried[name]!.push(input.carried![name]![sampleRow[c.gs]!]!);
-    }
-  }
+  const output = emitCells(input, cells, groupOrder, sampleRow, carriedNames, {
+    xmin,
+    ymin,
+    spanX,
+    spanY,
+    size: s,
+  });
 
   return {
-    x: outX,
-    y: outY,
-    width: outW,
-    height: outH,
-    count: outCount,
-    density: outDensity,
-    ncount: outNcount,
-    ndensity: outNdensity,
-    groups: outGroups,
-    carried,
+    x: output.x,
+    y: output.y,
+    width: output.widths,
+    height: output.heights,
+    count: output.count,
+    density: output.density,
+    ncount: output.ncount,
+    ndensity: output.ndensity,
+    groups: output.groups,
+    carried: output.carried,
     dropped,
     usedDefaultBins,
   };

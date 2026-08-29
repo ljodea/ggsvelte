@@ -57,8 +57,59 @@ export interface SummaryBinStatResult {
   cut: { fuzzy: readonly number[]; rightClosed: boolean; binIndex: Int32Array };
 }
 
+type BinBreaks = ReturnType<typeof binBreaksBins>;
+type SummaryBucket = { rows: number[]; sampleRow: number };
+
+function finiteExtent(values: Float64Array): [number, number] | undefined {
+  let min = Infinity;
+  let max = -Infinity;
+  let count = 0;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    count++;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return count === 0 ? undefined : [min, max];
+}
+
+function collectBuckets(input: SummaryBinStatInput, breaks: BinBreaks) {
+  const buckets = new Map<string, SummaryBucket>();
+  const groupOrder: number[] = [];
+  const seenGroup = new Set<number>();
+  const binCount = breaks.breaks.length - 1;
+  let dropped = 0;
+
+  for (let i = 0; i < input.x.length; i++) {
+    const x = input.x[i]!;
+    const y = input.y[i]!;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      dropped++;
+      continue;
+    }
+    const bin = binIndexOf(x, breaks.fuzzy, breaks.rightClosed);
+    if (bin < 0 || bin >= binCount) {
+      dropped++;
+      continue;
+    }
+    const group = input.groups[i]!;
+    if (!seenGroup.has(group)) {
+      seenGroup.add(group);
+      groupOrder.push(group);
+    }
+    const key = `${group}\0${bin}`;
+    let bucket = buckets.get(key);
+    if (bucket === undefined) {
+      bucket = { rows: [], sampleRow: i };
+      buckets.set(key, bucket);
+    }
+    bucket.rows.push(i);
+  }
+  return { buckets, groupOrder, dropped };
+}
+
 export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult {
-  const { x, y, groups } = input;
+  const { x, y } = input;
   const params = input.params ?? {};
   const fun: SummaryFunName = params.fun ?? "mean";
   const carriedNames = Object.keys(input.carried ?? {});
@@ -78,57 +129,18 @@ export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult
     cut: { fuzzy: [], rightClosed: true, binIndex: new Int32Array(0) },
   });
 
-  let min = Infinity;
-  let max = -Infinity;
-  let finiteX = 0;
-  for (let i = 0; i < x.length; i++) {
-    const xv = x[i]!;
-    if (!Number.isFinite(xv)) continue;
-    finiteX++;
-    if (xv < min) min = xv;
-    if (xv > max) max = xv;
-  }
-  if (finiteX === 0) return empty(x.length);
+  const extent = finiteExtent(x);
+  if (extent === undefined) return empty(x.length);
 
   const closed = params.closed ?? "right";
-  const range: [number, number] = input.range ?? [min, max];
+  const range: [number, number] = input.range ?? extent;
   const breaks =
     params.binwidth === undefined
       ? binBreaksBins(range, params.bins ?? 30, params.boundary, params.center, closed)
       : binBreaksWidth(range, params.binwidth, params.boundary, params.center, closed);
   const binCount = breaks.breaks.length - 1;
 
-  type Bucket = { rows: number[]; sampleRow: number };
-  const buckets = new Map<string, Bucket>();
-  const groupOrder: number[] = [];
-  const seenGroup = new Set<number>();
-  let dropped = 0;
-
-  for (let i = 0; i < x.length; i++) {
-    const xv = x[i]!;
-    const yv = y[i]!;
-    if (!Number.isFinite(xv) || !Number.isFinite(yv)) {
-      dropped++;
-      continue;
-    }
-    const bin = binIndexOf(xv, breaks.fuzzy, breaks.rightClosed);
-    if (bin < 0 || bin >= binCount) {
-      dropped++;
-      continue;
-    }
-    const g = groups[i]!;
-    if (!seenGroup.has(g)) {
-      seenGroup.add(g);
-      groupOrder.push(g);
-    }
-    const key = `${g}\0${bin}`;
-    let bucket = buckets.get(key);
-    if (bucket === undefined) {
-      bucket = { rows: [], sampleRow: i };
-      buckets.set(key, bucket);
-    }
-    bucket.rows.push(i);
-  }
+  const { buckets, groupOrder, dropped } = collectBuckets(input, breaks);
 
   const outX: number[] = [];
   const outXmin: number[] = [];

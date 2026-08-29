@@ -49,12 +49,18 @@
   },
   "overrides": [
     {
-      // Staged rollout inventory (2026-08-29): core 122.
-      // apps/docs, examples, scripts, tests, packages/spec, packages/cli,
-      // packages/skill, and benchmarks pass and use the global rule.
+      // Final staged rollout inventory (2026-08-29): packages/core 122.
+      // Later overrides re-enable the rule for each completed core scope;
+      // remove this exemption after the last scope reaches zero.
       "files": ["packages/core/**"],
       "rules": {
         "eslint/complexity": "off"
+      }
+    },
+    {
+      "files": ["packages/core/src/stats/**"],
+      "rules": {
+        "eslint/complexity": ["error", { "max": 20 }]
       }
     },
     {
