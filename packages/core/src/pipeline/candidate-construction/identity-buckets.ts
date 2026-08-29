@@ -18,7 +18,11 @@ export type AggregateLineageXView =
       readonly transformed: Float64Array;
       readonly xBinning: BinnedBoundaries;
     }
-  | { readonly kind: "semantic"; readonly semantic: Float64Array; readonly valid: Uint8Array }
+  | {
+      readonly kind: "semantic";
+      readonly semantic: Float64Array;
+      readonly valid: Uint8Array;
+    }
   | { readonly kind: "raw"; readonly column: readonly CellValue[] };
 
 /** Resolve conversion/parsed/position columns once for a frame's x field. */
@@ -102,6 +106,103 @@ interface BinEdge {
   bucket: number[];
 }
 
+function groupFrameRows(frame: FinalizedLayerFrame): Map<number, number[]> {
+  const rowsByGroup = new Map<number, number[]>();
+  for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+    const group = frame.groups[frameRow] ?? 0;
+    const rows = rowsByGroup.get(group);
+    if (rows === undefined) rowsByGroup.set(group, [frameRow]);
+    else rows.push(frameRow);
+  }
+  return rowsByGroup;
+}
+
+function buildWholeGroupBinBuckets(input: {
+  frame: FinalizedLayerFrame;
+  panelIndex: number;
+  layerIndex: number;
+  sourceRowsByGroupBin: Map<string, number[]>;
+}): void {
+  const membersByGroup = new Map<number, number[]>();
+  for (let localRow = 0; localRow < input.frame.inputGroups.length; localRow++) {
+    const group = input.frame.inputGroups[localRow]!;
+    const sourceRow = globalSourceRowForInputRow(input.frame, localRow);
+    const members = membersByGroup.get(group);
+    if (members === undefined) membersByGroup.set(group, [sourceRow]);
+    else members.push(sourceRow);
+  }
+  for (const [group, frameRows] of groupFrameRows(input.frame)) {
+    const members = membersByGroup.get(group) ?? [];
+    for (const frameRow of frameRows) {
+      input.sourceRowsByGroupBin.set(
+        `${input.panelIndex}:${input.layerIndex}:${group}:${frameRow}`,
+        members,
+      );
+    }
+  }
+}
+
+function buildBinEdges(input: {
+  frame: FinalizedLayerFrame;
+  panelIndex: number;
+  layerIndex: number;
+  sourceRowsByGroupBin: Map<string, number[]>;
+}): Map<number, BinEdge[]> {
+  const binsByGroup = new Map<number, BinEdge[]>();
+  for (let frameRow = 0; frameRow < input.frame.n; frameRow++) {
+    const group = input.frame.groups[frameRow] ?? 0;
+    const bucket: number[] = [];
+    input.sourceRowsByGroupBin.set(
+      `${input.panelIndex}:${input.layerIndex}:${group}:${frameRow}`,
+      bucket,
+    );
+    const list = binsByGroup.get(group);
+    const edge: BinEdge = { frameRow, bucket };
+    if (list === undefined) binsByGroup.set(group, [edge]);
+    else list.push(edge);
+  }
+  return binsByGroup;
+}
+
+function indexEdgesByGridBin(
+  binsByGroup: ReadonlyMap<number, readonly BinEdge[]>,
+  binIndex: ArrayLike<number>,
+): Map<number, Map<number, BinEdge>> {
+  const edgeByGridBin = new Map<number, Map<number, BinEdge>>();
+  for (const [group, bins] of binsByGroup) {
+    const byGridBin = new Map<number, BinEdge>();
+    for (const edge of bins) byGridBin.set(binIndex[edge.frameRow]!, edge);
+    edgeByGridBin.set(group, byGridBin);
+  }
+  return edgeByGridBin;
+}
+
+function populateBinEdges(input: {
+  frame: FinalizedLayerFrame;
+  field: string;
+  binsByGroup: ReadonlyMap<number, readonly BinEdge[]>;
+}): void {
+  const { frame, field } = input;
+  const cut = frame.binCut!;
+  const edgeByGridBin = indexEdgesByGridBin(input.binsByGroup, cut.binIndex);
+  const xNumeric = positionColumn(
+    frame.table,
+    field,
+    xConversionOf(frame.binding),
+    frame.binding.xTransform,
+  );
+  for (let localRow = 0; localRow < frame.inputGroups.length; localRow++) {
+    const group = frame.inputGroups[localRow]!;
+    const byGridBin = edgeByGridBin.get(group);
+    if (byGridBin === undefined || byGridBin.size === 0) continue;
+    const value = xNumeric[localRow]!;
+    if (!Number.isFinite(value)) continue;
+    const edge = byGridBin.get(binIndexOf(value, cut.fuzzy, cut.rightClosed));
+    if (edge === undefined) continue;
+    edge.bucket.push(globalSourceRowForInputRow(frame, localRow));
+  }
+}
+
 /**
  * Assign each source row to at most one bin in a single pass over the panel
  * rows, replaying the stat's own cut (O(n log B) binary search over the fuzzed
@@ -117,85 +218,16 @@ export function buildBinLineageBuckets(input: {
   layerIndex: number;
   sourceRowsByGroupBin: Map<string, number[]>;
 }): void {
-  const { frame, panelIndex, layerIndex, sourceRowsByGroupBin } = input;
+  const { frame } = input;
   const field = frame.binding.xField;
   if (field === null) return;
-
-  // Pre-stat groups cached on the frame during buildFrame (issue #217).
-  const inputGroups = frame.inputGroups;
-  const binsByGroup = new Map<number, BinEdge[]>();
   // Without the stat's own cut we cannot reproduce its fuzzed membership, so
   // fall back to the same conservative "mark represents the whole group"
   // behaviour used when bin edges are absent.
   const cut = frame.binCut;
-  const missingEdges =
-    frame.xmin === null || frame.xmax === null || cut === undefined || cut === null;
-  /** group → frame rows (missing-edges path only; enables O(n+k) fill). */
-  const frameRowsByGroup = missingEdges ? new Map<number, number[]>() : null;
-
-  for (let frameRow = 0; frameRow < frame.n; frameRow++) {
-    const group = frame.groups[frameRow] ?? 0;
-    if (frameRowsByGroup !== null) {
-      const rows = frameRowsByGroup.get(group);
-      if (rows === undefined) frameRowsByGroup.set(group, [frameRow]);
-      else rows.push(frameRow);
-      continue;
-    }
-    const bucket: number[] = [];
-    sourceRowsByGroupBin.set(`${panelIndex}:${layerIndex}:${group}:${frameRow}`, bucket);
-    const edge: BinEdge = { frameRow, bucket };
-    const list = binsByGroup.get(group);
-    if (list === undefined) binsByGroup.set(group, [edge]);
-    else list.push(edge);
-  }
-
-  // No bin edges: every output mark represents the full group (filter fallback).
-  // Pre-index group → frame rows, collect members O(n), share one array per group O(k).
-  if (frameRowsByGroup !== null) {
-    const membersByGroup = new Map<number, number[]>();
-    for (let localRow = 0; localRow < inputGroups.length; localRow++) {
-      const group = inputGroups[localRow]!;
-      const sourceRow = globalSourceRowForInputRow(frame, localRow);
-      const members = membersByGroup.get(group);
-      if (members === undefined) membersByGroup.set(group, [sourceRow]);
-      else members.push(sourceRow);
-    }
-    for (const [group, frameRows] of frameRowsByGroup) {
-      const members = membersByGroup.get(group) ?? [];
-      for (const frameRow of frameRows) {
-        sourceRowsByGroupBin.set(`${panelIndex}:${layerIndex}:${group}:${frameRow}`, members);
-      }
-    }
+  if (frame.xmin === null || frame.xmax === null || cut === undefined || cut === null) {
+    buildWholeGroupBinBuckets(input);
     return;
   }
-
-  // Grid bin index → the frame row that emitted it. summary_bin omits empty
-  // bins, so the grid index is not the frame row.
-  const edgeByGridBin = new Map<number, Map<number, BinEdge>>();
-  for (const [group, bins] of binsByGroup) {
-    const byGridBin = new Map<number, BinEdge>();
-    for (const edge of bins) byGridBin.set(cut!.binIndex[edge.frameRow]!, edge);
-    edgeByGridBin.set(group, byGridBin);
-  }
-
-  // Bin edges are in scale space after pre-stat transforms; compare source
-  // rows in the same space so log/sqrt histograms retain lineage.
-  const xNumeric = positionColumn(
-    frame.table,
-    field,
-    xConversionOf(frame.binding),
-    frame.binding.xTransform,
-  );
-  for (let localRow = 0; localRow < inputGroups.length; localRow++) {
-    const group = inputGroups[localRow]!;
-    const byGridBin = edgeByGridBin.get(group);
-    if (byGridBin === undefined || byGridBin.size === 0) continue;
-    const value = xNumeric[localRow]!;
-    if (!Number.isFinite(value)) continue;
-    // Replay the stat's own cut (fuzzed breaks) — exact-edge predicates
-    // disagree with it inside the fuzz band around a break (#905).
-    const edge = byGridBin.get(binIndexOf(value, cut!.fuzzy, cut!.rightClosed));
-    if (edge === undefined) continue;
-    edge.bucket.push(globalSourceRowForInputRow(frame, localRow));
-  }
+  populateBinEdges({ frame, field, binsByGroup: buildBinEdges(input) });
 }

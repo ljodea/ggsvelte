@@ -68,7 +68,7 @@ export function filterAggregateYRows(input: {
   return input.baseRows.filter((row) => Number.isFinite(numeric[row]!));
 }
 
-export function filterRepresentedSourceRows(input: {
+interface RepresentedRowsInput {
   frame: LayerFrame;
   table: ColumnTable;
   frameRow: number;
@@ -81,20 +81,29 @@ export function filterRepresentedSourceRows(input: {
   sourceRowsByGroupBin?: Map<string, number[]>;
   /** Precomputed finite-y rows per `${panel}:${layer}:${group}` (smooth/summary/boxplot). */
   sourceRowsByGroupY?: Map<string, number[]>;
-}): readonly number[] {
-  const { frame, table, frameRow } = input;
+}
+
+interface RepresentedRowsContext {
+  readonly aggregateXField: string | null;
+  readonly aggregateYField: string | null;
+  readonly indexKeyPrefix: string | null;
+  readonly needsBin: boolean;
+  readonly needsX: boolean;
+  readonly needsY: boolean;
+  readonly outputX: unknown;
+}
+
+function representedRowsContext(input: RepresentedRowsInput): RepresentedRowsContext {
+  const { frame, frameRow } = input;
   const stat = frame.binding.layer.stat ?? "identity";
   const aggregateXField = frame.binding.xField;
   const aggregateYField = frame.binding.yField;
   const outputX = frame.xValues?.[frameRow] ?? frame.xNumeric?.[frameRow] ?? null;
   const group = input.group ?? frame.groups[frameRow] ?? 0;
-  const panelIndex = input.panelIndex;
-  const layerIndex = input.layerIndex;
   const indexKeyPrefix =
-    panelIndex !== undefined && layerIndex !== undefined
-      ? `${panelIndex}:${layerIndex}:${group}`
+    input.panelIndex !== undefined && input.layerIndex !== undefined
+      ? `${input.panelIndex}:${input.layerIndex}:${group}`
       : null;
-
   const needsX =
     aggregateXField !== null &&
     outputX !== null &&
@@ -104,6 +113,23 @@ export function filterRepresentedSourceRows(input: {
   const needsBin = (stat === "bin" || stat === "summary_bin") && aggregateXField !== null;
   const needsY =
     (stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null;
+  return {
+    aggregateXField,
+    aggregateYField,
+    indexKeyPrefix,
+    needsBin,
+    needsX,
+    needsY,
+    outputX,
+  };
+}
+
+function indexedRepresentedRows(
+  input: RepresentedRowsInput,
+  context: RepresentedRowsContext,
+): readonly number[] | undefined {
+  const { frame, frameRow } = input;
+  const { indexKeyPrefix, needsBin, needsX, needsY, outputX } = context;
 
   // Full-group finite-y path (smooth; summary/boxplot without x/bin): return the
   // shared cached array before cloning baseRows — keeps resolve O(1) per mark.
@@ -133,6 +159,16 @@ export function filterRepresentedSourceRows(input: {
     if (indexed !== undefined) return indexed;
   }
 
+  return undefined;
+}
+
+function filterRepresentedRowsFallback(
+  input: RepresentedRowsInput,
+  context: RepresentedRowsContext,
+): readonly number[] {
+  const { frame, table, frameRow } = input;
+  const { aggregateXField, aggregateYField, needsBin, needsX, needsY, outputX } = context;
+
   // Nothing to narrow: hand back the shared frozen bucket, exactly as the
   // indexed arms above do. A clone is not frozen and so misses LineageStore's
   // identity cache, which made every mark re-tokenize its whole group.
@@ -143,7 +179,7 @@ export function filterRepresentedSourceRows(input: {
   if (needsX) {
     representedRows = filterAggregateXRows({
       table,
-      field: aggregateXField,
+      field: aggregateXField!,
       outputX,
       baseRows: representedRows,
       binding: frame.binding,
@@ -153,7 +189,7 @@ export function filterRepresentedSourceRows(input: {
       frame,
       table,
       frameRow,
-      field: aggregateXField,
+      field: aggregateXField!,
       baseRows: representedRows,
     });
   }
@@ -162,10 +198,16 @@ export function filterRepresentedSourceRows(input: {
     representedRows = filterAggregateYRows({
       frame,
       table,
-      field: aggregateYField,
+      field: aggregateYField!,
       baseRows: representedRows,
     });
   }
 
   return representedRows;
+}
+
+export function filterRepresentedSourceRows(input: RepresentedRowsInput): readonly number[] {
+  const context = representedRowsContext(input);
+  const indexed = indexedRepresentedRows(input, context);
+  return indexed ?? filterRepresentedRowsFallback(input, context);
 }
