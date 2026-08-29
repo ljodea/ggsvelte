@@ -257,6 +257,54 @@ export interface TrainResult {
   warnings: ScaleWarning[];
 }
 
+function trainPinned(
+  values: Iterable<unknown>,
+  spec: DiscreteScaleSpec,
+  domain: readonly unknown[],
+  prevState: ScaleState | null | undefined,
+  fingerprint: string,
+  onExhaust: "cycle" | "error",
+  warnings: ScaleWarning[],
+): TrainResult {
+  const rangeSize = spec.range.length;
+  const pinned = new Map<string, number>();
+  for (const value of domain) {
+    const key = encodeKey(value);
+    if (!pinned.has(key)) pinned.set(key, pinned.size);
+  }
+  if (pinned.size > rangeSize) {
+    if (onExhaust === "error") throw new PaletteExhaustedError(pinned.size, rangeSize);
+    warnings.push({
+      code: "palette-exhausted",
+      message: `Explicit domain has ${pinned.size} values for a range of ${rangeSize}; cycling.`,
+    });
+  }
+  const unknownKeys = new Set<string>();
+  for (const value of values) {
+    const key = encodeKey(value);
+    if (!pinned.has(key)) unknownKeys.add(key);
+  }
+  if (unknownKeys.size > 0) {
+    warnings.push({
+      code: "out-of-domain",
+      message: `${unknownKeys.size} data value(s) outside the explicit domain map to the 'unknown' output.`,
+      values: [...unknownKeys].map((key) => decodeKey(key)),
+    });
+  }
+  const state = prevState ?? freshScaleState(fingerprint);
+  return {
+    mode: "pinned",
+    state,
+    domain: [...pinned.keys()].map((key) => decodeKey(key)),
+    indexOf: (value) => pinned.get(encodeKey(value)),
+    rangeValueOf: (value) => {
+      const index = pinned.get(encodeKey(value));
+      return index === undefined ? undefined : spec.range[index % rangeSize];
+    },
+    warnings,
+  };
+}
+
 export function trainDiscrete(
   values: Iterable<unknown>,
   spec: DiscreteScaleSpec,
@@ -269,48 +317,7 @@ export function trainDiscrete(
 
   // ---- pinned mode: explicit domain SUSPENDS stored assignments -----------
   if (spec.domain !== undefined) {
-    const pinned = new Map<string, number>();
-    for (const v of spec.domain) {
-      const k = encodeKey(v);
-      if (!pinned.has(k)) pinned.set(k, pinned.size);
-    }
-    if (pinned.size > rangeSize) {
-      if (onExhaust === "error") {
-        throw new PaletteExhaustedError(pinned.size, rangeSize);
-      }
-      warnings.push({
-        code: "palette-exhausted",
-        message: `Explicit domain has ${pinned.size} values for a range of ${rangeSize}; cycling.`,
-      });
-    }
-    // Deduplicated out-of-domain notice.
-    const unknownKeys = new Set<string>();
-    for (const v of values) {
-      const k = encodeKey(v);
-      if (!pinned.has(k)) unknownKeys.add(k);
-    }
-    if (unknownKeys.size > 0) {
-      const offenders = [...unknownKeys].map((k) => decodeKey(k));
-      warnings.push({
-        code: "out-of-domain",
-        message: `${unknownKeys.size} data value(s) outside the explicit domain map to the 'unknown' output.`,
-        values: offenders,
-      });
-    }
-    // Stored assignments survive untouched; they restore when the explicit
-    // domain is removed (fingerprint is re-checked at that point).
-    const state = prevState ?? freshScaleState(fingerprint);
-    return {
-      mode: "pinned",
-      state,
-      domain: [...pinned.keys()].map((k) => decodeKey(k)),
-      indexOf: (v) => pinned.get(encodeKey(v)),
-      rangeValueOf: (v) => {
-        const i = pinned.get(encodeKey(v));
-        return i === undefined ? undefined : spec.range[i % rangeSize];
-      },
-      warnings,
-    };
+    return trainPinned(values, spec, spec.domain, prevState, fingerprint, onExhaust, warnings);
   }
 
   // ---- grow / data modes ---------------------------------------------------
