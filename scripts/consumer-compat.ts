@@ -92,6 +92,7 @@ function pack(root: string, artifacts: string): string[] {
   const versions: PublishablePackageVersions = {
     spec: packageVersion(root, "spec"),
     core: packageVersion(root, "core"),
+    compose: packageVersion(root, "compose"),
     svelte: packageVersion(root, "svelte"),
     cli: packageVersion(root, "cli"),
   };
