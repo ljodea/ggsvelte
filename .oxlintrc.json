@@ -169,6 +169,17 @@
       }
     },
     {
+      "files": [
+        "packages/core/src/pipeline/frame-identity.ts",
+        "packages/core/src/pipeline/position-jitter.ts",
+        "packages/core/src/table-coerce.ts",
+        "packages/core/src/semantic-viewport.ts"
+      ],
+      "rules": {
+        "eslint/complexity": ["error", { "max": 20 }]
+      }
+    },
+    {
       // Tests + benchmarks: fixture literals are cast deliberately (invalid
       // specs, RuntimeSpec shapes) and test files run long by design.
       "files": ["**/tests/**", "benchmarks/**"],
