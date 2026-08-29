@@ -21,6 +21,50 @@ const DEFAULT_LABEL_STROKE_WIDTH = 0.5;
 
 const measurer = new MetricsTableMeasurer(FONT_METRICS);
 
+function attachGlyphBoxes(input: {
+  batch: GlyphsBatch;
+  frame: LayerFrame;
+  emitted: EmittedGlyphs;
+  sizes: Float32Array | undefined;
+  fontSize: number;
+  params: {
+    padding?: number;
+    radius?: number;
+    linewidth?: number;
+  };
+  withBox: boolean;
+  wantsColors: boolean;
+  fill: ResolvedColorScale | null;
+}): void {
+  const { batch, frame, emitted, sizes, fontSize, params, withBox, wantsColors, fill } = input;
+  const { binding } = frame;
+  const padding = params.padding ?? DEFAULT_LABEL_PADDING;
+  const boxWidths = new Float32Array(emitted.kept);
+  const boxHeights = new Float32Array(emitted.kept);
+  for (let j = 0; j < emitted.kept; j++) {
+    const sz = sizes?.[j] ?? fontSize;
+    const text = emitted.texts[j]!;
+    boxWidths[j] = measurer.measureWidth(text, sz) + 2 * padding;
+    boxHeights[j] = measurer.measureHeight(sz) + 2 * padding;
+  }
+  batch.boxWidths = boxWidths;
+  batch.boxHeights = boxHeights;
+  batch.boxPadding = padding;
+  if (!withBox) return;
+  batch.boxRadius = params.radius ?? DEFAULT_LABEL_RADIUS;
+  batch.boxStrokeWidth = params.linewidth ?? DEFAULT_LABEL_STROKE_WIDTH;
+  batch.boxStroke = binding.color.constant;
+  if (wantsColors && emitted.colors !== null) batch.boxStrokes = emitted.colors;
+  const wantsFills =
+    fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null);
+  if (wantsFills && fill !== null) {
+    batch.boxFills = mappedPaintVector(frame, "fill", fill, emitted.styleRows);
+    batch.boxFill = null;
+  } else {
+    batch.boxFill = binding.fill.constant;
+  }
+}
+
 export function packGlyphsBatch(input: {
   frame: LayerFrame;
   emitted: EmittedGlyphs;
@@ -72,41 +116,19 @@ export function packGlyphsBatch(input: {
   }
   if (wantsColors && emitted.colors !== null) batch.colors = emitted.colors;
 
-  // Measure text extents for every glyph: inspect hover/pin chrome and hit
-  // AABB need a box that actually encloses the string (not a point ring).
-  // Visual label chrome (fill/stroke) stays opt-in via withBox (geom_label).
-  const padding = params.padding ?? DEFAULT_LABEL_PADDING;
-  const boxWidths = new Float32Array(emitted.kept);
-  const boxHeights = new Float32Array(emitted.kept);
-  for (let j = 0; j < emitted.kept; j++) {
-    const sz = sizes?.[j] ?? fontSize;
-    const text = emitted.texts[j]!;
-    boxWidths[j] = measurer.measureWidth(text, sz) + 2 * padding;
-    boxHeights[j] = measurer.measureHeight(sz) + 2 * padding;
-  }
-  batch.boxWidths = boxWidths;
-  batch.boxHeights = boxHeights;
-  batch.boxPadding = padding;
-
-  if (withBox) {
-    const radius = params.radius ?? DEFAULT_LABEL_RADIUS;
-    const strokeWidth = params.linewidth ?? DEFAULT_LABEL_STROKE_WIDTH;
-    batch.boxRadius = radius;
-    batch.boxStrokeWidth = strokeWidth;
-    // Outline follows text color (ggplot2: colour is ink + border).
-    batch.boxStroke = binding.color.constant;
-    if (wantsColors && emitted.colors !== null) batch.boxStrokes = emitted.colors;
-
-    const wantsFills =
-      fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null);
-    if (wantsFills && fill !== null) {
-      batch.boxFills = mappedPaintVector(frame, "fill", fill, emitted.styleRows);
-      batch.boxFill = null;
-    } else {
-      // Constant fill from binding, else theme paper at render time (null).
-      batch.boxFill = binding.fill.constant;
-    }
-  }
+  // Inspect hover/pin chrome and hit AABB need measured text boxes. Visual
+  // label fill/stroke stays opt-in via withBox (geom_label).
+  attachGlyphBoxes({
+    batch,
+    frame,
+    emitted,
+    sizes,
+    fontSize,
+    params,
+    withBox,
+    wantsColors,
+    fill,
+  });
 
   return batch;
 }

@@ -13,6 +13,10 @@ import {
   type ResolvedStyleScales,
 } from "./geometry-style.js";
 
+function emittedNoHexes(cursor: number, subpaths: number): boolean {
+  return cursor === 0 || subpaths === 0;
+}
+
 /**
  * Project one data-space hex into panel-local vertices.
  * Uses frame x/y centers and hexWidth/hexHeight (data units) from bin_hex.
@@ -92,7 +96,7 @@ export function hexBatch(
   }
   pathOffsets[subpaths] = cursor;
 
-  if (cursor === 0 || subpaths === 0) return null;
+  if (emittedNoHexes(cursor, subpaths)) return null;
 
   const params = (binding.layer.params ?? {}) as { alpha?: number; linewidth?: number };
   // Style vectors must index by kept subpath order (not raw frame rows): dropped
