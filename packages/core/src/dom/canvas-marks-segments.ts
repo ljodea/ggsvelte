@@ -87,6 +87,108 @@ function applyGlow(ctx: CanvasRenderingContext2D, glow: SegmentsBatch["glow"]): 
   };
 }
 
+function finishSegments(
+  ctx: CanvasRenderingContext2D,
+  restoreGlow: () => void,
+  previousLineCap: CanvasLineCap,
+): void {
+  applyDash(ctx, "solid");
+  restoreGlow();
+  ctx.lineCap = previousLineCap;
+}
+
+function drawMappedSegments(
+  ctx: CanvasRenderingContext2D,
+  batch: SegmentsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  includes: ((index: number) => boolean) | undefined,
+): void {
+  const baseAlpha = ctx.globalAlpha;
+  for (let j = 0; j < batch.segments.length / 4; j++) {
+    if (includes !== undefined && !includes(j)) continue;
+    const mark = resolveSegmentMark(batch, j, themeInk);
+    ctx.strokeStyle = resolveSegmentStroke(
+      ctx,
+      mark.stroke,
+      batch.strokePaint,
+      segmentBounds(batch, j),
+      resolve,
+    );
+    ctx.lineWidth = mark.width;
+    ctx.globalAlpha = baseAlpha * mark.alpha;
+    if (typeof ctx.setLineDash === "function") ctx.setLineDash([...mark.dash]);
+    ctx.beginPath();
+    traceSegment(ctx, batch, j);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = baseAlpha;
+}
+
+function panelStrokeStyle(
+  ctx: CanvasRenderingContext2D,
+  color: string,
+  paint: ResolvedGradientPaint | undefined,
+  resolve: ColorResolver,
+): string | CanvasGradient {
+  return paint === undefined
+    ? resolve(color)
+    : resolveSegmentStroke(ctx, color, paint, { x: 0, y: 0, width: 1, height: 1 }, resolve);
+}
+
+function drawMonoSegments(
+  ctx: CanvasRenderingContext2D,
+  batch: SegmentsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  includes: ((index: number) => boolean) | undefined,
+): void {
+  ctx.strokeStyle = panelStrokeStyle(
+    ctx,
+    segmentStrokeAt(batch, 0, themeInk),
+    batch.strokePaint,
+    resolve,
+  );
+  ctx.beginPath();
+  let traced = false;
+  for (let j = 0; j < batch.segments.length / 4; j++) {
+    if (includes !== undefined && !includes(j)) continue;
+    traceSegment(ctx, batch, j);
+    traced = true;
+  }
+  if (traced) ctx.stroke();
+}
+
+function drawSegmentRuns(
+  ctx: CanvasRenderingContext2D,
+  batch: SegmentsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  includes: ((index: number) => boolean) | undefined,
+): void {
+  const n = batch.segments.length / 4;
+  let runStart = 0;
+  while (runStart < n) {
+    if (includes !== undefined && !includes(runStart)) {
+      runStart++;
+      continue;
+    }
+    const color = segmentStrokeAt(batch, runStart, themeInk);
+    let runEnd = runStart + 1;
+    while (runEnd < n && segmentStrokeAt(batch, runEnd, themeInk) === color) runEnd++;
+    ctx.strokeStyle = panelStrokeStyle(ctx, color, batch.strokePaint, resolve);
+    ctx.beginPath();
+    let traced = false;
+    for (let j = runStart; j < runEnd; j++) {
+      if (includes !== undefined && !includes(j)) continue;
+      traceSegment(ctx, batch, j);
+      traced = true;
+    }
+    if (traced) ctx.stroke();
+    runStart = runEnd;
+  }
+}
+
 /**
  * Draw segments with Θ(runs) stroke() calls: mono batches (no per-segment
  * `strokes`) are one path; per-segment colors collapse contiguous same-color
@@ -126,91 +228,17 @@ export function drawSegments(
     batch.alphas !== undefined ||
     batch.linetypeIndexes !== undefined;
   if (mappedStyle || perSegmentPaint) {
-    const baseAlpha = ctx.globalAlpha;
-    for (let j = 0; j < n; j++) {
-      if (includes !== undefined && !includes(j)) continue;
-      const mark = resolveSegmentMark(batch, j, themeInk);
-      ctx.strokeStyle = resolveSegmentStroke(
-        ctx,
-        mark.stroke,
-        paint,
-        segmentBounds(batch, j),
-        resolve,
-      );
-      ctx.lineWidth = mark.width;
-      ctx.globalAlpha = baseAlpha * mark.alpha;
-      if (typeof ctx.setLineDash === "function") ctx.setLineDash([...mark.dash]);
-      ctx.beginPath();
-      traceSegment(ctx, batch, j);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = baseAlpha;
-    applyDash(ctx, "solid");
-    restoreGlow();
-    ctx.lineCap = previousLineCap;
+    drawMappedSegments(ctx, batch, themeInk, resolve, includes);
+    finishSegments(ctx, restoreGlow, previousLineCap);
     return;
   }
 
   // Solid mono path, or panel-space paint (bounds unused for panel mapping).
   if (batch.strokes === undefined) {
-    const monoSolid = segmentStrokeAt(batch, 0, themeInk);
-    if (paint) {
-      // Panel-space ignores bounds; placeholder is unused for mapping.
-      ctx.strokeStyle = resolveSegmentStroke(
-        ctx,
-        monoSolid,
-        paint,
-        { x: 0, y: 0, width: 1, height: 1 },
-        resolve,
-      );
-    } else {
-      ctx.strokeStyle = resolve(monoSolid);
-    }
-    ctx.beginPath();
-    let traced = false;
-    for (let j = 0; j < n; j++) {
-      if (includes !== undefined && !includes(j)) continue;
-      traceSegment(ctx, batch, j);
-      traced = true;
-    }
-    if (traced) ctx.stroke();
-    applyDash(ctx, "solid");
-    restoreGlow();
-    ctx.lineCap = previousLineCap;
+    drawMonoSegments(ctx, batch, themeInk, resolve, includes);
+    finishSegments(ctx, restoreGlow, previousLineCap);
     return;
   }
-
-  let runStart = 0;
-  while (runStart < n) {
-    if (includes !== undefined && !includes(runStart)) {
-      runStart++;
-      continue;
-    }
-    const color = segmentStrokeAt(batch, runStart, themeInk);
-    let runEnd = runStart + 1;
-    while (runEnd < n && segmentStrokeAt(batch, runEnd, themeInk) === color) runEnd++;
-    if (paint) {
-      ctx.strokeStyle = resolveSegmentStroke(
-        ctx,
-        color,
-        paint,
-        { x: 0, y: 0, width: 1, height: 1 },
-        resolve,
-      );
-    } else {
-      ctx.strokeStyle = resolve(color);
-    }
-    ctx.beginPath();
-    let traced = false;
-    for (let j = runStart; j < runEnd; j++) {
-      if (includes !== undefined && !includes(j)) continue;
-      traceSegment(ctx, batch, j);
-      traced = true;
-    }
-    if (traced) ctx.stroke();
-    runStart = runEnd;
-  }
-  applyDash(ctx, "solid");
-  restoreGlow();
-  ctx.lineCap = previousLineCap;
+  drawSegmentRuns(ctx, batch, themeInk, resolve, includes);
+  finishSegments(ctx, restoreGlow, previousLineCap);
 }

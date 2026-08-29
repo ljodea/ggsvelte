@@ -208,64 +208,82 @@ function drawIndexedColorPoints(
   }
 }
 
-export function drawPoints(
-  ctx: CanvasRenderingContext2D,
-  batch: PointsBatch,
-  theme: ThemeTokens,
-  resolve: ColorResolver,
-): void {
-  const themeInk = resolve(themeVar("ink", theme));
-  const n = batch.rowIndex.length;
-  // plus/cross/circle-open are open stroke paths — even a literal shape
-  // constant cannot use the fill-only fast path (it would paint nothing).
-  const needsPerPointPaint =
+function needsIndividualPaint(batch: PointsBatch): boolean {
+  return (
     batch.sizes !== undefined ||
     batch.alphas !== undefined ||
     batch.shapeIndexes !== undefined ||
     batch.shape === "plus" ||
     batch.shape === "cross" ||
-    batch.shape === "circle-open";
-  if (needsPerPointPaint) {
-    const baseAlpha = ctx.globalAlpha;
-    for (let j = 0; j < n; j++) {
-      const style = resolvePointMark(batch, j, themeInk);
-      ctx.globalAlpha = baseAlpha * style.alpha;
-      ctx.beginPath();
-      traceGeometry(ctx, style.geometry);
-      if (style.geometry.mode === "stroke") {
-        ctx.strokeStyle = resolve(style.fill);
-        ctx.lineWidth = style.geometry.strokeWidth;
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = resolve(style.fill);
-        ctx.fill();
-      }
-    }
-    ctx.globalAlpha = baseAlpha;
-    return;
-  }
-  if (batch.colorIndexes !== undefined && batch.colorPalette !== undefined) {
-    drawIndexedColorPoints(ctx, batch, resolve, null);
-    return;
-  }
-  if (batch.colors === undefined) {
-    // Single fill: one path for the whole batch (the fast path that makes
-    // canvas worth it at high counts).
-    ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
+    batch.shape === "circle-open"
+  );
+}
+
+function drawIndividualPoints(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  include: ((index: number) => boolean) | null,
+): void {
+  const baseAlpha = ctx.globalAlpha;
+  for (let j = 0; j < batch.rowIndex.length; j++) {
+    if (include !== null && !include(j)) continue;
+    const style = resolvePointMark(batch, j, themeInk);
+    ctx.globalAlpha = baseAlpha * style.alpha;
     ctx.beginPath();
-    if (isFilledCircleBatch(batch)) traceFilledCircles(ctx, batch, null);
-    else for (let j = 0; j < n; j++) tracePoint(ctx, batch, j);
-    ctx.fill();
-    return;
+    traceGeometry(ctx, style.geometry);
+    if (style.geometry.mode === "stroke") {
+      ctx.strokeStyle = resolve(style.fill);
+      ctx.lineWidth = style.geometry.strokeWidth;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = resolve(style.fill);
+      ctx.fill();
+    }
   }
-  // Per-mark colors: bucket by color when cardinality is small (typical
-  // categorical scatter: 5 series interleaved → run-length would be 1).
-  // Contiguous runs stay as the high-cardinality fallback (O(n) one pass).
+  ctx.globalAlpha = baseAlpha;
+}
+
+function drawSingleColorPoints(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  include: ((index: number) => boolean) | null,
+): void {
+  ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
+  ctx.beginPath();
+  let traced = false;
+  const circles = isFilledCircleBatch(batch);
+  for (let j = 0; j < batch.rowIndex.length; j++) {
+    if (include !== null && !include(j)) continue;
+    if (circles) {
+      traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
+    } else {
+      tracePoint(ctx, batch, j);
+    }
+    traced = true;
+  }
+  if (traced) ctx.fill();
+}
+
+type PointColorBuckets = {
+  uniqueColors: string[];
+  indicesByColor: Map<string, number[]>;
+  highCardinality: boolean;
+};
+
+function bucketPointColors(
+  batch: PointsBatch,
+  themeInk: string,
+  include: ((index: number) => boolean) | null,
+): PointColorBuckets {
   const uniqueColors: string[] = [];
   const indicesByColor = new Map<string, number[]>();
   let highCardinality = false;
-  for (let j = 0; j < n; j++) {
-    const color = batch.colors[j] ?? batch.fill ?? themeInk;
+  for (let j = 0; j < batch.rowIndex.length; j++) {
+    const color = batch.colors![j] ?? batch.fill ?? themeInk;
     let list = indicesByColor.get(color);
     if (list === undefined) {
       list = [];
@@ -276,39 +294,95 @@ export function drawPoints(
         break;
       }
     }
-    list.push(j);
+    if (include === null || include(j)) list.push(j);
   }
-  if (!highCardinality) {
-    const circles = isFilledCircleBatch(batch);
-    for (const color of uniqueColors) {
-      const list = indicesByColor.get(color)!;
-      ctx.fillStyle = resolve(color);
-      ctx.beginPath();
-      if (circles) traceFilledCircles(ctx, batch, list);
-      else for (const j of list) tracePoint(ctx, batch, j);
-      ctx.fill();
-    }
-    return;
+  return { uniqueColors, indicesByColor, highCardinality };
+}
+
+function drawBucketedPointColors(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  resolve: ColorResolver,
+  buckets: PointColorBuckets,
+): void {
+  const circles = isFilledCircleBatch(batch);
+  for (const color of buckets.uniqueColors) {
+    const list = buckets.indicesByColor.get(color)!;
+    if (list.length === 0) continue;
+    ctx.fillStyle = resolve(color);
+    ctx.beginPath();
+    if (circles) traceFilledCircles(ctx, batch, list);
+    else for (const j of list) tracePoint(ctx, batch, j);
+    ctx.fill();
   }
-  // High-cardinality: batch consecutive same-color runs.
+}
+
+function drawPointColorRuns(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  include: ((index: number) => boolean) | null,
+): void {
+  const n = batch.rowIndex.length;
   const circles = isFilledCircleBatch(batch);
   let runStart = 0;
   while (runStart < n) {
-    const color = batch.colors[runStart] ?? batch.fill ?? themeInk;
+    const color = batch.colors![runStart] ?? batch.fill ?? themeInk;
     let runEnd = runStart + 1;
-    while (runEnd < n && (batch.colors[runEnd] ?? batch.fill ?? themeInk) === color) runEnd++;
+    while (runEnd < n && (batch.colors![runEnd] ?? batch.fill ?? themeInk) === color) runEnd++;
     ctx.fillStyle = resolve(color);
     ctx.beginPath();
-    if (circles) {
-      for (let j = runStart; j < runEnd; j++) {
+    let traced = false;
+    for (let j = runStart; j < runEnd; j++) {
+      if (include !== null && !include(j)) continue;
+      if (circles) {
         traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
+      } else {
+        tracePoint(ctx, batch, j);
       }
-    } else {
-      for (let j = runStart; j < runEnd; j++) tracePoint(ctx, batch, j);
+      traced = true;
     }
-    ctx.fill();
+    if (traced) ctx.fill();
     runStart = runEnd;
   }
+}
+
+function drawColoredPoints(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  themeInk: string,
+  resolve: ColorResolver,
+  include: ((index: number) => boolean) | null,
+): void {
+  const buckets = bucketPointColors(batch, themeInk, include);
+  if (buckets.highCardinality) {
+    drawPointColorRuns(ctx, batch, themeInk, resolve, include);
+  } else {
+    drawBucketedPointColors(ctx, batch, resolve, buckets);
+  }
+}
+
+export function drawPoints(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+): void {
+  const themeInk = resolve(themeVar("ink", theme));
+  if (needsIndividualPaint(batch)) {
+    drawIndividualPoints(ctx, batch, themeInk, resolve, null);
+    return;
+  }
+  if (batch.colorIndexes !== undefined && batch.colorPalette !== undefined) {
+    drawIndexedColorPoints(ctx, batch, resolve, null);
+    return;
+  }
+  if (batch.colors === undefined) {
+    drawSingleColorPoints(ctx, batch, themeInk, resolve, null);
+    return;
+  }
+  drawColoredPoints(ctx, batch, themeInk, resolve, null);
 }
 
 export function drawPointsSubset(
@@ -321,32 +395,8 @@ export function drawPointsSubset(
 ): void {
   const includes = (index: number) => maskIncludes(mask, index) === focused;
   const themeInk = resolve(themeVar("ink", theme));
-  const n = batch.rowIndex.length;
-  const needsPerPointPaint =
-    batch.sizes !== undefined ||
-    batch.alphas !== undefined ||
-    batch.shapeIndexes !== undefined ||
-    batch.shape === "plus" ||
-    batch.shape === "cross" ||
-    batch.shape === "circle-open";
-  if (needsPerPointPaint) {
-    const baseAlpha = ctx.globalAlpha;
-    for (let j = 0; j < n; j++) {
-      if (!includes(j)) continue;
-      const style = resolvePointMark(batch, j, themeInk);
-      ctx.globalAlpha = baseAlpha * style.alpha;
-      ctx.beginPath();
-      traceGeometry(ctx, style.geometry);
-      if (style.geometry.mode === "stroke") {
-        ctx.strokeStyle = resolve(style.fill);
-        ctx.lineWidth = style.geometry.strokeWidth;
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = resolve(style.fill);
-        ctx.fill();
-      }
-    }
-    ctx.globalAlpha = baseAlpha;
+  if (needsIndividualPaint(batch)) {
+    drawIndividualPoints(ctx, batch, themeInk, resolve, includes);
     return;
   }
   if (batch.colorIndexes !== undefined && batch.colorPalette !== undefined) {
@@ -354,79 +404,8 @@ export function drawPointsSubset(
     return;
   }
   if (batch.colors === undefined) {
-    ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
-    ctx.beginPath();
-    let traced = false;
-    const circles = isFilledCircleBatch(batch);
-    for (let j = 0; j < n; j++) {
-      if (!includes(j)) continue;
-      if (circles) {
-        traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
-      } else {
-        tracePoint(ctx, batch, j);
-      }
-      traced = true;
-    }
-    if (traced) ctx.fill();
+    drawSingleColorPoints(ctx, batch, themeInk, resolve, includes);
     return;
   }
-  // Interactive masks must not turn alternating categorical colors into one
-  // beginPath/fill pair per point. For the normal small categorical case
-  // (≤64 global first-seen colors), bucket included indices by color in one
-  // O(n) pass — not re-scan n for each of C colors (O(C·n)). Preserve global
-  // first-seen paint order (including colors only present on the other mask
-  // half). Fall back to contiguous runs when cardinality exceeds 64.
-  const uniqueColors: string[] = [];
-  const indicesByColor = new Map<string, number[]>();
-  let highCardinality = false;
-  for (let j = 0; j < n; j++) {
-    const color = batch.colors[j] ?? batch.fill ?? themeInk;
-    let list = indicesByColor.get(color);
-    if (list === undefined) {
-      list = [];
-      indicesByColor.set(color, list);
-      uniqueColors.push(color);
-      // Mirror the prior discovery loop: collect at most 65 names, then bail
-      // to run-length (uniqueColors.length > 64). Incomplete buckets are unused.
-      if (uniqueColors.length > 64) {
-        highCardinality = true;
-        break;
-      }
-    }
-    if (includes(j)) list.push(j);
-  }
-  if (!highCardinality) {
-    const circles = isFilledCircleBatch(batch);
-    for (const color of uniqueColors) {
-      const list = indicesByColor.get(color)!;
-      if (list.length === 0) continue;
-      ctx.fillStyle = resolve(color);
-      ctx.beginPath();
-      if (circles) traceFilledCircles(ctx, batch, list);
-      else for (const j of list) tracePoint(ctx, batch, j);
-      ctx.fill();
-    }
-    return;
-  }
-  let runStart = 0;
-  while (runStart < n) {
-    const color = batch.colors[runStart] ?? batch.fill ?? themeInk;
-    let runEnd = runStart + 1;
-    while (runEnd < n && (batch.colors[runEnd] ?? batch.fill ?? themeInk) === color) runEnd++;
-    ctx.fillStyle = resolve(color);
-    ctx.beginPath();
-    let traced = false;
-    const circles = isFilledCircleBatch(batch);
-    for (let j = runStart; j < runEnd; j++) {
-      if (!includes(j)) continue;
-      if (circles) {
-        traceFilledCircle(ctx, batch.positions[j * 2]!, batch.positions[j * 2 + 1]!, batch.size);
-      } else {
-        tracePoint(ctx, batch, j);
-      }
-      traced = true;
-    }
-    if (traced) ctx.fill();
-    runStart = runEnd;
-  }
+  drawColoredPoints(ctx, batch, themeInk, resolve, includes);
 }
