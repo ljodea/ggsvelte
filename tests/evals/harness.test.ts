@@ -13,6 +13,7 @@ import { describe, expect, test } from "bun:test";
 import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
 import { KNOWN_GEOMS, normalize, validate } from "@ggsvelte/spec";
 
+import { collectCoverage } from "./coverage.ts";
 import { MockResponder } from "./model.ts";
 import {
   bindingSimilarity,
@@ -103,41 +104,7 @@ describe("case corpus", () => {
   });
 
   test("stat/position/facet/coord/scale coverage", () => {
-    const stats = new Set<string>();
-    const positions = new Set<string>();
-    const facts = new Set<string>();
-    for (const c of cases) {
-      if (c.gold === null) continue;
-      const g = c.gold as unknown as Record<string, unknown>;
-      for (const layer of c.gold.layers as Array<{
-        stat?: string;
-        position?: string;
-        params?: { method?: string };
-      }>) {
-        if (layer.stat !== undefined) stats.add(layer.stat);
-        if (layer.position !== undefined) positions.add(layer.position);
-        if (layer.params?.method !== undefined) facts.add(`smooth:${layer.params.method}`);
-      }
-      const facet = g["facet"] as Record<string, unknown> | undefined;
-      if (facet?.["wrap"] !== undefined) facts.add("facet:wrap");
-      if (facet?.["rows"] !== undefined || facet?.["cols"] !== undefined) facts.add("facet:grid");
-      if (facet?.["scales"] !== undefined && facet["scales"] !== "fixed") facts.add("facet:free");
-      const coord = g["coord"] as Record<string, unknown> | undefined;
-      if (coord?.["type"] === "flip") facts.add("coord:flip");
-      const scales = g["scales"] as
-        | Record<string, { type?: string; transform?: string }>
-        | undefined;
-      for (const channel of ["x", "y", "color", "fill"]) {
-        const kind = channel === "color" || channel === "fill" ? "colorish" : "pos";
-        const t = scales?.[channel]?.type;
-        if (t !== undefined) facts.add(`scale:${kind}:${t}`);
-        // Pre-stat position transform (log10/sqrt) is a canonical scale fact.
-        const transform = scales?.[channel]?.transform;
-        if (transform !== undefined && transform !== "identity") {
-          facts.add(`scale:${kind}:${transform}`);
-        }
-      }
-    }
+    const { stats, positions, facts } = collectCoverage(cases);
     for (const stat of ["count", "bin", "smooth", "boxplot", "density", "summary"]) {
       expect(stats.has(stat)).toBe(true);
     }
@@ -259,7 +226,10 @@ describe("MockResponder map refusal", () => {
       "",
       `Scatter of y by station and map region to color.\n${profileLine}`,
     );
-    const parsed = JSON.parse(reply) as { layers?: unknown[]; unsupported?: string };
+    const parsed = JSON.parse(reply) as {
+      layers?: unknown[];
+      unsupported?: string;
+    };
     expect(parsed.unsupported).toBeUndefined();
     expect(Array.isArray(parsed.layers)).toBe(true);
   });
@@ -320,7 +290,9 @@ describe("hard gate", () => {
     expect(ok.spec).not.toBeNull();
 
     const badField = gate(
-      { layers: [{ geom: "point", aes: { x: { field: "nope" }, y: { field: "b" } } }] },
+      {
+        layers: [{ geom: "point", aes: { x: { field: "nope" }, y: { field: "b" } } }],
+      },
       PROFILE,
     );
     expect(badField.ok).toBe(false);
@@ -342,7 +314,10 @@ describe("structural rubric", () => {
     expect(
       geomSimilarity(
         gold,
-        spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "point" }, { geom: "smooth" }] }),
+        spec({
+          aes: { x: "a", y: "b" },
+          layers: [{ geom: "point" }, { geom: "smooth" }],
+        }),
       ),
     ).toBe(1);
     expect(
@@ -351,13 +326,19 @@ describe("structural rubric", () => {
     expect(
       geomSimilarity(
         gold,
-        spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "line" }, { geom: "line" }] }),
+        spec({
+          aes: { x: "a", y: "b" },
+          layers: [{ geom: "line" }, { geom: "line" }],
+        }),
       ),
     ).toBe(0);
     // Duplicates count as a multiset, not a set.
     expect(
       geomSimilarity(
-        spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "point" }, { geom: "point" }] }),
+        spec({
+          aes: { x: "a", y: "b" },
+          layers: [{ geom: "point" }, { geom: "point" }],
+        }),
         spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "point" }] }),
       ),
     ).toBe(0.5);
@@ -402,7 +383,10 @@ describe("structural rubric", () => {
     });
     expect(extrasSimilarity(goldExtras, half)).toBe(0.5);
     // A gold with no non-default facts always scores 1.
-    const plain = spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "point" }] });
+    const plain = spec({
+      aes: { x: "a", y: "b" },
+      layers: [{ geom: "point" }],
+    });
     expect(extrasSimilarity(plain, goldExtras)).toBe(1);
   });
 
@@ -414,7 +398,10 @@ describe("structural rubric", () => {
       layers: [{ geom: "point" }],
       scales: { y: { type: "log" } },
     });
-    const noFacts = spec({ aes: { x: "a", y: "b" }, layers: [{ geom: "point" }] });
+    const noFacts = spec({
+      aes: { x: "a", y: "b" },
+      layers: [{ geom: "point" }],
+    });
     const atBoundary = structuralScore(goldWithFacts, noFacts);
     expect(atBoundary.total).toBe(0.8);
     expect(atBoundary.total >= PASS_STRUCTURAL).toBe(true);

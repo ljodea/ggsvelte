@@ -222,7 +222,17 @@ export function nonDefaultFacts(spec: PortableSpec): string[] {
   const facts: string[] = [];
   const s = spec as unknown as Record<string, unknown>;
 
-  const facet = s["facet"];
+  addFacetFacts(s["facet"], facts);
+
+  const coord = s["coord"];
+  if (isRecord(coord) && coord["type"] === "flip") facts.push("coord=flip");
+
+  addScaleFacts(s["scales"], facts);
+  addPositionFacts(spec, facts);
+  return facts;
+}
+
+function addFacetFacts(facet: unknown, facts: string[]): void {
   if (isRecord(facet)) {
     for (const form of ["wrap", "rows", "cols"] as const) {
       const ref = facet[form];
@@ -234,11 +244,9 @@ export function nonDefaultFacts(spec: PortableSpec): string[] {
       facts.push(`facet.scales=${facet["scales"]}`);
     }
   }
+}
 
-  const coord = s["coord"];
-  if (isRecord(coord) && coord["type"] === "flip") facts.push("coord=flip");
-
-  const scales = s["scales"];
+function addScaleFacts(scales: unknown, facts: string[]): void {
   if (isRecord(scales)) {
     for (const channel of ["x", "y", "color", "fill"] as const) {
       const config = scales[channel];
@@ -247,7 +255,9 @@ export function nonDefaultFacts(spec: PortableSpec): string[] {
       }
     }
   }
+}
 
+function addPositionFacts(spec: PortableSpec, facts: string[]): void {
   const seen = new Map<string, number>();
   for (const layer of layersOf(spec)) {
     const defaults = GEOM_DEFAULTS[layer.geom as keyof typeof GEOM_DEFAULTS];
@@ -259,7 +269,6 @@ export function nonDefaultFacts(spec: PortableSpec): string[] {
       facts.push(n === 0 ? key : `${key}#${n}`); // multiset-safe within a set
     }
   }
-  return facts;
 }
 
 /** Fraction of gold's non-default facts reproduced by the candidate. */
@@ -358,6 +367,9 @@ export function renderCheck(spec: PortableSpec, evalCase: EvalCase): RenderResul
     });
     return svg.length > 0 ? { ok: true } : { ok: false, error: "empty SVG output" };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }

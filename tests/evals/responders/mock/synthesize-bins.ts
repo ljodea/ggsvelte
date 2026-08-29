@@ -7,7 +7,9 @@ import { fieldNamed } from "./profile.ts";
 import { colorFor, f } from "./style.ts";
 import type { MockAes, MockContext, MockLayer } from "./types.ts";
 
-export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
+type BinHandler = (ctx: MockContext) => MockLayer[] | undefined;
+
+function synthesizeRaster(ctx: MockContext): MockLayer[] | undefined {
   const { prompt, profile, pick } = ctx;
 
   if (/\braster\b/.test(prompt)) {
@@ -22,6 +24,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
     return [{ geom: "raster", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeHex(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_hex / hexagonal bin heatmap — must win over bare "heatmap" → tile (#800).
   if (/\bhex(?:agon(?:al)?)?(?:\s+bin)?\b|\bgeom[_\s]?hex\b|\bbin_hex\b/.test(prompt)) {
@@ -54,6 +62,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizeBin2d(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   if (
     /\bgeom[_\s]?bin[_ ]?2d\b|\bbin[_ ]?2d\b|\b2d bin(?:ned)? heatmap\b|\b2d rectangular bins?\b|\brectangular bins?\b.*\bheatmap\b|\bheatmap\b.*\brectangular bins?\b|\bbin heatmap\b/.test(
       prompt,
@@ -85,6 +99,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizeTile(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
     const cats = profile.fields.filter(
       (field) => field.type === "nominal" || field.type === "ordinal",
@@ -111,6 +131,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     return [{ geom: "tile", aes }];
   }
 
+  return undefined;
+}
+
+function synthesizeRect(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   if (/\brectangles?\b|\bgeom rect\b|\brect\b.*xmin|\bxmin\/xmax\b/.test(prompt)) {
     const xmin =
       fieldNamed(profile, "xmin") ?? fieldNamed(profile, "start") ?? pick.quant() ?? "xmin";
@@ -131,6 +157,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+function synthesizeSegment(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   if (/\bsegment\b|leader line|xend|yend/.test(prompt)) {
     const x = fieldNamed(profile, "x") ?? pick.quant() ?? "x";
     const y = fieldNamed(profile, "y") ?? pick.quant() ?? "y";
@@ -145,6 +177,12 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     colorFor(ctx, "color", aes);
     return [{ geom: "segment", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeMap(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_map (#808): join value map_id to an inline fortified triangle set.
   if (/\bgeom map\b|\bfortified\b/.test(prompt)) {
@@ -176,5 +214,23 @@ export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
     return [{ geom: "map", aes, params }];
   }
 
+  return undefined;
+}
+
+const BIN_HANDLERS: BinHandler[] = [
+  synthesizeRaster,
+  synthesizeHex,
+  synthesizeBin2d,
+  synthesizeTile,
+  synthesizeRect,
+  synthesizeSegment,
+  synthesizeMap,
+];
+
+export function synthesizeBins(ctx: MockContext): MockLayer[] | undefined {
+  for (const handler of BIN_HANDLERS) {
+    const layers = handler(ctx);
+    if (layers !== undefined) return layers;
+  }
   return undefined;
 }

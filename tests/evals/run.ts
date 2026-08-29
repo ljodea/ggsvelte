@@ -255,31 +255,38 @@ function renderReport(board: Scoreboard, casesById: Map<string, EvalCase>): stri
   return lines.join("\n") + "\n";
 }
 
-export async function runEvals(options: RunEvalsOptions = {}): Promise<Scoreboard> {
+function resolveResponder(options: RunEvalsOptions): Responder {
   const dryRun = options.dryRun ?? false;
-  const repairEnabled = options.repair ?? true;
   const apiKey = process.env["OPENROUTER_API_KEY"];
-
-  let responder: Responder;
   if (options.responder !== undefined) {
-    responder = options.responder;
-  } else if (!dryRun && apiKey !== undefined && apiKey !== "") {
-    responder = new OpenRouterResponder(apiKey, options.model);
-  } else {
-    if (!dryRun && !(options.quiet ?? false)) {
-      console.log("NOTICE: OPENROUTER_API_KEY is not set — falling back to the MockResponder.");
-    }
-    responder = new MockResponder();
+    return options.responder;
   }
-  const live = responder instanceof OpenRouterResponder;
+  if (!dryRun && apiKey !== undefined && apiKey !== "") {
+    return new OpenRouterResponder(apiKey, options.model);
+  }
+  if (!dryRun && !(options.quiet ?? false)) {
+    console.log("NOTICE: OPENROUTER_API_KEY is not set — falling back to the MockResponder.");
+  }
+  return new MockResponder();
+}
 
+function selectCases(options: RunEvalsOptions): EvalCase[] {
   let cases = loadCases();
   if (options.cases !== undefined && options.cases.length > 0) {
     const wanted = new Set(options.cases);
     cases = cases.filter((c) => wanted.has(c.id));
   }
   if (options.max !== undefined) cases = cases.slice(0, options.max);
+  return cases;
+}
 
+async function scoreCases(
+  cases: EvalCase[],
+  responder: Responder,
+  options: RunEvalsOptions,
+): Promise<CaseScore[]> {
+  const live = responder instanceof OpenRouterResponder;
+  const repairEnabled = options.repair ?? true;
   const scores: CaseScore[] = [];
   for (const evalCase of cases) {
     if (scores.length > 0 && live) await sleep(INTER_CALL_DELAY_MS);
@@ -294,23 +301,36 @@ export async function runEvals(options: RunEvalsOptions = {}): Promise<Scoreboar
       );
     }
   }
+  return scores;
+}
 
-  const board: Scoreboard = {
+function buildScoreboard(responder: Responder, scores: CaseScore[]): Scoreboard {
+  return {
     meta: {
       timestamp: new Date().toISOString(),
       model: responder.name,
-      dryRun: !live,
+      dryRun: !(responder instanceof OpenRouterResponder),
       caseCount: scores.length,
     },
     totals: computeTotals(scores),
     cases: scores,
   };
+}
 
+function writeOutputs(board: Scoreboard, cases: EvalCase[]): void {
+  mkdirSync(OUT_DIR, { recursive: true });
+  writeFileSync(join(OUT_DIR, "scoreboard.json"), JSON.stringify(board, null, 2) + "\n");
+  const casesById = new Map(cases.map((c) => [c.id, c]));
+  writeFileSync(join(OUT_DIR, "report.md"), renderReport(board, casesById));
+}
+
+export async function runEvals(options: RunEvalsOptions = {}): Promise<Scoreboard> {
+  const responder = resolveResponder(options);
+  const cases = selectCases(options);
+  const scores = await scoreCases(cases, responder, options);
+  const board = buildScoreboard(responder, scores);
   if (options.writeOutputs ?? true) {
-    mkdirSync(OUT_DIR, { recursive: true });
-    writeFileSync(join(OUT_DIR, "scoreboard.json"), JSON.stringify(board, null, 2) + "\n");
-    const casesById = new Map(cases.map((c) => [c.id, c]));
-    writeFileSync(join(OUT_DIR, "report.md"), renderReport(board, casesById));
+    writeOutputs(board, cases);
   }
   if (!(options.quiet ?? false)) {
     console.log(JSON.stringify(board.totals));

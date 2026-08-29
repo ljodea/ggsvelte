@@ -8,8 +8,10 @@ import { fieldNamed } from "./profile.ts";
 import { f } from "./style.ts";
 import type { MockAes, MockContext, MockLayer } from "./types.ts";
 
-export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
-  const { prompt, profile, pick, scales } = ctx;
+type SurfaceHandler = (ctx: MockContext) => MockLayer[] | undefined;
+
+function synthesizeSfLabel(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_sf_label: boxed labels at representative SF points (#809 phase 3).
   if (
@@ -30,6 +32,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     if (label !== undefined) aes.label = f(label);
     return [{ geom: "sf_label", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeSfText(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_sf_text: labels at representative SF points (#809 phase 2).
   if (
@@ -55,6 +63,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     return [{ geom: "sf_text", aes }];
   }
 
+  return undefined;
+}
+
+function synthesizeSf(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_sf: GeoJSON Geometry JSON strings in a column (#809).
   if (
     /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer|choropleth)\b/.test(
@@ -70,6 +84,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     if (fill !== undefined) aes.fill = f(fill);
     return [{ geom: "sf", aes }];
   }
+
+  return undefined;
+}
+
+function synthesizeThreeLayers(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, pick, scales } = ctx;
 
   if (
     prompt.includes("three layers") &&
@@ -94,6 +114,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
       { geom: "density", aes: { x: f(x) } },
     ];
   }
+
+  return undefined;
+}
+
+function synthesizeFilledDensity(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_density_2d_filled closed KDE rings (#802 phase 2).
   if (
@@ -125,6 +151,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeEllipse(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // stat_ellipse bivariate normal rings on path (#812).
   if (/\bellipse\b|\bconfidence (?:ellipse|ring)/.test(prompt)) {
     const x = fieldNamed(profile, "x") ?? pick.mentionedQuant() ?? pick.quant() ?? "x";
@@ -153,6 +185,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeDotplot(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_dotplot / stat_bindot histodot stacks (#803).
   if (/\bdotplot\b|\bhistodot\b|\bbindot\b/.test(prompt)) {
     const x =
@@ -174,6 +212,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     if (Object.keys(params).length > 0) layer.params = params;
     return [layer];
   }
+
+  return undefined;
+}
+
+function synthesizeDensity2d(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
 
   // geom_density_2d / stat_density_2d product Gaussian isolines (#802).
   if (/\bdensity[_ ]?2d\b|\bbivariate kde\b|\bkde isolines?\b/.test(prompt)) {
@@ -207,6 +251,12 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     return layers;
   }
 
+  return undefined;
+}
+
+function synthesizeContour(ctx: MockContext): MockLayer[] | undefined {
+  const { prompt, profile, pick } = ctx;
+
   // geom_contour + stat_contour over a regular x/y/z grid (#801).
   if (/\bcontour\b|isolines?\b/.test(prompt)) {
     const x = fieldNamed(profile, "x") ?? pick.quant() ?? "x";
@@ -231,5 +281,25 @@ export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
     return [layer];
   }
 
+  return undefined;
+}
+
+const SURFACE_HANDLERS: SurfaceHandler[] = [
+  synthesizeSfLabel,
+  synthesizeSfText,
+  synthesizeSf,
+  synthesizeThreeLayers,
+  synthesizeFilledDensity,
+  synthesizeEllipse,
+  synthesizeDotplot,
+  synthesizeDensity2d,
+  synthesizeContour,
+];
+
+export function synthesizeSurfaces(ctx: MockContext): MockLayer[] | undefined {
+  for (const handler of SURFACE_HANDLERS) {
+    const layers = handler(ctx);
+    if (layers !== undefined) return layers;
+  }
   return undefined;
 }
