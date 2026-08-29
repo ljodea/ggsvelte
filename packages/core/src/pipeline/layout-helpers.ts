@@ -98,36 +98,57 @@ function defaultTemporalAxisPattern(
   const lean = options?.lean === true;
   if (kind === "monthDay") return "%b %e";
   if (kind === "time") {
-    if (precision === "millisecond") return "%H:%M:%S.%L";
-    if (precision === "minute") return "%H:%M";
-    return "%H:%M:%S";
+    return (
+      ({ millisecond: "%H:%M:%S.%L", minute: "%H:%M" } as Record<string, string>)[
+        precision ?? ""
+      ] ?? "%H:%M:%S"
+    );
   }
+  if (precision === "year") return "%Y";
+  if (precision === "quarter") return lean ? "%Y-%m" : "%Y-Q%q";
+  if (precision === "month") return "%Y-%m";
+  if (precision === "date" || kind === "date") return "%Y-%m-%d";
+  const suffix =
+    precision === "minute" ? "%H:%M" : precision === "millisecond" ? "%H:%M:%S.%L" : "%H:%M:%S";
+  return lean ? `%Y-%m-%d ${suffix}` : `%Y-%m-%d ${suffix} %Z`;
+}
 
-  switch (precision) {
-    case "year":
-      return "%Y";
-    case "quarter":
-      // formatTime (lean) has no %q token.
-      return lean ? "%Y-%m" : "%Y-Q%q";
-    case "month":
-      return "%Y-%m";
-    case "date":
-      return "%Y-%m-%d";
-    case "minute":
-      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M" : "%Y-%m-%d %H:%M %Z";
-    case "second":
-      return kind === "date" ? "%Y-%m-%d" : lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
-    case "millisecond":
-      return kind === "date"
-        ? "%Y-%m-%d"
-        : lean
-          ? "%Y-%m-%d %H:%M:%S.%L"
-          : "%Y-%m-%d %H:%M:%S.%L %Z";
-    default:
-      // Unknown precision: prior kind-only defaults.
-      if (kind === "date") return "%Y-%m-%d";
-      return lean ? "%Y-%m-%d %H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+function warnUnusedScaleOptions(
+  axis: "x" | "y",
+  config: PositionScaleSpec | undefined,
+  warnings: PipelineWarning[],
+): void {
+  const options: [unknown, unknown, string, string][] = [
+    [config?.breaks, config?.dateBreaks, "breaks", "dateBreaks"],
+    [config?.labels, config?.dateLabels, "labels", "dateLabels"],
+    [config?.dateMinorBreaks, config?.minorBreaks, "dateMinorBreaks", "minorBreaks"],
+  ];
+  for (const [primary, legacy, primaryName, legacyName] of options) {
+    if (primary !== undefined && legacy !== undefined) {
+      warnings.push({
+        code: "unused-scale-option",
+        message: `scales.${axis}.${primaryName} takes precedence; ${legacyName} is ignored.`,
+      });
+    }
   }
+}
+
+function defaultAxisFormatter(
+  scale: PositionScale,
+  config: PositionScaleSpec | undefined,
+  kind: TemporalScaleKind,
+  precision: TemporalPrecision | null | undefined,
+): TickFormatter | undefined {
+  if (scale.type !== "time") return undefined;
+  const compile = getTemporalRuntime()?.compileLabelFormat;
+  const pattern = defaultTemporalAxisPattern(kind, precision, { lean: compile === undefined });
+  if (compile === undefined) return (value) => formatTime(value as number, pattern);
+  const format = compile(pattern, {
+    kind,
+    locale: config?.locale ?? "en-US",
+    timezone: config?.timezone ?? "UTC",
+  });
+  return (value) => format(value as number);
 }
 
 export function makeAxisFormatter(
@@ -138,46 +159,11 @@ export function makeAxisFormatter(
   resolvedTemporalKind?: TemporalScaleKind | null,
   resolvedTemporalPrecision?: TemporalPrecision | null,
 ): TickFormatter | undefined {
-  if (config?.breaks !== undefined && config.dateBreaks !== undefined) {
-    warnings.push({
-      code: "unused-scale-option",
-      message: `scales.${axis}.breaks takes precedence; dateBreaks is ignored.`,
-    });
-  }
-  if (config?.labels !== undefined && config.dateLabels !== undefined) {
-    warnings.push({
-      code: "unused-scale-option",
-      message: `scales.${axis}.dateLabels takes precedence; labels is ignored.`,
-    });
-  }
-  if (config?.minorBreaks !== undefined && config.dateMinorBreaks !== undefined) {
-    warnings.push({
-      code: "unused-scale-option",
-      message: `scales.${axis}.dateMinorBreaks takes precedence; minorBreaks is ignored.`,
-    });
-  }
+  warnUnusedScaleOptions(axis, config, warnings);
   const labels = config?.dateLabels ?? config?.labels;
   if (labels === undefined) {
-    if (scale.type !== "time") return undefined;
     const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
-    // Crosshair and tooltip header share this formatter. Unit comes from
-    // column precision (year → %Y), not from how densely ticks are drawn.
-    const compile = getTemporalRuntime()?.compileLabelFormat;
-    if (compile === undefined) {
-      const leanPattern = defaultTemporalAxisPattern(kind, resolvedTemporalPrecision, {
-        lean: true,
-      });
-      return (value) => formatTime(value as number, leanPattern);
-    }
-    const defaultPattern = defaultTemporalAxisPattern(kind, resolvedTemporalPrecision, {
-      lean: false,
-    });
-    const format = compile(defaultPattern, {
-      kind,
-      locale: config?.locale ?? "en-US",
-      timezone: config?.timezone ?? "UTC",
-    });
-    return (value) => format(value as number);
+    return defaultAxisFormatter(scale, config, kind, resolvedTemporalPrecision);
   }
   if (scale.type === "band") {
     warnings.push({
