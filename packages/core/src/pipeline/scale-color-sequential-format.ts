@@ -38,42 +38,7 @@ function resolveColorLegendFormat(input: {
   const { domain, temporalKind, config, name, warnings } = input;
   const transform = input.transform ?? config?.transform ?? "identity";
   const labelFormat = config?.labels;
-  if (temporalKind !== null) {
-    const options = {
-      kind: temporalKind,
-      ...(config?.timezone !== undefined && { timezone: config.timezone }),
-    };
-    const compile = getTemporalRuntime()?.compileLabelFormat;
-    const fullLabel =
-      compile === undefined
-        ? defaultTimeTickFormat
-        : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z", options);
-    if (labelFormat !== undefined) {
-      if (compile === undefined) {
-        warnings.push({
-          code: "invalid-label-format",
-          message: `Temporal labels format on scales.${name} requires @ggsvelte/core/temporal (or the full package); using the default.`,
-        });
-      } else {
-        try {
-          return {
-            label: compile(labelFormat, options),
-            fullLabel,
-          };
-        } catch {
-          warnings.push({
-            code: "invalid-label-format",
-            message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
-          });
-        }
-      }
-    }
-    const label =
-      config?.timezone === undefined || compile === undefined
-        ? defaultTimeTickFormat
-        : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M", options);
-    return { label, fullLabel };
-  }
+  if (temporalKind !== null) return resolveTemporalFormat(input, temporalKind, labelFormat);
 
   // Log colorbars use decade ticks; linear span precision labels sub-unit
   // powers (0.001, 0.01, 0.1) as "0". Derive decimals from the domain floor.
@@ -115,6 +80,43 @@ function resolveColorLegendFormat(input: {
     }
   }
   return { label, fullLabel: label };
+}
+
+function resolveTemporalFormat(
+  input: Parameters<typeof resolveColorLegendFormat>[0],
+  temporalKind: TemporalKind,
+  labelFormat: string | undefined,
+): ColorLegendFormatter {
+  const { config, name, warnings } = input;
+  const options = {
+    kind: temporalKind,
+    ...(config?.timezone !== undefined && { timezone: config.timezone }),
+  };
+  const compile = getTemporalRuntime()?.compileLabelFormat;
+  const fullLabel =
+    compile === undefined
+      ? defaultTimeTickFormat
+      : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z", options);
+  if (labelFormat !== undefined && compile !== undefined) {
+    try {
+      return { label: compile(labelFormat, options), fullLabel };
+    } catch {
+      input.warnings.push({
+        code: "invalid-label-format",
+        message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
+      });
+    }
+  } else if (labelFormat !== undefined) {
+    warnings.push({
+      code: "invalid-label-format",
+      message: `Temporal labels format on scales.${name} requires @ggsvelte/core/temporal (or the full package); using the default.`,
+    });
+  }
+  const label =
+    config?.timezone === undefined || compile === undefined
+      ? defaultTimeTickFormat
+      : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M", options);
+  return { label, fullLabel };
 }
 
 export function resolveStyleLegendFormat(input: {
