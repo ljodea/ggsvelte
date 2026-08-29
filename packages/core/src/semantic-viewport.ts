@@ -194,23 +194,13 @@ function bandSpanForKeys(
   return [first!, first!];
 }
 
-function projectedSpan(
+function selectionSpan(
   scale: PositionScale,
-  selection: SemanticViewportAxisSelection | undefined,
-  coord: PanelCoordProjector["x"] | undefined,
+  selection: SemanticViewportAxisSelection,
   bandValuesByKey: ReadonlyMap<string, BandKeyEntry>,
 ): readonly [number, number] {
-  if (selection === undefined) return [0, 1];
-  let first: number | undefined;
-  let last: number | undefined;
   if (selection.kind === "band") {
     if (scale.type !== "band") return [0, 1];
-    // Span is min/max of band centers, expanded by half a step. Centers are
-    // monotone in domain index (including reverse), so track the extreme
-    // indices and normalize only those two values — not every selected key
-    // (#1332). Still one pass over keys: non-contiguous selections can put
-    // extremes anywhere in the list. Never `Math.min(...centers)`: spreading
-    // unbounded keys RangeErrors (same hazard as grouping.ts).
     let minIndex = Infinity;
     let maxIndex = -Infinity;
     let minValue: CellValue | undefined;
@@ -231,19 +221,24 @@ function projectedSpan(
     const c0 = scale.normalize(minValue);
     const c1 = minIndex === maxIndex ? c0 : scale.normalize(maxValue);
     if (c0 === undefined || c1 === undefined) return [0, 1];
-    const minCenter = Math.min(c0, c1);
-    const maxCenter = Math.max(c0, c1);
     const halfStep = scale.step / 2;
-    first = Math.max(0, minCenter - halfStep);
-    last = Math.min(1, maxCenter + halfStep);
-  } else {
-    if (scale.type === "band") return [0, 1];
-    const firstValue = scale.normalize(selection.domain[0]);
-    const lastValue = scale.normalize(selection.domain[1]);
-    if (!Number.isFinite(firstValue) || !Number.isFinite(lastValue)) return [0, 1];
-    first = Math.max(0, Math.min(firstValue, lastValue));
-    last = Math.min(1, Math.max(firstValue, lastValue));
+    return [Math.max(0, Math.min(c0, c1) - halfStep), Math.min(1, Math.max(c0, c1) + halfStep)];
   }
+  if (scale.type === "band") return [0, 1];
+  const first = scale.normalize(selection.domain[0]);
+  const last = scale.normalize(selection.domain[1]);
+  if (!Number.isFinite(first) || !Number.isFinite(last)) return [0, 1];
+  return [Math.max(0, Math.min(first, last)), Math.min(1, Math.max(first, last))];
+}
+
+function projectedSpan(
+  scale: PositionScale,
+  selection: SemanticViewportAxisSelection | undefined,
+  coord: PanelCoordProjector["x"] | undefined,
+  bandValuesByKey: ReadonlyMap<string, BandKeyEntry>,
+): readonly [number, number] {
+  if (selection === undefined) return [0, 1];
+  const [first, last] = selectionSpan(scale, selection, bandValuesByKey);
   const projectedFirst = coord?.projectFraction(first) ?? first;
   const projectedLast = coord?.projectFraction(last) ?? last;
   if (!Number.isFinite(projectedFirst) || !Number.isFinite(projectedLast)) return [0, 1];

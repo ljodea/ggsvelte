@@ -40,17 +40,7 @@ export function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
   return "quantitative";
 }
 
-/**
- * Deterministic field type inference. With the temporal runtime installed
- * (full package / tests), uses the shared strict registry. On the lean
- * render path, only ISO-like strings and Date values count as temporal.
- */
-export function inferFieldType(column: readonly CellValue[]): FieldType {
-  const runtime = getTemporalRuntime();
-  if (runtime !== null) {
-    const decision = runtime.parseColumn(column, "auto", {}).decision;
-    return decision.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
-  }
+function inferLeanFieldType(column: readonly CellValue[]): FieldType {
   let sawIso = false;
   let sawNonIsoString = false;
   let sawNumber = false;
@@ -79,6 +69,20 @@ export function inferFieldType(column: readonly CellValue[]): FieldType {
   if (sawIso && sawNumber) return "nominal";
   if (sawDate && sawNumber) return "nominal";
   return "quantitative";
+}
+
+/**
+ * Deterministic field type inference. With the temporal runtime installed
+ * (full package / tests), uses the shared strict registry. On the lean
+ * render path, only ISO-like strings and Date values count as temporal.
+ */
+export function inferFieldType(column: readonly CellValue[]): FieldType {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) {
+    const decision = runtime.parseColumn(column, "auto", {}).decision;
+    return decision.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
+  }
+  return inferLeanFieldType(column);
 }
 
 export function discretenessOf(type: FieldType): Discreteness {

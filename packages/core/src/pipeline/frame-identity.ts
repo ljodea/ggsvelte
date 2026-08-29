@@ -4,6 +4,7 @@
 import type { SpokeParams } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
+import type { CellValue } from "../table-types.js";
 
 import { spokeEndpoints } from "../stats/spoke.js";
 import { binIdColumn, snapColumnToBins, type BinnedBoundaries } from "./binned-scale.js";
@@ -75,6 +76,10 @@ function spokeAngleRadius(
   return { angle, radius };
 }
 
+function columnOrNull(table: ColumnTable, field: string | null): readonly CellValue[] | null {
+  return field === null ? null : table.column(field);
+}
+
 export function buildIdentityFrame(
   binding: LayerBinding,
   table: ColumnTable,
@@ -117,15 +122,14 @@ export function buildIdentityFrame(
       for (let i = 0; i < n; i++) rows[i] = i;
       return rows;
     })(),
-    colorValues: binding.color.field === null ? null : table.column(binding.color.field),
-    fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
-    sizeValues: binding.size.field === null ? null : table.column(binding.size.field),
-    linewidthValues:
-      binding.linewidth.field === null ? null : table.column(binding.linewidth.field),
-    alphaValues: binding.alpha.field === null ? null : table.column(binding.alpha.field),
-    shapeValues: binding.shape.field === null ? null : table.column(binding.shape.field),
-    linetypeValues: binding.linetype.field === null ? null : table.column(binding.linetype.field),
-    labelValues: binding.labelField === null ? null : table.column(binding.labelField),
+    colorValues: columnOrNull(table, binding.color.field),
+    fillValues: columnOrNull(table, binding.fill.field),
+    sizeValues: columnOrNull(table, binding.size.field),
+    linewidthValues: columnOrNull(table, binding.linewidth.field),
+    alphaValues: columnOrNull(table, binding.alpha.field),
+    shapeValues: columnOrNull(table, binding.shape.field),
+    linetypeValues: columnOrNull(table, binding.linetype.field),
+    labelValues: columnOrNull(table, binding.labelField),
     ...emptyFrameExtras(),
     bin: (() => {
       const xId =
