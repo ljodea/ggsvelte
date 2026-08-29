@@ -32,6 +32,7 @@ const EMPTY_DATUM_COLUMNS: CandidateDatumColumns = {
 };
 
 type OrdinalRankScale = NonNullable<ReturnType<typeof createRawResolverState>>["colorOrdinal"];
+type RankLookup = ((value: CellValue) => number) | null;
 
 /** Per-batch memo for ordinal `indexOf`: dense plots repeat values. */
 function rankMemo(scale: OrdinalRankScale): ((value: CellValue) => number) | null {
@@ -44,6 +45,47 @@ function rankMemo(scale: OrdinalRankScale): ((value: CellValue) => number) | nul
     memo.set(value, rank);
     return rank;
   };
+}
+
+function ordinalRank(
+  rankOf: RankLookup,
+  column: readonly CellValue[] | null,
+  localRow: number,
+): number {
+  if (rankOf === null) return -1;
+  return rankOf(localRow < 0 || column === null ? null : column[localRow]!);
+}
+
+function seriesRanks(
+  count: number,
+  groups: readonly number[],
+  colorColumn: readonly CellValue[] | null,
+  fillColumn: readonly CellValue[] | null,
+  colorRankOf: RankLookup,
+  fillRankOf: RankLookup,
+  localRow: (index: number) => number,
+): ArrayLike<number> | null {
+  if (colorRankOf === null && fillRankOf === null) return null;
+  const ranks = Array.from<number>({ length: count });
+  for (let i = 0; i < count; i++) {
+    const row = localRow(i);
+    const colorRank =
+      colorRankOf === null || colorColumn === null ? -1 : colorRankOf(colorColumn[row]!);
+    const fillRank = fillRankOf === null || fillColumn === null ? -1 : fillRankOf(fillColumn[row]!);
+    const group = groups[row] ?? 0;
+    ranks[i] = colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group;
+  }
+  return ranks;
+}
+
+function resolvedAutoModeCode(
+  binding: LayerBinding,
+  batch: Scene["batches"][number],
+  primitiveIndex: number,
+  semanticIndex: number,
+): number {
+  const mode = candidateAutoMode(binding, semanticIndex);
+  return AUTO_MODE_CODE[mode ?? defaultAutoMode(batch, primitiveIndex)];
 }
 
 /** One style channel as a batch column: null-elided, constant, or a sliced source column. */
@@ -145,19 +187,15 @@ export function createRawCandidateDatumColumnsResolver(input: {
       binding.color.field === null || state.color === null ? null : rankMemo(colorOrdinal);
     const fillRankOf =
       binding.fill.field === null || state.fill === null ? null : rankMemo(fillOrdinal);
-    let seriesRank: ArrayLike<number> | null = null;
-    if (colorRankOf !== null || fillRankOf !== null) {
-      const ranks = Array.from<number>({ length: count });
-      for (let i = 0; i < count; i++) {
-        const row = localRow(i);
-        const cr =
-          colorRankOf === null || state.color === null ? -1 : colorRankOf(state.color[row]!);
-        const fr = fillRankOf === null || state.fill === null ? -1 : fillRankOf(state.fill[row]!);
-        const group = state.groups[row] ?? 0;
-        ranks[i] = cr >= 0 ? cr : fr >= 0 ? fr : group;
-      }
-      seriesRank = ranks;
-    }
+    const seriesRank = seriesRanks(
+      count,
+      state.groups,
+      state.color,
+      state.fill,
+      colorRankOf,
+      fillRankOf,
+      localRow,
+    );
 
     const lineageCol = new Uint32Array(count);
     for (let i = 0; i < count; i++) lineageCol[i] = lineage.internSingleton(facts.rowIds[i]!);
@@ -264,23 +302,13 @@ export function createRawCandidateDatumColumnsResolver(input: {
       styleScratch.shape[i] = readStyle(state.shape) ?? null;
       styleScratch.linetype[i] = readStyle(state.linetype) ?? null;
       const group = localRow < 0 ? 0 : (state.groups[localRow] ?? 0);
-      const cr =
-        colorRankOf === null
-          ? -1
-          : colorRankOf(localRow < 0 || state.color === null ? null : state.color[localRow]!);
-      const fr =
-        fillRankOf === null
-          ? -1
-          : fillRankOf(localRow < 0 || state.fill === null ? null : state.fill[localRow]!);
+      const cr = ordinalRank(colorRankOf, state.color, localRow);
+      const fr = ordinalRank(fillRankOf, state.fill, localRow);
       seriesCol[i] = group;
       rankCol[i] = cr >= 0 ? cr : fr >= 0 ? fr : group;
       sourceOrderCol[i] = rowId;
       lineageCol[i] = lineage.internSingleton(rowId);
-      const mode = candidateAutoMode(binding, facts.semanticIds[i]!);
-      autoModeCol[i] =
-        mode === undefined
-          ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]
-          : AUTO_MODE_CODE[mode];
+      autoModeCol[i] = resolvedAutoModeCode(binding, batch, primitiveIndex, facts.semanticIds[i]!);
     }
     return {
       xValue: xValues,

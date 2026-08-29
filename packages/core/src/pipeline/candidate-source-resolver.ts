@@ -8,6 +8,11 @@ import { sourceBackedInspectY } from "./candidate-source-values.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 import type { FinalizedLayerFrame, LayerBinding, ResolvedColorScale } from "./types.js";
 
+function preferredRank(colorRank: number, fillRank: number, group: number): number {
+  if (colorRank >= 0) return colorRank;
+  return fillRank >= 0 ? fillRank : group;
+}
+
 export function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
   sources: SourceRegistry,
@@ -71,7 +76,7 @@ export function createRawCandidateDatumResolver(
       shapeValue: readStyle(state.shape),
       linetypeValue: readStyle(state.linetype),
       seriesId: group,
-      seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
+      seriesRank: preferredRank(colorRank, fillRank, group),
       sourceOrder: sourceRow,
       lineage: lineage.intern([sourceRow]),
       ...(autoMode === undefined ? {} : { autoMode }),
