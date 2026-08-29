@@ -111,6 +111,82 @@ function strokePath(
   ctx.stroke();
 }
 
+function isSolidLineHot(batch: PathsBatch, isArea: boolean, needBounds: boolean): boolean {
+  return (
+    !isArea &&
+    !needBounds &&
+    batch.glow === undefined &&
+    batch.alphas === undefined &&
+    batch.linewidths === undefined &&
+    batch.linetypeIndexes === undefined &&
+    (batch.linetype === undefined || batch.linetype === "solid") &&
+    batch.curve === "linear"
+  );
+}
+
+function drawSolidLines(
+  ctx: CanvasRenderingContext2D,
+  batch: PathsBatch,
+  ink: string,
+  resolve: ColorResolver,
+): void {
+  ctx.lineWidth = batch.linewidth;
+  ctx.lineJoin = batch.linejoin ?? "round";
+  ctx.lineCap = batch.linecap ?? "round";
+  if (typeof ctx.setLineDash === "function") ctx.setLineDash([]);
+  for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    if (end <= start) continue;
+    ctx.strokeStyle = resolve(batch.strokes[s] ?? batch.strokePaint?.fallback ?? ink);
+    ctx.beginPath();
+    ctx.moveTo(batch.positions[start * 2]!, batch.positions[start * 2 + 1]!);
+    for (let i = start + 1; i < end; i++) {
+      ctx.lineTo(batch.positions[i * 2]!, batch.positions[i * 2 + 1]!);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawResolvedPath(
+  ctx: CanvasRenderingContext2D,
+  batch: PathsBatch,
+  s: number,
+  start: number,
+  end: number,
+  baseAlpha: number,
+  isArea: boolean,
+  needBounds: boolean,
+  themeColors: { ink: string; accent: string },
+  resolve: ColorResolver,
+): void {
+  const bounds = needBounds ? subpathBounds(batch.positions, start, end) : null;
+  const style = resolvePathMark(batch, s, themeColors);
+  ctx.beginPath();
+  traceSubpath(ctx, batch, start, end);
+  ctx.globalAlpha = baseAlpha * style.alpha;
+  if (isArea) {
+    const solid = style.fill === "none" ? themeColors.accent : style.fill;
+    ctx.fillStyle =
+      bounds === null
+        ? resolve(solid)
+        : resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
+    if (batch.fillRule === "evenodd") ctx.fill("evenodd");
+    else ctx.fill();
+    if (style.stroke === "none") return;
+  }
+  const solid = style.stroke === "none" ? themeColors.ink : style.stroke;
+  ctx.strokeStyle =
+    bounds === null
+      ? resolve(solid)
+      : resolvePaintStyle(ctx, solid, batch.strokePaint, bounds, resolve);
+  ctx.lineWidth = style.width;
+  if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
+  ctx.lineJoin = style.linejoin;
+  ctx.lineCap = style.linecap;
+  ctx.stroke();
+}
+
 export function drawPaths(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
@@ -127,38 +203,8 @@ export function drawPaths(
   // Solid multi-series lines (competitive line-3×N): no fills, no per-subpath
   // alpha/linewidth/linetype, no gradient paint — one monomorphic stroke loop
   // without resolvePathMark allocations or setLineDash per subpath (#1468).
-  const solidLineHot =
-    !isArea &&
-    !needBounds &&
-    batch.glow === undefined &&
-    batch.alphas === undefined &&
-    batch.linewidths === undefined &&
-    batch.linetypeIndexes === undefined &&
-    (batch.linetype === undefined || batch.linetype === "solid") &&
-    batch.curve === "linear";
-  if (solidLineHot) {
-    const linewidth = batch.linewidth;
-    const linejoin = batch.linejoin ?? "round";
-    const linecap = batch.linecap ?? "round";
-    const ink = themeColors.ink;
-    ctx.lineWidth = linewidth;
-    ctx.lineJoin = linejoin;
-    ctx.lineCap = linecap;
-    if (typeof ctx.setLineDash === "function") ctx.setLineDash([]);
-    for (let s = 0; s < subpaths; s++) {
-      const start = batch.pathOffsets[s]!;
-      const end = batch.pathOffsets[s + 1]!;
-      if (end <= start) continue;
-      const stroke = batch.strokes[s];
-      ctx.strokeStyle = resolve(stroke ?? batch.strokePaint?.fallback ?? ink);
-      ctx.beginPath();
-      // Linear open path: no step corners / ring holes.
-      ctx.moveTo(batch.positions[start * 2]!, batch.positions[start * 2 + 1]!);
-      for (let i = start + 1; i < end; i++) {
-        ctx.lineTo(batch.positions[i * 2]!, batch.positions[i * 2 + 1]!);
-      }
-      ctx.stroke();
-    }
+  if (isSolidLineHot(batch, isArea, needBounds)) {
+    drawSolidLines(ctx, batch, themeColors.ink, resolve);
     restoreGlow();
     ctx.globalAlpha = baseAlpha;
     return;
@@ -168,43 +214,18 @@ export function drawPaths(
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
-    // Bounds only for gradient paint (solid strokes skip the O(vertices) scan).
-    const bounds = needBounds ? subpathBounds(batch.positions, start, end) : null;
-    const style = resolvePathMark(batch, s, themeColors);
-    ctx.beginPath();
-    traceSubpath(ctx, batch, start, end);
-    ctx.globalAlpha = baseAlpha * style.alpha;
-    if (isArea) {
-      const solid = style.fill === "none" ? themeColors.accent : style.fill;
-      ctx.fillStyle =
-        bounds === null
-          ? resolve(solid)
-          : resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
-      if (batch.fillRule === "evenodd") ctx.fill("evenodd");
-      else ctx.fill();
-      if (style.stroke !== "none") {
-        ctx.strokeStyle =
-          bounds === null
-            ? resolve(style.stroke)
-            : resolvePaintStyle(ctx, style.stroke, batch.strokePaint, bounds, resolve);
-        ctx.lineWidth = style.width;
-        if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
-        ctx.lineJoin = style.linejoin;
-        ctx.lineCap = style.linecap;
-        ctx.stroke();
-      }
-    } else {
-      const solid = style.stroke === "none" ? themeColors.ink : style.stroke;
-      ctx.strokeStyle =
-        bounds === null
-          ? resolve(solid)
-          : resolvePaintStyle(ctx, solid, batch.strokePaint, bounds, resolve);
-      ctx.lineWidth = style.width;
-      if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
-      ctx.lineJoin = style.linejoin;
-      ctx.lineCap = style.linecap;
-      ctx.stroke();
-    }
+    drawResolvedPath(
+      ctx,
+      batch,
+      s,
+      start,
+      end,
+      baseAlpha,
+      isArea,
+      needBounds,
+      themeColors,
+      resolve,
+    );
   }
   restoreGlow();
   ctx.globalAlpha = baseAlpha;
