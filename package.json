@@ -94,7 +94,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@changesets/cli": "3.0.0",
+    "@changesets/cli": "3.0.1",
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@playwright/test": "1.61.1",
