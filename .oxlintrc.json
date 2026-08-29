@@ -42,9 +42,29 @@
     // Pipeline stages and the validator walk are cohesive units; splitting
     // them to satisfy a line count harms readability.
     "eslint/max-lines": "off",
-    "eslint/max-lines-per-function": "off"
+    "eslint/max-lines-per-function": "off",
+    // Keep branching readable and testable. The rollout override below is a
+    // temporary ratchet: remove one scope after its violations are refactored.
+    "eslint/complexity": ["error", { "max": 20 }]
   },
   "overrides": [
+    {
+      // Staged rollout inventory (2026-08-29): docs 1, examples 1, scripts 13,
+      // tests 8, spec 30, svelte 11, core 122. packages/cli, packages/skill,
+      // and benchmarks already pass and are enforced by the global rule.
+      "files": [
+        "apps/docs/**",
+        "examples/**",
+        "scripts/**",
+        "tests/**",
+        "packages/spec/**",
+        "packages/svelte/**",
+        "packages/core/**"
+      ],
+      "rules": {
+        "eslint/complexity": "off"
+      }
+    },
     {
       // Tests + benchmarks: fixture literals are cast deliberately (invalid
       // specs, RuntimeSpec shapes) and test files run long by design.
