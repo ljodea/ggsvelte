@@ -50,48 +50,57 @@ export class TemporalGuideIntervalError extends Error {
   }
 }
 
+type TemporalTickSource = "automatic" | "interval" | "explicit";
+
+function selectTemporalCandidate(
+  input: TemporalAxisPlanInput,
+  source: TemporalTickSource,
+): TemporalCandidateEvaluation {
+  switch (source) {
+    case "automatic":
+      return automaticCandidate(input);
+    case "interval":
+      try {
+        return exactCandidate(input);
+      } catch (error) {
+        if (!(error instanceof TemporalIntervalError)) throw error;
+        throw new TemporalGuideIntervalError(input.aesthetic, "dateBreaks", error);
+      }
+    case "explicit":
+      return explicitCandidate(input);
+  }
+  throw new Error(`Unsupported temporal tick source: ${String(source)}`);
+}
+
+function planMinorTicks(
+  input: TemporalAxisPlanInput,
+  selected: TemporalCandidateEvaluation,
+): AxisGuideTick[] {
+  if (input.config.dateMinorBreaks === undefined) return [];
+  const majorValues = new Set(selected.ticks.map((tick) => tick.value as number));
+  const minorInterval = parseTemporalInterval(input.config.dateMinorBreaks);
+  try {
+    return temporalIntervalTicks(input.domain[0], input.domain[1], minorInterval, {
+      ...temporalOptions(input),
+      maxTicks: MAX_TEMPORAL_MINOR_TICKS,
+    })
+      .filter((value) => !majorValues.has(value))
+      .map((value) => ({ value, label: "", fullLabel: "", kind: "minor" as const }));
+  } catch (error) {
+    if (!(error instanceof TemporalIntervalError)) throw error;
+    throw new TemporalGuideIntervalError(input.aesthetic, "dateMinorBreaks", error);
+  }
+}
+
 export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
-  const source =
+  const source: TemporalTickSource =
     input.breaks === undefined
       ? input.config.dateBreaks === undefined
         ? "automatic"
         : "interval"
       : "explicit";
-  let selected: TemporalCandidateEvaluation;
-  switch (source) {
-    case "automatic":
-      selected = automaticCandidate(input);
-      break;
-    case "interval":
-      try {
-        selected = exactCandidate(input);
-      } catch (error) {
-        if (!(error instanceof TemporalIntervalError)) throw error;
-        throw new TemporalGuideIntervalError(input.aesthetic, "dateBreaks", error);
-      }
-      break;
-    case "explicit":
-      selected = explicitCandidate(input);
-      break;
-  }
-
-  const majorValues = new Set(selected.ticks.map((tick) => tick.value as number));
-  let minorTicks: AxisGuideTick[] = [];
-  if (input.config.dateMinorBreaks !== undefined) {
-    const minorInterval = parseTemporalInterval(input.config.dateMinorBreaks);
-    try {
-      const values = temporalIntervalTicks(input.domain[0], input.domain[1], minorInterval, {
-        ...temporalOptions(input),
-        maxTicks: MAX_TEMPORAL_MINOR_TICKS,
-      });
-      minorTicks = values
-        .filter((value) => !majorValues.has(value))
-        .map((value) => ({ value, label: "", fullLabel: "", kind: "minor" as const }));
-    } catch (error) {
-      if (!(error instanceof TemporalIntervalError)) throw error;
-      throw new TemporalGuideIntervalError(input.aesthetic, "dateMinorBreaks", error);
-    }
-  }
+  const selected = selectTemporalCandidate(input, source);
+  const minorTicks = planMinorTicks(input, selected);
 
   const degraded: GuideDegradedCode[] = [
     ...(selected.overlap ? (["temporal-label-overlap"] as const) : []),

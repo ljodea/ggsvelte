@@ -264,45 +264,33 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     maxWrapLines,
     buildTicks,
   });
-  // --- Author pins (no auto-escalation away from the chosen presentation) ---
-  if (guideMode === "single") return withPin(singlePlan({ reportOverlap: true }));
-  if (guideMode === "wrap") {
-    return withPin(tryWrapPlan(true) ?? singlePlan({ reportOverlap: true }));
-  }
-  if (guideMode === "rotate") {
-    // Prefer author angle; else the measured −45/−90 choice used by auto.
-    // Pins stay full-string (no silent wrap-then-rotate under mode:"rotate").
-    return withPin(rotated.rotatedPlan(pinnedAngle ?? rotated.chooseAutoAngle()));
-  }
+  const selectPlan = (): BandAxisPlan => {
+    // Author pins never auto-escalate away from the chosen presentation.
+    if (guideMode === "single") return withPin(singlePlan({ reportOverlap: true }));
+    if (guideMode === "wrap") {
+      return withPin(tryWrapPlan(true) ?? singlePlan({ reportOverlap: true }));
+    }
+    if (guideMode === "rotate") {
+      return withPin(rotated.rotatedPlan(pinnedAngle ?? rotated.chooseAutoAngle()));
+    }
 
-  // --- auto: measured escalation ladder ---
-  const floor = MODE_RANK[previousMode ?? "single-line"];
-
-  // --- single-line ---
-  if (floor <= MODE_RANK["single-line"]) {
-    const singleOverlap = neighbourOverlap(
-      entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
-      gap,
-    );
-    if (!singleOverlap) return singlePlan();
-  }
-
-  // --- wrapped (≤ maxWrapLines) ---
-  if (floor <= MODE_RANK.wrapped) {
-    const wrapped = tryWrapPlan(false);
-    if (wrapped !== null) return wrapped;
-  }
-
-  // --- wrap-then−45° (mode "rotated" + lines) before full-string rotate ---
-  if (floor <= MODE_RANK.rotated) {
-    const hybrid = rotated.tryHybridRotatePlan();
-    if (hybrid !== null) return hybrid;
-  }
-
-  // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
-  // −45 actually overlaps neighbours — unless the author pinned a specific angle.
-  // A −45 label that merely exceeds the bottom cap is truncated within the −45
-  // budget below — switching to −90 for that would need MORE bottom space and
-  // truncate harder without resolving any collision.
-  return rotated.rotatedPlan(pinnedAngle ?? rotated.chooseAutoAngle());
+    const floor = MODE_RANK[previousMode ?? "single-line"];
+    if (floor <= MODE_RANK["single-line"]) {
+      const singleOverlap = neighbourOverlap(
+        entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
+        gap,
+      );
+      if (!singleOverlap) return singlePlan();
+    }
+    if (floor <= MODE_RANK.wrapped) {
+      const wrapped = tryWrapPlan(false);
+      if (wrapped !== null) return wrapped;
+    }
+    if (floor <= MODE_RANK.rotated) {
+      const hybrid = rotated.tryHybridRotatePlan();
+      if (hybrid !== null) return hybrid;
+    }
+    return rotated.rotatedPlan(pinnedAngle ?? rotated.chooseAutoAngle());
+  };
+  return selectPlan();
 }

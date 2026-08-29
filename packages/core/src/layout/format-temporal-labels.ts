@@ -29,6 +29,60 @@ interface TemporalDisplayParts {
   offset: string;
 }
 
+function primaryTokenValue(token: string, d: TemporalDisplayParts): string | undefined {
+  switch (token) {
+    case "Y":
+      return String(d.year);
+    case "y":
+      return pad2(d.year % 100);
+    case "m":
+      return pad2(d.month);
+    case "b":
+      return d.monthShort;
+    case "B":
+      return d.monthLong;
+    case "d":
+      return pad2(d.day);
+    case "e":
+      return String(d.day);
+    case "a":
+      return d.weekdayShort;
+    case "A":
+      return d.weekdayLong;
+    case "H":
+      return pad2(d.hour);
+    case "I":
+      return pad2(d.hour % 12 || 12);
+    case "M":
+      return pad2(d.minute);
+    case "S":
+      return pad2(d.second);
+    case "L":
+      return pad3(d.millisecond);
+    case "p":
+      return d.dayPeriod;
+    default:
+      return undefined;
+  }
+}
+
+function tokenValue(token: string, d: TemporalDisplayParts): string {
+  const primary = primaryTokenValue(token, d);
+  if (primary !== undefined) return primary;
+  switch (token) {
+    case "q":
+      return String(Math.floor((d.month - 1) / 3) + 1);
+    case "z":
+      return d.offset;
+    case "Z":
+      return d.zoneShort;
+    case "%":
+      return "%";
+    default:
+      return "";
+  }
+}
+
 const WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const WEEKDAYS_LONG = [
   "Sunday",
@@ -178,65 +232,7 @@ export function compileTemporalLabelFormat(
         continue;
       }
       const token = pattern[++index]!;
-      switch (token) {
-        case "Y":
-          out += String(d.year);
-          break;
-        case "y":
-          out += pad2(d.year % 100);
-          break;
-        case "m":
-          out += pad2(d.month);
-          break;
-        case "b":
-          out += d.monthShort;
-          break;
-        case "B":
-          out += d.monthLong;
-          break;
-        case "d":
-          out += pad2(d.day);
-          break;
-        case "e":
-          out += String(d.day);
-          break;
-        case "a":
-          out += d.weekdayShort;
-          break;
-        case "A":
-          out += d.weekdayLong;
-          break;
-        case "H":
-          out += pad2(d.hour);
-          break;
-        case "I":
-          out += pad2(d.hour % 12 || 12);
-          break;
-        case "M":
-          out += pad2(d.minute);
-          break;
-        case "S":
-          out += pad2(d.second);
-          break;
-        case "L":
-          out += pad3(d.millisecond);
-          break;
-        case "p":
-          out += d.dayPeriod;
-          break;
-        case "q":
-          out += String(Math.floor((d.month - 1) / 3) + 1);
-          break;
-        case "z":
-          out += d.offset;
-          break;
-        case "Z":
-          out += d.zoneShort;
-          break;
-        case "%":
-          out += "%";
-          break;
-      }
+      out += tokenValue(token, d);
     }
     return out.replaceAll(/[\u00A0\u202F]/g, " ");
   };
@@ -245,6 +241,71 @@ export function compileTemporalLabelFormat(
 export interface TemporalTickLabel {
   label: string;
   fullLabel: string;
+}
+
+function yearLabel(part: TemporalDisplayParts, kind: TemporalScaleKind): string {
+  if (kind === "time") return `${pad2(part.hour)}:${pad2(part.minute)}`;
+  if (kind === "monthDay") return `${part.monthShort} ${String(part.day)}`;
+  return String(part.year);
+}
+
+function monthLabel(
+  part: TemporalDisplayParts,
+  kind: TemporalScaleKind,
+  multiYear: boolean,
+): string {
+  if (kind === "time") return `${pad2(part.hour)}:${pad2(part.minute)}`;
+  return multiYear ? `${part.monthShort} ${String(part.year)}` : part.monthShort;
+}
+
+function dayLabel(part: TemporalDisplayParts, kind: TemporalScaleKind, multiYear: boolean): string {
+  if (kind === "time") return `${pad2(part.hour)}:${pad2(part.minute)}`;
+  return multiYear
+    ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
+    : `${part.monthShort} ${String(part.day)}`;
+}
+
+function clockLabel(
+  part: TemporalDisplayParts,
+  kind: TemporalScaleKind,
+  multiYear: boolean,
+  multiDay: boolean,
+): string {
+  const clock = `${pad2(part.hour)}:${pad2(part.minute)}`;
+  if (kind === "time" || !multiDay) return clock;
+  return multiYear
+    ? `${part.monthShort} ${String(part.day)}, ${String(part.year)} ${clock}`
+    : `${part.monthShort} ${String(part.day)} ${clock}`;
+}
+
+function defaultTemporalLabel(
+  part: TemporalDisplayParts,
+  options: TemporalLabelFormatOptions & { interval: TemporalInterval },
+  multiYear: boolean,
+  multiDay: boolean,
+): string {
+  switch (options.interval.unit) {
+    case "year":
+      return yearLabel(part, options.kind);
+    case "quarter": {
+      if (options.kind === "time") return `${pad2(part.hour)}:${pad2(part.minute)}`;
+      const quarter = `Q${String(Math.floor((part.month - 1) / 3) + 1)}`;
+      return multiYear ? `${quarter} ${String(part.year)}` : quarter;
+    }
+    case "month":
+      return monthLabel(part, options.kind, multiYear);
+    case "week":
+    case "day":
+      return dayLabel(part, options.kind, multiYear);
+    case "hour":
+    case "minute":
+      return clockLabel(part, options.kind, multiYear, multiDay);
+    case "second":
+      return `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;
+    case "millisecond":
+      return `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}.${pad3(part.millisecond)}`;
+  }
+  throw new Error(`Unsupported temporal interval unit: ${String(options.interval.unit)}`);
 }
 
 export function formatTemporalTickSequence(
@@ -291,70 +352,6 @@ export function formatTemporalTickSequence(
   }
   const multiYear = parts.length > 0 && minYear !== maxYear;
   const multiDay = parts.length > 0 && minDayKey !== maxDayKey;
-  const labels = parts.map((part) => {
-    let label: string;
-    switch (options.interval.unit) {
-      case "year":
-        // Neither cyclical kind has a year to show: time-of-day (#831) lives on
-        // 1970-01-01Z and monthDay on the reference year. A year interval still
-        // reaches here — it is the fallback when an author gives fewer than two
-        // explicit breaks — so it has to answer with something truthful.
-        label =
-          options.kind === "time"
-            ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : options.kind === "monthDay"
-              ? `${part.monthShort} ${String(part.day)}`
-              : String(part.year);
-        break;
-      case "quarter": {
-        if (options.kind === "time") {
-          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
-          break;
-        }
-        const quarter = `Q${String(Math.floor((part.month - 1) / 3) + 1)}`;
-        label = multiYear ? `${quarter} ${String(part.year)}` : quarter;
-        break;
-      }
-      case "month":
-        label =
-          options.kind === "time"
-            ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : multiYear
-              ? `${part.monthShort} ${String(part.year)}`
-              : part.monthShort;
-        break;
-      case "week":
-      case "day":
-        // Floor is month+day so every tick is self-describing (#962); add year when
-        // the sequence spans more than one calendar year.
-        label =
-          options.kind === "time"
-            ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : multiYear
-              ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
-              : `${part.monthShort} ${String(part.day)}`;
-        break;
-      case "hour":
-      case "minute": {
-        // time-of-day: never prefix a calendar date — values live on 1970-01-01Z.
-        const clock = `${pad2(part.hour)}:${pad2(part.minute)}`;
-        if (options.kind === "time" || !multiDay) {
-          label = clock;
-        } else if (multiYear) {
-          label = `${part.monthShort} ${String(part.day)}, ${String(part.year)} ${clock}`;
-        } else {
-          label = `${part.monthShort} ${String(part.day)} ${clock}`;
-        }
-        break;
-      }
-      case "second":
-        label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;
-        break;
-      case "millisecond":
-        label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}.${pad3(part.millisecond)}`;
-        break;
-    }
-    return label;
-  });
+  const labels = parts.map((part) => defaultTemporalLabel(part, options, multiYear, multiDay));
   return values.map((value, index) => ({ label: labels[index]!, fullLabel: full(value) }));
 }
