@@ -20,7 +20,7 @@ export interface LayoutCaps {
   bottom: number;
 }
 
-export interface LayoutAxisWork {
+interface LayoutAxisWork {
   axis: AxisTicks;
   count: number;
   every: number;
