@@ -52,6 +52,49 @@ type LineBuffers = {
   subpaths: readonly (readonly number[])[];
 };
 
+type LineStyleParams = { alpha?: number; linewidth?: number };
+
+function applyStrokeFallback(strokes: (string | null)[], fallback: string | undefined): void {
+  if (fallback === undefined) return;
+  for (let i = 0; i < strokes.length; i++) strokes[i] ??= fallback;
+}
+
+function numericLineStyleParams(params: { alpha?: unknown; linewidth?: unknown }): LineStyleParams {
+  const styleParams: LineStyleParams = {};
+  if (typeof params.linewidth === "number") styleParams.linewidth = params.linewidth;
+  if (typeof params.alpha === "number") styleParams.alpha = params.alpha;
+  return styleParams;
+}
+
+function lineStyleParams(binding: LayerFrame["binding"]): LineStyleParams {
+  switch (binding.layer.geom) {
+    case "line":
+    case "qq_line":
+    case "path":
+    case "step":
+    case "quantile":
+    case "contour":
+    case "density_2d":
+    case "sf":
+    case "function":
+      return numericLineStyleParams(binding.layer.params ?? {});
+    default:
+      return {};
+  }
+}
+
+function lineCurve(binding: LayerFrame["binding"]): PathsBatch["curve"] {
+  if (binding.layer.geom === "step") {
+    const direction = (binding.layer.params ?? {}).direction ?? "hv";
+    if (direction === "vh") return "step-vh";
+    return direction === "mid" ? "step" : "step-hv";
+  }
+  if (binding.layer.geom === "line" || binding.layer.geom === "path") {
+    return (binding.layer.params ?? {}).curve ?? "linear";
+  }
+  return "linear";
+}
+
 /**
  * Continuous multi-series: one normalize+pixel pass that also buckets by group.
  * Falls back to bucket → sort → write when stroke style is mapped, scales are
@@ -135,34 +178,12 @@ export function lineBatch(
   const { positions, rowIndex, frameRowIndex, pathOffsets, strokes, subpaths } = buffers;
 
   // Apply strokePaint solid fallback when a stroke is still null/theme-default.
-  if (strokePaintResolved !== undefined) {
-    for (let i = 0; i < strokes.length; i++) {
-      strokes[i] ??= strokePaintResolved.fallback;
-    }
-  }
+  applyStrokeFallback(strokes, strokePaintResolved?.fallback);
 
-  // Keep geom checks inline so TS narrows layer.params (line/path vs quantile/function).
-  const params =
-    binding.layer.geom === "line" ||
-    binding.layer.geom === "qq_line" ||
-    binding.layer.geom === "path" ||
-    binding.layer.geom === "step" ||
-    binding.layer.geom === "quantile" ||
-    binding.layer.geom === "contour" ||
-    binding.layer.geom === "density_2d" ||
-    binding.layer.geom === "sf" ||
-    binding.layer.geom === "function"
-      ? (binding.layer.params ?? {})
-      : {};
+  const params = lineStyleParams(binding);
   // Quantile/contour/density_2d/function have no curve param; line/path may set step/linear.
   // geom_step instead carries params.direction, which picks the step family (#789).
-  let curve: PathsBatch["curve"] = "linear";
-  if (binding.layer.geom === "step") {
-    const direction = (binding.layer.params ?? {}).direction ?? "hv";
-    curve = direction === "vh" ? "step-vh" : direction === "mid" ? "step" : "step-hv";
-  } else if (binding.layer.geom === "line" || binding.layer.geom === "path") {
-    curve = (binding.layer.params ?? {}).curve ?? "linear";
-  }
+  const curve = lineCurve(binding);
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
@@ -170,13 +191,6 @@ export function lineBatch(
     linetypeIndex(value as Linetype),
   );
   const literalLinetype = binding.linetype.constant;
-  const styleParams: { alpha?: number; linewidth?: number } = {};
-  if ("linewidth" in params && typeof params.linewidth === "number") {
-    styleParams.linewidth = params.linewidth;
-  }
-  if ("alpha" in params && typeof params.alpha === "number") {
-    styleParams.alpha = params.alpha;
-  }
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -186,9 +200,9 @@ export function lineBatch(
     ...(frameRowIndex !== undefined && { frameRowIndex }),
     pathOffsets,
     strokes,
-    linewidth: constantStyle(binding, styleParams, "linewidth", DEFAULT_LINEWIDTH),
+    linewidth: constantStyle(binding, params, "linewidth", DEFAULT_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
-    alpha: alphas === undefined ? constantStyle(binding, styleParams, "alpha", 1) : 1,
+    alpha: alphas === undefined ? constantStyle(binding, params, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
