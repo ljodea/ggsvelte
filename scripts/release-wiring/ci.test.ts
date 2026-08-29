@@ -149,6 +149,9 @@ describe("R0 release wiring — CI lanes", () => {
       expect(job).not.toContain("run: bun run build\n");
     }
     expect(svelteJob).toContain("working-directory: packages/svelte");
+    expect(read(".github/workflows/ci-component-svelte.yml")).toContain(
+      "working-directory: packages/react",
+    );
     expect(svelteJob).toContain("--project chromium");
     expect(svelteJob).not.toContain("--project firefox");
     expect(svelteFxJob).toContain("working-directory: packages/svelte");
@@ -204,7 +207,9 @@ describe("R0 release wiring — CI lanes", () => {
     expect(producerJob).toContain("if-no-files-found: error");
     expect(producerJob).toContain("packages/spec/dist");
     expect(producerJob).toContain("packages/core/dist");
+    expect(producerJob).toContain("packages/compose/dist");
     expect(producerJob).toContain("packages/svelte/dist");
+    expect(producerJob).toContain("packages/react/dist");
     expect(producerJob).toContain("packages/cli/dist");
     expect(producerJob).toContain("run: bun run build");
     // Consumers download instead of rebuilding packages (via composite).

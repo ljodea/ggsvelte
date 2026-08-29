@@ -29,11 +29,19 @@ export function fixtureManifest(
   packageManager: PackageManager = "npm",
 ) {
   const file = (path: string) => `file:${relative(directory, path).replaceAll("\\", "/")}`;
+  const named = (directoryName: string) => {
+    const found = tarballs.find((path) => path.includes(`ggsvelte-${directoryName}-`));
+    if (found === undefined) {
+      throw new Error(`consumer fixture missing ggsvelte-${directoryName} tarball`);
+    }
+    return file(found);
+  };
   const localPackages = {
-    "@ggsvelte/spec": file(tarballs[0]!),
-    "@ggsvelte/core": file(tarballs[1]!),
-    "@ggsvelte/svelte": file(tarballs[2]!),
-    "@ggsvelte/cli": file(tarballs[3]!),
+    "@ggsvelte/spec": named("spec"),
+    "@ggsvelte/core": named("core"),
+    "@ggsvelte/compose": named("compose"),
+    "@ggsvelte/svelte": named("svelte"),
+    "@ggsvelte/cli": named("cli"),
   };
   return {
     name: "ggsvelte-packed-consumer",
@@ -70,7 +78,7 @@ export function writeConsumerFixture(
   if (packageManager === "pnpm") {
     writeFileSync(
       join(directory, "pnpm-workspace.yaml"),
-      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  '@ggsvelte/svelte': ${JSON.stringify(manifest.dependencies["@ggsvelte/svelte"])}\n  '@ggsvelte/cli': ${JSON.stringify(manifest.dependencies["@ggsvelte/cli"])}\n`,
+      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  '@ggsvelte/compose': ${JSON.stringify(manifest.dependencies["@ggsvelte/compose"])}\n  '@ggsvelte/svelte': ${JSON.stringify(manifest.dependencies["@ggsvelte/svelte"])}\n  '@ggsvelte/cli': ${JSON.stringify(manifest.dependencies["@ggsvelte/cli"])}\n`,
     );
   }
   writeFileSync(

@@ -280,7 +280,9 @@ describe("unit content inputs cover actionlint config", () => {
     for (const path of [
       "packages/spec/README.md",
       "packages/core/README.md",
+      "packages/compose/README.md",
       "packages/svelte/README.md",
+      "packages/react/README.md",
       "packages/cli/README.md",
       "packages/skill/README.md",
     ]) {

@@ -6019,6 +6019,149 @@
       }
     },
     {
+      "package": "@ggsvelte/compose",
+      "entry": ".",
+      "source": "packages/compose/src/index.ts",
+      "exports": {
+        "AssembleDraft": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AssemblePortableSpecInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GGPLOT_PROP_ORDER": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GRAMMAR_DOC_URLS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GRAMMAR_FAMILIES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GRAMMAR_PROP_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GrammarCodemodForm": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GrammarFamilyMeta": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GrammarLayerKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Layer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendAestheticChannel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFilterLayerValue": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusLayerValue": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MERGE_KEY_EMIT_ORDER": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MarkLayerDescriptor": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MarkLayerDescriptorLike": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MergeByKeyKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionScope": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotLayerLike": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "REPLACE_EMIT_ORDER": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ReplaceKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolveInteractionScopeInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ZoomInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ZoomOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "assemblePortableSpec": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "deprecatedGrammarPropPattern": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "foldPlotLayer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "grammarCodemodRules": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "grammarDocUrl": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isFacetedPlotIntent": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isHostPlotLayer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "mappedChannelField": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolveInteractionScope": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "toLayerInput": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
       "package": "@ggsvelte/svelte",
       "entry": ".",
       "source": "packages/svelte/src/lib/index.ts",

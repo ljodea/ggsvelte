@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@4.0.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte", "@ggsvelte/cli", "@ggsvelte/skill"]],
+  "fixed": [["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/compose", "@ggsvelte/svelte", "@ggsvelte/react", "@ggsvelte/cli", "@ggsvelte/skill"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

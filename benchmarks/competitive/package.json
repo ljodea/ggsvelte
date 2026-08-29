@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ggsvelte/core": "workspace:*",
+    "@ggsvelte/react": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
     "@tanstack/charts": "^0.14.0",

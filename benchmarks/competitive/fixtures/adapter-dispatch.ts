@@ -39,6 +39,9 @@ import type { MountHandle } from "./lifecycle";
 const ggplotAdapter = new URLSearchParams(location.search).has("ggplot")
   ? await import("../adapters/ggsvelte-ggplot")
   : null;
+const reactAdapter = new URLSearchParams(location.search).has("ggreact")
+  ? await import("../adapters/ggsvelte-react")
+  : null;
 
 registerBasicPoints();
 registerBasicLines();
@@ -100,6 +103,10 @@ export function mountSync(
       if (ggplotAdapter === null) throw new Error("ggsvelte-ggplot is not loaded");
       return ggplotAdapter.mountGgsvelteGgplot(scenario, data as ScatterColumns, root);
     }
+    case "ggsvelte-react": {
+      if (reactAdapter === null) throw new Error("ggsvelte-react is not loaded");
+      return reactAdapter.mountGgsvelteReact(scenario, data as ScatterColumns, root);
+    }
     default:
       throw new Error(
         `lib ${lib} has no browser harness (bundle-only peer — see scenarios.ts LIBS)`,
@@ -113,7 +120,11 @@ export function mountSync(
 export function assertMountable(lib: string, c: ScenarioCase): void {
   const meta = LIBS.find((l) => l.id === lib);
   if (meta === undefined) throw new Error(`unknown lib ${lib}`);
-  if (!meta.browser && !(lib === "ggsvelte-ggplot" && ggplotAdapter !== null)) {
+  if (
+    !meta.browser &&
+    !(lib === "ggsvelte-ggplot" && ggplotAdapter !== null) &&
+    !(lib === "ggsvelte-react" && reactAdapter !== null)
+  ) {
     throw new Error(`${lib} is bundle-only in this harness`);
   }
   if (!meta.scenarios.includes(c.scenario)) {
@@ -124,4 +135,8 @@ export function assertMountable(lib: string, c: ScenarioCase): void {
 /** Whether the optional ggplot adapter loaded (drives catalog availability). */
 export function ggplotLoaded(): boolean {
   return ggplotAdapter !== null;
+}
+
+export function reactLoaded(): boolean {
+  return reactAdapter !== null;
 }

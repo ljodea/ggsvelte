@@ -16,6 +16,8 @@ benchmarks/results/
 .vitest-reports/
 spikes/**/__screenshots__/
 packages/svelte/tests/__screenshots__/
+packages/react/tests/__screenshots__/
+packages/react/test-results/
 *.tsbuildinfo
 __pycache__/
 apps/docs/build/
