@@ -5,7 +5,7 @@ import type { FacetFieldRef } from "@ggsvelte/spec";
 
 import { createFacetPanelIdentity } from "../facet-identity.js";
 import { encodeKey } from "../scales/state.js";
-import type { ColumnTable } from "../table.js";
+import type { CellValue, ColumnTable } from "../table.js";
 
 import { facetDisplayLabel, facetValues } from "./facets-helpers.js";
 import { partitionByField, partitionByFields } from "./facets-tokens.js";
@@ -25,30 +25,9 @@ export function resolveFacetGrid(input: {
   strip: FacetStripConfig;
   warnings: PipelineWarning[];
 }): FacetLayout {
-  const { table, rowsField, colsField, freeX, freeY, baseSourceRows, strip, warnings } = input;
-  const rowLevels = input.rowsRef?.levels;
-  const colLevels = input.colsRef?.levels;
-  const rowLabels = input.rowsRef?.labels;
-  const colLabels = input.colsRef?.labels;
-
-  // Grid form: rows x cols, ALL combinations (empty combos render as empty
-  // panels — ggplot2 keeps the full grid). Closed levels keep empty panels too.
-  const rowValues =
-    rowsField === null
-      ? [null]
-      : facetValues(table, rowsField, {
-          ...(rowLevels !== undefined && { levels: rowLevels }),
-          path: "/facet/rows/levels",
-          warnings,
-        });
-  const colValues =
-    colsField === null
-      ? [null]
-      : facetValues(table, colsField, {
-          ...(colLevels !== undefined && { levels: colLevels }),
-          path: "/facet/cols/levels",
-          warnings,
-        });
+  const { table, rowsField, colsField, freeX, freeY, baseSourceRows, strip } = input;
+  const rowValues = facetValuesFor(input, "rows");
+  const colValues = facetValuesFor(input, "cols");
   if (
     (rowsField !== null && rowValues.length === 0) ||
     (colsField !== null && colValues.length === 0)
@@ -74,38 +53,8 @@ export function resolveFacetGrid(input: {
     const rowInner = grid === null ? null : (grid.get(encodeKey(rowValues[r]!)) ?? null);
     const rowOnly = rowBuckets === null ? null : (rowBuckets.get(encodeKey(rowValues[r]!)) ?? []);
     for (let c = 0; c < colValues.length; c++) {
-      let rows: number[];
-      if (grid !== null) {
-        // Full 2D grid: absent row or col bucket is an empty combination.
-        rows = rowInner?.get(encodeKey(colValues[c]!)) ?? [];
-      } else if (rowOnly !== null) {
-        rows = rowOnly;
-      } else if (colBuckets === null) {
-        // Unreachable: assertFacetForm guarantees ≥1 grid field once wrap is null.
-        throw new Error("facet grid resolved with neither rows nor cols field");
-      } else {
-        rows = colBuckets.get(encodeKey(colValues[c]!)) ?? [];
-      }
-      const parts: string[] = [];
-      if (rowsField !== null) parts.push(facetDisplayLabel(rowValues[r]!, rowLabels));
-      if (colsField !== null) parts.push(facetDisplayLabel(colValues[c]!, colLabels));
-      const identity = createFacetPanelIdentity([
-        ...(rowsField === null
-          ? []
-          : [{ role: "rows" as const, field: rowsField, value: rowValues[r] }]),
-        ...(colsField === null
-          ? []
-          : [{ role: "cols" as const, field: colsField, value: colValues[c] }]),
-      ]);
-      panels.push({
-        identity,
-        id: identity.key,
-        label: parts.join(" / "),
-        row: r,
-        col: c,
-        table: table.subset(rows),
-        sourceRows: rows.map((row) => baseSourceRows?.[row] ?? row),
-      });
+      const rows = panelRows(grid, rowInner, rowOnly, colBuckets, colValues[c]!);
+      panels.push(makeFacetPanel(input, rowValues[r]!, colValues[c]!, rows, r, c));
     }
   }
   return {
@@ -116,5 +65,58 @@ export function resolveFacetGrid(input: {
     freeX,
     freeY,
     strip,
+  };
+}
+
+type FacetGridInput = Parameters<typeof resolveFacetGrid>[0];
+
+function facetValuesFor(input: FacetGridInput, axis: "rows" | "cols") {
+  const field = axis === "rows" ? input.rowsField : input.colsField;
+  const ref = axis === "rows" ? input.rowsRef : input.colsRef;
+  if (field === null) return [null];
+  return facetValues(input.table, field, {
+    ...(ref?.levels !== undefined && { levels: ref.levels }),
+    path: `/facet/${axis}/levels`,
+    warnings: input.warnings,
+  });
+}
+
+function panelRows(
+  grid: Map<string, Map<string, number[]>> | null,
+  rowInner: Map<string, number[]> | null,
+  rowOnly: number[] | null,
+  colBuckets: Map<string, number[]> | null,
+  colValue: CellValue,
+): number[] {
+  if (grid !== null) return rowInner?.get(encodeKey(colValue)) ?? [];
+  if (rowOnly !== null) return rowOnly;
+  if (colBuckets === null) throw new Error("facet grid resolved with neither rows nor cols field");
+  return colBuckets.get(encodeKey(colValue)) ?? [];
+}
+
+function makeFacetPanel(
+  input: FacetGridInput,
+  rowValue: CellValue,
+  colValue: CellValue,
+  rows: number[],
+  row: number,
+  col: number,
+): FacetPanelDef {
+  const { table, rowsField, colsField, rowsRef, colsRef, baseSourceRows } = input;
+  const parts: string[] = [];
+  if (rowsField !== null) parts.push(facetDisplayLabel(rowValue, rowsRef?.labels));
+  if (colsField !== null) parts.push(facetDisplayLabel(colValue, colsRef?.labels));
+  const identity = createFacetPanelIdentity([
+    ...(rowsField === null ? [] : [{ role: "rows" as const, field: rowsField, value: rowValue }]),
+    ...(colsField === null ? [] : [{ role: "cols" as const, field: colsField, value: colValue }]),
+  ]);
+  return {
+    identity,
+    id: identity.key,
+    label: parts.join(" / "),
+    row,
+    col,
+    table: table.subset(rows),
+    sourceRows: rows.map((index) => baseSourceRows?.[index] ?? index),
   };
 }
