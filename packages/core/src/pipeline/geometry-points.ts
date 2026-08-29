@@ -22,6 +22,33 @@ import {
   packPointPixels,
 } from "./geometry-points-collect.js";
 
+type PointParams = {
+  size?: number;
+  alpha?: number;
+  shape?: PointShape;
+  binwidth?: number;
+  dotsize?: number;
+};
+
+function pointParams(binding: LayerFrame["binding"]): PointParams {
+  switch (binding.layer.geom) {
+    case "point":
+    case "count":
+    case "qq":
+    case "dotplot":
+    case "sf":
+      return binding.layer.params ?? {};
+    default:
+      return {};
+  }
+}
+
+function pointParamShape(geom: string, params: PointParams): PointShape | undefined {
+  return geom === "point" || geom === "count" || geom === "qq" || geom === "dotplot"
+    ? params.shape
+    : undefined;
+}
+
 /** Diameter ≈ binwidth in x data units × dotsize, converted to px radius. */
 function dotplotRadiusPx(
   frame: LayerFrame,
@@ -47,6 +74,59 @@ function dotplotRadiusPx(
   const dotsize = params.dotsize ?? 1;
   const diameterPx = (binwidth / span) * fx.innerWidth * dotsize;
   return Math.max(0.5, diameterPx / 2);
+}
+
+function pointMarkSize(
+  frame: LayerFrame,
+  fx: Frame,
+  params: PointParams,
+  literalSize: unknown,
+): number {
+  if (typeof literalSize === "number") return literalSize;
+  if (typeof params.size === "number") return params.size;
+  return frame.binding.layer.geom === "dotplot"
+    ? dotplotRadiusPx(frame, fx, params)
+    : DEFAULT_POINT_SIZE;
+}
+
+function attachMappedPointStyles(
+  batch: PointsBatch,
+  frame: LayerFrame,
+  styles: ResolvedStyleScales,
+  keptRows: Uint32Array,
+): void {
+  const sizes = numericStyleVector(frame, "size", keptRows, styles);
+  const alphas = numericStyleVector(frame, "alpha", keptRows, styles);
+  const shapeIndexes = indexedStyleVector(frame, "shape", keptRows, styles, (value) =>
+    pointShapeIndex(value as PointShape),
+  );
+  if (sizes !== undefined) batch.sizes = sizes;
+  if (alphas !== undefined) {
+    batch.alpha = 1;
+    batch.alphas = alphas;
+  }
+  if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
+}
+
+function attachMappedPointPaint(
+  batch: PointsBatch,
+  frame: LayerFrame,
+  paintKey: "color" | "fill",
+  paintScale: ResolvedColorScale | null,
+  paintValues: LayerFrame["colorValues"],
+  paintChannel: LayerFrame["binding"]["color"],
+  keptRows: Uint32Array,
+): void {
+  if (paintScale === null || (paintValues === null && paintChannel.scaledConstant === null)) return;
+  const indexed = mappedPaintIndexVector(frame, paintKey, paintScale, keptRows);
+  if (indexed === null) {
+    batch.colors = mappedPaintVector(frame, paintKey, paintScale, keptRows);
+  } else if (indexed.palette.length === 1) {
+    batch.fill = indexed.palette[0]!;
+  } else {
+    batch.colorPalette = indexed.palette;
+    batch.colorIndexes = indexed.indexes;
+  }
 }
 
 export function pointsBatch(
@@ -81,26 +161,11 @@ export function pointsBatch(
   // point / count / qq / dotplot / geom_sf point family share this builder.
   // SfParams has size/alpha (not shape); DotplotParams adds binwidth/dotsize.
   const geom = binding.layer.geom;
-  const params =
-    geom === "point" || geom === "count" || geom === "qq" || geom === "dotplot" || geom === "sf"
-      ? ((binding.layer.params ?? {}) as {
-          size?: number;
-          alpha?: number;
-          shape?: PointShape;
-          binwidth?: number;
-          dotsize?: number;
-        })
-      : {};
-  const paramShape =
-    geom === "point" || geom === "count" || geom === "qq" || geom === "dotplot"
-      ? params.shape
-      : undefined;
+  const params = pointParams(binding);
+  const paramShape = pointParamShape(geom, params);
   const literalSize = binding.size.constant;
   const literalShape = binding.shape.constant;
-  let markSize = DEFAULT_POINT_SIZE;
-  if (typeof literalSize === "number") markSize = literalSize;
-  else if (typeof params.size === "number") markSize = params.size;
-  else if (geom === "dotplot") markSize = dotplotRadiusPx(frame, fx, params);
+  const markSize = pointMarkSize(frame, fx, params, literalSize);
 
   // geom_dotplot paints with fill when present (schema: "Map fill/color for groups").
   // Solid point marks only have one paint channel; fill wins over color when both map.
@@ -126,27 +191,15 @@ export function pointsBatch(
       typeof literalShape === "string" ? (literalShape as PointShape) : (paramShape ?? "circle"),
     fill: paintChannel.constant,
   };
-  const sizes = numericStyleVector(frame, "size", collectedKeptRows, styles);
-  const alphas = numericStyleVector(frame, "alpha", collectedKeptRows, styles);
-  const shapeIndexes = indexedStyleVector(frame, "shape", collectedKeptRows, styles, (value) =>
-    pointShapeIndex(value as PointShape),
+  attachMappedPointStyles(batch, frame, styles, collectedKeptRows);
+  attachMappedPointPaint(
+    batch,
+    frame,
+    paintKey,
+    paintScale,
+    paintValues,
+    paintChannel,
+    collectedKeptRows,
   );
-  if (sizes !== undefined) batch.sizes = sizes;
-  if (alphas !== undefined) {
-    batch.alpha = 1;
-    batch.alphas = alphas;
-  }
-  if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
-  if (paintScale !== null && (paintValues !== null || paintChannel.scaledConstant !== null)) {
-    const indexed = mappedPaintIndexVector(frame, paintKey, paintScale, collectedKeptRows);
-    if (indexed === null) {
-      batch.colors = mappedPaintVector(frame, paintKey, paintScale, collectedKeptRows);
-    } else if (indexed.palette.length === 1) {
-      batch.fill = indexed.palette[0]!;
-    } else {
-      batch.colorPalette = indexed.palette;
-      batch.colorIndexes = indexed.indexes;
-    }
-  }
   return batch;
 }
