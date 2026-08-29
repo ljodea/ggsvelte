@@ -5,6 +5,61 @@ import type { LayerFrame, PipelineWarning } from "./types.js";
 import type { Frame } from "./geometry-shared-position.js";
 import { positionOf, removedWarning } from "./geometry-shared-position.js";
 
+type ContinuousPositionScale = Exclude<Frame["xScale"], { type: "band" }>;
+
+function bucketContinuousRows(
+  frame: LayerFrame,
+  groupRows: number[][],
+  xNum: Float64Array,
+  yNum: Float64Array,
+  xScale: ContinuousPositionScale,
+  yScale: ContinuousPositionScale,
+): number {
+  let removed = 0;
+  for (let row = 0; row < frame.n; row++) {
+    const xv = xNum[row];
+    const yv = yNum[row];
+    if (xv === undefined || yv === undefined || !Number.isFinite(xv) || !Number.isFinite(yv)) {
+      removed++;
+      continue;
+    }
+    const tx = xScale.normalizeTransformed(xv);
+    const ty = yScale.normalizeTransformed(yv);
+    if (Number.isNaN(tx) || Number.isNaN(ty)) {
+      removed++;
+      continue;
+    }
+    const group = frame.groups[row]!;
+    (groupRows[group] ??= []).push(row);
+  }
+  return removed;
+}
+
+function bucketGeneralRows(
+  frame: LayerFrame,
+  fx: Frame,
+  groupRows: number[][],
+  yNumericOverride: Float64Array | null,
+): number {
+  let removed = 0;
+  for (let row = 0; row < frame.n; row++) {
+    const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
+    const ty = positionOf(
+      fx.yScale,
+      yNumericOverride ?? frame.yNumeric,
+      yNumericOverride instanceof Float64Array ? null : frame.yValues,
+      row,
+    );
+    if (Number.isNaN(tx) || Number.isNaN(ty)) {
+      removed++;
+      continue;
+    }
+    const group = frame.groups[row]!;
+    (groupRows[group] ??= []).push(row);
+  }
+  return removed;
+}
+
 export function bucketByGroup(
   frame: LayerFrame,
   fx: Frame,
@@ -12,56 +67,29 @@ export function bucketByGroup(
   warnings: PipelineWarning[],
 ): number[][] {
   const groupRows: number[][] = [];
-  let removed = 0;
   // Continuous × continuous: monomorphic numeric + normalizeTransformed finite
   // filter (no band / column normalize branch). Still call normalizeTransformed
   // so projected panel scales (coord log/sqrt/etc.) that map out-of-range
   // fractions to NaN are dropped with removed-missing — same as positionOf.
   // Do not short-circuit on type/transform alone: projectors wrap linear
   // identity scales and override normalizeTransformed.
+  let removed: number;
   if (
     fx.xScale.type !== "band" &&
     fx.yScale.type !== "band" &&
     frame.xNumeric !== null &&
     (yNumericOverride !== null || frame.yNumeric !== null)
   ) {
-    const xNum = frame.xNumeric;
-    const yNum = yNumericOverride ?? frame.yNumeric!;
-    // PositionScale is ContinuousScale | BandScale; type guards above exclude band.
-    const xScale = fx.xScale;
-    const yScale = fx.yScale;
-    for (let row = 0; row < frame.n; row++) {
-      const xv = xNum[row];
-      const yv = yNum[row];
-      if (xv === undefined || yv === undefined || !Number.isFinite(xv) || !Number.isFinite(yv)) {
-        removed++;
-        continue;
-      }
-      const tx = xScale.normalizeTransformed(xv);
-      const ty = yScale.normalizeTransformed(yv);
-      if (Number.isNaN(tx) || Number.isNaN(ty)) {
-        removed++;
-        continue;
-      }
-      const g = frame.groups[row]!;
-      (groupRows[g] ??= []).push(row);
-    }
+    removed = bucketContinuousRows(
+      frame,
+      groupRows,
+      frame.xNumeric,
+      yNumericOverride ?? frame.yNumeric!,
+      fx.xScale,
+      fx.yScale,
+    );
   } else {
-    for (let row = 0; row < frame.n; row++) {
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = positionOf(
-        fx.yScale,
-        yNumericOverride ?? frame.yNumeric,
-        yNumericOverride instanceof Float64Array ? null : frame.yValues,
-        row,
-      );
-      if (Number.isNaN(tx) || Number.isNaN(ty)) {
-        removed++;
-        continue;
-      }
-      const g = frame.groups[row]!;
-      (groupRows[g] ??= []).push(row);
-    }
+    removed = bucketGeneralRows(frame, fx, groupRows, yNumericOverride);
   }
   removedWarning(removed, frame.binding.index, warnings);
   return groupRows.filter((rows) => rows !== undefined && rows.length > 0);

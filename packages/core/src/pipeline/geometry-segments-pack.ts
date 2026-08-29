@@ -17,6 +17,25 @@ import {
 import type { LayerFrame } from "./types.js";
 import { DEFAULT_RULE_LINEWIDTH } from "./geometry-shared.js";
 
+function applyMappedSegmentStyles(
+  batch: SegmentsBatch,
+  frame: LayerFrame,
+  styleRows: ArrayLike<number>,
+  styles: ResolvedStyleScales,
+): void {
+  const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
+  const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
+  const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
+    linetypeIndex(value as Linetype),
+  );
+  if (linewidths !== undefined) batch.linewidths = linewidths;
+  if (alphas !== undefined) {
+    batch.alpha = 1;
+    batch.alphas = alphas;
+  }
+  if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
+}
+
 export function packSegmentsBatch(input: {
   frame: LayerFrame;
   segments: Float32Array;
@@ -65,17 +84,7 @@ export function packSegmentsBatch(input: {
     ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
     ...(glowResolved !== undefined && { glow: glowResolved }),
   };
-  const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
-  const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
-  const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
-    linetypeIndex(value as Linetype),
-  );
-  if (linewidths !== undefined) batch.linewidths = linewidths;
-  if (alphas !== undefined) {
-    batch.alpha = 1;
-    batch.alphas = alphas;
-  }
-  if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
+  applyMappedSegmentStyles(batch, frame, styleRows, styles);
   if (wantsColors && binding.ruleForm !== "annotation" && strokes !== null) {
     batch.strokes = strokes;
   }

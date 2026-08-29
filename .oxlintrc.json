@@ -116,6 +116,17 @@
       }
     },
     {
+      "files": [
+        "packages/core/src/pipeline/geometry-hex.ts",
+        "packages/core/src/pipeline/geometry-segments-pack.ts",
+        "packages/core/src/pipeline/geometry-shared-bucket.ts",
+        "packages/core/src/pipeline/geometry-glyphs-pack.ts"
+      ],
+      "rules": {
+        "eslint/complexity": ["error", { "max": 20 }]
+      }
+    },
+    {
       // Tests + benchmarks: fixture literals are cast deliberately (invalid
       // specs, RuntimeSpec shapes) and test files run long by design.
       "files": ["**/tests/**", "benchmarks/**"],
