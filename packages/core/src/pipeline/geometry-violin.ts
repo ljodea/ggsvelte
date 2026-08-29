@@ -28,6 +28,32 @@ function sortRowsByY(rows: number[], y: Float64Array): number[] {
   return rows.toSorted((a, b) => y[a]! - y[b]!);
 }
 
+function sortedViolinGroups(
+  groupRows: readonly number[][],
+  y: Float64Array,
+): {
+  groups: number[][];
+  totalVertices: number;
+} {
+  const groups: number[][] = [];
+  let totalVertices = 0;
+  for (const rows of groupRows) {
+    const sorted = sortRowsByY(rows, y);
+    if (sorted.length < 2) continue;
+    groups.push(sorted);
+    totalVertices += sorted.length * 2;
+  }
+  return { groups, totalVertices };
+}
+
+function violinWidthFraction(fx: Frame, params: ViolinParams): number {
+  const width = params.width ?? DEFAULT_BOXPLOT_WIDTH;
+  const widthFraction = width * (fx.xScale.type === "band" ? fx.xScale.step : 1);
+  return params.width === undefined && fx.xScale.type === "band"
+    ? Math.min(widthFraction, MAX_BOXPLOT_PANEL_FRAC)
+    : widthFraction;
+}
+
 /** Bucket by (x category, group) so each violin is a separate closed path. */
 function bucketViolinRows(
   frame: LayerFrame,
@@ -58,6 +84,86 @@ function bucketViolinRows(
   return order.map((k) => map.get(k)!);
 }
 
+function writeViolinBuffers(input: {
+  frame: LayerFrame;
+  fx: Frame;
+  violinwidth: Float64Array;
+  groups: readonly number[][];
+  totalVertices: number;
+  widthFraction: number;
+  fillPaints: readonly (string | null)[];
+  strokePaints: readonly (string | null)[];
+  fillFallback: string | undefined;
+  strokeFallback: string | undefined;
+}): {
+  positions: Float32Array;
+  rowIndex: Uint32Array;
+  closedFrameRows: Uint32Array;
+  pathOffsets: Uint32Array;
+  fills: (string | null)[];
+  strokes: (string | null)[];
+} {
+  const {
+    frame,
+    fx,
+    violinwidth,
+    groups,
+    totalVertices,
+    widthFraction,
+    fillPaints,
+    strokePaints,
+    fillFallback,
+    strokeFallback,
+  } = input;
+  const positions = new Float32Array(totalVertices * 2);
+  const rowIndex = new Uint32Array(totalVertices);
+  const closedFrameRows = new Uint32Array(totalVertices);
+  const pathOffsets = new Uint32Array(groups.length + 1);
+  const fills: (string | null)[] = [];
+  const strokes: (string | null)[] = [];
+  let cursor = 0;
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+    pathOffsets[groupIndex] = cursor;
+    const rows = groups[groupIndex]!;
+    const first = rows[0]!;
+    let center = positionOf(fx.xScale, frame.xNumeric, frame.xValues, first);
+    let width = widthFraction;
+    if (frame.dodge !== null) {
+      const slotCount = Math.max(1, frame.dodge.slotCounts[first]!);
+      const slot = frame.dodge.slot[first]!;
+      width = widthFraction / slotCount;
+      center += widthFraction * ((slot + 0.5) / slotCount - 0.5);
+    }
+    const centerPx = center * fx.innerWidth;
+    const halfMaxPx = (width / 2) * fx.innerWidth;
+    for (const row of rows) {
+      const y = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
+      positions[cursor * 2] = centerPx + half;
+      positions[cursor * 2 + 1] = fx.innerHeight - y * fx.innerHeight;
+      rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
+      cursor++;
+    }
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const row = rows[i]!;
+      const y = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
+      positions[cursor * 2] = centerPx - half;
+      positions[cursor * 2 + 1] = fx.innerHeight - y * fx.innerHeight;
+      rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
+      cursor++;
+    }
+    fills.push(fillPaints[groupIndex] ?? fillFallback ?? null);
+    let stroke = strokePaints[groupIndex]!;
+    if (stroke === null && strokeFallback !== undefined) stroke = strokeFallback;
+    strokes.push(stroke);
+  }
+  pathOffsets[groups.length] = cursor;
+  return { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes };
+}
+
 export function violinBatch(
   frame: LayerFrame,
   fx: Frame,
@@ -76,12 +182,8 @@ export function violinBatch(
   if (groupRows.length === 0) return null;
 
   const params = (binding.layer.params ?? {}) as ViolinParams;
-  const widthParam = params.width ?? DEFAULT_BOXPLOT_WIDTH;
   // Same band-fraction model as boxplot (normalized units, not px yet).
-  let widthFrac = widthParam * (fx.xScale.type === "band" ? fx.xScale.step : 1);
-  if (params.width === undefined && fx.xScale.type === "band") {
-    widthFrac = Math.min(widthFrac, MAX_BOXPLOT_PANEL_FRAC);
-  }
+  const widthFraction = violinWidthFraction(fx, params);
 
   const paint = layerPaintFromParams(binding.layer.params);
   const fillPaintResolved =
@@ -94,71 +196,25 @@ export function violinBatch(
       : resolveGradientPaint(paint.strokePaint, binding.index, "stroke");
   const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
 
-  const sortedGroups: number[][] = [];
-  let total = 0;
-  for (const rows of groupRows) {
-    const sorted = sortRowsByY(rows, y);
-    if (sorted.length < 2) continue;
-    sortedGroups.push(sorted);
-    total += sorted.length * 2;
-  }
+  const { groups: sortedGroups, totalVertices } = sortedViolinGroups(groupRows, y);
   if (sortedGroups.length === 0) return null;
 
-  const positions = new Float32Array(total * 2);
-  const rowIndex = new Uint32Array(total);
-  const closedFrameRows = new Uint32Array(total);
-  const pathOffsets = new Uint32Array(sortedGroups.length + 1);
-  const fills: (string | null)[] = [];
-  const strokes: (string | null)[] = [];
   // One fill/stroke paint vector for all violins (#1309).
   const styleRows = sortedGroups.map((rows) => rows[0]!);
   const fillPaints = areaGroupFillsOf(frame, fill, styleRows);
   const strokePaints = paintVector(frame, "color", color, styleRows);
-  let cursor = 0;
-
-  for (let s = 0; s < sortedGroups.length; s++) {
-    pathOffsets[s] = cursor;
-    const rows = sortedGroups[s]!;
-    const first = rows[0]!;
-    let center = positionOf(fx.xScale, frame.xNumeric, frame.xValues, first);
-    let w = widthFrac;
-    if (frame.dodge !== null) {
-      const slotCount = Math.max(1, frame.dodge.slotCounts[first]!);
-      const slot = frame.dodge.slot[first]!;
-      w = widthFrac / slotCount;
-      center = center + widthFrac * ((slot + 0.5) / slotCount - 0.5);
-    }
-    const centerPx = center * fx.innerWidth;
-    const halfMaxPx = (w / 2) * fx.innerWidth;
-
-    // Right edge ascending in y, then left edge descending → closed violin.
-    for (const row of rows) {
-      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
-      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
-      positions[cursor * 2] = centerPx + half;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      closedFrameRows[cursor] = row;
-      cursor++;
-    }
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const row = rows[i]!;
-      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
-      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
-      positions[cursor * 2] = centerPx - half;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      closedFrameRows[cursor] = row;
-      cursor++;
-    }
-    fills.push(fillPaints[s] ?? fillPaintResolved?.fallback ?? null);
-    let stroke = strokePaints[s]!;
-    if (stroke === null && strokePaintResolved !== undefined) {
-      stroke = strokePaintResolved.fallback;
-    }
-    strokes.push(stroke);
-  }
-  pathOffsets[sortedGroups.length] = cursor;
+  const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } = writeViolinBuffers({
+    frame,
+    fx,
+    violinwidth,
+    groups: sortedGroups,
+    totalVertices,
+    widthFraction,
+    fillPaints,
+    strokePaints,
+    fillFallback: fillPaintResolved?.fallback,
+    strokeFallback: strokePaintResolved?.fallback,
+  });
 
   const mappedAlphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const subpathCount = pathOffsets.length - 1;
@@ -174,9 +230,9 @@ export function violinBatch(
     kind: "paths",
     layerIndex: binding.index,
     panelIndex: 0,
-    positions: positions.subarray(0, cursor * 2).slice(),
-    rowIndex: rowIndex.subarray(0, cursor).slice(),
-    closedFrameRows: closedFrameRows.subarray(0, cursor).slice(),
+    positions,
+    rowIndex,
+    closedFrameRows,
     pathOffsets,
     strokes,
     fills,
