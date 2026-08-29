@@ -208,7 +208,8 @@ describe("readiness + canvas + handle", () => {
 
   it("stays not-ready when there is nothing to render", () => {
     const { container } = render(<GGPlot data={rows} width={480} height={320} />);
-    expect(container.querySelector(".gg-plot-root")?.dataset.ggReady).toBe("false");
+    const root = container.querySelector<HTMLElement>(".gg-plot-root");
+    expect(root?.dataset.ggReady).toBe("false");
   });
 
   it("renders a canvas sibling for render=canvas layers", () => {

@@ -22,7 +22,7 @@ function clickMark(container: HTMLElement): void {
 describe("controlled interaction scope", () => {
   it("throws when interaction is set without interactionScope", () => {
     const controller = createPlotInteraction();
-    expect(() =>
+    expect(() => {
       render(
         <GGPlot
           data={rows}
@@ -34,16 +34,16 @@ describe("controlled interaction scope", () => {
         >
           <GeomPoint />
         </GGPlot>,
-      ),
-    ).toThrow(/interactionScope/);
+      );
+    }).toThrow(/interactionScope/);
   });
 });
 
 describe("createPlotInteraction", () => {
   it("notifies subscribers and onchange when selection changes", () => {
-    const onchange = vi.fn();
+    const onchange = vi.fn(() => {});
     const controller = createPlotInteraction({ onchange });
-    const listener = vi.fn();
+    const listener = vi.fn(() => {});
     const unsub = controller.subscribe(listener);
     controller.setSelection(["a"], { scope: { keys: "plot" } });
     expect(controller.selected({ keys: "plot" })).toEqual(["a"]);
@@ -58,7 +58,7 @@ describe("createPlotInteraction", () => {
 
 describe("inspect + select host", () => {
   it("enables inspect via <Inspect /> without crashing", () => {
-    const oninspect = vi.fn();
+    const oninspect = vi.fn(() => {});
     const { container } = render(
       <GGPlot data={rows} aes={{ x: "x", y: "y" }} width={480} height={320} oninspect={oninspect}>
         <GeomPoint />
@@ -71,7 +71,7 @@ describe("inspect + select host", () => {
   });
 
   it("wires select clicks to onselect and the shared controller", () => {
-    const onselect = vi.fn();
+    const onselect = vi.fn(() => {});
     const controller = createPlotInteraction();
     const { container } = render(
       <GGPlot
@@ -93,7 +93,7 @@ describe("inspect + select host", () => {
   });
 
   it("uses the id column as the selection key by default", () => {
-    const onselect = vi.fn();
+    const onselect = vi.fn(() => {});
     const { container } = render(
       <GGPlot
         data={rows}
@@ -107,12 +107,13 @@ describe("inspect + select host", () => {
       </GGPlot>,
     );
     clickMark(container);
-    const keys = onselect.mock.calls[0]?.[0]?.keys as PropertyKey[] | undefined;
+    const payload = onselect.mock.calls[0]?.[0] as { keys?: PropertyKey[] } | undefined;
+    const keys = payload?.keys;
     expect(keys?.[0] === "a" || keys?.[0] === "b").toBe(true);
   });
 
   it("uses <Inspect identity> over inspect={{ identity }} on the plot", () => {
-    const onselect = vi.fn();
+    const onselect = vi.fn(() => {});
     const { container } = render(
       <GGPlot
         data={rows}
@@ -128,7 +129,8 @@ describe("inspect + select host", () => {
       </GGPlot>,
     );
     clickMark(container);
-    const key = onselect.mock.calls[0]?.[0]?.keys[0];
+    const payload = onselect.mock.calls[0]?.[0] as { keys?: PropertyKey[] } | undefined;
+    const key = payload?.keys?.[0];
     expect(key === "a" || key === "b").toBe(true);
   });
 
@@ -137,7 +139,7 @@ describe("inspect + select host", () => {
       { x: 1, y: 10, name: "alpha" },
       { x: 2, y: 20, name: "beta" },
     ];
-    const onselect = vi.fn();
+    const onselect = vi.fn(() => {});
     const { container } = render(
       <GGPlot
         data={named}
@@ -152,7 +154,8 @@ describe("inspect + select host", () => {
       </GGPlot>,
     );
     clickMark(container);
-    const key = onselect.mock.calls[0]?.[0]?.keys[0];
+    const payload = onselect.mock.calls[0]?.[0] as { keys?: PropertyKey[] } | undefined;
+    const key = payload?.keys?.[0];
     expect(key === "alpha" || key === "beta").toBe(true);
   });
 });
@@ -190,8 +193,8 @@ describe("createPlotInteraction zoom on the host", () => {
   });
 
   it("does not select when the pointer brushes a zoom", () => {
-    const onselect = vi.fn();
-    const onzoom = vi.fn();
+    const onselect = vi.fn(() => {});
+    const onzoom = vi.fn(() => {});
     const { container } = render(
       <GGPlot
         data={rows}
@@ -218,8 +221,8 @@ describe("createPlotInteraction zoom on the host", () => {
   });
 
   it("selects on click when zoom is also enabled", () => {
-    const onselect = vi.fn();
-    const onzoom = vi.fn();
+    const onselect = vi.fn(() => {});
+    const onzoom = vi.fn(() => {});
     const { container } = render(
       <GGPlot
         data={rows}

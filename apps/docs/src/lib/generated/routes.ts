@@ -12486,6 +12486,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ggsvelte-compose",
+        title: "@ggsvelte/compose",
+        level: 2,
+      },
+      {
+        id: "experimental-34",
+        title: "experimental (34)",
+        level: 3,
+      },
+      {
         id: "ggsvelte-svelte",
         title: "@ggsvelte/svelte",
         level: 2,

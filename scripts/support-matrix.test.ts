@@ -108,7 +108,7 @@ describe("consumer support matrix", () => {
 
   test("keeps publishable manifests aligned with the declared Node and Svelte support", () => {
     const matrix = loadSupportMatrix(root);
-    for (const dir of ["spec", "core", "svelte", "cli"]) {
+    for (const dir of ["spec", "core", "compose", "svelte", "react", "cli"]) {
       const manifest = JSON.parse(
         readFileSync(join(root, "packages", dir, "package.json"), "utf8"),
       ) as { engines?: { node?: string }; peerDependencies?: { svelte?: string } };

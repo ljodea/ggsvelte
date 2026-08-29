@@ -4,7 +4,7 @@ import type { Layer, MarkLayerDescriptor } from "@ggsvelte/compose";
 
 export type HostCapabilityKind = "inspect";
 
-export type InspectCapabilityChild = Record<string, unknown>;
+type InspectCapabilityChild = Record<string, unknown>;
 
 export type HostCapabilityValue = {
   readonly inspect: InspectCapabilityChild;
@@ -95,7 +95,7 @@ export class LayerRegistry {
   capabilities<K extends HostCapabilityKind>(kind: K): readonly HostCapabilityValue[K][] {
     const out: HostCapabilityValue[K][] = [];
     for (const entry of this.#capabilities.values()) {
-      if (entry.kind === kind) out.push(entry.value as HostCapabilityValue[K]);
+      if (entry.kind === kind) out.push(entry.value);
     }
     return out;
   }
@@ -107,7 +107,7 @@ export class LayerRegistry {
 
 export const PlotRegistryContext = createContext<LayerRegistry | null>(null);
 
-export function usePlotRegistry(): LayerRegistry | null {
+function usePlotRegistry(): LayerRegistry | null {
   return useContext(PlotRegistryContext);
 }
 

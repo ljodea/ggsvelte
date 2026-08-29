@@ -18,12 +18,14 @@ import { commitForPackageVersion } from "./stage-github-releases";
 const root = join(import.meta.dir, "..");
 
 describe("readPublishedPackageVersions", () => {
-  it("returns the five lockstep packages with name+version", () => {
+  it("returns the lockstep packages with name+version", () => {
     const pkgs = readPublishedPackageVersions(root);
     const names = pkgs.map((p) => p.name).toSorted();
     expect(names).toEqual([
       "@ggsvelte/cli",
+      "@ggsvelte/compose",
       "@ggsvelte/core",
+      "@ggsvelte/react",
       "@ggsvelte/skill",
       "@ggsvelte/spec",
       "@ggsvelte/svelte",

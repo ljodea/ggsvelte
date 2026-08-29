@@ -9,9 +9,4 @@ export {
   grammarCodemodRules,
   grammarDocUrl,
 } from "@ggsvelte/compose";
-export type {
-  GrammarCodemodForm,
-  GrammarFamilyMeta,
-  MergeByKeyKind,
-  ReplaceKind,
-} from "@ggsvelte/compose";
+export type { GrammarCodemodForm, MergeByKeyKind, ReplaceKind } from "@ggsvelte/compose";

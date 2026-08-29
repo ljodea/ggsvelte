@@ -25,7 +25,7 @@ import { applyAriaLabel, destroyAllLives, syncStrata, withChromeSvg } from "./st
 
 const DEFAULT_HEIGHT = 400;
 
-export function isContainerWidth(
+function isContainerWidth(
   width: number | "container" | undefined,
 ): width is "container" | undefined {
   return width === undefined || width === "container";
@@ -68,9 +68,16 @@ export function PlotSurface(
   },
 ) {
   const { registry, plotRef, identityKey } = props;
-  useSyncExternalStore(registry.subscribe, registry.getSnapshot, registry.getSnapshot);
+  useSyncExternalStore(
+    (onStoreChange) => registry.subscribe(onStoreChange),
+    () => registry.getSnapshot(),
+    () => registry.getSnapshot(),
+  );
   const interactionRevision = useSyncExternalStore(
-    props.interaction?.subscribe ?? subscribeNone,
+    (onStoreChange) => {
+      if (props.interaction === undefined) return subscribeNone();
+      return props.interaction.subscribe(onStoreChange);
+    },
     () => readRevision(props.interaction),
     () => readRevision(props.interaction),
   );
@@ -95,7 +102,9 @@ export function PlotSurface(
   const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
 
   useEffect(() => {
-    if (!isContainerWidth(props.width) || rootRef.current === null) return;
+    if (!isContainerWidth(props.width) || rootRef.current === null) {
+      return () => {};
+    }
     const el = rootRef.current;
     const ro = new ResizeObserver((entries) => {
       const w = entries[0]?.contentRect.width;
@@ -104,7 +113,9 @@ export function PlotSurface(
     ro.observe(el);
     const initial = el.getBoundingClientRect().width;
     if (initial > 0) setContainerWidth(initial);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+    };
   }, [props.width]);
 
   const assembled = useMemo(
@@ -147,7 +158,9 @@ export function PlotSurface(
   }, [paint, runSpec]);
 
   useEffect(() => {
-    return () => disposePlot(livesRef.current, modelRef);
+    return () => {
+      disposePlot(livesRef.current, modelRef);
+    };
   }, []);
 
   useEffect(() => {

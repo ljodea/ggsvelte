@@ -226,6 +226,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/core/**",
     "packages/compose/**",
     "packages/svelte/**",
+    "packages/react/**",
     "packages/cli/**",
     "packages/skill/**",
   ],

@@ -14,7 +14,7 @@ export interface CommandStep {
   expect?: string;
 }
 
-export const publishablePackageDirectories = ["spec", "core", "svelte", "cli"] as const;
+export const publishablePackageDirectories = ["spec", "core", "compose", "svelte", "cli"] as const;
 
 export type PublishablePackageVersions = Readonly<
   Record<(typeof publishablePackageDirectories)[number], string>

@@ -76,7 +76,7 @@ describe("spec render path isolation", () => {
   });
 
   it("keeps assemblePortableSpec off the fluent builder validate path", () => {
-    const assemble = read("packages/svelte/src/lib/assembly/assemble.ts");
+    const assemble = read("packages/compose/src/assemble.ts");
     const code = assemble.replaceAll(/\/\*[\s\S]*?\*\//g, "").replaceAll(/(^|[^:])\/\/.*$/gm, "$1");
     expect(code).not.toMatch(/import\s*\{[^}]*\bgg\b/);
     // No builder.spec() call (comments already stripped).
@@ -86,7 +86,7 @@ describe("spec render path isolation", () => {
   });
 
   it("keeps foldPlotLayer off the fluent builder", () => {
-    const fold = read("packages/svelte/src/lib/layers/fold.ts");
+    const fold = read("packages/compose/src/fold.ts");
     expect(fold).not.toMatch(/import\s*\{[^}]*\bgg\b/);
     expect(fold).not.toMatch(/from\s*["']@ggsvelte\/spec["'][^;\n]*\bgg\b/);
   });

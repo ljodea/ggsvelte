@@ -6,13 +6,30 @@ import { LayerRegistry, PlotRegistryContext } from "./registry.js";
 
 import "./host-init.js";
 
+function restWithoutChildren(props: GGPlotProps): Omit<GGPlotProps, "children" | "key"> {
+  const { children: _children, ...rest } = props;
+  void _children;
+  const withoutKey = { ...rest };
+  Reflect.deleteProperty(withoutKey, "key");
+  return withoutKey;
+}
+
+function identityKeyFallback(props: object): GGPlotProps["key"] {
+  return Reflect.get(props, "key") as GGPlotProps["key"];
+}
+
 export const GGPlot = forwardRef<GGPlotHandle, GGPlotProps>(function GGPlot(props, ref) {
   const registry = useMemo(() => new LayerRegistry(), []);
-  const { key: legacyKey, children, ...rest } = props;
+  const rest = restWithoutChildren(props);
   return (
     <PlotRegistryContext.Provider value={registry}>
-      {children}
-      <PlotSurface {...rest} identityKey={legacyKey} registry={registry} plotRef={ref} />
+      {props.children}
+      <PlotSurface
+        {...rest}
+        identityKey={identityKeyFallback(props)}
+        registry={registry}
+        plotRef={ref}
+      />
     </PlotRegistryContext.Provider>
   );
 });

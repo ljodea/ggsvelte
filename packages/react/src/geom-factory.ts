@@ -31,44 +31,42 @@ export function useGeomLayer(geom: GeomName, props: GeomProps): void {
   const propsRef = useRef(props);
   propsRef.current = props;
   const layerRef = useRef<Layer | null>(null);
-  if (layerRef.current === null) {
-    layerRef.current = {
-      kind: "mark",
-      descriptor: {
-        geom,
-        get stat() {
-          return propsRef.current.stat;
-        },
-        get aes() {
-          return propsRef.current.aes;
-        },
-        get data() {
-          return propsRef.current.data;
-        },
-        get position() {
-          return propsRef.current.position;
-        },
-        get positionParams() {
-          return propsRef.current.positionParams;
-        },
-        get render() {
-          return propsRef.current.render;
-        },
-        get inspect() {
-          return propsRef.current.inspect;
-        },
-        get params() {
-          const current = propsRef.current as Record<string, unknown>;
-          const params: Record<string, unknown> = {};
-          for (const key of paramKeys) {
-            const value = current[key];
-            if (value !== undefined) params[key] = value;
-          }
-          return Object.keys(params).length > 0 ? params : undefined;
-        },
+  layerRef.current ??= {
+    kind: "mark",
+    descriptor: {
+      geom,
+      get stat() {
+        return propsRef.current.stat;
       },
-    };
-  }
+      get aes() {
+        return propsRef.current.aes;
+      },
+      get data() {
+        return propsRef.current.data;
+      },
+      get position() {
+        return propsRef.current.position;
+      },
+      get positionParams() {
+        return propsRef.current.positionParams;
+      },
+      get render() {
+        return propsRef.current.render;
+      },
+      get inspect() {
+        return propsRef.current.inspect;
+      },
+      get params() {
+        const current = propsRef.current as Record<string, unknown>;
+        const params: Record<string, unknown> = {};
+        for (const key of paramKeys) {
+          const value = current[key];
+          if (value !== undefined) params[key] = value;
+        }
+        return Object.keys(params).length > 0 ? params : undefined;
+      },
+    },
+  };
   useRegisterLayer(layerRef.current);
 }
 
@@ -79,13 +77,11 @@ export function usePlotLayerValue<K extends Exclude<Layer["kind"], "mark">>(
   const buildRef = useRef(build);
   buildRef.current = build;
   const layerRef = useRef<Layer | null>(null);
-  if (layerRef.current === null) {
-    layerRef.current = {
-      kind,
-      get value() {
-        return buildRef.current();
-      },
-    } as Layer;
-  }
+  layerRef.current ??= {
+    kind,
+    get value() {
+      return buildRef.current();
+    },
+  } as Layer;
   useRegisterLayer(layerRef.current);
 }
