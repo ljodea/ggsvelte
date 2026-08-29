@@ -56,6 +56,7 @@
     "test:coverage": "vitest run --coverage --project chromium && vitest run --coverage --config vitest.ssr.config.ts"
   },
   "dependencies": {
+    "@ggsvelte/compose": "^0.41.0",
     "@ggsvelte/core": "^0.41.0",
     "@ggsvelte/spec": "^0.41.0"
   },

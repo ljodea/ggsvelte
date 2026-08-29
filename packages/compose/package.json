@@ -1,0 +1,45 @@
+{
+  "name": "@ggsvelte/compose",
+  "version": "0.41.0",
+  "description": "Framework-free plot composition: assemble PortableSpec from props and grammar layers.",
+  "keywords": [
+    "charts",
+    "ggplot2",
+    "grammar-of-graphics",
+    "spec"
+  ],
+  "homepage": "https://ggsvelte.sh/",
+  "bugs": "https://github.com/ljodea/ggsvelte/issues",
+  "license": "MIT",
+  "author": "Liam O'Dea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljodea/ggsvelte.git",
+    "directory": "packages/compose"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@ggsvelte/spec": "^0.41.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -17,10 +17,18 @@ describe("R0 release wiring — packages", () => {
     expect(config.format).toBe("prettier");
     expect(config.$schema).toContain("@changesets/config@4.0.0");
     expect(config.ignore).toEqual(["@ggsvelte-spike/*"]);
-    // fixed (not linked): any release bumps all five so package-identity
+    // fixed (not linked): any release bumps all publishable packages so
     // lockstep versions stay equal even when only one package has a changeset.
     expect(config.fixed).toEqual([
-      ["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte", "@ggsvelte/cli", "@ggsvelte/skill"],
+      [
+        "@ggsvelte/spec",
+        "@ggsvelte/core",
+        "@ggsvelte/compose",
+        "@ggsvelte/svelte",
+        "@ggsvelte/react",
+        "@ggsvelte/cli",
+        "@ggsvelte/skill",
+      ],
     ]);
     expect(config.linked ?? []).toEqual([]);
   });

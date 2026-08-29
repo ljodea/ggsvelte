@@ -10,6 +10,8 @@ describe("R0 release wiring — dependencies", () => {
     for (const directory of [
       '"/"',
       '"/packages/core"',
+      '"/packages/compose"',
+      '"/packages/react"',
       '"/packages/skill"',
       '"/packages/spec"',
       '"/packages/svelte"',
@@ -43,7 +45,9 @@ describe("R0 release wiring — dependencies", () => {
   it("keeps internal dependencies installable in npm-published manifests", () => {
     for (const path of [
       "packages/core/package.json",
+      "packages/compose/package.json",
       "packages/svelte/package.json",
+      "packages/react/package.json",
       "packages/cli/package.json",
     ]) {
       const manifest = JSON.parse(read(path)) as { dependencies?: Record<string, string> };

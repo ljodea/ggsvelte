@@ -281,6 +281,7 @@ export type LibId =
   | "tanstack-svelte"
   | "tanstack-react"
   | "ggsvelte-ggplot"
+  | "ggsvelte-react"
   | "ggsvelte-full";
 
 export type LibMeta = {
@@ -337,6 +338,15 @@ export const LIBS: readonly LibMeta[] = [
     bundle: true,
     scenarios: ["scatter-color"],
     note: "<GGPlot> + <GeomPoint>/<GeomLine> via @ggsvelte/svelte — the #1420 tree-shaken app graph",
+  },
+  {
+    id: "ggsvelte-react",
+    label: "ggsvelte GGPlot (React)",
+    form: "svg",
+    browser: false,
+    bundle: true,
+    scenarios: ["scatter-color"],
+    note: "<GGPlot> via @ggsvelte/react — tree-shaken app graph",
   },
   {
     id: "d3",

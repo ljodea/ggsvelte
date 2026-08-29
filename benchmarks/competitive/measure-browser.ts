@@ -39,10 +39,18 @@ const onlyCases = process.env["COMPETITIVE_CASES"]
 const cases = casesForRun(full).filter((c) => !onlyCases || onlyCases.includes(c.id));
 const browserLibs = LIBS.filter(
   (lib) =>
-    (lib.browser || (lib.id === "ggsvelte-ggplot" && onlyLibs?.includes(lib.id))) &&
+    (lib.browser ||
+      ((lib.id === "ggsvelte-ggplot" || lib.id === "ggsvelte-react") &&
+        onlyLibs?.includes(lib.id))) &&
     (!onlyLibs || onlyLibs.includes(lib.id)),
 );
 const ggplotRequested = browserLibs.some((lib) => lib.id === "ggsvelte-ggplot");
+const reactRequested = browserLibs.some((lib) => lib.id === "ggsvelte-react");
+const benchQuery = [
+  ...(ggplotRequested ? ["ggplot=1"] : []),
+  ...(reactRequested ? ["ggreact=1"] : []),
+].join("&");
+const benchUrl = `http://127.0.0.1:5199/${benchQuery === "" ? "" : `?${benchQuery}`}`;
 
 type BenchApi = {
   mount: (lib: string, caseId: string) => Promise<{ ms: number; syncMs: number; markHint: number }>;
@@ -192,12 +200,12 @@ function isTimeout(err: unknown): boolean {
  * (a cold vite dep-optimize can stall the first load past the page timeout). */
 async function gotoBenchPage(p: Page): Promise<void> {
   try {
-    await p.goto(`http://127.0.0.1:5199/${ggplotRequested ? "?ggplot=1" : ""}`);
+    await p.goto(benchUrl);
     await waitForBenchApi();
   } catch (err) {
     if (!isTimeout(err)) throw err;
     process.stderr.write("page load timed out; retrying once...\n");
-    await p.goto(`http://127.0.0.1:5199/${ggplotRequested ? "?ggplot=1" : ""}`);
+    await p.goto(benchUrl);
     await waitForBenchApi();
   }
 }

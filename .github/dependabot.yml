@@ -28,7 +28,9 @@ updates:
     directories:
       - "/"
       - "/packages/cli"
+      - "/packages/compose"
       - "/packages/core"
+      - "/packages/react"
       - "/packages/skill"
       - "/packages/spec"
       - "/packages/svelte"

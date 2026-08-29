@@ -41,6 +41,14 @@
       "entry": ["tests/**/*.test.ts"],
       "project": ["src/**", "tests/**"],
     },
+    "packages/compose": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**"],
+    },
+    "packages/react": {
+      "entry": ["src/index.ts", "tests/**/*.test.ts", "tests/**/*.test.tsx"],
+      "project": ["src/**", "tests/**"],
+    },
     "packages/cli": {
       // knip infers bin/ and the exports entry from package.json itself.
       "entry": ["tests/**/*.test.ts"],
@@ -80,7 +88,7 @@
       // fixtures/ggplot-*/App.svelte imports @ggsvelte/svelte — knip excludes
       // compiled .svelte from the project graph (hint above), so the import
       // is invisible here.
-      "ignoreDependencies": ["@ggsvelte/svelte"],
+      "ignoreDependencies": ["@ggsvelte/svelte", "@ggsvelte/react"],
     },
     "examples": {
       // The corpus: spec.ts/data.ts are consumed by the docs app via the

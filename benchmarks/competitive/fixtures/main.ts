@@ -20,7 +20,7 @@
  * input. Switching cells or calling mount()/replace() destroys the live
  * update handle first.
  */
-import { assertMountable, ggplotLoaded, mountSync } from "./adapter-dispatch";
+import { assertMountable, ggplotLoaded, mountSync, reactLoaded } from "./adapter-dispatch";
 import {
   afterPaint,
   caseById,
@@ -107,7 +107,10 @@ function listCatalog(): {
   return {
     libs: LIBS.map((l) => ({
       id: l.id,
-      browser: l.browser || (l.id === "ggsvelte-ggplot" && ggplotLoaded()),
+      browser:
+        l.browser ||
+        (l.id === "ggsvelte-ggplot" && ggplotLoaded()) ||
+        (l.id === "ggsvelte-react" && reactLoaded()),
       scenarios: [...l.scenarios],
     })),
     cases: CASES.map((c) => ({

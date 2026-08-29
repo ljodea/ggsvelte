@@ -26,7 +26,9 @@ interface Target {
 const targets: Target[] = [
   { dir: "packages/spec", attw: true },
   { dir: "packages/core", attw: true },
+  { dir: "packages/compose", attw: true },
   { dir: "packages/svelte", attw: false }, // .svelte d.ts imports (see header)
+  { dir: "packages/react", attw: true },
   { dir: "packages/cli", attw: true },
   // packages/skill is deliberately absent: markdown-only (no exports, no
   // dist), publint/attw have nothing to validate. Its pack shape is guarded

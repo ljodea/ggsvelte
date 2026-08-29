@@ -45,6 +45,7 @@ describe("competitive scenario catalog", () => {
     expect(ids.has("d3")).toBe(true);
     expect(ids.has("ggsvelte-svg")).toBe(true);
     expect(ids.has("ggsvelte-canvas")).toBe(true);
+    expect(ids.has("ggsvelte-react")).toBe(true);
   });
 
   test("Svelte peers remain for bundle comparison", () => {

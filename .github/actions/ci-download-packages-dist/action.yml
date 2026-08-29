@@ -3,7 +3,7 @@
 name: CI download packages-dist
 description: >
   Download the packages-dist artifact into packages/ and verify that
-  spec/core/svelte/cli dist entrypoints exist.
+  spec/core/compose/svelte/react/cli dist entrypoints exist.
 
 runs:
   using: composite
@@ -21,7 +21,9 @@ runs:
         for path in \
           packages/spec/dist/index.js \
           packages/core/dist/index.js \
+          packages/compose/dist/index.js \
           packages/svelte/dist/index.js \
+          packages/react/dist/index.js \
           packages/cli/dist/index.js; do
           if [ ! -f "${path}" ]; then
             echo "::error::packages-dist artifact missing ${path} after download"

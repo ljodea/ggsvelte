@@ -50,7 +50,9 @@ describe("package README npm front doors", () => {
   it("covers every publishable package", () => {
     expect(readmes.map((r) => r.name).toSorted()).toEqual([
       "cli",
+      "compose",
       "core",
+      "react",
       "skill",
       "spec",
       "svelte",
