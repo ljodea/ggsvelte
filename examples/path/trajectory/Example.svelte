@@ -25,6 +25,41 @@
 
   type Inspection = PlotInspectionChange<Record<string, unknown>, PropertyKey>;
 
+  interface AlignmentElements {
+    host: HTMLDivElement;
+    mapRoot: HTMLElement;
+    mapPanel: HTMLElement;
+    coldPanel: HTMLElement;
+    coldRoot: HTMLElement;
+  }
+
+  function alignmentElements(
+    host: HTMLDivElement | null,
+    map: HTMLDivElement,
+    cold: HTMLDivElement,
+  ): AlignmentElements | null {
+    const mapRoot = map.querySelector(".gg-plot-root");
+    const mapPanel = map.querySelector(".gg-panel");
+    const coldPanel = cold.querySelector(".gg-panel");
+    const coldRoot = cold.querySelector(".gg-plot-root");
+    if (
+      host === null ||
+      mapRoot === null ||
+      mapPanel === null ||
+      coldPanel === null ||
+      coldRoot === null
+    ) {
+      return null;
+    }
+    return {
+      host,
+      mapRoot: mapRoot as HTMLElement,
+      mapPanel: mapPanel as HTMLElement,
+      coldPanel: coldPanel as HTMLElement,
+      coldRoot: coldRoot as HTMLElement,
+    };
+  }
+
   /**
    * Map uses CoordFixed; cold strip does not. Independent layout passes then
    * pick different left chrome and, when the map letterboxes, different panel
@@ -61,24 +96,9 @@
     };
 
     function alignColdPanelToMap(reschedule: () => void): void {
-      const host = minardEl;
-      const mapRoot = mapHost?.querySelector(".gg-plot-root");
-      const mapPanel = mapHost?.querySelector(".gg-panel");
-      const coldPanel = coldHost?.querySelector(".gg-panel");
-      const coldRoot = coldHost?.querySelector(".gg-plot-root");
-      if (
-        host === null ||
-        mapRoot === null ||
-        mapRoot === undefined ||
-        mapPanel === null ||
-        mapPanel === undefined ||
-        coldPanel === null ||
-        coldPanel === undefined ||
-        coldRoot === null ||
-        coldRoot === undefined
-      ) {
-        return;
-      }
+      const elements = alignmentElements(minardEl, map, cold);
+      if (elements === null) return;
+      const { host, mapRoot, mapPanel, coldPanel, coldRoot } = elements;
       if (
         mapRoot.dataset["ggReady"] !== "true" ||
         coldRoot.dataset["ggReady"] !== "true"
