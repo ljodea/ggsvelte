@@ -12,6 +12,162 @@ import type { NormalizedGeomName, StatName } from "@ggsvelte/spec";
 import { requireField } from "./bind-layer-check-field.js";
 import type { RuleForm } from "./types.js";
 
+type RequirementKind =
+  | "xy"
+  | "x"
+  | "range"
+  | "rect"
+  | "ribbon"
+  | "rule"
+  | "segment"
+  | "spoke"
+  | "rug"
+  | "none";
+
+const GEOM_REQUIREMENT = {
+  point: "xy",
+  count: "xy",
+  line: "xy",
+  path: "xy",
+  step: "xy",
+  col: "xy",
+  area: "xy",
+  polygon: "xy",
+  text: "xy",
+  label: "xy",
+  smooth: "xy",
+  quantile: "xy",
+  boxplot: "xy",
+  violin: "xy",
+  tile: "xy",
+  raster: "xy",
+  hex: "xy",
+  density_2d: "xy",
+  density_2d_filled: "xy",
+  bin_2d: "xy",
+  contour: "xy",
+  bar: "x",
+  density: "x",
+  dotplot: "x",
+  errorbar: "range",
+  linerange: "range",
+  pointrange: "range",
+  crossbar: "range",
+  rect: "rect",
+  ribbon: "ribbon",
+  rule: "rule",
+  segment: "segment",
+  curve: "segment",
+  spoke: "spoke",
+  rug: "rug",
+  function: "none",
+  abline: "none",
+  map: "none",
+  sf: "none",
+  sf_text: "none",
+  sf_label: "none",
+  blank: "none",
+  qq: "none",
+  qq_line: "none",
+} as const satisfies Record<NormalizedGeomName, RequirementKind>;
+
+function requireRangeChannels(input: {
+  geom: NormalizedGeomName;
+  stat: StatName;
+  index: number;
+  xField: string | null;
+  yField: string | null;
+  yminField: string | null;
+  ymaxField: string | null;
+}): void {
+  requireField(input.xField, "x", input.index, input.geom);
+  if (input.stat === "summary" || input.stat === "summary_bin") {
+    requireField(input.yField, "y", input.index, input.geom);
+    return;
+  }
+  requireField(input.yminField, "ymin", input.index, input.geom);
+  requireField(input.ymaxField, "ymax", input.index, input.geom);
+  if (input.geom === "pointrange" || input.geom === "crossbar")
+    requireField(input.yField, "y", input.index, input.geom);
+}
+
+function requireRibbonChannels(input: {
+  geom: NormalizedGeomName;
+  index: number;
+  orientation: "x" | "y";
+  xField: string | null;
+  yField: string | null;
+  yminField: string | null;
+  ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+}): void {
+  if (input.orientation === "x") {
+    requireField(input.xField, "x", input.index, input.geom);
+    requireField(input.yminField, "ymin", input.index, input.geom);
+    requireField(input.ymaxField, "ymax", input.index, input.geom);
+    return;
+  }
+  requireField(input.yField, "y", input.index, input.geom);
+  requireField(input.xminField, "xmin", input.index, input.geom);
+  requireField(input.xmaxField, "xmax", input.index, input.geom);
+}
+
+function requireSpokeChannels(input: {
+  geom: NormalizedGeomName;
+  index: number;
+  xField: string | null;
+  yField: string | null;
+  angleField: string | null;
+  radiusField: string | null;
+  layerParams: unknown;
+}): void {
+  requireField(input.xField, "x", input.index, input.geom);
+  requireField(input.yField, "y", input.index, input.geom);
+  const params =
+    typeof input.layerParams === "object" && input.layerParams !== null
+      ? (input.layerParams as Record<string, unknown>)
+      : {};
+  if (input.angleField === null && params["angle"] === undefined)
+    requireField(input.angleField, "angle", input.index, input.geom);
+  if (input.radiusField === null && params["radius"] === undefined)
+    requireField(input.radiusField, "radius", input.index, input.geom);
+}
+
+function requireXYChannels(input: {
+  geom: NormalizedGeomName;
+  index: number;
+  xField: string | null;
+  yField: string | null;
+  yStatColumn: string | null;
+}): void {
+  requireField(input.xField, "x", input.index, input.geom);
+  if (input.yStatColumn === null) requireField(input.yField, "y", input.index, input.geom);
+}
+
+function requireRuleChannels(
+  geom: NormalizedGeomName,
+  index: number,
+  ruleForm: RuleForm | null,
+  xField: string | null,
+  yField: string | null,
+): void {
+  if (ruleForm === "vertical") requireField(xField, "x", index, geom);
+  if (ruleForm === "horizontal") requireField(yField, "y", index, geom);
+}
+
+function requireRugChannels(
+  geom: NormalizedGeomName,
+  index: number,
+  rugSides: string | undefined,
+  xField: string | null,
+  yField: string | null,
+): void {
+  const sides = rugSides !== undefined && rugSides.length > 0 ? rugSides : "bl";
+  if (/[bt]/.test(sides)) requireField(xField, "x", index, geom);
+  if (/[lr]/.test(sides)) requireField(yField, "y", index, geom);
+}
+
 export function assertRequiredChannels(input: {
   geom: NormalizedGeomName;
   stat: StatName;
@@ -54,57 +210,17 @@ export function assertRequiredChannels(input: {
     rugSides,
   } = input;
 
-  switch (geom) {
-    case "point":
-    case "count":
-    case "line":
-    case "path":
-    case "step":
-    case "col":
-    case "area":
-    case "polygon":
-    case "text":
-    case "label":
-    case "smooth":
-    case "quantile":
-    case "boxplot":
-    case "violin":
-    case "tile":
-    case "raster":
-    case "hex":
-    case "density_2d":
-    case "density_2d_filled":
-    case "bin_2d": {
-      requireField(xField, "x", index, geom);
-      // yStatColumn set (e.g. ecdf) means y is computed — skip field requirement.
-      if (yStatColumn === null) requireField(yField, "y", index, geom);
+  switch (GEOM_REQUIREMENT[geom]) {
+    case "xy": {
+      requireXYChannels({ geom, index, xField, yField, yStatColumn });
       break;
     }
-    case "bar":
-    case "density":
-    case "dotplot": {
+    case "x": {
       requireField(xField, "x", index, geom);
       break;
     }
-    case "contour": {
-      requireField(xField, "x", index, geom);
-      requireField(yField, "y", index, geom);
-      break;
-    }
-    case "errorbar":
-    case "linerange":
-    case "pointrange":
-    case "crossbar": {
-      requireField(xField, "x", index, geom);
-      if (stat === "summary" || stat === "summary_bin") {
-        requireField(yField, "y", index, geom);
-      } else {
-        requireField(yminField, "ymin", index, geom);
-        requireField(ymaxField, "ymax", index, geom);
-        if (geom === "pointrange" || geom === "crossbar") {
-          requireField(yField, "y", index, geom);
-        }
-      }
+    case "range": {
+      requireRangeChannels({ geom, stat, index, xField, yField, yminField, ymaxField });
       break;
     }
     case "rect": {
@@ -115,26 +231,24 @@ export function assertRequiredChannels(input: {
       break;
     }
     case "ribbon": {
-      const orientation = ribbonOrientation ?? "x";
-      if (orientation === "x") {
-        requireField(xField, "x", index, geom);
-        requireField(yminField, "ymin", index, geom);
-        requireField(ymaxField, "ymax", index, geom);
-      } else {
-        requireField(yField, "y", index, geom);
-        requireField(xminField, "xmin", index, geom);
-        requireField(xmaxField, "xmax", index, geom);
-      }
+      requireRibbonChannels({
+        geom,
+        index,
+        orientation: ribbonOrientation ?? "x",
+        xField,
+        yField,
+        yminField,
+        ymaxField,
+        xminField,
+        xmaxField,
+      });
       break;
     }
     case "rule": {
-      if (ruleForm === "vertical") requireField(xField, "x", index, geom);
-      if (ruleForm === "horizontal") requireField(yField, "y", index, geom);
-      // annotation form: intercepts live on params (resolveRuleForm already ran).
+      requireRuleChannels(geom, index, ruleForm, xField, yField);
       break;
     }
-    case "segment":
-    case "curve": {
+    case "segment": {
       requireField(xField, "x", index, geom);
       requireField(yField, "y", index, geom);
       requireField(xendField, "xend", index, geom);
@@ -142,53 +256,26 @@ export function assertRequiredChannels(input: {
       break;
     }
     case "spoke": {
-      requireField(xField, "x", index, geom);
-      requireField(yField, "y", index, geom);
-      const params =
-        typeof layerParams === "object" && layerParams !== null
-          ? (layerParams as Record<string, unknown>)
-          : {};
-      if (angleField === null && params["angle"] === undefined) {
-        requireField(angleField, "angle", index, geom);
-      }
-      if (radiusField === null && params["radius"] === undefined) {
-        requireField(radiusField, "radius", index, geom);
-      }
+      requireSpokeChannels({
+        geom,
+        index,
+        xField,
+        yField,
+        angleField,
+        radiusField,
+        layerParams,
+      });
       break;
     }
     case "rug": {
-      const sides = rugSides !== undefined && rugSides.length > 0 ? rugSides : "bl";
-      if (/[bt]/.test(sides)) requireField(xField, "x", index, geom);
-      if (/[lr]/.test(sides)) requireField(yField, "y", index, geom);
+      requireRugChannels(geom, index, rugSides, xField, yField);
       break;
     }
-    // --- intentional no x/y requirements (channels elsewhere or params) ---
-    case "function":
-      // Domain from params.xlim / peer layers; y from fun (stat_function).
-      break;
-    case "abline":
-      // Annotation slope/intercept params only.
-      break;
-    case "map":
-      // map_id required in bind-layer-extras; geometry from fortified map.
-      break;
-    case "sf":
-    case "sf_text":
-    case "sf_label":
-      // Geometry column in frame-stats-sf; label for text/label in extras.
-      break;
-    case "blank":
-      // Scale training only; no marks.
-      break;
-    case "qq":
-    case "qq_line":
-      // sample channel required in bind-layer-extras.
+    case "none":
       break;
     default: {
-      // No silent fall-through: a geom with no arm above is a compile error
-      // here, not a layer that quietly requires nothing (#1042).
-      const exhaustive: never = geom;
-      throw new Error(`unhandled geom in required channels: ${String(exhaustive)}`);
+      const exhaustive: never = GEOM_REQUIREMENT[geom];
+      throw new Error(`unhandled requirement in required channels: ${String(exhaustive)}`);
     }
   }
 }
