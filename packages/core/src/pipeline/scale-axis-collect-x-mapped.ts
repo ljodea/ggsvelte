@@ -7,6 +7,29 @@ import type { AxisCollectAcc } from "./scale-axis-collect-acc.js";
 import { positionFieldType, xConversionOf } from "./temporal-position.js";
 import type { Advisory, LayerFrame } from "./types.js";
 
+function collectMappedXEndEvidence(
+  frame: LayerFrame,
+  conversion: ReturnType<typeof xConversionOf>,
+  acc: AxisCollectAcc,
+): void {
+  if (frame.xend === null || frame.xend === undefined) return;
+  acc.numeric.push(frame.xend);
+  if (frame.xendValues !== null && frame.xendValues !== undefined) {
+    acc.columns.push(frame.xendValues);
+  }
+  const endField = frame.binding.xendField;
+  if (endField !== null && frame.table.has(endField)) {
+    const endType = positionFieldType(frame.table, endField, conversion);
+    acc.typeParts.add(endType);
+    if (endType === "nominal") acc.anyDiscrete = true;
+    if (endType !== "temporal") acc.allTemporal = false;
+  } else {
+    acc.typeParts.add("quantitative");
+    acc.allTemporal = false;
+  }
+  acc.sawContinuousEvidence = true;
+}
+
 export function collectMappedXEvidence(
   frame: LayerFrame,
   configType: PositionScaleSpec["type"] | undefined,
@@ -42,23 +65,5 @@ export function collectMappedXEvidence(
   if (fieldType !== "temporal") acc.allTemporal = false;
   acc.sawContinuousEvidence = true;
 
-  // Segment end x: same dual evidence as mapped x (numeric + discrete categories).
-  // Guard undefined partial fixtures (not only null).
-  if (frame.xend !== null && frame.xend !== undefined) {
-    acc.numeric.push(frame.xend);
-    if (frame.xendValues !== null && frame.xendValues !== undefined) {
-      acc.columns.push(frame.xendValues);
-    }
-    const endField = binding.xendField;
-    if (endField !== null && frame.table.has(endField)) {
-      const endType = positionFieldType(frame.table, endField, conversion);
-      acc.typeParts.add(endType);
-      if (endType === "nominal") acc.anyDiscrete = true;
-      if (endType !== "temporal") acc.allTemporal = false;
-    } else {
-      acc.typeParts.add("quantitative");
-      acc.allTemporal = false;
-    }
-    acc.sawContinuousEvidence = true;
-  }
+  collectMappedXEndEvidence(frame, conversion, acc);
 }

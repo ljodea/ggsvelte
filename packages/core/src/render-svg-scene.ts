@@ -70,6 +70,35 @@ export interface SceneSVGOptions {
   paintMode?: PaintRenderMode;
 }
 
+function renderScenePanels(
+  scene: Scene,
+  theme: Scene["theme"],
+  paintMode: PaintRenderMode,
+): string[] {
+  const parts: string[] = [];
+  const { byPanel } = groupBatchesByPanel(scene.panels.length, scene.batches, false);
+  for (let i = 0; i < scene.panels.length; i++) {
+    const p = scene.panels[i]!;
+    parts.push(
+      `<g class="gg-panel" data-panel="${i}" transform="translate(${px(p.x)},${px(p.y)})">`,
+      theme.panel === "none"
+        ? ""
+        : `<rect class="gg-panel-background" width="${px(p.width)}" height="${px(p.height)}" fill="${themeVar("panel", theme)}"/>`,
+      renderGrid(p, theme),
+      `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
+    );
+    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme, paintMode));
+    parts.push("</g>");
+    if (theme.showPanelBorder) {
+      parts.push(
+        `<rect class="gg-panel-border" width="${px(p.width)}" height="${px(p.height)}" fill="none" stroke="${themeVar("panelBorder", theme)}" stroke-width="${px(theme.panelBorderWidth)}" vector-effect="non-scaling-stroke"/>`,
+      );
+    }
+    parts.push("</g>", renderStrip(p, scene, i), renderPanelAxes(p, theme));
+  }
+  return parts;
+}
+
 /** Serialize a computed Scene to a standalone SVG string. */
 export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): string {
   const paintMode = options.paintMode ?? "full";
@@ -126,30 +155,7 @@ export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): s
       );
     }
   }
-  // One O(P+B) panel→batch index (issue #185) instead of re-scanning all
-  // batches per panel (O(P·B)). Bucket order preserves original batch list
-  // order within each panel.
-  const { byPanel } = groupBatchesByPanel(scene.panels.length, scene.batches, false);
-  for (let i = 0; i < scene.panels.length; i++) {
-    const p = scene.panels[i]!;
-    parts.push(
-      `<g class="gg-panel" data-panel="${i}" transform="translate(${px(p.x)},${px(p.y)})">`,
-      theme.panel === "none"
-        ? ""
-        : `<rect class="gg-panel-background" width="${px(p.width)}" height="${px(p.height)}" fill="${themeVar("panel", theme)}"/>`,
-      renderGrid(p, theme),
-      `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
-    );
-    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme, paintMode));
-    parts.push("</g>");
-    if (theme.showPanelBorder) {
-      parts.push(
-        `<rect class="gg-panel-border" width="${px(p.width)}" height="${px(p.height)}" fill="none" stroke="${themeVar("panelBorder", theme)}" stroke-width="${px(theme.panelBorderWidth)}" vector-effect="non-scaling-stroke"/>`,
-      );
-    }
-    parts.push("</g>", renderStrip(p, scene, i), renderPanelAxes(p, theme));
-  }
-  parts.push(renderAxisTitles(scene));
+  parts.push(...renderScenePanels(scene, theme, paintMode), renderAxisTitles(scene));
   for (const legend of scene.legends) {
     // Deterministic gradient ids (byte-determinism wins over cross-plot id
     // uniqueness; documented caveat when inlining several plots in one page —

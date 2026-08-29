@@ -97,7 +97,22 @@ function numericIdentityResolution(input: {
   };
 }
 
-export function resolveNumericStyleScale(input: {
+function numericStyleRange(
+  aesthetic: NumericStyleAesthetic,
+  config: NumericStyleConfig | undefined,
+): number[] {
+  const defaultRange = NUMERIC_DEFAULT_RANGE[aesthetic];
+  const range = [
+    ...(config?.range ??
+      Array.from({ length: 5 }, (_, index) =>
+        numericMappedValue(aesthetic, index / 4, defaultRange, config?.sizeUnit),
+      )),
+  ];
+  if (config?.reverse === true) range.reverse();
+  return range;
+}
+
+function resolveNonIdentityNumericStyleScale(input: {
   aesthetic: NumericStyleAesthetic;
   values: readonly CellValue[];
   catalog: readonly CellValue[];
@@ -122,39 +137,11 @@ export function resolveNumericStyleScale(input: {
     warnings,
   } = input;
   const type = config?.type ?? (anyDiscrete ? "ordinal" : "sequential");
-  if (type === "identity") {
-    return numericIdentityResolution({
-      aesthetic,
-      values,
-      config,
-      title,
-      warnings,
-    });
-  }
-  if (type === "sequential" || type === "binned") {
-    return numericSequentialResolution({
-      aesthetic,
-      kind: type,
-      values,
-      config,
-      title,
-      warnings,
-    });
-  }
-  const defaultRange = NUMERIC_DEFAULT_RANGE[aesthetic];
-  const range = [
-    ...(config?.range ??
-      Array.from({ length: 5 }, (_, index) =>
-        numericMappedValue(aesthetic, index / 4, defaultRange, config?.sizeUnit),
-      )),
-  ];
-  if (config?.reverse === true) range.reverse();
+  const range = numericStyleRange(aesthetic, config);
   const fallback = numericFallback(aesthetic, config);
   return discreteStyleResolution({
     aesthetic,
-    kind: type,
-    // Stat columns never reach the source catalog, so fall back to the observed
-    // (post-stat) values when no catalog/explicit domain exists — matching color.
+    kind: type === "manual" ? "manual" : "ordinal",
     values:
       type === "manual"
         ? (config?.domain ?? (catalog.length > 0 ? catalog : values))
@@ -174,4 +161,40 @@ export function resolveNumericStyleScale(input: {
     title,
     warnings,
   });
+}
+
+export function resolveNumericStyleScale(input: {
+  aesthetic: NumericStyleAesthetic;
+  values: readonly CellValue[];
+  catalog: readonly CellValue[];
+  anyDiscrete: boolean;
+  anyIndexable: boolean;
+  nonInteractiveValues?: readonly CellValue[];
+  config: NumericStyleConfig | undefined;
+  prevState: ScaleState | null;
+  title: string;
+  warnings: PipelineWarning[];
+}): StyleResolution {
+  const { aesthetic, values, anyDiscrete, config, title, warnings } = input;
+  const type = config?.type ?? (anyDiscrete ? "ordinal" : "sequential");
+  if (type === "identity") {
+    return numericIdentityResolution({
+      aesthetic,
+      values,
+      config,
+      title,
+      warnings,
+    });
+  }
+  if (type === "sequential" || type === "binned") {
+    return numericSequentialResolution({
+      aesthetic,
+      kind: type,
+      values,
+      config,
+      title,
+      warnings,
+    });
+  }
+  return resolveNonIdentityNumericStyleScale(input);
 }

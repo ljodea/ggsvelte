@@ -22,7 +22,7 @@ export interface ResolvedLegendAppearance {
   theme?: GuideThemeSpec;
 }
 
-interface LegendKeyStyle {
+export interface LegendKeyStyle {
   color?: string;
   size?: number;
   linewidth?: number;
