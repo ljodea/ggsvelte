@@ -76,6 +76,12 @@
       }
     },
     {
+      "files": ["packages/core/src/svg-live/**"],
+      "rules": {
+        "eslint/complexity": ["error", { "max": 20 }]
+      }
+    },
+    {
       // Tests + benchmarks: fixture literals are cast deliberately (invalid
       // specs, RuntimeSpec shapes) and test files run long by design.
       "files": ["**/tests/**", "benchmarks/**"],
