@@ -111,9 +111,8 @@ export function layerStructuralErrors(
       ? layer["stat"]
       : (GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity");
 
-  errors.push(...computedYMappedErrors(geom, stat, layerPath, mapped));
-
   errors.push(
+    ...computedYMappedErrors(geom, stat, layerPath, mapped),
     ...binAlignmentErrors(layer, geom, stat, layerPath),
     ...intervalChannelErrors(geom, stat, layerPath, mapped),
     ...(geom === "ribbon" ? ribbonStructuralErrors(layer, layerPath, mapped) : []),

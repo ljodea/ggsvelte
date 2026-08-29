@@ -135,11 +135,12 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     // specs remain composable.
     // Eligibility: record layers with a known geom whose branch is valid
     // (see branchOkLayers above). Uses shared GEOM_BRANCHES for known-geom keys.
-    errors.push(...collectLayerGrammarErrors(input, options, branchOkLayers));
-
     // --- tier 2 (opt-in): facet form rules --------------------------------------
     // Runs for any record-valued facet, even when the facet is schema-invalid.
-    errors.push(...collectFacetGrammarErrors(input, options));
+    errors.push(
+      ...collectLayerGrammarErrors(input, options, branchOkLayers),
+      ...collectFacetGrammarErrors(input, options),
+    );
 
     // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
     // One resolveLayerFieldEvidence pass for plot + layer tables; dataChecks and
