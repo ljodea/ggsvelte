@@ -119,6 +119,109 @@ function lerpHex(a: string, b: string, t: number): string {
   return out;
 }
 
+const VIRIDIS_RAMP_SWATCH: ScaleSwatch = {
+  colors: VIRIDIS_RAMP_10,
+  kind: "ramp",
+  caption: 'Default sequential scheme "viridis"',
+};
+
+const DEFAULT_DISCRETE_SWATCH: ScaleSwatch = {
+  colors: CATEGORICAL_SCHEMES.observable10,
+  kind: "discrete",
+  caption: 'Default scheme "observable10"',
+};
+
+const SCALE_SWATCH_BY_STEM: Readonly<Record<string, ScaleSwatch>> = {
+  discrete: DEFAULT_DISCRETE_SWATCH,
+  ordinal: DEFAULT_DISCRETE_SWATCH,
+  continuous: VIRIDIS_RAMP_SWATCH,
+  binned: VIRIDIS_RAMP_SWATCH,
+  log10: VIRIDIS_RAMP_SWATCH,
+  sqrt: VIRIDIS_RAMP_SWATCH,
+  date: VIRIDIS_RAMP_SWATCH,
+  datetime: VIRIDIS_RAMP_SWATCH,
+  viridis_c: {
+    colors: VIRIDIS_RAMP_10,
+    kind: "ramp",
+    caption: 'Viridis ramp (option "viridis")',
+  },
+  viridis_b: {
+    colors: VIRIDIS_RAMP_10,
+    kind: "ramp",
+    caption: 'Viridis ramp (option "viridis")',
+  },
+  viridis_d: {
+    colors: VIRIDIS_RAMP_10,
+    kind: "ramp",
+    caption: 'Viridis discrete sample (option "viridis")',
+  },
+  hue: {
+    colors: CATEGORICAL_SCHEMES.hue,
+    kind: "discrete",
+    caption: 'Default scheme "hue"',
+  },
+  grey: {
+    colors: GREY_SWATCH_10,
+    kind: "discrete",
+    caption: "Default greyscale range (scale_*_grey)",
+  },
+  brewer: {
+    colors: CB_SET1,
+    kind: "discrete",
+    caption: 'Example palette "Set1" (ColorBrewer qualitative)',
+  },
+  distiller: {
+    colors: CB_BLUES,
+    kind: "ramp",
+    caption: 'Example palette "Blues" (ColorBrewer sequential)',
+  },
+  fermenter: {
+    colors: CB_BLUES,
+    kind: "ramp",
+    caption: 'Example palette "Blues" (ColorBrewer sequential)',
+  },
+  gradient: {
+    colors: expandStops([GRADIENT_LOW, GRADIENT_HIGH]),
+    kind: "ramp",
+    caption: `Default low→high (${GRADIENT_LOW} → ${GRADIENT_HIGH})`,
+  },
+  steps: {
+    colors: expandStops([GRADIENT_LOW, GRADIENT_HIGH]),
+    kind: "ramp",
+    caption: `Default low→high (${GRADIENT_LOW} → ${GRADIENT_HIGH})`,
+  },
+  gradient2: {
+    colors: expandStops([GRADIENT2_LOW, GRADIENT2_MID, GRADIENT2_HIGH]),
+    kind: "ramp",
+    caption: `Default low→mid→high (${GRADIENT2_LOW} → ${GRADIENT2_MID} → ${GRADIENT2_HIGH})`,
+  },
+  steps2: {
+    colors: expandStops([GRADIENT2_LOW, GRADIENT2_MID, GRADIENT2_HIGH]),
+    kind: "ramp",
+    caption: `Default low→mid→high (${GRADIENT2_LOW} → ${GRADIENT2_MID} → ${GRADIENT2_HIGH})`,
+  },
+  gradientn: {
+    colors: expandStops(EXAMPLE_MULTI),
+    kind: "ramp",
+    caption: "Example colours (author must supply ≥2 stops)",
+  },
+  stepsn: {
+    colors: expandStops(EXAMPLE_MULTI),
+    kind: "ramp",
+    caption: "Example colours (author must supply ≥2 stops)",
+  },
+  manual: {
+    colors: EXAMPLE_MANUAL,
+    kind: "discrete",
+    caption: "Example values (author must supply colors)",
+  },
+  identity: {
+    colors: EXAMPLE_IDENTITY,
+    kind: "discrete",
+    caption: "Example identity colors (data values are #hex colors)",
+  },
+};
+
 /**
  * Default swatch for a color/fill scale reference entry, or null when the
  * scale is not a color/fill family.
@@ -127,105 +230,12 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
   if (entry.family !== "color-fill") return null;
 
   const stem = stemOf(entry.slug);
+  const knownSwatch = SCALE_SWATCH_BY_STEM[stem];
+  if (knownSwatch !== undefined) return knownSwatch;
 
-  switch (stem) {
-    case "discrete":
-    case "ordinal":
-      return {
-        colors: CATEGORICAL_SCHEMES.observable10,
-        kind: "discrete",
-        caption: 'Default scheme "observable10"',
-      };
-    case "continuous":
-    case "binned":
-    case "log10":
-    case "sqrt":
-    case "date":
-    case "datetime":
-    case "viridis_c":
-    case "viridis_b":
-    case "viridis_d":
-      return {
-        colors: VIRIDIS_RAMP_10,
-        kind: "ramp",
-        caption:
-          stem === "viridis_d"
-            ? 'Viridis discrete sample (option "viridis")'
-            : stem.startsWith("viridis")
-              ? 'Viridis ramp (option "viridis")'
-              : 'Default sequential scheme "viridis"',
-      };
-    case "hue":
-      return {
-        colors: CATEGORICAL_SCHEMES.hue,
-        kind: "discrete",
-        caption: 'Default scheme "hue"',
-      };
-    case "grey":
-      return {
-        colors: GREY_SWATCH_10,
-        kind: "discrete",
-        caption: "Default greyscale range (scale_*_grey)",
-      };
-    case "brewer":
-      return {
-        colors: CB_SET1,
-        kind: "discrete",
-        caption: 'Example palette "Set1" (ColorBrewer qualitative)',
-      };
-    case "distiller":
-    case "fermenter":
-      return {
-        colors: CB_BLUES,
-        kind: "ramp",
-        caption: 'Example palette "Blues" (ColorBrewer sequential)',
-      };
-    case "gradient":
-    case "steps":
-      return {
-        colors: expandStops([GRADIENT_LOW, GRADIENT_HIGH]),
-        kind: "ramp",
-        caption: `Default low→high (${GRADIENT_LOW} → ${GRADIENT_HIGH})`,
-      };
-    case "gradient2":
-    case "steps2":
-      return {
-        colors: expandStops([GRADIENT2_LOW, GRADIENT2_MID, GRADIENT2_HIGH]),
-        kind: "ramp",
-        caption: `Default low→mid→high (${GRADIENT2_LOW} → ${GRADIENT2_MID} → ${GRADIENT2_HIGH})`,
-      };
-    case "gradientn":
-    case "stepsn":
-      return {
-        colors: expandStops(EXAMPLE_MULTI),
-        kind: "ramp",
-        caption: "Example colours (author must supply ≥2 stops)",
-      };
-    case "manual":
-      return {
-        colors: EXAMPLE_MANUAL,
-        kind: "discrete",
-        caption: "Example values (author must supply colors)",
-      };
-    case "identity":
-      return {
-        colors: EXAMPLE_IDENTITY,
-        kind: "discrete",
-        caption: "Example identity colors (data values are #hex colors)",
-      };
-    default:
-      // Fallback: sequential → viridis, ordinal-ish → observable10
-      if (entry.scaleType === "sequential" || entry.scaleType === "binned") {
-        return {
-          colors: VIRIDIS_RAMP_10,
-          kind: "ramp",
-          caption: 'Default sequential scheme "viridis"',
-        };
-      }
-      return {
-        colors: CATEGORICAL_SCHEMES.observable10,
-        kind: "discrete",
-        caption: 'Default scheme "observable10"',
-      };
+  // Fallback: sequential → viridis, ordinal-ish → observable10
+  if (entry.scaleType === "sequential" || entry.scaleType === "binned") {
+    return VIRIDIS_RAMP_SWATCH;
   }
+  return DEFAULT_DISCRETE_SWATCH;
 }
