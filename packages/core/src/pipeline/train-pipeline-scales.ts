@@ -58,49 +58,27 @@ export interface TrainPipelineScalesInput {
   advisories: Advisory[];
 }
 
-export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPipelineScales {
-  const {
-    normalized,
-    options,
-    table,
-    sourceTable,
-    bindings,
-    facetPanels,
-    panelFrames,
-    freeX,
-    freeY,
-    xConversion,
-    yConversion,
-    editionDefaults,
-    warnings,
-    advisories,
-  } = input;
+function withResolvedParser(
+  config: NonNullable<PortableSpec["scales"]>["x"],
+  conversion: PositionConversionContext,
+): NonNullable<PortableSpec["scales"]>["x"] {
+  if (
+    config === undefined ||
+    config.parse !== undefined ||
+    conversion.parser === "auto" ||
+    config.type === "band" ||
+    config.type === "linear" ||
+    config.type === "log"
+  ) {
+    return config;
+  }
+  return { ...config, parse: conversion.parser };
+}
 
-  const sourceScalesConfig = normalized.scales ?? {};
-  const withResolvedParser = (
-    axis: "x" | "y",
-    conversion: typeof xConversion,
-  ): (typeof sourceScalesConfig)["x"] => {
-    const config = sourceScalesConfig[axis];
-    if (
-      config === undefined ||
-      config.parse !== undefined ||
-      conversion.parser === "auto" ||
-      config.type === "band" ||
-      config.type === "linear" ||
-      config.type === "log"
-    ) {
-      return config;
-    }
-    // This is an internal effective config only: the canonical PortableSpec
-    // remains untouched while domains/breaks reuse the source-column decision.
-    return { ...config, parse: conversion.parser };
-  };
-  const scalesConfig: NonNullable<typeof normalized.scales> = { ...sourceScalesConfig };
-  const resolvedX = withResolvedParser("x", xConversion);
-  const resolvedY = withResolvedParser("y", yConversion);
-  if (resolvedX !== undefined) scalesConfig.x = resolvedX;
-  if (resolvedY !== undefined) scalesConfig.y = resolvedY;
+function applyGuideOverrides(
+  scalesConfig: NonNullable<PortableSpec["scales"]>,
+  guides: PortableSpec["guides"],
+): void {
   for (const aesthetic of [
     "x",
     "y",
@@ -112,7 +90,7 @@ export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPip
     "shape",
     "linetype",
   ] as const) {
-    const top = normalized.guides?.[aesthetic];
+    const top = guides?.[aesthetic];
     if (top === undefined) continue;
     const scale = (scalesConfig[aesthetic] ?? {}) as { guide?: unknown };
     const local = scale.guide;
@@ -145,6 +123,42 @@ export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPip
         : top;
     Object.assign(scalesConfig, { [aesthetic]: { ...scale, guide } });
   }
+}
+
+function resolveTrainingScalesConfig(input: {
+  normalized: PortableSpec;
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
+}): NonNullable<PortableSpec["scales"]> {
+  const sourceScalesConfig = input.normalized.scales ?? {};
+  const scalesConfig: NonNullable<typeof sourceScalesConfig> = { ...sourceScalesConfig };
+  const resolvedX = withResolvedParser(sourceScalesConfig.x, input.xConversion);
+  const resolvedY = withResolvedParser(sourceScalesConfig.y, input.yConversion);
+  if (resolvedX !== undefined) scalesConfig.x = resolvedX;
+  if (resolvedY !== undefined) scalesConfig.y = resolvedY;
+  applyGuideOverrides(scalesConfig, input.normalized.guides);
+  return scalesConfig;
+}
+
+export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPipelineScales {
+  const {
+    normalized,
+    options,
+    table,
+    sourceTable,
+    bindings,
+    facetPanels,
+    panelFrames,
+    freeX,
+    freeY,
+    xConversion,
+    yConversion,
+    editionDefaults,
+    warnings,
+    advisories,
+  } = input;
+
+  const scalesConfig = resolveTrainingScalesConfig({ normalized, xConversion, yConversion });
   const position = trainPipelinePositionScales({
     scalesConfig,
     facetPanels,

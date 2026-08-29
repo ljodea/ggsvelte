@@ -15,6 +15,32 @@ import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
 import type { PipelineWarning, RunOptions } from "./types.js";
 
+function resolvedStyleScales(
+  styleResolutions: TrainedPipelineScales["styleResolutions"],
+): import("./geometry-style.js").ResolvedStyleScales {
+  return Object.fromEntries(
+    Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
+      aesthetic,
+      resolution.resolved,
+    ]),
+  ) as import("./geometry-style.js").ResolvedStyleScales;
+}
+
+function minorBreakOptions(
+  normalized: PortableSpec,
+  flip: boolean,
+): {
+  hMinorBreaks?: readonly number[];
+  vMinorBreaks?: readonly number[];
+} {
+  const h = flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks;
+  const v = flip ? normalized.scales?.x?.minorBreaks : normalized.scales?.y?.minorBreaks;
+  return {
+    ...(h !== undefined && { hMinorBreaks: h }),
+    ...(v !== undefined && { vMinorBreaks: v }),
+  };
+}
+
 export function finalizeGeometryAndScene(input: {
   normalized: PortableSpec;
   options: RunOptions;
@@ -52,12 +78,7 @@ export function finalizeGeometryAndScene(input: {
     panelScales,
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
-    styles: Object.fromEntries(
-      Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
-        aesthetic,
-        resolution.resolved,
-      ]),
-    ) as import("./geometry-style.js").ResolvedStyleScales,
+    styles: resolvedStyleScales(styleResolutions),
     flip,
     coordProjectors,
     warnings,
@@ -82,14 +103,7 @@ export function finalizeGeometryAndScene(input: {
     coordProjectors,
     ...(options.measureText !== undefined && { measureText: options.measureText }),
     axisTextSize: theme.axisTextSize,
-    ...((flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks) !==
-      undefined && {
-      hMinorBreaks: flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks,
-    }),
-    ...((flip ? normalized.scales?.x?.minorBreaks : normalized.scales?.y?.minorBreaks) !==
-      undefined && {
-      vMinorBreaks: flip ? normalized.scales?.x?.minorBreaks : normalized.scales?.y?.minorBreaks,
-    }),
+    ...minorBreakOptions(normalized, flip),
     batches,
     legendBlock: panelLayout.legendBlock,
     topBand: panelLayout.topBand,

@@ -95,6 +95,169 @@ function gridPositionsByKind(ticks: readonly SceneTick[]): {
   return { major, minor };
 }
 
+function buildScenePanel(
+  input: {
+    placements: readonly PanelPlacement[];
+    facetPanels: readonly FacetPanelDef[];
+    displayScales: (p: number) => { h: PositionScale; v: PositionScale };
+    coordProjectors: readonly PanelCoordProjector[];
+    axisTextSize: number;
+    strip?: import("./facets-types.js").FacetStripConfig;
+    stripBand?: number;
+    measureText?: TextMeasurer | undefined;
+    stripSize?: number;
+    hAxisTextSize?: number;
+    vAxisTextSize?: number;
+    tickChromePx?: number;
+    yTickChromePx?: number;
+    yLabelsVisible?: boolean;
+    hMinorBreaks?: readonly number[] | undefined;
+    vMinorBreaks?: readonly number[] | undefined;
+    degraded?: boolean;
+  },
+  p: number,
+  measurer: TextMeasurer,
+  stripSize: number,
+): ScenePanel {
+  const placement = input.placements[p]!;
+  const { h, v } = input.displayScales(p);
+  const majorBottom = axisTicks(h, placement.ticksH, placement.width, false);
+  const majorLeft = axisTicks(v, placement.ticksV, placement.height, true);
+  const projector = input.coordProjectors[p];
+  const projectBottom = (tick: SceneTick): SceneTick => ({
+    ...tick,
+    pos:
+      projector === undefined
+        ? tick.pos
+        : projector.x.projectFraction(tick.pos / placement.width) * placement.width,
+  });
+  const projectLeft = (tick: SceneTick): SceneTick => ({
+    ...tick,
+    pos:
+      projector === undefined
+        ? tick.pos
+        : (1 - projector.y.projectFraction(1 - tick.pos / placement.height)) * placement.height,
+  });
+  const projectedBottom = [
+    ...majorBottom,
+    ...numericMinorTicks(h, input.hMinorBreaks, majorBottom, placement.width, false),
+  ]
+    .map((tick) => projectBottom(tick))
+    .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.width);
+  const projectedLeft = [
+    ...majorLeft,
+    ...numericMinorTicks(v, input.vMinorBreaks, majorLeft, placement.height, true),
+  ]
+    .map((tick) => projectLeft(tick))
+    .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.height);
+  const bottom =
+    projector?.x.active === true
+      ? suppressProjectedLabelOverlap(
+          projectedBottom,
+          "horizontal",
+          measurer,
+          input.hAxisTextSize ?? input.axisTextSize,
+        )
+      : projectedBottom;
+  const left =
+    projector?.y.active === true
+      ? suppressProjectedLabelOverlap(
+          projectedLeft,
+          "vertical",
+          measurer,
+          input.vAxisTextSize ?? input.axisTextSize,
+        )
+      : projectedLeft;
+  const xGrid = gridPositionsByKind(bottom);
+  const yGrid = gridPositionsByKind(left);
+  const label = input.facetPanels[p]!.label;
+  const hasStrip = label !== "";
+  const strip = input.strip!;
+  const stripLabel =
+    hasStrip && strip.show && isSideStrip(strip.position)
+      ? capSideStripLabel(label, placement.height, measurer, stripSize)
+      : label;
+  return {
+    identity: input.facetPanels[p]!.identity,
+    id: input.facetPanels[p]!.id,
+    x: placement.x,
+    y: placement.y,
+    width: placement.width,
+    height: placement.height,
+    strip: stripLabel,
+    ...(hasStrip && {
+      stripPosition: strip.position,
+      showStrip: strip.show,
+      stripBand: strip.show ? input.stripBand : 0,
+    }),
+    ...(placement.allocation !== undefined && { allocation: { ...placement.allocation } }),
+    clip: projector?.clip ?? true,
+    axisX: placement.showAxisX ? bottom : null,
+    axisY: placement.showAxisY ? left : null,
+    grid: {
+      x: xGrid.major,
+      y: yGrid.major,
+      minorX: input.degraded === true ? [] : xGrid.minor,
+      minorY: input.degraded === true ? [] : yGrid.minor,
+    },
+  };
+}
+
+function assembleSceneAxes(input: {
+  scenePanels: readonly ScenePanel[];
+  placements: readonly PanelPlacement[];
+  hTitle: string;
+  vTitle: string;
+  measurer: TextMeasurer;
+  tickChromePx: number;
+  yTickChromePx: number;
+  axisTextSize: number;
+  vAxisTextSize?: number;
+  yLabelsVisible?: boolean;
+}): { xAxis: SceneAxis; yAxis: SceneAxis } {
+  const firstX = input.scenePanels.find((p) => p.axisX !== null);
+  const firstY = input.scenePanels.find((p) => p.axisY !== null);
+  const gap = 10;
+  const bandTitleOffset = input.placements.reduce((max, placement) => {
+    const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
+    if (
+      plan?.bandLabelMode === undefined ||
+      plan.bandLabelMode === "single-line" ||
+      plan.bandLabelBandHeight === undefined
+    ) {
+      return max;
+    }
+    return Math.max(max, input.tickChromePx + plan.bandLabelBandHeight + gap);
+  }, 0);
+  const yLabelsVisible = input.yLabelsVisible !== false;
+  let yLabelBandPx = 0;
+  if (input.vTitle !== "" && yLabelsVisible) {
+    const fontSize = input.vAxisTextSize ?? input.axisTextSize;
+    for (const tick of input.scenePanels.flatMap((panel) => panel.axisY ?? [])) {
+      if (tick.label === "" || tick.showLabel === false) continue;
+      const size = tick.labelSize ?? fontSize;
+      const fragments =
+        tick.lines !== undefined && tick.lines.length > 0 ? tick.lines : [tick.label];
+      for (const fragment of fragments) {
+        yLabelBandPx = Math.max(yLabelBandPx, input.measurer.measureWidth(fragment, size));
+      }
+    }
+  }
+  const yTitleClearance = yLabelBandPx > 0 ? input.yTickChromePx + yLabelBandPx + gap : 0;
+  return {
+    xAxis: {
+      ticks: firstX?.axisX ?? [],
+      title: input.hTitle,
+      ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
+    },
+    yAxis: {
+      ticks: firstY?.axisY ?? [],
+      title: input.vTitle,
+      ...(yTitleClearance > 32 && { titleOffset: yTitleClearance }),
+    },
+  };
+}
+
 export function assembleScenePanels(input: {
   placements: readonly PanelPlacement[];
   facetPanels: readonly FacetPanelDef[];
@@ -128,151 +291,27 @@ export function assembleScenePanels(input: {
   xAxis: SceneAxis;
   yAxis: SceneAxis;
 } {
-  const { placements, facetPanels, displayScales, hTitle, vTitle, strip, stripBand } = input;
+  const { placements, hTitle, vTitle } = input;
   const measurer = input.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
   const stripSize = input.stripSize ?? 12;
 
-  const scenePanels: ScenePanel[] = placements.map((placement, p) => {
-    const { h, v } = displayScales(p);
-    const majorBottom = axisTicks(h, placement.ticksH, placement.width, false);
-    const majorLeft = axisTicks(v, placement.ticksV, placement.height, true);
-    const projector = input.coordProjectors[p];
-    const projectBottom = (tick: SceneTick): SceneTick => ({
-      ...tick,
-      pos:
-        projector === undefined
-          ? tick.pos
-          : projector.x.projectFraction(tick.pos / placement.width) * placement.width,
-    });
-    const projectLeft = (tick: SceneTick): SceneTick => ({
-      ...tick,
-      pos:
-        projector === undefined
-          ? tick.pos
-          : (1 - projector.y.projectFraction(1 - tick.pos / placement.height)) * placement.height,
-    });
-    const projectedBottom = [
-      ...majorBottom,
-      ...numericMinorTicks(h, input.hMinorBreaks, majorBottom, placement.width, false),
-    ]
-      .map((tick) => projectBottom(tick))
-      .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.width);
-    const projectedLeft = [
-      ...majorLeft,
-      ...numericMinorTicks(v, input.vMinorBreaks, majorLeft, placement.height, true),
-    ]
-      .map((tick) => projectLeft(tick))
-      .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.height);
-    const bottom =
-      projector?.x.active === true
-        ? suppressProjectedLabelOverlap(
-            projectedBottom,
-            "horizontal",
-            measurer,
-            input.hAxisTextSize ?? input.axisTextSize,
-          )
-        : projectedBottom;
-    const left =
-      projector?.y.active === true
-        ? suppressProjectedLabelOverlap(
-            projectedLeft,
-            "vertical",
-            measurer,
-            input.vAxisTextSize ?? input.axisTextSize,
-          )
-        : projectedLeft;
-    const xGrid = gridPositionsByKind(bottom);
-    const yGrid = gridPositionsByKind(left);
-    const label = facetPanels[p]!.label;
-    const hasStrip = label !== "";
-    // Left/right strips rotate labels 90°: advance width becomes vertical
-    // extent. Cap to panel height so multi-row layouts cannot paint into
-    // neighboring panel content (#611).
-    const stripLabel =
-      hasStrip && strip.show && isSideStrip(strip.position)
-        ? capSideStripLabel(label, placement.height, measurer, stripSize)
-        : label;
-    return {
-      identity: facetPanels[p]!.identity,
-      id: facetPanels[p]!.id,
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-      strip: stripLabel,
-      ...(hasStrip && {
-        stripPosition: strip.position,
-        showStrip: strip.show,
-        stripBand: strip.show ? stripBand : 0,
-      }),
-      ...(placement.allocation !== undefined && { allocation: { ...placement.allocation } }),
-      clip: projector?.clip ?? true,
-      axisX: placement.showAxisX ? bottom : null,
-      axisY: placement.showAxisY ? left : null,
-      grid: {
-        x: xGrid.major,
-        y: yGrid.major,
-        minorX: input.degraded === true ? [] : xGrid.minor,
-        minorY: input.degraded === true ? [] : yGrid.minor,
-      },
-    };
-  });
+  const scenePanels: ScenePanel[] = placements.map((_, p) =>
+    buildScenePanel(input, p, measurer, stripSize),
+  );
 
-  const firstX = scenePanels.find((p) => p.axisX !== null);
-  const firstY = scenePanels.find((p) => p.axisY !== null);
-  // Multi-line / rotated band labels need the x-axis title pushed below the whole
-  // measured label band (max band height across panels for free scales), instead
-  // of the renderer's fixed single-line offset.
-  // Tick chrome from the active theme (renderer-matched), not a fixed default, so
-  // a custom longer-tick theme still pushes the x title below the label band.
   const tickChromePx = input.tickChromePx ?? 9; // tickLength(6) + gap(3) defaults
   const yTickChromePx = input.yTickChromePx ?? tickChromePx;
-  const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
-  // Renderer default title offset (x and y) when scene leaves titleOffset unset.
-  const DEFAULT_TITLE_OFFSET_PX = 32;
-  const bandTitleOffset = placements.reduce((max, placement) => {
-    const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
-    if (
-      plan?.bandLabelMode === undefined ||
-      plan.bandLabelMode === "single-line" ||
-      plan.bandLabelBandHeight === undefined
-    ) {
-      return max;
-    }
-    return Math.max(max, tickChromePx + plan.bandLabelBandHeight + TITLE_GAP_PX);
-  }, 0);
-  const xAxis: SceneAxis = {
-    ticks: firstX?.axisX ?? [],
-    title: hTitle,
-    ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
-  };
-
-  // Wide y tick labels need the y-axis title pushed left of the label band so
-  // gridLeft - titleOffset clears them (mirrors x band-titleOffset max-across
-  // panels; #1570). Measure every panel that draws a y axis — free_y facets can
-  // share one left margin while tick strings differ per row.
-  const yTicks = firstY?.axisY ?? [];
-  const yLabelsVisible = input.yLabelsVisible !== false;
-  let yLabelBandPx = 0;
-  if (vTitle !== "" && yLabelsVisible) {
-    const fontSize = input.vAxisTextSize ?? input.axisTextSize;
-    const yAxisTicks = scenePanels.flatMap((panel) => panel.axisY ?? []);
-    for (const tick of yAxisTicks) {
-      if (tick.label === "" || tick.showLabel === false) continue;
-      const size = tick.labelSize ?? fontSize;
-      const fragments =
-        tick.lines !== undefined && tick.lines.length > 0 ? tick.lines : [tick.label];
-      for (const fragment of fragments) {
-        yLabelBandPx = Math.max(yLabelBandPx, measurer.measureWidth(fragment, size));
-      }
-    }
-  }
-  const yTitleClearance = yLabelBandPx > 0 ? yTickChromePx + yLabelBandPx + TITLE_GAP_PX : 0;
-  const yAxis: SceneAxis = {
-    ticks: yTicks,
-    title: vTitle,
-    ...(yTitleClearance > DEFAULT_TITLE_OFFSET_PX && { titleOffset: yTitleClearance }),
-  };
-
+  const { xAxis, yAxis } = assembleSceneAxes({
+    scenePanels,
+    placements,
+    hTitle,
+    vTitle,
+    measurer,
+    tickChromePx,
+    yTickChromePx,
+    axisTextSize: input.axisTextSize,
+    ...(input.vAxisTextSize !== undefined && { vAxisTextSize: input.vAxisTextSize }),
+    ...(input.yLabelsVisible !== undefined && { yLabelsVisible: input.yLabelsVisible }),
+  });
   return { scenePanels, xAxis, yAxis };
 }
