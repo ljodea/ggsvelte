@@ -160,17 +160,11 @@ export function ensurePreviewCleanupRedirects(
   writeFileSync(path, redirects);
 }
 
-export function validateDeploymentArtifact(
+function validateHtmlDocuments(
   buildDirectory: string,
   expected: DeploymentExpectation,
-): string[] {
-  const problems = REQUIRED_DEPLOYMENT_FILES.filter(
-    (path) => !existsSync(join(buildDirectory, path)),
-  ).map((path) => `missing required deployment file: ${path}`);
-  for (const path of listFiles(buildDirectory, join(buildDirectory, "bench"))) {
-    problems.push(`Cloudflare artifact must not contain mutable benchmark history: ${path}`);
-  }
-
+  problems: string[],
+): { hasAnalyticsBeacon: boolean; hasExpectedAnalyticsToken: boolean } {
   let hasAnalyticsBeacon = false;
   let hasExpectedAnalyticsToken = false;
   for (const path of listFiles(buildDirectory).filter((file) => file.endsWith(".html"))) {
@@ -181,124 +175,158 @@ export function validateDeploymentArtifact(
     if (/\b(?:href|src)=["']\/ggsvelte(?:\/|["'])/i.test(html)) {
       problems.push(`${path} contains a /ggsvelte project-base URL`);
     }
-    if (html.includes("https://static.cloudflareinsights.com/beacon.min.js")) {
-      hasAnalyticsBeacon = true;
-      if (expected.analyticsToken !== undefined && html.includes(expected.analyticsToken)) {
-        hasExpectedAnalyticsToken = true;
-      }
+    if (!html.includes("https://static.cloudflareinsights.com/beacon.min.js")) continue;
+    hasAnalyticsBeacon = true;
+    if (expected.analyticsToken !== undefined && html.includes(expected.analyticsToken)) {
+      hasExpectedAnalyticsToken = true;
     }
   }
-  const notFoundPath = join(buildDirectory, "404.html");
-  if (existsSync(notFoundPath)) {
-    const notFoundHtml = readFileSync(notFoundPath, "utf8");
-    if (!notFoundHtml.includes('name="robots" content="noindex')) {
-      problems.push("404.html must contain a noindex robots policy");
-    }
-    if (!notFoundHtml.includes("<main><h1>Not found</h1>")) {
-      problems.push("404.html must render Not found without JavaScript");
-    }
-    if (notFoundHtml.includes("<script")) {
-      problems.push("404.html must remain useful without client scripts");
-    }
-  }
+  return { hasAnalyticsBeacon, hasExpectedAnalyticsToken };
+}
 
-  if (expected.buildMode === "cloudflare-preview" && hasAnalyticsBeacon) {
+function validateNotFound(buildDirectory: string, problems: string[]): void {
+  const path = join(buildDirectory, "404.html");
+  if (!existsSync(path)) return;
+  const html = readFileSync(path, "utf8");
+  if (!html.includes('name="robots" content="noindex')) {
+    problems.push("404.html must contain a noindex robots policy");
+  }
+  if (!html.includes("<main><h1>Not found</h1>")) {
+    problems.push("404.html must render Not found without JavaScript");
+  }
+  if (html.includes("<script")) problems.push("404.html must remain useful without client scripts");
+}
+
+function validateAnalytics(
+  expected: DeploymentExpectation,
+  state: { hasAnalyticsBeacon: boolean; hasExpectedAnalyticsToken: boolean },
+  problems: string[],
+): void {
+  if (expected.buildMode === "cloudflare-preview" && state.hasAnalyticsBeacon) {
     problems.push("preview artifact must not contain the Cloudflare Web Analytics beacon");
   }
   if (
     expected.buildMode === "cloudflare-production" &&
     expected.analyticsToken !== undefined &&
-    (!hasAnalyticsBeacon || !hasExpectedAnalyticsToken)
+    (!state.hasAnalyticsBeacon || !state.hasExpectedAnalyticsToken)
   ) {
     problems.push("production artifact is missing the configured Cloudflare Web Analytics beacon");
   }
+}
 
-  const headersPath = join(buildDirectory, "_headers");
-  if (existsSync(headersPath)) {
-    const headers = readFileSync(headersPath, "utf8");
-    for (const policy of REQUIRED_SECURITY_HEADERS) {
-      if (!headers.includes(policy)) {
-        problems.push(`_headers is missing required security policy: ${policy}`);
-      }
+function validateHeaders(
+  buildDirectory: string,
+  expected: DeploymentExpectation,
+  problems: string[],
+): boolean {
+  const path = join(buildDirectory, "_headers");
+  if (!existsSync(path)) return false;
+  const headers = readFileSync(path, "utf8");
+  for (const policy of REQUIRED_SECURITY_HEADERS) {
+    if (!headers.includes(policy)) {
+      problems.push(`_headers is missing required security policy: ${policy}`);
     }
-    // Browsers always revalidate (max-age=0). Optional s-maxage=N lets the
-    // edge hold HTML briefly (#1167) without changing browser cache semantics.
-    if (!hasHtmlRevalidateCacheControl(headers)) {
-      problems.push("_headers must revalidate public HTML and metadata");
-    }
+  }
+  if (!hasHtmlRevalidateCacheControl(headers)) {
+    problems.push("_headers must revalidate public HTML and metadata");
+  }
+  if (
+    expected.buildMode === "cloudflare-preview" &&
+    !headers.includes("/*\n  X-Robots-Tag: noindex")
+  ) {
+    problems.push("preview _headers must apply X-Robots-Tag: noindex to every route");
+  }
+  if (
+    !headers.includes("/_app/immutable/*") ||
+    !headers.includes("Cache-Control: public, max-age=31536000, immutable")
+  ) {
+    problems.push("_headers must cache only SvelteKit immutable assets for one year");
+  }
+  if (!headers.includes("/_app/immutable/*\n  ! Cache-Control\n")) {
+    problems.push("_headers must detach the inherited HTML cache policy from immutable assets");
+  }
+  return true;
+}
+
+function validateRedirects(
+  buildDirectory: string,
+  expected: DeploymentExpectation,
+  problems: string[],
+): void {
+  const path = join(buildDirectory, "_redirects");
+  if (!existsSync(path)) return;
+  const redirects = readFileSync(path, "utf8");
+  if (/^https:\/\/\S+\s+/m.test(redirects)) {
+    problems.push("_redirects must not contain unsupported domain-level source URLs");
+  }
+  if (redirects.includes("ljodea.github.io") || redirects.includes("github.io/ggsvelte")) {
+    problems.push("_redirects must not send traffic to GitHub Pages");
+  }
+  if (/^\/bench(?:\s|\/\*)/m.test(redirects)) {
+    problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
+  }
+  if (expected.buildMode === "cloudflare-production") {
     if (
-      expected.buildMode === "cloudflare-preview" &&
-      !headers.includes("/*\n  X-Robots-Tag: noindex")
+      !hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
+      !hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
     ) {
-      problems.push("preview _headers must apply X-Robots-Tag: noindex to every route");
+      problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
     }
-    if (
-      !headers.includes("/_app/immutable/*") ||
-      !headers.includes("Cache-Control: public, max-age=31536000, immutable")
-    ) {
-      problems.push("_headers must cache only SvelteKit immutable assets for one year");
-    }
-    if (!headers.includes("/_app/immutable/*\n  ! Cache-Control\n")) {
-      problems.push("_headers must detach the inherited HTML cache policy from immutable assets");
-    }
+    return;
   }
+  if (expected.buildMode !== "cloudflare-preview") return;
+  if (
+    hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
+    hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
+  ) {
+    problems.push("preview _redirects must not send /ggsvelte cleanup traffic to production");
+  }
+  if (
+    !hasRedirectRule(redirects, "/ggsvelte / 301") ||
+    !hasRedirectRule(redirects, "/ggsvelte/* /:splat 301")
+  ) {
+    problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
+  }
+}
 
-  const redirectsPath = join(buildDirectory, "_redirects");
-  if (existsSync(redirectsPath)) {
-    const redirects = readFileSync(redirectsPath, "utf8");
-    if (/^https:\/\/\S+\s+/m.test(redirects)) {
-      problems.push("_redirects must not contain unsupported domain-level source URLs");
-    }
-    if (redirects.includes("ljodea.github.io") || redirects.includes("github.io/ggsvelte")) {
-      problems.push("_redirects must not send traffic to GitHub Pages");
-    }
-    if (/^\/bench(?:\s|\/\*)/m.test(redirects)) {
-      problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
-    }
-    if (expected.buildMode === "cloudflare-production") {
-      // Bare `/ggsvelte` does not match `/ggsvelte/*`; require both exact + wildcard.
-      // Line-anchored: `/old/ggsvelte …` must not satisfy the bare-source check.
-      if (
-        !hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
-        !hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
-      ) {
-        problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
-      }
-    } else if (expected.buildMode === "cloudflare-preview") {
-      if (
-        hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
-        hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
-      ) {
-        problems.push("preview _redirects must not send /ggsvelte cleanup traffic to production");
-      }
-      if (
-        !hasRedirectRule(redirects, "/ggsvelte / 301") ||
-        !hasRedirectRule(redirects, "/ggsvelte/* /:splat 301")
-      ) {
-        problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
-      }
-    }
+function validateIdentity(
+  buildDirectory: string,
+  expected: DeploymentExpectation,
+  problems: string[],
+): void {
+  const path = join(buildDirectory, "artifact.json");
+  if (!existsSync(path)) return;
+  let actual: unknown;
+  try {
+    actual = JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    problems.push("artifact.json is not valid JSON");
   }
+  if (
+    actual !== undefined &&
+    JSON.stringify(actual) !== JSON.stringify(buildDeploymentIdentity(expected))
+  ) {
+    problems.push("artifact.json does not match the expected source, routes, and build mode");
+  }
+}
 
-  if (existsSync(headersPath)) {
-    problems.push(...validateDocsCsp(buildDirectory));
+export function validateDeploymentArtifact(
+  buildDirectory: string,
+  expected: DeploymentExpectation,
+): string[] {
+  const problems = REQUIRED_DEPLOYMENT_FILES.filter(
+    (path) => !existsSync(join(buildDirectory, path)),
+  ).map((path) => `missing required deployment file: ${path}`);
+  for (const path of listFiles(buildDirectory, join(buildDirectory, "bench"))) {
+    problems.push(`Cloudflare artifact must not contain mutable benchmark history: ${path}`);
   }
-
-  const identityPath = join(buildDirectory, "artifact.json");
-  if (existsSync(identityPath)) {
-    let actual: unknown;
-    try {
-      actual = JSON.parse(readFileSync(identityPath, "utf8"));
-    } catch {
-      problems.push("artifact.json is not valid JSON");
-    }
-    if (
-      actual !== undefined &&
-      JSON.stringify(actual) !== JSON.stringify(buildDeploymentIdentity(expected))
-    ) {
-      problems.push("artifact.json does not match the expected source, routes, and build mode");
-    }
-  }
+  const analytics = validateHtmlDocuments(buildDirectory, expected, problems);
+  validateNotFound(buildDirectory, problems);
+  validateAnalytics(expected, analytics, problems);
+  const hasHeaders = validateHeaders(buildDirectory, expected, problems);
+  validateRedirects(buildDirectory, expected, problems);
+  if (hasHeaders) problems.push(...validateDocsCsp(buildDirectory));
+  validateIdentity(buildDirectory, expected, problems);
   return problems;
 }
 

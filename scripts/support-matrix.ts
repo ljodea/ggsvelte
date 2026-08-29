@@ -42,22 +42,8 @@ export function prDefaultConsumerRows(matrix: SupportMatrix): ConsumerRow[] {
   return [linux];
 }
 
-export function validateSupportMatrix(matrix: SupportMatrix): string[] {
+function requiredCoverageProblems(matrix: SupportMatrix): string[] {
   const errors: string[] = [];
-  if (matrix.schemaVersion !== 1) errors.push("schemaVersion must be 1");
-  if (matrix.node.range !== `>=${matrix.node.tested[0]}`) {
-    errors.push("Node range must begin at the first required tested major");
-  }
-  if (matrix.svelte.range !== `^${matrix.svelte.minimum}`) {
-    errors.push("Svelte peer range must begin at the tested minimum");
-  }
-  if (matrix.required.length < 4 || matrix.required.length > 6) {
-    errors.push("required matrix must contain 4–6 covering rows");
-  }
-  if (matrix.required.length + matrix.nightly.length > 12) {
-    errors.push("full nightly matrix must contain at most 12 rows");
-  }
-  const rows = [...matrix.required, ...matrix.nightly];
   const requiredValues = {
     node: new Set(matrix.required.map((row) => row.node)),
     svelte: new Set(matrix.required.map((row) => row.svelte)),
@@ -68,9 +54,8 @@ export function validateSupportMatrix(matrix: SupportMatrix): string[] {
     if (!requiredValues.node.has(node)) errors.push(`required matrix must cover Node ${node}`);
   }
   for (const svelte of [matrix.svelte.minimum, matrix.svelte.current]) {
-    if (!requiredValues.svelte.has(svelte)) {
+    if (!requiredValues.svelte.has(svelte))
       errors.push(`required matrix must cover Svelte ${svelte}`);
-    }
   }
   for (const packageManager of Object.keys(matrix.packageManagers) as PackageManager[]) {
     if (!requiredValues.packageManager.has(packageManager)) {
@@ -80,12 +65,11 @@ export function validateSupportMatrix(matrix: SupportMatrix): string[] {
   for (const os of ["ubuntu-latest", "windows-latest"] as const) {
     if (!requiredValues.os.has(os)) errors.push(`required matrix must cover ${os}`);
   }
-  if (!matrix.nightly.some((row) => row.node === matrix.node.canary)) {
-    errors.push(`nightly matrix must cover Node ${matrix.node.canary}`);
-  }
-  if (!matrix.nightly.some((row) => row.os === "macos-latest")) {
-    errors.push("nightly matrix must cover macos-latest");
-  }
+  return errors;
+}
+
+function rowProblems(matrix: SupportMatrix, rows: readonly ConsumerRow[]): string[] {
+  const errors: string[] = [];
   const keys = new Set<string>();
   for (const row of rows) {
     if (!matrix.operatingSystems.includes(row.os)) errors.push(`unknown OS: ${row.os}`);
@@ -102,6 +86,33 @@ export function validateSupportMatrix(matrix: SupportMatrix): string[] {
     if (keys.has(key)) errors.push(`duplicate row: ${key}`);
     keys.add(key);
   }
+  return errors;
+}
+
+export function validateSupportMatrix(matrix: SupportMatrix): string[] {
+  const errors: string[] = [];
+  if (matrix.schemaVersion !== 1) errors.push("schemaVersion must be 1");
+  if (matrix.node.range !== `>=${matrix.node.tested[0]}`) {
+    errors.push("Node range must begin at the first required tested major");
+  }
+  if (matrix.svelte.range !== `^${matrix.svelte.minimum}`) {
+    errors.push("Svelte peer range must begin at the tested minimum");
+  }
+  if (matrix.required.length < 4 || matrix.required.length > 6) {
+    errors.push("required matrix must contain 4–6 covering rows");
+  }
+  if (matrix.required.length + matrix.nightly.length > 12) {
+    errors.push("full nightly matrix must contain at most 12 rows");
+  }
+  const rows = [...matrix.required, ...matrix.nightly];
+  errors.push(...requiredCoverageProblems(matrix));
+  if (!matrix.nightly.some((row) => row.node === matrix.node.canary)) {
+    errors.push(`nightly matrix must cover Node ${matrix.node.canary}`);
+  }
+  if (!matrix.nightly.some((row) => row.os === "macos-latest")) {
+    errors.push("nightly matrix must cover macos-latest");
+  }
+  errors.push(...rowProblems(matrix, rows));
   if (matrix.browsers.engines.join(",") !== "chromium,firefox,webkit") {
     errors.push("browser matrix must contain Chromium, Firefox, and WebKit");
   }

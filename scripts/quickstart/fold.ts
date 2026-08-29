@@ -79,6 +79,116 @@ export interface FoldSakuraOptions {
   readonly annotations?: boolean;
 }
 
+interface SakuraFoldState {
+  readonly layers: Record<string, LayerSpec>;
+  order: readonly string[];
+  scales: Scales;
+  guides: GuidesSpec | undefined;
+  labs: Labs | undefined;
+  theme: ThemeName | undefined;
+  readonly components: Set<string>;
+  readonly registers: Set<string>;
+  readonly consts: string[];
+  readonly attrs: Map<string, string>;
+  readonly children: Record<string, string>;
+  readonly grammar: Record<string, string>;
+  childOrder: readonly string[];
+}
+
+function accumulateSakuraSteps(steps: readonly (typeof SAKURA_STEPS)[number][]): SakuraFoldState {
+  const state: SakuraFoldState = {
+    layers: { ...BASE_LAYERS },
+    order: BASE_ORDER,
+    scales: { ...BASE_SCALES },
+    guides: undefined,
+    labs: { ...BASE_LABS },
+    theme: undefined,
+    components: new Set<string>(BASE_COMPONENTS),
+    registers: new Set<string>(),
+    consts: [],
+    attrs: new Map<string, string>([
+      ["data", "  data={kyotoSakura}"],
+      ["aes", `  aes={{ x: "year", y: "bloomDate" }}`],
+    ]),
+    children: { ...BASE_CHILDREN },
+    grammar: { ...BASE_GRAMMAR },
+    childOrder: BASE_ORDER,
+  };
+  for (const step of steps) {
+    Object.assign(state.layers, step.spec.layers ?? {});
+    if (step.spec.order !== undefined) state.order = step.spec.order;
+    state.scales = { ...state.scales, ...step.spec.scales };
+    if (step.spec.guides !== undefined) state.guides = { ...state.guides, ...step.spec.guides };
+    if (step.spec.labs !== undefined) state.labs = { ...state.labs, ...step.spec.labs };
+    if (step.spec.theme !== undefined) state.theme = step.spec.theme;
+    for (const component of step.source.components ?? []) state.components.add(component);
+    for (const register of step.source.registers ?? []) state.registers.add(register);
+    state.consts.push(...(step.source.consts ?? []));
+    for (const [name, text] of Object.entries(step.source.attrs ?? {})) {
+      state.attrs.set(name, text);
+    }
+    Object.assign(state.grammar, step.source.grammar ?? {});
+    Object.assign(state.children, step.source.children ?? {});
+    if (step.source.childOrder !== undefined) state.childOrder = step.source.childOrder;
+  }
+  return state;
+}
+
+function buildSakuraSpec(
+  state: SakuraFoldState,
+  rows: readonly SakuraRow[],
+  annotations: boolean | undefined,
+): PortableSpec {
+  const order =
+    annotations === false
+      ? state.order.filter((name) => !SAKURA_ANNOTATION_LAYERS.includes(name as never))
+      : state.order;
+  return {
+    data: { values: [...rows] },
+    aes: { x: { field: "year" }, y: { field: "bloomDate" } },
+    layers: order.map((name) => state.layers[name]!),
+    ...(Object.keys(state.scales).length > 0 && { scales: state.scales }),
+    ...(state.guides !== undefined && { guides: state.guides }),
+    ...(state.labs !== undefined && { labs: state.labs }),
+    ...(state.theme !== undefined && { theme: state.theme }),
+  };
+}
+
+function buildSakuraSource(state: SakuraFoldState): string {
+  const imported = [...state.components, ...state.registers].toSorted((a, b) => a.localeCompare(b));
+  const imports =
+    imported.join(", ").length > 60
+      ? `{\n${imported.map((name) => `    ${name},`).join("\n")}\n  }`
+      : `{ ${imported.join(", ")} }`;
+  const script = [
+    `  import ${imports} from "@ggsvelte/svelte";`,
+    `  import { kyotoSakura } from "@ggsvelte/svelte/data";`,
+    ...(state.registers.size > 0
+      ? [
+          "",
+          `  // A stat= override opts into its family explicitly (#1420).`,
+          ...[...state.registers].map((fn) => `  ${fn}();`),
+        ]
+      : []),
+    ...(state.consts.length > 0 ? ["", ...state.consts] : []),
+  ].join("\n");
+  const children = [
+    ...state.childOrder.map((name) => state.children[name]!),
+    ...GRAMMAR_ORDER.filter((name) => state.grammar[name] !== undefined).map(
+      (name) => state.grammar[name]!,
+    ),
+  ].join("\n");
+  return `<script lang="ts">
+${script}
+</script>
+
+<GGPlot
+${[...state.attrs.values()].join("\n")}
+>
+${children}
+</GGPlot>`;
+}
+
 /**
  * Accumulate the first `count` steps (0 = the first render). Pure: the same
  * count always yields the same spec and the same source text.
@@ -89,96 +199,16 @@ export function foldSakura(
   options: FoldSakuraOptions = {},
 ): SakuraFold {
   const steps = SAKURA_STEPS.slice(0, Math.max(0, Math.min(count, SAKURA_STEPS.length)));
-
-  const layers: Record<string, LayerSpec> = { ...BASE_LAYERS };
-  let order: readonly string[] = BASE_ORDER;
-  let scales: Scales = { ...BASE_SCALES };
-  let guides: GuidesSpec | undefined;
-  let labs: Labs | undefined = { ...BASE_LABS };
-  let theme: ThemeName | undefined;
-
-  const components = new Set<string>(BASE_COMPONENTS);
-  const registers = new Set<string>();
-  const consts: string[] = [];
-  const attrs = new Map<string, string>([
-    ["data", "  data={kyotoSakura}"],
-    ["aes", `  aes={{ x: "year", y: "bloomDate" }}`],
-  ]);
-  const children: Record<string, string> = { ...BASE_CHILDREN };
-  const grammar: Record<string, string> = { ...BASE_GRAMMAR };
-  let childOrder: readonly string[] = BASE_ORDER;
-
-  for (const step of steps) {
-    Object.assign(layers, step.spec.layers ?? {});
-    if (step.spec.order !== undefined) order = step.spec.order;
-    scales = { ...scales, ...step.spec.scales };
-    if (step.spec.guides !== undefined) guides = { ...guides, ...step.spec.guides };
-    if (step.spec.labs !== undefined) labs = { ...labs, ...step.spec.labs };
-    if (step.spec.theme !== undefined) theme = step.spec.theme;
-
-    for (const component of step.source.components ?? []) components.add(component);
-    for (const register of step.source.registers ?? []) registers.add(register);
-    consts.push(...(step.source.consts ?? []));
-    for (const [name, text] of Object.entries(step.source.attrs ?? {})) attrs.set(name, text);
-    Object.assign(grammar, step.source.grammar ?? {});
-    Object.assign(children, step.source.children ?? {});
-    if (step.source.childOrder !== undefined) childOrder = step.source.childOrder;
-  }
-
-  const drawn =
-    options.annotations === false
-      ? order.filter((name) => !SAKURA_ANNOTATION_LAYERS.includes(name as never))
-      : order;
-
-  const spec: PortableSpec = {
-    data: { values: [...rows] },
-    aes: { x: { field: "year" }, y: { field: "bloomDate" } },
-    layers: drawn.map((name) => layers[name]!),
-    ...(Object.keys(scales).length > 0 && { scales }),
-    ...(guides !== undefined && { guides }),
-    ...(labs !== undefined && { labs }),
-    ...(theme !== undefined && { theme }),
-  };
-
-  // No ariaLabel in the lesson sources: the basic plot is for learning the
-  // grammar, and an accessible name is a production polish step — not the
-  // first thing a new reader should copy. Hosts still get a generated label.
-  const imported = [...components, ...registers].toSorted((a, b) => a.localeCompare(b));
-  // Wrap the component import once it stops fitting on one readable line.
-  const imports =
-    imported.join(", ").length > 60
-      ? `{\n${imported.map((name) => `    ${name},`).join("\n")}\n  }`
-      : `{ ${imported.join(", ")} }`;
-  const script = [
-    `  import ${imports} from "@ggsvelte/svelte";`,
-    `  import { kyotoSakura } from "@ggsvelte/svelte/data";`,
-    // stat= overrides: shells register only their default stat (#1420).
-    ...(registers.size > 0
-      ? [
-          "",
-          `  // A stat= override opts into its family explicitly (#1420).`,
-          ...[...registers].map((fn) => `  ${fn}();`),
-        ]
-      : []),
-    ...(consts.length > 0 ? ["", ...consts] : []),
-  ].join("\n");
-
-  const source = `<script lang="ts">
-${script}
-</script>
-
-<GGPlot
-${[...attrs.values()].join("\n")}
->
-${[...childOrder.map((name) => children[name]!), ...GRAMMAR_ORDER.filter((name) => grammar[name] !== undefined).map((name) => grammar[name]!)].join("\n")}
-</GGPlot>`;
+  const state = accumulateSakuraSteps(steps);
+  const spec = buildSakuraSpec(state, rows, options.annotations);
+  const source = buildSakuraSource(state);
 
   return {
     spec,
     source,
-    key: attrs.has("key") ? "year" : undefined,
+    key: state.attrs.has("key") ? "year" : undefined,
     // Host capability: preferred as `<Inspect>` child (not a PortableSpec field).
-    inspect: components.has("Inspect") ? { mode: "exact", pin: true } : undefined,
+    inspect: state.components.has("Inspect") ? { mode: "exact", pin: true } : undefined,
   };
 }
 

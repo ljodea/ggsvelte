@@ -31,6 +31,82 @@ export function allowSoftSkipLoadFailure(env: NodeJS.ProcessEnv = process.env): 
   return env["CI"] !== "true" && env["GITHUB_ACTIONS"] !== "true";
 }
 
+function parseDoubleQuotedScalar(s: string): string {
+  let out = "";
+  for (let i = 1; i < s.length; i++) {
+    const ch = s[i]!;
+    if (ch === '"') return out;
+    if (ch !== "\\" || i + 1 >= s.length) {
+      out += ch;
+      continue;
+    }
+    const next = s[i + 1]!;
+    const simple: Record<string, string> = {
+      "0": "\0",
+      a: "\u0007",
+      b: "\b",
+      t: "\t",
+      n: "\n",
+      v: "\v",
+      f: "\f",
+      r: "\r",
+      e: "\u001B",
+      " ": " ",
+      '"': '"',
+      "/": "/",
+      "\\": "\\",
+      N: "\u0085",
+      _: "\u00A0",
+      L: "\u2028",
+      P: "\u2029",
+    };
+    if (next in simple) {
+      out += simple[next]!;
+      i += 1;
+      continue;
+    }
+    const widths: Readonly<Record<string, number>> = { x: 2, u: 4, U: 8 };
+    const width = widths[next];
+    if (width !== undefined && i + width + 1 < s.length) {
+      const hex = s.slice(i + 2, i + 2 + width);
+      if (new RegExp(`^[0-9a-fA-F]{${String(width)}}$`).test(hex)) {
+        out += String.fromCodePoint(Number.parseInt(hex, 16));
+        i += width + 1;
+        continue;
+      }
+    }
+    // Unknown escape: keep the escapee literally (YAML rejects these; we
+    // stay permissive so a bad config still yields a stable suppression).
+    out += next;
+    i += 1;
+  }
+  return out;
+}
+
+function parseSingleQuotedScalar(s: string): string {
+  let out = "";
+  for (let i = 1; i < s.length; i++) {
+    const ch = s[i]!;
+    if (ch !== "'") {
+      out += ch;
+      continue;
+    }
+    if (s[i + 1] !== "'") return out;
+    out += "'";
+    i += 1;
+  }
+  return out;
+}
+
+function parsePlainScalar(s: string): string {
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] === "#" && (i === 0 || /\s/.test(s[i - 1]!))) {
+      return s.slice(0, i).trimEnd();
+    }
+  }
+  return s;
+}
+
 /**
  * Parse a YAML list-item scalar value (the part after `- `).
  * Strips unquoted inline comments (`ggsvelte # pool` → `ggsvelte`) while
@@ -39,99 +115,9 @@ export function allowSoftSkipLoadFailure(env: NodeJS.ProcessEnv = process.env): 
 export function parseYamlListScalar(raw: string): string {
   const s = raw.trim();
   if (s.length === 0) return "";
-
-  if (s.startsWith('"')) {
-    let out = "";
-    for (let i = 1; i < s.length; i++) {
-      const ch = s[i]!;
-      if (ch === '"') return out;
-      if (ch !== "\\" || i + 1 >= s.length) {
-        out += ch;
-        continue;
-      }
-      // YAML double-quoted escapes (subset sufficient for label scalars).
-      const next = s[i + 1]!;
-      const simple: Record<string, string> = {
-        "0": "\0",
-        a: "\u0007",
-        b: "\b",
-        t: "\t",
-        n: "\n",
-        v: "\v",
-        f: "\f",
-        r: "\r",
-        e: "\u001B",
-        " ": " ",
-        '"': '"',
-        "/": "/",
-        "\\": "\\",
-        N: "\u0085",
-        _: "\u00A0",
-        L: "\u2028",
-        P: "\u2029",
-      };
-      if (next in simple) {
-        out += simple[next]!;
-        i += 1;
-        continue;
-      }
-      if (next === "x" && i + 3 < s.length) {
-        const hex = s.slice(i + 2, i + 4);
-        if (/^[0-9a-fA-F]{2}$/.test(hex)) {
-          out += String.fromCodePoint(Number.parseInt(hex, 16));
-          i += 3;
-          continue;
-        }
-      }
-      if (next === "u" && i + 5 < s.length) {
-        const hex = s.slice(i + 2, i + 6);
-        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
-          out += String.fromCodePoint(Number.parseInt(hex, 16));
-          i += 5;
-          continue;
-        }
-      }
-      if (next === "U" && i + 9 < s.length) {
-        const hex = s.slice(i + 2, i + 10);
-        if (/^[0-9a-fA-F]{8}$/.test(hex)) {
-          out += String.fromCodePoint(Number.parseInt(hex, 16));
-          i += 9;
-          continue;
-        }
-      }
-      // Unknown escape: keep the escapee literally (YAML rejects these; we
-      // stay permissive so a bad config still yields a stable suppression).
-      out += next;
-      i += 1;
-    }
-    return out;
-  }
-
-  if (s.startsWith("'")) {
-    // YAML single-quoted: '' is an escaped single quote.
-    let out = "";
-    for (let i = 1; i < s.length; i++) {
-      const ch = s[i]!;
-      if (ch === "'") {
-        if (s[i + 1] === "'") {
-          out += "'";
-          i += 1;
-          continue;
-        }
-        return out;
-      }
-      out += ch;
-    }
-    return out;
-  }
-
-  // Plain scalar: `#` starts a comment only when preceded by whitespace.
-  for (let i = 0; i < s.length; i++) {
-    if (s[i] === "#" && (i === 0 || /\s/.test(s[i - 1]!))) {
-      return s.slice(0, i).trimEnd();
-    }
-  }
-  return s;
+  if (s.startsWith('"')) return parseDoubleQuotedScalar(s);
+  if (s.startsWith("'")) return parseSingleQuotedScalar(s);
+  return parsePlainScalar(s);
 }
 
 /** Parse `self-hosted-runner.labels` from actionlint.yaml without a YAML dep. */

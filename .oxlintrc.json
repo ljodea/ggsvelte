@@ -49,16 +49,10 @@
   },
   "overrides": [
     {
-      // Staged rollout inventory (2026-08-29): scripts 13, tests 8, spec 30,
-      // svelte 11, core 122. apps/docs, examples, packages/cli,
+      // Staged rollout inventory (2026-08-29): tests 8, spec 30, svelte 11,
+      // core 122. apps/docs, examples, scripts, packages/cli,
       // packages/skill, and benchmarks pass and use the global rule.
-      "files": [
-        "scripts/**",
-        "tests/**",
-        "packages/spec/**",
-        "packages/svelte/**",
-        "packages/core/**"
-      ],
+      "files": ["tests/**", "packages/spec/**", "packages/svelte/**", "packages/core/**"],
       "rules": {
         "eslint/complexity": "off"
       }
