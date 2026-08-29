@@ -335,26 +335,45 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
       batch.boxStroke !== undefined ||
       batch.boxStrokes !== undefined);
   for (let j = 0; j < n; j++) {
-    const mark = resolveGlyphMark(batch, j, themeInk);
-    const size = batch.sizes === undefined ? undefined : mark.size;
-    const alpha = batch.alphas === undefined ? undefined : mark.alpha;
-    const tx = batch.positions[j * 2]!;
-    const ty = batch.positions[j * 2 + 1]!;
-    if (hasBox) {
-      const bw = batch.boxWidths![j]!;
-      const bh = batch.boxHeights![j]!;
-      const pad = batch.boxPadding ?? 0;
-      const origin = labelBoxOrigin(tx, ty, bw, bh, batch.anchor, pad);
-      const boxFill = batch.boxFills?.[j] ?? batch.boxFill ?? themePaper;
-      const boxStroke = batch.boxStrokes?.[j] ?? batch.boxStroke ?? themeInk;
-      const sw = batch.boxStrokeWidth ?? 0.5;
-      const rx = batch.boxRadius ?? 0;
-      out += `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`;
-    }
-    out += `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${mark.fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`;
+    out += renderGlyph(batch, j, themeInk, themePaper, hasBox);
   }
   out += "</g>";
   return out;
+}
+
+function renderGlyph(
+  batch: GlyphsBatch,
+  index: number,
+  themeInk: string,
+  themePaper: string,
+  hasBox: boolean,
+): string {
+  const mark = resolveGlyphMark(batch, index, themeInk);
+  const size = batch.sizes === undefined ? undefined : mark.size;
+  const alpha = batch.alphas === undefined ? undefined : mark.alpha;
+  const tx = batch.positions[index * 2]!;
+  const ty = batch.positions[index * 2 + 1]!;
+  const box = hasBox ? renderGlyphBox(batch, index, tx, ty, alpha, themeInk, themePaper) : "";
+  return `${box}<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${mark.fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[index]!)}</text>`;
+}
+
+function renderGlyphBox(
+  batch: GlyphsBatch,
+  index: number,
+  tx: number,
+  ty: number,
+  alpha: number | undefined,
+  themeInk: string,
+  themePaper: string,
+): string {
+  const bw = batch.boxWidths![index]!;
+  const bh = batch.boxHeights![index]!;
+  const origin = labelBoxOrigin(tx, ty, bw, bh, batch.anchor, batch.boxPadding ?? 0);
+  const boxFill = batch.boxFills?.[index] ?? batch.boxFill ?? themePaper;
+  const boxStroke = batch.boxStrokes?.[index] ?? batch.boxStroke ?? themeInk;
+  const sw = batch.boxStrokeWidth ?? 0.5;
+  const rx = batch.boxRadius ?? 0;
+  return `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`;
 }
 
 /** Dispatch one geometry batch to its emitter (internal to the pure renderer). */

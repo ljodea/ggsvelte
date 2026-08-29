@@ -102,20 +102,7 @@ export function buildInteractionMasks<Key extends PropertyKey>(
 
   const focused = new Map<number, Uint8Array>();
   for (const candidate of candidates) {
-    if (candidate.keys.length === 0) continue;
-    const batch = batches[candidate.batchIndex];
-    if (batch === undefined) continue;
-    const primitiveIndex = rendererPrimitive(batch, candidate.primitiveIndex);
-    if (primitiveIndex === null) continue;
-
-    // Allocate the batch mask whenever a candidate is addressable so
-    // non-matching emphasis still yields focusedCount 0 (not a null mask).
-    let values = focused.get(candidate.batchIndex);
-    if (values === undefined) {
-      values = new Uint8Array(renderPrimitiveCount(batch));
-      focused.set(candidate.batchIndex, values);
-    }
-    if (candidate.keys.some((key) => emphasis.has(key))) values[primitiveIndex] = 1;
+    markFocusedCandidate(focused, batches, candidate, emphasis);
   }
 
   // Mirror fill-batch focus onto presentation-only path batches on the same
@@ -144,35 +131,55 @@ export function buildInteractionMasks<Key extends PropertyKey>(
         });
       }
     }
-    const peer = peerByLayer.get(batch.layerIndex);
-    if (peer === undefined) continue;
-    const source = peer.values;
-    const sourceCount = peer.count;
-    const outlineCount = renderPrimitiveCount(batch);
-    const mirrored = new Uint8Array(outlineCount);
-    if (outlineCount === sourceCount) {
-      mirrored.set(source);
-    } else if (sourceCount > 0 && outlineCount === sourceCount * 2) {
-      // outline: "both" — two open subpaths per closed fill run
-      for (let path = 0; path < sourceCount; path++) {
-        const bit = source[path]!;
-        mirrored[path * 2] = bit;
-        mirrored[path * 2 + 1] = bit;
-      }
-    } else if (sourceCount > 0) {
-      // Length mismatch: mute all outline primitives under any active emphasis.
-      // (zeros = not focused → canvas draws at mutedAlpha)
-    }
-    focused.set(index, mirrored);
-    if (index < peer.batchIndex)
-      peerByLayer.set(batch.layerIndex, {
-        batchIndex: index,
-        values: mirrored,
-        count: outlineCount,
-      });
+    const peer = peerByLayer?.get(batch.layerIndex);
+    mirrorPeerMask(focused, peerByLayer, batch, index, peer);
   }
 
   return freezeMasks(batches, focused);
+}
+
+function markFocusedCandidate<Key extends PropertyKey>(
+  focused: Map<number, Uint8Array>,
+  batches: readonly GeometryBatch[],
+  candidate: SemanticCandidateKeys<Key>,
+  emphasis: ReadonlySet<Key>,
+): void {
+  if (candidate.keys.length === 0) return;
+  const batch = batches[candidate.batchIndex];
+  if (batch === undefined) return;
+  const primitiveIndex = rendererPrimitive(batch, candidate.primitiveIndex);
+  if (primitiveIndex === null) return;
+  let values = focused.get(candidate.batchIndex);
+  if (values === undefined) {
+    values = new Uint8Array(renderPrimitiveCount(batch));
+    focused.set(candidate.batchIndex, values);
+  }
+  if (candidate.keys.some((key) => emphasis.has(key))) values[primitiveIndex] = 1;
+}
+
+function mirrorPeerMask(
+  focused: Map<number, Uint8Array>,
+  peerByLayer: Map<number, { batchIndex: number; values: Uint8Array; count: number }> | null,
+  batch: GeometryBatch,
+  index: number,
+  peer: { batchIndex: number; values: Uint8Array; count: number } | undefined,
+): void {
+  if (peer === undefined || peerByLayer === null) return;
+  const source = peer.values;
+  const sourceCount = peer.count;
+  const outlineCount = renderPrimitiveCount(batch);
+  const mirrored = new Uint8Array(outlineCount);
+  if (outlineCount === sourceCount) mirrored.set(source);
+  else if (sourceCount > 0 && outlineCount === sourceCount * 2) {
+    for (let path = 0; path < sourceCount; path++) {
+      const bit = source[path]!;
+      mirrored[path * 2] = bit;
+      mirrored[path * 2 + 1] = bit;
+    }
+  }
+  focused.set(index, mirrored);
+  if (index < peer.batchIndex)
+    peerByLayer.set(batch.layerIndex, { batchIndex: index, values: mirrored, count: outlineCount });
 }
 
 /**
