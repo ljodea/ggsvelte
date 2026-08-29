@@ -14,6 +14,88 @@ import { positionFieldType, type PositionConversionContext } from "./temporal-po
 import { PipelineError } from "./types.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
 
+function normalizeTileSizes(layer: NormalizedLayerSpec, aes: Aes, index: number): void {
+  if (layer.geom !== "tile") return;
+  const params = { ...layer.params } as Record<string, unknown>;
+  let mutated = false;
+  for (const channel of ["width", "height"] as const) {
+    const mapping = aes[channel];
+    if (mapping === undefined || mapping === null || !("value" in mapping)) continue;
+    if (mapping.scale === true) {
+      throw new PipelineError(
+        "unsupported-param",
+        `/layers/${index}/aes/${channel}`,
+        `Tile aes.${channel} does not support { value, scale: true }; use params.${channel} or a field mapping.`,
+      );
+    }
+    const value = mapping.value;
+    if (typeof value !== "number" || !(value > 0) || !Number.isFinite(value)) {
+      throw new PipelineError(
+        "tile-nonpositive-size",
+        `/layers/${index}/aes/${channel}`,
+        `The tile geom requires positive finite ${channel}; got ${String(value)}.`,
+      );
+    }
+    if (params[channel] === undefined) {
+      params[channel] = value;
+      mutated = true;
+    }
+  }
+  if (mutated) (layer as { params?: Record<string, unknown> }).params = params;
+}
+
+function validateRectEdges(input: {
+  layer: NormalizedLayerSpec;
+  index: number;
+  table: ColumnTable;
+  edges: readonly (readonly [
+    "xmin" | "xmax" | "ymin" | "ymax",
+    string | null,
+    PositionConversionContext,
+  ])[];
+}): void {
+  if (input.layer.geom !== "rect") return;
+  for (const [channel, field, conversion] of input.edges) {
+    if (field === null) continue;
+    if (positionFieldType(input.table, field, conversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${input.index}/aes/${channel}`,
+        `The rect geom needs quantitative edges, but field "${field}" (${channel}) is nominal.`,
+      );
+    }
+  }
+}
+
+function activeRibbonBounds(input: {
+  orientation: "x" | "y" | undefined;
+  yminField: string | null;
+  ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+}): {
+  yminField: string | null;
+  ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+} {
+  if (input.orientation === "x")
+    return {
+      yminField: input.yminField,
+      ymaxField: input.ymaxField,
+      xminField: null,
+      xmaxField: null,
+    };
+  if (input.orientation === "y")
+    return {
+      yminField: null,
+      ymaxField: null,
+      xminField: input.xminField,
+      xmaxField: input.xmaxField,
+    };
+  return input;
+}
+
 export function resolveLayerPositionChannels(input: {
   layer: NormalizedLayerSpec;
   aes: Aes;
@@ -67,36 +149,7 @@ export function resolveLayerPositionChannels(input: {
   const angleField = checkField(aes.angle, "angle", index, table, warnings);
   const radiusField = checkField(aes.radius, "radius", index, table, warnings);
 
-  if (geom === "tile") {
-    const params = { ...layer.params } as Record<string, unknown>;
-    let mutated = false;
-    for (const channel of ["width", "height"] as const) {
-      const mapping = aes[channel];
-      if (mapping === undefined || mapping === null || !("value" in mapping)) continue;
-      if (mapping.scale === true) {
-        throw new PipelineError(
-          "unsupported-param",
-          `/layers/${index}/aes/${channel}`,
-          `Tile aes.${channel} does not support { value, scale: true }; use params.${channel} or a field mapping.`,
-        );
-      }
-      const value = mapping.value;
-      if (typeof value !== "number" || !(value > 0) || !Number.isFinite(value)) {
-        throw new PipelineError(
-          "tile-nonpositive-size",
-          `/layers/${index}/aes/${channel}`,
-          `The tile geom requires positive finite ${channel}; got ${String(value)}.`,
-        );
-      }
-      if (params[channel] === undefined) {
-        params[channel] = value;
-        mutated = true;
-      }
-    }
-    if (mutated) {
-      (layer as { params?: Record<string, unknown> }).params = params;
-    }
-  }
+  normalizeTileSizes(layer, aes, index);
 
   const ribbonOrientation =
     geom === "ribbon"
@@ -141,48 +194,34 @@ export function resolveLayerPositionChannels(input: {
     ...(rugSides !== undefined && { rugSides }),
   });
 
-  if (geom === "rect") {
-    for (const [channel, field, conversion] of [
+  validateRectEdges({
+    layer,
+    index,
+    table,
+    edges: [
       ["xmin", xminField, xConversion],
       ["xmax", xmaxField, xConversion],
       ["ymin", yminField, yConversion],
       ["ymax", ymaxField, yConversion],
-    ] as const) {
-      if (field === null) continue;
-      const fieldType = positionFieldType(table, field, conversion);
-      if (fieldType === "nominal") {
-        throw new PipelineError(
-          "channel-type-mismatch",
-          `/layers/${index}/aes/${channel}`,
-          `The rect geom needs quantitative edges, but field "${field}" (${channel}) is nominal.`,
-        );
-      }
-    }
-  }
+    ],
+  });
 
   // When orientation is pinned, drop the inactive bound pair so scale training
   // does not train the measure axis from unused interval channels.
-  let outYmin = yminField;
-  let outYmax = ymaxField;
-  let outXmin = xminField;
-  let outXmax = xmaxField;
-  if (ribbonOrientation === "x") {
-    outXmin = null;
-    outXmax = null;
-  } else if (ribbonOrientation === "y") {
-    outYmin = null;
-    outYmax = null;
-  }
+  const activeBounds = activeRibbonBounds({
+    orientation: ribbonOrientation,
+    yminField,
+    ymaxField,
+    xminField,
+    xmaxField,
+  });
 
   return {
     ruleForm,
     xField,
     yField,
     yStatColumn,
-    yminField: outYmin,
-    ymaxField: outYmax,
-    xminField: outXmin,
-    xmaxField: outXmax,
+    ...activeBounds,
     widthField,
     heightField,
     xendField,
