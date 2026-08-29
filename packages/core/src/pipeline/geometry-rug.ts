@@ -27,6 +27,83 @@ function parseRugSides(sides: string | undefined): Set<"b" | "l" | "t" | "r"> {
   return out;
 }
 
+function rugLength(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.min(value, 1)
+    : DEFAULT_LENGTH;
+}
+
+function emitRugSegments(
+  frame: LayerFrame,
+  fx: Frame,
+  sides: ReadonlySet<"b" | "l" | "t" | "r">,
+  length: number,
+): {
+  segments: Float32Array;
+  rowIndex: Uint32Array;
+  styleRows: Uint32Array;
+  kept: number;
+  removed: number;
+} {
+  const capacity = frame.n * sides.size;
+  const segments = new Float32Array(capacity * 4);
+  const rowIndex = new Uint32Array(capacity);
+  const styleRows = new Uint32Array(capacity);
+  const needX = sides.has("b") || sides.has("t");
+  const needY = sides.has("l") || sides.has("r");
+  const width = fx.innerWidth;
+  const height = fx.innerHeight;
+  const tickHeight = length * height;
+  const tickWidth = length * width;
+  let kept = 0;
+  let removed = 0;
+
+  const push = (row: number, x0: number, y0: number, x1: number, y1: number): void => {
+    const offset = kept * 4;
+    segments[offset] = x0;
+    segments[offset + 1] = y0;
+    segments[offset + 2] = x1;
+    segments[offset + 3] = y1;
+    rowIndex[kept] = frame.rowIndex[row]!;
+    styleRows[kept] = row;
+    kept++;
+  };
+
+  for (let row = 0; row < frame.n; row++) {
+    let emitted = 0;
+    if (needX) {
+      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
+      if (!Number.isNaN(tx)) {
+        const x = tx * width;
+        if (sides.has("b")) {
+          push(row, x, height, x, height - tickHeight);
+          emitted++;
+        }
+        if (sides.has("t")) {
+          push(row, x, 0, x, tickHeight);
+          emitted++;
+        }
+      }
+    }
+    if (needY) {
+      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+      if (!Number.isNaN(ty)) {
+        const y = height - ty * height;
+        if (sides.has("l")) {
+          push(row, 0, y, tickWidth, y);
+          emitted++;
+        }
+        if (sides.has("r")) {
+          push(row, width, y, width - tickWidth, y);
+          emitted++;
+        }
+      }
+    }
+    if (emitted === 0) removed++;
+  }
+  return { segments, rowIndex, styleRows, kept, removed };
+}
+
 export function rugBatch(
   frame: LayerFrame,
   fx: Frame,
@@ -37,10 +114,7 @@ export function rugBatch(
   const { binding } = frame;
   const params = (binding.layer.params ?? {}) as RugParams;
   const sides = parseRugSides(params.sides);
-  const length =
-    typeof params.length === "number" && Number.isFinite(params.length) && params.length > 0
-      ? Math.min(params.length, 1)
-      : DEFAULT_LENGTH;
+  const length = rugLength(params.length);
 
   const needX = sides.has("b") || sides.has("t");
   const needY = sides.has("l") || sides.has("r");
@@ -54,65 +128,14 @@ export function rugBatch(
   const capacity = frame.n * sides.size;
   if (capacity === 0) return null;
 
-  const segments = new Float32Array(capacity * 4);
-  const rowIndex = new Uint32Array(capacity);
-  const styleRows = new Uint32Array(capacity);
-  let kept = 0;
-  let removed = 0;
+  const { segments, rowIndex, styleRows, kept, removed } = emitRugSegments(
+    frame,
+    fx,
+    sides,
+    length,
+  );
 
-  const W = fx.innerWidth;
-  const H = fx.innerHeight;
-  const tickH = length * H;
-  const tickW = length * W;
-
-  const push = (row: number, x0: number, y0: number, x1: number, y1: number): void => {
-    const o = kept * 4;
-    segments[o] = x0;
-    segments[o + 1] = y0;
-    segments[o + 2] = x1;
-    segments[o + 3] = y1;
-    rowIndex[kept] = frame.rowIndex[row]!;
-    styleRows[kept] = row;
-    kept++;
-  };
-
-  for (let row = 0; row < frame.n; row++) {
-    let emitted = 0;
-
-    if (needX) {
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      if (!Number.isNaN(tx)) {
-        const sx = tx * W;
-        if (sides.has("b")) {
-          push(row, sx, H, sx, H - tickH);
-          emitted++;
-        }
-        if (sides.has("t")) {
-          push(row, sx, 0, sx, tickH);
-          emitted++;
-        }
-      }
-    }
-
-    if (needY) {
-      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
-      if (!Number.isNaN(ty)) {
-        const sy = H - ty * H;
-        if (sides.has("l")) {
-          push(row, 0, sy, tickW, sy);
-          emitted++;
-        }
-        if (sides.has("r")) {
-          push(row, W, sy, W - tickW, sy);
-          emitted++;
-        }
-      }
-    }
-
-    // One removal unit per row that produced no ticks (all requested channels non-finite).
-    if (emitted === 0) removed++;
-  }
-
+  // One removal unit per row that produced no ticks (all requested channels non-finite).
   removedWarning(removed, binding.index, warnings);
   if (kept === 0) return null;
 
