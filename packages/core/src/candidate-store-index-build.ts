@@ -67,7 +67,7 @@ function writeCandidatePosition(
   state.rows[candidateIndex] = rowId;
   state.xs[candidateIndex] = panel.x + lx;
   state.ys[candidateIndex] = panel.y + ly;
-  if (!Number.isFinite(state.xs[candidateIndex]!) || !Number.isFinite(state.ys[candidateIndex]!))
+  if (!Number.isFinite(state.xs[candidateIndex]) || !Number.isFinite(state.ys[candidateIndex]))
     state.anyNonFiniteAnchor = true;
 }
 
