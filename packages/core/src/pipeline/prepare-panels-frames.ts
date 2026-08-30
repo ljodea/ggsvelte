@@ -255,15 +255,7 @@ export function buildPanelFrames(input: {
     conversions,
     layerTables: layerContexts.map((c) => c.sourceTable),
   });
-  for (const axis of ["x", "y"] as const) {
-    assertInferredTemporalTransform(
-      axis,
-      normalized.scales?.[axis],
-      temporal.decisions.some(
-        (decision) => decision.aesthetic === axis && decision.status === "temporal",
-      ),
-    );
-  }
+  assertTemporalTransforms(normalized, temporal.decisions);
   // Resolve the effective pre-stat transform per axis (after preflight fixes the
   // parser) and attach it to every binding, so stat reads and the affine trainer
   // agree on scale-space. Continuous/binned only; time/band stay identity.
@@ -288,12 +280,7 @@ export function buildPanelFrames(input: {
     temporal.yConversion,
     yTransform,
   );
-  for (const binding of bindings) {
-    binding.xTransform = xTransform;
-    binding.yTransform = yTransform;
-    binding.xBinning = xBinning;
-    binding.yBinning = yBinning;
-  }
+  assignBindingTransforms(bindings, xTransform, yTransform, xBinning, yBinning);
   // One deduplicated per-axis diagnostic for pre-stat transform-domain and OOB
   // drops, counted on each layer's filtered table before faceting.
   const transformDiagnostics: ScaleDiagnostic[] = [];
@@ -326,35 +313,18 @@ export function buildPanelFrames(input: {
       faceted,
     }),
   );
-  for (let p = 0; p < facetPanels.length; p++) {
-    for (let index = 0; index < bindings.length; index++) {
-      const slice = layerSlicers[index]!(facetPanels[p]!);
-      const frame = buildFrame(
-        bindings[index]!,
-        slice.table,
-        warnings,
-        advisories,
-        binRanges[index],
-        functionDomains[index],
-        normalized.datasets,
-        xDiscreteRisk,
-      );
-      applyPosition(frame, advisories, slice.table);
-      // Annotation frames are rowless — do not retain the full panel source-row
-      // array (can be huge under facets) when there is no lineage to resolve.
-      // Still mark lineage finalized (empty) so panelFrames is FinalizedLayerFrame[].
-      let finalized: FinalizedLayerFrame;
-      if (bindings[index]!.ruleForm === "annotation" || bindings[index]!.layer.geom === "abline") {
-        // Rowless — empty lineage map (do not retain huge panel source-row arrays).
-        frame.inputSourceRows = [];
-        finalized = frame as FinalizedLayerFrame;
-      } else {
-        finalized = finalizeFrameSourceRows(frame, slice);
-      }
-      assertRibbonBounds(finalized);
-      panelFrames[p]!.push(finalized);
-    }
-  }
+  buildPanelFrameGrid({
+    facetPanels,
+    bindings,
+    layerSlicers,
+    panelFrames,
+    warnings,
+    advisories,
+    binRanges,
+    functionDomains,
+    datasets: normalized.datasets,
+    xDiscreteRisk,
+  });
   warnEmptyLayers(bindings, panelFrames, warnings);
 
   return {
@@ -365,4 +335,93 @@ export function buildPanelFrames(input: {
     xConversion: temporal.xConversion,
     yConversion: temporal.yConversion,
   };
+}
+
+function assertTemporalTransforms(
+  normalized: NormalizedSpec,
+  decisions: readonly ScaleDecision[],
+): void {
+  for (const axis of ["x", "y"] as const) {
+    assertInferredTemporalTransform(
+      axis,
+      normalized.scales?.[axis],
+      decisions.some((decision) => decision.aesthetic === axis && decision.status === "temporal"),
+    );
+  }
+}
+
+function assignBindingTransforms(
+  bindings: readonly LayerBinding[],
+  xTransform: ColumnTransformConfig | undefined,
+  yTransform: ColumnTransformConfig | undefined,
+  xBinning: ReturnType<typeof resolveBinnedAxis>,
+  yBinning: ReturnType<typeof resolveBinnedAxis>,
+): void {
+  for (const binding of bindings) {
+    binding.xTransform = xTransform;
+    binding.yTransform = yTransform;
+    binding.xBinning = xBinning;
+    binding.yBinning = yBinning;
+  }
+}
+
+function buildPanelFrameGrid(input: {
+  facetPanels: readonly FacetPanelDef[];
+  bindings: readonly LayerBinding[];
+  layerSlicers: readonly ((
+    panel: FacetPanelDef,
+  ) => ReturnType<typeof createLayerPanelSlicer> extends (...args: never[]) => infer R
+    ? R
+    : never)[];
+  panelFrames: FinalizedLayerFrame[][];
+  warnings: PipelineWarning[];
+  advisories: Advisory[];
+  binRanges: ReturnType<typeof computePanelBinRanges>;
+  functionDomains: ReturnType<typeof computeFunctionPeerDomains>;
+  datasets: NormalizedSpec["datasets"];
+  xDiscreteRisk: ReturnType<typeof xDiscreteRiskOf>;
+}): void {
+  const {
+    facetPanels,
+    bindings,
+    layerSlicers,
+    panelFrames,
+    warnings,
+    advisories,
+    binRanges,
+    functionDomains,
+    datasets,
+    xDiscreteRisk,
+  } = input;
+  for (let p = 0; p < facetPanels.length; p++) {
+    for (let index = 0; index < bindings.length; index++) {
+      const slice = layerSlicers[index]!(facetPanels[p]!);
+      const frame = buildFrame(
+        bindings[index]!,
+        slice.table,
+        warnings,
+        advisories,
+        binRanges[index],
+        functionDomains[index],
+        datasets,
+        xDiscreteRisk,
+      );
+      applyPosition(frame, advisories, slice.table);
+      const finalized = finalizePanelFrame(bindings[index]!, frame, slice);
+      assertRibbonBounds(finalized);
+      panelFrames[p]!.push(finalized);
+    }
+  }
+}
+
+function finalizePanelFrame(
+  binding: LayerBinding,
+  frame: ReturnType<typeof buildFrame>,
+  slice: ReturnType<ReturnType<typeof createLayerPanelSlicer>>,
+): FinalizedLayerFrame {
+  if (binding.ruleForm === "annotation" || binding.layer.geom === "abline") {
+    frame.inputSourceRows = [];
+    return frame as FinalizedLayerFrame;
+  }
+  return finalizeFrameSourceRows(frame, slice);
 }
