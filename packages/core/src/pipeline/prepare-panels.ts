@@ -107,19 +107,13 @@ function filterLayerTable(
   return applyRuntimeRowFilters(table, applicable);
 }
 
-export function preparePanels(
+function buildLayerContexts(
   normalized: NormalizedSpec,
   options: RunOptions,
-  warnings: PipelineWarning[],
-  advisories: Advisory[],
-): PreparedPanels {
-  const registry = new SourceRegistry();
-  const plotSource = bindPlotData(normalized, options);
-  // Reuse ColumnTable instances for identical named refs so shared datasets
-  // share SourceRegistry namespaces (and therefore source-row identity).
+  plotSource: ColumnTable | null,
+  registry: SourceRegistry,
+): LayerDataContext[] {
   const namedTableCache = new Map<string, ColumnTable>();
-  // Seed from plot-level named data so an explicit layer `data: { name }` that
-  // matches the plot ref reuses the same table (and registry row range).
   const plotData = normalized.data;
   if (
     plotSource !== null &&
@@ -127,15 +121,13 @@ export function preparePanels(
     "name" in plotData &&
     !("values" in plotData) &&
     !("columns" in plotData)
-  ) {
+  )
     namedTableCache.set(plotData.name, plotSource);
-  }
-
   const layerContexts: LayerDataContext[] = [];
   for (let index = 0; index < normalized.layers.length; index++) {
     const layer = normalized.layers[index]!;
-    let sourceTable: ColumnTable;
     const layerData = layer.data;
+    let sourceTable: ColumnTable;
     if (
       layerData !== undefined &&
       "name" in layerData &&
@@ -144,19 +136,14 @@ export function preparePanels(
     ) {
       const cacheKey = layerData.name;
       const cached = namedTableCache.get(cacheKey);
-      if (cached === undefined) {
-        sourceTable = bindLayerTable(layerData, plotSource, index, normalized, options);
-        namedTableCache.set(cacheKey, sourceTable);
-      } else {
-        sourceTable = cached;
-      }
+      sourceTable = cached ?? bindLayerTable(layerData, plotSource, index, normalized, options);
+      if (cached === undefined) namedTableCache.set(cacheKey, sourceTable);
     } else if (layerData === undefined && plotSource !== null) {
       sourceTable = plotSource;
     } else {
       sourceTable = bindLayerTable(layerData, plotSource, index, normalized, options);
-      if (layerData !== undefined && "name" in layerData) {
+      if (layerData !== undefined && "name" in layerData)
         namedTableCache.set(layerData.name, sourceTable);
-      }
     }
     const sourceId = registry.register(sourceTable);
     const filtered = filterLayerTable(sourceTable, options.rowFilters, layer, normalized.aes);
@@ -167,6 +154,101 @@ export function preparePanels(
       sourceId,
     });
   }
+  return layerContexts;
+}
+
+function buildEmptyDataBindings(
+  normalized: NormalizedSpec,
+  layerContexts: LayerDataContext[],
+  sourceTable: ColumnTable,
+  conversions: {
+    x: ReturnType<typeof positionConversionContext>;
+    y: ReturnType<typeof positionConversionContext>;
+  },
+  warnings: PipelineWarning[],
+  advisories: Advisory[],
+): {
+  bindings: LayerBinding[];
+  decisions: ScaleDecision[];
+  diagnostics: ScaleDiagnostic[];
+  xConversion: typeof conversions.x;
+  yConversion: typeof conversions.y;
+} {
+  const bindings: LayerBinding[] = [];
+  for (let index = 0; index < normalized.layers.length; index++) {
+    const ctx = layerContexts[index]!;
+    const binding = bindLayer(
+      normalized.layers[index]!,
+      index,
+      ctx.filteredTable,
+      warnings,
+      conversions,
+      { sourceTable: ctx.sourceTable, sourceId: ctx.sourceId },
+    );
+    binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
+      normalized.scales?.color?.type ?? "",
+    );
+    binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
+      normalized.scales?.fill?.type ?? "",
+    );
+    configureStyleBindings(binding, normalized.scales, ctx.filteredTable);
+    bindings.push(binding);
+  }
+  const temporal = preflightTemporalBindings({
+    table: sourceTable,
+    bindings,
+    warnings,
+    advisories,
+    conversions,
+    layerTables: layerContexts.map((c) => c.sourceTable),
+  });
+  return {
+    bindings,
+    decisions: temporal.decisions,
+    diagnostics: temporal.diagnostics,
+    xConversion: temporal.xConversion,
+    yConversion: temporal.yConversion,
+  };
+}
+
+function buildFacetLayout(
+  normalized: NormalizedSpec,
+  layerContexts: LayerDataContext[],
+  plotSource: ColumnTable | null,
+  primaryFiltered: { table: ColumnTable; sourceRows: number[] | null },
+  emptyData: boolean,
+  warnings: PipelineWarning[],
+): FacetLayout {
+  const layoutSources: ColumnTable[] = [];
+  const seenSourceTables = new Set<ColumnTable>();
+  if (plotSource !== null) {
+    layoutSources.push(primaryFiltered.table);
+    seenSourceTables.add(plotSource);
+  }
+  for (const ctx of layerContexts) {
+    if (seenSourceTables.has(ctx.sourceTable)) continue;
+    seenSourceTables.add(ctx.sourceTable);
+    layoutSources.push(ctx.filteredTable);
+  }
+  const layoutTable = facetLayoutTable(normalized.facet, layoutSources);
+  const hasClosedLevels =
+    normalized.facet?.wrap?.levels !== undefined ||
+    normalized.facet?.rows?.levels !== undefined ||
+    normalized.facet?.cols?.levels !== undefined;
+  return emptyData && !hasClosedLevels
+    ? SINGLE_PANEL(primaryFiltered.table, primaryFiltered.sourceRows)
+    : resolveFacet(normalized.facet, layoutTable, null, warnings);
+}
+
+export function preparePanels(
+  normalized: NormalizedSpec,
+  options: RunOptions,
+  warnings: PipelineWarning[],
+  advisories: Advisory[],
+): PreparedPanels {
+  const registry = new SourceRegistry();
+  const plotSource = bindPlotData(normalized, options);
+  const layerContexts = buildLayerContexts(normalized, options, plotSource, registry);
 
   // Primary table: plot source when present, else first layer source (for
   // legacy prepared.table / prepared.sourceTable consumers).
@@ -192,31 +274,14 @@ export function preparePanels(
   assertScaleConfiguration("x", normalized.scales?.x);
   assertScaleConfiguration("y", normalized.scales?.y);
 
-  // One filtered view per unfiltered source object: plot first when present,
-  // then layer-local tables. Inherited layers share plotSource and must not
-  // re-enter the complete set (#608 union without double-counting).
-  const layoutSources: ColumnTable[] = [];
-  const seenSourceTables = new Set<ColumnTable>();
-  if (plotSource !== null) {
-    layoutSources.push(primaryFiltered.table);
-    seenSourceTables.add(plotSource);
-  }
-  for (const ctx of layerContexts) {
-    if (seenSourceTables.has(ctx.sourceTable)) continue;
-    seenSourceTables.add(ctx.sourceTable);
-    layoutSources.push(ctx.filteredTable);
-  }
-  const layoutTable = facetLayoutTable(normalized.facet, layoutSources);
-  // Closed levels still produce empty panels when every row was filtered out;
-  // only implicit (data-driven) facets collapse to a single placeholder.
-  const hasClosedLevels =
-    normalized.facet?.wrap?.levels !== undefined ||
-    normalized.facet?.rows?.levels !== undefined ||
-    normalized.facet?.cols?.levels !== undefined;
-  const facetLayout: FacetLayout =
-    emptyData && !hasClosedLevels
-      ? SINGLE_PANEL(table, primaryFiltered.sourceRows)
-      : resolveFacet(normalized.facet, layoutTable, null, warnings);
+  const facetLayout = buildFacetLayout(
+    normalized,
+    layerContexts,
+    plotSource,
+    primaryFiltered,
+    emptyData,
+    warnings,
+  );
   const { faceted, nrow, ncol, strip } = facetLayout;
   const facetPanels = facetLayout.panels;
   const freeX = faceted && facetLayout.freeX;
@@ -251,36 +316,18 @@ export function preparePanels(
     sourceTable.fields.length > 0 ||
     layerContexts.some((c) => c.sourceTable.fields.length > 0)
   ) {
-    for (let index = 0; index < normalized.layers.length; index++) {
-      const ctx = layerContexts[index]!;
-      const binding = bindLayer(
-        normalized.layers[index]!,
-        index,
-        ctx.filteredTable,
-        warnings,
-        conversions,
-        { sourceTable: ctx.sourceTable, sourceId: ctx.sourceId },
-      );
-      binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
-        normalized.scales?.color?.type ?? "",
-      );
-      binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
-        normalized.scales?.fill?.type ?? "",
-      );
-      configureStyleBindings(binding, normalized.scales, ctx.filteredTable);
-      bindings.push(binding);
-    }
-    const temporal = preflightTemporalBindings({
-      table: sourceTable,
-      bindings,
+    const built = buildEmptyDataBindings(
+      normalized,
+      layerContexts,
+      sourceTable,
+      conversions,
       warnings,
       advisories,
-      conversions,
-      layerTables: layerContexts.map((c) => c.sourceTable),
-    });
-    scaleDecisions = temporal.decisions;
-    scaleDiagnostics = temporal.diagnostics;
-    resolvedConversions = { x: temporal.xConversion, y: temporal.yConversion };
+    );
+    bindings = built.bindings;
+    scaleDecisions = built.decisions;
+    scaleDiagnostics = built.diagnostics;
+    resolvedConversions = { x: built.xConversion, y: built.yConversion };
   }
 
   return {
