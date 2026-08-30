@@ -83,62 +83,45 @@ export interface NumericStyleValueView {
   semanticOf(value: unknown): number | undefined;
 }
 
-export function resolveNumericStyleValueView(input: {
-  aesthetic: Extract<StyleAesthetic, "size" | "linewidth" | "alpha">;
-  values: readonly CellValue[];
-  config: NumericStyleConfig | undefined;
-  warnings: PipelineWarning[];
-}): NumericStyleValueView {
-  const { aesthetic, values, config, warnings } = input;
-  const requestsTemporal =
-    config?.temporalKind !== undefined ||
-    config?.parse !== undefined ||
-    config?.timezone !== undefined ||
-    config?.disambiguation !== undefined;
-  if (!requestsTemporal) {
-    // Dense plots feed all-number columns; a per-element cellToNumber
-    // callback inside Float64Array.from does not inline well. Single fused
-    // pass with a coercion fallback on the first non-number.
-    const semantic = new Float64Array(values.length);
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i]!;
-      if (typeof value !== "number") {
-        for (let j = i; j < values.length; j++) semantic[j] = cellToNumber(values[j]!);
-        break;
-      }
-      semantic[i] = value;
+function nonTemporalNumericView(values: readonly CellValue[]): NumericStyleValueView {
+  const semantic = new Float64Array(values.length);
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i]!;
+    if (typeof value !== "number") {
+      for (let j = i; j < values.length; j++) semantic[j] = cellToNumber(values[j]!);
+      break;
     }
-    return {
-      semantic,
-      temporalKind: null,
-      semanticOf(value: unknown) {
-        const number = cellToNumber(value as CellValue);
-        return Number.isFinite(number) ? number : undefined;
-      },
-    };
+    semantic[i] = value;
   }
+  return {
+    semantic,
+    temporalKind: null,
+    semanticOf(value: unknown) {
+      const number = cellToNumber(value as CellValue);
+      return Number.isFinite(number) ? number : undefined;
+    },
+  };
+}
 
-  const options = {
+function temporalOptions(config: NumericStyleConfig | undefined) {
+  return {
     ...(config?.timezone !== undefined && { timezone: config.timezone }),
     ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
   };
-  // A runtime filter can empty `values` while an authored temporal domain or
-  // binned breaks still fully determine the scale (e.g. size: { temporalKind:
-  // "date", domain: [...] } or { type: "binned", breaks: [...] }). With no
-  // samples, auto detection reports non-temporal and explicit parsers report
-  // kind: null, so the checks below would throw before numericSequentialResolution()
-  // ever parses the authored boundaries. Seed the temporal decision from the
-  // authored domain — or, failing that, authored *binned* breaks — when no
-  // samples remain, mirroring the color path returning a usable view for a fully
-  // filtered temporal frame. Only binned breaks are bin boundaries that train the
-  // domain; sequential breaks are guide-tick positions, so seeding from them would
-  // let arbitrary tick choices invent a domain (numericSequentialResolution treats
-  // `view.semantic` as the extent). Restrict the breaks fallback to `type: "binned"`.
-  const temporalColumn =
-    values.length === 0
-      ? (config?.domain ?? (config?.type === "binned" ? config?.breaks : undefined) ?? values)
-      : values;
-  const parsed = runtimeParseColumn(temporalColumn, config?.parse ?? "auto", options);
+}
+
+function temporalColumn(values: readonly CellValue[], config: NumericStyleConfig | undefined) {
+  return values.length === 0
+    ? (config?.domain ?? (config?.type === "binned" ? config?.breaks : undefined) ?? values)
+    : values;
+}
+
+function validateTemporalDecision(
+  aesthetic: Extract<StyleAesthetic, "size" | "linewidth" | "alpha">,
+  config: NumericStyleConfig | undefined,
+  parsed: ReturnType<typeof runtimeParseColumn>,
+  warnings: PipelineWarning[],
+): void {
   if (parsed.decision.status !== "temporal") {
     const cause =
       parsed.decision.status === "ambiguous"
@@ -166,13 +149,25 @@ export function resolveNumericStyleValueView(input: {
       `The ${aesthetic} scale requested ${config.temporalKind} but parsed ${parsed.decision.kind}.`,
     );
   }
+}
+
+function temporalNumericView(input: {
+  aesthetic: Extract<StyleAesthetic, "size" | "linewidth" | "alpha">;
+  values: readonly CellValue[];
+  config: NumericStyleConfig | undefined;
+  warnings: PipelineWarning[];
+}): NumericStyleValueView {
+  const { aesthetic, values, config, warnings } = input;
+  const options = temporalOptions(config);
+  const column = temporalColumn(values, config);
+  const parsed = runtimeParseColumn(column, config?.parse ?? "auto", options);
+  validateTemporalDecision(aesthetic, config, parsed, warnings);
   const parser =
     config?.parse ??
     (parsed.decision.parser === null ? null : (parsed.decision.parser as TemporalParserSpec));
   const byKey = new Map<string, number>();
-  for (let index = 0; index < temporalColumn.length; index++) {
-    if (parsed.valid[index] === 1)
-      byKey.set(encodeKey(temporalColumn[index]), parsed.semantic[index]!);
+  for (let index = 0; index < column.length; index++) {
+    if (parsed.valid[index] === 1) byKey.set(encodeKey(column[index]), parsed.semantic[index]!);
   }
   return {
     semantic: parsed.semantic,
@@ -190,4 +185,32 @@ export function resolveNumericStyleValueView(input: {
       return result.ok ? result.epochMs : undefined;
     },
   };
+}
+
+export function resolveNumericStyleValueView(input: {
+  aesthetic: Extract<StyleAesthetic, "size" | "linewidth" | "alpha">;
+  values: readonly CellValue[];
+  config: NumericStyleConfig | undefined;
+  warnings: PipelineWarning[];
+}): NumericStyleValueView {
+  const { aesthetic, values, config, warnings } = input;
+  const requestsTemporal =
+    config?.temporalKind !== undefined ||
+    config?.parse !== undefined ||
+    config?.timezone !== undefined ||
+    config?.disambiguation !== undefined;
+  if (!requestsTemporal) return nonTemporalNumericView(values);
+  // A runtime filter can empty `values` while an authored temporal domain or
+  // binned breaks still fully determine the scale (e.g. size: { temporalKind:
+  // "date", domain: [...] } or { type: "binned", breaks: [...] }). With no
+  // samples, auto detection reports non-temporal and explicit parsers report
+  // kind: null, so the checks below would throw before numericSequentialResolution()
+  // ever parses the authored boundaries. Seed the temporal decision from the
+  // authored domain — or, failing that, authored *binned* breaks — when no
+  // samples remain, mirroring the color path returning a usable view for a fully
+  // filtered temporal frame. Only binned breaks are bin boundaries that train the
+  // domain; sequential breaks are guide-tick positions, so seeding from them would
+  // let arbitrary tick choices invent a domain (numericSequentialResolution treats
+  // `view.semantic` as the extent). Restrict the breaks fallback to `type: "binned"`.
+  return temporalNumericView({ aesthetic, values, config, warnings });
 }
