@@ -1,18 +1,11 @@
-import {
-  closestOrthInRange,
-  directionalNearestInOrder,
-  panelRangeInOrder,
-} from "./candidate-geometry-nearest.js";
+import { closestOrthInRange } from "./candidate-geometry-nearest.js";
 import { createHitGeometry } from "./candidate-hit-geometry.js";
 import { resolveTopmostHit } from "./candidate-hit-resolve.js";
-import { AUTO_MODES, buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
+import { buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { BucketBoundary, SeriesBoundary } from "./candidate-store-indexes.js";
 import { buildSpatialIndex } from "./candidate-store-spatial-index.js";
-import type {
-  CandidateStore,
-  CandidateStoreOptions,
-  ResolvedCandidateInspectMode,
-} from "./candidate-store-types.js";
+import { findNearest, traverseCandidate } from "./candidate-store-nearest.js";
+import type { CandidateStore, CandidateStoreOptions } from "./candidate-store-types.js";
 import type { Scene } from "./scene.js";
 
 /** Shared empty anchors returned by disposed / uninitialized stores. */
@@ -61,101 +54,6 @@ export function assembleCandidateStore(
   const { spatial, isPoint, pointBatchIndexes, isFilledPath, filledSpanStart, filledSpanEnd } =
     query;
 
-  /**
-   * Expand a filled-path subpath representative to the best candidate in its
-   * span (#1342). Per-vertex autoMode / axis-token filters apply inside the
-   * span (not only on the rep). Scans high→low id so exact (distance, orth)
-   * ties keep the topmost candidate, matching the descending shortlist contract.
-   * Never promote filled paths via containment hypot under auto (#770).
-   */
-  const bestFilledInSpan = (
-    repId: number,
-    isAuto: boolean,
-    explicitMode: ResolvedCandidateInspectMode,
-    px: number,
-    py: number,
-    maxDistance: number,
-    probe: ReturnType<typeof hit.probePoint>,
-  ): { id: number; distance: number; orth: number; mode: ResolvedCandidateInspectMode } | null => {
-    const start = filledSpanStart[repId]!;
-    const end = filledSpanEnd[repId]!;
-    if (start < 0 || end <= start) return null;
-    // Containment is identical for every vertex on the subpath — compute once
-    // when any vertex may take exact mode.
-    let contained: boolean | null = null;
-    const isContained = (): boolean => {
-      contained ??= probe.distance(repId) !== null;
-      return contained;
-    };
-    // Under auto, exact-mode vertices (tier 1) beat axis-snap (tier 2) even when
-    // farther — track tiers separately so a mixed-mode span cannot collapse
-    // away the tier winner before the outer ranking sees it (#770 / Devin).
-    let bestExactId = -1;
-    let bestExactDistance = Infinity;
-    let bestSnapId = -1;
-    let bestSnapDistance = Infinity;
-    let bestSnapOrth = Infinity;
-    let bestSnapMode: ResolvedCandidateInspectMode = explicitMode;
-    // Descending: first equal (distance, orth) wins → highest id (topmost).
-    for (let id = end - 1; id >= start; id--) {
-      const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : explicitMode;
-      if (
-        (candidateMode === "x" && xTokenIds[id] === -1) ||
-        (candidateMode === "y" && yTokenIds[id] === -1)
-      )
-        continue;
-      let distance: number;
-      let orth: number;
-      if (candidateMode === "exact") {
-        if (!isContained()) continue;
-        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
-        orth = 0;
-        if (distance < bestExactDistance) {
-          bestExactId = id;
-          bestExactDistance = distance;
-        }
-        // Explicit exact ranks among exact vertices only (via bestExact*).
-        // Under auto, exact is tier-1 and returned below; skip snap ranking.
-        continue;
-      }
-      if (candidateMode === "x") {
-        distance = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
-        if (distance > maxDistance) continue;
-        orth = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
-      } else if (candidateMode === "y") {
-        distance = Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py));
-        if (distance > maxDistance) continue;
-        orth = Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px));
-      } else {
-        distance = Math.hypot(xs[id]! - px, ys[id]! - py);
-        if (distance > maxDistance) continue;
-        orth = 0;
-      }
-      if (distance < bestSnapDistance || (distance === bestSnapDistance && orth < bestSnapOrth)) {
-        bestSnapId = id;
-        bestSnapDistance = distance;
-        bestSnapOrth = orth;
-        bestSnapMode = candidateMode;
-      }
-    }
-    // Prefer exact when auto (tier 1) or when explicit mode is exact.
-    if (bestExactId >= 0 && (isAuto || explicitMode === "exact")) {
-      return {
-        id: bestExactId,
-        distance: bestExactDistance,
-        orth: 0,
-        mode: "exact",
-      };
-    }
-    return bestSnapId < 0
-      ? null
-      : {
-          id: bestSnapId,
-          distance: bestSnapDistance,
-          orth: bestSnapOrth,
-          mode: bestSnapMode,
-        };
-  };
   return {
     epoch,
     size: n,
@@ -187,109 +85,27 @@ export function assembleCandidateStore(
       );
     },
     nearest(px, py, search) {
-      let best = -1,
-        bestDistance = Infinity,
-        bestOrth = Infinity;
-      // Under auto, exact-mode geometric hits (tier 1) beat pure axis-snap
-      // candidates (tier 2). Prevents path/smooth x-crosshair from stealing
-      // co-layered point hits (#770). Explicit mode is un-tiered.
-      let bestGeometric = false;
-      const isAuto = search.mode === "auto";
-      // Ternary must compare search.mode directly so TS narrows away "auto".
-      const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
-      let resultMode: ResolvedCandidateInspectMode = mode;
-      const probe = hit.probePoint(px, py);
-      // When spatial is null (n===0) shortlistNearest returns []. Empty scenes
-      // have nothing to scan; non-empty always builds a tree (or filled-only
-      // trees that still shortlist via extended).
-      const ids = query.shortlistNearest(px, py, search.mode, search.maxDistance);
-      for (const id of ids) {
-        if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
-          continue;
-
-        // Filled-path shortlist entries are subpath reps (#1342) — expand with
-        // per-vertex mode/token filters before global ranking.
-        if (isFilledPath[id] === 1) {
-          // Only process the representative once (span start equals rep id).
-          if (filledSpanStart[id] !== id) continue;
-          const expanded = bestFilledInSpan(id, isAuto, mode, px, py, search.maxDistance, probe);
-          if (expanded === null) continue;
-          // Exact-mode vertices in a filled span are rare (override datum);
-          // default filled autoMode is "x" (tier 2) — do not promote via
-          // containment hypot under auto (#770).
-          const geometric = isAuto && expanded.mode === "exact";
-          if (isAuto) {
-            if (geometric && !bestGeometric) {
-              best = expanded.id;
-              bestDistance = expanded.distance;
-              bestOrth = expanded.orth;
-              resultMode = expanded.mode;
-              bestGeometric = true;
-              continue;
-            }
-            if (!geometric && bestGeometric) continue;
-          }
-          if (
-            expanded.distance < bestDistance ||
-            (expanded.distance === bestDistance && expanded.orth < bestOrth)
-          ) {
-            best = expanded.id;
-            bestDistance = expanded.distance;
-            bestOrth = expanded.orth;
-            resultMode = expanded.mode;
-            if (isAuto) bestGeometric = geometric;
-          }
-          continue;
-        }
-
-        const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : mode;
-        if (
-          (candidateMode === "x" && xTokenIds[id] === -1) ||
-          (candidateMode === "y" && yTokenIds[id] === -1)
-        )
-          continue;
-
-        const distance =
-          candidateMode === "exact"
-            ? probe.distance(id)
-            : candidateMode === "x"
-              ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-              : candidateMode === "y"
-                ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
-                : Math.hypot(xs[id]! - px, ys[id]! - py);
-        if (distance === null || (candidateMode !== "exact" && distance > search.maxDistance))
-          continue;
-        const orth =
-          candidateMode === "x"
-            ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
-            : candidateMode === "y"
-              ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-              : 0;
-        // Tier 1 = exact-mode candidates with a finite exactDistance only.
-        // Do not promote x/y candidates via stroke geometry (filled areas
-        // return unbounded containment hypot; Claude plan review #770).
-        const geometric = isAuto && candidateMode === "exact";
-        if (isAuto) {
-          if (geometric && !bestGeometric) {
-            best = id;
-            bestDistance = distance;
-            bestOrth = orth;
-            resultMode = candidateMode;
-            bestGeometric = true;
-            continue;
-          }
-          if (!geometric && bestGeometric) continue;
-        }
-        if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
-          best = id;
-          bestDistance = distance;
-          bestOrth = orth;
-          resultMode = candidateMode;
-          if (isAuto) bestGeometric = geometric;
-        }
-      }
-      const found = indexes.fact(best);
-      return found === null ? null : { ...found, distance: bestDistance, mode: resultMode };
+      return findNearest(
+        {
+          flip,
+          autoModes,
+          xTokenIds,
+          yTokenIds,
+          xs,
+          ys,
+          filledSpanStart,
+          filledSpanEnd,
+          probe: hit.probePoint(px, py),
+          panelIds,
+          scene,
+          query,
+          indexesFact: (id) => indexes.fact(id),
+          isFilledPath,
+        },
+        px,
+        py,
+        search,
+      );
     },
     group(seedId, axis) {
       if (seedId < 0 || seedId >= n) return null;
@@ -344,52 +160,17 @@ export function assembleCandidateStore(
       };
     },
     traverse(startId, direction = "next", step) {
-      if (n === 0) return null;
-      if (direction === "first") return traversal[0]!;
-      if (direction === "last") return traversal[n - 1]!;
-      if (direction === "next" || direction === "previous") {
-        if (startId !== null && (!Number.isInteger(startId) || startId < 0 || startId >= n))
-          return traversal[0]!;
-        // Preserve the original null-start contract when callers omit step.
-        if (startId === null && step === undefined) return traversal[0]!;
-        const resolvedStep = step ?? 1;
-        if (!Number.isInteger(resolvedStep) || !Number.isFinite(resolvedStep)) return startId;
-        const at = startId === null ? -1 : traversalRank[startId]!;
-        const delta = direction === "next" ? resolvedStep : -resolvedStep;
-        const next = (((at + delta) % n) + n) % n;
-        return traversal[next]!;
-      }
-      if (startId === null) return traversal[0]!;
-      if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
-      // left/right/up/down: O(log n + k) via panel-sorted primary axis indexes
-      // (not a full O(n) scan). Same panel; min primary > 0; min orth; topmost id.
-      const panel = panelIds[startId]!;
-      if (direction === "left" || direction === "right") {
-        const [panelStart, panelEnd] = panelRangeInOrder(orderByX, panelIds, panel);
-        return directionalNearestInOrder(
-          orderByX,
-          xs,
-          ys,
-          panelStart,
-          panelEnd,
-          startId,
-          xs[startId]!,
-          ys[startId]!,
-          direction === "right",
-        );
-      }
-      // up/down: reuse traversal (panel → y → x → …).
-      const [panelStart, panelEnd] = panelRangeInOrder(traversal, panelIds, panel);
-      return directionalNearestInOrder(
-        traversal,
-        ys,
-        xs,
-        panelStart,
-        panelEnd,
+      return traverseCandidate(
         startId,
-        ys[startId]!,
-        xs[startId]!,
-        direction === "down",
+        direction,
+        step,
+        n,
+        traversal,
+        traversalRank,
+        panelIds,
+        orderByX,
+        xs,
+        ys,
       );
     },
     cycle(seedId, step = 1) {
