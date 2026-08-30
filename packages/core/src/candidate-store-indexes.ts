@@ -1,19 +1,15 @@
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import { buildCandidateCoincidence } from "./candidate-store-coincidence.js";
 import { createLazyCandidateAxisGroups } from "./candidate-store-axis-groups.js";
-import type { CandidateStoreIndexes } from "./candidate-store-index-types.js";
 import {
-  defaultAutoMode,
-  candidatePrimitiveCount,
-  isCandidatePrimitive,
-  localAnchor,
-  primitiveCount,
-} from "./candidate-geometry.js";
+  populateCandidateBuffers,
+  type CandidateBufferState,
+} from "./candidate-store-index-build.js";
+import type { CandidateStoreIndexes } from "./candidate-store-index-types.js";
+import { candidatePrimitiveCount } from "./candidate-geometry.js";
 import type {
-  CandidateBuildFacts,
   CandidateFacts,
   CandidateStoreOptions,
-  CandidateStyleColumn,
   ResolvedCandidateInspectMode,
 } from "./candidate-store-types.js";
 import type { Scene } from "./scene.js";
@@ -42,11 +38,6 @@ export const AUTO_MODES = [
  * group() bucket permutations. Growable construction buffers are cleared at
  * the end of this function (retained-memory budget boundary).
  */
-
-/** Pad a lazily materialized style array with nulls up to candidate `upto`. */
-function backfillStyle(arr: CellValue[], upto: number): void {
-  for (let i = arr.length; i < upto; i++) arr.push(null);
-}
 
 export function buildCandidateStoreIndexes(
   scene: Scene,
@@ -148,188 +139,35 @@ export function buildCandidateStoreIndexes(
     return -1;
   };
 
-  // Style-value arrays are append-only and lazily materialized: a batch
-  // whose style column resolves to null writes NOTHING (dense identity
-  // layers carry no style mappings, so unconditional null pushes were five
-  // growable-array writes per candidate). Before the first real write at
-  // candidate n, nulls are backfilled so `fact()` reads stay index-aligned;
-  // untouched columns read `undefined ?? null`.
-  let n = 0;
-  for (let batchIndex = 0; batchIndex < scene.batches.length; batchIndex++) {
-    const batch = scene.batches[batchIndex]!;
-    const panel = scene.panels[batch.panelIndex];
-    if (panel === undefined) continue;
-    // Layer opted out of inspection (#1065) — paint it, never target it.
-    if (uninspectable?.has(batch.layerIndex) === true) continue;
-
-    // Eligibility, shared by both datum paths: candidate-bearing primitives
-    // in candidate order, their datum-facing (semantic) indexes, and rows.
-    const primIds = new Uint32Array(candidatePrimitiveCount(batch));
-    const semIds = new Uint32Array(primIds.length);
-    const rowIds = new Uint32Array(primIds.length);
-    {
-      let e = 0;
-      for (let p = 0; p < primitiveCount(batch); p++) {
-        if (!isCandidatePrimitive(batch, p)) continue;
-        primIds[e] = p;
-        semIds[e] = batch.kind === "paths" ? (batch.semanticIndex?.[p] ?? p) : p;
-        rowIds[e] = batch.rowIndex[p] ?? NO_ROW;
-        e++;
-      }
-    }
-    const batchStart = n;
-    const columns =
-      options.datumColumns?.({
-        batchIndex,
-        layerIndex: batch.layerIndex,
-        panelIndex: batch.panelIndex,
-        primitiveIds: primIds,
-        semanticIds: semIds,
-        rowIds,
-      }) ?? null;
-
-    if (columns !== null) {
-      // Columnar path: zero per-candidate objects. Value semantics mirror the
-      // per-candidate loop exactly (`?? null` reads, `?? series` ranks,
-      // `rowIndex ?? primitiveIndex` source order, geometry-default autoMode).
-      const count = primIds.length;
-      const writeStyle = (target: CellValue[], column: CandidateStyleColumn): void => {
-        if (column === null) return;
-        backfillStyle(target, batchStart);
-        if (column.kind === "constant") {
-          for (let i = 0; i < count; i++) target.push(column.value);
-        } else {
-          const offset = column.offset ?? 0;
-          for (let i = 0; i < count; i++) target.push(column.values[offset + i] ?? null);
-        }
-      };
-      writeStyle(sizeValues, columns.sizeValue);
-      writeStyle(linewidthValues, columns.linewidthValue);
-      writeStyle(alphaValues, columns.alphaValue);
-      writeStyle(shapeValues, columns.shapeValue);
-      writeStyle(linetypeValues, columns.linetypeValue);
-      const xValues = columns.xValue;
-      const yValues = columns.yValue;
-      const seriesCol = columns.seriesId;
-      const rankCol = columns.seriesRank;
-      const sourceOrderCol = columns.sourceOrder;
-      const lineageCol = columns.lineage;
-      const autoModeCol = columns.autoMode;
-      for (let i = 0; i < count; i++) {
-        const primitiveIndex = primIds[i]!;
-        const rowId = rowIds[i]!;
-        const rowIndex = rowId === NO_ROW ? null : rowId;
-        const [lx, ly] = localAnchor(batch, primitiveIndex);
-        batchIdsBuf[n] = batchIndex;
-        primitiveIdsBuf[n] = primitiveIndex;
-        panelIdsBuf[n] = batch.panelIndex;
-        rowsBuf[n] = rowId;
-        const ax = panel.x + lx;
-        const ay = panel.y + ly;
-        xsBuf[n] = ax;
-        ysBuf[n] = ay;
-        // Read the NARROWED f32 values back (see the per-candidate path).
-        if (!Number.isFinite(xsBuf[n]!) || !Number.isFinite(ysBuf[n]!)) anyNonFiniteAnchor = true;
-        const xValue = xValues === null ? null : (xValues[i] ?? null);
-        const yValue = yValues === null ? null : (yValues[i] ?? null);
-        const xToken = remember(xValue);
-        const yToken = remember(yValue);
-        xTokenIdsBuf[n] = xToken;
-        yTokenIdsBuf[n] = yToken;
-        xDatesBuf[n] = xValue instanceof Date ? 1 : 0;
-        yDatesBuf[n] = yValue instanceof Date ? 1 : 0;
-        if (xToken === -1 && xValue !== null) invalidX.set(n, xValue);
-        if (yToken === -1 && yValue !== null) invalidY.set(n, yValue);
-        const series = seriesCol === null ? 0 : (seriesCol[i] ?? 0);
-        seriesBuf[n] = series;
-        ranksBuf[n] = rankCol === null ? series : (rankCol[i] ?? series);
-        sourcesBuf[n] =
-          sourceOrderCol === null
-            ? (rowIndex ?? primitiveIndex)
-            : (sourceOrderCol[i] ?? rowIndex ?? primitiveIndex);
-        lineagesBuf[n] = lineageCol === null ? 0 : (lineageCol[i] ?? 0);
-        autoModesBuf[n] =
-          autoModeCol === null
-            ? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]
-            : (autoModeCol[i] ?? AUTO_MODE_CODE[defaultAutoMode(batch, primitiveIndex)]);
-        n++;
-      }
-      continue;
-    }
-
-    // Per-callback path (identity-indexed strategy, and batches the columnar
-    // resolver declined). Style values land in batch-local scratch first so a
-    // null-only style never touches the shared arrays (see backfillStyle).
-    const batchSize: CellValue[] = [];
-    const batchLinewidth: CellValue[] = [];
-    const batchAlpha: CellValue[] = [];
-    const batchShape: CellValue[] = [];
-    const batchLinetype: CellValue[] = [];
-    for (let e = 0; e < primIds.length; e++) {
-      const primitiveIndex = primIds[e]!;
-      const candidateIndex = n;
-      const raw = rowIds[e]!;
-      const rowIndex = raw === NO_ROW ? null : raw;
-      const [lx, ly] = localAnchor(batch, primitiveIndex);
-      const buildFacts: CandidateBuildFacts = {
-        candidateIndex,
-        batchIndex,
-        primitiveIndex: semIds[e]!,
-        layerIndex: batch.layerIndex,
-        panelIndex: batch.panelIndex,
-        rowIndex,
-        kind: batch.kind,
-        x: panel.x + lx,
-        y: panel.y + ly,
-      };
-      const datum = options.datum?.(buildFacts) ?? {};
-      const xValue = datum.xValue ?? null;
-      const yValue = datum.yValue ?? null;
-      batchSize.push(datum.sizeValue ?? null);
-      batchLinewidth.push(datum.linewidthValue ?? null);
-      batchAlpha.push(datum.alphaValue ?? null);
-      batchShape.push(datum.shapeValue ?? null);
-      batchLinetype.push(datum.linetypeValue ?? null);
-      batchIdsBuf[n] = batchIndex;
-      primitiveIdsBuf[n] = primitiveIndex;
-      panelIdsBuf[n] = batch.panelIndex;
-      rowsBuf[n] = rowIndex ?? NO_ROW;
-      const ax = panel.x + lx;
-      const ay = panel.y + ly;
-      xsBuf[n] = ax;
-      ysBuf[n] = ay;
-      // Read the NARROWED f32 values back: a finite double that overflows
-      // float32 (e.g. 1e39) is stored as ±Infinity, and the fast paths below
-      // must see the same (non-)finiteness the stored columns carry.
-      if (!Number.isFinite(xsBuf[n]!) || !Number.isFinite(ysBuf[n]!)) anyNonFiniteAnchor = true;
-      const xToken = remember(xValue);
-      const yToken = remember(yValue);
-      xTokenIdsBuf[n] = xToken;
-      yTokenIdsBuf[n] = yToken;
-      xDatesBuf[n] = xValue instanceof Date ? 1 : 0;
-      yDatesBuf[n] = yValue instanceof Date ? 1 : 0;
-      if (xToken === -1 && xValue !== null) invalidX.set(candidateIndex, xValue);
-      if (yToken === -1 && yValue !== null) invalidY.set(candidateIndex, yValue);
-      const series = datum.seriesId ?? 0;
-      seriesBuf[n] = series;
-      ranksBuf[n] = datum.seriesRank ?? series;
-      sourcesBuf[n] = datum.sourceOrder ?? rowIndex ?? primitiveIndex;
-      lineagesBuf[n] = datum.lineage ?? 0;
-      autoModesBuf[n] = AUTO_MODE_CODE[datum.autoMode ?? defaultAutoMode(batch, primitiveIndex)]!;
-      n++;
-    }
-    // Flush style scratch, skipping null-only columns entirely.
-    const flushStyle = (target: CellValue[], values: CellValue[]): void => {
-      if (values.every((v) => v === null)) return;
-      backfillStyle(target, batchStart);
-      for (const v of values) target.push(v);
-    };
-    flushStyle(sizeValues, batchSize);
-    flushStyle(linewidthValues, batchLinewidth);
-    flushStyle(alphaValues, batchAlpha);
-    flushStyle(shapeValues, batchShape);
-    flushStyle(linetypeValues, batchLinetype);
-  }
+  const buildState: CandidateBufferState = {
+    n: 0,
+    anyNonFiniteAnchor: false,
+    batchIds: batchIdsBuf,
+    primitiveIds: primitiveIdsBuf,
+    panelIds: panelIdsBuf,
+    rows: rowsBuf,
+    series: seriesBuf,
+    ranks: ranksBuf,
+    sources: sourcesBuf,
+    lineages: lineagesBuf,
+    autoModes: autoModesBuf,
+    xs: xsBuf,
+    ys: ysBuf,
+    xTokenIds: xTokenIdsBuf,
+    yTokenIds: yTokenIdsBuf,
+    xDates: xDatesBuf,
+    yDates: yDatesBuf,
+    invalidX,
+    invalidY,
+    sizeValues,
+    linewidthValues,
+    alphaValues,
+    shapeValues,
+    linetypeValues,
+    remember,
+  };
+  const n = populateCandidateBuffers(scene, options, uninspectable, buildState);
+  anyNonFiniteAnchor = buildState.anyNonFiniteAnchor;
 
   // Exact-count trim: when eligibility skipped primitives the capacity was
   // an upper bound, so slice the tails off (a view when exact — the common
