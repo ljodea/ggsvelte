@@ -238,23 +238,7 @@ export interface CLIRunOptions {
   version?: string;
 }
 
-/** Run the CLI. Returns the process exit code (documented in module docs). */
-export async function runCLI(
-  argv: readonly string[],
-  io: CLIIO,
-  options: CLIRunOptions = {},
-): Promise<number> {
-  // The CLI always runs the full grammar (#1420): headless spec rendering has
-  // no component layer to self-register specialty geoms/stats.
-  registerAll();
-  let args: ParsedArgs;
-  try {
-    args = parseArgs(argv);
-  } catch (error) {
-    cliError(io, "usage", (error as Error).message);
-    io.writeErr(USAGE);
-    return 2;
-  }
+function handleSpecialArgs(args: ParsedArgs, io: CLIIO, options: CLIRunOptions): number | null {
   if (args.version) {
     const hasOtherArguments =
       args.help ||
@@ -282,61 +266,60 @@ export async function runCLI(
     io.writeErr(USAGE);
     return 0;
   }
+  return null;
+}
 
-  let specText: string;
+async function readSpecText(args: ParsedArgs, io: CLIIO): Promise<string | null> {
   try {
-    specText = args.specPath === null ? await io.readStdin() : io.readFile(args.specPath);
+    return args.specPath === null ? await io.readStdin() : io.readFile(args.specPath);
   } catch (error) {
     cliError(
       io,
       "unreadable-input",
       `Cannot read ${args.specPath ?? "stdin"}: ${error instanceof Error ? error.message : String(error)}`,
     );
-    return 2;
+    return null;
   }
-  const parsedSpec = parseJSON(io, specText, args.specPath ?? "stdin");
-  if (parsedSpec === null) return 2;
-  const spec = parsedSpec.value;
+}
 
-  let data: Record<string, NamedData> | undefined;
-  if (args.dataPath !== null) {
-    let dataText: string;
-    try {
-      dataText = io.readFile(args.dataPath);
-    } catch (error) {
-      cliError(
-        io,
-        "unreadable-input",
-        `Cannot read ${args.dataPath}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return 2;
-    }
-    const parsedData = parseJSON(io, dataText, args.dataPath);
-    if (parsedData === null) return 2;
-    const parsed = parsedData.value;
-    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      cliError(
-        io,
-        "invalid-data-file",
-        "--data must be a JSON object mapping dataset names to inline data.",
-      );
-      return 2;
-    }
-    data = parsed as Record<string, NamedData>;
-  }
-
-  const specRecord =
-    typeof spec === "object" && spec !== null ? (spec as Record<string, unknown>) : {};
-  const width = args.width ?? (typeof specRecord["width"] === "number" ? specRecord["width"] : 832);
-  const height =
-    args.height ?? (typeof specRecord["height"] === "number" ? specRecord["height"] : 400);
-
+function readNamedData(args: ParsedArgs, io: CLIIO): Record<string, NamedData> | undefined | null {
+  if (args.dataPath === null) return undefined;
+  let dataText: string;
   try {
-    // Agent/CLI path: full TypeBox schema validation (exit 3). The render
-    // pipeline itself no longer loads typebox/compile for chart pages.
+    dataText = io.readFile(args.dataPath);
+  } catch (error) {
+    cliError(
+      io,
+      "unreadable-input",
+      `Cannot read ${args.dataPath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return null;
+  }
+  const parsedData = parseJSON(io, dataText, args.dataPath);
+  if (parsedData === null) return null;
+  const parsed = parsedData.value;
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    cliError(
+      io,
+      "invalid-data-file",
+      "--data must be a JSON object mapping dataset names to inline data.",
+    );
+    return null;
+  }
+  return parsed as Record<string, NamedData>;
+}
+
+function renderCLI(
+  spec: unknown,
+  args: ParsedArgs,
+  data: Record<string, NamedData> | undefined,
+  width: number,
+  height: number,
+  io: CLIIO,
+): number {
+  try {
     const schema = validate(spec);
     if (!schema.ok) throw new SpecValidationError(schema.errors);
-
     const model = runPipeline(spec as SpecInput, {
       width,
       height,
@@ -344,28 +327,20 @@ export async function runCLI(
     });
     for (const warning of model.warnings) errLine(io, { kind: "warning", ...warning });
     for (const advisory of model.advisories) errLine(io, { kind: "advisory", ...advisory });
-    for (const diagnostic of model.scaleDiagnostics) {
-      // Documented CLI contract is error|warning|advisory only. Scale diagnostics
-      // already carry severity; map 1:1 and never invent a fourth kind.
+    for (const diagnostic of model.scaleDiagnostics)
       errLine(io, {
         kind: scaleDiagnosticCliKind(diagnostic.severity),
         source: "scale",
         ...diagnostic,
       });
-    }
-    // Spec-lint advisories (Hadley lesson 16): valid-but-questionable specs.
-    // Distinguished from pipeline heuristics by source: "spec-lint".
-    for (const advisory of lintSpec(spec)) {
+    for (const advisory of lintSpec(spec))
       errLine(io, { kind: "advisory", source: "spec-lint", ...advisory });
-    }
-    // Host interaction intent (#1531): pure inspect×geom collectors. Opt-in
-    // via --inspect because inspect.mode is host-only, not PortableSpec.
     if (args.inspectMode !== null) {
       const layers =
         typeof spec === "object" && spec !== null
           ? (spec as { layers?: unknown }).layers
           : undefined;
-      for (const diagnostic of collectInspectIntentDiagnostics(layers, args.inspectMode)) {
+      for (const diagnostic of collectInspectIntentDiagnostics(layers, args.inspectMode))
         errLine(io, {
           kind: diagnostic.severity,
           source: "interaction",
@@ -376,7 +351,6 @@ export async function runCLI(
           docUrl: diagnostic.docUrl,
           ...(diagnostic.actual !== undefined && { actual: diagnostic.actual }),
         });
-      }
     }
     const limit = args.maxMarks ?? 100_000;
     const marks = countMarks(model.scene);
@@ -392,9 +366,7 @@ export async function runCLI(
     return 0;
   } catch (error) {
     if (error instanceof SpecValidationError) {
-      for (const e of error.errors) {
-        errLine(io, { kind: "error", ...e });
-      }
+      for (const e of error.errors) errLine(io, { kind: "error", ...e });
       return 3;
     }
     if (error instanceof PipelineError) {
@@ -410,4 +382,41 @@ export async function runCLI(
     cliError(io, "internal", error instanceof Error ? error.message : String(error));
     return 1;
   }
+}
+
+/** Run the CLI. Returns the process exit code (documented in module docs). */
+export async function runCLI(
+  argv: readonly string[],
+  io: CLIIO,
+  options: CLIRunOptions = {},
+): Promise<number> {
+  // The CLI always runs the full grammar (#1420): headless spec rendering has
+  // no component layer to self-register specialty geoms/stats.
+  registerAll();
+  let args: ParsedArgs;
+  try {
+    args = parseArgs(argv);
+  } catch (error) {
+    cliError(io, "usage", (error as Error).message);
+    io.writeErr(USAGE);
+    return 2;
+  }
+  const special = handleSpecialArgs(args, io, options);
+  if (special !== null) return special;
+  const specText = await readSpecText(args, io);
+  if (specText === null) return 2;
+  const parsedSpec = parseJSON(io, specText, args.specPath ?? "stdin");
+  if (parsedSpec === null) return 2;
+  const spec = parsedSpec.value;
+
+  const data = readNamedData(args, io);
+  if (data === null) return 2;
+
+  const specRecord =
+    typeof spec === "object" && spec !== null ? (spec as Record<string, unknown>) : {};
+  const width = args.width ?? (typeof specRecord["width"] === "number" ? specRecord["width"] : 832);
+  const height =
+    args.height ?? (typeof specRecord["height"] === "number" ? specRecord["height"] : 400);
+
+  return renderCLI(spec, args, data, width, height, io);
 }
