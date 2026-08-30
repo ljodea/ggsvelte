@@ -49,35 +49,27 @@ export type SpatialIndex = {
   ): number[];
 };
 
-/** Build shortlist indexes and shortlist helpers for an eager store. */
-export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeometry): SpatialIndex {
-  const { scene, n, hitTolerance, flip, batchIds, primitiveIds, xs, ys } = indexes;
+type ExtendedBuild = {
+  readonly extendedIds: number[];
+  readonly extMinX: number[];
+  readonly extMinY: number[];
+  readonly extMaxX: number[];
+  readonly extMaxY: number[];
+};
 
-  // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
-  // candidates shortlist via the tree; rects/segments/paths/glyphs use
-  // size-classed AABB-center trees so hit regions far from anchors still
-  // shortlist without force-adding every extended id. Classes bucket by
-  // log2(max half-extent) so one giant AABB cannot expand every query to O(E).
-  // Filled path vertices use NaN so StaticQuadtree skips them (#1342).
-  const spatialXs = Float64Array.from(xs);
-  const spatialYs = Float64Array.from(ys);
-  const isPoint = new Uint8Array(n);
-  const isFilledPath = new Uint8Array(n);
-  const filledSpanStart = new Int32Array(n);
-  const filledSpanEnd = new Int32Array(n);
-  filledSpanStart.fill(-1);
-  filledSpanEnd.fill(-1);
+function classifySpatialCandidates(
+  scene: CandidateStoreIndexes["scene"],
+  n: number,
+  hitTolerance: number,
+  batchIds: Uint32Array,
+  primitiveIds: Uint32Array,
+  spatialXs: Float64Array,
+  spatialYs: Float64Array,
+  isPoint: Uint8Array,
+  isFilledPath: Uint8Array,
+): { pointIdsByBatch: Map<number, number[]>; maxPointReach: number } {
   const pointIdsByBatch = new Map<number, number[]>();
-  const extendedIds: number[] = [];
-  const extMinXBuild: number[] = [];
-  const extMinYBuild: number[] = [];
-  const extMaxXBuild: number[] = [];
-  const extMaxYBuild: number[] = [];
-  // Subpath AABB cache: `${batchIndex}:${start}:${end}` → box (plot px).
-  const pathAabbCache = new Map<string, readonly [number, number, number, number]>();
   let maxPointReach = 0;
-
-  // First pass: classify points / filled paths; strip filled anchors from spatial.
   for (let id = 0; id < n; id++) {
     const batch = scene.batches[batchIds[id]!]!;
     if (batch.kind === "points") {
@@ -98,10 +90,26 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
       spatialYs[id] = Number.NaN;
     }
   }
+  return { pointIdsByBatch, maxPointReach };
+}
 
-  // Second pass: extended AABBs. Filled paths contribute one entry per subpath
-  // (first candidate id in the subpath span). Stroked paths / rects / segments /
-  // glyphs stay one entry per candidate.
+function collectExtendedBuild(
+  scene: CandidateStoreIndexes["scene"],
+  n: number,
+  batchIds: Uint32Array,
+  primitiveIds: Uint32Array,
+  isPoint: Uint8Array,
+  isFilledPath: Uint8Array,
+  hit: HitGeometry,
+  filledSpanStart: Int32Array,
+  filledSpanEnd: Int32Array,
+): ExtendedBuild {
+  const extendedIds: number[] = [];
+  const extMinX: number[] = [];
+  const extMinY: number[] = [];
+  const extMaxX: number[] = [];
+  const extMaxY: number[] = [];
+  const pathAabbCache = new Map<string, readonly [number, number, number, number]>();
   for (let id = 0; id < n;) {
     if (isPoint[id] === 1) {
       id++;
@@ -129,25 +137,72 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
         filledSpanStart[j] = startId;
         filledSpanEnd[j] = endId;
       }
-      // One extended entry for the whole filled subpath.
       extendedIds.push(startId);
       const [minX, minY, maxX, maxY] = hit.aabb(startId, pathAabbCache);
-      extMinXBuild.push(minX);
-      extMinYBuild.push(minY);
-      extMaxXBuild.push(maxX);
-      extMaxYBuild.push(maxY);
+      extMinX.push(minX);
+      extMinY.push(minY);
+      extMaxX.push(maxX);
+      extMaxY.push(maxY);
       continue;
     }
     extendedIds.push(id);
-    // glyphs still need a finite AABB for index init even though they never hit.
     const [minX, minY, maxX, maxY] = hit.aabb(id, pathAabbCache);
-    extMinXBuild.push(minX);
-    extMinYBuild.push(minY);
-    extMaxXBuild.push(maxX);
-    extMaxYBuild.push(maxY);
+    extMinX.push(minX);
+    extMinY.push(minY);
+    extMaxX.push(maxX);
+    extMaxY.push(maxY);
     id++;
   }
   pathAabbCache.clear();
+  return { extendedIds, extMinX, extMinY, extMaxX, extMaxY };
+}
+
+/** Build shortlist indexes and shortlist helpers for an eager store. */
+export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeometry): SpatialIndex {
+  const { scene, n, hitTolerance, flip, batchIds, primitiveIds, xs, ys } = indexes;
+
+  // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
+  // candidates shortlist via the tree; rects/segments/paths/glyphs use
+  // size-classed AABB-center trees so hit regions far from anchors still
+  // shortlist without force-adding every extended id. Classes bucket by
+  // log2(max half-extent) so one giant AABB cannot expand every query to O(E).
+  // Filled path vertices use NaN so StaticQuadtree skips them (#1342).
+  const spatialXs = Float64Array.from(xs);
+  const spatialYs = Float64Array.from(ys);
+  const isPoint = new Uint8Array(n);
+  const isFilledPath = new Uint8Array(n);
+  const filledSpanStart = new Int32Array(n);
+  const filledSpanEnd = new Int32Array(n);
+  filledSpanStart.fill(-1);
+  filledSpanEnd.fill(-1);
+  const { pointIdsByBatch, maxPointReach } = classifySpatialCandidates(
+    scene,
+    n,
+    hitTolerance,
+    batchIds,
+    primitiveIds,
+    spatialXs,
+    spatialYs,
+    isPoint,
+    isFilledPath,
+  );
+  const {
+    extendedIds,
+    extMinX: extMinXBuild,
+    extMinY: extMinYBuild,
+    extMaxX: extMaxXBuild,
+    extMaxY: extMaxYBuild,
+  } = collectExtendedBuild(
+    scene,
+    n,
+    batchIds,
+    primitiveIds,
+    isPoint,
+    isFilledPath,
+    hit,
+    filledSpanStart,
+    filledSpanEnd,
+  );
   const spatial = n > 0 ? new StaticQuadtree(spatialXs, spatialYs) : null;
 
   // Pointer hit testing preserves reverse paint order and per-batch point
