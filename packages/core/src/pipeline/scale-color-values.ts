@@ -84,25 +84,22 @@ function colorScaleError(
   });
 }
 
-export function resolveColorValueView(input: {
-  name: "color" | "fill";
-  values: readonly CellValue[];
-  config: ColorScaleSpec | undefined;
-  warnings: PipelineWarning[];
-}): ColorValueView {
-  const { name, values, config, warnings } = input;
-  const requestsTemporal =
-    config?.temporalKind !== undefined ||
-    config?.parse !== undefined ||
-    config?.timezone !== undefined ||
-    config?.disambiguation !== undefined;
-  const options = {
+function colorOptions(config: ColorScaleSpec | undefined) {
+  return {
     ...(config?.timezone !== undefined && { timezone: config.timezone }),
     ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
   };
-  const parsed = runtimeParseColumn(values, config?.parse ?? "auto", options);
-  const temporal = parsed.decision.status === "temporal";
+}
 
+function validateColorTemporal(input: {
+  name: "color" | "fill";
+  config: ColorScaleSpec | undefined;
+  parsed: ReturnType<typeof runtimeParseColumn>;
+  temporal: boolean;
+  requestsTemporal: boolean;
+  warnings: PipelineWarning[];
+}): void {
+  const { name, config, parsed, temporal, requestsTemporal, warnings } = input;
   if (
     (temporal || requestsTemporal) &&
     config?.transform !== undefined &&
@@ -120,7 +117,6 @@ export function resolveColorValueView(input: {
       "/transform",
     );
   }
-
   if (requestsTemporal && !temporal) {
     const cause =
       parsed.decision.status === "ambiguous"
@@ -143,9 +139,6 @@ export function resolveColorValueView(input: {
     }
     warnings.push({ code: "color-temporal-censored", message: cause });
   }
-
-  // Check kind whenever parse recovered a precision — including partial
-  // parseFailure: "censor" columns whose overall status is "invalid".
   if (
     config?.temporalKind !== undefined &&
     parsed.decision.kind !== null &&
@@ -164,34 +157,62 @@ export function resolveColorValueView(input: {
       ],
     );
   }
+}
 
-  if (temporal || requestsTemporal) {
-    const parser =
-      config?.parse ??
-      (parsed.decision.parser === null ? null : (parsed.decision.parser as TemporalParserSpec));
-    const byKey = new Map<string, number>();
-    for (let index = 0; index < values.length; index++) {
-      if (parsed.valid[index] !== 1) continue;
-      byKey.set(encodeKey(values[index]), parsed.semantic[index]!);
-    }
-    return {
-      semantic: parsed.semantic,
-      temporalKind: parsed.decision.kind ?? config?.temporalKind ?? null,
-      parser,
-      semanticOf(value: unknown): number | undefined {
-        if (value === null || value === undefined) return undefined;
-        try {
-          const cached = byKey.get(encodeKey(value));
-          if (cached !== undefined) return cached;
-        } catch {
-          return undefined;
-        }
-        if (parser === null) return undefined;
-        const result = runtimeParseOne(value as CellValue, parser, options);
-        return result.ok ? result.epochMs : undefined;
-      },
-    };
+function temporalColorView(input: {
+  name: "color" | "fill";
+  values: readonly CellValue[];
+  config: ColorScaleSpec | undefined;
+  parsed: ReturnType<typeof runtimeParseColumn>;
+  options: ReturnType<typeof colorOptions>;
+}): ColorValueView {
+  const { values, config, parsed, options } = input;
+  const parser =
+    config?.parse ??
+    (parsed.decision.parser === null ? null : (parsed.decision.parser as TemporalParserSpec));
+  const byKey = new Map<string, number>();
+  for (let index = 0; index < values.length; index++) {
+    if (parsed.valid[index] !== 1) continue;
+    byKey.set(encodeKey(values[index]), parsed.semantic[index]!);
   }
+  return {
+    semantic: parsed.semantic,
+    temporalKind: parsed.decision.kind ?? config?.temporalKind ?? null,
+    parser,
+    semanticOf(value: unknown): number | undefined {
+      if (value === null || value === undefined) return undefined;
+      try {
+        const cached = byKey.get(encodeKey(value));
+        if (cached !== undefined) return cached;
+      } catch {
+        return undefined;
+      }
+      if (parser === null) return undefined;
+      const result = runtimeParseOne(value as CellValue, parser, options);
+      return result.ok ? result.epochMs : undefined;
+    },
+  };
+}
+
+export function resolveColorValueView(input: {
+  name: "color" | "fill";
+  values: readonly CellValue[];
+  config: ColorScaleSpec | undefined;
+  warnings: PipelineWarning[];
+}): ColorValueView {
+  const { name, values, config, warnings } = input;
+  const requestsTemporal =
+    config?.temporalKind !== undefined ||
+    config?.parse !== undefined ||
+    config?.timezone !== undefined ||
+    config?.disambiguation !== undefined;
+  const options = colorOptions(config);
+  const parsed = runtimeParseColumn(values, config?.parse ?? "auto", options);
+  const temporal = parsed.decision.status === "temporal";
+  validateColorTemporal({ name, config, parsed, temporal, requestsTemporal, warnings });
+
+  if (temporal || requestsTemporal)
+    return temporalColorView({ name, values, config, parsed, options });
 
   const semantic = new Float64Array(values.length);
   for (let index = 0; index < values.length; index++) {
