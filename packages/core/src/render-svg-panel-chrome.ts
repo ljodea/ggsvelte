@@ -29,84 +29,115 @@ function rotatedBandLabelSvg(
 
 export function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
+  if (panel.axisX !== null) parts.push(renderXAxis(panel, theme));
+  if (panel.axisY !== null) parts.push(renderYAxis(panel, theme));
+  return parts.join("");
+}
+
+function renderXAxis(panel: ScenePanel, theme: ThemeTokens): string {
   const axisText = themeVar("axisText", theme);
   const axisLine = themeVar("axisLine", theme);
   const tickColor = themeVar("tickColor", theme);
-  if (panel.axisX !== null) {
+  const parts = [
+    `<g class="gg-axis gg-axis-x" transform="translate(${px(panel.x)},${px(panel.y + panel.height)})">`,
+  ];
+  if (theme.axisLineX) {
     parts.push(
-      `<g class="gg-axis gg-axis-x" transform="translate(${px(panel.x)},${px(panel.y + panel.height)})">`,
+      `<line class="gg-axis-line" x1="0" y1="0" x2="${px(panel.width)}" y2="0" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
     );
-    if (theme.axisLineX) {
-      parts.push(
-        `<line class="gg-axis-line" x1="0" y1="0" x2="${px(panel.width)}" y2="0" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
-      );
-    }
-    for (const tick of panel.axisX) {
-      const minor = tick.kind === "minor";
-      parts.push(
-        `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(${px(tick.pos)},0)">`,
-      );
-      if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
-      if (theme.ticksX && tick.showTick !== false) {
-        parts.push(
-          `<line y2="${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
-        );
-      }
-      if (tick.label !== "" && tick.showLabel !== false) {
-        const yOff = (theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3;
-        const labelSize = tick.labelSize ?? theme.axisTextSize;
-        const font = `fill="${axisText}" font-size="${px(labelSize)}" font-weight="${theme.fontWeight}"`;
-        if (tick.angle !== undefined && tick.angle !== 0) {
-          parts.push(rotatedBandLabelSvg({ ...tick, angle: tick.angle }, yOff, labelSize, font));
-        } else if (tick.lines !== undefined && tick.lines.length > 1) {
-          // Wrapped band label: one tspan per line, centered.
-          const lineH = labelSize * 1.15;
-          const tspans = tick.lines
-            .map(
-              (line, i) =>
-                `<tspan x="0" dy="${i === 0 ? "0.71em" : px(lineH)}">${escapeXML(line)}</tspan>`,
-            )
-            .join("");
-          parts.push(`<text y="${px(yOff)}" text-anchor="middle" ${font}>${tspans}</text>`);
-        } else {
-          parts.push(
-            `<text y="${px(yOff)}" dy="0.71em" text-anchor="middle" ${font}>${escapeXML(tick.label)}</text>`,
-          );
-        }
-      }
-      parts.push("</g>");
-    }
-    parts.push("</g>");
   }
-  if (panel.axisY !== null) {
+  for (const tick of panel.axisX!) parts.push(renderXAxisTick(tick, theme, axisText, tickColor));
+  parts.push("</g>");
+  return parts.join("");
+}
+
+function renderXAxisTick(
+  tick: NonNullable<ScenePanel["axisX"]>[number],
+  theme: ThemeTokens,
+  axisText: string,
+  tickColor: string,
+): string {
+  const minor = tick.kind === "minor";
+  const parts = [
+    `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(${px(tick.pos)},0)">`,
+  ];
+  if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
+  if (theme.ticksX && tick.showTick !== false) {
     parts.push(
-      `<g class="gg-axis gg-axis-y" transform="translate(${px(panel.x)},${px(panel.y)})">`,
+      `<line y2="${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
     );
-    if (theme.axisLineY) {
-      parts.push(
-        `<line class="gg-axis-line" x1="0" y1="0" x2="0" y2="${px(panel.height)}" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
-      );
-    }
-    for (const tick of panel.axisY) {
-      const minor = tick.kind === "minor";
-      parts.push(
-        `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(0,${px(tick.pos)})">`,
-      );
-      if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
-      if (theme.ticksY && tick.showTick !== false) {
-        parts.push(
-          `<line x2="-${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
-        );
-      }
-      if (tick.label !== "" && tick.showLabel !== false) {
-        parts.push(
-          `<text x="-${px((theme.ticksY && tick.showTick !== false ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(tick.labelSize ?? theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
-        );
-      }
-      parts.push("</g>");
-    }
-    parts.push("</g>");
   }
+  if (tick.label !== "" && tick.showLabel !== false) {
+    const yOff = (theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3;
+    const labelSize = tick.labelSize ?? theme.axisTextSize;
+    const font = `fill="${axisText}" font-size="${px(labelSize)}" font-weight="${theme.fontWeight}"`;
+    parts.push(renderXAxisLabel(tick, yOff, labelSize, font));
+  }
+  parts.push("</g>");
+  return parts.join("");
+}
+
+function renderXAxisLabel(
+  tick: NonNullable<ScenePanel["axisX"]>[number],
+  yOff: number,
+  labelSize: number,
+  font: string,
+): string {
+  if (tick.angle !== undefined && tick.angle !== 0) {
+    return rotatedBandLabelSvg({ ...tick, angle: tick.angle }, yOff, labelSize, font);
+  }
+  if (tick.lines !== undefined && tick.lines.length > 1) {
+    const lineH = labelSize * 1.15;
+    const tspans = tick.lines
+      .map(
+        (line, i) =>
+          `<tspan x="0" dy="${i === 0 ? "0.71em" : px(lineH)}">${escapeXML(line)}</tspan>`,
+      )
+      .join("");
+    return `<text y="${px(yOff)}" text-anchor="middle" ${font}>${tspans}</text>`;
+  }
+  return `<text y="${px(yOff)}" dy="0.71em" text-anchor="middle" ${font}>${escapeXML(tick.label)}</text>`;
+}
+
+function renderYAxis(panel: ScenePanel, theme: ThemeTokens): string {
+  const axisText = themeVar("axisText", theme);
+  const axisLine = themeVar("axisLine", theme);
+  const tickColor = themeVar("tickColor", theme);
+  const parts = [
+    `<g class="gg-axis gg-axis-y" transform="translate(${px(panel.x)},${px(panel.y)})">`,
+  ];
+  if (theme.axisLineY) {
+    parts.push(
+      `<line class="gg-axis-line" x1="0" y1="0" x2="0" y2="${px(panel.height)}" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
+    );
+  }
+  for (const tick of panel.axisY!) parts.push(renderYAxisTick(tick, theme, axisText, tickColor));
+  parts.push("</g>");
+  return parts.join("");
+}
+
+function renderYAxisTick(
+  tick: NonNullable<ScenePanel["axisY"]>[number],
+  theme: ThemeTokens,
+  axisText: string,
+  tickColor: string,
+): string {
+  const minor = tick.kind === "minor";
+  const parts = [
+    `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(0,${px(tick.pos)})">`,
+  ];
+  if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
+  if (theme.ticksY && tick.showTick !== false) {
+    parts.push(
+      `<line x2="-${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
+    );
+  }
+  if (tick.label !== "" && tick.showLabel !== false) {
+    parts.push(
+      `<text x="-${px((theme.ticksY && tick.showTick !== false ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(tick.labelSize ?? theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
+    );
+  }
+  parts.push("</g>");
   return parts.join("");
 }
 
