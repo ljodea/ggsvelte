@@ -246,57 +246,16 @@ export function deriveGroups(
   const n = rowCount(columns);
 
   // 1. Explicit aes.group override wins.
-  const groupChannel = aes["group"];
-  if (groupChannel !== undefined && groupChannel !== null && !("stat" in groupChannel)) {
-    if ("value" in groupChannel) {
-      // Constant group (e.g. ggplot2's aes(group = 1)): a single group.
-      return {
-        groups: Array.from({ length: n }, () => 0),
-        groupCount: n === 0 ? 0 : 1,
-        source: "explicit",
-        groupedBy: [],
-      };
-    }
-    const column = columns[groupChannel.field];
-    if (column === undefined) {
-      throw new Error(`deriveGroups: unknown field "${groupChannel.field}" in aes.group`);
-    }
-    // Group by value regardless of discreteness (matches ggplot2's id()).
-    const { groups, groupCount } =
-      canonicalGroupsSingleColumn(n, column) ?? canonicalGroups(n, (i) => cellKey(column[i]!));
-    return {
-      groups,
-      groupCount,
-      source: "explicit",
-      groupedBy: [groupChannel.field],
-    };
-  }
+  const explicit = explicitGroupDerivation(n, columns, aes);
+  if (explicit !== null) return explicit;
 
   // 2. Interaction of discrete mapped aesthetics.
-  const discreteColumns: { field: string; column: readonly CellValue[] }[] = [];
-  const constantParts: string[] = [];
-  for (const [channel, mapping] of Object.entries(aes)) {
-    if (mapping === undefined || mapping === null) continue;
-    if (NON_GROUPING_CHANNELS.has(channel)) continue;
-    if ("stat" in mapping) continue; // after-stat channels are pre-stat invisible
-    if ("value" in mapping) {
-      // A literal string/boolean constant is a discrete column of one value in
-      // ggplot2; it joins the interaction but can never split rows apart.
-      if (typeof mapping.value === "string" || typeof mapping.value === "boolean") {
-        constantParts.push(cellKey(mapping.value));
-      }
-      continue;
-    }
-    const override = channelOverrides[channel];
-    const discreteness =
-      override?.discreteness ?? fieldDiscreteness(mapping.field, columns, declaredDiscreteness);
-    if (discreteness === "discrete") {
-      discreteColumns.push({
-        field: mapping.field,
-        column: override?.column ?? columns[mapping.field]!,
-      });
-    }
-  }
+  const { discreteColumns, constantParts } = collectDiscreteGroupingColumns(
+    columns,
+    aes,
+    declaredDiscreteness,
+    channelOverrides,
+  );
 
   if (discreteColumns.length === 0 && constantParts.length === 0) {
     // 3. No discrete aesthetic -> ggplot2 NO_GROUP (-1): single implicit group.
@@ -331,4 +290,73 @@ export function deriveGroups(
     source: "derived",
     groupedBy: discreteColumns.map((c) => c.field),
   };
+}
+
+function explicitGroupDerivation(
+  n: number,
+  columns: Columns,
+  aes: AesMapping,
+): GroupDerivation | null {
+  const groupChannel = aes["group"];
+  if (groupChannel === undefined || groupChannel === null || "stat" in groupChannel) {
+    return null;
+  }
+  if ("value" in groupChannel) {
+    // Constant group (e.g. ggplot2's aes(group = 1)): a single group.
+    return {
+      groups: Array.from({ length: n }, () => 0),
+      groupCount: n === 0 ? 0 : 1,
+      source: "explicit",
+      groupedBy: [],
+    };
+  }
+  const column = columns[groupChannel.field];
+  if (column === undefined) {
+    throw new Error(`deriveGroups: unknown field "${groupChannel.field}" in aes.group`);
+  }
+  // Group by value regardless of discreteness (matches ggplot2's id()).
+  const { groups, groupCount } =
+    canonicalGroupsSingleColumn(n, column) ?? canonicalGroups(n, (i) => cellKey(column[i]!));
+  return {
+    groups,
+    groupCount,
+    source: "explicit",
+    groupedBy: [groupChannel.field],
+  };
+}
+
+function collectDiscreteGroupingColumns(
+  columns: Columns,
+  aes: AesMapping,
+  declaredDiscreteness: DeclaredDiscreteness,
+  channelOverrides: ChannelGroupingOverrides,
+): {
+  discreteColumns: { field: string; column: readonly CellValue[] }[];
+  constantParts: string[];
+} {
+  const discreteColumns: { field: string; column: readonly CellValue[] }[] = [];
+  const constantParts: string[] = [];
+  for (const [channel, mapping] of Object.entries(aes)) {
+    if (mapping === undefined || mapping === null) continue;
+    if (NON_GROUPING_CHANNELS.has(channel)) continue;
+    if ("stat" in mapping) continue; // after-stat channels are pre-stat invisible
+    if ("value" in mapping) {
+      // A literal string/boolean constant is a discrete column of one value in
+      // ggplot2; it joins the interaction but can never split rows apart.
+      if (typeof mapping.value === "string" || typeof mapping.value === "boolean") {
+        constantParts.push(cellKey(mapping.value));
+      }
+      continue;
+    }
+    const override = channelOverrides[channel];
+    const discreteness =
+      override?.discreteness ?? fieldDiscreteness(mapping.field, columns, declaredDiscreteness);
+    if (discreteness === "discrete") {
+      discreteColumns.push({
+        field: mapping.field,
+        column: override?.column ?? columns[mapping.field]!,
+      });
+    }
+  }
+  return { discreteColumns, constantParts };
 }
