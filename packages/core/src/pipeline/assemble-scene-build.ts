@@ -59,6 +59,54 @@ function presentTicks(ticks: SceneTick[], guide: AssembleSceneInput["hGuide"]): 
   });
 }
 
+function applyPanelGuide(
+  panel: Scene["panels"][number],
+  axis: "x" | "y",
+  guide: AssembleSceneInput["hGuide"],
+): void {
+  const key = axis === "x" ? "axisX" : "axisY";
+  const ticks = panel[key];
+  if (!guide.visible) panel[key] = null;
+  else if (ticks !== null) panel[key] = presentTicks(ticks, guide);
+}
+
+function applyPanelGuides(
+  panels: Scene["panels"],
+  hGuide: AssembleSceneInput["hGuide"],
+  vGuide: AssembleSceneInput["vGuide"],
+): void {
+  for (const panel of panels) {
+    applyPanelGuide(panel, "x", hGuide);
+    applyPanelGuide(panel, "y", vGuide);
+  }
+}
+
+function applyAxisGuides(
+  xAxis: Scene["axes"]["x"],
+  yAxis: Scene["axes"]["y"],
+  hGuide: AssembleSceneInput["hGuide"],
+  vGuide: AssembleSceneInput["vGuide"],
+): void {
+  if (hGuide.theme?.titleSize !== undefined) xAxis.titleSize = hGuide.theme.titleSize;
+  if (vGuide.theme?.titleSize !== undefined) yAxis.titleSize = vGuide.theme.titleSize;
+  xAxis.ticks = hGuide.visible ? presentTicks(xAxis.ticks, hGuide) : [];
+  yAxis.ticks = vGuide.visible ? presentTicks(yAxis.ticks, vGuide) : [];
+}
+
+function sceneBounds(
+  panels: Scene["panels"],
+  topBand: number,
+): { panelX: number; panelY: number; minimumLegendY: number } {
+  return {
+    panelX: panels.length === 0 ? 0 : Math.min(...panels.map((panel) => panel.x)),
+    panelY: panels.length === 0 ? topBand : Math.min(...panels.map((panel) => panel.y)),
+    minimumLegendY:
+      panels.length === 0
+        ? topBand
+        : Math.min(...panels.map((panel) => panel.allocation?.y ?? panel.y)),
+  };
+}
+
 export function assembleScene(input: AssembleSceneInput): Scene {
   const {
     width,
@@ -115,24 +163,9 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     ...(vMinorBreaks !== undefined && { vMinorBreaks }),
   });
 
-  for (const panel of scenePanels) {
-    if (!hGuide.visible) panel.axisX = null;
-    else if (panel.axisX !== null) panel.axisX = presentTicks(panel.axisX, hGuide);
-    if (!vGuide.visible) panel.axisY = null;
-    else if (panel.axisY !== null) panel.axisY = presentTicks(panel.axisY, vGuide);
-  }
-  if (hGuide.theme?.titleSize !== undefined) xAxis.titleSize = hGuide.theme.titleSize;
-  if (vGuide.theme?.titleSize !== undefined) yAxis.titleSize = vGuide.theme.titleSize;
-  xAxis.ticks = hGuide.visible ? presentTicks(xAxis.ticks, hGuide) : [];
-  yAxis.ticks = vGuide.visible ? presentTicks(yAxis.ticks, vGuide) : [];
-
-  const panelX = scenePanels.length === 0 ? 0 : Math.min(...scenePanels.map((panel) => panel.x));
-  const panelY =
-    scenePanels.length === 0 ? topBand : Math.min(...scenePanels.map((panel) => panel.y));
-  const minimumLegendY =
-    scenePanels.length === 0
-      ? topBand
-      : Math.min(...scenePanels.map((panel) => panel.allocation?.y ?? panel.y));
+  applyPanelGuides(scenePanels, hGuide, vGuide);
+  applyAxisGuides(xAxis, yAxis, hGuide, vGuide);
+  const { panelX, panelY, minimumLegendY } = sceneBounds(scenePanels, topBand);
   const legends = placeSceneLegends({
     legends: legendBlock.legends,
     legendWidth: legendBlock.width,
