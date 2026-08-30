@@ -316,7 +316,7 @@ function renderCLI(
   width: number,
   height: number,
   io: CLIIO,
-): Promise<number> {
+): number {
   try {
     const schema = validate(spec);
     if (!schema.ok) throw new SpecValidationError(schema.errors);
