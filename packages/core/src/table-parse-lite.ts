@@ -76,37 +76,16 @@ function parseLiteColumn(
   // Single pass: classify the column and count non-nulls. Pure number columns
   // (the competitive x/y path) and pure non-ISO string columns (color/group
   // series labels) take monomorphic fast paths that skip ISO coercion.
-  let nonNullCount = 0;
-  let isoCount = 0;
-  let stringCount = 0;
-  let sawClock = false;
-  let sawNumber = false;
-  let sawNumericLookingString = false;
-  let blockingNonString = false;
-  let allNumberOrNull = true;
-  for (const value of raw) {
-    if (value === null) continue;
-    nonNullCount++;
-    if (typeof value === "number") {
-      sawNumber = true;
-      continue;
-    }
-    allNumberOrNull = false;
-    if (typeof value === "string") {
-      stringCount++;
-      if (isIsoLikeString(value)) {
-        isoCount++;
-        if (isoHasClock(value)) sawClock = true;
-      } else if (stringLooksNumeric(value)) {
-        // "10" / " 3.5" must stay on cellsToNumeric (Number coercion), not the
-        // all-NaN label path — lean and full runtime must agree (#1468 review).
-        sawNumericLookingString = true;
-      }
-      continue;
-    }
-    if (value instanceof Date && Number.isFinite(value.getTime())) continue;
-    blockingNonString = true;
-  }
+  const classification = classifyLiteColumn(raw);
+  const {
+    nonNullCount,
+    isoCount,
+    stringCount,
+    sawClock,
+    sawNumber,
+    blockingNonString,
+    allNumberOrNull,
+  } = classification;
 
   if (allNumberOrNull) {
     const { semantic, valid } = pureNumberSemantic(raw);
@@ -143,23 +122,14 @@ function parseLiteColumn(
   if (!temporal) {
     // Pure non-ISO *label* strings (series names): semantic is all-NaN — skip
     // cellsToNumeric. Numeric text ("10") is NOT a label path.
-    const pureNonIsoLabelStrings =
-      !blockingNonString &&
-      !sawNumber &&
-      !sawNumericLookingString &&
-      stringCount > 0 &&
-      isoCount === 0 &&
-      stringCount === nonNullCount;
-    const { semantic, valid } = pureNonIsoLabelStrings
-      ? allInvalidSemantic(raw.length)
-      : fallbackNumericColumn(raw, true);
+    const { semantic, valid, parserKey } = nonTemporalLiteColumn(raw, classification);
     return {
       decision: {
         status: "nominal",
         parser: null,
         // lite:labels = pure non-ISO strings; lite:auto = mixed / numeric-text
         // (fieldType must fall back to nonTemporalFieldType for the latter).
-        parserKey: pureNonIsoLabelStrings ? "lite:labels" : "lite:auto",
+        parserKey,
         kind: null,
         precision: null,
         evidence: [],
@@ -208,6 +178,84 @@ function parseLiteColumn(
     valid,
     kind,
     precision,
+  };
+}
+
+function nonTemporalLiteColumn(
+  raw: readonly CellValue[],
+  classification: LiteColumnClassification,
+): { semantic: Float64Array; valid: Uint8Array; parserKey: "lite:labels" | "lite:auto" } {
+  const {
+    blockingNonString,
+    sawNumber,
+    sawNumericLookingString,
+    stringCount,
+    isoCount,
+    nonNullCount,
+  } = classification;
+  const pureNonIsoLabelStrings =
+    !blockingNonString &&
+    !sawNumber &&
+    !sawNumericLookingString &&
+    stringCount > 0 &&
+    isoCount === 0 &&
+    stringCount === nonNullCount;
+  const { semantic, valid } = pureNonIsoLabelStrings
+    ? allInvalidSemantic(raw.length)
+    : fallbackNumericColumn(raw, true);
+  return { semantic, valid, parserKey: pureNonIsoLabelStrings ? "lite:labels" : "lite:auto" };
+}
+
+type LiteColumnClassification = {
+  nonNullCount: number;
+  isoCount: number;
+  stringCount: number;
+  sawClock: boolean;
+  sawNumber: boolean;
+  sawNumericLookingString: boolean;
+  blockingNonString: boolean;
+  allNumberOrNull: boolean;
+};
+
+function classifyLiteColumn(raw: readonly CellValue[]): LiteColumnClassification {
+  let nonNullCount = 0;
+  let isoCount = 0;
+  let stringCount = 0;
+  let sawClock = false;
+  let sawNumber = false;
+  let sawNumericLookingString = false;
+  let blockingNonString = false;
+  let allNumberOrNull = true;
+  for (const value of raw) {
+    if (value === null) continue;
+    nonNullCount++;
+    if (typeof value === "number") {
+      sawNumber = true;
+      continue;
+    }
+    allNumberOrNull = false;
+    if (typeof value === "string") {
+      stringCount++;
+      if (isIsoLikeString(value)) {
+        isoCount++;
+        if (isoHasClock(value)) sawClock = true;
+      } else if (stringLooksNumeric(value)) {
+        sawNumericLookingString = true;
+      }
+      continue;
+    }
+    if (value instanceof Date && Number.isFinite(value.getTime())) continue;
+    blockingNonString = true;
+  }
+  return {
+    nonNullCount,
+    isoCount,
+    stringCount,
+    sawClock,
+    sawNumber,
+    sawNumericLookingString,
+    blockingNonString,
+    allNumberOrNull,
   };
 }
 
