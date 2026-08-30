@@ -18,23 +18,36 @@ import {
   numericMappedValue,
 } from "./scale-style-numeric-helpers.js";
 
-export function numericSequentialResolution(input: {
+type NumericSequentialInput = {
   aesthetic: NumericStyleAesthetic;
   kind: "sequential" | "binned";
   values: readonly CellValue[];
   config: NumericStyleConfig | undefined;
   title: string;
   warnings: PipelineWarning[];
-}): StyleResolution {
-  const { aesthetic, kind, values, config, title, warnings } = input;
-  const view = resolveNumericStyleValueView({ aesthetic, values, config, warnings });
-  const configuredDomain = config?.domain;
-  const mappedDomain =
-    configuredDomain?.length === 2
-      ? ([view.semanticOf(configuredDomain[0]), view.semanticOf(configuredDomain[1])] as const)
-      : undefined;
+};
+
+type NumericDomain = {
+  domain: [number, number];
+  low: number;
+  high: number;
+  boundaries: number[];
+  sequentialBreaks: number[] | undefined;
+};
+
+function resolveNumericConfiguredDomain(
+  input: Pick<NumericSequentialInput, "aesthetic" | "kind" | "config"> & {
+    view: ReturnType<typeof resolveNumericStyleValueView>;
+  },
+): {
+  mappedDomain: readonly [number | undefined, number | undefined] | undefined;
+  configuredBoundaries: number[] | undefined;
+  boundaryDomain: [number, number] | null;
+} {
+  const { aesthetic, kind, config, view } = input;
+  const mappedDomain = mapNumericDomain(config?.domain, view);
   if (
-    configuredDomain !== undefined &&
+    config?.domain !== undefined &&
     (mappedDomain?.[0] === undefined || mappedDomain[1] === undefined)
   ) {
     throw new PipelineError(
@@ -45,11 +58,7 @@ export function numericSequentialResolution(input: {
   }
   const mappedBoundaries =
     kind === "binned" ? config?.breaks?.map((value) => view.semanticOf(value)) : undefined;
-  if (
-    kind === "binned" &&
-    config?.breaks !== undefined &&
-    (mappedBoundaries === undefined || mappedBoundaries.some((value) => value === undefined))
-  ) {
+  if (kind === "binned" && config?.breaks !== undefined && hasInvalidBoundaries(mappedBoundaries)) {
     throw new PipelineError(
       "style-binned-breaks",
       `/scales/${aesthetic}/breaks`,
@@ -61,18 +70,51 @@ export function numericSequentialResolution(input: {
     configuredBoundaries !== undefined && configuredBoundaries.length >= 2
       ? ([configuredBoundaries[0]!, configuredBoundaries.at(-1)!] as [number, number])
       : null;
+  validateNumericBoundaryDomain(aesthetic, mappedDomain, boundaryDomain);
+  return { mappedDomain, configuredBoundaries, boundaryDomain };
+}
+
+function validateNumericBoundaryDomain(
+  aesthetic: NumericStyleAesthetic,
+  mappedDomain: readonly [number | undefined, number | undefined] | undefined,
+  boundaryDomain: [number, number] | null,
+): void {
   if (
-    boundaryDomain !== null &&
-    mappedDomain?.[0] !== undefined &&
-    mappedDomain[1] !== undefined &&
-    (mappedDomain[0] !== boundaryDomain[0] || mappedDomain[1] !== boundaryDomain[1])
+    boundaryDomain === null ||
+    mappedDomain?.[0] === undefined ||
+    mappedDomain[1] === undefined ||
+    (mappedDomain[0] === boundaryDomain[0] && mappedDomain[1] === boundaryDomain[1])
   ) {
-    throw new PipelineError(
-      "style-domain-invalid",
-      `/scales/${aesthetic}/domain`,
-      `The ${aesthetic} binned domain must match its first and last boundaries.`,
-    );
+    return;
   }
+  throw new PipelineError(
+    "style-domain-invalid",
+    `/scales/${aesthetic}/domain`,
+    `The ${aesthetic} binned domain must match its first and last boundaries.`,
+  );
+}
+
+function mapNumericDomain(
+  domain: NumericStyleConfig["domain"],
+  view: ReturnType<typeof resolveNumericStyleValueView>,
+): readonly [number | undefined, number | undefined] | undefined {
+  return domain?.length === 2
+    ? ([view.semanticOf(domain[0]), view.semanticOf(domain[1])] as const)
+    : undefined;
+}
+
+function hasInvalidBoundaries(values: readonly (number | undefined)[] | undefined): boolean {
+  return values === undefined || values.some((value) => value === undefined);
+}
+
+function resolveNumericDomain(
+  input: Pick<NumericSequentialInput, "aesthetic" | "kind" | "config"> & {
+    view: ReturnType<typeof resolveNumericStyleValueView>;
+  },
+): NumericDomain {
+  const { aesthetic, kind, config, view } = input;
+  const { mappedDomain, configuredBoundaries, boundaryDomain } =
+    resolveNumericConfiguredDomain(input);
   const extent = finiteExtent([view.semantic]);
   let domain =
     boundaryDomain ??
@@ -94,6 +136,22 @@ export function numericSequentialResolution(input: {
   }
   const low = Math.min(domain[0], domain[1]);
   const high = Math.max(domain[0], domain[1]);
+  const boundaries =
+    kind === "binned"
+      ? (configuredBoundaries ??
+        Array.from({ length: 6 }, (_, index) => low + ((high - low) * index) / 5))
+      : [];
+  if (
+    kind === "binned" &&
+    (boundaries.length < 2 ||
+      boundaries.some((value, index) => index > 0 && value <= boundaries[index - 1]!))
+  ) {
+    throw new PipelineError(
+      "style-binned-breaks",
+      `/scales/${aesthetic}/breaks`,
+      `The ${aesthetic} boundaries must be finite and strictly increasing.`,
+    );
+  }
   // Authored breaks on a sequential (non-binned) style scale are guide ticks,
   // not bin boundaries — mirror color sequential scales: parse them and require
   // each to lie inside the trained domain instead of running them through the
@@ -112,6 +170,23 @@ export function numericSequentialResolution(input: {
       `Every ${aesthetic} break must parse and lie inside the ${aesthetic} domain.`,
     );
   }
+  return {
+    domain,
+    low,
+    high,
+    boundaries,
+    sequentialBreaks: sequentialBreaks as number[] | undefined,
+  };
+}
+
+function resolveNumericRange(
+  input: Pick<NumericSequentialInput, "aesthetic" | "kind" | "config"> & {
+    low: number;
+    high: number;
+    boundaries: number[];
+  },
+): { fallback: ReturnType<typeof numericFallback>; range: [number, number] } {
+  const { aesthetic, kind, config } = input;
   const fallback = numericFallback(aesthetic, config);
   const configuredRange = config?.range;
   if (configuredRange !== undefined && configuredRange.length < 2) {
@@ -127,57 +202,85 @@ export function numericSequentialResolution(input: {
       ? [configuredRange[0]!, configuredRange.at(-1)!]
       : [...defaultRange];
   if (config?.reverse === true) range.reverse();
-  const boundaries =
-    kind === "binned"
-      ? (configuredBoundaries ??
-        Array.from({ length: 6 }, (_, index) => low + ((high - low) * index) / 5))
-      : [];
-  if (
-    kind === "binned" &&
-    (boundaries.length < 2 ||
-      boundaries.some((value, index) => index > 0 && value <= boundaries[index - 1]!))
-  ) {
-    throw new PipelineError(
-      "style-binned-breaks",
-      `/scales/${aesthetic}/breaks`,
-      `The ${aesthetic} boundaries must be finite and strictly increasing.`,
-    );
-  }
-  const semanticOutput = (semantic: number): number => {
+  return { fallback, range };
+}
+
+function numericSemanticOutput(
+  input: Pick<NumericSequentialInput, "aesthetic" | "kind" | "config"> & {
+    low: number;
+    high: number;
+    boundaries: number[];
+    fallback: ReturnType<typeof numericFallback>;
+    range: [number, number];
+  },
+): (semantic: number) => number {
+  const { aesthetic, kind, config, low, high, boundaries, fallback, range } = input;
+  return (semantic: number): number => {
     let bounded = semantic;
     if (semantic < low || semantic > high) {
       if (config?.oob !== "squish") return fallback.unknownValue;
       bounded = Math.min(high, Math.max(low, semantic));
     }
-    let t: number;
-    if (kind === "binned") {
-      const bin = styleBinIndex(boundaries, bounded);
-      t = boundaries.length <= 2 ? 0.5 : bin / (boundaries.length - 2);
-    } else {
-      t = high === low ? 0.5 : (bounded - low) / (high - low);
-    }
+    const t =
+      kind === "binned"
+        ? boundaries.length <= 2
+          ? 0.5
+          : styleBinIndex(boundaries, bounded) / (boundaries.length - 2)
+        : high === low
+          ? 0.5
+          : (bounded - low) / (high - low);
     return numericMappedValue(aesthetic, t, range, config?.sizeUnit);
   };
+}
+
+function countNumericUnknowns(
+  values: readonly CellValue[],
+  semanticValues: Float64Array,
+  low: number,
+  high: number,
+  oob: NumericStyleConfig["oob"],
+): number {
   // Index the batch semantic array (index-aligned when values is non-empty;
   // empty values skip this loop). Avoid semanticOf on the warn path so temporal
   // misses do not re-call parseColumn one row at a time.
   let unknownCount = 0;
   for (let index = 0; index < values.length; index++) {
     if (values[index] === null) continue;
-    const semantic = view.semantic[index]!;
-    if (
-      !Number.isFinite(semantic) ||
-      (config?.oob !== "squish" && (semantic < low || semantic > high))
-    ) {
+    const semantic = semanticValues[index]!;
+    if (!Number.isFinite(semantic) || (oob !== "squish" && (semantic < low || semantic > high))) {
       unknownCount++;
     }
   }
+  return unknownCount;
+}
+
+export function numericSequentialResolution(input: NumericSequentialInput): StyleResolution {
+  const { aesthetic, kind, values, config, title, warnings } = input;
+  const view = resolveNumericStyleValueView({ aesthetic, values, config, warnings });
+  const domainInfo = resolveNumericDomain({ aesthetic, kind, config, view });
+  const rangeInfo = resolveNumericRange({ aesthetic, kind, config, ...domainInfo });
+  const semanticOutput = numericSemanticOutput({
+    aesthetic,
+    kind,
+    config,
+    ...domainInfo,
+    ...rangeInfo,
+  });
+  const unknownCount = countNumericUnknowns(
+    values,
+    view.semantic,
+    domainInfo.low,
+    domainInfo.high,
+    config?.oob,
+  );
   if (unknownCount > 0) {
     warnings.push({
       code: "style-unknown-values",
       message: `${String(unknownCount)} ${aesthetic} value(s) use the unknown style.`,
     });
   }
+  const { fallback } = rangeInfo;
+  const { domain, low, high, boundaries, sequentialBreaks } = domainInfo;
   const scale: StyleScale = Object.freeze({
     aesthetic,
     type: kind,
@@ -191,9 +294,7 @@ export function numericSequentialResolution(input: {
     },
   });
   const ticks =
-    kind === "binned"
-      ? boundaries.slice(0, -1)
-      : ((sequentialBreaks as number[] | undefined) ?? linearTicks(low, high, 5));
+    kind === "binned" ? boundaries.slice(0, -1) : (sequentialBreaks ?? linearTicks(low, high, 5));
   const formatStep = kind === "binned" ? minAdjacentWidth(boundaries) : undefined;
   const formatter = resolveStyleLegendFormat({
     domain,
