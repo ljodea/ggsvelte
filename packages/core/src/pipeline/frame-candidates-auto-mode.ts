@@ -6,6 +6,48 @@ import type { ResolvedCandidateInspectMode } from "../candidate-store.js";
 import { interceptList } from "./frame-helpers.js";
 import type { LayerBinding } from "./types.js";
 
+const EXACT_GEOMS = new Set([
+  "point",
+  "count",
+  "dotplot",
+  "text",
+  "label",
+  "qq",
+  "sf_text",
+  "sf_label",
+  "col",
+  "bar",
+  "rect",
+  "tile",
+  "raster",
+  "polygon",
+  "hex",
+  "density_2d_filled",
+  "map",
+  "sf",
+  "bin_2d",
+  "errorbar",
+  "linerange",
+  "pointrange",
+  "crossbar",
+  "boxplot",
+  "violin",
+  "rug",
+]);
+const X_GEOMS = new Set([
+  "line",
+  "function",
+  "qq_line",
+  "path",
+  "step",
+  "contour",
+  "area",
+  "density",
+  "smooth",
+  "quantile",
+  "density_2d",
+]);
+
 /**
  * Layer-level auto hit mode. Returns `undefined` when the store should use
  * geometry-based {@link defaultAutoMode} (e.g. finite segments: axis from dx/dy).
@@ -15,56 +57,12 @@ export function candidateAutoMode(
   primitiveIndex: number,
 ): ResolvedCandidateInspectMode | undefined {
   const geom = binding.layer.geom;
+  if (EXACT_GEOMS.has(geom)) return "exact";
+  if (X_GEOMS.has(geom)) return "x";
   switch (geom) {
     // Points/text: exact focus + hover ring only. Axis grouping (`x`/`y`/`xy`)
     // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
     // dense scatters without adding much (#754).
-    case "point":
-    case "count":
-    case "dotplot":
-    case "text":
-    case "label":
-    case "qq":
-    case "sf_text":
-    case "sf_label":
-      return "exact";
-    case "col":
-    case "bar":
-    case "rect":
-    case "tile":
-    case "raster":
-    case "polygon":
-    case "hex":
-    case "density_2d_filled":
-    case "map":
-    case "sf":
-    case "bin_2d":
-      return "exact";
-
-    case "line":
-    case "function":
-    case "qq_line":
-    case "path":
-    case "step":
-    case "contour":
-    case "area":
-    case "density":
-    case "smooth":
-    case "quantile":
-    case "density_2d":
-      return "x";
-    // Distribution / interval geoms almost always sit on a discrete band
-    // axis. Axis-group hover (x/y/xy) freescrolls a guide through the mark
-    // body and leaves blank tooltip rows when the pointer is between band
-    // centers — prefer exact focus on the mark (#1528). Authors who want
-    // axis grouping can still set mode explicitly (and get an advisory).
-    case "errorbar":
-    case "linerange":
-    case "pointrange":
-    case "crossbar":
-    case "boxplot":
-    case "violin":
-      return "exact";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
     case "spoke":
@@ -92,8 +90,7 @@ export function candidateAutoMode(
     default: {
       // No silent fall-through: a geom with no arm above is a compile error
       // here, not a mark that quietly gets the wrong inspect mode (#1042).
-      const exhaustive: never = geom;
-      throw new Error(`unhandled geom in candidate auto mode: ${String(exhaustive)}`);
+      throw new Error(`unhandled geom in candidate auto mode: ${geom}`);
     }
   }
 }
