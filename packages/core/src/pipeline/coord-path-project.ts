@@ -57,6 +57,242 @@ function expandedStepVertices(
   return { positions: p, rows: r, anchors: a, indices };
 }
 
+type ProjectionState = {
+  projected: number[];
+  rows: number[];
+  semanticAnchors: number[];
+  semanticIndices: number[];
+  panelExtraRemaining: number;
+  capped: boolean;
+};
+
+type SubpathContext = {
+  batch: PathsBatch;
+  projectable: Uint8Array;
+  sourceRingStarts: Uint32Array | undefined;
+  projected: number[];
+  offsets: number[];
+  strokes: (string | null)[];
+  fills: (string | null)[] | undefined;
+  linewidths: number[] | undefined;
+  alphas: number[] | undefined;
+  linetypeIndexes: number[] | undefined;
+  remappedRingStarts: number[];
+  runProject(start: number, end: number): boolean;
+};
+
+function appendStyle(ctx: SubpathContext, index: number): void {
+  const { batch } = ctx;
+  ctx.offsets.push(ctx.projected.length / 2);
+  ctx.strokes.push(batch.strokes[index] ?? null);
+  ctx.fills?.push(batch.fills?.[index] ?? null);
+  ctx.linewidths?.push(batch.linewidths?.[index] ?? batch.linewidth);
+  ctx.alphas?.push(batch.alphas?.[index] ?? batch.alpha);
+  ctx.linetypeIndexes?.push(batch.linetypeIndexes?.[index] ?? 0);
+}
+
+function projectNormalSubpath(
+  ctx: SubpathContext,
+  start: number,
+  end: number,
+  index: number,
+): void {
+  let runStart = start;
+  while (runStart < end) {
+    while (runStart < end && ctx.projectable[runStart] === 0) runStart++;
+    if (runStart >= end) return;
+    let runEnd = runStart + 1;
+    while (runEnd < end && ctx.projectable[runEnd] === 1) runEnd++;
+    if (ctx.runProject(runStart, runEnd)) appendStyle(ctx, index);
+    runStart = runEnd + 1;
+  }
+}
+
+function projectHoleSubpath(
+  ctx: SubpathContext,
+  start: number,
+  end: number,
+  index: number,
+): boolean {
+  if (ctx.sourceRingStarts === undefined || ctx.sourceRingStarts.length === 0) return false;
+  const cuts = ringCuts(ctx.sourceRingStarts, start, end);
+  if (cuts.length === 2) {
+    if (!ctx.runProject(start, end)) return true;
+    appendStyle(ctx, index);
+    return true;
+  }
+  let emittedAny = false;
+  for (let c = 0; c + 1 < cuts.length; c++) {
+    const rs = cuts[c]!;
+    const re = cuts[c + 1]!;
+    if (re <= rs) continue;
+    if (emittedAny) ctx.remappedRingStarts.push(ctx.projected.length / 2);
+    if (ctx.runProject(rs, re)) emittedAny = true;
+  }
+  if (emittedAny) appendStyle(ctx, index);
+  return true;
+}
+
+function projectSubpaths(ctx: SubpathContext, dropped: { value: number }): void {
+  const { batch } = ctx;
+  for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    let invalid = false;
+    for (let vertex = start; vertex < end; vertex++) {
+      if (ctx.projectable[vertex] === 0) {
+        invalid = true;
+        break;
+      }
+    }
+    if (batch.closed === true && batch.fills !== undefined && invalid) {
+      dropped.value++;
+      continue;
+    }
+    const hole =
+      batch.closed === true &&
+      batch.fills !== undefined &&
+      ctx.sourceRingStarts !== undefined &&
+      ctx.sourceRingStarts.length > 0;
+    if (hole && projectHoleSubpath(ctx, start, end, s)) continue;
+    projectNormalSubpath(ctx, start, end, s);
+  }
+}
+
+function projectableVertices(
+  batch: PathsBatch,
+  projector: PanelCoordProjector,
+  width: number,
+  height: number,
+  unprojected: Float64Array,
+): { projectable: Uint8Array; invalid: number } {
+  const projectable = new Uint8Array(batch.positions.length / 2);
+  let invalid = 0;
+  for (let vertex = 0; vertex < projectable.length; vertex++) {
+    const [x, y] = projectPoint(
+      projector,
+      width,
+      height,
+      unprojected[vertex * 2]!,
+      unprojected[vertex * 2 + 1]!,
+    );
+    if (Number.isFinite(x) && Number.isFinite(y)) projectable[vertex] = 1;
+    else invalid++;
+  }
+  return { projectable, invalid };
+}
+
+function adjustInvalidBudget(
+  invalid: number,
+  batch: PathsBatch,
+  sharedBudget: CoordTessellationBudget | undefined,
+  state: ProjectionState,
+): void {
+  if (invalid === 0) return;
+  const totalMandatory = sharedBudget?.mandatoryVertices ?? batch.positions.length / 2;
+  const validMandatory = Math.max(0, totalMandatory - invalid);
+  const allowedExtra = Math.max(0, MAX_COORD_VERTICES_PER_PANEL_LAYER - validMandatory);
+  state.panelExtraRemaining = Math.min(state.panelExtraRemaining + invalid, allowedExtra);
+  if (sharedBudget !== undefined) {
+    sharedBudget.mandatoryVertices = validMandatory;
+    sharedBudget.extraRemaining = Math.min(sharedBudget.extraRemaining + invalid, allowedExtra);
+  }
+  state.capped = validMandatory > MAX_COORD_VERTICES_PER_PANEL_LAYER;
+}
+
+function applyRingMetadata(batch: PathsBatch, remappedRingStarts: number[]): void {
+  if (remappedRingStarts.length > 0) {
+    batch.ringStarts = Uint32Array.from(remappedRingStarts);
+    batch.fillRule = "evenodd";
+  } else {
+    if (batch.ringStarts !== undefined) delete batch.ringStarts;
+    if (batch.fillRule !== undefined) delete batch.fillRule;
+  }
+}
+
+function projectRun(
+  batch: PathsBatch,
+  projector: PanelCoordProjector,
+  width: number,
+  height: number,
+  unprojected: Float64Array,
+  state: ProjectionState,
+  runStart: number,
+  runEnd: number,
+): boolean {
+  if (runEnd <= runStart) return false;
+  const authoredCount = runEnd - runStart;
+  const stepMode = isStepCurve(batch.curve) ? batch.curve : null;
+  const desiredStepCorners =
+    stepMode === null ? 0 : Math.max(0, stepCornersPerSegment(stepMode) * (authoredCount - 1));
+  const stepCornerAllowance = Math.min(
+    state.panelExtraRemaining,
+    Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
+  );
+  const source =
+    stepMode === null
+      ? {
+          positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
+          rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
+          anchors: Array.from({ length: authoredCount }, () => 1),
+          indices: indexRange(runStart, runEnd),
+        }
+      : expandedStepVertices(
+          unprojected,
+          batch.rowIndex,
+          runStart,
+          runEnd,
+          stepCornerAllowance,
+          stepMode,
+        );
+  const count = source.rows.length;
+  if (count === 0) return false;
+  const emittedStepCorners = Math.max(0, count - authoredCount);
+  if (emittedStepCorners < desiredStepCorners) state.capped = true;
+  state.panelExtraRemaining -= emittedStepCorners;
+  const [firstX, firstY] = projectPoint(
+    projector,
+    width,
+    height,
+    source.positions[0]!,
+    source.positions[1]!,
+  );
+  state.projected.push(firstX, firstY);
+  state.rows.push(source.rows[0]!);
+  state.semanticAnchors.push(source.anchors[0]!);
+  state.semanticIndices.push(source.indices[0]!);
+  let subpathExtraRemaining = Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - count);
+  if (count > MAX_COORD_VERTICES_PER_SUBPATH) state.capped = true;
+  for (let i = 1; i < count; i++) {
+    const allowance = Math.min(subpathExtraRemaining, state.panelExtraRemaining);
+    const segmentBudget = { remaining: 1 + allowance, capped: false };
+    const before = state.projected.length / 2;
+    tessellateSegment(
+      projector,
+      width,
+      height,
+      source.positions[(i - 1) * 2]!,
+      source.positions[(i - 1) * 2 + 1]!,
+      source.positions[i * 2]!,
+      source.positions[i * 2 + 1]!,
+      source.rows[i]!,
+      source.indices[i]!,
+      state.projected,
+      state.rows,
+      state.semanticAnchors,
+      state.semanticIndices,
+      segmentBudget,
+    );
+    const added = state.projected.length / 2 - before;
+    const extraUsed = Math.max(0, added - 1);
+    subpathExtraRemaining -= extraUsed;
+    state.panelExtraRemaining -= extraUsed;
+    state.capped ||= segmentBudget.capped;
+    if (added > 0) state.semanticAnchors[state.semanticAnchors.length - 1] = source.anchors[i]!;
+  }
+  return true;
+}
+
 export function projectPathBatch(
   batch: PathsBatch,
   projector: PanelCoordProjector,
@@ -87,203 +323,45 @@ export function projectPathBatch(
   // Path-like geoms are intentionally built in ordinary scale space so this
   // post-stat stage can split coordinate-invalid runs before projection.
   const unprojected = Float64Array.from(batch.positions);
-  const projectable = new Uint8Array(batch.positions.length / 2);
-  for (let vertex = 0; vertex < projectable.length; vertex++) {
-    const [x, y] = projectPoint(
-      projector,
-      width,
-      height,
-      unprojected[vertex * 2]!,
-      unprojected[vertex * 2 + 1]!,
-    );
-    if (Number.isFinite(x) && Number.isFinite(y)) projectable[vertex] = 1;
-    else invalidVertices++;
-  }
-  // Invalid vertices never become mandatory rendered anchors; free their
-  // reserved slots without exceeding max(0, cap − validMandatory).
-  if (invalidVertices > 0) {
-    const totalMandatory = sharedBudget?.mandatoryVertices ?? batch.positions.length / 2;
-    const validMandatory = Math.max(0, totalMandatory - invalidVertices);
-    const allowedExtra = Math.max(0, MAX_COORD_VERTICES_PER_PANEL_LAYER - validMandatory);
-    panelExtraRemaining = Math.min(panelExtraRemaining + invalidVertices, allowedExtra);
-    if (sharedBudget !== undefined) {
-      sharedBudget.mandatoryVertices = validMandatory;
-      sharedBudget.extraRemaining = Math.min(
-        sharedBudget.extraRemaining + invalidVertices,
-        allowedExtra,
-      );
-    }
-    capped = validMandatory > MAX_COORD_VERTICES_PER_PANEL_LAYER;
-  }
+  const projectedVertices = projectableVertices(batch, projector, width, height, unprojected);
+  const projectable = projectedVertices.projectable;
+  invalidVertices = projectedVertices.invalid;
 
-  /**
-   * Project a half-open source vertex range [runStart, runEnd) into `projected`.
-   * Returns false when the range is empty.
-   *
-   * Per-ring subpath vertex budget: each call resets subpathExtraRemaining, so
-   * an N-ring compound can use up to N × MAX_COORD_VERTICES_PER_SUBPATH of
-   * tessellation budget (panel cap still shared via panelExtraRemaining).
-   */
-  const projectRun = (runStart: number, runEnd: number): boolean => {
-    if (runEnd <= runStart) return false;
-    const authoredCount = runEnd - runStart;
-    const stepMode = isStepCurve(batch.curve) ? batch.curve : null;
-    const desiredStepCorners =
-      stepMode === null ? 0 : Math.max(0, stepCornersPerSegment(stepMode) * (authoredCount - 1));
-    const stepCornerAllowance = Math.min(
-      panelExtraRemaining,
-      Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
-    );
-    const source =
-      stepMode === null
-        ? {
-            positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
-            rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
-            anchors: Array.from({ length: authoredCount }, () => 1),
-            indices: indexRange(runStart, runEnd),
-          }
-        : expandedStepVertices(
-            unprojected,
-            batch.rowIndex,
-            runStart,
-            runEnd,
-            stepCornerAllowance,
-            stepMode,
-          );
-    const count = source.rows.length;
-    if (count === 0) return false;
-    const emittedStepCorners = Math.max(0, count - authoredCount);
-    if (emittedStepCorners < desiredStepCorners) capped = true;
-    panelExtraRemaining -= emittedStepCorners;
-    const [firstX, firstY] = projectPoint(
-      projector,
-      width,
-      height,
-      source.positions[0]!,
-      source.positions[1]!,
-    );
-    projected.push(firstX, firstY);
-    rows.push(source.rows[0]!);
-    semanticAnchors.push(source.anchors[0]!);
-    semanticIndices.push(source.indices[0]!);
-    let subpathExtraRemaining = Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - count);
-    if (count > MAX_COORD_VERTICES_PER_SUBPATH) capped = true;
-    for (let i = 1; i < count; i++) {
-      const allowance = Math.min(subpathExtraRemaining, panelExtraRemaining);
-      const segmentBudget = { remaining: 1 + allowance, capped: false };
-      const before = projected.length / 2;
-      tessellateSegment(
-        projector,
-        width,
-        height,
-        source.positions[(i - 1) * 2]!,
-        source.positions[(i - 1) * 2 + 1]!,
-        source.positions[i * 2]!,
-        source.positions[i * 2 + 1]!,
-        source.rows[i]!,
-        source.indices[i]!,
-        projected,
-        rows,
-        semanticAnchors,
-        semanticIndices,
-        segmentBudget,
-      );
-      const added = projected.length / 2 - before;
-      const extraUsed = Math.max(0, added - 1);
-      subpathExtraRemaining -= extraUsed;
-      panelExtraRemaining -= extraUsed;
-      capped ||= segmentBudget.capped;
-      // The recursion marks its endpoint synthetic; the authored/stat vertex
-      // remains a semantic anchor even when midpoint vertices precede it.
-      if (added > 0) semanticAnchors[semanticAnchors.length - 1] = source.anchors[i]!;
-    }
-    return true;
+  const state: ProjectionState = {
+    projected,
+    rows,
+    semanticAnchors,
+    semanticIndices,
+    panelExtraRemaining,
+    capped,
   };
+  adjustInvalidBudget(invalidVertices, batch, sharedBudget, state);
+  const runProject = (runStart: number, runEnd: number): boolean =>
+    projectRun(batch, projector, width, height, unprojected, state, runStart, runEnd);
 
-  const sourceRingStarts = batch.ringStarts;
   const remappedRingStarts: number[] = [];
+  const dropped = { value: 0 };
+  projectSubpaths(
+    {
+      batch,
+      projectable,
+      sourceRingStarts: batch.ringStarts,
+      projected,
+      offsets,
+      strokes,
+      fills,
+      linewidths,
+      alphas,
+      linetypeIndexes,
+      remappedRingStarts,
+      runProject,
+    },
+    dropped,
+  );
+  droppedFilledSubpaths = dropped.value;
 
-  for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
-    const start = batch.pathOffsets[s]!;
-    const end = batch.pathOffsets[s + 1]!;
-    let sourceHasInvalidVertex = false;
-    for (let vertex = start; vertex < end; vertex++) {
-      if (projectable[vertex] === 0) {
-        sourceHasInvalidVertex = true;
-        break;
-      }
-    }
-    // A partial closed polygon has no valid boundary: SVG and canvas filling
-    // implicitly join its finite endpoints with a false chord. Drop that
-    // source subpath instead of painting geometry across an invalid gap.
-    // Multi-ring compounds drop as a whole (no partial hole remapping).
-    if (batch.closed === true && batch.fills !== undefined && sourceHasInvalidVertex) {
-      droppedFilledSubpaths++;
-      continue;
-    }
-
-    // Hole rings (#809 phase 9): project each ring of this compound separately
-    // so tessellation never invents an exterior→hole chord, then remap
-    // ringStarts to post-projection vertex indices (per-compound interior breaks).
-    // Without fills, ringStarts is not remapped (undefined consumers); fall
-    // through to run-splitting and clear metadata at the end.
-    const holeCompound =
-      batch.closed === true &&
-      batch.fills !== undefined &&
-      sourceRingStarts !== undefined &&
-      sourceRingStarts.length > 0;
-    if (holeCompound) {
-      const cuts = ringCuts(sourceRingStarts, start, end);
-      // No interior cuts in this subpath → ordinary single-ring project.
-      if (cuts.length === 2) {
-        if (!projectRun(start, end)) continue;
-        offsets.push(projected.length / 2);
-        strokes.push(batch.strokes[s] ?? null);
-        fills?.push(batch.fills?.[s] ?? null);
-        linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
-        alphas?.push(batch.alphas?.[s] ?? batch.alpha);
-        linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
-        continue;
-      }
-      let emittedAny = false;
-      for (let c = 0; c + 1 < cuts.length; c++) {
-        const rs = cuts[c]!;
-        const re = cuts[c + 1]!;
-        if (re <= rs) continue;
-        // First ring of this compound is not a ringStarts entry; subsequent
-        // successful rings record the current projected vertex cursor.
-        if (emittedAny) remappedRingStarts.push(projected.length / 2);
-        if (projectRun(rs, re)) emittedAny = true;
-      }
-      if (!emittedAny) continue;
-      offsets.push(projected.length / 2);
-      strokes.push(batch.strokes[s] ?? null);
-      fills?.push(batch.fills?.[s] ?? null);
-      linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
-      alphas?.push(batch.alphas?.[s] ?? batch.alpha);
-      linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
-      continue;
-    }
-
-    let runStart = start;
-    while (runStart < end) {
-      while (runStart < end && projectable[runStart] === 0) runStart++;
-      if (runStart >= end) break;
-      let runEnd = runStart + 1;
-      while (runEnd < end && projectable[runEnd] === 1) runEnd++;
-      if (!projectRun(runStart, runEnd)) {
-        runStart = runEnd + 1;
-        continue;
-      }
-      offsets.push(projected.length / 2);
-      strokes.push(batch.strokes[s] ?? null);
-      fills?.push(batch.fills?.[s] ?? null);
-      linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
-      alphas?.push(batch.alphas?.[s] ?? batch.alpha);
-      linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
-      runStart = runEnd + 1;
-    }
-  }
+  panelExtraRemaining = state.panelExtraRemaining;
+  capped = state.capped;
 
   if (sharedBudget !== undefined) sharedBudget.extraRemaining = panelExtraRemaining;
   batch.positions = Float32Array.from(projected);
@@ -296,15 +374,8 @@ export function projectPathBatch(
   if (linetypeIndexes !== undefined) batch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
   batch.semanticAnchors = Uint8Array.from(semanticAnchors);
   batch.semanticIndex = Uint32Array.from(semanticIndices);
-  // Remap even-odd hole topology (#809 phase 9). Dropped compounds omit their
-  // ringStarts (no stale indices). Closing edges remain untessellated (paint closePath).
-  if (remappedRingStarts.length > 0) {
-    batch.ringStarts = Uint32Array.from(remappedRingStarts);
-    batch.fillRule = "evenodd";
-  } else {
-    if (batch.ringStarts !== undefined) delete batch.ringStarts;
-    if (batch.fillRule !== undefined) delete batch.fillRule;
-  }
+  // Remap even-odd hole topology (#809 phase 9). Dropped compounds omit stale ringStarts.
+  applyRingMetadata(batch, remappedRingStarts);
   if (invalidVertices > 0) {
     warnings.push({
       code: "coord-invalid-geometry",
