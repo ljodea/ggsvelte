@@ -120,8 +120,22 @@ function foundationFromTokens(t: ThemeTokens): FoundationBag {
   };
 }
 
-function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
-  const fromBase = foundationFromTokens(base);
+function mergeFoundationColors(
+  theme: ThemeSpec,
+  fromBase: FoundationBag,
+): Pick<
+  FoundationBag,
+  | "ink"
+  | "paper"
+  | "accent"
+  | "grid"
+  | "panel"
+  | "letterboxFill"
+  | "axisText"
+  | "axisLine"
+  | "tickColor"
+  | "panelBorder"
+> {
   return {
     ink: theme.ink ?? fromBase.ink,
     paper: theme.paper ?? fromBase.paper,
@@ -133,6 +147,27 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
     axisLine: theme.axisLine ?? fromBase.axisLine,
     tickColor: theme.tickColor ?? fromBase.tickColor,
     panelBorder: theme.panelBorder ?? fromBase.panelBorder,
+  };
+}
+
+function mergeFoundationTypography(
+  theme: ThemeSpec,
+  fromBase: FoundationBag,
+): Pick<
+  FoundationBag,
+  | "fontFamily"
+  | "fontSize"
+  | "axisTextSize"
+  | "fontWeight"
+  | "titleSize"
+  | "titleWeight"
+  | "subtitleSize"
+  | "subtitleWeight"
+  | "axisTitleSize"
+  | "axisTitleWeight"
+  | "guideTitleSize"
+> {
+  return {
     fontFamily: theme.fontFamily ?? fromBase.fontFamily,
     fontSize: theme.fontSize ?? fromBase.fontSize,
     axisTextSize: theme.axisTextSize ?? fromBase.axisTextSize,
@@ -144,6 +179,25 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
     axisTitleSize: theme.axisTitleSize ?? fromBase.axisTitleSize,
     axisTitleWeight: theme.axisTitleWeight ?? fromBase.axisTitleWeight,
     guideTitleSize: theme.guideTitleSize ?? fromBase.guideTitleSize,
+  };
+}
+
+function mergeFoundationLegendLayout(
+  theme: ThemeSpec,
+  fromBase: FoundationBag,
+): Pick<
+  FoundationBag,
+  | "legendKeySize"
+  | "legendKeyGap"
+  | "legendRowGap"
+  | "guideBlockGap"
+  | "colorbarThickness"
+  | "colorbarLengthMin"
+  | "captionSize"
+  | "stripSize"
+  | "stripWeight"
+> {
+  return {
     legendKeySize: theme.legendKeySize ?? fromBase.legendKeySize,
     legendKeyGap: theme.legendKeyGap ?? fromBase.legendKeyGap,
     legendRowGap: theme.legendRowGap ?? fromBase.legendRowGap,
@@ -153,12 +207,42 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
     captionSize: theme.captionSize ?? fromBase.captionSize,
     stripSize: theme.stripSize ?? fromBase.stripSize,
     stripWeight: theme.stripWeight ?? fromBase.stripWeight,
+  };
+}
+
+function mergeFoundationMetrics(
+  theme: ThemeSpec,
+  fromBase: FoundationBag,
+): Pick<
+  FoundationBag,
+  "axisLineWidth" | "tickWidth" | "tickLength" | "gridWidth" | "panelBorderWidth" | "gridDasharray"
+> {
+  return {
     axisLineWidth: theme.axisLineWidth ?? fromBase.axisLineWidth,
     tickWidth: theme.tickWidth ?? fromBase.tickWidth,
     tickLength: theme.tickLength ?? fromBase.tickLength,
     gridWidth: theme.gridWidth ?? fromBase.gridWidth,
     panelBorderWidth: theme.panelBorderWidth ?? fromBase.panelBorderWidth,
     gridDasharray: theme.gridDasharray ?? fromBase.gridDasharray,
+  };
+}
+
+function mergeFoundationVisibility(
+  theme: ThemeSpec,
+  fromBase: FoundationBag,
+): Pick<
+  FoundationBag,
+  | "axisLineX"
+  | "axisLineY"
+  | "ticksX"
+  | "ticksY"
+  | "labelsX"
+  | "labelsY"
+  | "gridX"
+  | "gridY"
+  | "showPanelBorder"
+> {
+  return {
     axisLineX: theme.axisLineX ?? fromBase.axisLineX,
     axisLineY: theme.axisLineY ?? fromBase.axisLineY,
     ticksX: theme.ticksX ?? fromBase.ticksX,
@@ -168,6 +252,17 @@ function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
     gridX: theme.gridX ?? fromBase.gridX,
     gridY: theme.gridY ?? fromBase.gridY,
     showPanelBorder: theme.showPanelBorder ?? fromBase.showPanelBorder,
+  };
+}
+
+function mergeFoundation(theme: ThemeSpec, base: ThemeTokens): FoundationBag {
+  const fromBase = foundationFromTokens(base);
+  return {
+    ...mergeFoundationColors(theme, fromBase),
+    ...mergeFoundationTypography(theme, fromBase),
+    ...mergeFoundationLegendLayout(theme, fromBase),
+    ...mergeFoundationMetrics(theme, fromBase),
+    ...mergeFoundationVisibility(theme, fromBase),
   };
 }
 
