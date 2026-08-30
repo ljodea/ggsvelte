@@ -43,20 +43,10 @@
     // them to satisfy a line count harms readability.
     "eslint/max-lines": "off",
     "eslint/max-lines-per-function": "off",
-    // Keep branching readable and testable. The rollout override below is a
-    // temporary ratchet: remove one scope after its violations are refactored.
+    // Keep branching readable and testable.
     "eslint/complexity": ["error", { "max": 20 }]
   },
   "overrides": [
-    {
-      // Final staged rollout inventory (2026-08-29): packages/core 122.
-      // Later overrides re-enable the rule for each completed core scope;
-      // remove this exemption after the last scope reaches zero.
-      "files": ["packages/core/**"],
-      "rules": {
-        "eslint/complexity": "off"
-      }
-    },
     {
       "files": ["packages/core/src/stats/**"],
       "rules": {
