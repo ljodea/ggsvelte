@@ -1,7 +1,4 @@
-/**
- * Named topmost-hit policy: reverse paint order, path stable-edge contract,
- * and within-batch tie-breaks. Testable without the full CandidateStore shell.
- */
+/** Named topmost-hit policy: reverse paint order and within-batch tie-breaks. */
 import {
   pathRange,
   pathSemanticNeighborRange,
@@ -16,11 +13,19 @@ import type { Scene } from "./scene.js";
 type PointBatchIndex = {
   readonly batchIndex: number;
   readonly ids: number[];
-  readonly spatial: {
-    queryRect(loX: number, loY: number, hiX: number, hiY: number): number[];
-  };
-  /** Precomputed max(batch.size, …sizes) * 1.25; see spatial-index build. */
+  readonly spatial: { queryRect(loX: number, loY: number, hiX: number, hiY: number): number[] };
   readonly maxRadius: number;
+};
+
+type HitCandidate = {
+  candidateId: number;
+  batchIndex: number;
+  primitive: number;
+  distance: number;
+  pathStart: number;
+  pathEdge: number;
+  anchorDistance: number;
+  semanticAnchors: boolean;
 };
 
 export type TopmostHitContext = {
@@ -32,7 +37,6 @@ export type TopmostHitContext = {
   readonly xs: Float32Array;
   readonly ys: Float32Array;
   readonly pointBatchIndexes: readonly PointBatchIndex[];
-  /** Filled-path subpath candidate spans (#1342); -1 when not a filled path. */
   readonly filledSpanStart: Int32Array;
   readonly filledSpanEnd: Int32Array;
   readonly isFilledPath: Uint8Array;
@@ -41,208 +45,192 @@ export type TopmostHitContext = {
   fact(id: number): CandidateFacts | null;
 };
 
+function outsidePanel(panel: Scene["panels"][number] | undefined, px: number, py: number): boolean {
+  return (
+    panel === undefined ||
+    (panel.clip !== false &&
+      (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height))
+  );
+}
+
+function findPointHit(ctx: TopmostHitContext, px: number, py: number): HitCandidate | null {
+  const { scene, hitTolerance, primitiveIds, xs, ys, pointBatchIndexes } = ctx;
+  for (let index = pointBatchIndexes.length - 1; index >= 0; index--) {
+    const entry = pointBatchIndexes[index]!;
+    const batch = scene.batches[entry.batchIndex]!;
+    if (batch.kind !== "points" || outsidePanel(scene.panels[batch.panelIndex], px, py)) continue;
+    const localIds = entry.spatial
+      .queryRect(
+        px - entry.maxRadius - hitTolerance,
+        py - entry.maxRadius - hitTolerance,
+        px + entry.maxRadius + hitTolerance,
+        py + entry.maxRadius + hitTolerance,
+      )
+      .toSorted((a, b) => b - a);
+    for (const localId of localIds) {
+      const candidateId = entry.ids[localId]!;
+      const distance = pointHitDistance(
+        batch,
+        primitiveIds[candidateId]!,
+        xs[candidateId]! - px,
+        ys[candidateId]! - py,
+        hitTolerance,
+      );
+      if (distance !== null)
+        return {
+          candidateId,
+          batchIndex: entry.batchIndex,
+          distance,
+          pathStart: -1,
+          primitive: primitiveIds[candidateId]!,
+          pathEdge: Infinity,
+          anchorDistance: distance,
+          semanticAnchors: false,
+        };
+    }
+  }
+  return null;
+}
+
+function filledPathHit(
+  ctx: TopmostHitContext,
+  id: number,
+  batch: Extract<Scene["batches"][number], { kind: "paths" }>,
+  px: number,
+  py: number,
+  probe: HitProbePoint,
+): HitCandidate | null {
+  const spanStart = ctx.filledSpanStart[id]!;
+  const spanEnd = ctx.filledSpanEnd[id]!;
+  if (spanStart < 0 || spanEnd <= spanStart || probe.distance(id) === null) return null;
+  let candidateId = spanStart;
+  let anchorDistance = Math.hypot(ctx.xs[spanStart]! - px, ctx.ys[spanStart]! - py);
+  let primitive = ctx.primitiveIds[spanStart]!;
+  for (let cid = spanStart + 1; cid < spanEnd; cid++) {
+    const d = Math.hypot(ctx.xs[cid]! - px, ctx.ys[cid]! - py);
+    const p = ctx.primitiveIds[cid]!;
+    if (d < anchorDistance || (d === anchorDistance && p < primitive)) {
+      candidateId = cid;
+      anchorDistance = d;
+      primitive = p;
+    }
+  }
+  return {
+    candidateId,
+    batchIndex: ctx.batchIds[id]!,
+    primitive,
+    distance: anchorDistance,
+    pathStart: pathRange(batch, ctx.primitiveIds[id]!)?.[0] ?? -1,
+    pathEdge: Infinity,
+    anchorDistance,
+    semanticAnchors: true,
+  };
+}
+
+function regularPathHit(
+  ctx: TopmostHitContext,
+  id: number,
+  batch: Scene["batches"][number],
+  panel: NonNullable<Scene["panels"][number]>,
+  px: number,
+  py: number,
+  probe: HitProbePoint,
+): HitCandidate | null {
+  const distance = probe.distance(id);
+  if (distance === null) return null;
+  const primitive = ctx.primitiveIds[id]!;
+  const range = batch.kind === "paths" ? pathRange(batch, primitive) : null;
+  const pathStart = range?.[0] ?? -1;
+  let pathEdge = Infinity;
+  let candidateId = id;
+  let anchorDistance = Math.hypot(ctx.xs[id]! - px, ctx.ys[id]! - py);
+  if (batch.kind === "paths" && batch.fills === undefined && range !== null) {
+    const localX = px - panel.x;
+    const localY = py - panel.y;
+    const subpath = pathSubpathIndex(batch.pathOffsets, primitive);
+    const slop =
+      (subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth)) / 2 +
+      ctx.hitTolerance;
+    pathEdge = closestPathEdge(
+      batch,
+      pathSemanticNeighborRange(batch, primitive),
+      localX,
+      localY,
+      slop,
+    );
+    if (!Number.isFinite(pathEdge)) return null;
+    if (batch.semanticAnchors === undefined) {
+      const firstDistance = Math.hypot(
+        batch.positions[pathEdge * 2]! - localX,
+        batch.positions[pathEdge * 2 + 1]! - localY,
+      );
+      const secondDistance = Math.hypot(
+        batch.positions[(pathEdge + 1) * 2]! - localX,
+        batch.positions[(pathEdge + 1) * 2 + 1]! - localY,
+      );
+      candidateId = id - primitive + (firstDistance <= secondDistance ? pathEdge : pathEdge + 1);
+      anchorDistance = Math.min(firstDistance, secondDistance);
+    }
+  }
+  return {
+    candidateId,
+    batchIndex: ctx.batchIds[id]!,
+    primitive,
+    distance,
+    pathStart,
+    pathEdge,
+    anchorDistance,
+    semanticAnchors: batch.kind === "paths" && batch.semanticAnchors !== undefined,
+  };
+}
+
+function improvesWithinBatch(candidate: HitCandidate, best: HitCandidate | null): boolean {
+  if (best === null) return true;
+  if (candidate.pathStart !== -1 || best.pathStart !== -1) {
+    if (candidate.pathStart !== best.pathStart) return candidate.pathStart > best.pathStart;
+    if (candidate.semanticAnchors || best.semanticAnchors) {
+      if (candidate.pathEdge !== best.pathEdge) return candidate.pathEdge < best.pathEdge;
+      return (
+        candidate.anchorDistance < best.anchorDistance ||
+        (candidate.anchorDistance === best.anchorDistance && candidate.primitive < best.primitive)
+      );
+    }
+    return candidate.pathEdge < best.pathEdge;
+  }
+  return candidate.primitive > best.primitive;
+}
+
 /** Resolve the topmost candidate under (px, py), or null when nothing hits. */
 export function resolveTopmostHit(
   ctx: TopmostHitContext,
   px: number,
   py: number,
 ): CandidateFacts | null {
-  const {
-    scene,
-    hitTolerance,
-    batchIds,
-    primitiveIds,
-    panelIds,
-    xs,
-    ys,
-    pointBatchIndexes,
-    filledSpanStart,
-    filledSpanEnd,
-    isFilledPath,
-  } = ctx;
-  // Bind via arrows so type-aware unbound-method is satisfied.
-  const addExtendedIntersecting = (
-    loX: number,
-    loY: number,
-    hiX: number,
-    hiY: number,
-    into: number[],
-  ): void => {
-    ctx.addExtendedIntersecting(loX, loY, hiX, hiY, into);
-  };
-  const fact = (id: number) => ctx.fact(id);
   const probe = ctx.probePoint(px, py);
-
-  let best = -1;
-  let bestBatch = -1;
-  let bestDistance = Infinity;
-  let bestPathStart = -1;
-  let bestPathEdge = Infinity;
-
-  for (let index = pointBatchIndexes.length - 1; index >= 0; index--) {
-    const entry = pointBatchIndexes[index]!;
-    const batch = scene.batches[entry.batchIndex]!;
-    if (batch.kind !== "points") continue;
-    const panel = scene.panels[batch.panelIndex];
-    if (
-      panel === undefined ||
-      (panel.clip !== false &&
-        (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height))
-    )
-      continue;
-    const maxRadius = entry.maxRadius;
-    const localIds = entry.spatial
-      .queryRect(
-        px - maxRadius - hitTolerance,
-        py - maxRadius - hitTolerance,
-        px + maxRadius + hitTolerance,
-        py + maxRadius + hitTolerance,
-      )
-      .toSorted((a, b) => b - a);
-    for (const localId of localIds) {
-      const candidateId = entry.ids[localId]!;
-      const primitive = primitiveIds[candidateId]!;
-      const distance = pointHitDistance(
-        batch,
-        primitive,
-        xs[candidateId]! - px,
-        ys[candidateId]! - py,
-        hitTolerance,
-      );
-      if (distance === null) continue;
-      best = candidateId;
-      bestBatch = entry.batchIndex;
-      bestDistance = distance;
-      break;
-    }
-    if (best >= 0) break;
-  }
-
+  let best = findPointHit(ctx, px, py);
   const extended: number[] = [];
-  addExtendedIntersecting(px, py, px, py, extended);
+  ctx.addExtendedIntersecting(px, py, px, py, extended);
   extended.sort((a, b) => b - a);
   for (const id of extended) {
-    const batchIndex = batchIds[id]!;
-    if (batchIndex < bestBatch) continue;
-    const batch = scene.batches[batchIndex]!;
+    const batchIndex = ctx.batchIds[id]!;
+    if (best !== null && batchIndex < best.batchIndex) continue;
+    const batch = ctx.scene.batches[batchIndex]!;
     if (batch.kind === "glyphs") continue;
-    const panel = scene.panels[panelIds[id]!]!;
+    const panel = ctx.scene.panels[ctx.panelIds[id]!];
+    if (outsidePanel(panel, px, py)) continue;
+    const candidate =
+      ctx.isFilledPath[id] === 1 && batch.kind === "paths" && batch.fills !== undefined
+        ? filledPathHit(ctx, id, batch, px, py, probe)
+        : panel === undefined
+          ? null
+          : regularPathHit(ctx, id, batch, panel, px, py, probe);
+    if (candidate === null) continue;
     if (
-      panel.clip !== false &&
-      (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height)
+      best === null ||
+      candidate.batchIndex > best.batchIndex ||
+      (candidate.batchIndex === best.batchIndex && improvesWithinBatch(candidate, best))
     )
-      continue;
-
-    // Filled path: one extended shortlist entry per subpath (#1342). Contain
-    // once via the rep, then nearest-anchor scan over the candidate span.
-    if (isFilledPath[id] === 1 && batch.kind === "paths" && batch.fills !== undefined) {
-      const spanStart = filledSpanStart[id]!;
-      const spanEnd = filledSpanEnd[id]!;
-      if (spanStart < 0 || spanEnd <= spanStart) continue;
-      // Containment is identical for every vertex on the subpath.
-      if (probe.distance(id) === null) continue;
-      const range = pathRange(batch, primitiveIds[id]!);
-      const pathStart = range?.[0] ?? -1;
-      let candidateId = spanStart;
-      let anchorDistance = Math.hypot(xs[spanStart]! - px, ys[spanStart]! - py);
-      let primitive = primitiveIds[spanStart]!;
-      for (let cid = spanStart + 1; cid < spanEnd; cid++) {
-        const d = Math.hypot(xs[cid]! - px, ys[cid]! - py);
-        const p = primitiveIds[cid]!;
-        if (d < anchorDistance || (d === anchorDistance && p < primitive)) {
-          candidateId = cid;
-          anchorDistance = d;
-          primitive = p;
-        }
-      }
-      const sameBatch = batchIndex === bestBatch;
-      const improvesWithinBatch =
-        pathStart > bestPathStart ||
-        (pathStart === bestPathStart &&
-          (anchorDistance < bestDistance ||
-            (anchorDistance === bestDistance &&
-              primitive < (best < 0 ? Infinity : primitiveIds[best]!))));
-      if (batchIndex > bestBatch || (sameBatch && improvesWithinBatch)) {
-        best = candidateId;
-        bestBatch = batchIndex;
-        bestDistance = anchorDistance;
-        bestPathStart = pathStart;
-        bestPathEdge = Infinity;
-      }
-      continue;
-    }
-
-    const distance = probe.distance(id);
-    if (distance === null) continue;
-    const sameBatch = batchIndex === bestBatch;
-    const primitive = primitiveIds[id]!;
-    const range = batch.kind === "paths" ? pathRange(batch, primitive) : null;
-    const pathStart = range?.[0] ?? -1;
-    let pathEdge = Infinity;
-    let candidateId = id;
-    let anchorDistance = Math.hypot(xs[id]! - px, ys[id]! - py);
-    if (batch.kind === "paths" && batch.fills === undefined && range !== null) {
-      const localX = px - panel.x;
-      const localY = py - panel.y;
-      const subpath = pathSubpathIndex(batch.pathOffsets, primitive);
-      const slop =
-        (subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth)) /
-          2 +
-        hitTolerance;
-      pathEdge = closestPathEdge(
-        batch,
-        pathSemanticNeighborRange(batch, primitive),
-        localX,
-        localY,
-        slop,
-      );
-      if (!Number.isFinite(pathEdge)) continue;
-      if (batch.semanticAnchors === undefined) {
-        // Preserve the historical stable edge contract: an equidistant
-        // ordinary path edge resolves to its first render vertex.
-        const firstDistance = Math.hypot(
-          batch.positions[pathEdge * 2]! - localX,
-          batch.positions[pathEdge * 2 + 1]! - localY,
-        );
-        const secondDistance = Math.hypot(
-          batch.positions[(pathEdge + 1) * 2]! - localX,
-          batch.positions[(pathEdge + 1) * 2 + 1]! - localY,
-        );
-        const chosenPrimitive = firstDistance <= secondDistance ? pathEdge : pathEdge + 1;
-        candidateId = id - primitive + chosenPrimitive;
-        anchorDistance = Math.min(firstDistance, secondDistance);
-      } else {
-        // Synthetic render vertices never become candidates. Competing
-        // semantic anchors that own this tessellated edge are compared by
-        // anchor distance in the normal within-batch tie break below.
-        candidateId = id;
-        anchorDistance = Math.hypot(xs[id]! - px, ys[id]! - py);
-      }
-    }
-    const nearerTessellatedAnchor =
-      batch.kind === "paths" &&
-      batch.semanticAnchors !== undefined &&
-      pathEdge === bestPathEdge &&
-      (anchorDistance < bestDistance ||
-        (anchorDistance === bestDistance &&
-          primitive < (best < 0 ? Infinity : primitiveIds[best]!)));
-    const improvesWithinBatch =
-      batch.kind === "paths"
-        ? pathStart > bestPathStart ||
-          (pathStart === bestPathStart &&
-            (batch.fills === undefined
-              ? pathEdge < bestPathEdge || nearerTessellatedAnchor
-              : anchorDistance < bestDistance ||
-                (anchorDistance === bestDistance &&
-                  primitive < (best < 0 ? Infinity : primitiveIds[best]!))))
-        : primitive > (best < 0 ? -1 : primitiveIds[best]!);
-    if (batchIndex > bestBatch || (sameBatch && improvesWithinBatch)) {
-      best = candidateId;
-      bestBatch = batchIndex;
-      bestDistance = batch.kind === "paths" ? anchorDistance : distance;
-      bestPathStart = pathStart;
-      bestPathEdge = pathEdge;
-    }
+      best = candidate;
   }
-  return fact(best);
+  return ctx.fact(best?.candidateId ?? -1);
 }
