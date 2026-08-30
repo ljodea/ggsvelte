@@ -5,7 +5,11 @@
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
-import { getScaleTransform, type ColumnTransformConfig } from "../scales/transform.js";
+import {
+  getScaleTransform,
+  type ColumnTransformConfig,
+  type ScaleTransform,
+} from "../scales/transform.js";
 
 import {
   resolveBinnedBoundaries,
@@ -31,22 +35,40 @@ export function resolveBinnedAxis(
 ): BinnedBoundaries | undefined {
   if (config?.type !== "binned") return undefined;
   const scaleTransform = transform?.transform ?? getScaleTransform("identity");
-  const authoredBreaks = config.breaks;
+  const explicitEdges = resolveExplicitEdges(axis, config.breaks, scaleTransform);
+  const measuredExtent = collectBinnedExtent(
+    axis,
+    bindings,
+    tables,
+    conversion,
+    transform,
+    explicitEdges !== null,
+  );
+  const extent = explicitEdges === null ? measuredExtent : null;
+  return resolveBinnedBoundaries(extent, explicitEdges, axis) ?? undefined;
+}
+
+function resolveExplicitEdges(
+  axis: "x" | "y",
+  authoredBreaks: PositionScaleSpec["breaks"],
+  transform: ScaleTransform,
+): readonly number[] | null {
   if (
     authoredBreaks !== undefined &&
     authoredBreaks.some(
-      (value) =>
-        typeof value !== "number" || !Number.isFinite(value) || !scaleTransform.valid(value),
+      (value) => typeof value !== "number" || !Number.isFinite(value) || !transform.valid(value),
     )
   ) {
     throw new PipelineError(
       "invalid-scale-breaks",
       `/scales/${axis}/breaks`,
-      `A type: "binned" scale requires finite numeric boundaries inside the ${scaleTransform.key} transform domain.`,
+      `A type: "binned" scale requires finite numeric boundaries inside the ${transform.key} transform domain.`,
     );
   }
-  const numericBreaks = authoredBreaks as readonly number[] | undefined;
-  const explicitEdges = transformExplicitBreaks(numericBreaks, scaleTransform);
+  const explicitEdges = transformExplicitBreaks(
+    authoredBreaks as readonly number[] | undefined,
+    transform,
+  );
   if (explicitEdges !== null && new Set(explicitEdges).size < 2) {
     throw new PipelineError(
       "invalid-scale-breaks",
@@ -54,17 +76,24 @@ export function resolveBinnedAxis(
       `A type: "binned" scale requires at least two distinct usable boundaries.`,
     );
   }
+  return explicitEdges;
+}
 
+function collectBinnedExtent(
+  axis: "x" | "y",
+  bindings: readonly LayerBinding[],
+  tables: readonly ColumnTable[],
+  conversion: PositionConversionContext,
+  transform: ColumnTransformConfig | undefined,
+  hasExplicitEdges: boolean,
+): [number, number] | null {
   let lo = Number.POSITIVE_INFINITY;
   let hi = Number.NEGATIVE_INFINITY;
-  // Keyed by sourceId+field so same name on different tables both contribute.
   const seen = new Set<string>();
   for (let index = 0; index < bindings.length; index++) {
     const binding = bindings[index]!;
     const table = tables[index] ?? tables[0];
     if (table === undefined) continue;
-    // Segment endpoints train the same axis — only when this binding is a segment
-    // (plot-level aes can leave xend/yend on non-segment layers that ignore them).
     const isSegment = binding.layer.geom === "segment";
     const fields =
       axis === "x"
@@ -76,28 +105,35 @@ export function resolveBinnedAxis(
       if (seen.has(seenKey)) continue;
       seen.add(seenKey);
       if (!table.has(field)) continue;
-      const fieldType = positionFieldType(table, field, conversion);
-      if (fieldType !== "quantitative") {
-        throw new PipelineError(
-          "binned-scale-requires-continuous",
-          `/scales/${axis}`,
-          `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
-        );
-      }
-      if (explicitEdges !== null) continue;
+      assertQuantitativeBinnedField(axis, field, table, conversion);
+      if (hasExplicitEdges) continue;
       const values =
         transform === undefined
           ? table.numeric(field, conversion.sourceParser, conversion.options)
           : table.transformed(field, conversion.sourceParser, conversion.options, transform)
               .transformed;
-      for (let i = 0; i < values.length; i++) {
-        const value = values[i]!;
+      for (const value of values) {
         if (!Number.isFinite(value)) continue;
-        if (value < lo) lo = value;
-        if (value > hi) hi = value;
+        lo = Math.min(lo, value);
+        hi = Math.max(hi, value);
       }
     }
   }
-  const extent: [number, number] | null = explicitEdges === null && lo <= hi ? [lo, hi] : null;
-  return resolveBinnedBoundaries(extent, explicitEdges, axis) ?? undefined;
+  return lo <= hi ? [lo, hi] : null;
+}
+
+function assertQuantitativeBinnedField(
+  axis: "x" | "y",
+  field: string,
+  table: ColumnTable,
+  conversion: PositionConversionContext,
+): void {
+  const fieldType = positionFieldType(table, field, conversion);
+  if (fieldType !== "quantitative") {
+    throw new PipelineError(
+      "binned-scale-requires-continuous",
+      `/scales/${axis}`,
+      `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
+    );
+  }
 }
