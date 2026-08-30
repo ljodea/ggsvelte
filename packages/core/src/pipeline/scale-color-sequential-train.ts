@@ -23,14 +23,67 @@ export function trainSequentialColorScale(input: {
   warnings: PipelineWarning[];
   advisories: Advisory[];
 }): SequentialColorScale {
-  const { name, values, anyDiscreteField, config, editionDefaults, warnings, advisories } = input;
+  const { name, values, config, warnings, advisories } = input;
+  warnSequentialDiscrete(input);
+  const prepared = prepareSequentialColor(input);
+  const scale = trainPreparedSequentialColor(name, prepared);
+  warnSequentialUnknowns(name, values, prepared, scale, warnings);
+  if (config?.scheme === undefined && config?.range === undefined) {
+    advisories.push({
+      code: "palette-inferred",
+      path: `scales.${name}`,
+      chosen: "sequential viridis ramp",
+      howToOverride: `Set scales.${name}.range (ramp stops) or scales.${name}.domain.`,
+    });
+  }
+  const guideBreaks = resolveSequentialBreaks(
+    name,
+    config,
+    prepared.view,
+    prepared.transform,
+    scale,
+  );
+  const semanticColorOf = (value: unknown): string | undefined => scale.colorOf(value);
+  return {
+    ...scale,
+    ...(prepared.view.temporalKind !== null &&
+      prepared.view.temporalKind !== "time" && {
+        temporal: true,
+        temporalKind: prepared.view.temporalKind,
+      }),
+    ...(guideBreaks !== undefined && { guideBreaks: Object.freeze(guideBreaks) }),
+    colorOf(value: unknown): string | undefined {
+      if (value === null || value === undefined) return semanticColorOf(null);
+      const semantic = prepared.view.semanticOf(value);
+      return semantic === undefined ? scale.unknownValue : semanticColorOf(semantic);
+    },
+  };
+}
 
+type SequentialColorInput = Parameters<typeof trainSequentialColorScale>[0];
+type PreparedSequentialColor = {
+  view: ReturnType<typeof resolveColorValueView>;
+  config: ColorScaleSpec | undefined;
+  transformName: NonNullable<ColorScaleSpec["transform"]>;
+  transform: ReturnType<typeof scaleTransform>;
+  extent: ReturnType<typeof finiteExtent>;
+  domain: [number, number] | undefined;
+  range: ReturnType<typeof resolveSequentialRange>;
+  oob: ColorScaleSpec["oob"];
+};
+
+function warnSequentialDiscrete(input: SequentialColorInput): void {
+  const { name, anyDiscreteField, config, warnings } = input;
   if (anyDiscreteField && config?.temporalKind === undefined && config?.parse === undefined) {
     warnings.push({
       code: "sequential-discrete-field",
       message: `The ${name} scale is sequential but a mapped field is discrete; values that do not parse as numbers render the unknown color.`,
     });
   }
+}
+
+function prepareSequentialColor(input: SequentialColorInput): PreparedSequentialColor {
+  const { name, values, config, editionDefaults, warnings } = input;
   const view = resolveColorValueView({ name, values, config, warnings });
   const transformName = config?.transform ?? "identity";
   const transform = scaleTransform(transformName);
@@ -48,6 +101,19 @@ export function trainSequentialColorScale(input: {
       message: `${String(invalidCount)} ${name} value(s) are invalid for the ${transformName} transform and use the unknown color.`,
     });
   }
+  const domain = resolveColorDomain(name, config, view);
+  validateColorTransformInput(name, values, config, transformName, extent, domain);
+  const range = resolveSequentialRange(config, editionDefaults);
+  const cyclic = config?.scheme !== undefined && CYCLIC_SCHEMES.has(config.scheme);
+  const oob = config?.oob ?? (cyclic ? "wrap" : undefined);
+  return { view, config, transformName, transform, extent, domain, range, oob };
+}
+
+function resolveColorDomain(
+  name: "color" | "fill",
+  config: ColorScaleSpec | undefined,
+  view: ReturnType<typeof resolveColorValueView>,
+): [number, number] | undefined {
   const configuredDomain = config?.domain;
   const semanticDomain =
     configuredDomain?.length === 2
@@ -66,26 +132,41 @@ export function trainSequentialColorScale(input: {
       `The ${name} domain must contain exactly two values valid for its parser and transform.`,
     );
   }
+  return domain;
+}
+
+function validateColorTransformInput(
+  name: "color" | "fill",
+  values: readonly CellValue[],
+  config: ColorScaleSpec | undefined,
+  transformName: NonNullable<ColorScaleSpec["transform"]>,
+  extent: ReturnType<typeof finiteExtent>,
+  domain: [number, number] | undefined,
+): void {
   if (
-    extent === null &&
-    domain === undefined &&
-    values.some((value) => value !== null) &&
-    (transformName !== "identity" ||
-      config?.temporalKind !== undefined ||
-      config?.parse !== undefined)
+    extent !== null ||
+    domain !== undefined ||
+    !values.some((value) => value !== null) ||
+    (transformName === "identity" &&
+      config?.temporalKind === undefined &&
+      config?.parse === undefined)
   ) {
-    throw new PipelineError(
-      "color-transform-empty",
-      `/scales/${name}`,
-      `All ${name} values are invalid for the ${transformName} transform.`,
-    );
+    return;
   }
-  const range = resolveSequentialRange(config, editionDefaults);
-  const cyclic = config?.scheme !== undefined && CYCLIC_SCHEMES.has(config.scheme);
-  const oob = config?.oob ?? (cyclic ? "wrap" : undefined);
-  let scale: SequentialColorScale;
+  throw new PipelineError(
+    "color-transform-empty",
+    `/scales/${name}`,
+    `All ${name} values are invalid for the ${transformName} transform.`,
+  );
+}
+
+function trainPreparedSequentialColor(
+  name: "color" | "fill",
+  prepared: PreparedSequentialColor,
+): SequentialColorScale {
+  const { extent, domain, range, transformName, oob, config } = prepared;
   try {
-    scale = trainSequential(extent, {
+    return trainSequential(extent, {
       ...(domain !== undefined && { domain }),
       ...(range !== undefined && { range }),
       ...(config?.reverse !== undefined && { reverse: config.reverse }),
@@ -101,6 +182,16 @@ export function trainSequentialColorScale(input: {
       error instanceof Error ? error.message : `Invalid ${name} transform domain.`,
     );
   }
+}
+
+function warnSequentialUnknowns(
+  name: "color" | "fill",
+  values: readonly CellValue[],
+  prepared: PreparedSequentialColor,
+  scale: SequentialColorScale,
+  warnings: PipelineWarning[],
+): void {
+  const { view, transform, oob } = prepared;
   const lower = Math.min(scale.domain[0], scale.domain[1]);
   const upper = Math.max(scale.domain[0], scale.domain[1]);
   let unknownCount = 0;
@@ -121,15 +212,18 @@ export function trainSequentialColorScale(input: {
       message: `${String(unknownCount)} ${name} value(s) use the unknown color.`,
     });
   }
-  if (config?.scheme === undefined && config?.range === undefined) {
-    advisories.push({
-      code: "palette-inferred",
-      path: `scales.${name}`,
-      chosen: "sequential viridis ramp",
-      howToOverride: `Set scales.${name}.range (ramp stops) or scales.${name}.domain.`,
-    });
-  }
+}
+
+function resolveSequentialBreaks(
+  name: "color" | "fill",
+  config: ColorScaleSpec | undefined,
+  view: ReturnType<typeof resolveColorValueView>,
+  transform: ReturnType<typeof scaleTransform>,
+  scale: SequentialColorScale,
+): number[] | undefined {
   const guideBreaks = config?.breaks?.map((value) => view.semanticOf(value));
+  const lower = Math.min(scale.domain[0], scale.domain[1]);
+  const upper = Math.max(scale.domain[0], scale.domain[1]);
   if (
     guideBreaks?.some(
       (value) => value === undefined || !transform.valid(value) || value < lower || value > upper,
@@ -141,21 +235,5 @@ export function trainSequentialColorScale(input: {
       `Every ${name} colorbar break must parse, satisfy the transform, and lie inside the semantic domain.`,
     );
   }
-  const semanticColorOf = (value: unknown): string | undefined => scale.colorOf(value);
-  return {
-    ...scale,
-    ...(view.temporalKind !== null &&
-      view.temporalKind !== "time" && {
-        temporal: true,
-        temporalKind: view.temporalKind,
-      }),
-    ...(guideBreaks !== undefined && {
-      guideBreaks: Object.freeze(guideBreaks as number[]),
-    }),
-    colorOf(value: unknown): string | undefined {
-      if (value === null || value === undefined) return semanticColorOf(null);
-      const semantic = view.semanticOf(value);
-      return semantic === undefined ? scale.unknownValue : semanticColorOf(semantic);
-    },
-  };
+  return guideBreaks as number[] | undefined;
 }
