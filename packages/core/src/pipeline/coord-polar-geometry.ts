@@ -72,56 +72,25 @@ function rectsToPolarPaths(
   const linetypeIndexes: number[] = [];
 
   for (let i = 0; i < n; i++) {
-    const o = i * 4;
-    const x = batch.rects[o]!;
-    const y = batch.rects[o + 1]!;
-    const w = batch.rects[o + 2]!;
-    const h = batch.rects[o + 3]!;
-    // Rect in panel px (y = top). Corners in y-down: TL, TR, BR, BL.
-    // Walk edges with denser sampling so polar arcs stay smooth.
-    const corners: Array<readonly [number, number]> = [
-      [x, y],
-      [x + w, y],
-      [x + w, y + h],
-      [x, y + h],
-    ];
-    const ring: number[] = [];
-    for (let e = 0; e < 4; e++) {
-      const [x0, y0] = corners[e]!;
-      const [x1, y1] = corners[(e + 1) % 4]!;
-      const samples = POLAR_RECT_EDGE_SAMPLES;
-      // Emit each edge's start corner (t=0) and stop short of the next (t < 1).
-      // The next edge supplies that corner — do NOT skip s===0 on later edges
-      // (that chamfers corners and leaves gaps between pie slices).
-      for (let s = 0; s < samples; s++) {
-        const t = s / samples;
-        const px = x0 + (x1 - x0) * t;
-        const py = y0 + (y1 - y0) * t;
-        const [qx, qy] = projectPoint(projector, width, height, px, py);
-        ring.push(qx, qy);
-      }
-    }
-    // Cap ring length for safety
-    const maxVerts = MAX_COORD_VERTICES_PER_SUBPATH;
-    const vertCount = Math.min(ring.length / 2, maxVerts);
-    const row = batch.rowIndex[i] ?? 0xffffffff;
-    for (let v = 0; v < vertCount; v++) {
-      positions.push(ring[v * 2]!, ring[v * 2 + 1]!);
-      rowIndex.push(row);
-      // One semantic candidate per sector (munch vertices are presentation-only).
-      semanticAnchors.push(v === 0 ? 1 : 0);
-      semanticIndex.push(i);
-    }
-    pathOffsets.push(positions.length / 2);
-    // fillRole "paper" + null fill is a hollow rect under Cartesian; PathsBatch
-    // has no fillRole, so keep null (theme accent) rather than inventing paper
-    // without a theme token here. Mapped fills always win.
-    fills.push(batch.fills?.[i] ?? batch.fill);
-    const stroke = batch.strokes?.[i] ?? (batch.stroke === undefined ? null : batch.stroke);
-    strokes.push(stroke);
-    if (hasAlphas) alphas.push(batch.alphas![i] ?? batch.alpha);
-    if (hasStrokeWidths) strokeWidths.push(batch.strokeWidths![i] ?? batch.strokeWidth ?? 1);
-    if (hasLinetypes) linetypeIndexes.push(batch.linetypeIndexes![i] ?? 0);
+    const path = polarRectPath(batch, i, projector, width, height);
+    appendPolarRect(
+      path,
+      batch,
+      i,
+      positions,
+      rowIndex,
+      semanticAnchors,
+      semanticIndex,
+      pathOffsets,
+      fills,
+      strokes,
+      alphas,
+      strokeWidths,
+      linetypeIndexes,
+      hasAlphas,
+      hasStrokeWidths,
+      hasLinetypes,
+    );
   }
 
   const hasStroke =
@@ -152,4 +121,76 @@ function rectsToPolarPaths(
   if (batch.strokePaint !== undefined) pathBatch.strokePaint = batch.strokePaint;
   if (batch.glow !== undefined) pathBatch.glow = batch.glow;
   return pathBatch;
+}
+
+function polarRectPath(
+  batch: RectsBatch,
+  index: number,
+  projector: PanelCoordProjector,
+  width: number,
+  height: number,
+): number[] {
+  const o = index * 4;
+  const x = batch.rects[o]!;
+  const y = batch.rects[o + 1]!;
+  const w = batch.rects[o + 2]!;
+  const h = batch.rects[o + 3]!;
+  const corners: Array<readonly [number, number]> = [
+    [x, y],
+    [x + w, y],
+    [x + w, y + h],
+    [x, y + h],
+  ];
+  const ring: number[] = [];
+  for (let e = 0; e < 4; e++) {
+    const [x0, y0] = corners[e]!;
+    const [x1, y1] = corners[(e + 1) % 4]!;
+    for (let s = 0; s < POLAR_RECT_EDGE_SAMPLES; s++) {
+      const t = s / POLAR_RECT_EDGE_SAMPLES;
+      const [qx, qy] = projectPoint(
+        projector,
+        width,
+        height,
+        x0 + (x1 - x0) * t,
+        y0 + (y1 - y0) * t,
+      );
+      ring.push(qx, qy);
+    }
+  }
+  return ring;
+}
+
+function appendPolarRect(
+  path: readonly number[],
+  batch: RectsBatch,
+  index: number,
+  positions: number[],
+  rowIndex: number[],
+  semanticAnchors: number[],
+  semanticIndex: number[],
+  pathOffsets: number[],
+  fills: (string | null)[],
+  strokes: (string | null)[],
+  alphas: number[],
+  strokeWidths: number[],
+  linetypeIndexes: number[],
+  hasAlphas: boolean,
+  hasStrokeWidths: boolean,
+  hasLinetypes: boolean,
+): void {
+  const vertCount = Math.min(path.length / 2, MAX_COORD_VERTICES_PER_SUBPATH);
+  const row = batch.rowIndex[index] ?? 0xffffffff;
+  for (let v = 0; v < vertCount; v++) {
+    positions.push(path[v * 2]!, path[v * 2 + 1]!);
+    rowIndex.push(row);
+    semanticAnchors.push(v === 0 ? 1 : 0);
+    semanticIndex.push(index);
+  }
+  pathOffsets.push(positions.length / 2);
+  fills.push(batch.fills?.[index] ?? batch.fill);
+  const stroke = batch.strokes?.[index] ?? (batch.stroke === undefined ? null : batch.stroke);
+  strokes.push(stroke);
+  if (hasAlphas) alphas.push(batch.alphas![index] ?? batch.alpha);
+  if (hasStrokeWidths) strokeWidths.push(batch.strokeWidths![index] ?? batch.strokeWidth ?? 1);
+  if (hasLinetypes) linetypeIndexes.push(batch.linetypeIndexes![index] ?? 0);
 }
